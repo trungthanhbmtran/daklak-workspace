@@ -1,5 +1,5 @@
 model Task {
-  id          Int     @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   parentId    Int?    @map("parent_id")
   title       String  @map("title")
   description String? @db.Text
@@ -29,7 +29,7 @@ model Task {
   updatedAt           DateTime @updatedAt @map("updated_at")
   isDeleted           Boolean  @default(false) @map("is_deleted")
 
-  plan           MasterPlan?         @relation(fields: [planId, organizationId], references: [id, organizationId])
+  plan           MasterPlan?         @relation(fields: [planId], references: [id])
   kpiEvaluations KpiEvaluationTask[]
 
   participants TaskParticipant[]
@@ -42,18 +42,19 @@ model Task {
   notificationLogs TaskNotificationLog[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
+
   @@index([dueDate])
   @@index([status, dueDate])
   @@index([isCompleted, dueDate])
   @@index([parentId])
   @@index([planId])
   @@index([createdAt])
+  @@index([isDeleted, status, dueDate])
   @@map("tasks")
 }
 
 model TaskStep {
-  id           Int       @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   taskId       Int       @map("task_id")
   title        String    @map("title")
   status       String    @default("TODO") // TODO, COMPLETED
@@ -65,26 +66,26 @@ model TaskStep {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   isDeleted    Boolean   @default(false) @map("is_deleted")
 
-  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
+
   @@index([taskId])
   @@map("task_steps")
 }
 
 model TaskAttachment {
-  id         Int      @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   taskId     Int      @map("task_id")
   documentId String   @map("document_id")
   type       String   @default("REFERENCE")
   createdAt  DateTime @default(now()) @map("created_at")
   isDeleted  Boolean  @default(false) @map("is_deleted")
 
-  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
+
   @@index([taskId])
   @@map("task_attachments")
 }
@@ -108,11 +109,12 @@ model TaskParticipant {
   reason     String?   @map("reason") @db.Text
   attendedAt DateTime? @map("attended_at")
 
-  task     Task     @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
-  employee Employee @relation("EmployeeTasks", fields: [employeeCode, organizationId], references: [employeeCode, organizationId])
+  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  employee Employee @relation("EmployeeTasks", fields: [employeeCode], references: [employeeCode])
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([taskId, employeeCode, participantRole, organizationId])
+
+  @@id([taskId, employeeCode, participantRole])
   @@map("task_participants")
 }
 
@@ -121,16 +123,17 @@ model TaskClosure {
   descendantId Int @map("descendant_id")
   depth        Int @map("depth")
 
-  ancestor   Task @relation("TaskClosureAncestor", fields: [ancestorId, organizationId], references: [id, organizationId], onDelete: Cascade)
-  descendant Task @relation("TaskClosureDescendant", fields: [descendantId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  ancestor   Task @relation("TaskClosureAncestor", fields: [ancestorId], references: [id], onDelete: Cascade)
+  descendant Task @relation("TaskClosureDescendant", fields: [descendantId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([ancestorId, descendantId, organizationId])
+
+  @@id([ancestorId, descendantId])
   @@map("task_closure")
 }
 
 model TaskHistory {
-  id        Int      @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   taskId    Int      @map("task_id")
   action    String   @map("action")
   actorCode String?  @map("actor_code")
@@ -138,24 +141,24 @@ model TaskHistory {
   newValue  Json?    @map("new_value")
   createdAt DateTime @default(now()) @map("created_at")
 
-  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
+
   @@index([taskId])
   @@map("task_histories")
 }
 
 model TaskNotificationLog {
-  id        Int      @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   taskId    Int      @map("task_id")
   type      String   @map("type")
   createdAt DateTime @default(now()) @map("created_at")
 
-  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
+
   @@unique([taskId, type, organizationId])
   @@index([taskId])
   @@map("task_notification_logs")

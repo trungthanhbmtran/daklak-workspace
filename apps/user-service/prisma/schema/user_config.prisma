@@ -1,13 +1,12 @@
 model UserConfig {
-  id        Int      @default(autoincrement())
+  id        Int      @default(autoincrement()) @id 
   userId    Int      @map("user_id")
   key       String
   value     String   @db.Text
   updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([userId, key, organizationId])
+  @@unique([userId, key])
   @@map("user_configs")
 }

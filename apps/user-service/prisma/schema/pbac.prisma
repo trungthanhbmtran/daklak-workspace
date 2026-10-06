@@ -1,48 +1,27 @@
 model Policy {
-  id         Int         @default(autoincrement())
+  id         Int         @default(autoincrement()) @id 
   resourceId Int         @map("resource_id")
   action     String
   effect     String      @default("ALLOW")
   conditions Json?
-  resource   Resource    @relation(fields: [resourceId, organizationId], references: [id, organizationId])
-  users      UserPolicy[]
-  userGroups UserGroupPolicy[]
+  resource   Resource    @relation(fields: [resourceId], references: [id])
+  users      User[]      @relation("PolicyToUser")
+  userGroups UserGroup[] @relation("PolicyToUserGroup")
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
   @@index([resourceId], map: "policies_resource_id_fkey")
   @@map("policies")
 }
 
 model Resource {
-  id          Int      @default(autoincrement())
-  code        String   
+  id          Int      @default(autoincrement()) @id 
+  code        String @unique 
   name        String
   serviceCode String?  @map("service_code")
   policies    Policy[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([code, organizationId])
   @@map("resources")
 }
 
-model UserPolicy {
-  userId Int
-  policyId Int
-  user User @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Cascade)
-  policy Policy @relation(fields: [policyId, organizationId], references: [id, organizationId], onDelete: Cascade)
-  organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([userId, policyId, organizationId])
-  @@map("user_policies")
-}
 
-model UserGroupPolicy {
-  groupId Int
-  policyId Int
-  group UserGroup @relation(fields: [groupId, organizationId], references: [id, organizationId], onDelete: Cascade)
-  policy Policy @relation(fields: [policyId, organizationId], references: [id, organizationId], onDelete: Cascade)
-  organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([groupId, policyId, organizationId])
-  @@map("user_group_policies")
-}

@@ -117,12 +117,17 @@ export class PostsService implements OnModuleInit {
   /**
    * Recursively traverses Lexical JSON tree and translates any text node using translateOnlyTextTags.
    */
-  public async translateLexicalRecursive(data: any, translateFn: (s: string) => Promise<string>): Promise<any> {
+  public async translateLexicalRecursive(data: any, translateFn: (s: string) => Promise<string>, depth = 0): Promise<any> {
     if (!data) return data;
+    if (depth > 50) return data; // Prevent Stack Overflow (Algorithm Rule)
+
+    if (depth % 10 === 0 && depth > 0) {
+      await new Promise(resolve => setImmediate(resolve)); // Node.js Event Loop Protection
+    }
 
     if (Array.isArray(data)) {
       for (let i = 0; i < data.length; i++) {
-        data[i] = await this.translateLexicalRecursive(data[i], translateFn);
+        data[i] = await this.translateLexicalRecursive(data[i], translateFn, depth + 1);
       }
     } else if (typeof data === 'object') {
       if (data.type === 'text' && typeof data.text === 'string') {
@@ -131,7 +136,7 @@ export class PostsService implements OnModuleInit {
 
       for (const key of Object.keys(data)) {
         if (typeof data[key] === 'object' && data[key] !== null) {
-          data[key] = await this.translateLexicalRecursive(data[key], translateFn);
+          data[key] = await this.translateLexicalRecursive(data[key], translateFn, depth + 1);
         }
       }
     }
@@ -736,44 +741,6 @@ export class PostsService implements OnModuleInit {
    * Thống kê tổng hợp bài viết — backend tính, client chỉ render.
    * Thay thế pattern client fetch limit:1000 để đếm.
    */
-  async getStats(query: { categoryId?: string; authorId?: string } = {}) {
-    const base: any = { isDeleted: false };
-    if (query.categoryId) base.categoryId = query.categoryId;
-    if (query.authorId)   base.authorId   = query.authorId;
-
-    // Sử dụng thuật toán Single-Pass Bucketing thông qua Prisma groupBy
-    const stats = await this.prisma.post.groupBy({
-      by: ['status'],
-      where: base,
-      _count: { _all: true },
-      _sum: { viewCount: true },
-    });
-
-    let total = 0, published = 0, draft = 0, pending = 0, reviewing = 0, rejected = 0, totalViews = 0;
-
-    for (const group of stats) {
-      const count = group._count._all;
-      total += count;
-      totalViews += group._sum.viewCount ?? 0;
-
-      switch (group.status) {
-        case 'PUBLISHED': published += count; break;
-        case 'DRAFT': draft += count; break;
-        case 'SUBMITTED': pending += count; break;
-        case 'REVIEWING': reviewing += count; break;
-        case 'REJECTED': rejected += count; break;
-      }
-    }
-
-    return {
-      total,
-      published,
-      draft,
-      pending,
-      reviewing,
-      rejected,
-      totalViews,
-    };
-  }
+  
 }
 

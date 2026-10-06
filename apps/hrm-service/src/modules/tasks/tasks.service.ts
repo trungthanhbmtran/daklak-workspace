@@ -846,14 +846,21 @@ export class TasksService {
       }
 
       // 4. Execute queries
-      for (const p of participantsToDelete) {
-        await tx.taskParticipant.delete({ where: { taskId_employeeCode_participantRole: { taskId: id, employeeCode: p.employeeCode, participantRole: p.participantRole } } });
-      }
-      if (participantsToCreate.length > 0) {
-        await tx.taskParticipant.createMany({ data: participantsToCreate, skipDuplicates: true });
-      }
-      for (const u of participantsToUpdate) {
-        await tx.taskParticipant.update({ where: u.where, data: u.data });
+        if (participantsToDelete.length > 0) {
+          await tx.taskParticipant.deleteMany({
+            where: {
+              OR: participantsToDelete.map(p => ({
+                taskId: id, employeeCode: p.employeeCode, participantRole: p.participantRole
+              }))
+            }
+          });
+        }
+        if (participantsToCreate.length > 0) {
+          await tx.taskParticipant.createMany({ data: participantsToCreate, skipDuplicates: true });
+        }
+        if (participantsToUpdate.length > 0) {
+          await Promise.all(participantsToUpdate.map(u => tx.taskParticipant.update({ where: u.where, data: u.data })));
+        });
       }
 
       if (resetTaskStatus) {

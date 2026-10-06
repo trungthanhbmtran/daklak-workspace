@@ -1,47 +1,44 @@
 model Category {
-  id                          Int                          @default(autoincrement())
+  id                          Int                          @default(autoincrement()) @id 
   groupCode                   String                       @map("group_code")
-  code                        String
+  code                        String 
   order                       Int                          @default(0)
   isActive                    Boolean                      @default(true) @map("is_active")
   unitDomains                 UnitDomain[]
   staffingSlotDomains         StaffingSlotDomain[]
   staffingSlotGeographicAreas StaffingSlotGeographicArea[]
-  group                       CategoryGroup                @relation(fields: [groupCode, organizationId], references: [code, organizationId])
+  group                       CategoryGroup                @relation(fields: [groupCode], references: [code])
   translations                CategoryTranslation[]
   jobTitles                   JobTitle[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([groupCode, code, organizationId])
+  @@unique([groupCode, code])
   @@index([groupCode])
   @@index([isActive])
   @@map("sys_categories")
 }
 
 model CategoryTranslation {
-  id          Int      @default(autoincrement())
+  id          Int      @default(autoincrement()) @id 
   categoryId  Int      @map("category_id")
   langCode    String   @map("lang_code")
   name        String   @db.Text
   description String?  @db.Text
-  category    Category @relation(fields: [categoryId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([categoryId, langCode, organizationId])
+  @@unique([categoryId, langCode])
   @@index([langCode])
   @@map("sys_category_translations")
 }
 
 model CategoryGroup {
-  code       String     
+  code       String @id 
   name       String
   order      Int        @default(0)
   isActive   Boolean    @default(true)
   categories Category[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([code, organizationId])
   @@map("sys_category_groups")
 }

@@ -1,6 +1,6 @@
 model IntegrationUpstream {
-  id             String  @default(uuid())
-  name           String  
+  id             String  @default(uuid()) @id 
+  name           String @unique 
   type           String // 'internal' | 'external'
   baseUrl        String
   allowedPaths   Json // Array of strings, e.g., ["/api/*", "/v1/docs"]
@@ -24,13 +24,11 @@ model IntegrationUpstream {
   updatedAt DateTime @updatedAt
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([name, organizationId])
   @@map("integration_upstreams")
 }
 
 model IntegrationUpstreamAudit {
-  id           String   @default(uuid())
+  id           String   @default(uuid()) @id 
   upstreamName String
   action       String // 'CREATE' | 'UPDATE' | 'DELETE'
   changedBy    String?
@@ -39,7 +37,6 @@ model IntegrationUpstreamAudit {
   createdAt    DateTime @default(now())
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
   @@index([upstreamName])
   @@map("integration_upstream_audits")
 }

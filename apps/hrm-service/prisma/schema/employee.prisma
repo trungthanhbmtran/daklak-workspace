@@ -1,13 +1,13 @@
 // Nhân viên HRM – departmentId, jobTitleId tham chiếu sang user-service (OrganizationUnit, JobTitle)
 model Employee {
-  id     Int     @default(autoincrement())
+  id     Int     @id @default(autoincrement())
   // Thêm user_id theo chuẩn DDD (Tham chiếu sang user-service)
   userId String? @map("user_id")
 
   firstname    String    @map("firstname")
   lastname     String    @map("lastname")
   fullName     String    @map("full_name")
-  employeeCode String    @map("employee_code")
+  employeeCode String    @unique @map("employee_code")
   email        String?
   phone        String?
   gender       String?   @default("male")
@@ -38,7 +38,6 @@ model Employee {
   taskParticipants TaskParticipant[] @relation("EmployeeTasks")
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([employeeCode, organizationId])
+
   @@map("employees")
 }

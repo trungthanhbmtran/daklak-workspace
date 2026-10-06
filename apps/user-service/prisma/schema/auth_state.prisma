@@ -1,11 +1,10 @@
 model AuthStateSync {
-  userId      Int      @map("user_id")
+  userId      Int      @map("user_id") @id 
   authVersion Int      @map("auth_version")
   status      String   @default("PENDING") @db.VarChar(20)
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([userId, organizationId])
   @@index([status, updatedAt])
   @@map("auth_state_sync")
 }

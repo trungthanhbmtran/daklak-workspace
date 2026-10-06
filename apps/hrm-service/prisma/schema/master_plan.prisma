@@ -1,5 +1,5 @@
 model MasterPlan {
-  id          Int     @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   title       String  @map("title")
   description String? @db.Text
   type        String  @default("SMART_GOAL")
@@ -20,6 +20,6 @@ model MasterPlan {
   tasks Task[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
+
   @@map("master_plans")
 }

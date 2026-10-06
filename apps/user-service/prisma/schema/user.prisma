@@ -1,7 +1,7 @@
 model User {
-  id              Int               @default(autoincrement())
-  email           String            
-  username        String?           
+  id              Int               @default(autoincrement()) @id 
+  email           String @unique 
+  username        String? @unique 
   fullName        String?           @map("full_name")
   phoneNumber     String?           @map("phone_number")
   avatarUrl       String?           @map("avatar_url")
@@ -16,19 +16,16 @@ model User {
   credential      Credential?
   refreshTokens   RefreshToken[]
   jobPositions    JobPosition[]
-  policies        UserPolicy[]
+  policies        Policy[]          @relation("PolicyToUser")
   userConfigs     UserConfig[]
   aiAssistants    AiAssistant[]
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([email, organizationId])
-  @@unique([username, organizationId])
   @@map("users")
 }
 
 model JobPosition {
-  id             Int              @default(autoincrement())
+  id             Int              @default(autoincrement()) @id 
   userId         Int              @map("user_id")
   unitId         Int              @map("unit_id")
   jobTitleId     Int              @map("job_title_id")
@@ -37,12 +34,11 @@ model JobPosition {
   isDeputyLeader Boolean          @default(false) @map("is_deputy_leader")
   startDate      DateTime         @default(now()) @map("start_date")
   endDate        DateTime?        @map("end_date")
-  jobTitle       JobTitle         @relation(fields: [jobTitleId, organizationId], references: [id, organizationId])
-  unit           OrganizationUnit @relation(fields: [unitId, organizationId], references: [id, organizationId])
-  user           User             @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  jobTitle       JobTitle         @relation(fields: [jobTitleId], references: [id])
+  unit           OrganizationUnit @relation(fields: [unitId], references: [id])
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
   @@index([jobTitleId], map: "job_positions_job_title_id_fkey")
   @@index([unitId], map: "job_positions_unit_id_fkey")
   @@index([userId], map: "job_positions_user_id_fkey")
@@ -50,14 +46,12 @@ model JobPosition {
 }
 
 model UserGroup {
-  id              Int               @default(autoincrement())
-  name            String            
+  id              Int               @default(autoincrement()) @id 
+  name            String @unique 
   UserToUserGroup UserToUserGroup[]
-  policies        UserGroupPolicy[]
+  policies        Policy[]          @relation("PolicyToUserGroup")
 
   organizationId String @default("DEFAULT") @map("organization_id")
-  @@id([id, organizationId])
-  @@unique([name, organizationId])
   @@map("user_groups")
 }
 

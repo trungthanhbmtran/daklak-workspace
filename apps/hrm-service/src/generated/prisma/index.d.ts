@@ -24969,17 +24969,15 @@ export namespace Prisma {
   }
 
   export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
-    employeeCode_organizationId?: EmployeeEmployeeCodeOrganizationIdCompoundUniqueInput
-    id_organizationId?: EmployeeIdOrganizationIdCompoundUniqueInput
+    id?: number
+    employeeCode?: string
     AND?: EmployeeWhereInput | EmployeeWhereInput[]
     OR?: EmployeeWhereInput[]
     NOT?: EmployeeWhereInput | EmployeeWhereInput[]
-    id?: IntFilter<"Employee"> | number
     userId?: StringNullableFilter<"Employee"> | string | null
     firstname?: StringFilter<"Employee"> | string
     lastname?: StringFilter<"Employee"> | string
     fullName?: StringFilter<"Employee"> | string
-    employeeCode?: StringFilter<"Employee"> | string
     email?: StringNullableFilter<"Employee"> | string | null
     phone?: StringNullableFilter<"Employee"> | string | null
     gender?: StringNullableFilter<"Employee"> | string | null
@@ -25002,7 +25000,7 @@ export namespace Prisma {
     kpiEvaluations?: KpiEvaluationListRelationFilter
     kpiReviews?: KpiEvaluationListRelationFilter
     taskParticipants?: TaskParticipantListRelationFilter
-  }, "id_organizationId" | "employeeCode_organizationId">
+  }, "id" | "employeeCode">
 
   export type EmployeeOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25105,12 +25103,11 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetWhereUniqueInput = Prisma.AtLeast<{
-    unitId_version_organizationId?: KpiRuleSetUnitIdVersionOrganizationIdCompoundUniqueInput
-    id_organizationId?: KpiRuleSetIdOrganizationIdCompoundUniqueInput
+    id?: number
+    unitId_version?: KpiRuleSetUnitIdVersionCompoundUniqueInput
     AND?: KpiRuleSetWhereInput | KpiRuleSetWhereInput[]
     OR?: KpiRuleSetWhereInput[]
     NOT?: KpiRuleSetWhereInput | KpiRuleSetWhereInput[]
-    id?: IntFilter<"KpiRuleSet"> | number
     unitId?: StringFilter<"KpiRuleSet"> | string
     version?: StringFilter<"KpiRuleSet"> | string
     isActive?: BoolFilter<"KpiRuleSet"> | boolean
@@ -25123,7 +25120,7 @@ export namespace Prisma {
     organizationId?: StringFilter<"KpiRuleSet"> | string
     domainWeights?: KpiDomainWeightListRelationFilter
     evaluations?: KpiEvaluationListRelationFilter
-  }, "id_organizationId" | "unitId_version_organizationId">
+  }, "id" | "unitId_version">
 
   export type KpiRuleSetOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25190,12 +25187,11 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightWhereUniqueInput = Prisma.AtLeast<{
-    ruleSetId_domainCode_organizationId?: KpiDomainWeightRuleSetIdDomainCodeOrganizationIdCompoundUniqueInput
-    id_organizationId?: KpiDomainWeightIdOrganizationIdCompoundUniqueInput
+    id?: number
+    ruleSetId_domainCode?: KpiDomainWeightRuleSetIdDomainCodeCompoundUniqueInput
     AND?: KpiDomainWeightWhereInput | KpiDomainWeightWhereInput[]
     OR?: KpiDomainWeightWhereInput[]
     NOT?: KpiDomainWeightWhereInput | KpiDomainWeightWhereInput[]
-    id?: IntFilter<"KpiDomainWeight"> | number
     ruleSetId?: IntFilter<"KpiDomainWeight"> | number
     domainCode?: StringFilter<"KpiDomainWeight"> | string
     volumeWeight?: FloatFilter<"KpiDomainWeight"> | number
@@ -25204,7 +25200,7 @@ export namespace Prisma {
     attitudeWeight?: FloatFilter<"KpiDomainWeight"> | number
     organizationId?: StringFilter<"KpiDomainWeight"> | string
     ruleSet?: XOR<KpiRuleSetScalarRelationFilter, KpiRuleSetWhereInput>
-  }, "id_organizationId" | "ruleSetId_domainCode_organizationId">
+  }, "id" | "ruleSetId_domainCode">
 
   export type KpiDomainWeightOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25263,11 +25259,10 @@ export namespace Prisma {
   }
 
   export type KpiPeriodWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: KpiPeriodIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: KpiPeriodWhereInput | KpiPeriodWhereInput[]
     OR?: KpiPeriodWhereInput[]
     NOT?: KpiPeriodWhereInput | KpiPeriodWhereInput[]
-    id?: IntFilter<"KpiPeriod"> | number
     name?: StringFilter<"KpiPeriod"> | string
     startDate?: DateTimeFilter<"KpiPeriod"> | Date | string
     endDate?: DateTimeFilter<"KpiPeriod"> | Date | string
@@ -25275,7 +25270,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"KpiPeriod"> | Date | string
     organizationId?: StringFilter<"KpiPeriod"> | string
     evaluations?: KpiEvaluationListRelationFilter
-  }, "id_organizationId">
+  }, "id">
 
   export type KpiPeriodOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25360,11 +25355,10 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: KpiEvaluationIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: KpiEvaluationWhereInput | KpiEvaluationWhereInput[]
     OR?: KpiEvaluationWhereInput[]
     NOT?: KpiEvaluationWhereInput | KpiEvaluationWhereInput[]
-    id?: IntFilter<"KpiEvaluation"> | number
     employeeCode?: StringFilter<"KpiEvaluation"> | string
     periodId?: IntFilter<"KpiEvaluation"> | number
     staffingSlotId?: IntNullableFilter<"KpiEvaluation"> | number | null
@@ -25386,7 +25380,7 @@ export namespace Prisma {
     ruleSet?: XOR<KpiRuleSetNullableScalarRelationFilter, KpiRuleSetWhereInput> | null
     tasks?: KpiEvaluationTaskListRelationFilter
     documents?: KpiFormDocumentListRelationFilter
-  }, "id_organizationId">
+  }, "id">
 
   export type KpiEvaluationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25495,11 +25489,10 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: KpiEvaluationTaskIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: KpiEvaluationTaskWhereInput | KpiEvaluationTaskWhereInput[]
     OR?: KpiEvaluationTaskWhereInput[]
     NOT?: KpiEvaluationTaskWhereInput | KpiEvaluationTaskWhereInput[]
-    id?: IntFilter<"KpiEvaluationTask"> | number
     evaluationId?: IntFilter<"KpiEvaluationTask"> | number
     taskName?: StringFilter<"KpiEvaluationTask"> | string
     domainCode?: StringFilter<"KpiEvaluationTask"> | string
@@ -25524,7 +25517,7 @@ export namespace Prisma {
     organizationId?: StringFilter<"KpiEvaluationTask"> | string
     task?: XOR<TaskNullableScalarRelationFilter, TaskWhereInput> | null
     evaluation?: XOR<KpiEvaluationScalarRelationFilter, KpiEvaluationWhereInput>
-  }, "id_organizationId">
+  }, "id">
 
   export type KpiEvaluationTaskOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25613,11 +25606,10 @@ export namespace Prisma {
   }
 
   export type KpiFormTemplateWhereUniqueInput = Prisma.AtLeast<{
-    formCode_organizationId?: KpiFormTemplateFormCodeOrganizationIdCompoundUniqueInput
+    formCode?: string
     AND?: KpiFormTemplateWhereInput | KpiFormTemplateWhereInput[]
     OR?: KpiFormTemplateWhereInput[]
     NOT?: KpiFormTemplateWhereInput | KpiFormTemplateWhereInput[]
-    formCode?: StringFilter<"KpiFormTemplate"> | string
     name?: StringFilter<"KpiFormTemplate"> | string
     description?: StringNullableFilter<"KpiFormTemplate"> | string | null
     templateFileId?: StringNullableFilter<"KpiFormTemplate"> | string | null
@@ -25625,7 +25617,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"KpiFormTemplate"> | Date | string
     organizationId?: StringFilter<"KpiFormTemplate"> | string
     documents?: KpiFormDocumentListRelationFilter
-  }, "formCode_organizationId">
+  }, "formCode">
 
   export type KpiFormTemplateOrderByWithAggregationInput = {
     formCode?: SortOrder
@@ -25694,11 +25686,10 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: KpiFormDocumentIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: KpiFormDocumentWhereInput | KpiFormDocumentWhereInput[]
     OR?: KpiFormDocumentWhereInput[]
     NOT?: KpiFormDocumentWhereInput | KpiFormDocumentWhereInput[]
-    id?: IntFilter<"KpiFormDocument"> | number
     formCode?: StringFilter<"KpiFormDocument"> | string
     evaluationId?: IntFilter<"KpiFormDocument"> | number
     documentFileId?: StringNullableFilter<"KpiFormDocument"> | string | null
@@ -25713,7 +25704,7 @@ export namespace Prisma {
     organizationId?: StringFilter<"KpiFormDocument"> | string
     template?: XOR<KpiFormTemplateScalarRelationFilter, KpiFormTemplateWhereInput>
     evaluation?: XOR<KpiEvaluationScalarRelationFilter, KpiEvaluationWhereInput>
-  }, "id_organizationId">
+  }, "id">
 
   export type KpiFormDocumentOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25796,11 +25787,10 @@ export namespace Prisma {
   }
 
   export type MasterPlanWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: MasterPlanIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: MasterPlanWhereInput | MasterPlanWhereInput[]
     OR?: MasterPlanWhereInput[]
     NOT?: MasterPlanWhereInput | MasterPlanWhereInput[]
-    id?: IntFilter<"MasterPlan"> | number
     title?: StringFilter<"MasterPlan"> | string
     description?: StringNullableFilter<"MasterPlan"> | string | null
     type?: StringFilter<"MasterPlan"> | string
@@ -25815,7 +25805,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"MasterPlan"> | Date | string
     organizationId?: StringFilter<"MasterPlan"> | string
     tasks?: TaskListRelationFilter
-  }, "id_organizationId">
+  }, "id">
 
   export type MasterPlanOrderByWithAggregationInput = {
     id?: SortOrder
@@ -25938,11 +25928,10 @@ export namespace Prisma {
   }
 
   export type TaskWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: TaskIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: TaskWhereInput | TaskWhereInput[]
     OR?: TaskWhereInput[]
     NOT?: TaskWhereInput | TaskWhereInput[]
-    id?: IntFilter<"Task"> | number
     parentId?: IntNullableFilter<"Task"> | number | null
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
@@ -25976,7 +25965,7 @@ export namespace Prisma {
     ancestors?: TaskClosureListRelationFilter
     descendants?: TaskClosureListRelationFilter
     notificationLogs?: TaskNotificationLogListRelationFilter
-  }, "id_organizationId">
+  }, "id">
 
   export type TaskOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26079,11 +26068,10 @@ export namespace Prisma {
   }
 
   export type TaskStepWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: TaskStepIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: TaskStepWhereInput | TaskStepWhereInput[]
     OR?: TaskStepWhereInput[]
     NOT?: TaskStepWhereInput | TaskStepWhereInput[]
-    id?: IntFilter<"TaskStep"> | number
     taskId?: IntFilter<"TaskStep"> | number
     title?: StringFilter<"TaskStep"> | string
     status?: StringFilter<"TaskStep"> | string
@@ -26096,7 +26084,7 @@ export namespace Prisma {
     isDeleted?: BoolFilter<"TaskStep"> | boolean
     organizationId?: StringFilter<"TaskStep"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }, "id_organizationId">
+  }, "id">
 
   export type TaskStepOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26163,11 +26151,10 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: TaskAttachmentIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: TaskAttachmentWhereInput | TaskAttachmentWhereInput[]
     OR?: TaskAttachmentWhereInput[]
     NOT?: TaskAttachmentWhereInput | TaskAttachmentWhereInput[]
-    id?: IntFilter<"TaskAttachment"> | number
     taskId?: IntFilter<"TaskAttachment"> | number
     documentId?: StringFilter<"TaskAttachment"> | string
     type?: StringFilter<"TaskAttachment"> | string
@@ -26175,7 +26162,7 @@ export namespace Prisma {
     isDeleted?: BoolFilter<"TaskAttachment"> | boolean
     organizationId?: StringFilter<"TaskAttachment"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }, "id_organizationId">
+  }, "id">
 
   export type TaskAttachmentOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26238,7 +26225,7 @@ export namespace Prisma {
   }
 
   export type TaskParticipantWhereUniqueInput = Prisma.AtLeast<{
-    taskId_employeeCode_participantRole_organizationId?: TaskParticipantTaskIdEmployeeCodeParticipantRoleOrganizationIdCompoundUniqueInput
+    taskId_employeeCode_participantRole?: TaskParticipantTaskIdEmployeeCodeParticipantRoleCompoundUniqueInput
     AND?: TaskParticipantWhereInput | TaskParticipantWhereInput[]
     OR?: TaskParticipantWhereInput[]
     NOT?: TaskParticipantWhereInput | TaskParticipantWhereInput[]
@@ -26253,7 +26240,7 @@ export namespace Prisma {
     organizationId?: StringFilter<"TaskParticipant"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     employee?: XOR<EmployeeScalarRelationFilter, EmployeeWhereInput>
-  }, "taskId_employeeCode_participantRole_organizationId">
+  }, "taskId_employeeCode_participantRole">
 
   export type TaskParticipantOrderByWithAggregationInput = {
     taskId?: SortOrder
@@ -26310,7 +26297,7 @@ export namespace Prisma {
   }
 
   export type TaskClosureWhereUniqueInput = Prisma.AtLeast<{
-    ancestorId_descendantId_organizationId?: TaskClosureAncestorIdDescendantIdOrganizationIdCompoundUniqueInput
+    ancestorId_descendantId?: TaskClosureAncestorIdDescendantIdCompoundUniqueInput
     AND?: TaskClosureWhereInput | TaskClosureWhereInput[]
     OR?: TaskClosureWhereInput[]
     NOT?: TaskClosureWhereInput | TaskClosureWhereInput[]
@@ -26320,7 +26307,7 @@ export namespace Prisma {
     organizationId?: StringFilter<"TaskClosure"> | string
     ancestor?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     descendant?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }, "ancestorId_descendantId_organizationId">
+  }, "ancestorId_descendantId">
 
   export type TaskClosureOrderByWithAggregationInput = {
     ancestorId?: SortOrder
@@ -26373,11 +26360,10 @@ export namespace Prisma {
   }
 
   export type TaskHistoryWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: TaskHistoryIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: TaskHistoryWhereInput | TaskHistoryWhereInput[]
     OR?: TaskHistoryWhereInput[]
     NOT?: TaskHistoryWhereInput | TaskHistoryWhereInput[]
-    id?: IntFilter<"TaskHistory"> | number
     taskId?: IntFilter<"TaskHistory"> | number
     action?: StringFilter<"TaskHistory"> | string
     actorCode?: StringNullableFilter<"TaskHistory"> | string | null
@@ -26386,7 +26372,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"TaskHistory"> | Date | string
     organizationId?: StringFilter<"TaskHistory"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }, "id_organizationId">
+  }, "id">
 
   export type TaskHistoryOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26441,18 +26427,17 @@ export namespace Prisma {
   }
 
   export type TaskNotificationLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
     taskId_type_organizationId?: TaskNotificationLogTaskIdTypeOrganizationIdCompoundUniqueInput
-    id_organizationId?: TaskNotificationLogIdOrganizationIdCompoundUniqueInput
     AND?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
     OR?: TaskNotificationLogWhereInput[]
     NOT?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
-    id?: IntFilter<"TaskNotificationLog"> | number
     taskId?: IntFilter<"TaskNotificationLog"> | number
     type?: StringFilter<"TaskNotificationLog"> | string
     createdAt?: DateTimeFilter<"TaskNotificationLog"> | Date | string
     organizationId?: StringFilter<"TaskNotificationLog"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
-  }, "id_organizationId" | "taskId_type_organizationId">
+  }, "id" | "taskId_type_organizationId">
 
   export type TaskNotificationLogOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26517,11 +26502,10 @@ export namespace Prisma {
   }
 
   export type TaskRankTemplateWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: TaskRankTemplateIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: TaskRankTemplateWhereInput | TaskRankTemplateWhereInput[]
     OR?: TaskRankTemplateWhereInput[]
     NOT?: TaskRankTemplateWhereInput | TaskRankTemplateWhereInput[]
-    id?: IntFilter<"TaskRankTemplate"> | number
     classification?: StringFilter<"TaskRankTemplate"> | string
     rank?: StringFilter<"TaskRankTemplate"> | string
     domainCode?: StringFilter<"TaskRankTemplate"> | string
@@ -26535,7 +26519,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"TaskRankTemplate"> | Date | string
     updatedAt?: DateTimeFilter<"TaskRankTemplate"> | Date | string
     organizationId?: StringFilter<"TaskRankTemplate"> | string
-  }, "id_organizationId">
+  }, "id">
 
   export type TaskRankTemplateOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26610,11 +26594,10 @@ export namespace Prisma {
   }
 
   export type RankQuotaWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: RankQuotaIdOrganizationIdCompoundUniqueInput
+    id?: number
     AND?: RankQuotaWhereInput | RankQuotaWhereInput[]
     OR?: RankQuotaWhereInput[]
     NOT?: RankQuotaWhereInput | RankQuotaWhereInput[]
-    id?: IntFilter<"RankQuota"> | number
     rankCode?: StringFilter<"RankQuota"> | string
     domainCode?: StringFilter<"RankQuota"> | string
     taskName?: StringFilter<"RankQuota"> | string
@@ -26624,7 +26607,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"RankQuota"> | Date | string
     updatedAt?: DateTimeFilter<"RankQuota"> | Date | string
     organizationId?: StringFilter<"RankQuota"> | string
-  }, "id_organizationId">
+  }, "id">
 
   export type RankQuotaOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26695,11 +26678,10 @@ export namespace Prisma {
   }
 
   export type OutboxEventWhereUniqueInput = Prisma.AtLeast<{
-    id_organizationId?: OutboxEventIdOrganizationIdCompoundUniqueInput
+    id?: string
     AND?: OutboxEventWhereInput | OutboxEventWhereInput[]
     OR?: OutboxEventWhereInput[]
     NOT?: OutboxEventWhereInput | OutboxEventWhereInput[]
-    id?: StringFilter<"OutboxEvent"> | string
     workflowInstanceId?: StringNullableFilter<"OutboxEvent"> | string | null
     processVersion?: IntNullableFilter<"OutboxEvent"> | number | null
     nodeId?: StringNullableFilter<"OutboxEvent"> | string | null
@@ -26711,7 +26693,7 @@ export namespace Prisma {
     processedAt?: DateTimeNullableFilter<"OutboxEvent"> | Date | string | null
     errorReason?: StringNullableFilter<"OutboxEvent"> | string | null
     organizationId?: StringFilter<"OutboxEvent"> | string
-  }, "id_organizationId">
+  }, "id">
 
   export type OutboxEventOrderByWithAggregationInput = {
     id?: SortOrder
@@ -26774,17 +26756,16 @@ export namespace Prisma {
   }
 
   export type ProcessedCommandWhereUniqueInput = Prisma.AtLeast<{
-    commandId_organizationId?: ProcessedCommandCommandIdOrganizationIdCompoundUniqueInput
+    commandId?: string
     AND?: ProcessedCommandWhereInput | ProcessedCommandWhereInput[]
     OR?: ProcessedCommandWhereInput[]
     NOT?: ProcessedCommandWhereInput | ProcessedCommandWhereInput[]
-    commandId?: StringFilter<"ProcessedCommand"> | string
     workflowInstanceId?: StringFilter<"ProcessedCommand"> | string
     processedAt?: DateTimeFilter<"ProcessedCommand"> | Date | string
     action?: StringFilter<"ProcessedCommand"> | string
     status?: StringFilter<"ProcessedCommand"> | string
     organizationId?: StringFilter<"ProcessedCommand"> | string
-  }, "commandId_organizationId">
+  }, "commandId">
 
   export type ProcessedCommandOrderByWithAggregationInput = {
     commandId?: SortOrder
@@ -26811,7 +26792,6 @@ export namespace Prisma {
   }
 
   export type EmployeeCreateInput = {
-    id?: number
     userId?: string | null
     firstname: string
     lastname: string
@@ -26873,7 +26853,6 @@ export namespace Prisma {
   }
 
   export type EmployeeUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     firstname?: StringFieldUpdateOperationsInput | string
     lastname?: StringFieldUpdateOperationsInput | string
@@ -26963,7 +26942,6 @@ export namespace Prisma {
   }
 
   export type EmployeeUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     firstname?: StringFieldUpdateOperationsInput | string
     lastname?: StringFieldUpdateOperationsInput | string
@@ -27019,7 +26997,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetCreateInput = {
-    id?: number
     unitId: string
     version: string
     isActive?: boolean
@@ -27051,7 +27028,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     unitId?: StringFieldUpdateOperationsInput | string
     version?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -27097,7 +27073,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     unitId?: StringFieldUpdateOperationsInput | string
     version?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -27125,12 +27100,12 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightCreateInput = {
-    id?: number
     domainCode: string
     volumeWeight: number
     qualityWeight: number
     progressWeight: number
     attitudeWeight: number
+    organizationId?: string
     ruleSet: KpiRuleSetCreateNestedOneWithoutDomainWeightsInput
   }
 
@@ -27146,12 +27121,12 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     domainCode?: StringFieldUpdateOperationsInput | string
     volumeWeight?: FloatFieldUpdateOperationsInput | number
     qualityWeight?: FloatFieldUpdateOperationsInput | number
     progressWeight?: FloatFieldUpdateOperationsInput | number
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
     ruleSet?: KpiRuleSetUpdateOneRequiredWithoutDomainWeightsNestedInput
   }
 
@@ -27178,12 +27153,12 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     domainCode?: StringFieldUpdateOperationsInput | string
     volumeWeight?: FloatFieldUpdateOperationsInput | number
     qualityWeight?: FloatFieldUpdateOperationsInput | number
     progressWeight?: FloatFieldUpdateOperationsInput | number
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiDomainWeightUncheckedUpdateManyInput = {
@@ -27198,7 +27173,6 @@ export namespace Prisma {
   }
 
   export type KpiPeriodCreateInput = {
-    id?: number
     name: string
     startDate: Date | string
     endDate: Date | string
@@ -27220,7 +27194,6 @@ export namespace Prisma {
   }
 
   export type KpiPeriodUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
     endDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27252,7 +27225,6 @@ export namespace Prisma {
   }
 
   export type KpiPeriodUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
     endDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27272,7 +27244,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -27283,6 +27254,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
@@ -27313,7 +27285,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -27324,6 +27295,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
@@ -27373,7 +27345,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -27384,6 +27355,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationUncheckedUpdateManyInput = {
@@ -27406,7 +27378,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskCreateInput = {
-    id?: number
     taskName: string
     domainCode: string
     plannedQty?: number
@@ -27426,6 +27397,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     task?: TaskCreateNestedOneWithoutKpiEvaluationsInput
     evaluation: KpiEvaluationCreateNestedOneWithoutTasksInput
   }
@@ -27457,7 +27429,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     taskName?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
     plannedQty?: FloatFieldUpdateOperationsInput | number
@@ -27477,6 +27448,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneWithoutKpiEvaluationsNestedInput
     evaluation?: KpiEvaluationUpdateOneRequiredWithoutTasksNestedInput
   }
@@ -27534,7 +27506,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     taskName?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
     plannedQty?: FloatFieldUpdateOperationsInput | number
@@ -27554,6 +27525,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationTaskUncheckedUpdateManyInput = {
@@ -27657,7 +27629,6 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentCreateInput = {
-    id?: number
     documentFileId?: string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
@@ -27667,6 +27638,7 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     template: KpiFormTemplateCreateNestedOneWithoutDocumentsInput
     evaluation: KpiEvaluationCreateNestedOneWithoutDocumentsInput
   }
@@ -27688,7 +27660,6 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
@@ -27698,6 +27669,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     template?: KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInput
     evaluation?: KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInput
   }
@@ -27735,7 +27707,6 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
@@ -27745,6 +27716,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiFormDocumentUncheckedUpdateManyInput = {
@@ -27764,7 +27736,6 @@ export namespace Prisma {
   }
 
   export type MasterPlanCreateInput = {
-    id?: number
     title: string
     description?: string | null
     type?: string
@@ -27800,7 +27771,6 @@ export namespace Prisma {
   }
 
   export type MasterPlanUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
@@ -27853,7 +27823,6 @@ export namespace Prisma {
   }
 
   export type MasterPlanUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
@@ -27887,7 +27856,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -27910,6 +27878,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -27958,7 +27927,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27981,6 +27949,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -28057,7 +28026,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -28080,6 +28048,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskUncheckedUpdateManyInput = {
@@ -28111,7 +28080,6 @@ export namespace Prisma {
   }
 
   export type TaskStepCreateInput = {
-    id?: number
     title: string
     status?: string
     order?: number
@@ -28121,6 +28089,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     task: TaskCreateNestedOneWithoutStepsInput
   }
 
@@ -28140,7 +28109,6 @@ export namespace Prisma {
   }
 
   export type TaskStepUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -28150,6 +28118,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneRequiredWithoutStepsNestedInput
   }
 
@@ -28184,7 +28153,6 @@ export namespace Prisma {
   }
 
   export type TaskStepUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -28194,6 +28162,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskStepUncheckedUpdateManyInput = {
@@ -28212,11 +28181,11 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentCreateInput = {
-    id?: number
     documentId: string
     type?: string
     createdAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     task: TaskCreateNestedOneWithoutAttachmentsInput
   }
 
@@ -28231,11 +28200,11 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneRequiredWithoutAttachmentsNestedInput
   }
 
@@ -28260,11 +28229,11 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAttachmentUncheckedUpdateManyInput = {
@@ -28284,6 +28253,7 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
     task: TaskCreateNestedOneWithoutParticipantsInput
     employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
@@ -28307,6 +28277,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
     employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
@@ -28342,6 +28313,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskParticipantUncheckedUpdateManyInput = {
@@ -28358,6 +28330,7 @@ export namespace Prisma {
 
   export type TaskClosureCreateInput = {
     depth: number
+    organizationId?: string
     ancestor: TaskCreateNestedOneWithoutDescendantsInput
     descendant: TaskCreateNestedOneWithoutAncestorsInput
   }
@@ -28371,6 +28344,7 @@ export namespace Prisma {
 
   export type TaskClosureUpdateInput = {
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
     ancestor?: TaskUpdateOneRequiredWithoutDescendantsNestedInput
     descendant?: TaskUpdateOneRequiredWithoutAncestorsNestedInput
   }
@@ -28391,6 +28365,7 @@ export namespace Prisma {
 
   export type TaskClosureUpdateManyMutationInput = {
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskClosureUncheckedUpdateManyInput = {
@@ -28401,12 +28376,12 @@ export namespace Prisma {
   }
 
   export type TaskHistoryCreateInput = {
-    id?: number
     action: string
     actorCode?: string | null
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+    organizationId?: string
     task: TaskCreateNestedOneWithoutHistoriesInput
   }
 
@@ -28422,12 +28397,12 @@ export namespace Prisma {
   }
 
   export type TaskHistoryUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     action?: StringFieldUpdateOperationsInput | string
     actorCode?: NullableStringFieldUpdateOperationsInput | string | null
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneRequiredWithoutHistoriesNestedInput
   }
 
@@ -28454,12 +28429,12 @@ export namespace Prisma {
   }
 
   export type TaskHistoryUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     action?: StringFieldUpdateOperationsInput | string
     actorCode?: NullableStringFieldUpdateOperationsInput | string | null
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskHistoryUncheckedUpdateManyInput = {
@@ -28474,9 +28449,9 @@ export namespace Prisma {
   }
 
   export type TaskNotificationLogCreateInput = {
-    id?: number
     type: string
     createdAt?: Date | string
+    organizationId?: string
     task: TaskCreateNestedOneWithoutNotificationLogsInput
   }
 
@@ -28489,9 +28464,9 @@ export namespace Prisma {
   }
 
   export type TaskNotificationLogUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneRequiredWithoutNotificationLogsNestedInput
   }
 
@@ -28512,9 +28487,9 @@ export namespace Prisma {
   }
 
   export type TaskNotificationLogUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskNotificationLogUncheckedUpdateManyInput = {
@@ -28526,7 +28501,6 @@ export namespace Prisma {
   }
 
   export type TaskRankTemplateCreateInput = {
-    id?: number
     classification: string
     rank: string
     domainCode?: string
@@ -28560,7 +28534,6 @@ export namespace Prisma {
   }
 
   export type TaskRankTemplateUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     classification?: StringFieldUpdateOperationsInput | string
     rank?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
@@ -28611,7 +28584,6 @@ export namespace Prisma {
   }
 
   export type TaskRankTemplateUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     classification?: StringFieldUpdateOperationsInput | string
     rank?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
@@ -28645,7 +28617,6 @@ export namespace Prisma {
   }
 
   export type RankQuotaCreateInput = {
-    id?: number
     rankCode: string
     domainCode?: string
     taskName: string
@@ -28671,7 +28642,6 @@ export namespace Prisma {
   }
 
   export type RankQuotaUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     rankCode?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
     taskName?: StringFieldUpdateOperationsInput | string
@@ -28710,7 +28680,6 @@ export namespace Prisma {
   }
 
   export type RankQuotaUpdateManyMutationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     rankCode?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
     taskName?: StringFieldUpdateOperationsInput | string
@@ -29036,16 +29005,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type EmployeeEmployeeCodeOrganizationIdCompoundUniqueInput = {
-    employeeCode: string
-    organizationId: string
-  }
-
-  export type EmployeeIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
-  }
-
   export type EmployeeCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -29301,15 +29260,9 @@ export namespace Prisma {
     search: string
   }
 
-  export type KpiRuleSetUnitIdVersionOrganizationIdCompoundUniqueInput = {
+  export type KpiRuleSetUnitIdVersionCompoundUniqueInput = {
     unitId: string
     version: string
-    organizationId: string
-  }
-
-  export type KpiRuleSetIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type KpiRuleSetCountOrderByAggregateInput = {
@@ -29397,15 +29350,9 @@ export namespace Prisma {
     search: string
   }
 
-  export type KpiDomainWeightRuleSetIdDomainCodeOrganizationIdCompoundUniqueInput = {
+  export type KpiDomainWeightRuleSetIdDomainCodeCompoundUniqueInput = {
     ruleSetId: number
     domainCode: string
-    organizationId: string
-  }
-
-  export type KpiDomainWeightIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type KpiDomainWeightCountOrderByAggregateInput = {
@@ -29463,11 +29410,6 @@ export namespace Prisma {
     fields: KpiPeriodOrderByRelevanceFieldEnum | KpiPeriodOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type KpiPeriodIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type KpiPeriodCountOrderByAggregateInput = {
@@ -29563,11 +29505,6 @@ export namespace Prisma {
     fields: KpiEvaluationOrderByRelevanceFieldEnum | KpiEvaluationOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type KpiEvaluationIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type KpiEvaluationCountOrderByAggregateInput = {
@@ -29681,11 +29618,6 @@ export namespace Prisma {
     fields: KpiEvaluationTaskOrderByRelevanceFieldEnum | KpiEvaluationTaskOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type KpiEvaluationTaskIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type KpiEvaluationTaskCountOrderByAggregateInput = {
@@ -29806,11 +29738,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type KpiFormTemplateFormCodeOrganizationIdCompoundUniqueInput = {
-    formCode: string
-    organizationId: string
-  }
-
   export type KpiFormTemplateCountOrderByAggregateInput = {
     formCode?: SortOrder
     name?: SortOrder
@@ -29850,11 +29777,6 @@ export namespace Prisma {
     fields: KpiFormDocumentOrderByRelevanceFieldEnum | KpiFormDocumentOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type KpiFormDocumentIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type KpiFormDocumentCountOrderByAggregateInput = {
@@ -29927,11 +29849,6 @@ export namespace Prisma {
     fields: MasterPlanOrderByRelevanceFieldEnum | MasterPlanOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type MasterPlanIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type MasterPlanCountOrderByAggregateInput = {
@@ -30056,11 +29973,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type TaskIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
-  }
-
   export type TaskCountOrderByAggregateInput = {
     id?: SortOrder
     parentId?: SortOrder
@@ -30172,11 +30084,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type TaskStepIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
-  }
-
   export type TaskStepCountOrderByAggregateInput = {
     id?: SortOrder
     taskId?: SortOrder
@@ -30242,11 +30149,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type TaskAttachmentIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
-  }
-
   export type TaskAttachmentCountOrderByAggregateInput = {
     id?: SortOrder
     taskId?: SortOrder
@@ -30300,11 +30202,10 @@ export namespace Prisma {
     search: string
   }
 
-  export type TaskParticipantTaskIdEmployeeCodeParticipantRoleOrganizationIdCompoundUniqueInput = {
+  export type TaskParticipantTaskIdEmployeeCodeParticipantRoleCompoundUniqueInput = {
     taskId: number
     employeeCode: string
     participantRole: $Enums.TaskRole
-    organizationId: string
   }
 
   export type TaskParticipantCountOrderByAggregateInput = {
@@ -30369,10 +30270,9 @@ export namespace Prisma {
     search: string
   }
 
-  export type TaskClosureAncestorIdDescendantIdOrganizationIdCompoundUniqueInput = {
+  export type TaskClosureAncestorIdDescendantIdCompoundUniqueInput = {
     ancestorId: number
     descendantId: number
-    organizationId: string
   }
 
   export type TaskClosureCountOrderByAggregateInput = {
@@ -30412,11 +30312,6 @@ export namespace Prisma {
     fields: TaskHistoryOrderByRelevanceFieldEnum | TaskHistoryOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type TaskHistoryIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type TaskHistoryCountOrderByAggregateInput = {
@@ -30470,11 +30365,6 @@ export namespace Prisma {
     organizationId: string
   }
 
-  export type TaskNotificationLogIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
-  }
-
   export type TaskNotificationLogCountOrderByAggregateInput = {
     id?: SortOrder
     taskId?: SortOrder
@@ -30513,11 +30403,6 @@ export namespace Prisma {
     fields: TaskRankTemplateOrderByRelevanceFieldEnum | TaskRankTemplateOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type TaskRankTemplateIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type TaskRankTemplateCountOrderByAggregateInput = {
@@ -30587,11 +30472,6 @@ export namespace Prisma {
     fields: RankQuotaOrderByRelevanceFieldEnum | RankQuotaOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type RankQuotaIdOrganizationIdCompoundUniqueInput = {
-    id: number
-    organizationId: string
   }
 
   export type RankQuotaCountOrderByAggregateInput = {
@@ -30672,11 +30552,6 @@ export namespace Prisma {
     fields: OutboxEventOrderByRelevanceFieldEnum | OutboxEventOrderByRelevanceFieldEnum[]
     sort: SortOrder
     search: string
-  }
-
-  export type OutboxEventIdOrganizationIdCompoundUniqueInput = {
-    id: string
-    organizationId: string
   }
 
   export type OutboxEventCountOrderByAggregateInput = {
@@ -30764,11 +30639,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type ProcessedCommandCommandIdOrganizationIdCompoundUniqueInput = {
-    commandId: string
-    organizationId: string
-  }
-
   export type ProcessedCommandCountOrderByAggregateInput = {
     commandId?: SortOrder
     workflowInstanceId?: SortOrder
@@ -30836,14 +30706,6 @@ export namespace Prisma {
     connectOrCreate?: TaskParticipantCreateOrConnectWithoutEmployeeInput | TaskParticipantCreateOrConnectWithoutEmployeeInput[]
     createMany?: TaskParticipantCreateManyEmployeeInputEnvelope
     connect?: TaskParticipantWhereUniqueInput | TaskParticipantWhereUniqueInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type NullableStringFieldUpdateOperationsInput = {
@@ -30914,6 +30776,14 @@ export namespace Prisma {
     update?: TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput | TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput[]
     updateMany?: TaskParticipantUpdateManyWithWhereWithoutEmployeeInput | TaskParticipantUpdateManyWithWhereWithoutEmployeeInput[]
     deleteMany?: TaskParticipantScalarWhereInput | TaskParticipantScalarWhereInput[]
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput = {
@@ -32169,7 +32039,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateWithoutEmployeeInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -32180,6 +32049,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
@@ -32202,6 +32072,7 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -32217,7 +32088,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateWithoutReviewerInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -32228,6 +32098,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
@@ -32250,6 +32121,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -32271,6 +32143,7 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
     task: TaskCreateNestedOneWithoutParticipantsInput
   }
 
@@ -32282,6 +32155,7 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
   }
 
   export type TaskParticipantCreateOrConnectWithoutEmployeeInput = {
@@ -32380,12 +32254,12 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightCreateWithoutRuleSetInput = {
-    id?: number
     domainCode: string
     volumeWeight: number
     qualityWeight: number
     progressWeight: number
     attitudeWeight: number
+    organizationId?: string
   }
 
   export type KpiDomainWeightUncheckedCreateWithoutRuleSetInput = {
@@ -32395,6 +32269,7 @@ export namespace Prisma {
     qualityWeight: number
     progressWeight: number
     attitudeWeight: number
+    organizationId?: string
   }
 
   export type KpiDomainWeightCreateOrConnectWithoutRuleSetInput = {
@@ -32408,7 +32283,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateWithoutRuleSetInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -32419,6 +32293,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
@@ -32441,6 +32316,7 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -32502,7 +32378,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetCreateWithoutDomainWeightsInput = {
-    id?: number
     unitId: string
     version: string
     isActive?: boolean
@@ -32548,7 +32423,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetUpdateWithoutDomainWeightsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     unitId?: StringFieldUpdateOperationsInput | string
     version?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -32578,7 +32452,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateWithoutPeriodInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -32589,6 +32462,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
@@ -32611,6 +32485,7 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
     documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
@@ -32642,7 +32517,6 @@ export namespace Prisma {
   }
 
   export type EmployeeCreateWithoutKpiEvaluationsInput = {
-    id?: number
     userId?: string | null
     firstname: string
     lastname: string
@@ -32707,7 +32581,6 @@ export namespace Prisma {
   }
 
   export type EmployeeCreateWithoutKpiReviewsInput = {
-    id?: number
     userId?: string | null
     firstname: string
     lastname: string
@@ -32772,7 +32645,6 @@ export namespace Prisma {
   }
 
   export type KpiPeriodCreateWithoutEvaluationsInput = {
-    id?: number
     name: string
     startDate: Date | string
     endDate: Date | string
@@ -32797,7 +32669,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetCreateWithoutEvaluationsInput = {
-    id?: number
     unitId: string
     version: string
     isActive?: boolean
@@ -32832,7 +32703,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskCreateWithoutEvaluationInput = {
-    id?: number
     taskName: string
     domainCode: string
     plannedQty?: number
@@ -32852,6 +32722,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     task?: TaskCreateNestedOneWithoutKpiEvaluationsInput
   }
 
@@ -32877,6 +32748,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput = {
@@ -32890,7 +32762,6 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentCreateWithoutEvaluationInput = {
-    id?: number
     documentFileId?: string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
@@ -32900,6 +32771,7 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     template: KpiFormTemplateCreateNestedOneWithoutDocumentsInput
   }
 
@@ -32915,6 +32787,7 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiFormDocumentCreateOrConnectWithoutEvaluationInput = {
@@ -32939,7 +32812,6 @@ export namespace Prisma {
   }
 
   export type EmployeeUpdateWithoutKpiEvaluationsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     firstname?: StringFieldUpdateOperationsInput | string
     lastname?: StringFieldUpdateOperationsInput | string
@@ -33010,7 +32882,6 @@ export namespace Prisma {
   }
 
   export type EmployeeUpdateWithoutKpiReviewsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     firstname?: StringFieldUpdateOperationsInput | string
     lastname?: StringFieldUpdateOperationsInput | string
@@ -33081,7 +32952,6 @@ export namespace Prisma {
   }
 
   export type KpiPeriodUpdateWithoutEvaluationsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     startDate?: DateTimeFieldUpdateOperationsInput | Date | string
     endDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33112,7 +32982,6 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetUpdateWithoutEvaluationsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     unitId?: StringFieldUpdateOperationsInput | string
     version?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -33222,7 +33091,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutKpiEvaluationsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -33245,6 +33113,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -33296,7 +33165,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateWithoutTasksInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -33307,6 +33175,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
@@ -33351,7 +33220,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutKpiEvaluationsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33374,6 +33242,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -33431,7 +33300,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpdateWithoutTasksInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -33442,6 +33310,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
@@ -33470,7 +33339,6 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentCreateWithoutTemplateInput = {
-    id?: number
     documentFileId?: string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: string
@@ -33480,6 +33348,7 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     evaluation: KpiEvaluationCreateNestedOneWithoutDocumentsInput
   }
 
@@ -33495,6 +33364,7 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiFormDocumentCreateOrConnectWithoutTemplateInput = {
@@ -33549,7 +33419,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationCreateWithoutDocumentsInput = {
-    id?: number
     staffingSlotId?: number | null
     phase?: string
     status?: string
@@ -33560,6 +33429,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
     reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
     period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
@@ -33635,7 +33505,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpdateWithoutDocumentsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -33646,6 +33515,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
@@ -33674,7 +33544,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutPlanInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -33697,6 +33566,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -33731,6 +33601,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
@@ -33799,7 +33670,6 @@ export namespace Prisma {
   }
 
   export type MasterPlanCreateWithoutTasksInput = {
-    id?: number
     title: string
     description?: string | null
     type?: string
@@ -33838,7 +33708,6 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskCreateWithoutTaskInput = {
-    id?: number
     taskName: string
     domainCode: string
     plannedQty?: number
@@ -33858,6 +33727,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
     evaluation: KpiEvaluationCreateNestedOneWithoutTasksInput
   }
 
@@ -33883,6 +33753,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiEvaluationTaskCreateOrConnectWithoutTaskInput = {
@@ -33902,6 +33773,7 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
     employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
 
@@ -33913,6 +33785,7 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
   }
 
   export type TaskParticipantCreateOrConnectWithoutTaskInput = {
@@ -33926,11 +33799,11 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentCreateWithoutTaskInput = {
-    id?: number
     documentId: string
     type?: string
     createdAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskAttachmentUncheckedCreateWithoutTaskInput = {
@@ -33939,6 +33812,7 @@ export namespace Prisma {
     type?: string
     createdAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskAttachmentCreateOrConnectWithoutTaskInput = {
@@ -33952,12 +33826,12 @@ export namespace Prisma {
   }
 
   export type TaskHistoryCreateWithoutTaskInput = {
-    id?: number
     action: string
     actorCode?: string | null
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskHistoryUncheckedCreateWithoutTaskInput = {
@@ -33967,6 +33841,7 @@ export namespace Prisma {
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskHistoryCreateOrConnectWithoutTaskInput = {
@@ -33980,7 +33855,6 @@ export namespace Prisma {
   }
 
   export type TaskStepCreateWithoutTaskInput = {
-    id?: number
     title: string
     status?: string
     order?: number
@@ -33990,6 +33864,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskStepUncheckedCreateWithoutTaskInput = {
@@ -34003,6 +33878,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskStepCreateOrConnectWithoutTaskInput = {
@@ -34017,12 +33893,14 @@ export namespace Prisma {
 
   export type TaskClosureCreateWithoutDescendantInput = {
     depth: number
+    organizationId?: string
     ancestor: TaskCreateNestedOneWithoutDescendantsInput
   }
 
   export type TaskClosureUncheckedCreateWithoutDescendantInput = {
     ancestorId: number
     depth: number
+    organizationId?: string
   }
 
   export type TaskClosureCreateOrConnectWithoutDescendantInput = {
@@ -34037,12 +33915,14 @@ export namespace Prisma {
 
   export type TaskClosureCreateWithoutAncestorInput = {
     depth: number
+    organizationId?: string
     descendant: TaskCreateNestedOneWithoutAncestorsInput
   }
 
   export type TaskClosureUncheckedCreateWithoutAncestorInput = {
     descendantId: number
     depth: number
+    organizationId?: string
   }
 
   export type TaskClosureCreateOrConnectWithoutAncestorInput = {
@@ -34056,15 +33936,16 @@ export namespace Prisma {
   }
 
   export type TaskNotificationLogCreateWithoutTaskInput = {
-    id?: number
     type: string
     createdAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskNotificationLogUncheckedCreateWithoutTaskInput = {
     id?: number
     type: string
     createdAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskNotificationLogCreateOrConnectWithoutTaskInput = {
@@ -34089,7 +33970,6 @@ export namespace Prisma {
   }
 
   export type MasterPlanUpdateWithoutTasksInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     type?: StringFieldUpdateOperationsInput | string
@@ -34317,7 +34197,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutStepsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -34340,6 +34219,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -34402,7 +34282,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutStepsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34425,6 +34304,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -34471,7 +34351,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutAttachmentsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -34494,6 +34373,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -34556,7 +34436,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutAttachmentsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34579,6 +34458,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -34625,7 +34505,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutParticipantsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -34648,6 +34527,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
@@ -34699,7 +34579,6 @@ export namespace Prisma {
   }
 
   export type EmployeeCreateWithoutTaskParticipantsInput = {
-    id?: number
     userId?: string | null
     firstname: string
     lastname: string
@@ -34775,7 +34654,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutParticipantsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34798,6 +34676,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -34855,7 +34734,6 @@ export namespace Prisma {
   }
 
   export type EmployeeUpdateWithoutTaskParticipantsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     firstname?: StringFieldUpdateOperationsInput | string
     lastname?: StringFieldUpdateOperationsInput | string
@@ -34915,7 +34793,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutDescendantsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -34938,6 +34815,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -34989,7 +34867,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutAncestorsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -35012,6 +34889,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -35074,7 +34952,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutDescendantsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35097,6 +34974,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -35154,7 +35032,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutAncestorsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35177,6 +35054,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -35223,7 +35101,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutHistoriesInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -35246,6 +35123,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -35308,7 +35186,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutHistoriesInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35331,6 +35208,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -35377,7 +35255,6 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutNotificationLogsInput = {
-    id?: number
     parentId?: number | null
     title: string
     description?: string | null
@@ -35400,6 +35277,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
     plan?: MasterPlanCreateNestedOneWithoutTasksInput
     kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
     participants?: TaskParticipantCreateNestedManyWithoutTaskInput
@@ -35462,7 +35340,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutNotificationLogsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35485,6 +35362,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     plan?: MasterPlanUpdateOneWithoutTasksNestedInput
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
@@ -35545,6 +35423,7 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiEvaluationCreateManyReviewerInput = {
@@ -35562,6 +35441,7 @@ export namespace Prisma {
     totalScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskParticipantCreateManyEmployeeInput = {
@@ -35572,10 +35452,10 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
   }
 
   export type KpiEvaluationUpdateWithoutEmployeeInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -35586,6 +35466,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
@@ -35608,6 +35489,7 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -35627,10 +35509,10 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationUpdateWithoutReviewerInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -35641,6 +35523,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
@@ -35663,6 +35546,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -35682,6 +35566,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskParticipantUpdateWithoutEmployeeInput = {
@@ -35691,6 +35576,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
   }
 
@@ -35702,6 +35588,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskParticipantUncheckedUpdateManyWithoutEmployeeInput = {
@@ -35712,6 +35599,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiDomainWeightCreateManyRuleSetInput = {
@@ -35721,6 +35609,7 @@ export namespace Prisma {
     qualityWeight: number
     progressWeight: number
     attitudeWeight: number
+    organizationId?: string
   }
 
   export type KpiEvaluationCreateManyRuleSetInput = {
@@ -35738,15 +35627,16 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiDomainWeightUpdateWithoutRuleSetInput = {
-    id?: IntFieldUpdateOperationsInput | number
     domainCode?: StringFieldUpdateOperationsInput | string
     volumeWeight?: FloatFieldUpdateOperationsInput | number
     qualityWeight?: FloatFieldUpdateOperationsInput | number
     progressWeight?: FloatFieldUpdateOperationsInput | number
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiDomainWeightUncheckedUpdateWithoutRuleSetInput = {
@@ -35756,6 +35646,7 @@ export namespace Prisma {
     qualityWeight?: FloatFieldUpdateOperationsInput | number
     progressWeight?: FloatFieldUpdateOperationsInput | number
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiDomainWeightUncheckedUpdateManyWithoutRuleSetInput = {
@@ -35765,10 +35656,10 @@ export namespace Prisma {
     qualityWeight?: FloatFieldUpdateOperationsInput | number
     progressWeight?: FloatFieldUpdateOperationsInput | number
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationUpdateWithoutRuleSetInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -35779,6 +35670,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
@@ -35801,6 +35693,7 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -35820,6 +35713,7 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationCreateManyPeriodInput = {
@@ -35837,10 +35731,10 @@ export namespace Prisma {
     reviewerCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiEvaluationUpdateWithoutPeriodInput = {
-    id?: IntFieldUpdateOperationsInput | number
     staffingSlotId?: NullableIntFieldUpdateOperationsInput | number | null
     phase?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
@@ -35851,6 +35745,7 @@ export namespace Prisma {
     totalScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
     reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
     ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
@@ -35873,6 +35768,7 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
     documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
@@ -35892,6 +35788,7 @@ export namespace Prisma {
     reviewerCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationTaskCreateManyEvaluationInput = {
@@ -35916,6 +35813,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiFormDocumentCreateManyEvaluationInput = {
@@ -35930,10 +35828,10 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiEvaluationTaskUpdateWithoutEvaluationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     taskName?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
     plannedQty?: FloatFieldUpdateOperationsInput | number
@@ -35953,6 +35851,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     task?: TaskUpdateOneWithoutKpiEvaluationsNestedInput
   }
 
@@ -35978,6 +35877,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationInput = {
@@ -36002,10 +35902,10 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiFormDocumentUpdateWithoutEvaluationInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
@@ -36015,6 +35915,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     template?: KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInput
   }
 
@@ -36030,6 +35931,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiFormDocumentUncheckedUpdateManyWithoutEvaluationInput = {
@@ -36044,6 +35946,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiFormDocumentCreateManyTemplateInput = {
@@ -36058,10 +35961,10 @@ export namespace Prisma {
     decisionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiFormDocumentUpdateWithoutTemplateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentFileId?: NullableStringFieldUpdateOperationsInput | string | null
     contentJson?: NullableJsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
@@ -36071,6 +35974,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     evaluation?: KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInput
   }
 
@@ -36086,6 +35990,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiFormDocumentUncheckedUpdateManyWithoutTemplateInput = {
@@ -36100,6 +36005,7 @@ export namespace Prisma {
     decisionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskCreateManyPlanInput = {
@@ -36126,10 +36032,10 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskUpdateWithoutPlanInput = {
-    id?: IntFieldUpdateOperationsInput | number
     parentId?: NullableIntFieldUpdateOperationsInput | number | null
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
@@ -36152,6 +36058,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
@@ -36186,6 +36093,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
     kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
     participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -36220,6 +36128,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationTaskCreateManyTaskInput = {
@@ -36244,6 +36153,7 @@ export namespace Prisma {
     finalKpiScore?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskParticipantCreateManyTaskInput = {
@@ -36254,6 +36164,7 @@ export namespace Prisma {
     status?: string
     reason?: string | null
     attendedAt?: Date | string | null
+    organizationId?: string
   }
 
   export type TaskAttachmentCreateManyTaskInput = {
@@ -36262,6 +36173,7 @@ export namespace Prisma {
     type?: string
     createdAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskHistoryCreateManyTaskInput = {
@@ -36271,6 +36183,7 @@ export namespace Prisma {
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
+    organizationId?: string
   }
 
   export type TaskStepCreateManyTaskInput = {
@@ -36284,26 +36197,29 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     isDeleted?: boolean
+    organizationId?: string
   }
 
   export type TaskClosureCreateManyDescendantInput = {
     ancestorId: number
     depth: number
+    organizationId?: string
   }
 
   export type TaskClosureCreateManyAncestorInput = {
     descendantId: number
     depth: number
+    organizationId?: string
   }
 
   export type TaskNotificationLogCreateManyTaskInput = {
     id?: number
     type: string
     createdAt?: Date | string
+    organizationId?: string
   }
 
   export type KpiEvaluationTaskUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     taskName?: StringFieldUpdateOperationsInput | string
     domainCode?: StringFieldUpdateOperationsInput | string
     plannedQty?: FloatFieldUpdateOperationsInput | number
@@ -36323,6 +36239,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     evaluation?: KpiEvaluationUpdateOneRequiredWithoutTasksNestedInput
   }
 
@@ -36348,6 +36265,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type KpiEvaluationTaskUncheckedUpdateManyWithoutTaskInput = {
@@ -36372,6 +36290,7 @@ export namespace Prisma {
     finalKpiScore?: NullableFloatFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskParticipantUpdateWithoutTaskInput = {
@@ -36381,6 +36300,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
     employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
 
@@ -36392,6 +36312,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskParticipantUncheckedUpdateManyWithoutTaskInput = {
@@ -36402,14 +36323,15 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAttachmentUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     documentId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAttachmentUncheckedUpdateWithoutTaskInput = {
@@ -36418,6 +36340,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAttachmentUncheckedUpdateManyWithoutTaskInput = {
@@ -36426,15 +36349,16 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskHistoryUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     action?: StringFieldUpdateOperationsInput | string
     actorCode?: NullableStringFieldUpdateOperationsInput | string | null
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskHistoryUncheckedUpdateWithoutTaskInput = {
@@ -36444,6 +36368,7 @@ export namespace Prisma {
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskHistoryUncheckedUpdateManyWithoutTaskInput = {
@@ -36453,10 +36378,10 @@ export namespace Prisma {
     oldValue?: NullableJsonNullValueInput | InputJsonValue
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskStepUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
@@ -36466,6 +36391,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskStepUncheckedUpdateWithoutTaskInput = {
@@ -36479,6 +36405,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskStepUncheckedUpdateManyWithoutTaskInput = {
@@ -36492,54 +36419,63 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskClosureUpdateWithoutDescendantInput = {
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
     ancestor?: TaskUpdateOneRequiredWithoutDescendantsNestedInput
   }
 
   export type TaskClosureUncheckedUpdateWithoutDescendantInput = {
     ancestorId?: IntFieldUpdateOperationsInput | number
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskClosureUncheckedUpdateManyWithoutDescendantInput = {
     ancestorId?: IntFieldUpdateOperationsInput | number
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskClosureUpdateWithoutAncestorInput = {
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
     descendant?: TaskUpdateOneRequiredWithoutAncestorsNestedInput
   }
 
   export type TaskClosureUncheckedUpdateWithoutAncestorInput = {
     descendantId?: IntFieldUpdateOperationsInput | number
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskClosureUncheckedUpdateManyWithoutAncestorInput = {
     descendantId?: IntFieldUpdateOperationsInput | number
     depth?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskNotificationLogUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskNotificationLogUncheckedUpdateWithoutTaskInput = {
     id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskNotificationLogUncheckedUpdateManyWithoutTaskInput = {
     id?: IntFieldUpdateOperationsInput | number
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
 

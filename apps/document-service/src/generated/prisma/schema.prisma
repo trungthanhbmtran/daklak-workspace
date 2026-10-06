@@ -97,6 +97,7 @@ model Document {
   @@index([issueDate])
   @@index([createdAt])
   @@index([isIncoming])
+  @@index([status, isIncoming, isPublic])
   @@map("documents")
 }
 
