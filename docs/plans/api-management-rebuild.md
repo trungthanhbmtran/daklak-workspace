@@ -107,7 +107,7 @@ Thiết kế giữ contract theo domain để sau này có thể tách service. 
 
 ## 4. Mô hình và contract mục tiêu
 
-Thiết kế chi tiết nằm tại [data-model.md](<docs/rebuild api manager/data-model.md>) và [contracts.md](<docs/rebuild api manager/contracts.md>).
+Thiết kế chi tiết nằm tại [data-model.md](<../rebuild api manager/data-model.md>) và [contracts.md](<../rebuild api manager/contracts.md>).
 
 - `IntegrationConnection`: id/code bất biến; displayName sửa được; `networkZone` tách khỏi `protocol`; origin/basePath tách nhau; scope tổ chức; draft/published/disabled; configVersion và credential metadata.
 - `IntegrationEndpoint`: method + normalized pathTemplate + connection + organization; phiên bản/schema/capabilities riêng. Không tạo quyền bằng cách nhân chéo hai danh sách.
@@ -190,7 +190,7 @@ Trang dùng RSC lấy dữ liệu đầu tiên với auth context, hydration cho
 
 ## 8. Các giai đoạn thực hiện và gate
 
-Danh sách task có thứ tự, dependency, vùng file và tiêu chí riêng ở [tasks.md](<docs/rebuild api manager/tasks.md>). Không có task nào được đánh dấu hoàn thành bởi việc lập kế hoạch.
+Danh sách task có thứ tự, dependency, vùng file và tiêu chí riêng ở [tasks.md](<../rebuild api manager/tasks.md>). Không có task nào được đánh dấu hoàn thành bởi việc lập kế hoạch.
 
 | Giai đoạn | Công việc | Điều kiện qua gate |
 |---|---|---|
@@ -232,7 +232,7 @@ P0..P4 là baseline chức năng mới. P6 là gate phát hành, P7 là điều 
 
 ## 10. Nghiệm thu và kiểm chứng
 
-Hướng dẫn chạy và tình huống chi tiết: [quickstart.md](<docs/rebuild api manager/quickstart.md>).
+Hướng dẫn chạy và tình huống chi tiết: [quickstart.md](<../rebuild api manager/quickstart.md>).
 
 | Mã | Kiểm chứng bắt buộc | Tiêu chí đạt |
 |---|---|---|

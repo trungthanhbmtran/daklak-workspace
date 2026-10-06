@@ -110,7 +110,8 @@ const ROUTE_TO_SERVICE: Record<string, string> = {
   "/services/admin": "SYS_GROUP",
   "/services/documents": "DOC_GROUP",
   "/services/posts": "CONTENT_GROUP",
-  "/services/integration": "WORKFLOW_GROUP",
+  "/services/workflow": "WORKFLOW_GROUP",
+  "/services/api-manager": "API_MANAGER_GROUP",
   "/services/reports": "REPORT_GROUP",
 };
 

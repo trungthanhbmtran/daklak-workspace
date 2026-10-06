@@ -612,15 +612,19 @@ export async function seedCategoriesDanhMCDNgChung(prisma: PrismaClient) {
     { code: 'CONTENT_CONFIG_MENU', name: 'Cấu hình Portal', route: '/services/posts/portal-config', icon: 'Settings', order: 6, parentCode: 'CONTENT_GROUP', linkedResourceCode: 'POST', type: 'MENU' },
     { code: 'CONTENT_BUILDER_MENU', name: 'Trình dựng trang', route: '/services/posts/portal-page-builder', icon: 'Layers', order: 7, parentCode: 'CONTENT_GROUP', linkedResourceCode: 'POST', type: 'MENU' },
 
-    // 6. Quy trình & Tích hợp
-    { code: 'WORKFLOW_GROUP', name: 'Quy trình & Liên thông', route: '/services/integration', icon: 'GitBranch', order: 5, linkedResourceCode: null, type: 'SERVICE_ITEM' },
-    { code: 'WORKFLOW_DASHBOARD_MENU', name: 'Bảng quản trị', route: '/services/integration', icon: 'Layers', order: 1, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
-    { code: 'WORKFLOW_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/integration/gateway', icon: 'Network', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
-    { code: 'WORKFLOW_SYSTEM_MENU', name: 'Quy trình hệ thống', route: '/services/integration/workflows', icon: 'GitBranch', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
-    { code: 'WORKFLOW_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/integration/apis', icon: 'Plug', order: 4, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
+    // 6. Quy trình hệ thống
+    { code: 'WORKFLOW_GROUP', name: 'Quy trình hệ thống', route: '/services/workflow', icon: 'GitBranch', order: 5, linkedResourceCode: null, type: 'SERVICE_ITEM' },
+    { code: 'WORKFLOW_DASHBOARD_MENU', name: 'Bảng quản trị', route: '/services/workflow', icon: 'Layers', order: 1, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
+    { code: 'WORKFLOW_SYSTEM_MENU', name: 'Định nghĩa quy trình', route: '/services/workflow/workflows', icon: 'GitBranch', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
+    { code: 'WORKFLOW_INSTANCE_MENU', name: 'Quy trình đang chạy', route: '/services/workflow/instances', icon: 'Activity', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
+
+    // 6.1 Quản lý API Gateway
+    { code: 'API_MANAGER_GROUP', name: 'Quản lý API Gateway', route: '/services/api-manager', icon: 'Network', order: 6, linkedResourceCode: null, type: 'SERVICE_ITEM' },
+    { code: 'API_MANAGER_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/api-manager/gateway', icon: 'Network', order: 1, parentCode: 'API_MANAGER_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
+    { code: 'API_MANAGER_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/api-manager/apis', icon: 'Plug', order: 2, parentCode: 'API_MANAGER_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
 
     // 7. Phân tích, báo cáo
-    { code: 'REPORT_GROUP', name: 'Phân tích, báo cáo', route: '/services/reports', icon: 'BarChart3', order: 6, linkedResourceCode: null, type: 'SERVICE_ITEM' },
+    { code: 'REPORT_GROUP', name: 'Phân tích, báo cáo', route: '/services/reports', icon: 'BarChart3', order: 7, linkedResourceCode: null, type: 'SERVICE_ITEM' },
     { code: 'REPORT_DASHBOARD_MENU', name: 'Dashboard Thống kê', route: '/services/reports', icon: 'LayoutDashboard', order: 1, parentCode: 'REPORT_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },
   ];
 

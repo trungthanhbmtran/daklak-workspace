@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Activity, ArrowRight, Layers, Network, Plug } from "lucide-react";
+import { Activity, ArrowRight, Layers } from "lucide-react";
 import { PageHeader } from "@/components/layouts/page-header";
 import { WORKFLOW_ROUTES } from "@/features/workflow/routes";
 
 export const metadata = {
-  title: "Trung tâm Tích hợp & Quy trình | Cổng Ứng dụng Nội bộ",
+  title: "Quy trình hệ thống | Cổng Ứng dụng Nội bộ",
 };
 
 const MODULES = [
@@ -19,29 +19,17 @@ const MODULES = [
     title: "Quy trình đang chạy",
     description: "Giám sát các phiên thực thi quy trình trên toàn hệ thống.",
     icon: Activity,
-  },
-  {
-    href: "/services/integration/gateway",
-    title: "Cấu hình API Gateway",
-    description: "Quản trị định tuyến, bảo mật và cấu hình cho các microservice.",
-    icon: Network,
-  },
-  {
-    href: "/services/integration/apis",
-    title: "Kết nối API đầu vào",
-    description: "Quản lý cấu hình, xác thực kết nối với hệ thống ngoài (LGSP, Webhook).",
-    icon: Plug,
-  },
+  }
 ] as const;
 
-export default function IntegrationPage() {
+export default function WorkflowPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
-        title="Trung tâm Tích hợp & Quy trình"
-        description="Thiết kế luồng tự động hóa và quản trị giao tiếp dữ liệu giữa các phân hệ."
+        title="Quy trình hệ thống"
+        description="Quản trị định nghĩa luồng và theo dõi quá trình thực thi."
       />
-      <nav aria-label="Phân hệ tích hợp" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <nav aria-label="Phân hệ quy trình" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {MODULES.map((m) => (
           <Link
             key={m.href}

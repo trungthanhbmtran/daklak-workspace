@@ -60,3 +60,4 @@ docs/
 docs/*
 !docs/plans/
 !docs/plans/workflow-user-designed-processes.md
+!docs/rebuild api manager/
