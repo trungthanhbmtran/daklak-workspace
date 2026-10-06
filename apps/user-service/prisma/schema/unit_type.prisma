@@ -1,6 +1,6 @@
 model UnitType {
-  id                Int                   @id @default(autoincrement())
-  code              String                @unique
+  id                Int                   @default(autoincrement())
+  code              String                
   name              String
   description       String?
   level             Int                   @default(1)
@@ -10,16 +10,20 @@ model UnitType {
   organizationUnits OrganizationUnit[]
   jobTemplates      UnitTypeJobTemplate[]
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
+  @@unique([code, organizationId])
   @@map("unit_types")
 }
 
 model UnitTypeJobTemplate {
   unitTypeId Int      @map("unit_type_id")
   jobTitleId Int      @map("job_title_id")
-  jobTitle   JobTitle @relation(fields: [jobTitleId], references: [id], onDelete: Cascade)
-  unitType   UnitType @relation(fields: [unitTypeId], references: [id], onDelete: Cascade)
+  jobTitle   JobTitle @relation(fields: [jobTitleId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  unitType   UnitType @relation(fields: [unitTypeId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
-  @@id([unitTypeId, jobTitleId])
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([unitTypeId, jobTitleId, organizationId])
   @@index([jobTitleId], map: "unit_type_job_templates_job_title_id_fkey")
   @@map("unit_type_job_templates")
 }

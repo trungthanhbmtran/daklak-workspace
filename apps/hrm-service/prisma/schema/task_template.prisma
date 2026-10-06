@@ -1,5 +1,5 @@
 model TaskRankTemplate {
-  id                   Int     @id @default(autoincrement())
+  id                   Int     @default(autoincrement())
   classification       String  @map("classification")
   rank                 String  @map("rank")
   domainCode           String  @default("GENERIC") @map("domain_code")
@@ -14,11 +14,13 @@ model TaskRankTemplate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@map("task_rank_templates")
 }
 
 model RankQuota {
-  id          Int    @id @default(autoincrement())
+  id          Int    @default(autoincrement())
   rankCode    String @map("rank_code")
   domainCode  String @default("GENERIC") @map("domain_code")
   taskName    String @map("task_name")
@@ -29,5 +31,7 @@ model RankQuota {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@map("rank_quotas")
 }

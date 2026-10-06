@@ -1,4 +1,8 @@
-import {
+const fs = require('fs');
+
+const servicePath = 'C:/Users/Admin/Desktop/daklak-workspace/apps/report-service/src/modules/statistics/statistics.service.ts';
+
+const newServiceContent = `import {
   Injectable,
   Inject,
   OnModuleInit,
@@ -7,7 +11,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
-import type { ClientGrpc } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 
 @Injectable()
 export class StatisticsService implements OnModuleInit {
@@ -270,3 +274,7 @@ export class StatisticsService implements OnModuleInit {
     });
   }
 }
+`;
+
+fs.writeFileSync(servicePath, newServiceContent);
+console.log("Rewrote statistics.service.ts using standard ORM via gRPC");

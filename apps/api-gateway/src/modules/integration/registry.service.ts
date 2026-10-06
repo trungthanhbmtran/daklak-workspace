@@ -17,6 +17,7 @@ export interface UpstreamConfig {
   retry: any;
   cacheTtlSec: number;
   rateLimit: any;
+  rateLimitWindow?: number;
   roles: string[];
   scopes: string[];
   version: number;

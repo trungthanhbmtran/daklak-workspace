@@ -1,5 +1,5 @@
 model Category {
-  id                          Int                          @id @default(autoincrement())
+  id                          Int                          @default(autoincrement())
   groupCode                   String                       @map("group_code")
   code                        String
   order                       Int                          @default(0)
@@ -7,35 +7,41 @@ model Category {
   unitDomains                 UnitDomain[]
   staffingSlotDomains         StaffingSlotDomain[]
   staffingSlotGeographicAreas StaffingSlotGeographicArea[]
-  group                       CategoryGroup                @relation(fields: [groupCode], references: [code])
+  group                       CategoryGroup                @relation(fields: [groupCode, organizationId], references: [code, organizationId])
   translations                CategoryTranslation[]
   jobTitles                   JobTitle[]
 
-  @@unique([groupCode, code])
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
+  @@unique([groupCode, code, organizationId])
   @@index([groupCode])
   @@index([isActive])
   @@map("sys_categories")
 }
 
 model CategoryTranslation {
-  id          Int      @id @default(autoincrement())
+  id          Int      @default(autoincrement())
   categoryId  Int      @map("category_id")
   langCode    String   @map("lang_code")
   name        String   @db.Text
   description String?  @db.Text
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
-  @@unique([categoryId, langCode])
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
+  @@unique([categoryId, langCode, organizationId])
   @@index([langCode])
   @@map("sys_category_translations")
 }
 
 model CategoryGroup {
-  code       String     @id
+  code       String     
   name       String
   order      Int        @default(0)
   isActive   Boolean    @default(true)
   categories Category[]
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([code, organizationId])
   @@map("sys_category_groups")
 }

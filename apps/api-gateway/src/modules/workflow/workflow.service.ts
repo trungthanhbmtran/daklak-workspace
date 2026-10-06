@@ -114,6 +114,12 @@ export class WorkflowService implements OnModuleInit {
       }
       delete res.definitionJson;
     }
+    if (res.bpmnLogic) {
+      try { res.bpmnLogic = JSON.parse(res.bpmnLogic); } catch (e) {}
+    }
+    if (res.uiMetadata) {
+      try { res.uiMetadata = JSON.parse(res.uiMetadata); } catch (e) {}
+    }
     return res;
   }
 
@@ -143,6 +149,8 @@ export class WorkflowService implements OnModuleInit {
     const payload = { 
       name: body.name, description: body.description, code: body.code, 
       definitionJson: body.definition ? JSON.stringify(body.definition) : undefined,
+      bpmnLogic: body.bpmnLogic ? JSON.stringify(body.bpmnLogic) : undefined,
+      uiMetadata: body.uiMetadata ? JSON.stringify(body.uiMetadata) : undefined,
       organizationId: user?.organizationId || user?.orgId,
       createdBy: user?.id?.toString()
     };
@@ -154,6 +162,8 @@ export class WorkflowService implements OnModuleInit {
     const payload: any = { 
       id, name: body.name, description: body.description, code: body.code, 
       definitionJson: body.definition ? JSON.stringify(body.definition) : undefined,
+      bpmnLogic: body.bpmnLogic ? JSON.stringify(body.bpmnLogic) : undefined,
+      uiMetadata: body.uiMetadata ? JSON.stringify(body.uiMetadata) : undefined,
       organizationId: user?.organizationId || user?.orgId
     };
     const result = (await firstValueFrom(this.workflowGrpcService.UpdateWorkflow(payload)).catch(e => this.handleRpcError(e))) as any;

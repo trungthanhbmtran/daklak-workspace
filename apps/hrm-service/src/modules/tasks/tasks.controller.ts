@@ -28,8 +28,7 @@ export class TasksController {
   @GrpcMethod('TaskService', 'DeleteTask')
   deleteTask(data: any) { return this.tasksService.deleteTask(data.id); }
 
-  @GrpcMethod('TaskService', 'GetTaskStats')
-  getTaskStats(data: any) { return this.tasksService.getTaskStats(data); }
+  
 
 
   @GrpcMethod('TaskService', 'GetTaskTree')
@@ -38,8 +37,7 @@ export class TasksController {
   @GrpcMethod('TaskService', 'RecordAttendance')
   recordAttendance(data: any) { return this.tasksService.recordAttendance(data.taskId, data.currentEmployeeCode || data.employeeCode); }
 
-  @GrpcMethod('TaskService', 'GetAttendanceStats')
-  getAttendanceStats(data: any) { return this.tasksService.getAttendanceStats(data.taskId); }
+  
 
   // ─── Status & Progress ────────────────────────────────────────────────────
 

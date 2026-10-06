@@ -10,6 +10,7 @@ import {
   type UpstreamCaller,
 } from './upstream-access';
 import { clientIp } from '../../core/client-ip';
+import { RateLimiterService } from '../../core/rate-limiter/rate-limiter.service';
 
 const HOP_HEADERS = new Set([
   'connection',
@@ -40,6 +41,7 @@ export class IntegrationService {
   constructor(
     private readonly registry: RegistryService,
     private readonly secretProvider: EnvSecretProvider,
+    private readonly rateLimiter: RateLimiterService,
   ) {}
 
   public async proxyMiddleware(
@@ -80,6 +82,23 @@ export class IntegrationService {
       return res.status(403).json({
         success: false,
         message: 'Không có quyền truy cập nguồn, phương thức hoặc đường dẫn',
+      });
+    }
+
+    // Rate Limiting Khắt khe theo Upstream
+    const limit = upstream.config.rateLimit || 100; // default 100 req
+    const windowSec = upstream.config.rateLimitWindow || 60; // default 60s
+    const rateLimitKey = `gw:${upstreamName}:${caller.id || clientIp(req)}`;
+    const rateLimitResult = await this.rateLimiter.check(rateLimitKey, limit, windowSec);
+    
+    if (!rateLimitResult.allowed) {
+      res.setHeader('Retry-After', rateLimitResult.retryAfterSec);
+      res.setHeader('X-RateLimit-Limit', limit);
+      res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
+      return res.status(429).json({
+        success: false,
+        message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.',
+        retryAfter: rateLimitResult.retryAfterSec
       });
     }
 

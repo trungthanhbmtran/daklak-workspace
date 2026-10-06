@@ -32,10 +32,7 @@ export class DocumentController {
     return this.documentService.remove(data.id);
   }
 
-  @GrpcMethod('DocumentService', 'GetStatistics')
-  getStatistics(@Payload() data: AnyGrpcDto) {
-    return this.documentService.getStatistics();
-  }
+  
 
   @GrpcMethod('DocumentService', 'ExtractMetadata')
   extractMetadata(@Payload() data: ExtractMetadataGrpcDto) {

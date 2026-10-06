@@ -182,11 +182,47 @@ export function useWorkflowData({
       type: typeToBackendMap[n.type || ''] || n.type
     }));
 
+    const bpmnLogicNodes = nodesForBackend.map(n => ({
+      id: n.id,
+      type: n.type,
+      data: { ...n.data, label: undefined }
+    }));
+    
+    const uiMetadataNodes = nodesForBackend.map(n => ({
+      id: n.id,
+      position: n.position,
+      positionAbsolute: (n as any).positionAbsolute,
+      width: (n as any).width,
+      height: (n as any).height,
+      className: n.className,
+      style: n.style,
+      data: { label: n.data?.label }
+    }));
+
+    const bpmnLogicEdges = edges.map((e: any) => ({
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      sourceHandle: e.sourceHandle,
+      targetHandle: e.targetHandle,
+      type: e.type,
+      data: e.data
+    }));
+
+    const uiMetadataEdges = edges.map((e: any) => ({
+      id: e.id,
+      animated: e.animated,
+      label: e.label,
+      markerEnd: e.markerEnd,
+      style: e.style
+    }));
+
     const workflowData = {
       name: workflowName,
       description: workflowDesc,
       code: workflowCode,
-      definition: { nodes: nodesForBackend, edges: edges as any },
+      bpmnLogic: { nodes: bpmnLogicNodes, edges: bpmnLogicEdges },
+      uiMetadata: { nodes: uiMetadataNodes, edges: uiMetadataEdges },
     };
 
     try {
@@ -274,11 +310,47 @@ export function useWorkflowData({
         type: typeToBackendMap[n.type || ''] || n.type
       }));
 
+      const bpmnLogicNodes = nodesForBackend.map(n => ({
+        id: n.id,
+        type: n.type,
+        data: { ...n.data, label: undefined }
+      }));
+      
+      const uiMetadataNodes = nodesForBackend.map(n => ({
+        id: n.id,
+        position: n.position,
+        positionAbsolute: (n as any).positionAbsolute,
+        width: (n as any).width,
+        height: (n as any).height,
+        className: n.className,
+        style: n.style,
+        data: { label: n.data?.label }
+      }));
+  
+      const bpmnLogicEdges = edges.map((e: any) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
+        type: e.type,
+        data: e.data
+      }));
+  
+      const uiMetadataEdges = edges.map((e: any) => ({
+        id: e.id,
+        animated: e.animated,
+        label: e.label,
+        markerEnd: e.markerEnd,
+        style: e.style
+      }));
+  
       const workflowData = {
         name: workflowName,
         description: workflowDesc,
         code: workflowCode,
-        definition: { nodes: nodesForBackend, edges: edges as any },
+        bpmnLogic: { nodes: bpmnLogicNodes, edges: bpmnLogicEdges },
+        uiMetadata: { nodes: uiMetadataNodes, edges: uiMetadataEdges },
       };
       try {
         const response = await workflowApi.create(workflowData as any);

@@ -347,6 +347,8 @@ message CreateWorkflowRequest {
   string createdBy = 6;
   string definitionJson = 7;
   string organizationId = 8;
+  string bpmnLogic = 9;
+  string uiMetadata = 10;
 }
 
 message UpdateWorkflowRequest {
@@ -358,6 +360,8 @@ message UpdateWorkflowRequest {
   string status = 6;
   string definitionJson = 7;
   string organizationId = 8;
+  string bpmnLogic = 9;
+  string uiMetadata = 10;
 }
 
 message FindOneWorkflowRequest {
@@ -406,6 +410,8 @@ message WorkflowResponse {
   // New fields (additive, field numbers after 11)
   string publishedBy = 12;
   string publishedAt = 13;
+  string bpmnLogic = 14;
+  string uiMetadata = 15;
 }
 
 message WorkflowDefinition {

@@ -1,5 +1,5 @@
 model KpiPeriod {
-  id          Int             @id @default(autoincrement())
+  id          Int             @default(autoincrement())
   name        String          @map("name")
   startDate   DateTime        @map("start_date") @db.Date
   endDate     DateTime        @map("end_date") @db.Date
@@ -8,11 +8,13 @@ model KpiPeriod {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@map("kpi_periods")
 }
 
 model KpiEvaluation {
-  id             Int    @id @default(autoincrement())
+  id             Int    @default(autoincrement())
   employeeCode   String @map("employee_code")
   periodId       Int    @map("period_id")
   staffingSlotId Int?   @map("staffing_slot_id") // Vị trí việc làm / Định biên khi được đánh giá
@@ -35,10 +37,10 @@ model KpiEvaluation {
 
   reviewerCode String? @map("reviewer_code")
 
-  employee Employee    @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
-  reviewer Employee?   @relation("KpiReviewer", fields: [reviewerCode], references: [employeeCode])
-  period   KpiPeriod   @relation(fields: [periodId], references: [id])
-  ruleSet  KpiRuleSet? @relation(fields: [ruleSetId], references: [id])
+  employee Employee    @relation("KpiEmployee", fields: [employeeCode, organizationId], references: [employeeCode, organizationId])
+  reviewer Employee?   @relation("KpiReviewer", fields: [reviewerCode, organizationId], references: [employeeCode, organizationId])
+  period   KpiPeriod   @relation(fields: [periodId, organizationId], references: [id, organizationId])
+  ruleSet  KpiRuleSet? @relation(fields: [ruleSetId, organizationId], references: [id, organizationId])
 
   tasks     KpiEvaluationTask[]
   documents KpiFormDocument[]
@@ -46,19 +48,21 @@ model KpiEvaluation {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@map("kpi_evaluations")
 }
 
 // Bảng lưu công việc đăng ký và chấm điểm (Hợp nhất dữ liệu Mẫu 01, Mẫu 02, Mẫu 04)
 model KpiEvaluationTask {
-  id           Int    @id @default(autoincrement())
+  id           Int    @default(autoincrement())
   evaluationId Int    @map("evaluation_id")
   taskName     String @map("task_name")
   domainCode   String @map("domain_code")
 
   // Liên kết hệ thống công việc (Task Management)
   taskId Int?  @map("task_id")
-  task   Task? @relation(fields: [taskId], references: [id])
+  task   Task? @relation(fields: [taskId, organizationId], references: [id, organizationId])
 
   // 1. Thành tố Khối lượng (A)
   plannedQty   Float   @default(1.0) @map("planned_qty")
@@ -85,10 +89,12 @@ model KpiEvaluationTask {
   calculatedAttitudePct Float? @map("calculated_attitude_pct")
   finalKpiScore         Float? @map("final_kpi_score")
 
-  evaluation KpiEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluation KpiEvaluation @relation(fields: [evaluationId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@map("kpi_evaluation_tasks")
 }

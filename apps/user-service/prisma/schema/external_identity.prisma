@@ -1,12 +1,14 @@
 model ExternalIdentity {
-  id String @id @default(cuid()) @db.VarChar(64)
+  id String @default(cuid()) @db.VarChar(64)
   userId Int
   issuerHash String @db.Char(64)
   subjectHash String @db.Char(64)
   approvedBy Int
   approvedAt DateTime @default(now())
   disabledAt DateTime?
-  @@unique([issuerHash, subjectHash])
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
+  @@unique([issuerHash, subjectHash, organizationId])
   @@index([userId])
   @@map("external_identities")
 }

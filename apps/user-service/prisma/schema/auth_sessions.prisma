@@ -1,5 +1,5 @@
 model AuthDeviceSession {
-  id           String   @id @db.VarChar(36)
+  id           String   @db.VarChar(36)
   userId       Int      @map("user_id")
   authVersion  Int      @map("auth_version")
   expiresAt    DateTime @map("expires_at")
@@ -8,18 +8,22 @@ model AuthDeviceSession {
   createdAt    DateTime @default(now()) @map("created_at")
   handles      AuthRefreshHandle[]
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@index([userId, revokedAt])
   @@index([revokedAt, redisCleaned])
   @@map("auth_device_sessions")
 }
 
 model AuthRefreshHandle {
-  hash       String @id @db.Char(64)
+  hash       String @db.Char(64)
   sessionId  String @map("session_id") @db.VarChar(36)
   status     String @default("ACTIVE") @db.VarChar(12)
   createdAt  DateTime @default(now()) @map("created_at")
-  session    AuthDeviceSession @relation(fields: [sessionId], references: [id])
+  session    AuthDeviceSession @relation(fields: [sessionId, organizationId], references: [id, organizationId])
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([hash, organizationId])
   @@index([sessionId, status])
   @@map("auth_refresh_handles")
 }

@@ -27,7 +27,7 @@ export class GrpcWorkflowController {
       code: data.code,
       name: data.name,
       description: data.description,
-      graph: data.definitionJson ? JSON.parse(data.definitionJson) : (data.definition || {}),
+      graph: this.parseGraphPayload(data),
       organizationId: data.organizationId,
       createdBy: data.createdBy,
     });
@@ -37,10 +37,9 @@ export class GrpcWorkflowController {
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
   async updateWorkflow(@Payload() data: any) {
     let updatePayload = { ...data };
-    if (data.definitionJson) {
-      updatePayload.graph = JSON.parse(data.definitionJson);
-    } else if (data.definition) {
-      updatePayload.graph = data.definition;
+    const graphPayload = this.parseGraphPayload(data);
+    if (Object.keys(graphPayload).length > 0) {
+      updatePayload.graph = graphPayload;
     }
     const result = await this.definitionService.updateProcess(data.id, updatePayload, data.organizationId);
     return this.mapToWorkflowResponse(result.def, result.version);
@@ -265,8 +264,22 @@ export class GrpcWorkflowController {
   }
 
   // =========================================================================
-  // MAPPERS
-  // =========================================================================
+  private parseGraphPayload(data: any): any {
+    if (data.bpmnLogic) {
+      const bpmnLogic = typeof data.bpmnLogic === 'string' ? JSON.parse(data.bpmnLogic) : data.bpmnLogic;
+      const uiMetadata = typeof data.uiMetadata === 'string' && data.uiMetadata ? JSON.parse(data.uiMetadata) : data.uiMetadata;
+      return {
+        nodes: bpmnLogic.nodes || [],
+        edges: bpmnLogic.edges || [],
+        _uiMetadata: uiMetadata || { nodes: [], edges: [] }
+      };
+    }
+    if (data.definitionJson) {
+      return JSON.parse(data.definitionJson);
+    }
+    return data.definition || {};
+  }
+
   private mapToWorkflowResponse(def: any, version: any) {
     if (!def) return {};
     return {
@@ -276,7 +289,8 @@ export class GrpcWorkflowController {
       description: def.description,
       version: version?.version || 1,
       status: version?.status || 'DRAFT',
-      definitionJson: version?.graph ? JSON.stringify(version.graph) : '{}',
+      bpmnLogic: version?.graph ? JSON.stringify({ nodes: version.graph.nodes || [], edges: version.graph.edges || [] }) : '{}',
+      uiMetadata: version?.graph?._uiMetadata ? JSON.stringify(version.graph._uiMetadata) : '{}',
       trigger: def.code,
       createdAt: def.createdAt?.toISOString(),
       updatedAt: def.updatedAt?.toISOString(),

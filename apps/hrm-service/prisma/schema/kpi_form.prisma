@@ -1,6 +1,6 @@
 // Quản lý các biểu mẫu hành chính (Administrative Forms) độc lập với hệ thống tính toán (Metric Engine)
 model KpiFormTemplate {
-  formCode    String  @id @map("form_code") // Ví dụ: MAU_01, MAU_02
+  formCode    String  @map("form_code") // Ví dụ: MAU_01, MAU_02
   name        String  @map("name")
   description String? @db.Text
 
@@ -12,11 +12,13 @@ model KpiFormTemplate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([formCode, organizationId])
   @@map("kpi_form_templates")
 }
 
 model KpiFormDocument {
-  id           Int    @id @default(autoincrement())
+  id           Int    @default(autoincrement())
   formCode     String @map("form_code")
   evaluationId Int    @map("evaluation_id")
 
@@ -34,11 +36,13 @@ model KpiFormDocument {
   decisionNumber String?   @map("decision_number")
   decisionDate   DateTime? @map("decision_date") @db.Date
 
-  template   KpiFormTemplate @relation(fields: [formCode], references: [formCode])
-  evaluation KpiEvaluation   @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  template   KpiFormTemplate @relation(fields: [formCode, organizationId], references: [formCode, organizationId])
+  evaluation KpiEvaluation   @relation(fields: [evaluationId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@map("kpi_form_documents")
 }

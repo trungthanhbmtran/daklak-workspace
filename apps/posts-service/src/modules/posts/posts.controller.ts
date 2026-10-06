@@ -130,10 +130,7 @@ export class PostsController {
   /**
    * Trả về thống kê tổng hợp — backend tính sẵn, client không cần fetch bulk.
    */
-  @GrpcMethod('PostService', 'GetPostStats')
-  async getPostStats(@Payload() data: GetPostStatsGrpcDto) {
-    return this.postsService.getStats(data);
-  }
+  
 
   @MessagePattern('translation_response')
   async handleTranslationResponse(@Payload() payload: any, @Ctx() context: RmqContext) {

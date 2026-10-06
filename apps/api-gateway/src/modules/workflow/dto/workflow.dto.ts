@@ -188,6 +188,16 @@ export class CreateWorkflowDto {
   @IsObject()
   @IsOptional()
   definition?: Record<string, any>;
+
+  @ApiProperty({ required: false, type: Object })
+  @IsObject()
+  @IsOptional()
+  bpmnLogic?: Record<string, any>;
+
+  @ApiProperty({ required: false, type: Object })
+  @IsObject()
+  @IsOptional()
+  uiMetadata?: Record<string, any>;
 }
 
 export class UpdateWorkflowDto extends CreateWorkflowDto {}

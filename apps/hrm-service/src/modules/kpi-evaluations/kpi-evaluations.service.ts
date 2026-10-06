@@ -171,55 +171,7 @@ export class KpiEvaluationsService implements OnModuleInit {
     };
   }
 
-  async getEvaluationStats(query: any) {
-    const periodId = query?.periodId ? Number(query.periodId) : undefined;
-    const where: any = {};
-    if (periodId) {
-      where.periodId = periodId;
-    }
-
-    // [Góc nhìn Database Optimizer]: Lấy tổng quan nhanh
-    const totalEvaluations = await this.prisma.kpiEvaluation.count({ where });
-    const scoreAgg = await this.prisma.kpiEvaluation.aggregate({
-      where,
-      _avg: { totalScore: true }
-    });
-    const companyAvgScore = scoreAgg._avg.totalScore || 0;
-
-    // [Góc nhìn Database Optimizer]: Tránh N+1 query bằng cách lấy select các cột cần thiết rồi Gom nhóm (Group By) O(N) ở RAM
-    const allEval = await this.prisma.kpiEvaluation.findMany({
-      where,
-      select: {
-        totalScore: true,
-        employee: {
-          select: { departmentId: true }
-        }
-      }
-    });
-
-    const unitMap = new Map<number, { count: number, totalScore: number }>();
-    for (const item of allEval) {
-      const deptId = item.employee?.departmentId || 0;
-      const score = item.totalScore || 0;
-      
-      const stat = unitMap.get(deptId) || { count: 0, totalScore: 0 };
-      stat.count++;
-      stat.totalScore += score;
-      unitMap.set(deptId, stat);
-    }
-
-    const statsByUnit = Array.from(unitMap.entries()).map(([departmentId, stat]) => ({
-      departmentId,
-      avgScore: stat.count > 0 ? (stat.totalScore / stat.count) : 0,
-      totalEvaluations: stat.count
-    }));
-
-    return { 
-      success: true, 
-      message: 'Thống kê KPI thành công',
-      data: { statsByUnit, companyAvgScore, totalEvaluations } 
-    };
-  }
+  
 
   // TÍNH ĐIỂM TỰ ĐỘNG DỰA TRÊN SỐ LIỆU LGSP VÀ CÔNG VIỆC TRÊN HỆ THỐNG
   async calculatePersonalKpi(data: { periodId: number | string, employeeCode: string, staffingSlotId?: number }) {

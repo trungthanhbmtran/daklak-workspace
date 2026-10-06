@@ -1,5 +1,5 @@
 model AiKnowledgeSource {
-  id          String  @id @default(cuid())
+  id          String  @default(cuid())
   assistantId String  @map("assistant_id")
   type        String // TEXT, FILE, URL
   title       String
@@ -10,8 +10,10 @@ model AiKnowledgeSource {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  assistant AiAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
+  assistant AiAssistant @relation(fields: [assistantId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
   @@index([assistantId])
   @@map("ai_knowledge_sources")
 }

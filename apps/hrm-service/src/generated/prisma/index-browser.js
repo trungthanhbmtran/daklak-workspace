@@ -144,7 +144,8 @@ exports.Prisma.EmployeeScalarFieldEnum = {
   startDate: 'startDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
+  isDeleted: 'isDeleted',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiRuleSetScalarFieldEnum = {
@@ -157,7 +158,8 @@ exports.Prisma.KpiRuleSetScalarFieldEnum = {
   bonusThresholdPct: 'bonusThresholdPct',
   maxBonusPct: 'maxBonusPct',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiDomainWeightScalarFieldEnum = {
@@ -167,7 +169,8 @@ exports.Prisma.KpiDomainWeightScalarFieldEnum = {
   volumeWeight: 'volumeWeight',
   qualityWeight: 'qualityWeight',
   progressWeight: 'progressWeight',
-  attitudeWeight: 'attitudeWeight'
+  attitudeWeight: 'attitudeWeight',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiPeriodScalarFieldEnum = {
@@ -176,7 +179,8 @@ exports.Prisma.KpiPeriodScalarFieldEnum = {
   startDate: 'startDate',
   endDate: 'endDate',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiEvaluationScalarFieldEnum = {
@@ -194,7 +198,8 @@ exports.Prisma.KpiEvaluationScalarFieldEnum = {
   totalScore: 'totalScore',
   reviewerCode: 'reviewerCode',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiEvaluationTaskScalarFieldEnum = {
@@ -219,7 +224,8 @@ exports.Prisma.KpiEvaluationTaskScalarFieldEnum = {
   calculatedAttitudePct: 'calculatedAttitudePct',
   finalKpiScore: 'finalKpiScore',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiFormTemplateScalarFieldEnum = {
@@ -228,7 +234,8 @@ exports.Prisma.KpiFormTemplateScalarFieldEnum = {
   description: 'description',
   templateFileId: 'templateFileId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiFormDocumentScalarFieldEnum = {
@@ -243,7 +250,8 @@ exports.Prisma.KpiFormDocumentScalarFieldEnum = {
   decisionNumber: 'decisionNumber',
   decisionDate: 'decisionDate',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.MasterPlanScalarFieldEnum = {
@@ -259,7 +267,8 @@ exports.Prisma.MasterPlanScalarFieldEnum = {
   documentId: 'documentId',
   workflowCode: 'workflowCode',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskScalarFieldEnum = {
@@ -286,7 +295,8 @@ exports.Prisma.TaskScalarFieldEnum = {
   creatorEmployeeCode: 'creatorEmployeeCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
+  isDeleted: 'isDeleted',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskStepScalarFieldEnum = {
@@ -300,7 +310,8 @@ exports.Prisma.TaskStepScalarFieldEnum = {
   completedAt: 'completedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
+  isDeleted: 'isDeleted',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskAttachmentScalarFieldEnum = {
@@ -309,7 +320,8 @@ exports.Prisma.TaskAttachmentScalarFieldEnum = {
   documentId: 'documentId',
   type: 'type',
   createdAt: 'createdAt',
-  isDeleted: 'isDeleted'
+  isDeleted: 'isDeleted',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskParticipantScalarFieldEnum = {
@@ -320,13 +332,15 @@ exports.Prisma.TaskParticipantScalarFieldEnum = {
   contributionPercentage: 'contributionPercentage',
   status: 'status',
   reason: 'reason',
-  attendedAt: 'attendedAt'
+  attendedAt: 'attendedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskClosureScalarFieldEnum = {
   ancestorId: 'ancestorId',
   descendantId: 'descendantId',
-  depth: 'depth'
+  depth: 'depth',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskHistoryScalarFieldEnum = {
@@ -336,14 +350,16 @@ exports.Prisma.TaskHistoryScalarFieldEnum = {
   actorCode: 'actorCode',
   oldValue: 'oldValue',
   newValue: 'newValue',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskNotificationLogScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
   type: 'type',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskRankTemplateScalarFieldEnum = {
@@ -359,7 +375,8 @@ exports.Prisma.TaskRankTemplateScalarFieldEnum = {
   legalBasis: 'legalBasis',
   workflowId: 'workflowId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.RankQuotaScalarFieldEnum = {
@@ -371,7 +388,8 @@ exports.Prisma.RankQuotaScalarFieldEnum = {
   targetValue: 'targetValue',
   weight: 'weight',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.OutboxEventScalarFieldEnum = {
@@ -385,7 +403,8 @@ exports.Prisma.OutboxEventScalarFieldEnum = {
   retryCount: 'retryCount',
   createdAt: 'createdAt',
   processedAt: 'processedAt',
-  errorReason: 'errorReason'
+  errorReason: 'errorReason',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.ProcessedCommandScalarFieldEnum = {
@@ -393,7 +412,8 @@ exports.Prisma.ProcessedCommandScalarFieldEnum = {
   workflowInstanceId: 'workflowInstanceId',
   processedAt: 'processedAt',
   action: 'action',
-  status: 'status'
+  status: 'status',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.SortOrder = {
@@ -439,40 +459,47 @@ exports.Prisma.EmployeeOrderByRelevanceFieldEnum = {
   employmentType: 'employmentType',
   employmentStatus: 'employmentStatus',
   address: 'address',
-  avatar: 'avatar'
+  avatar: 'avatar',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiRuleSetOrderByRelevanceFieldEnum = {
   unitId: 'unitId',
-  version: 'version'
+  version: 'version',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiDomainWeightOrderByRelevanceFieldEnum = {
-  domainCode: 'domainCode'
+  domainCode: 'domainCode',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiPeriodOrderByRelevanceFieldEnum = {
-  name: 'name'
+  name: 'name',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiEvaluationOrderByRelevanceFieldEnum = {
   employeeCode: 'employeeCode',
   phase: 'phase',
   status: 'status',
-  reviewerCode: 'reviewerCode'
+  reviewerCode: 'reviewerCode',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiEvaluationTaskOrderByRelevanceFieldEnum = {
   taskName: 'taskName',
   domainCode: 'domainCode',
-  errorSeverity: 'errorSeverity'
+  errorSeverity: 'errorSeverity',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiFormTemplateOrderByRelevanceFieldEnum = {
   formCode: 'formCode',
   name: 'name',
   description: 'description',
-  templateFileId: 'templateFileId'
+  templateFileId: 'templateFileId',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.KpiFormDocumentOrderByRelevanceFieldEnum = {
@@ -481,7 +508,8 @@ exports.Prisma.KpiFormDocumentOrderByRelevanceFieldEnum = {
   status: 'status',
   submitterCode: 'submitterCode',
   signerCode: 'signerCode',
-  decisionNumber: 'decisionNumber'
+  decisionNumber: 'decisionNumber',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.MasterPlanOrderByRelevanceFieldEnum = {
@@ -491,7 +519,8 @@ exports.Prisma.MasterPlanOrderByRelevanceFieldEnum = {
   status: 'status',
   createdByCode: 'createdByCode',
   documentId: 'documentId',
-  workflowCode: 'workflowCode'
+  workflowCode: 'workflowCode',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskOrderByRelevanceFieldEnum = {
@@ -504,33 +533,43 @@ exports.Prisma.TaskOrderByRelevanceFieldEnum = {
   rejectReason: 'rejectReason',
   workflowInstId: 'workflowInstId',
   conversationId: 'conversationId',
-  creatorEmployeeCode: 'creatorEmployeeCode'
+  creatorEmployeeCode: 'creatorEmployeeCode',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskStepOrderByRelevanceFieldEnum = {
   title: 'title',
   status: 'status',
-  assigneeCode: 'assigneeCode'
+  assigneeCode: 'assigneeCode',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskAttachmentOrderByRelevanceFieldEnum = {
   documentId: 'documentId',
-  type: 'type'
+  type: 'type',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskParticipantOrderByRelevanceFieldEnum = {
   employeeCode: 'employeeCode',
   status: 'status',
-  reason: 'reason'
+  reason: 'reason',
+  organizationId: 'organizationId'
+};
+
+exports.Prisma.TaskClosureOrderByRelevanceFieldEnum = {
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskHistoryOrderByRelevanceFieldEnum = {
   action: 'action',
-  actorCode: 'actorCode'
+  actorCode: 'actorCode',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskNotificationLogOrderByRelevanceFieldEnum = {
-  type: 'type'
+  type: 'type',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.TaskRankTemplateOrderByRelevanceFieldEnum = {
@@ -541,14 +580,16 @@ exports.Prisma.TaskRankTemplateOrderByRelevanceFieldEnum = {
   defaultUnit: 'defaultUnit',
   rankNameVN: 'rankNameVN',
   legalBasis: 'legalBasis',
-  workflowId: 'workflowId'
+  workflowId: 'workflowId',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.RankQuotaOrderByRelevanceFieldEnum = {
   rankCode: 'rankCode',
   domainCode: 'domainCode',
   taskName: 'taskName',
-  unit: 'unit'
+  unit: 'unit',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.OutboxEventOrderByRelevanceFieldEnum = {
@@ -557,14 +598,16 @@ exports.Prisma.OutboxEventOrderByRelevanceFieldEnum = {
   nodeId: 'nodeId',
   commandType: 'commandType',
   status: 'status',
-  errorReason: 'errorReason'
+  errorReason: 'errorReason',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.ProcessedCommandOrderByRelevanceFieldEnum = {
   commandId: 'commandId',
   workflowInstanceId: 'workflowInstanceId',
   action: 'action',
-  status: 'status'
+  status: 'status',
+  organizationId: 'organizationId'
 };
 exports.TaskRole = exports.$Enums.TaskRole = {
   OWNER: 'OWNER',

@@ -1,5 +1,5 @@
 model KpiRuleSet {
-  id       Int     @id @default(autoincrement())
+  id       Int     @default(autoincrement())
   unitId   String  @map("unit_code") // Mã tổ chức (Từ user-service, ví dụ: 'BTCTU_DAKLAK')
   version  String  @map("version") // Phiên bản công thức (Ví dụ: "v1.2026")
   isActive Boolean @default(true) @map("is_active")
@@ -17,12 +17,14 @@ model KpiRuleSet {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([unitId, version])
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
+  @@unique([unitId, version, organizationId])
   @@map("kpi_rule_sets")
 }
 
 model KpiDomainWeight {
-  id         Int    @id @default(autoincrement())
+  id         Int    @default(autoincrement())
   ruleSetId  Int    @map("rule_set_id")
   domainCode String @map("domain_code") // Mã mảng việc (DOM_THAM_DINH, DOM_VAN_THU...)
 
@@ -31,8 +33,10 @@ model KpiDomainWeight {
   progressWeight Float @map("progress_weight") // Trọng số Tiến độ (C)
   attitudeWeight Float @map("attitude_weight") // Trọng số Thái độ / Lãnh đạo (D)
 
-  ruleSet KpiRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+  ruleSet KpiRuleSet @relation(fields: [ruleSetId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
-  @@unique([ruleSetId, domainCode])
+  organizationId String @default("DEFAULT") @map("organization_id")
+  @@id([id, organizationId])
+  @@unique([ruleSetId, domainCode, organizationId])
   @@map("kpi_domain_weights")
 }

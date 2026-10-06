@@ -1,13 +1,13 @@
 // Nhân viên HRM – departmentId, jobTitleId tham chiếu sang user-service (OrganizationUnit, JobTitle)
 model Employee {
-  id     Int     @id @default(autoincrement())
+  id     Int     @default(autoincrement())
   // Thêm user_id theo chuẩn DDD (Tham chiếu sang user-service)
   userId String? @map("user_id")
 
   firstname    String    @map("firstname")
   lastname     String    @map("lastname")
   fullName     String    @map("full_name")
-  employeeCode String    @unique @map("employee_code")
+  employeeCode String    @map("employee_code")
   email        String?
   phone        String?
   gender       String?   @default("male")
@@ -37,11 +37,15 @@ model Employee {
   kpiReviews       KpiEvaluation[]   @relation("KpiReviewer")
   taskParticipants TaskParticipant[] @relation("EmployeeTasks")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
+  @@unique([employeeCode, organizationId])
   @@map("employees")
 }
 
 model KpiRuleSet {
-  id       Int     @id @default(autoincrement())
+  id       Int     @default(autoincrement())
   unitId   String  @map("unit_code") // Mã tổ chức (Từ user-service, ví dụ: 'BTCTU_DAKLAK')
   version  String  @map("version") // Phiên bản công thức (Ví dụ: "v1.2026")
   isActive Boolean @default(true) @map("is_active")
@@ -59,12 +63,15 @@ model KpiRuleSet {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([unitId, version])
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
+  @@unique([unitId, version, organizationId])
   @@map("kpi_rule_sets")
 }
 
 model KpiDomainWeight {
-  id         Int    @id @default(autoincrement())
+  id         Int    @default(autoincrement())
   ruleSetId  Int    @map("rule_set_id")
   domainCode String @map("domain_code") // Mã mảng việc (DOM_THAM_DINH, DOM_VAN_THU...)
 
@@ -73,14 +80,17 @@ model KpiDomainWeight {
   progressWeight Float @map("progress_weight") // Trọng số Tiến độ (C)
   attitudeWeight Float @map("attitude_weight") // Trọng số Thái độ / Lãnh đạo (D)
 
-  ruleSet KpiRuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+  ruleSet KpiRuleSet @relation(fields: [ruleSetId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
-  @@unique([ruleSetId, domainCode])
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
+  @@unique([ruleSetId, domainCode, organizationId])
   @@map("kpi_domain_weights")
 }
 
 model KpiPeriod {
-  id          Int             @id @default(autoincrement())
+  id          Int             @default(autoincrement())
   name        String          @map("name")
   startDate   DateTime        @map("start_date") @db.Date
   endDate     DateTime        @map("end_date") @db.Date
@@ -89,11 +99,14 @@ model KpiPeriod {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("kpi_periods")
 }
 
 model KpiEvaluation {
-  id             Int    @id @default(autoincrement())
+  id             Int    @default(autoincrement())
   employeeCode   String @map("employee_code")
   periodId       Int    @map("period_id")
   staffingSlotId Int?   @map("staffing_slot_id") // Vị trí việc làm / Định biên khi được đánh giá
@@ -116,10 +129,10 @@ model KpiEvaluation {
 
   reviewerCode String? @map("reviewer_code")
 
-  employee Employee    @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
-  reviewer Employee?   @relation("KpiReviewer", fields: [reviewerCode], references: [employeeCode])
-  period   KpiPeriod   @relation(fields: [periodId], references: [id])
-  ruleSet  KpiRuleSet? @relation(fields: [ruleSetId], references: [id])
+  employee Employee    @relation("KpiEmployee", fields: [employeeCode, organizationId], references: [employeeCode, organizationId])
+  reviewer Employee?   @relation("KpiReviewer", fields: [reviewerCode, organizationId], references: [employeeCode, organizationId])
+  period   KpiPeriod   @relation(fields: [periodId, organizationId], references: [id, organizationId])
+  ruleSet  KpiRuleSet? @relation(fields: [ruleSetId, organizationId], references: [id, organizationId])
 
   tasks     KpiEvaluationTask[]
   documents KpiFormDocument[]
@@ -127,19 +140,22 @@ model KpiEvaluation {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("kpi_evaluations")
 }
 
 // Bảng lưu công việc đăng ký và chấm điểm (Hợp nhất dữ liệu Mẫu 01, Mẫu 02, Mẫu 04)
 model KpiEvaluationTask {
-  id           Int    @id @default(autoincrement())
+  id           Int    @default(autoincrement())
   evaluationId Int    @map("evaluation_id")
   taskName     String @map("task_name")
   domainCode   String @map("domain_code")
 
   // Liên kết hệ thống công việc (Task Management)
   taskId Int?  @map("task_id")
-  task   Task? @relation(fields: [taskId], references: [id])
+  task   Task? @relation(fields: [taskId, organizationId], references: [id, organizationId])
 
   // 1. Thành tố Khối lượng (A)
   plannedQty   Float   @default(1.0) @map("planned_qty")
@@ -166,17 +182,20 @@ model KpiEvaluationTask {
   calculatedAttitudePct Float? @map("calculated_attitude_pct")
   finalKpiScore         Float? @map("final_kpi_score")
 
-  evaluation KpiEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluation KpiEvaluation @relation(fields: [evaluationId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("kpi_evaluation_tasks")
 }
 
 // Quản lý các biểu mẫu hành chính (Administrative Forms) độc lập với hệ thống tính toán (Metric Engine)
 model KpiFormTemplate {
-  formCode    String  @id @map("form_code") // Ví dụ: MAU_01, MAU_02
+  formCode    String  @map("form_code") // Ví dụ: MAU_01, MAU_02
   name        String  @map("name")
   description String? @db.Text
 
@@ -188,11 +207,14 @@ model KpiFormTemplate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([formCode, organizationId])
   @@map("kpi_form_templates")
 }
 
 model KpiFormDocument {
-  id           Int    @id @default(autoincrement())
+  id           Int    @default(autoincrement())
   formCode     String @map("form_code")
   evaluationId Int    @map("evaluation_id")
 
@@ -210,12 +232,15 @@ model KpiFormDocument {
   decisionNumber String?   @map("decision_number")
   decisionDate   DateTime? @map("decision_date") @db.Date
 
-  template   KpiFormTemplate @relation(fields: [formCode], references: [formCode])
-  evaluation KpiEvaluation   @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  template   KpiFormTemplate @relation(fields: [formCode, organizationId], references: [formCode, organizationId])
+  evaluation KpiEvaluation   @relation(fields: [evaluationId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("kpi_form_documents")
 }
 
@@ -231,7 +256,7 @@ datasource db {
 }
 
 model MasterPlan {
-  id          Int     @id @default(autoincrement())
+  id          Int     @default(autoincrement())
   title       String  @map("title")
   description String? @db.Text
   type        String  @default("SMART_GOAL")
@@ -251,11 +276,14 @@ model MasterPlan {
 
   tasks Task[]
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("master_plans")
 }
 
 model Task {
-  id          Int     @id @default(autoincrement())
+  id          Int     @default(autoincrement())
   parentId    Int?    @map("parent_id")
   title       String  @map("title")
   description String? @db.Text
@@ -285,7 +313,7 @@ model Task {
   updatedAt           DateTime @updatedAt @map("updated_at")
   isDeleted           Boolean  @default(false) @map("is_deleted")
 
-  plan           MasterPlan?         @relation(fields: [planId], references: [id])
+  plan           MasterPlan?         @relation(fields: [planId, organizationId], references: [id, organizationId])
   kpiEvaluations KpiEvaluationTask[]
 
   participants TaskParticipant[]
@@ -297,6 +325,9 @@ model Task {
   descendants      TaskClosure[]         @relation("TaskClosureAncestor")
   notificationLogs TaskNotificationLog[]
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@index([dueDate])
   @@index([status, dueDate])
   @@index([isCompleted, dueDate])
@@ -307,7 +338,7 @@ model Task {
 }
 
 model TaskStep {
-  id           Int       @id @default(autoincrement())
+  id           Int       @default(autoincrement())
   taskId       Int       @map("task_id")
   title        String    @map("title")
   status       String    @default("TODO") // TODO, COMPLETED
@@ -319,22 +350,28 @@ model TaskStep {
   updatedAt    DateTime  @updatedAt @map("updated_at")
   isDeleted    Boolean   @default(false) @map("is_deleted")
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@index([taskId])
   @@map("task_steps")
 }
 
 model TaskAttachment {
-  id         Int      @id @default(autoincrement())
+  id         Int      @default(autoincrement())
   taskId     Int      @map("task_id")
   documentId String   @map("document_id")
   type       String   @default("REFERENCE")
   createdAt  DateTime @default(now()) @map("created_at")
   isDeleted  Boolean  @default(false) @map("is_deleted")
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@index([taskId])
   @@map("task_attachments")
 }
@@ -358,10 +395,12 @@ model TaskParticipant {
   reason     String?   @map("reason") @db.Text
   attendedAt DateTime? @map("attended_at")
 
-  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  employee Employee @relation("EmployeeTasks", fields: [employeeCode], references: [employeeCode])
+  task     Task     @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  employee Employee @relation("EmployeeTasks", fields: [employeeCode, organizationId], references: [employeeCode, organizationId])
 
-  @@id([taskId, employeeCode, participantRole])
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([taskId, employeeCode, participantRole, organizationId])
   @@map("task_participants")
 }
 
@@ -370,15 +409,17 @@ model TaskClosure {
   descendantId Int @map("descendant_id")
   depth        Int @map("depth")
 
-  ancestor   Task @relation("TaskClosureAncestor", fields: [ancestorId], references: [id], onDelete: Cascade)
-  descendant Task @relation("TaskClosureDescendant", fields: [descendantId], references: [id], onDelete: Cascade)
+  ancestor   Task @relation("TaskClosureAncestor", fields: [ancestorId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  descendant Task @relation("TaskClosureDescendant", fields: [descendantId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
-  @@id([ancestorId, descendantId])
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([ancestorId, descendantId, organizationId])
   @@map("task_closure")
 }
 
 model TaskHistory {
-  id        Int      @id @default(autoincrement())
+  id        Int      @default(autoincrement())
   taskId    Int      @map("task_id")
   action    String   @map("action")
   actorCode String?  @map("actor_code")
@@ -386,27 +427,33 @@ model TaskHistory {
   newValue  Json?    @map("new_value")
   createdAt DateTime @default(now()) @map("created_at")
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@index([taskId])
   @@map("task_histories")
 }
 
 model TaskNotificationLog {
-  id        Int      @id @default(autoincrement())
+  id        Int      @default(autoincrement())
   taskId    Int      @map("task_id")
   type      String   @map("type")
   createdAt DateTime @default(now()) @map("created_at")
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId, organizationId], references: [id, organizationId], onDelete: Cascade)
 
-  @@unique([taskId, type])
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
+  @@unique([taskId, type, organizationId])
   @@index([taskId])
   @@map("task_notification_logs")
 }
 
 model TaskRankTemplate {
-  id                   Int     @id @default(autoincrement())
+  id                   Int     @default(autoincrement())
   classification       String  @map("classification")
   rank                 String  @map("rank")
   domainCode           String  @default("GENERIC") @map("domain_code")
@@ -421,11 +468,14 @@ model TaskRankTemplate {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("task_rank_templates")
 }
 
 model RankQuota {
-  id          Int    @id @default(autoincrement())
+  id          Int    @default(autoincrement())
   rankCode    String @map("rank_code")
   domainCode  String @default("GENERIC") @map("domain_code")
   taskName    String @map("task_name")
@@ -436,6 +486,9 @@ model RankQuota {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@map("rank_quotas")
 }
 
@@ -445,7 +498,7 @@ model RankQuota {
 
 // Bảng Outbox lưu trữ Command/Event khi hệ thống Offline hoặc để đảm bảo Transaction
 model OutboxEvent {
-  id                 String    @id @default(uuid())
+  id                 String    @default(uuid())
   workflowInstanceId String?   @map("workflow_instance_id")
   processVersion     Int?      @map("process_version")
   nodeId             String?   @map("node_id")
@@ -457,6 +510,9 @@ model OutboxEvent {
   processedAt        DateTime? @map("processed_at")
   errorReason        String?   @map("error_reason") @db.Text
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([id, organizationId])
   @@index([status])
   @@index([workflowInstanceId])
   @@map("outbox_events")
@@ -464,12 +520,15 @@ model OutboxEvent {
 
 // Bảng Inbox chống Duplicate Event (Idempotency) khi mạng chập chờn
 model ProcessedCommand {
-  commandId          String   @id @map("command_id")
+  commandId          String   @map("command_id")
   workflowInstanceId String   @map("workflow_instance_id")
   processedAt        DateTime @default(now()) @map("processed_at")
   action             String
   status             String   @default("SUCCESS") // SUCCESS, REJECTED
 
+  organizationId String @default("DEFAULT") @map("organization_id")
+
+  @@id([commandId, organizationId])
   @@index([workflowInstanceId])
   @@map("processed_commands")
 }

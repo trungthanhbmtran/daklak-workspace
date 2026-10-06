@@ -46,10 +46,7 @@ export class KpiEvaluationsController {
     return this.kpiEvaluationsService.findEvaluations(data);
   }
 
-  @GrpcMethod('KpiService', 'GetEvaluationStats')
-  getEvaluationStats(data: any) {
-    return this.kpiEvaluationsService.getEvaluationStats(data);
-  }
+  
 
   @GrpcMethod('KpiService', 'CalculatePersonalKpi')
   calculatePersonalKpi(data: { periodId: number, employeeCode: string }) {
