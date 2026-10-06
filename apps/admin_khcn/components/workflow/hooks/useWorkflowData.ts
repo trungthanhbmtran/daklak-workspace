@@ -52,7 +52,14 @@ export function useWorkflowData({
               const hasPosition = node.position && typeof node.position.x === 'number' && typeof node.position.y === 'number';
               const fallbackX = typeof node.x === 'number' ? node.x : (index % 4) * 280;
               const fallbackY = typeof node.y === 'number' ? node.y : Math.floor(index / 4) * 160;
-              const type = node.type === 'userTask' ? 'user_task' : node.type;
+              const typeMap: Record<string, string> = {
+                userTask: 'user_task',
+                serviceTask: 'service_task',
+                scriptTask: 'script_task',
+                exclusiveGateway: 'exclusive_gateway',
+                parallelGateway: 'parallel_gateway',
+              };
+              const type = typeMap[node.type] || node.type;
 
               return {
                 ...node,
@@ -162,11 +169,24 @@ export function useWorkflowData({
     }
 
     setIsSaving(true);
+    const typeToBackendMap: Record<string, string> = {
+      'user_task': 'userTask',
+      'service_task': 'serviceTask',
+      'script_task': 'scriptTask',
+      'exclusive_gateway': 'exclusiveGateway',
+      'parallel_gateway': 'parallelGateway',
+    };
+
+    const nodesForBackend = validatedNodes.map(n => ({
+      ...n,
+      type: typeToBackendMap[n.type || ''] || n.type
+    }));
+
     const workflowData = {
       name: workflowName,
       description: workflowDesc,
       code: workflowCode,
-      definition: { nodes: validatedNodes, edges: edges as any },
+      definition: { nodes: nodesForBackend, edges: edges as any },
     };
 
     try {
@@ -241,11 +261,24 @@ export function useWorkflowData({
     // Nếu chưa lưu, lưu trước
     if (!targetId) {
       setIsSaving(true);
+      const typeToBackendMap: Record<string, string> = {
+        'user_task': 'userTask',
+        'service_task': 'serviceTask',
+        'script_task': 'scriptTask',
+        'exclusive_gateway': 'exclusiveGateway',
+        'parallel_gateway': 'parallelGateway',
+      };
+
+      const nodesForBackend = validatedNodes.map(n => ({
+        ...n,
+        type: typeToBackendMap[n.type || ''] || n.type
+      }));
+
       const workflowData = {
         name: workflowName,
         description: workflowDesc,
         code: workflowCode,
-        definition: { nodes: validatedNodes, edges: edges as any },
+        definition: { nodes: nodesForBackend, edges: edges as any },
       };
       try {
         const response = await workflowApi.create(workflowData as any);
