@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ReportConfigAST } from '../../../types/v2';
-import { Button } from '../../../../../../../components/ui/button';
+import { ReportConfigAST } from '../../../../types/v2';
+import { Button } from '../../../../../../components/ui/button';
 import { SourceExplorer } from './SourceExplorer';
 import { Canvas } from './Canvas';
 

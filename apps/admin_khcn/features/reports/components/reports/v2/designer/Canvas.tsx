@@ -1,6 +1,6 @@
 import React from 'react';
-import { ReportConfigAST } from '../../../types/v2';
-import { Button } from '../../../../../../../components/ui/button';
+import { ReportConfigAST, JoinDef, ReportSourceDef } from '../../../../types/v2';
+import { Button } from '../../../../../../components/ui/button';
 
 interface CanvasProps {
   config: ReportConfigAST;
@@ -11,9 +11,8 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
   const handleRemoveSource = (id: string) => {
     setConfig({
       ...config,
-      sources: config.sources.filter((s) => s.id !== id),
-      joins: config.joins.filter(
-        (j) => j.leftSource !== id && j.rightSource !== id
+      sources: config.sources.filter((s: any) => s.id !== id),
+      joins: config.joins.filter((j: any) => j.leftSource !== id && j.rightSource !== id
       ),
     });
   };
@@ -32,7 +31,7 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
           </div>
         ) : (
           <div className="flex flex-wrap gap-4">
-            {config.sources.map((src) => (
+            {config.sources.map((src: any) => (
               <div key={src.id} className="border rounded-md p-3 min-w-[200px]">
                 <div className="flex justify-between items-center mb-2">
                   <strong className="text-sm">{src.id}</strong>
@@ -46,7 +45,7 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
                   </Button>
                 </div>
                 <ul className="text-xs text-gray-600 space-y-1 bg-slate-50 p-2 rounded">
-                  {src.fields.map((field) => (
+                  {src.fields.map((field: any) => (
                     <li key={field}>• {field}</li>
                   ))}
                 </ul>
@@ -60,7 +59,7 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
             <h4 className="font-medium text-sm mb-2">Cấu hình JOIN nhanh</h4>
             <div className="flex items-center gap-2">
               <select className="border text-sm p-1 rounded">
-                {config.sources.map((s) => (
+                {config.sources.map((s: any) => (
                   <option key={s.id} value={s.id}>
                     {s.id}
                   </option>
@@ -68,7 +67,7 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
               </select>
               <span>kết nối với</span>
               <select className="border text-sm p-1 rounded">
-                {config.sources.map((s) => (
+                {config.sources.map((s: any) => (
                   <option key={s.id} value={s.id}>
                     {s.id}
                   </option>
@@ -78,7 +77,7 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
             </div>
             {/* Hiển thị join */}
             <div className="mt-2 text-sm">
-              {config.joins.map((j, idx) => (
+              {config.joins.map((j: any, idx: number) => (
                 <div key={idx} className="bg-blue-50 text-blue-800 p-1 rounded inline-block mr-2">
                   {j.leftSource} {j.type} JOIN {j.rightSource}
                 </div>

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useGetReportDefinitions, useCreateReportDefinition } from '../../api/v2';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../../../../components/ui/card';
-import { Button } from '../../../../../../components/ui/button';
+import { useGetReportDefinitions, useCreateReportDefinition } from '../../../api/v2';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../../../components/ui/card';
+import { Button } from '../../../../../components/ui/button';
 import { ReportDesigner } from './designer/ReportDesigner';
 import { ReportViewer } from './ReportViewer';
-import { ReportConfigAST } from '../../types/v2';
+import { ReportConfigAST } from '../../../types/v2';
 
 export const ReportWorkspace = () => {
   const { data: reports, isLoading } = useGetReportDefinitions();

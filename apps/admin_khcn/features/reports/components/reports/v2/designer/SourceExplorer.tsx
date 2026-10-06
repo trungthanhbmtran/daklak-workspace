@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ReportSourceDef } from '../../../types/v2';
-import { Button } from '../../../../../../../components/ui/button';
+import { ReportSourceDef } from '../../../../types/v2';
+import { Button } from '../../../../../../components/ui/button';
 
 interface SourceExplorerProps {
   onAddSource: (source: ReportSourceDef) => void;

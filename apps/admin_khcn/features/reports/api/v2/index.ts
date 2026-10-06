@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { axiosInstance } from '../../../../lib/axios';
-import { ReportDefinition, ReportRun, DatasetSnapshot } from '../types/v2';
+import axiosInstance from '../../../../lib/axiosInstance';
+import { ReportDefinition, ReportRun, DatasetSnapshot } from '../../types/v2';
 
 export const reportKeys = {
   all: ['v2-reports'] as const,
