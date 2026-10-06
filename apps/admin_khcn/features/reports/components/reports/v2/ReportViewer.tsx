@@ -70,16 +70,57 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({ definitionId, config
 
             {runStatus?.status === 'SUCCEEDED' && (
               <div className="space-y-6">
-                {/* Khu vực Biểu đồ */}
+                {/* Khu vực Biểu đồ (Aesthetic View) */}
                 {config?.charts && config.charts.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">Biểu đồ Phân tích</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="mt-8 border-t border-slate-200 pt-6">
+                    <h3 className="text-xl font-bold text-slate-800 mb-6">Trực quan hóa Dữ liệu</h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                       {config.charts.map((chart: any, index: number) => (
-                        <div key={index} className="border rounded p-4 flex flex-col items-center justify-center h-48 bg-slate-50 text-gray-500">
-                          <p className="font-medium text-gray-700">{chart.title || `Biểu đồ ${chart.type}`}</p>
-                          <p className="text-sm">Trục X: {chart.xAxis} | Trục Y: {chart.yAxis}</p>
-                          <p className="text-xs italic mt-2">(Render bằng Recharts sẽ thực hiện ở phase sau)</p>
+                        <div key={index} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+                          <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
+                            <h4 className="font-bold text-slate-700 truncate">{chart.title || 'Biểu đồ'}</h4>
+                            <span className="text-xs font-semibold px-2 py-1 bg-indigo-100 text-indigo-700 rounded-md uppercase tracking-wider">{chart.type}</span>
+                          </div>
+                          
+                          <div className="h-56 bg-slate-50 relative flex flex-col items-center justify-center p-4">
+                            {/* Lưới nền (Grid background) */}
+                            <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                            
+                            {/* Dummy Data Visualization */}
+                            <div className="relative z-10 w-full h-full flex flex-col items-center justify-end pb-4">
+                              {chart.type === 'bar' && (
+                                <div className="flex items-end justify-center gap-3 w-full h-32 px-4">
+                                  {[40, 70, 45, 90, 60, 30].map((h, i) => (
+                                    <div key={i} className="w-1/6 bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-md relative group-hover:from-indigo-500 group-hover:to-indigo-300 transition-colors" style={{ height: `${h}%` }}></div>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {chart.type === 'line' && (
+                                <div className="w-full h-32 flex items-center justify-center">
+                                  <svg className="w-full h-full drop-shadow-md text-indigo-500" viewBox="0 0 100 40" preserveAspectRatio="none">
+                                    <path d="M0,35 Q10,30 20,20 T40,25 T60,10 T80,15 T100,5" fill="none" stroke="currentColor" strokeWidth="3.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M0,35 Q10,30 20,20 T40,25 T60,10 T80,15 T100,5 L100,40 L0,40 Z" fill="currentColor" opacity="0.1" stroke="none" />
+                                  </svg>
+                                </div>
+                              )}
+                              
+                              {chart.type === 'pie' && (
+                                <div className="w-32 h-32 mt-2">
+                                  <div className="w-full h-full rounded-full border-[14px] border-indigo-100 border-t-indigo-500 border-r-indigo-400 border-b-indigo-300 shadow-inner transform group-hover:rotate-12 transition-transform duration-700 ease-out"></div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Trục hoành / Trục tung */}
+                            <div className="absolute bottom-2 left-0 right-0 flex justify-center z-10">
+                              <div className="bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-[11px] font-medium text-slate-500 border border-slate-200 shadow-sm inline-flex items-center gap-2">
+                                <span><span className="text-slate-400">X:</span> {chart.xAxis}</span>
+                                <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                                <span><span className="text-slate-400">Y:</span> {chart.yAxis}</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
