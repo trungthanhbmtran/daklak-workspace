@@ -3,6 +3,8 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { executeTable } from './table-engine';
 
+import { PrismaService } from '../prisma/prisma.service';
+
 @Injectable()
 export class ReportsService implements OnModuleInit {
   private readonly logger = new Logger(ReportsService.name);
@@ -14,6 +16,7 @@ export class ReportsService implements OnModuleInit {
     @Inject('USER_SERVICE') private userClient: ClientGrpc,
     @Inject('TASK_SERVICE') private taskClient: ClientGrpc,
     @Inject('DOCUMENT_SERVICE') private docClient: ClientGrpc,
+    private readonly prisma: PrismaService,
   ) {}
 
   onModuleInit() {
@@ -162,6 +165,46 @@ export class ReportsService implements OnModuleInit {
       return {
         success: false,
         message: 'Lỗi tạo báo cáo chất lượng nhân sự',
+        data: JSON.stringify([]),
+      };
+    }
+  }
+
+  async getReportCatalog(payloadStr: string, _userDataStr: string) {
+    try {
+      // Fetch dynamic catalog from Prisma ReportDataSource table
+      const sources = await this.prisma.reportDataSource.findMany({
+        select: {
+          endpoint: true,
+          name: true,
+          fields: true,
+        },
+      });
+
+      // If DB is empty, provide fallback defaults or just empty array
+      const catalog = sources.length > 0 ? sources : [
+        {
+          endpoint: 'HRM_TASK_STATS',
+          name: 'Thống kê nhiệm vụ',
+          fields: ['taskId', 'employeeId', 'status', 'hours'],
+        },
+        {
+          endpoint: 'DOC_STATS',
+          name: 'Thống kê văn bản',
+          fields: ['docId', 'departmentId', 'type', 'issueDate'],
+        },
+      ];
+
+      return {
+        success: true,
+        message: 'Lấy danh mục dữ liệu thành công',
+        data: JSON.stringify(catalog),
+      };
+    } catch (error: any) {
+      this.logger.error('Error fetching report catalog:', error);
+      return {
+        success: false,
+        message: 'Lỗi lấy danh mục dữ liệu',
         data: JSON.stringify([]),
       };
     }

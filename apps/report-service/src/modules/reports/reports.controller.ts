@@ -56,19 +56,7 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'GetReportCatalog')
   async getReportCatalog(data: { payload: string; userData: string }) {
-    const mockCatalog = [
-      {
-        endpoint: 'HRM_TASK_STATS',
-        name: 'Thống kê nhiệm vụ',
-        fields: ['taskId', 'employeeId', 'status', 'hours'],
-      },
-      {
-        endpoint: 'DOC_STATS',
-        name: 'Thống kê văn bản',
-        fields: ['docId', 'departmentId', 'type', 'issueDate'],
-      },
-    ];
-    return { success: true, data: JSON.stringify(mockCatalog), message: 'Lấy danh mục dữ liệu thành công' };
+    return this.reportsService.getReportCatalog(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'RunReport')
