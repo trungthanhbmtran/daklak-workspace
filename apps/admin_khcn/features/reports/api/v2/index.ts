@@ -6,11 +6,22 @@ export const reportKeys = {
   all: ['v2-reports'] as const,
   lists: () => [...reportKeys.all, 'list'] as const,
   list: (filters: string) => [...reportKeys.lists(), { filters }] as const,
+  catalog: () => [...reportKeys.all, 'catalog'] as const,
   details: () => [...reportKeys.all, 'detail'] as const,
   detail: (id: string) => [...reportKeys.details(), id] as const,
   runs: (id: string) => [...reportKeys.detail(id), 'runs'] as const,
   runStatus: (runId: string) => [...reportKeys.all, 'runStatus', runId] as const,
   snapshot: (runId: string) => [...reportKeys.all, 'snapshot', runId] as const,
+};
+
+export const useGetReportCatalog = () => {
+  return useQuery({
+    queryKey: reportKeys.catalog(),
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/admin/reports/v2/catalog');
+      return data.data as { endpoint: string; name: string; fields: string[] }[];
+    },
+  });
 };
 
 export const useGetReportDefinitions = () => {

@@ -138,6 +138,26 @@ export class ReportsController {
     );
   }
 
+  @Get('v2/catalog')
+  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  async getReportCatalog() {
+    return {
+      success: true,
+      data: [
+        {
+          endpoint: 'HRM_TASK_STATS',
+          name: 'Thống kê nhiệm vụ',
+          fields: ['taskId', 'employeeId', 'status', 'hours'],
+        },
+        {
+          endpoint: 'DOC_STATS',
+          name: 'Thống kê văn bản',
+          fields: ['docId', 'departmentId', 'type', 'issueDate'],
+        },
+      ],
+    };
+  }
+
   @Get('v2/definitions/:id')
   @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
   async getReportDefinitionById(@Param('id') id: string, @Req() req: any) {
