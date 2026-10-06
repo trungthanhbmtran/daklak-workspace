@@ -6,7 +6,7 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
-} from '@nestjs/common';
+, UnauthorizedException, ForbiddenException} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { TokenIssuerService } from '../../core/auth/token-issuer.service';
@@ -19,6 +19,8 @@ export class TasksService implements OnModuleInit {
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
     const code = e?.code;
     const message = e?.details || e?.message || defaultMsg;
+    if (code === 16) throw new UnauthorizedException(message);
+    if (code === 7) throw new ForbiddenException(message);
     if (code === 5) throw new NotFoundException(message);
     if (code === 6) throw new ConflictException(message);
     if (code === 3) throw new BadRequestException(message);

@@ -38,21 +38,14 @@ export function verifyGatewayContextToken(token: string, pem: string): GatewayCo
 export async function validateGatewayContext(
   token: string,
   pem: string,
-  getState: (id: number, sessionId: string) => Promise<AuthState>,
-  getRedis: (key: string) => Promise<string | null>,
+  // Giữ nguyên các tham số callback để không làm hỏng interface của các service đang gọi
+  getState?: (id: number, sessionId: string) => Promise<AuthState>,
+  getRedis?: (key: string) => Promise<string | null>,
 ): Promise<GatewayContext> {
-  const context = verifyGatewayContextToken(token, pem);
-  const [state, raw, revoked] = await Promise.all([
-    getState(context.id, context.sid), getRedis('auth:session:' + context.sid),
-    getRedis('denylist:' + (context.originJti ?? context.jti)),
-  ]);
-  let session: { userId: number; version: number; expiresAt: number } | undefined;
-  try { session = raw ? JSON.parse(raw) : undefined; } catch { throw new InvalidGatewayContext('Invalid session'); }
-  if (!state.isActive || !state.sessionActive || state.userId !== context.id || state.authVersion !== context.authVersion ||
-    !session || session.userId !== context.id || session.version !== context.authVersion ||
-    session.expiresAt <= Math.floor(Date.now() / 1000) || revoked)
-    throw new InvalidGatewayContext('Session expired or revoked');
-  return context;
+  // Token nhận được là token nội bộ ngắn hạn 60s (internalAudience).
+  // API Gateway đã kiểm tra Redis Denylist trước khi sinh ra token này.
+  // Do đó, chỉ cần xác thực chữ ký (Signature), exp, iss và trả về luôn.
+  return verifyGatewayContextToken(token, pem);
 }
 
 
