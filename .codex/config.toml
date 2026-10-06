@@ -1,7 +1,0 @@
-[agents]
-enabled = true
-max_concurrent_threads_per_session = 1
-
-[agents.chatgpt_planner]
-description = "ChatGPT planning role: research, critique, and write a concrete ordered plan saved under docs/plans before implementation. Do not implement."
-config_file = "../.agents/agents/chatgpt-planner.toml"
