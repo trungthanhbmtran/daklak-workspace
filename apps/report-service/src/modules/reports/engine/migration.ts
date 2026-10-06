@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../../generated/prisma/client';
 import { ReportConfigAST } from './types';
 
 export class ReportMigrationTool {
