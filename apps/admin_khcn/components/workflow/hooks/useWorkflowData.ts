@@ -60,24 +60,33 @@ export function useWorkflowData({
           setNodes(loadedNodes.length > 0 ? loadedNodes : initialNodes);
 
           const loadedEdges = (definition.edges || []).map(
-            (edge: any, index: number) => ({
-              ...edge,
-              type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
-              id: String(edge.id || `edge-${edge.source}-${edge.target}-${index}`),
-              animated: edge.animated || true,
-              data: edge.data || {},
-              label: edge.label || (edge.data?.label as string) || "Chuyển tiếp",
-              markerEnd: edge.markerEnd || {
-                type: MarkerType.ArrowClosed,
-                width: 20,
-                height: 20,
-                color: '#3b82f6',
-              },
-              style: edge.style || {
-                strokeWidth: 2,
-                stroke: '#3b82f6',
-              }
-            })
+            (edge: any, index: number) => {
+              const source = String(edge.source || edge.sourceNodeId || "");
+              const target = String(edge.target || edge.targetNodeId || "");
+              
+              return {
+                ...edge,
+                source,
+                target,
+                sourceHandle: edge.sourceHandle || undefined,
+                targetHandle: edge.targetHandle || undefined,
+                type: edge.type === 'smoothstep' ? 'custom' : (edge.type || 'custom'),
+                id: String(edge.id || `edge-${source}-${target}-${index}`),
+                animated: edge.animated ?? true,
+                data: edge.data || {},
+                label: edge.label || (edge.data?.label as string) || "Chuyển tiếp",
+                markerEnd: edge.markerEnd || {
+                  type: MarkerType.ArrowClosed,
+                  width: 20,
+                  height: 20,
+                  color: '#3b82f6',
+                },
+                style: edge.style || {
+                  strokeWidth: 2,
+                  stroke: '#3b82f6',
+                }
+              };
+            }
           );
 
           console.log(`Setting ${loadedEdges.length} edges`);
