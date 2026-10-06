@@ -14,6 +14,26 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('--- Bắt đầu Seed Dữ liệu Báo cáo Động (Report Templates & Widgets) ---');
 
+  await prisma.reportDataSource.deleteMany();
+  await prisma.reportDataSource.createMany({
+    data: [
+      {
+        endpoint: 'HRM_TASK_STATS',
+        name: 'Thống kê nhiệm vụ',
+        fields: ['taskId', 'employeeId', 'status', 'hours'],
+      },
+      {
+        endpoint: 'DOC_STATS',
+        name: 'Thống kê văn bản',
+        fields: ['docId', 'departmentId', 'type', 'issueDate'],
+      },
+      {
+        endpoint: 'POST_STATS',
+        name: 'Thống kê bài viết',
+        fields: ['postId', 'authorId', 'categoryName', 'viewCount'],
+      }
+    ]
+  });
   // Xóa các template cũ nếu có để re-seed đồng bộ
   await prisma.reportWidget.deleteMany({});
   await prisma.reportTemplate.deleteMany({});
