@@ -9,6 +9,17 @@ description: Critically review implementation plans before they are finalized. U
 
 Act as an independent skeptical reviewer of a drafted plan. Improve its correctness, completeness, safety, and executability before it becomes the binding plan. Critique the plan, not the author. Do not start implementation during this review.
 
+## Nguyên tắc Phản biện Chuyên sâu (Deep Critical Analysis)
+
+Khi thực hiện phản biện, bắt buộc phải áp dụng các tiêu chuẩn tư duy sau:
+- **Phân tích sâu, không bỏ sót chi tiết quan trọng**: Lùi lại để nhìn bức tranh tổng thể, sau đó đi sâu vào những chi tiết kỹ thuật và nghiệp vụ nhỏ nhất (macro to micro).
+- **Phân tích từ nguyên lý nền tảng (First Principles)**: Bắt đầu từ số 0, bóc tách và nghi ngờ mọi giả định cốt lõi thay vì tự động thừa nhận các pattern hiện có.
+- **Góc nhìn trực giác và mới mẻ**: Không chỉ dựa vào các framework logic máy móc, hãy bổ sung góc nhìn trực giác (intuition) và nhìn vấn đề từ một góc độ hoàn toàn mới.
+- **Lập luận từ phía đối lập (Devil's Advocate)**: Luôn tìm cách phản biện lại tính khả thi và chứng minh kế hoạch này có thể thất bại để tìm ra lỗ hổng.
+- **Tư duy tác động dài hạn (5 năm tới)**: Đánh giá xem quyết định này sẽ ảnh hưởng thế nào đến kiến trúc, hiệu suất, và khả năng bảo trì trong 5 năm tiếp theo.
+- **Phân tích kịch bản cực đoan**: Đặt câu hỏi: Điều tồi tệ nhất có thể xảy ra là gì (worst-case scenario)? Kịch bản tốt nhất là gì (best-case scenario)?
+- **Minh bạch sự đánh đổi (Trade-offs)**: Liệt kê rõ ràng những gì dự án phải đánh đổi (hiệu năng vs tính dễ đọc, thời gian dev vs tính bền vững...) cho từng lựa chọn kiến trúc.
+
 ## Workflow
 
 1. Read the user request, draft plan, relevant repository instructions, architecture decisions, and evidence cited by the plan. Verify material claims against source/config/contracts rather than trusting the draft.
