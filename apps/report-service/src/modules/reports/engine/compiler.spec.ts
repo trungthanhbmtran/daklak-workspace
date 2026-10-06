@@ -59,6 +59,26 @@ describe('ReportCompiler', () => {
     expect(() => ReportCompiler.compile(ast)).toThrow('Cấu hình join tạo thành vòng lặp (cycle).');
   });
 
+  it('should compile AST with chart configs', () => {
+    const ast: ReportConfigAST = {
+      version: 1,
+      sources: [
+        { id: 'SRC1', endpoint: 'ep1', fields: [] },
+      ],
+      joins: [],
+      filters: [],
+      columns: [],
+      groupBy: [],
+      charts: [
+        { type: 'bar', xAxis: 'month', yAxis: 'revenue', title: 'Doanh thu tháng' }
+      ]
+    };
+
+    const plan = ReportCompiler.compile(ast);
+    expect(plan.executionOrder).toEqual(['SRC1']);
+    expect(plan.joins).toEqual([]);
+  });
+
   it('should throw if sources exceed limit', () => {
     const ast: ReportConfigAST = {
       version: 1,
@@ -77,3 +97,4 @@ describe('ReportCompiler', () => {
     expect(() => ReportCompiler.compile(ast)).toThrow('Báo cáo phải có từ 1 đến 3 nguồn dữ liệu.');
   });
 });
+
