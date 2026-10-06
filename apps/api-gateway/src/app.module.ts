@@ -14,6 +14,7 @@ import { TranslateModule } from './modules/translate/translate.module';
 import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
 import { IntegrationModule } from './modules/integration/integration.module';
+import { GatewayModule } from './modules/gateway/gateway.module';
 import { DynamicProxyMiddleware } from './core/middlewares/dynamic-proxy.middleware';
 import { SecurityMiddleware } from './core/middlewares/security.middleware';
 import { PrismaModule } from './prisma/prisma.module';
@@ -42,6 +43,7 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
     TranslateModule,
     RedisModule,
     IntegrationModule,
+    GatewayModule,
     PrismaModule,
     ChatModule,
     ReportsModule,
