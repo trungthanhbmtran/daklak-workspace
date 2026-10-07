@@ -277,6 +277,15 @@ async function main() {
   const prisma = createPrismaClient();
 
   try {
+    // 0. Xóa dữ liệu cũ
+    console.log('🧹 Xóa toàn bộ dữ liệu workflow cũ...');
+    await (prisma as any).processInstance.deleteMany({});
+    await (prisma as any).processBinding.deleteMany({});
+    await (prisma as any).processVersion.deleteMany({});
+    await (prisma as any).processDefinition.deleteMany({});
+    await (prisma as any).processType.deleteMany({});
+    console.log('  ✅ Đã xóa xong.');
+
     // 1. Seed IntegrationConnections
     console.log('📡 Seeding IntegrationConnections...');
     for (const conn of integrationConnections) {
