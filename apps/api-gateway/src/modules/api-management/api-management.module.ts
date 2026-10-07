@@ -22,7 +22,7 @@ const protoRoot =
         options: {
           package: 'api_management.v2',
           protoPath: join(protoRoot, 'integration', 'api-management.proto'),
-          url: process.env.USER_SERVICE_GRPC_URL ?? '0.0.0.0:50051',
+          url: MICROSERVICES.API_MANAGEMENT.URL,
           loader: {
             keepCase: false,
             longs: String,

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ApiConnectionCard } from "./ApiConnectionCard";
 import { ApiConnectionDetail } from "./ApiConnectionDetail";
 import { ApiImportWizard } from "./ApiImportWizard";
+import { ApiConnectionCreateDialog } from "./ApiConnectionCreateDialog";
 
 export function ApiManagementDashboard() {
   const [search, setSearch] = useState("");
