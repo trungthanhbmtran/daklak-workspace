@@ -25,6 +25,7 @@ import { RequirePermissions } from '../../core/decorators/permissions.decorator'
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 import { ClientGrpc } from '@nestjs/microservices';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller('admin/api-management/connections')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -42,6 +43,14 @@ export class ApiManagementController implements OnModuleInit {
     this.grpcService = this.client.getService('ApiManagementService');
   }
 
+  private getGrpcMetadata(req: any): Metadata {
+    const metadata = new Metadata();
+    if (req.user?.id) {
+      metadata.add('user-id', req.user.id.toString());
+    }
+    return metadata;
+  }
+
   @Get()
   @RequirePermissions('INTEGRATION:VIEW')
   async listConnections(
@@ -52,39 +61,47 @@ export class ApiManagementController implements OnModuleInit {
   ) {
     const payload = { search: search || '', limit: +limit, offset: +offset };
     const res = (await firstValueFrom(
-      this.grpcService.ListConnections(payload),
+      this.grpcService.ListConnections(payload, this.getGrpcMetadata(req)),
     )) as any;
     return { success: true, data: res.data || [], total: res.total || 0 };
   }
 
   @Get(':id')
   @RequirePermissions('INTEGRATION:VIEW')
-  async getConnection(@Param('id') id: string) {
-    const res = await firstValueFrom(this.grpcService.GetConnection({ id }));
+  async getConnection(@Req() req: any, @Param('id') id: string) {
+    const res = await firstValueFrom(
+      this.grpcService.GetConnection({ id }, this.getGrpcMetadata(req)),
+    );
     return { success: true, data: res };
   }
 
   @Post()
   @RequirePermissions('INTEGRATION:MANAGE')
-  async createConnection(@Body() dto: any) {
-    const res = await firstValueFrom(this.grpcService.CreateConnection(dto));
+  async createConnection(@Req() req: any, @Body() dto: any) {
+    const res = await firstValueFrom(
+      this.grpcService.CreateConnection(dto, this.getGrpcMetadata(req)),
+    );
     return { success: true, data: res };
   }
 
   @Put(':id')
   @RequirePermissions('INTEGRATION:MANAGE')
-  async updateConnection(@Param('id') id: string, @Body() dto: any) {
+  async updateConnection(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: any,
+  ) {
     const res = await firstValueFrom(
-      this.grpcService.UpdateConnection({ id, ...dto }),
+      this.grpcService.UpdateConnection({ id, ...dto }, this.getGrpcMetadata(req)),
     );
     return { success: true, data: res };
   }
 
   @Delete(':id')
   @RequirePermissions('INTEGRATION:MANAGE')
-  async deleteConnection(@Param('id') id: string) {
+  async deleteConnection(@Req() req: any, @Param('id') id: string) {
     const res = (await firstValueFrom(
-      this.grpcService.DeleteConnection({ id }),
+      this.grpcService.DeleteConnection({ id }, this.getGrpcMetadata(req)),
     )) as any;
     return { success: res.success };
   }
@@ -92,19 +109,25 @@ export class ApiManagementController implements OnModuleInit {
   @Put(':id/disable')
   @RequirePermissions('INTEGRATION:MANAGE')
   async disableConnection(
+    @Req() req: any,
     @Param('id') id: string,
     @Body('expectedVersion') expectedVersion: number,
   ) {
     const res = await firstValueFrom(
-      this.grpcService.DisableConnection({ id, expectedVersion }),
+      this.grpcService.DisableConnection(
+        { id, expectedVersion },
+        this.getGrpcMetadata(req),
+      ),
     );
     return { success: true, data: res };
   }
 
   @Post('publish')
   @RequirePermissions('INTEGRATION:MANAGE')
-  async publishRevision() {
-    const res = await firstValueFrom(this.grpcService.PublishRevision({}));
+  async publishRevision(@Req() req: any) {
+    const res = await firstValueFrom(
+      this.grpcService.PublishRevision({}, this.getGrpcMetadata(req)),
+    );
     return { success: true, data: res };
   }
 }

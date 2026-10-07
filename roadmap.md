@@ -83,3 +83,6 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 - [x] **[Hotfix] Sửa lỗi API Gateway gọi nhầm gRPC localhost và bổ sung nút Tạo thủ công trong API Manager (07/10/2026)**
   - Sửa URL  .0.0.0:50051 hardcoded trong ApiManagementGatewayModule thành constant MICROSERVICES.API_MANAGEMENT.URL.
   - Triển khai Dialog component cho nút "Tạo thủ công" (gọi useCreateConnection từ UI) cho phần quản trị API.
+- [x] **[Hotfix] S?a l?i b? redirect ra m�n h�nh login khi v�o trang Qu?n l� API (07/10/2026)**
+  - ApiManagementController trong pi-gateway thi?u gRPC metadata (user-id) n�n b? user-service t? ch?i (UNAUTHENTICATED), g�y ra l?i 401 Unauthorized d?y user ra login.
+  - �� b? sung ti?n �ch d?c v� ch�n metadata v�o l?i g?i gRPC trong Controller c?a gateway.
