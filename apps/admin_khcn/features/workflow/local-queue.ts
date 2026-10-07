@@ -34,7 +34,7 @@ export const localCommandQueue = {
     const queue = localCommandQueue.getQueue();
     const newCommand: LocalCommand = {
       ...command,
-      id: crypto.randomUUID(),
+      id: Math.random().toString(36).substring(2, 10),
       status: 'PENDING',
       createdAt: Date.now(),
     };
