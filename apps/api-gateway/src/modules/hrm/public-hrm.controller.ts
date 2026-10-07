@@ -8,7 +8,9 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
-  UnauthorizedException, ForbiddenException} from '@nestjs/common';
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';

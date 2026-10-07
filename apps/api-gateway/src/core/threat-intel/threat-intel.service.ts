@@ -3,25 +3,25 @@ import { RedisService } from '../redis/redis.service';
 
 // ─── Threat Score Matrix ───────────────────────────────────────────────────
 export const THREAT_SCORES = {
-  AUTH_FAIL: 10,           // 401 - sai mật khẩu, token hết hạn
-  INVALID_JWT: 15,         // Token bị giả mạo / sai định dạng
-  REVOKED_TOKEN: 50,       // Token bị thu hồi (đã logout) vẫn dùng → đáng ngờ cao
-  FORBIDDEN: 5,            // 403 - truy cập không có quyền
-  ENDPOINT_PROBE: 3,       // 404 - quét endpoint
-  SQL_INJECTION: 200,      // Pattern SQL injection → block ngay
-  PATH_TRAVERSAL: 200,     // ../ path traversal → block ngay
-  XSS_ATTEMPT: 100,        // <script> pattern
-  SCANNER_UA: 30,          // User-Agent của tool quét bảo mật / bot
-  MASS_ENDPOINT_SCAN: 20,  // Quét nhiều endpoint 404 liên tiếp (nhân lên)
+  AUTH_FAIL: 10, // 401 - sai mật khẩu, token hết hạn
+  INVALID_JWT: 15, // Token bị giả mạo / sai định dạng
+  REVOKED_TOKEN: 50, // Token bị thu hồi (đã logout) vẫn dùng → đáng ngờ cao
+  FORBIDDEN: 5, // 403 - truy cập không có quyền
+  ENDPOINT_PROBE: 3, // 404 - quét endpoint
+  SQL_INJECTION: 200, // Pattern SQL injection → block ngay
+  PATH_TRAVERSAL: 200, // ../ path traversal → block ngay
+  XSS_ATTEMPT: 100, // <script> pattern
+  SCANNER_UA: 30, // User-Agent của tool quét bảo mật / bot
+  MASS_ENDPOINT_SCAN: 20, // Quét nhiều endpoint 404 liên tiếp (nhân lên)
 } as const;
 
 // ─── Phân loại mối đe dọa ─────────────────────────────────────────────────
 export enum ThreatLevel {
-  CLEAN = 'CLEAN',           // Score 0-49: bình thường
+  CLEAN = 'CLEAN', // Score 0-49: bình thường
   SUSPICIOUS = 'SUSPICIOUS', // Score 50-149: tăng cường giám sát
-  SCANNER = 'SCANNER',       // Score 150-299: đang quét hệ thống
-  ATTACKER = 'ATTACKER',     // Score 300-499: đang tấn công → auto-block 1h
-  BLOCKED = 'BLOCKED',       // Score 500+: block 24h
+  SCANNER = 'SCANNER', // Score 150-299: đang quét hệ thống
+  ATTACKER = 'ATTACKER', // Score 300-499: đang tấn công → auto-block 1h
+  BLOCKED = 'BLOCKED', // Score 500+: block 24h
 }
 
 export interface ThreatProfile {
@@ -38,16 +38,26 @@ export interface ThreatProfile {
 
 // Known scanner / exploit framework User-Agents
 const MALICIOUS_UA_PATTERNS = [
-  /sqlmap/i, /nikto/i, /nmap/i, /masscan/i, /zgrab/i,
-  /nuclei/i, /dirsearch/i, /gobuster/i, /hydra/i, /burpsuite/i,
-  /metasploit/i, /nessus/i, /openvas/i, /wfuzz/i, /ffuf/i,
+  /sqlmap/i,
+  /nikto/i,
+  /nmap/i,
+  /masscan/i,
+  /zgrab/i,
+  /nuclei/i,
+  /dirsearch/i,
+  /gobuster/i,
+  /hydra/i,
+  /burpsuite/i,
+  /metasploit/i,
+  /nessus/i,
+  /openvas/i,
+  /wfuzz/i,
+  /ffuf/i,
   /python-requests\/[0-1]\./i, // Rất cũ — thường là tool tự động
 ];
 
 // SQL Injection patterns (Chỉ áp dụng cho URL/Query, rất dễ false positive nếu áp dụng cho Body)
-const STRICT_SQLI_PATTERNS = [
-  /(\%27)|(\')|(\-\-)|(\%23)|(#)/i,
-];
+const STRICT_SQLI_PATTERNS = [/(\%27)|(\')|(\-\-)|(\%23)|(#)/i];
 
 // SQL Injection patterns (Áp dụng cho toàn bộ Request bao gồm Body)
 const GENERIC_SQLI_PATTERNS = [
@@ -80,16 +90,16 @@ const XSS_PATTERNS = [
 ];
 
 // TTL configs (giây)
-const SCORE_TTL_SEC = 3600;        // Score reset sau 1h không hoạt động
-const BLOCK_ATTACKER_TTL = 3600;   // Block 1h nếu ATTACKER
+const SCORE_TTL_SEC = 3600; // Score reset sau 1h không hoạt động
+const BLOCK_ATTACKER_TTL = 3600; // Block 1h nếu ATTACKER
 const BLOCK_PERMANENT_TTL = 86400; // Block 24h nếu score 500+
-const PROFILE_TTL_SEC = 86400;     // Lưu profile 24h
+const PROFILE_TTL_SEC = 86400; // Lưu profile 24h
 
 @Injectable()
 export class ThreatIntelService {
   private readonly logger = new Logger(ThreatIntelService.name);
 
-  constructor(private readonly redisService: RedisService) { }
+  constructor(private readonly redisService: RedisService) {}
 
   // ─── Kiểm tra xem IP có đang bị block không ──────────────────────────────
 
@@ -108,7 +118,7 @@ export class ThreatIntelService {
     try {
       const raw = await this.redisService.get(`threat:profile:${ip}`);
       if (raw) return JSON.parse(raw);
-    } catch { }
+    } catch {}
     return null;
   }
 
@@ -127,7 +137,11 @@ export class ThreatIntelService {
       body?: string;
       query?: string;
     },
-  ): Promise<{ threatLevel: ThreatLevel; shouldBlock: boolean; reasons: string[] }> {
+  ): Promise<{
+    threatLevel: ThreatLevel;
+    shouldBlock: boolean;
+    reasons: string[];
+  }> {
     const reasons: string[] = [];
     let additionalScore = 0;
 
@@ -240,13 +254,21 @@ export class ThreatIntelService {
       let blockExpiresAt: number | undefined = undefined;
       if (!isBlocked) {
         if (totalScore >= 500) {
-          await redisClient.setex(`threat:blocked:${ip}`, BLOCK_PERMANENT_TTL, 'PERMANENT');
+          await redisClient.setex(
+            `threat:blocked:${ip}`,
+            BLOCK_PERMANENT_TTL,
+            'PERMANENT',
+          );
           blockExpiresAt = now + BLOCK_PERMANENT_TTL * 1000;
           this.logger.error(
             `[THREAT:BLOCKED] ip=${ip} score=${totalScore} — BLOCKED 24h. Reasons: ${reasons.join(', ')}`,
           );
         } else if (totalScore >= 300) {
-          await redisClient.setex(`threat:blocked:${ip}`, BLOCK_ATTACKER_TTL, 'ATTACKER');
+          await redisClient.setex(
+            `threat:blocked:${ip}`,
+            BLOCK_ATTACKER_TTL,
+            'ATTACKER',
+          );
           blockExpiresAt = now + BLOCK_ATTACKER_TTL * 1000;
           this.logger.error(
             `[THREAT:ATTACKER] ip=${ip} score=${totalScore} — AUTO-BLOCKED 1h. Reasons: ${reasons.join(', ')}`,
@@ -272,7 +294,7 @@ export class ThreatIntelService {
       // Cập nhật profile
       const allReasons = [
         ...(existing.reasons ?? []),
-        ...reasons.filter(r => r.length > 0),
+        ...reasons.filter((r) => r.length > 0),
       ].slice(-20); // Giữ 20 lý do gần nhất
 
       const profile: ThreatProfile = {

@@ -122,10 +122,55 @@ model CredentialBinding {
   opaqueRef String @unique @map("opaque_ref")
   kind      String
   version   Int    @default(1)
+  encryptedData String? @map("encrypted_data")
   status    String @default("ACTIVE")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("api_credential_bindings")
+}
+
+
+// ============================================
+// P5 - INBOUND PARTNER INTEGRATION
+// ============================================
+model ApiPartner {
+  id             String  @id @default(uuid())
+  code           String  @unique
+  name           String
+  description    String?
+  status         String  @default("ACTIVE") // ACTIVE, SUSPENDED
+  organizationId String  @map("organization_id")
+  
+  keys           ApiPartnerKey[]
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("api_partners")
+}
+
+model ApiPartnerKey {
+  id             String   @id @default(uuid())
+  partnerId      String   @map("partner_id")
+  name           String
+  keyPrefix      String   @map("key_prefix") // For UI identification, e.g., "daklak_..."
+  hashedKey      String   @map("hashed_key")
+  scopes         Json     // Array of allowed endpoints or logical scopes
+  status         String   @default("ACTIVE") // ACTIVE, REVOKED
+  expiresAt      DateTime? @map("expires_at")
+  lastUsedAt     DateTime? @map("last_used_at")
+
+  partner        ApiPartner @relation(fields: [partnerId], references: [id])
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([partnerId])
+  @@map("api_partner_keys")
 }

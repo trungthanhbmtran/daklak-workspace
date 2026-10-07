@@ -32,10 +32,17 @@ export class AuthStateSyncWorker implements OnModuleInit, OnModuleDestroy {
         take: 100,
       });
       if (jobs.length > 0) {
-        await Promise.all(jobs.map(job => this.sessions.revokeAllForUser(job.userId, job.authVersion)));
+        await Promise.all(
+          jobs.map((job) =>
+            this.sessions.revokeAllForUser(job.userId, job.authVersion),
+          ),
+        );
         await this.prisma.authStateSync.updateMany({
-          where: { userId: { in: jobs.map(j => j.userId) }, status: 'PENDING' },
-          data: { status: 'PROCESSED' }
+          where: {
+            userId: { in: jobs.map((j) => j.userId) },
+            status: 'PENDING',
+          },
+          data: { status: 'PROCESSED' },
         });
       }
       const revoked = await this.prisma.authDeviceSession.findMany({
@@ -43,10 +50,15 @@ export class AuthStateSyncWorker implements OnModuleInit, OnModuleDestroy {
         take: 100,
       });
       if (revoked.length > 0) {
-        await Promise.all(revoked.map(session => this.sessions.revokeSession(session.id)));
+        await Promise.all(
+          revoked.map((session) => this.sessions.revokeSession(session.id)),
+        );
         await this.prisma.authDeviceSession.updateMany({
-          where: { id: { in: revoked.map(s => s.id) }, revokedAt: { not: null } },
-          data: { redisCleaned: true }
+          where: {
+            id: { in: revoked.map((s) => s.id) },
+            revokedAt: { not: null },
+          },
+          data: { redisCleaned: true },
         });
       }
     } catch {

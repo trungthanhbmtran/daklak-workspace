@@ -156,9 +156,6 @@ export class DocumentsController {
     return this.documentsService.extractMetadata(body);
   }
 
-
-
-
   @Get(':id/logs')
   async getDocumentLogs(@Param('id') id: string) {
     return this.documentsService.getDocumentLogs(id);

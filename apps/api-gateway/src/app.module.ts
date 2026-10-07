@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+﻿import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthCryptoModule } from './core/auth/auth-crypto.module';
@@ -14,6 +14,7 @@ import { TranslateModule } from './modules/translate/translate.module';
 import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
 import { IntegrationModule } from './modules/integration/integration.module';
+import { ApiManagementGatewayModule } from './modules/api-management/api-management.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
 import { DynamicProxyMiddleware } from './core/middlewares/dynamic-proxy.middleware';
 import { SecurityMiddleware } from './core/middlewares/security.middleware';
@@ -43,6 +44,7 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
     TranslateModule,
     RedisModule,
     IntegrationModule,
+    ApiManagementGatewayModule,
     GatewayModule,
     PrismaModule,
     ChatModule,
@@ -56,7 +58,7 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // SecurityMiddleware PHẢI đứng TRƯỚC tất cả — chặn IP bị block tại cổng vào
+    // SecurityMiddleware PHáº¢I Ä‘á»©ng TRÆ¯á»šC táº¥t cáº£ â€” cháº·n IP bá»‹ block táº¡i cá»•ng vÃ o
     consumer.apply(SecurityMiddleware).forRoutes('*');
 
     consumer.apply(DynamicProxyMiddleware).forRoutes('*');
@@ -96,7 +98,6 @@ export class AppModule implements NestModule {
           req.query = { lang };
         }
 
-
         // Also inject into request body for @Body bindings
         if (req.body && typeof req.body === 'object') {
           req.body.lang = lang;
@@ -107,4 +108,3 @@ export class AppModule implements NestModule {
       .forRoutes('*');
   }
 }
-

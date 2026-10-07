@@ -1,12 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { GatewayConfigService } from './gateway.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
-// Note: The path remains 'admin/integration' because the frontend calls /integration/apikeys, 
+// Note: The path remains 'admin/integration' because the frontend calls /integration/apikeys,
 // but it is now correctly grouped in the Gateway domain.
-@Controller('admin/integration') 
+@Controller('admin/integration')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class GatewayConfigController {
   constructor(private readonly service: GatewayConfigService) {}

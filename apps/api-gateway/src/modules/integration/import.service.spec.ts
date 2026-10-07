@@ -14,9 +14,9 @@ describe('ImportParserService', () => {
       servers: [{ url: 'https://api.example.com/v1' }],
       paths: {
         '/users': {
-          get: { summary: 'Get Users' }
-        }
-      }
+          get: { summary: 'Get Users' },
+        },
+      },
     });
 
     const result = await service.parseFileOrText(content, 'test.json');

@@ -20,6 +20,7 @@ const protoPath = [
   join(userDir, 'ai_assistant.proto'),
   join(userDir, 'ai.proto'),
   join(userDir, 'integration.proto'),
+  join(protoRoot, 'integration', 'api-management.proto'),
 ];
 
 async function bootstrap() {
@@ -37,7 +38,10 @@ async function bootstrap() {
           'users',
           'auth',
           'user_config',
+          'ai_assistant',
+          'ai',
           'integration',
+          'api_management.v2',
         ],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50051',

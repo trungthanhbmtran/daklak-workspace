@@ -2,7 +2,10 @@ import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { Pool } from 'undici';
 import CircuitBreaker from 'opossum';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { checkUpstreamNetwork, guardedUpstreamLookup } from './upstream-network';
+import {
+  checkUpstreamNetwork,
+  guardedUpstreamLookup,
+} from './upstream-network';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 
@@ -33,22 +36,28 @@ export interface UpstreamState {
 @Injectable()
 export class RegistryService implements OnModuleInit {
   private readonly logger = new Logger(RegistryService.name);
-  
+
   private upstreams = new Map<string, UpstreamState>();
   private currentVersion = 0;
   private currentEtag = '';
   private isReady = false;
   private grpcService: any;
 
-  constructor(@Inject(MICROSERVICES.INTEGRATION.SYMBOL) private readonly client: any) {}
+  constructor(
+    @Inject(MICROSERVICES.INTEGRATION.SYMBOL) private readonly client: any,
+  ) {}
 
   async onModuleInit() {
-    this.grpcService = this.client.getService(MICROSERVICES.INTEGRATION.SERVICE);
+    this.grpcService = this.client.getService(
+      MICROSERVICES.INTEGRATION.SERVICE,
+    );
 
     await this.fetchInitialSnapshot();
-    
+
     setInterval(() => {
-      this.pollSnapshot().catch(err => this.logger.error(`Polling failed: ${err.message}`));
+      this.pollSnapshot().catch((err) =>
+        this.logger.error(`Polling failed: ${err.message}`),
+      );
     }, 30000);
   }
 
@@ -61,17 +70,23 @@ export class RegistryService implements OnModuleInit {
         this.logger.log('Initial registry snapshot loaded successfully.');
         return;
       } catch (err: any) {
-        this.logger.warn(`Failed to fetch initial snapshot. Retries left: ${retries - 1}. Error: ${err.message}`);
+        this.logger.warn(
+          `Failed to fetch initial snapshot. Retries left: ${retries - 1}. Error: ${err.message}`,
+        );
         retries--;
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise((r) => setTimeout(r, 2000));
       }
     }
-    this.logger.error('CRITICAL: Could not fetch initial snapshot. Gateway cannot serve traffic.');
+    this.logger.error(
+      'CRITICAL: Could not fetch initial snapshot. Gateway cannot serve traffic.',
+    );
   }
 
   private async pollSnapshot() {
     try {
-      const data = (await firstValueFrom(this.grpcService.GetSnapshot({}))) as any;
+      const data = (await firstValueFrom(
+        this.grpcService.GetSnapshot({}),
+      )) as any;
       if (!data || data.etag === this.currentEtag) {
         return; // No changes
       }
@@ -90,7 +105,11 @@ export class RegistryService implements OnModuleInit {
     }
   }
 
-  private async applySnapshot(upstreamsList: UpstreamConfig[], version: number, etag: string) {
+  private async applySnapshot(
+    upstreamsList: UpstreamConfig[],
+    version: number,
+    etag: string,
+  ) {
     const newUpstreams = new Map<string, UpstreamState>();
 
     for (const conf of upstreamsList) {
@@ -106,7 +125,9 @@ export class RegistryService implements OnModuleInit {
       try {
         await this.checkSsrf(conf);
       } catch (err: any) {
-        this.logger.error(`SSRF Protection triggered for ${conf.name}: ${err.message}. Skipping upstream.`);
+        this.logger.error(
+          `SSRF Protection triggered for ${conf.name}: ${err.message}. Skipping upstream.`,
+        );
         continue;
       }
 
@@ -153,7 +174,9 @@ export class RegistryService implements OnModuleInit {
   async handleRegistryChanged(@Payload() data: any) {
     this.logger.log(`Received registry.changed event for ${data.upstream}`);
     // Trigger an immediate poll to get the authoritative state
-    await this.pollSnapshot().catch(err => this.logger.error(`Event sync failed: ${err.message}`));
+    await this.pollSnapshot().catch((err) =>
+      this.logger.error(`Event sync failed: ${err.message}`),
+    );
   }
 
   public getUpstream(name: string): UpstreamState | undefined {
@@ -161,7 +184,7 @@ export class RegistryService implements OnModuleInit {
   }
 
   public getReportSourceConfigs(): UpstreamConfig[] {
-    return [...this.upstreams.values()].map(state => state.config);
+    return [...this.upstreams.values()].map((state) => state.config);
   }
 
   public checkReady(): boolean {

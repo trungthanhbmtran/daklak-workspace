@@ -55,7 +55,7 @@ export class IntegrationConfigController {
 
   private parseDto(data: any) {
     const dto = { ...data };
-    
+
     const safeParse = (val: any) => {
       if (!val) return {};
       if (typeof val === 'string') {
@@ -72,7 +72,7 @@ export class IntegrationConfigController {
     dto.retry = safeParse(dto.retry);
     dto.rateLimit = safeParse(dto.rateLimit);
     dto.metadata = safeParse(dto.metadata);
-    
+
     return dto;
   }
 
@@ -87,7 +87,8 @@ export class IntegrationConfigController {
       if (e.code === 'P2002') {
         throw new RpcException({
           code: GrpcStatus.ALREADY_EXISTS,
-          message: 'Tên API (Upstream) này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.',
+          message:
+            'Tên API (Upstream) này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.',
         });
       }
       throw new RpcException({
@@ -128,7 +129,8 @@ export class IntegrationConfigController {
       if (e.code === 'P2002') {
         throw new RpcException({
           code: GrpcStatus.ALREADY_EXISTS,
-          message: 'Tên API (Upstream) này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.',
+          message:
+            'Tên API (Upstream) này đã tồn tại trong hệ thống. Vui lòng chọn tên khác.',
         });
       }
       throw new RpcException({

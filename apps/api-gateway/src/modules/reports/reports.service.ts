@@ -136,7 +136,7 @@ export class ReportsService implements OnModuleInit {
   }
 
   // --- V2 Dynamic Report Designer ---
-  
+
   async createReportDefinition(body: any, user: any, authHeader: string) {
     return this.parseResponse(
       await this.callGrpc('CreateReportDefinition', body, user, authHeader),
@@ -173,9 +173,19 @@ export class ReportsService implements OnModuleInit {
     );
   }
 
-  async getDatasetSnapshot(runId: string, query: any, user: any, authHeader: string) {
+  async getDatasetSnapshot(
+    runId: string,
+    query: any,
+    user: any,
+    authHeader: string,
+  ) {
     return this.parseResponse(
-      await this.callGrpc('GetDatasetSnapshot', { runId, ...query }, user, authHeader),
+      await this.callGrpc(
+        'GetDatasetSnapshot',
+        { runId, ...query },
+        user,
+        authHeader,
+      ),
     );
   }
 }

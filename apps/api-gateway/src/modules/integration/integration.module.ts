@@ -12,13 +12,17 @@ import { ImportParserService } from './import.service';
   imports: [RateLimiterModule],
   controllers: [IntegrationController],
   providers: [
-    IntegrationService, 
-    RegistryService, 
-    TokenValidatorService, 
-    EnvSecretProvider, 
-    ImportParserService
+    IntegrationService,
+    RegistryService,
+    TokenValidatorService,
+    EnvSecretProvider,
+    ImportParserService,
   ],
-  exports: [IntegrationService, RegistryService, TokenValidatorService, EnvSecretProvider],
+  exports: [
+    IntegrationService,
+    RegistryService,
+    TokenValidatorService,
+    EnvSecretProvider,
+  ],
 })
 export class IntegrationModule {}
-

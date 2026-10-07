@@ -108,22 +108,47 @@ export class TokenIssuerService {
     });
   }
 
-  signDelegation(user: Record<string, unknown>, trace: { requestId?: string; ipAddress?: string } = {}): string {
+  signDelegation(
+    user: Record<string, unknown>,
+    trace: { requestId?: string; ipAddress?: string } = {},
+  ): string {
     const id = Number(user.id ?? user.sub);
     const authVersion = Number(user.authVersion);
     const sid = user.sid;
-    if (!Number.isSafeInteger(id) || id < 1 || !Number.isSafeInteger(authVersion) ||
-      authVersion < 0 || typeof sid !== 'string' || !/^[a-f0-9-]{36}$/i.test(sid))
+    if (
+      !Number.isSafeInteger(id) ||
+      id < 1 ||
+      !Number.isSafeInteger(authVersion) ||
+      authVersion < 0 ||
+      typeof sid !== 'string' ||
+      !/^[a-f0-9-]{36}$/i.test(sid)
+    )
       throw new Error('Verified session context is required for delegation');
     const now = Math.floor(Date.now() / 1000);
     const context: Record<string, unknown> = {
-      iss: AUTH_JWT.issuer, aud: AUTH_JWT.internalAudience,
-      id, sub: String(id), sid, authVersion, iat: now, exp: now + 60,
-      jti: crypto.randomUUID(), originJti: user.jti,
-      permissionsFlatten: Array.isArray(user.permissionsFlatten) ? user.permissionsFlatten : [],
+      iss: AUTH_JWT.issuer,
+      aud: AUTH_JWT.internalAudience,
+      id,
+      sub: String(id),
+      sid,
+      authVersion,
+      iat: now,
+      exp: now + 60,
+      jti: crypto.randomUUID(),
+      originJti: user.jti,
+      permissionsFlatten: Array.isArray(user.permissionsFlatten)
+        ? user.permissionsFlatten
+        : [],
       ...trace,
     };
-    for (const field of ['employeeCode', 'unitId', 'unitCode', 'username', 'jobTitleCode', 'jobTitleName'])
+    for (const field of [
+      'employeeCode',
+      'unitId',
+      'unitCode',
+      'username',
+      'jobTitleCode',
+      'jobTitleName',
+    ])
       if (user[field] != null) context[field] = user[field];
     return this.signToken(context);
   }
@@ -144,4 +169,3 @@ export class TokenIssuerService {
     return `${encodedHeader}.${encodedPayload}.${signature}`;
   }
 }
-

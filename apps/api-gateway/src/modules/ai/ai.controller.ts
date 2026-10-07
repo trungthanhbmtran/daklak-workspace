@@ -22,9 +22,7 @@ export class AiGatewayController implements OnModuleInit {
   private readonly logger = new Logger(AiGatewayController.name);
   private aiService: any;
 
-  constructor(
-    @Inject(MICROSERVICES.AI.SYMBOL) private readonly client: any,
-  ) {}
+  constructor(@Inject(MICROSERVICES.AI.SYMBOL) private readonly client: any) {}
 
   onModuleInit() {
     this.aiService = this.client.getService('AiService');

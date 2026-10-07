@@ -5,10 +5,15 @@ import { TokenIssuerService } from './token-issuer.service';
 class JwksController {
   constructor(private readonly issuer: TokenIssuerService) {}
   @Get('jwks')
-  jwks() { return this.issuer.getJwks(); }
+  jwks() {
+    return this.issuer.getJwks();
+  }
 }
 
 @Global()
-@Module({ controllers: [JwksController], providers: [TokenIssuerService], exports: [TokenIssuerService] })
+@Module({
+  controllers: [JwksController],
+  providers: [TokenIssuerService],
+  exports: [TokenIssuerService],
+})
 export class AuthCryptoModule {}
-

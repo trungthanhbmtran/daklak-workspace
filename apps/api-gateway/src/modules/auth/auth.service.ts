@@ -36,7 +36,9 @@ interface UserProfile extends Record<string, unknown> {
   avatarUrl?: string;
 }
 interface SessionGrant extends Omit<AuthTokens, 'accessToken'> {
-  userId: number; sessionId: string; authVersion: number;
+  userId: number;
+  sessionId: string;
+  authVersion: number;
 }
 interface UserAuthGrpc {
   LoginSso(input: { assertion: string }): Observable<SessionGrant>;
@@ -44,9 +46,14 @@ interface UserAuthGrpc {
   Login(data: {
     usernameOrEmail: string;
     password: string;
-    ipAddress?: string; requestId?: string;
+    ipAddress?: string;
+    requestId?: string;
   }): Observable<SessionGrant>;
-  Refresh(data: { refreshToken: string; ipAddress?: string; requestId?: string }): Observable<SessionGrant>;
+  Refresh(data: {
+    refreshToken: string;
+    ipAddress?: string;
+    requestId?: string;
+  }): Observable<SessionGrant>;
   RevokeRefreshToken(data: {
     refreshToken: string;
   }): Observable<{ success: boolean }>;
@@ -61,7 +68,10 @@ interface EmployeeGrpc {
     code: string;
   }): Observable<{ data?: EmployeeProfile }>;
 }
-export type AuthRequest = Pick<Partial<Request>, 'cookies' | 'ip' | 'socket'> & {
+export type AuthRequest = Pick<
+  Partial<Request>,
+  'cookies' | 'ip' | 'socket'
+> & {
   user?: { id?: unknown };
 };
 
@@ -135,14 +145,38 @@ export class AuthService implements OnModuleInit {
     if (!Number.isFinite(date.getTime()))
       throw new Error('Invalid authentication lifetime');
     const expiresAt = date.toISOString();
-    if (!Number.isSafeInteger(result.userId) || result.userId < 1 ||
-      !Number.isSafeInteger(result.authVersion) || result.authVersion < 0 ||
-      typeof result.sessionId !== 'string' || !/^[a-f0-9-]{36}$/i.test(result.sessionId))
+    if (
+      !Number.isSafeInteger(result.userId) ||
+      result.userId < 1 ||
+      !Number.isSafeInteger(result.authVersion) ||
+      result.authVersion < 0 ||
+      typeof result.sessionId !== 'string' ||
+      !/^[a-f0-9-]{36}$/i.test(result.sessionId)
+    )
       throw new Error('Invalid session grant');
-    const state = await firstValueFrom(this.userGrpcService.GetAuthState({ id: result.userId, sessionId: result.sessionId }).pipe(timeout(5000)));
-    if (!state.isActive || !state.sessionActive || state.userId !== result.userId || state.authVersion !== result.authVersion)
-      throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không hợp lệ');
-    setAuthCookies(res, { ...result, accessToken: this.issuer.signAccessToken(result.userId, result.expiresIn, result.sessionId, result.authVersion) });
+    const state = await firstValueFrom(
+      this.userGrpcService
+        .GetAuthState({ id: result.userId, sessionId: result.sessionId })
+        .pipe(timeout(5000)),
+    );
+    if (
+      !state.isActive ||
+      !state.sessionActive ||
+      state.userId !== result.userId ||
+      state.authVersion !== result.authVersion
+    )
+      throw new UnauthorizedException(
+        'Tên đăng nhập hoặc mật khẩu không hợp lệ',
+      );
+    setAuthCookies(res, {
+      ...result,
+      accessToken: this.issuer.signAccessToken(
+        result.userId,
+        result.expiresIn,
+        result.sessionId,
+        result.authVersion,
+      ),
+    });
     return { expiresAt };
   }
   async login(body: LoginDto, res: Response, req?: AuthRequest) {
@@ -164,7 +198,12 @@ export class AuthService implements OnModuleInit {
     try {
       const result = await firstValueFrom(
         this.userGrpcService
-          .Login({ usernameOrEmail: loginKey, password: body.password, ipAddress: clientIp(req ?? {}), requestId: randomUUID() })
+          .Login({
+            usernameOrEmail: loginKey,
+            password: body.password,
+            ipAddress: clientIp(req ?? {}),
+            requestId: randomUUID(),
+          })
           .pipe(timeout(10000)),
       );
       return await this.establishSession(res, result);
@@ -172,15 +211,31 @@ export class AuthService implements OnModuleInit {
       throw this.authError(error);
     }
   }
-  async loginSso(identity: { issuer: string; subject: string }, res: Response, req: AuthRequest) {
+  async loginSso(
+    identity: { issuer: string; subject: string },
+    res: Response,
+    req: AuthRequest,
+  ) {
     const now = Math.floor(Date.now() / 1000);
-    const assertion = this.issuer.signToken({ iss: AUTH_JWT.issuer, aud: SSO_GRANT_AUDIENCE, iat: now, exp: now + 30, jti: randomUUID(),
-      issuerHash: createHash('sha256').update(identity.issuer).digest('hex'), subjectHash: createHash('sha256').update(identity.subject).digest('hex'),
-      ipAddress: clientIp(req), requestId: randomUUID() });
+    const assertion = this.issuer.signToken({
+      iss: AUTH_JWT.issuer,
+      aud: SSO_GRANT_AUDIENCE,
+      iat: now,
+      exp: now + 30,
+      jti: randomUUID(),
+      issuerHash: createHash('sha256').update(identity.issuer).digest('hex'),
+      subjectHash: createHash('sha256').update(identity.subject).digest('hex'),
+      ipAddress: clientIp(req),
+      requestId: randomUUID(),
+    });
     try {
-      const grant = await firstValueFrom(this.userGrpcService.LoginSso({ assertion }).pipe(timeout(10000)));
+      const grant = await firstValueFrom(
+        this.userGrpcService.LoginSso({ assertion }).pipe(timeout(10000)),
+      );
       return await this.establishSession(res, grant);
-    } catch (error) { throw this.authError(error); }
+    } catch (error) {
+      throw this.authError(error);
+    }
   }
 
   private refreshToken(
@@ -205,7 +260,11 @@ export class AuthService implements OnModuleInit {
     try {
       const result = await firstValueFrom(
         this.userGrpcService
-          .Refresh({ refreshToken: token, ipAddress: clientIp(req), requestId: randomUUID() })
+          .Refresh({
+            refreshToken: token,
+            ipAddress: clientIp(req),
+            requestId: randomUUID(),
+          })
           .pipe(timeout(10000)),
       );
       return await this.establishSession(res, result);
@@ -269,5 +328,3 @@ export class AuthService implements OnModuleInit {
     };
   }
 }
-
-

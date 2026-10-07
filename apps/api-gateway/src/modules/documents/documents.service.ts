@@ -283,9 +283,6 @@ export class DocumentsService implements OnModuleInit {
     );
   }
 
-
-
-
   async getDocumentLogs(id: string) {
     return firstValueFrom(
       this.documentService.GetLogs({ documentId: id }),

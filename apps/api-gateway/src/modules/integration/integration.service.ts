@@ -89,8 +89,12 @@ export class IntegrationService {
     const limit = upstream.config.rateLimit || 100; // default 100 req
     const windowSec = upstream.config.rateLimitWindow || 60; // default 60s
     const rateLimitKey = `gw:${upstreamName}:${caller.id || clientIp(req)}`;
-    const rateLimitResult = await this.rateLimiter.check(rateLimitKey, limit, windowSec);
-    
+    const rateLimitResult = await this.rateLimiter.check(
+      rateLimitKey,
+      limit,
+      windowSec,
+    );
+
     if (!rateLimitResult.allowed) {
       res.setHeader('Retry-After', rateLimitResult.retryAfterSec);
       res.setHeader('X-RateLimit-Limit', limit);
@@ -98,7 +102,7 @@ export class IntegrationService {
       return res.status(429).json({
         success: false,
         message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.',
-        retryAfter: rateLimitResult.retryAfterSec
+        retryAfter: rateLimitResult.retryAfterSec,
       });
     }
 

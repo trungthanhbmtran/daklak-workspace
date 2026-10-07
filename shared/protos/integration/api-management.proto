@@ -11,6 +11,18 @@ service ApiManagementService {
   rpc GetConnection (GetResourceRequest) returns (ConnectionResponse) {}
   rpc UpdateConnection (UpdateConnectionRequest) returns (ConnectionResponse) {}
   rpc DeleteConnection (GetResourceRequest) returns (DeleteResponse) {}
+  rpc DisableConnection (DisableConnectionRequest) returns (ConnectionResponse) {}
+  rpc PublishRevision (PublishRequest) returns (PublishResponse) {}
+
+  // Importer
+  rpc CreateImportSession (CreateImportSessionRequest) returns (ImportSessionResponse) {}
+  rpc CommitImportSession (CommitImportSessionRequest) returns (CommitImportSessionResponse) {}
+  
+  // Auth resolution for Gateway
+  rpc ResolveCredential (ResolveCredentialRequest) returns (ResolveCredentialResponse) {}
+  
+  // Partner Auth Validation
+  rpc ValidatePartnerKey (ValidatePartnerKeyRequest) returns (ValidatePartnerKeyResponse) {}
 
   // Endpoints Management
   rpc CreateEndpoint (CreateEndpointRequest) returns (EndpointResponse) {}
@@ -135,4 +147,87 @@ message EndpointListResponse {
 
 message DeleteResponse {
   bool success = 1;
+}
+
+message DisableConnectionRequest {
+  string id = 1;
+  int32 expectedVersion = 2;
+}
+
+message PublishRequest {
+}
+
+message PublishResponse {
+  string id = 1;
+  int32 version = 2;
+  string checksum = 3;
+  string createdAt = 4;
+}
+
+message CreateImportSessionRequest {
+  string systemName = 1;
+  string baseUrl = 2;
+  repeated ParsedEndpoint endpoints = 3;
+  string targetConnectionId = 4; // optional: if updating an existing connection
+  string organizationId = 5;
+}
+
+message ParsedEndpoint {
+  string method = 1;
+  string path = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message ImportSessionResponse {
+  string sessionId = 1;
+  string inputHash = 2;
+  repeated ImportDiff diffs = 3;
+}
+
+message ImportDiff {
+  string method = 1;
+  string path = 2;
+  string status = 3; // "NEW", "CONFLICT_OVERWRITE", "CONFLICT_SKIP", "UNCHANGED"
+  string existingEndpointId = 4; // if conflict
+}
+
+message CommitImportSessionRequest {
+  string sessionId = 1;
+  repeated Resolution resolutions = 2;
+  string userId = 3;
+}
+
+message Resolution {
+  string method = 1;
+  string path = 2;
+  string action = 3; // "OVERWRITE", "SKIP"
+}
+
+message CommitImportSessionResponse {
+  string connectionId = 1;
+  int32 endpointsCreated = 2;
+  int32 endpointsUpdated = 3;
+}
+
+message ResolveCredentialRequest {
+  string opaqueRef = 1;
+}
+
+message ResolveCredentialResponse {
+  string rawSecret = 1;
+  string kind = 2;
+}
+
+message ValidatePartnerKeyRequest {
+  string hashedKey = 1;
+}
+
+message ValidatePartnerKeyResponse {
+  string partnerId = 1;
+  string partnerCode = 2;
+  string organizationId = 3;
+  // scopes could be JSON stringified for simplicity, or bytes, or repeated string
+  // Using string for JSON serialization to avoid complex proto mapping
+  string scopes = 4;
 }

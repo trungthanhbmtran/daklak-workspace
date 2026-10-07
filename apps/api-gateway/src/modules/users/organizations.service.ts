@@ -6,7 +6,9 @@ import {
   NotFoundException,
   ConflictException,
   InternalServerErrorException,
-  UnauthorizedException, ForbiddenException} from '@nestjs/common';
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 

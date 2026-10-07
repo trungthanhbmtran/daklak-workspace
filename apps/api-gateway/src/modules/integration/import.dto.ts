@@ -1,4 +1,10 @@
-import { IsString, IsArray, ValidateNested, IsIn, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  ValidateNested,
+  IsIn,
+  IsNotEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ParsedEndpointDto {

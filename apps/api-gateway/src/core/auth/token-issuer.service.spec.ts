@@ -64,4 +64,3 @@ describe('Persistent authentication signing configuration', () => {
     expect(() => new TokenIssuerService()).toThrow('matching RSA');
   });
 });
-

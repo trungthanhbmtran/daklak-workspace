@@ -8,7 +8,7 @@ export class GatewayConfigService {
   // GatewayService
   async getServices() {
     return this.prisma.gatewayService.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -19,7 +19,7 @@ export class GatewayConfigService {
   async updateService(id: number, data: any) {
     return this.prisma.gatewayService.update({
       where: { id },
-      data
+      data,
     });
   }
 
@@ -31,7 +31,7 @@ export class GatewayConfigService {
   async getRoutes() {
     return this.prisma.gatewayRoute.findMany({
       include: { service: true },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -42,7 +42,7 @@ export class GatewayConfigService {
   async updateRoute(id: number, data: any) {
     return this.prisma.gatewayRoute.update({
       where: { id },
-      data
+      data,
     });
   }
 
@@ -53,7 +53,7 @@ export class GatewayConfigService {
   // ApiKey
   async getApiKeys() {
     return this.prisma.apiKey.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -70,7 +70,7 @@ export class GatewayConfigService {
     }
     return this.prisma.apiKey.update({
       where: { id },
-      data
+      data,
     });
   }
 

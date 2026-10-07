@@ -32,7 +32,9 @@ describe('Integration proxy security boundaries', () => {
     });
     getSecret = jest.fn().mockResolvedValue('partner-credential');
     const rateLimiter = {
-      check: jest.fn().mockResolvedValue({ allowed: true, remaining: 99, retryAfterSec: 0 }),
+      check: jest
+        .fn()
+        .mockResolvedValue({ allowed: true, remaining: 99, retryAfterSec: 0 }),
     };
     service = new IntegrationService(
       { getUpstream: () => ({ config, breaker: { fire } }) } as never,

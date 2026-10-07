@@ -19,4 +19,3 @@ import { RateLimitGuard } from '../../core/guards/rate-limit.guard';
   providers: [SsoService, AuthService, RateLimitGuard, AuthOriginGuard],
 })
 export class AuthModule {}
-

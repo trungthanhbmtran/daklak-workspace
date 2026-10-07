@@ -114,4 +114,3 @@ export class JwtAuthGuard implements CanActivate {
     this.threatIntel.recordEvent(ip, event, detail).catch(() => {});
   }
 }
-

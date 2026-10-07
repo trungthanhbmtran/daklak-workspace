@@ -7,14 +7,16 @@ export class EnvSecretProvider implements SecretProvider {
 
   async getSecret(secretRef: string): Promise<string | null> {
     // Expected format: 'env:VAR_NAME' or just 'VAR_NAME'
-    const varName = secretRef.startsWith('env:') ? secretRef.substring(4) : secretRef;
-    
+    const varName = secretRef.startsWith('env:')
+      ? secretRef.substring(4)
+      : secretRef;
+
     const secret = process.env[varName];
     if (!secret) {
       this.logger.warn(`Secret ${varName} not found in environment`);
       return null;
     }
-    
+
     return secret;
   }
 }

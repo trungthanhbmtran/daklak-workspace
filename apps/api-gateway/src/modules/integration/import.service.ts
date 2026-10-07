@@ -10,11 +10,26 @@ export interface ParsedEndpoint {
   name: string;
   description: string;
   status?: 'NEW' | 'CONFLICT';
-  headers?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
-  params?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
+  headers?: Array<{
+    key: string;
+    value: string;
+    enabled?: boolean;
+    description?: string;
+  }>;
+  params?: Array<{
+    key: string;
+    value: string;
+    enabled?: boolean;
+    description?: string;
+  }>;
   body?: string;
   bodyType?: 'none' | 'raw' | 'x-www-form-urlencoded' | 'form-data';
-  formItems?: Array<{ key: string; value: string; enabled?: boolean; description?: string }>;
+  formItems?: Array<{
+    key: string;
+    value: string;
+    enabled?: boolean;
+    description?: string;
+  }>;
 }
 
 export interface ParseResult {
@@ -25,8 +40,14 @@ export interface ParseResult {
 
 @Injectable()
 export class ImportParserService {
-  async parseFileOrText(content: string, filename?: string): Promise<ParseResult> {
-    const isYaml = filename?.endsWith('.yaml') || filename?.endsWith('.yml') || (!content.trim().startsWith('{') && !content.trim().startsWith('curl'));
+  async parseFileOrText(
+    content: string,
+    filename?: string,
+  ): Promise<ParseResult> {
+    const isYaml =
+      filename?.endsWith('.yaml') ||
+      filename?.endsWith('.yml') ||
+      (!content.trim().startsWith('{') && !content.trim().startsWith('curl'));
     const isCurl = content.trim().toLowerCase().startsWith('curl');
 
     if (isCurl) {
@@ -41,7 +62,9 @@ export class ImportParserService {
         parsedJson = JSON.parse(content);
       }
     } catch (e) {
-      throw new BadRequestException('Định dạng file không hợp lệ (Không phải JSON hoặc YAML hợp lệ).');
+      throw new BadRequestException(
+        'Định dạng file không hợp lệ (Không phải JSON hoặc YAML hợp lệ).',
+      );
     }
 
     if (parsedJson.info && parsedJson.item) {
@@ -49,7 +72,9 @@ export class ImportParserService {
     } else if (parsedJson.swagger || parsedJson.openapi) {
       return this.parseSwaggerOpenApi(parsedJson);
     } else {
-      throw new BadRequestException('Không nhận diện được định dạng (Chỉ hỗ trợ OpenAPI/Swagger, Postman, cURL).');
+      throw new BadRequestException(
+        'Không nhận diện được định dạng (Chỉ hỗ trợ OpenAPI/Swagger, Postman, cURL).',
+      );
     }
   }
 
@@ -57,7 +82,7 @@ export class ImportParserService {
     try {
       const endpoints: ParsedEndpoint[] = [];
       const paths = apiObj.paths || {};
-      
+
       let baseUrl = '';
       if (apiObj.servers && apiObj.servers.length > 0) {
         baseUrl = apiObj.servers[0].url;
@@ -68,15 +93,32 @@ export class ImportParserService {
 
       for (const [path, methods] of Object.entries(paths)) {
         for (const [method, detailsObj] of Object.entries(methods as any)) {
-          if (!['get', 'post', 'put', 'delete', 'patch'].includes(method.toLowerCase())) continue;
+          if (
+            !['get', 'post', 'put', 'delete', 'patch'].includes(
+              method.toLowerCase(),
+            )
+          )
+            continue;
           const details: any = detailsObj;
-          
+
           const headers: any[] = [];
           const params: any[] = [];
           if (details.parameters && Array.isArray(details.parameters)) {
             details.parameters.forEach((p: any) => {
-              if (p.in === 'header') headers.push({ key: p.name, value: p.example || '', description: p.description, enabled: true });
-              if (p.in === 'query') params.push({ key: p.name, value: p.example || '', description: p.description, enabled: true });
+              if (p.in === 'header')
+                headers.push({
+                  key: p.name,
+                  value: p.example || '',
+                  description: p.description,
+                  enabled: true,
+                });
+              if (p.in === 'query')
+                params.push({
+                  key: p.name,
+                  value: p.example || '',
+                  description: p.description,
+                  enabled: true,
+                });
             });
           }
 
@@ -86,11 +128,24 @@ export class ImportParserService {
             const contentTypes = Object.keys(details.requestBody.content);
             if (contentTypes.length > 0) {
               const mainType = contentTypes[0];
-              bodyType = mainType.includes('json') || mainType.includes('xml') || mainType.includes('text') ? 'raw' : (mainType.includes('form') ? 'form-data' : 'raw');
+              bodyType =
+                mainType.includes('json') ||
+                mainType.includes('xml') ||
+                mainType.includes('text')
+                  ? 'raw'
+                  : mainType.includes('form')
+                    ? 'form-data'
+                    : 'raw';
               if (details.requestBody.content[mainType].example) {
-                body = typeof details.requestBody.content[mainType].example === 'string' 
-                       ? details.requestBody.content[mainType].example 
-                       : JSON.stringify(details.requestBody.content[mainType].example, null, 2);
+                body =
+                  typeof details.requestBody.content[mainType].example ===
+                  'string'
+                    ? details.requestBody.content[mainType].example
+                    : JSON.stringify(
+                        details.requestBody.content[mainType].example,
+                        null,
+                        2,
+                      );
               }
             }
           }
@@ -113,7 +168,7 @@ export class ImportParserService {
       return {
         systemName: apiObj.info?.title || 'Imported Swagger/OpenAPI',
         baseUrl,
-        endpoints
+        endpoints,
       };
     } catch (error) {
       throw new BadRequestException('Lỗi khi phân tích OpenAPI/Swagger file.');
@@ -124,35 +179,59 @@ export class ImportParserService {
     try {
       const collection = new Collection(data);
       const endpoints: ParsedEndpoint[] = [];
-      
+
       let baseUrl = '';
       if (data.variable && Array.isArray(data.variable)) {
-        const baseUrlVar = data.variable.find((v: any) => v.key.toLowerCase().includes("url") || v.key.toLowerCase().includes("host"));
+        const baseUrlVar = data.variable.find(
+          (v: any) =>
+            v.key.toLowerCase().includes('url') ||
+            v.key.toLowerCase().includes('host'),
+        );
         if (baseUrlVar) baseUrl = baseUrlVar.value;
       }
 
       collection.forEachItem((item) => {
         const req = item.request;
         if (req) {
-          const rawUrl = typeof req.url === 'string' ? req.url : req.url?.toString() || '';
+          const rawUrl =
+            typeof req.url === 'string' ? req.url : req.url?.toString() || '';
           if (!baseUrl && rawUrl.startsWith('http')) {
-             const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
-             if (match) baseUrl = match[1];
+            const match = rawUrl.match(/^(https?:\/\/[^\/]+)/);
+            if (match) baseUrl = match[1];
           }
-          
+
           let path = '';
           if (typeof req.url !== 'string' && req.url?.path) {
             path = '/' + req.url.path.join('/');
           } else {
-            const urlObj = new URL(rawUrl.startsWith('http') ? rawUrl : `http://dummy${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`);
+            const urlObj = new URL(
+              rawUrl.startsWith('http')
+                ? rawUrl
+                : `http://dummy${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`,
+            );
             path = urlObj.pathname;
           }
-          
+
           const desc: any = req.description;
-          
-          const headers = req.headers ? req.headers.map((h: any) => ({ key: h.key, value: h.value, enabled: h.disabled !== true, description: h.description })) : [];
-          const params = (typeof req.url !== 'string' && req.url?.query) ? req.url.query.map((q: any) => ({ key: q.key, value: q.value, enabled: q.disabled !== true, description: q.description })) : [];
-          
+
+          const headers = req.headers
+            ? req.headers.map((h: any) => ({
+                key: h.key,
+                value: h.value,
+                enabled: h.disabled !== true,
+                description: h.description,
+              }))
+            : [];
+          const params =
+            typeof req.url !== 'string' && req.url?.query
+              ? req.url.query.map((q: any) => ({
+                  key: q.key,
+                  value: q.value,
+                  enabled: q.disabled !== true,
+                  description: q.description,
+                }))
+              : [];
+
           let body = '';
           let bodyType = 'none';
           let formItems: any[] = [];
@@ -164,12 +243,20 @@ export class ImportParserService {
             } else if (req.body.mode === 'formdata') {
               bodyType = 'form-data';
               if (Array.isArray(req.body.formdata)) {
-                formItems = req.body.formdata.map((f: any) => ({ key: f.key, value: f.value || '', enabled: f.disabled !== true }));
+                formItems = req.body.formdata.map((f: any) => ({
+                  key: f.key,
+                  value: f.value || '',
+                  enabled: f.disabled !== true,
+                }));
               }
             } else if (req.body.mode === 'urlencoded') {
               bodyType = 'x-www-form-urlencoded';
               if (Array.isArray(req.body.urlencoded)) {
-                formItems = req.body.urlencoded.map((f: any) => ({ key: f.key, value: f.value || '', enabled: f.disabled !== true }));
+                formItems = req.body.urlencoded.map((f: any) => ({
+                  key: f.key,
+                  value: f.value || '',
+                  enabled: f.disabled !== true,
+                }));
               }
             }
           }
@@ -180,7 +267,8 @@ export class ImportParserService {
             method: req.method?.toUpperCase() || 'GET',
             path: this.normalizePath(path),
             name: item.name || path,
-            description: desc?.content || (typeof desc === 'string' ? desc : ''),
+            description:
+              desc?.content || (typeof desc === 'string' ? desc : ''),
             headers,
             params,
             body,
@@ -193,22 +281,26 @@ export class ImportParserService {
       return {
         systemName: data.info?.name || 'Imported Postman Collection',
         baseUrl,
-        endpoints
+        endpoints,
       };
     } catch (e: any) {
-      console.error("Postman parse error:", e);
-      throw new BadRequestException(`Lỗi khi phân tích Postman file: ${e.message || 'Lỗi không xác định'}`);
+      console.error('Postman parse error:', e);
+      throw new BadRequestException(
+        `Lỗi khi phân tích Postman file: ${e.message || 'Lỗi không xác định'}`,
+      );
     }
   }
 
   private parseCurl(curlString: string): ParseResult {
     try {
-      let url = "";
+      let url = '';
       const urlMatch = curlString.match(/'(https?:\/\/[^']+)'/);
       if (urlMatch) {
         url = urlMatch[1];
       } else {
-        const fallbackMatch = curlString.match(/curl (?:\s+--location)?\s+['"]?(https?:\/\/[^\s'"]+)['"]?/);
+        const fallbackMatch = curlString.match(
+          /curl (?:\s+--location)?\s+['"]?(https?:\/\/[^\s'"]+)['"]?/,
+        );
         if (fallbackMatch) {
           url = fallbackMatch[1];
         }
@@ -219,8 +311,8 @@ export class ImportParserService {
       }
 
       const urlObj = new URL(url);
-      
-      let dataStr = "";
+
+      let dataStr = '';
       const dataMatch = curlString.match(/--data(?:-raw)?\s+'([^']+)'/);
       if (dataMatch) {
         dataStr = dataMatch[1];
@@ -231,19 +323,23 @@ export class ImportParserService {
         }
       }
 
-      let method = dataStr ? "POST" : "GET";
+      let method = dataStr ? 'POST' : 'GET';
       const methodMatch = curlString.match(/-(?:X|request)\s+'?([A-Z]+)'?/);
       if (methodMatch) {
         method = methodMatch[1].toUpperCase();
       }
 
       const path = urlObj.pathname;
-      
+
       const headers: any[] = [];
       const headerRegex = /-(?:H|-header)\s+['"]([^:]+):\s*([^'"]+)['"]/g;
       let headerMatch;
       while ((headerMatch = headerRegex.exec(curlString)) !== null) {
-        headers.push({ key: headerMatch[1], value: headerMatch[2], enabled: true });
+        headers.push({
+          key: headerMatch[1],
+          value: headerMatch[2],
+          enabled: true,
+        });
       }
 
       const params: any[] = [];
@@ -265,9 +361,9 @@ export class ImportParserService {
             headers,
             params,
             body: dataStr,
-            bodyType: dataStr ? 'raw' : 'none'
-          }
-        ]
+            bodyType: dataStr ? 'raw' : 'none',
+          },
+        ],
       };
     } catch (e) {
       throw new BadRequestException('Lỗi phân tích lệnh cURL.');

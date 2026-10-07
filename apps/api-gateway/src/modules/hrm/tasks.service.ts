@@ -6,7 +6,9 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
-  UnauthorizedException, ForbiddenException} from '@nestjs/common';
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { TokenIssuerService } from '../../core/auth/token-issuer.service';
@@ -43,7 +45,14 @@ export class TasksService implements OnModuleInit {
 
   getGrpcMetadata(req: any) {
     const meta = new Metadata();
-    meta.set('authorization', 'Bearer ' + this.issuer.signDelegation(req.user, { requestId: randomUUID(), ipAddress: clientIp(req) }));
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
     return meta;
   }
 
@@ -819,5 +828,3 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
   }
 }
-
-

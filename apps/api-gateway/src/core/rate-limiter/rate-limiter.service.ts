@@ -44,7 +44,7 @@ export class RateLimiterService {
       // Atomic Lua: INCR + EXPIRE trong 1 round-trip — tránh race condition
       const result = (await client.eval(
         this.LUA_SLIDING_WINDOW,
-        1,        // numkeys
+        1, // numkeys
         redisKey, // KEYS[1]
         windowSec.toString(), // ARGV[1]
       )) as [number, number];
@@ -65,11 +65,12 @@ export class RateLimiterService {
       return { allowed, remaining, retryAfterSec };
     } catch (e: any) {
       // Nếu Redis lỗi, ALLOW thay vì block toàn bộ (Fail Open — tránh outage)
-      this.logger.error(`[RateLimiter] Redis error: ${e.message}. Failing open.`);
+      this.logger.error(
+        `[RateLimiter] Redis error: ${e.message}. Failing open.`,
+      );
       return { allowed: true, remaining: limit, retryAfterSec: 0 };
     }
   }
-
 
   /**
    * Reset bộ đếm — dùng sau khi login thành công để tránh penalize user hợp lệ.
@@ -78,7 +79,9 @@ export class RateLimiterService {
     try {
       await this.redisService.del(`rate_limit:${key}`);
     } catch (e: any) {
-      this.logger.warn(`[RateLimiter] Reset failed for key=${key}: ${e.message}`);
+      this.logger.warn(
+        `[RateLimiter] Reset failed for key=${key}: ${e.message}`,
+      );
     }
   }
 }
