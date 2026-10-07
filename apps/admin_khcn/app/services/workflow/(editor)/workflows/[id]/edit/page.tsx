@@ -1,10 +1,9 @@
 import WorkflowEditorScreen from "@/components/workflow/WorkflowEditorScreen";
 
 export const metadata = {
-  title: "Chỉnh sửa quy trình | Cổng Ứng dụng Nội bộ",
+  title: "Chỉnh sửa quy trình",
 };
 
-export default async function EditWorkflowPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return <WorkflowEditorScreen id={decodeURIComponent(id)} mode="edit" />;
+export default function EditWorkflowPage({ params }: { params: { id: string } }) {
+  return <WorkflowEditorScreen id={params.id} mode="edit" />;
 }

@@ -1,12 +1,12 @@
 import WorkflowBindingList from "@/components/workflow/WorkflowBindingList";
 
 export const metadata = {
-  title: "Cấu hình tự động | Quản lý Quy trình",
+  title: "Cấu hình tự động (Auto-Binding)",
 };
 
-export default function WorkflowsBindingPage() {
+export default function WorkflowBindingsPage() {
   return (
-    <div className="container mx-auto py-6">
+    <div className="p-6 h-full flex-1">
       <WorkflowBindingList />
     </div>
   );

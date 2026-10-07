@@ -1,0 +1,138 @@
+﻿syntax = "proto3";
+
+package api_management.v2;
+
+service ApiManagementService {
+  rpc GetSnapshot (SnapshotRequest) returns (SnapshotResponse) {}
+  
+  // Connection Management
+  rpc CreateConnection (CreateConnectionRequest) returns (ConnectionResponse) {}
+  rpc ListConnections (ListConnectionsRequest) returns (ConnectionListResponse) {}
+  rpc GetConnection (GetResourceRequest) returns (ConnectionResponse) {}
+  rpc UpdateConnection (UpdateConnectionRequest) returns (ConnectionResponse) {}
+  rpc DeleteConnection (GetResourceRequest) returns (DeleteResponse) {}
+
+  // Endpoints Management
+  rpc CreateEndpoint (CreateEndpointRequest) returns (EndpointResponse) {}
+  rpc ListEndpoints (ListEndpointsRequest) returns (EndpointListResponse) {}
+  rpc GetEndpoint (GetResourceRequest) returns (EndpointResponse) {}
+  rpc UpdateEndpoint (UpdateEndpointRequest) returns (EndpointResponse) {}
+  rpc DeleteEndpoint (GetResourceRequest) returns (DeleteResponse) {}
+}
+
+message SnapshotRequest {
+  string currentEtag = 1;
+}
+
+message SnapshotResponse {
+  int32 version = 1;
+  string etag = 2;
+  repeated ConnectionConfig connections = 3;
+}
+
+message ConnectionConfig {
+  string id = 1;
+  string code = 2;
+  string networkZone = 3;
+  string baseUrl = 4;
+  AuthBinding auth = 5;
+  int32 timeoutMs = 6;
+  bool enabled = 7;
+  repeated EndpointConfig endpoints = 8;
+  int32 version = 9;
+}
+
+message EndpointConfig {
+  string id = 1;
+  string method = 2;
+  string pathTemplate = 3;
+}
+
+message AuthBinding {
+  string kind = 1;
+  optional string secretRef = 2;
+}
+
+message GetResourceRequest {
+  string id = 1;
+}
+
+message CreateConnectionRequest {
+  string code = 1;
+  string displayName = 2;
+  string networkZone = 3;
+  string baseUrl = 4;
+  optional AuthBinding auth = 5;
+  optional int32 timeoutMs = 6;
+  string organizationId = 7;
+}
+
+message UpdateConnectionRequest {
+  string id = 1;
+  optional string displayName = 2;
+  optional string baseUrl = 3;
+  optional AuthBinding auth = 4;
+  optional int32 timeoutMs = 5;
+  optional bool enabled = 6;
+  int32 expectedVersion = 7;
+}
+
+message ConnectionResponse {
+  string id = 1;
+  string code = 2;
+  string displayName = 3;
+  string networkZone = 4;
+  string baseUrl = 5;
+  AuthBinding auth = 6;
+  int32 timeoutMs = 7;
+  string organizationId = 8;
+  bool enabled = 9;
+  int32 version = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+}
+
+message ListConnectionsRequest {
+  string organizationId = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ConnectionListResponse {
+  repeated ConnectionResponse data = 1;
+  int32 total = 2;
+}
+
+message CreateEndpointRequest {
+  string connectionId = 1;
+  string method = 2;
+  string pathTemplate = 3;
+  string schema = 4;
+}
+
+message UpdateEndpointRequest {
+  string id = 1;
+  optional string method = 2;
+  optional string pathTemplate = 3;
+  optional string schema = 4;
+}
+
+message EndpointResponse {
+  string id = 1;
+  string connectionId = 2;
+  string method = 3;
+  string pathTemplate = 4;
+  string schema = 5;
+}
+
+message ListEndpointsRequest {
+  string connectionId = 1;
+}
+
+message EndpointListResponse {
+  repeated EndpointResponse data = 1;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}

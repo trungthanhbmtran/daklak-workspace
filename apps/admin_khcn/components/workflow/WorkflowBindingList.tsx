@@ -6,6 +6,7 @@ import { Plus, Trash2, Link as LinkIcon, Edit, PowerOff } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
+import WorkflowBindingModal from "./WorkflowBindingModal";
 
 interface ProcessBinding {
   id: string;
@@ -21,6 +22,7 @@ interface ProcessBinding {
 export default function WorkflowBindingList() {
   const [bindings, setBindings] = useState<ProcessBinding[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchBindings = async () => {
     try {
@@ -64,7 +66,7 @@ export default function WorkflowBindingList() {
             Cấu hình No-Code: Khi một đối tượng nghiệp vụ phát sinh sự kiện, hệ thống sẽ tự động chạy quy trình tương ứng.
           </CardDescription>
         </div>
-        <Button onClick={() => alert("Mở Modal tạo Binding ở đây")}>
+        <Button onClick={() => setIsModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Thêm cấu hình
         </Button>
@@ -92,7 +94,7 @@ export default function WorkflowBindingList() {
               <tbody className="divide-y">
                 {bindings.map((b) => (
                   <tr key={b.id} className="hover:bg-gray-50/30">
-                    <td className="px-4 py-3 font-medium text-primary">{b.processTypeCode}</td>
+                    <td className="px-4 py-3 font-medium text-primary">{b.processTypeCode || (b as any).processTypeId}</td>
                     <td className="px-4 py-3">
                       <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                         {b.trigger}
@@ -123,6 +125,12 @@ export default function WorkflowBindingList() {
           </div>
         )}
       </CardContent>
+
+      <WorkflowBindingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchBindings}
+      />
     </Card>
   );
 }

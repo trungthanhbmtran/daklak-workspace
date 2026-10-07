@@ -44,3 +44,9 @@ Sao chép mẫu này khi bắt đầu task; không điền hoàn thành trước
 - **Step 11 - Validation:** static/contract/link/encoding/source consistency và kết quả chính xác.
 - **Step 12 - Architecture & Government Review:** PBAC/scope, trust/secret/integration/audit/records/ops; hồ sơ hiện trạng khớp deployment, không tự tuyên bố pháp lý.
 - **Step 13 - Quality Gate:** DRY/types/compatibility/doc/roadmap, findings/gates còn mở; task checkbox và AC evidence khớp.
+
+
+
+
+
+

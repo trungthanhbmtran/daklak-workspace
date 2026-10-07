@@ -4,6 +4,10 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **Hoàn thiện Workflow Binding Modal cho Auto-Binding (07/10/2026)**
+  - **Tác vụ**: Thêm component `WorkflowBindingModal.tsx` và gắn vào `WorkflowBindingList.tsx`.
+  - **Chi tiết**: Form cho phép chọn Process Type (Đối tượng nghiệp vụ), Trigger (Sự kiện), và Quy trình thực thi. Dữ liệu được gọi từ API `/admin/workflow/catalog/process-types` và `/admin/workflow` để kết nối linh hoạt các trigger sự kiện với định nghĩa workflow mà không cần code.
+
 - [x] **Rà soát và lên phương án tái cấu trúc giao diện và hệ thống quy trình nghiệp vụ (Workflow)**
   - Tác vụ: Tổng hợp tài liệu thiết kế và tình trạng trực tiếp từ `/admin/services/workflow/workflows` để lên phương án tái cấu trúc giao diện (No-Code, Offline-Tolerant) và backend (PBAC, Idempotency, Transactional Outbox) ra một artifact đề xuất độc lập.
 - [x] **Thực thi phương án tái cấu trúc UI Workflow (No-Code & Binding)**

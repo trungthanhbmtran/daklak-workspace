@@ -2,6 +2,7 @@
 export const WORKFLOW_ROUTES = {
   hub: "/services/workflow",
   list: "/services/workflow/workflows",
+  bindings: "/services/workflow/workflows/bindings",
   create: "/services/workflow/workflows/new",
   edit: (id: string) => `/services/workflow/workflows/${encodeURIComponent(id)}/edit`,
   instances: "/services/workflow/instances",

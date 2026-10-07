@@ -42,3 +42,90 @@ model IntegrationUpstreamAudit {
   @@index([upstreamName])
   @@map("integration_upstream_audits")
 }
+
+// V2 Models for Rebuild API Manager
+model ApiConnection {
+  id             String  @id @default(uuid())
+  code           String  @unique
+  displayName    String
+  networkZone    String // internal, external
+  baseUrl        String
+  auth           Json // { kind: 'none'|'basic'|'apiKey'|'bearer', secretRef?: string }
+  timeoutMs      Int     @default(5000)
+  organizationId String  @map("organization_id")
+  enabled        Boolean @default(false)
+  version        Int     @default(1)
+
+  endpoints ApiEndpoint[]
+
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("api_connections")
+}
+
+model ApiEndpoint {
+  id           String @id @default(uuid())
+  connectionId String @map("connection_id")
+  method       String
+  pathTemplate String @map("path_template")
+  schema       Json?
+
+  connection ApiConnection @relation(fields: [connectionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([connectionId, method, pathTemplate])
+  @@map("api_endpoints")
+}
+
+model ApiRevision {
+  id        String   @id @default(uuid())
+  version   Int      @unique @default(autoincrement())
+  checksum  String
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  @@map("api_revisions")
+}
+
+model ApiImportSession {
+  id          String   @id @default(uuid())
+  inputHash   String   @map("input_hash")
+  previewData Json     @map("preview_data")
+  ttl         DateTime
+  status      String   @default("PENDING") // PENDING, COMMITTED, FAILED
+
+  createdAt DateTime @default(now())
+
+  @@map("api_import_sessions")
+}
+
+model ApiOutbox {
+  id         String @id @default(uuid())
+  topic      String
+  payload    Json
+  status     String @default("PENDING") // PENDING, SENT, DEAD_LETTER
+  retryCount Int    @default(0) @map("retry_count")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("api_outboxes")
+}
+
+model CredentialBinding {
+  id        String @id @default(uuid())
+  opaqueRef String @unique @map("opaque_ref")
+  kind      String
+  version   Int    @default(1)
+  status    String @default("ACTIVE")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("api_credential_bindings")
+}

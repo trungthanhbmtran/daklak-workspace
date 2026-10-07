@@ -1,9 +1,13 @@
 import WorkflowList from "@/components/workflow/WorkflowList";
 
 export const metadata = {
-  title: "Định nghĩa quy trình | Cổng Ứng dụng Nội bộ",
+  title: "Quản lý quy trình",
 };
 
 export default function WorkflowsPage() {
-  return <WorkflowList />;
+  return (
+    <div className="p-6 h-full flex-1">
+      <WorkflowList />
+    </div>
+  );
 }
