@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -45,6 +45,8 @@ export default function WorkflowBindingModal({
     trigger: "",
     definitionId: "",
     priority: "100",
+    conditionField: "",
+    conditionValue: "",
   });
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function WorkflowBindingModal({
       setProcessTypes(ptRes.data?.data || []);
       setWorkflows(wfRes.data?.data || wfRes.data?.items || []);
     } catch (error: any) {
-      toast.error(error?.message || "Lỗi khi tải dữ liệu khởi tạo");
+      toast.error(error?.message || "Lá»—i khi táº£i dá»¯ liá»‡u khá»Ÿi táº¡o");
     } finally {
       setLoading(false);
     }
@@ -85,7 +87,7 @@ export default function WorkflowBindingModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.processTypeId || !formData.definitionId || !formData.trigger) {
-      toast.error("Vui lòng nhập đầy đủ thông tin");
+      toast.error("Vui lÃ²ng nháº­p Ä‘áº§y Ä‘á»§ thÃ´ng tin");
       return;
     }
 
@@ -97,7 +99,7 @@ export default function WorkflowBindingModal({
       };
       const res = await apiClient.post("/admin/workflow/bindings", payload);
       if (res.data?.success) {
-        toast.success("Tạo cấu hình Auto-Binding thành công");
+        toast.success("Táº¡o cáº¥u hÃ¬nh Auto-Binding thÃ nh cÃ´ng");
         onSuccess();
         onClose();
         setFormData({
@@ -105,10 +107,12 @@ export default function WorkflowBindingModal({
           trigger: "",
           definitionId: "",
           priority: "100",
+    conditionField: "",
+    conditionValue: "",
         });
       }
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Tạo binding thất bại");
+      toast.error(error?.response?.data?.message || "Táº¡o binding tháº¥t báº¡i");
     } finally {
       setSubmitting(false);
     }
@@ -118,9 +122,9 @@ export default function WorkflowBindingModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Tạo cấu hình Auto-Binding mới</DialogTitle>
+          <DialogTitle>Táº¡o cáº¥u hÃ¬nh Auto-Binding má»›i</DialogTitle>
           <DialogDescription>
-            Gắn kết một đối tượng nghiệp vụ (Process Type) với Quy trình đã thiết kế.
+            Gáº¯n káº¿t má»™t Ä‘á»‘i tÆ°á»£ng nghiá»‡p vá»¥ (Process Type) vá»›i Quy trÃ¬nh Ä‘Ã£ thiáº¿t káº¿.
           </DialogDescription>
         </DialogHeader>
         {loading ? (
@@ -130,7 +134,7 @@ export default function WorkflowBindingModal({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label>Đối tượng nghiệp vụ (Process Type)</Label>
+              <Label>Äá»‘i tÆ°á»£ng nghiá»‡p vá»¥ (Process Type)</Label>
               <Select
                 value={formData.processTypeId}
                 onValueChange={(val) =>
@@ -138,7 +142,7 @@ export default function WorkflowBindingModal({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn đối tượng..." />
+                  <SelectValue placeholder="Chá»n Ä‘á»‘i tÆ°á»£ng..." />
                 </SelectTrigger>
                 <SelectContent>
                   {processTypes.map((pt) => (
@@ -152,7 +156,7 @@ export default function WorkflowBindingModal({
 
             {formData.processTypeId && (
               <div className="space-y-2">
-                <Label>Sự kiện kích hoạt (Trigger)</Label>
+                <Label>Sá»± kiá»‡n kÃ­ch hoáº¡t (Trigger)</Label>
                 <Select
                   value={formData.trigger}
                   onValueChange={(val) =>
@@ -160,7 +164,7 @@ export default function WorkflowBindingModal({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn sự kiện..." />
+                    <SelectValue placeholder="Chá»n sá»± kiá»‡n..." />
                   </SelectTrigger>
                   <SelectContent>
                     {triggers.length > 0 ? (
@@ -171,7 +175,7 @@ export default function WorkflowBindingModal({
                       ))
                     ) : (
                       <SelectItem value="CREATED" disabled>
-                        Không có dữ liệu trigger
+                        KhÃ´ng cÃ³ dá»¯ liá»‡u trigger
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -180,7 +184,7 @@ export default function WorkflowBindingModal({
             )}
 
             <div className="space-y-2">
-              <Label>Quy trình thực thi (Workflow Definition)</Label>
+              <Label>Quy trÃ¬nh thá»±c thi (Workflow Definition)</Label>
               <Select
                 value={formData.definitionId}
                 onValueChange={(val) =>
@@ -188,7 +192,7 @@ export default function WorkflowBindingModal({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn quy trình..." />
+                  <SelectValue placeholder="Chá»n quy trÃ¬nh..." />
                 </SelectTrigger>
                 <SelectContent>
                   {workflows.map((wf) => (
@@ -201,7 +205,7 @@ export default function WorkflowBindingModal({
             </div>
 
             <div className="space-y-2">
-              <Label>Độ ưu tiên (Mặc định: 100)</Label>
+              <Label>Äá»™ Æ°u tiÃªn (Máº·c Ä‘á»‹nh: 100)</Label>
               <Input
                 type="number"
                 value={formData.priority}
@@ -213,11 +217,11 @@ export default function WorkflowBindingModal({
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
-                Hủy
+                Há»§y
               </Button>
               <Button type="submit" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Lưu cấu hình
+                LÆ°u cáº¥u hÃ¬nh
               </Button>
             </DialogFooter>
           </form>
@@ -226,3 +230,5 @@ export default function WorkflowBindingModal({
     </Dialog>
   );
 }
+
+

@@ -80,7 +80,7 @@ export class ExecutorService {
       })
       .catch((err) => {
         this.singleFlight.delete(opaqueRef);
-        // Dependency failure không mở quyền (Fail-closed)
+        // Dependency failure khÃ´ng má»Ÿ quyá»n (Fail-closed)
         throw new HttpException(
           'Credential resolution failed (dependency down)',
           HttpStatus.BAD_GATEWAY,
@@ -179,7 +179,23 @@ export class ExecutorService {
         case 'apiKey':
           reqHeaders['x-api-key'] = rawSecret;
           break;
-        case 'basic':
+                  case 'oauth2':
+            // Simple OAuth2 Client Credentials token fetch (mock caching logic)
+            // Expects rawSecret to be JSON: { tokenUrl, clientId, clientSecret }
+            try {
+              const creds = JSON.parse(rawSecret);
+              const tokenRes = await axios.post(creds.tokenUrl, new URLSearchParams({
+                grant_type: 'client_credentials',
+                client_id: creds.clientId,
+                client_secret: creds.clientSecret
+              }).toString(), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+              reqHeaders['authorization'] = `Bearer ${tokenRes.data.access_token}`;
+            } catch (e: any) {
+              this.logger.error(`OAuth2 Adapter failed: ${e.message}`);
+              throw new Error('OAuth2 Adapter Failed to fetch token');
+            }
+            break;
+          case 'basic':
           reqHeaders['authorization'] =
             `Basic ${Buffer.from(rawSecret).toString('base64')}`;
           break;
@@ -219,3 +235,4 @@ export class ExecutorService {
     }
   }
 }
+

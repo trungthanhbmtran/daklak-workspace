@@ -217,7 +217,7 @@ model WorkflowCommand {
   createdAt     DateTime  @default(now()) @map("created_at")
   sentAt        DateTime? @map("sent_at")
   ackedAt       DateTime? @map("acked_at")
-  // Client-supplied key: cùng key => trả lại command cũ, không tạo command mới.
+  // Client-supplied key: cÃ¹ng key => tráº£ láº¡i command cÅ©, khÃ´ng táº¡o command má»›i.
   idempotencyKey String?  @unique @map("idempotency_key")
   actorId        String?  @map("actor_id")
 
@@ -290,6 +290,7 @@ model WorkflowBinding {
   entityType           String   @map("entity_type")
   eventTrigger         String   @map("event_trigger")
   workflowDefinitionId String   @map("workflow_definition_id")
+  conditions           Json?    // Optional Rule Engine conditions for Auto-Binding
   isActive             Boolean  @default(true) @map("is_active")
   createdAt            DateTime @default(now()) @map("created_at")
   updatedAt            DateTime @updatedAt @map("updated_at")
@@ -317,7 +318,7 @@ model OutboxEvent {
   error              String?   @db.Text
   createdAt          DateTime  @default(now()) @map("created_at")
   processedAt        DateTime? @map("processed_at")
-  // Resilience fields (OutboxPublisher): backoff, lease chống double-publish, dead-letter.
+  // Resilience fields (OutboxPublisher): backoff, lease chá»‘ng double-publish, dead-letter.
   correlationId      String?   @map("correlation_id")
   maxRetries         Int       @default(8) @map("max_retries")
   nextRetryAt        DateTime? @map("next_retry_at")
@@ -349,3 +350,4 @@ model BindingAudit {
   @@index([bindingId])
   @@map("binding_audits")
 }
+
