@@ -12,9 +12,9 @@ File này xác định bộ quy tắc hoạt động cho Antigravity (AGY) AI Ag
 Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trình 5 bước sau:
 
 ### Bước 1: Lên kế hoạch (Planning)
-- **Phân tích yêu cầu**: Đọc kỹ yêu cầu và code hiện tại. Tránh đoán mò dựa trên tên file.
+- **Phân tích yêu cầu & Bối cảnh (Deep Context Gathering)**: Đọc kỹ yêu cầu và code hiện tại. BẮT BUỘC phải tìm và đọc các file liên quan (schema, interface, dependencies) để nắm rõ cấu trúc. Tránh đoán mò dựa trên tên file. Nếu yêu cầu mập mờ, **PHẢI hỏi lại người dùng** để chốt phương án, không tự ý giả định.
 - **Tạo Plan (Kế hoạch)**: BẮT BUỘC phải lên kế hoạch từng bước cụ thể (step-by-step) trước khi bắt tay vào code. Nếu tác vụ lớn, chia nhỏ thành nhiều bước độc lập (ví dụ: tạo schema -> viết service -> viết controller -> verify).
-- **Lưu Kế hoạch**: Trình bày rõ plan này để đảm bảo cả Agent và người dùng đều nắm được lộ trình.
+- **Lưu và Giám sát Kế hoạch**: Trình bày rõ plan này và BẮT BUỘC lưu lại vào một file (ví dụ: `.agents/current_plan.md`). Trong quá trình thực thi, Agent phải liên tục cập nhật trạng thái (check-off) các bước đã hoàn thành trong file này để giám sát tiến độ, tránh việc quên hoặc lặp lại công việc.
 
 ### Bước 2: Phản biện & Kiểm chứng Kế hoạch (Critique & Verification)
 - **Đánh giá rủi ro (Critique)**: Tự đóng vai trò phản biện để xem xét Plan có vi phạm kiến trúc (architecture), rò rỉ dữ liệu, hay gây lỗi hiệu năng (OOM/N+1) hay không.
@@ -28,7 +28,7 @@ Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trìn
 
 ### Bước 4: Chạy kiểm chứng & Tự sửa lỗi (Test Execution & Self-Correction)
 - Sau khi viết code, BẮT BUỘC dùng lệnh (`run_command` để build, start app, hoặc chạy test) để verify logic vừa thực hiện.
-- **Vòng lặp khắc phục**: Nếu gặp lỗi, Agent phải tự động đọc log và sửa lỗi cho đến khi thành công. KHÔNG ĐƯỢC chỉ báo lỗi cho người dùng rồi dừng lại mà không tìm cách tự khắc phục.
+- **Vòng lặp khắc phục & Chống thử mù quáng (Anti-thrashing)**: Nếu gặp lỗi, Agent phải tự động đọc log và sửa lỗi. Tuy nhiên, nếu một lỗi lặp lại (hoặc không giải quyết được) sau 2-3 lần thử, Agent PHẢI dừng việc "thử sai", lùi lại để đọc kỹ log và phân tích nguyên nhân gốc rễ (root cause), hoặc giải trình rủi ro và xin ý kiến người dùng. Tuyệt đối không sửa mù quáng theo cảm tính.
 
 ### Bước 5: Kiểm duyệt & Dọn rác (Quality Gate & Cleanup)
 - **Dọn rác (Bắt buộc)**: Quét lại toàn bộ các file vừa sửa. Xóa mọi imports thừa, biến không dùng, logs (`console.log`, `debugger`), mã giả tạm thời.
@@ -52,3 +52,8 @@ Kết thúc bất kỳ thay đổi nào, Agent phải xuất ra một báo cáo 
 - **Bước 5 - Dọn rác & Tối ưu (Cleanup):** [Xác nhận đã xóa log/code thừa/import dư]
 ```
 Mọi thông tin trong báo cáo phải là SỰ THẬT (không ngụy tạo kết quả test hay kiểm chứng).
+
+## 5. Nhật ký & Quản lý tri thức (Execution Log & Knowledge Base)
+Để tránh lặp lại các lỗi đã giải quyết và tối ưu hóa thời gian xử lý, Agent phải tuân thủ:
+- **Lưu log các trường hợp đã xử lý**: Mọi bugs phức tạp đã được fix, các quyết định quan trọng về kiến trúc, cấu hình hoặc các workaround BẮT BUỘC phải được lưu lại vào một file nhật ký (ví dụ: `.agents/execution_log.md` hoặc thư mục `knowledge/`).
+- **Tra cứu trước khi thực hiện**: Trước khi bắt tay vào fix một lỗi hoặc xử lý một logic mới, Agent nên chủ động tìm kiếm và kiểm tra lại các file log/knowledge này xem vấn đề tương tự đã từng được giải quyết hay chưa, nhằm tái sử dụng giải pháp và tránh đi vào vết xe đổ.

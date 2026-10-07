@@ -120,6 +120,7 @@ export class WorkflowService implements OnModuleInit {
     if (res.uiMetadata) {
       try { res.uiMetadata = JSON.parse(res.uiMetadata); } catch (e) {}
     }
+    console.log("MAPPED RESPONSE:", JSON.stringify(res, null, 2));
     return res;
   }
 

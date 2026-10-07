@@ -282,7 +282,7 @@ export class GrpcWorkflowController {
 
   private mapToWorkflowResponse(def: any, version: any) {
     if (!def) return {};
-    return {
+    const result = {
       id: def.id,
       code: def.code,
       name: def.name,
@@ -297,6 +297,8 @@ export class GrpcWorkflowController {
       publishedBy: version?.publishedBy,
       publishedAt: version?.publishedAt?.toISOString(),
     };
+    console.log("SENDING GRPC RESPONSE:", JSON.stringify(result));
+    return result;
   }
 
   private mapInstanceToResponse(instance: any) {

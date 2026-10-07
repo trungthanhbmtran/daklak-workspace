@@ -1,9 +1,25 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
-const packageDefinition = protoLoader.loadSync('/app/protos/reports/report.proto', { includeDirs: ['/app/protos'] });
-const reportProto = grpc.loadPackageDefinition(packageDefinition).reports.ReportService;
-const client = new reportProto('daklak-workspace-report-service-1:50062', grpc.credentials.createInsecure());
-client.GetReportCatalog({ payload: '{}', userData: '{}' }, (err, response) => {
-  if (err) console.error(err);
-  else console.log(response);
+const path = require('path');
+
+const PROTO_DIR = path.resolve(__dirname, '../../shared/protos');
+const PROTO_PATH = path.resolve(PROTO_DIR, 'workflow/workflow.proto');
+const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+  includeDirs: [PROTO_DIR]
+});
+
+const workflowProto = grpc.loadPackageDefinition(packageDefinition).workflow;
+const client = new workflowProto.WorkflowService('localhost:50060', grpc.credentials.createInsecure());
+
+client.FindOneWorkflow({ id: 'cmuu017910000uceqxrsxrn96' }, (err, response) => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log(JSON.stringify(response, null, 2));
+  }
 });

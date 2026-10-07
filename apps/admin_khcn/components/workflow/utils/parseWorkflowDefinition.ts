@@ -27,6 +27,10 @@ export function parseWorkflowDefinition(data: any): { nodes: any[], edges: any[]
     definition = data.workflowDefinition;
   }
 
+  if (!definition && data.graph) {
+    definition = data.graph;
+  }
+
   while (typeof definition === "string") {
     try {
       definition = JSON.parse(definition);
