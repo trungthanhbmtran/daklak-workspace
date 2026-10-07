@@ -14,6 +14,14 @@ const GRID_Y = 160;
 export function normalizeWorkflowGraph(workflow: any): { nodes: Node[]; edges: Edge[] } {
   const definition = parseWorkflowDefinition(workflow);
 
+  const typeMap: Record<string, string> = {
+    userTask: 'user_task',
+    serviceTask: 'service_task',
+    scriptTask: 'script_task',
+    exclusiveGateway: 'exclusive_gateway',
+    parallelGateway: 'parallel_gateway',
+  };
+
   const nodes: Node[] = definition.nodes
     .filter((n: any) => n && n.id)
     .map((n: any, index: number) => {
@@ -21,9 +29,11 @@ export function normalizeWorkflowGraph(workflow: any): { nodes: Node[]; edges: E
         n.position && Number.isFinite(n.position.x) && Number.isFinite(n.position.y);
       const fallbackX = Number.isFinite(n.x) ? n.x : (index % 4) * GRID_X;
       const fallbackY = Number.isFinite(n.y) ? n.y : Math.floor(index / 4) * GRID_Y;
+      const nodeType = typeMap[n.type] || n.type;
+      
       return {
         id: String(n.id),
-        type: n.type,
+        type: nodeType,
         position: hasPosition ? n.position : { x: fallbackX, y: fallbackY },
         data: { label: n.name, ...(n.data || {}) },
         draggable: false,

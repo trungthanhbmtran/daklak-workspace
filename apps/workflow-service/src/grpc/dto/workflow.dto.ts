@@ -151,6 +151,26 @@ export class CreateWorkflowGrpcDto {
   @IsObject()
   @IsOptional()
   definition?: Record<string, any>;
+
+  @IsString()
+  @IsOptional()
+  definitionJson?: string;
+
+  @IsString()
+  @IsOptional()
+  bpmnLogic?: string;
+
+  @IsString()
+  @IsOptional()
+  uiMetadata?: string;
+
+  @IsString()
+  @IsOptional()
+  organizationId?: string;
+
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
 }
 
 export class StartWorkflowGrpcDto {
@@ -215,6 +235,22 @@ export class UpdateWorkflowGrpcDto {
   @IsObject()
   @IsOptional()
   definition?: Record<string, any>;
+
+  @IsString()
+  @IsOptional()
+  definitionJson?: string;
+
+  @IsString()
+  @IsOptional()
+  bpmnLogic?: string;
+
+  @IsString()
+  @IsOptional()
+  uiMetadata?: string;
+
+  @IsString()
+  @IsOptional()
+  organizationId?: string;
 }
 
 export class PublishWorkflowGrpcDto {
