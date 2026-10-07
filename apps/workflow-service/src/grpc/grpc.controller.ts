@@ -130,7 +130,19 @@ export class GrpcWorkflowController {
   // =========================================================================
   @GrpcMethod('WorkflowService', 'CreateProcessBinding')
   async createProcessBinding(@Payload() data: any) {
-    return this.bindingService.create(data);
+    return this.bindingService.create({
+      processTypeCode: data.processTypeCode,
+      definitionId: data.definitionId,
+      pinnedVersionId: data.pinnedVersionId || undefined,
+      organizationId: data.organizationId || undefined,
+      trigger: data.trigger,
+      criteria: data.criteria ? (typeof data.criteria === 'string' ? JSON.parse(data.criteria) : data.criteria) : undefined,
+      priority: data.priority ? Number(data.priority) : undefined,
+      effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
+      effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
+      createdBy: data.createdBy,
+      reason: data.reason || undefined,
+    });
   }
 
   @GrpcMethod('WorkflowService', 'UpdateProcessBinding')
