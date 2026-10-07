@@ -86,3 +86,8 @@ TÃ i liá»‡u nÃ y lÆ°u váº¿t tiáº¿n Ä‘á»™ vÃ  cÃ¡c tÃ¡c vá»¥ phÃ¡t sinh (hotfixes
 - [x] **[Hotfix] S?a l?i b? redirect ra màn hình login khi vào trang Qu?n lý API (07/10/2026)**
   - ApiManagementController trong pi-gateway thi?u gRPC metadata (user-id) nên b? user-service t? ch?i (UNAUTHENTICATED), gây ra l?i 401 Unauthorized d?y user ra login.
   - Ðã b? sung ti?n ích d?c và chèn metadata vào l?i g?i gRPC trong Controller c?a gateway.
+
+- [x] **[Hotfix] S?a l?i danh sách workflow bindings không hi?n th? (07/10/2026)**
+  - **V?n d?**: Truy c?p trang Qu?n lý G?n nghi?p v? (Bindings) nhung b?ng báo "Chua có binding".
+  - **Nguyên nhân**: gRPC t? d?ng cast organizationId t? undefined (khi admin không thu?c don v? nào) sang chu?i r?ng "". Service dùng "" query DB trong khi DB luu là null, d?n d?n không tìm th?y data.
+  - **Gi?i pháp**: S?a logic trong workflow-service (binding.service.ts) d? khi tìm ki?m s? cho phép l?y các global bindings (organizationId = null) ho?c bindings c?a t? ch?c.

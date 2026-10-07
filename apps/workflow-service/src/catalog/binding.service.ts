@@ -74,14 +74,14 @@ export class BindingService {
       }
     }
 
-    // 3. Tạo binding
+    // 3. To binding
     const binding = await this.prisma.$transaction(async (tx) => {
       const created = await tx.processBinding.create({
         data: {
           processTypeId: processType.id,
           definitionId: dto.definitionId,
-          pinnedVersionId: dto.pinnedVersionId,
-          organizationId: dto.organizationId ?? null,
+          pinnedVersionId: dto.pinnedVersionId || null,
+          organizationId: dto.organizationId || null,
           trigger: dto.trigger,
           criteria: dto.criteria,
           priority: dto.priority ?? 100,
@@ -100,7 +100,7 @@ export class BindingService {
           action: 'CREATED',
           actorId: dto.createdBy,
           reason: dto.reason,
-          snapshot: created as any,
+          snapshot: JSON.parse(JSON.stringify(created)),
         },
       });
 
@@ -108,14 +108,17 @@ export class BindingService {
     });
 
     this.logger.log(
-      `Created binding ${binding.id} for processType=${dto.processTypeCode} org=${dto.organizationId ?? "GLOBAL"} trigger=${dto.trigger}`,
+      `Created binding ${binding.id} for processType=${dto.processTypeCode} org=${dto.organizationId || "GLOBAL"} trigger=${dto.trigger}`,
     );
     return binding;
   }
 
   async findById(id: string, organizationId?: string) {
     const binding = await this.prisma.processBinding.findFirst({
-      where: { id, ...(organizationId ? { organizationId } : {}) },
+      where: { 
+        id, 
+        ...(organizationId ? { OR: [{ organizationId }, { organizationId: null }] } : {}) 
+      },
       include: { processType: true, definition: true, pinnedVersion: true },
     });
     if (!binding) throw new NotFoundException(`Binding ${id} not found`);
@@ -131,8 +134,11 @@ export class BindingService {
     if (params.processTypeCode) {
       where.processType = { code: params.processTypeCode };
     }
-    if (params.organizationId !== undefined) {
-      where.organizationId = params.organizationId ?? null;
+    if (params.organizationId) {
+      where.OR = [
+        { organizationId: params.organizationId },
+        { organizationId: null }
+      ];
     }
 
     const [items, total] = await this.prisma.$transaction([
@@ -190,7 +196,7 @@ export class BindingService {
           action: 'UPDATED',
           actorId: dto.updatedBy,
           reason: dto.reason,
-          snapshot: updated as any,
+          snapshot: JSON.parse(JSON.stringify(updated)),
         },
       });
 
@@ -206,7 +212,10 @@ export class BindingService {
   ) {
     return this.prisma.$transaction(async (tx) => {
       const binding = await tx.processBinding.findFirst({
-        where: { id, ...(organizationId ? { organizationId } : {}) },
+        where: { 
+          id, 
+          ...(organizationId ? { OR: [{ organizationId }, { organizationId: null }] } : {}) 
+        },
       });
       if (!binding) throw new NotFoundException(`Binding ${id} not found`);
       if (binding.status === 'INACTIVE') return binding;
@@ -222,7 +231,7 @@ export class BindingService {
           action: 'DEACTIVATED',
           actorId,
           reason,
-          snapshot: updated as any,
+          snapshot: JSON.parse(JSON.stringify(updated)),
         },
       });
 
