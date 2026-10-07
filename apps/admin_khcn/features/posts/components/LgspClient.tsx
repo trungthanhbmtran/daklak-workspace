@@ -23,7 +23,7 @@ export function LgspClient() {
   } = useQuery({
     queryKey: ["lgsp-documents"],
     queryFn: async () => {
-      const res: any = await apiClient.get("/admin/integrations/documents/sync", {
+      const res: any = await apiClient.get("/integrations/documents/sync", {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" },
       });
       if (res.success) {
@@ -36,8 +36,7 @@ export function LgspClient() {
 
   const sendMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const response: any = await apiClient.post(
-        "/admin/integrations/documents/send",
+      const response: any = await apiClient.post("/integrations/documents/send",
         payload,
         { params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" } }
       );

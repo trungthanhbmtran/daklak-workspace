@@ -4,6 +4,7 @@ export const metadata = {
   title: "Chi tiết quy trình",
 };
 
-export default function ViewWorkflowPage({ params }: { params: { id: string } }) {
-  return <WorkflowEditorScreen id={params.id} mode="view" />;
+export default async function ViewWorkflowPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <WorkflowEditorScreen id={id} mode="view" />;
 }

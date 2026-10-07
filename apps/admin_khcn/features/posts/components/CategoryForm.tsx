@@ -160,7 +160,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       // For now, let's assume postsApi has a generic upload request or we use the specific media one
       // Since postsApi doesn't have it, we use a custom one or add it to postsApi
 
-      const uploadInfo: any = await apiClient.post("/admin/media/request-upload", {
+      const uploadInfo: any = await apiClient.post("/media/request-upload", {
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
@@ -173,7 +173,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       });
 
       // 3. Confirm
-      const confirmRes: any = await apiClient.post("/admin/media/confirm-upload", {
+      const confirmRes: any = await apiClient.post("/media/confirm-upload", {
         fileId: uploadInfo.fileId
       });
 

@@ -54,7 +54,7 @@ export default function ImageComponent({
     setIsUploading(true);
     try {
       /* * NƠI BẠN GẮN API BACKEND CỦA MÌNH VÀO:
-       * const response: any = await apiClient.post('/admin/media/upload-from-url', { url: src });
+       * const response: any = await apiClient.post('/media/upload-from-url', { url: src });
        * const newLocalUrl = response.data?.localUrl || `/api/v1/admin/media/download/${response.data?.fileId}`;
        */
 

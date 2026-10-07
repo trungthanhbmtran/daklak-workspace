@@ -33,7 +33,7 @@ export interface ApiEndpoint {
 export const apiManagementApi = {
   getConnections: async (params?: { search?: string; limit?: number; offset?: number }) => {
     try {
-      const res = await apiClient.get('/admin/api-management/connections', { params }) as any;
+      const res = await apiClient.get('/api-management/connections', { params }) as any;
       return (res?.data || []) as ApiConnection[];
     } catch {
       return [] as ApiConnection[];
@@ -41,32 +41,32 @@ export const apiManagementApi = {
   },
   
   getConnection: async (id: string) => {
-    const res = await apiClient.get("/admin/api-management/connections/" + id) as any;
+    const res = await apiClient.get("/api-management/connections/" + id) as any;
     return res?.data as ApiConnection;
   },
 
   createConnection: async (data: Partial<ApiConnection>) => {
-    const res = await apiClient.post('/admin/api-management/connections', data) as any;
+    const res = await apiClient.post('/api-management/connections', data) as any;
     return res?.data;
   },
 
   updateConnection: async (id: string, data: Partial<ApiConnection>) => {
-    const res = await apiClient.put("/admin/api-management/connections/" + id, data) as any;
+    const res = await apiClient.put("/api-management/connections/" + id, data) as any;
     return res?.data;
   },
 
   deleteConnection: async (id: string) => {
-    const res = await apiClient.delete("/admin/api-management/connections/" + id) as any;
+    const res = await apiClient.delete("/api-management/connections/" + id) as any;
     return res?.data;
   },
 
   disableConnection: async (id: string, expectedVersion: number) => {
-    const res = await apiClient.put("/admin/api-management/connections/" + id + "/disable", { expectedVersion }) as any;
+    const res = await apiClient.put("/api-management/connections/" + id + "/disable", { expectedVersion }) as any;
     return res?.data;
   },
 
   publishRevision: async () => {
-    const res = await apiClient.post('/admin/api-management/connections/publish') as any;
+    const res = await apiClient.post('/api-management/connections/publish') as any;
     return res?.data;
   },
 
@@ -75,14 +75,14 @@ export const apiManagementApi = {
     formData.append('file', file);
     if (targetConnectionId) formData.append('targetConnectionId', targetConnectionId);
     
-    const res = await apiClient.post('/admin/api-management/connections/import/upload', formData, {
+    const res = await apiClient.post('/api-management/connections/import/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }) as any;
     return res?.data; // { sessionId, inputHash, diffs: [{ method, path, status }] }
   },
 
   commitImport: async (sessionId: string, resolutions: { method: string, path: string, action: 'OVERWRITE' | 'SKIP' }[]) => {
-    const res = await apiClient.post('/admin/api-management/connections/import/commit', { sessionId, resolutions }) as any;
+    const res = await apiClient.post('/api-management/connections/import/commit', { sessionId, resolutions }) as any;
     return res?.data;
   }
 };

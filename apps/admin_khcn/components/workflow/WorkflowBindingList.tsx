@@ -27,7 +27,7 @@ export default function WorkflowBindingList() {
   const fetchBindings = async () => {
     try {
       setLoading(true);
-      const res = await apiClient.get("/admin/workflow/bindings");
+      const res = await apiClient.get("/workflow/bindings");
       if (res.data?.success) {
         setBindings(res.data.data || []);
       }
@@ -45,7 +45,7 @@ export default function WorkflowBindingList() {
   const handleDeactivate = async (id: string) => {
     if (!confirm("Bạn có chắc muốn vô hiệu hóa thiết lập này?")) return;
     try {
-      const res = await apiClient.post(`/admin/workflow/bindings/${id}/deactivate`, { reason: "User deactivated via UI" });
+      const res = await apiClient.post(`/workflow/bindings/${id}/deactivate`, { reason: "User deactivated via UI" });
       if (res.data?.success) {
         toast.success("Đã vô hiệu hóa thiết lập quy trình");
         fetchBindings();

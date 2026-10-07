@@ -59,8 +59,8 @@ export default function WorkflowBindingModal({
     setLoading(true);
     try {
       const [ptRes, wfRes] = await Promise.all([
-        apiClient.get("/admin/workflow/catalog/process-types"),
-        apiClient.get("/admin/workflow"), // List workflows
+        apiClient.get("/workflow/catalog/process-types"),
+        apiClient.get("/workflow"), // List workflows
       ]);
       setProcessTypes(ptRes.data?.data || []);
       setWorkflows(wfRes.data?.data || wfRes.data?.items || []);
@@ -97,7 +97,7 @@ export default function WorkflowBindingModal({
         ...formData,
         priority: parseInt(formData.priority, 10) || 100,
       };
-      const res = await apiClient.post("/admin/workflow/bindings", payload);
+      const res = await apiClient.post("/workflow/bindings", payload);
       if (res.data?.success) {
         toast.success("Tạo cấu hình Auto-Binding thành công");
         onSuccess();
