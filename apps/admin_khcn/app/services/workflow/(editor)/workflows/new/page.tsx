@@ -1,9 +1,2 @@
-import WorkflowEditorScreen from "@/components/workflow/WorkflowEditorScreen";
-
-export const metadata = {
-  title: "Tạo quy trình mới",
-};
-
-export default function NewWorkflowPage() {
-  return <WorkflowEditorScreen />;
-}
+import { WorkflowEditorScreen } from "@/features/workflow/screens/WorkflowEditorScreen";
+export default function Page() { return <WorkflowEditorScreen />; }

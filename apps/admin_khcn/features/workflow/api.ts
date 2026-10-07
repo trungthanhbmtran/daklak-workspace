@@ -1,197 +1,140 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { AxiosResponse } from "axios";
 import apiClient from "@/lib/axiosInstance";
 
-export interface Position {
-  x?: number;
-  y?: number;
+export interface WorkflowPosition { x: number; y: number }
+export interface WorkflowNodeData {
+  label?: string;
+  assignmentStrategy?: string;
+  targetRole?: string;
+  employeeCode?: string;
+  [key: string]: unknown;
 }
-
-export interface Measured {
-  width?: number;
-  height?: number;
-}
-
+export interface WorkflowAssignmentRule { id: string; type: string; value: string }
 export interface WorkflowNode {
   id: string;
-  nodeKey?: string;
-  type?: string;
-  name?: string;
-  propertiesJson?: string;
-  
-  // React Flow Properties
-  position?: Position;
-  data?: Record<string, any>;
-  width?: number;
-  height?: number;
-  selected?: boolean;
-  positionAbsolute?: Position;
-  dragging?: boolean;
-  measured?: Measured;
+  type: string;
+  position: WorkflowPosition;
+  data: WorkflowNodeData;
+  assignments?: WorkflowAssignmentRule[];
+  [key: string]: unknown;
 }
-
 export interface WorkflowEdge {
   id: string;
-  sourceNodeId?: string;
-  targetNodeId?: string;
-  
-  // React Flow Properties
-  source?: string;
-  target?: string;
-  sourceHandle?: string;
-  targetHandle?: string;
-  animated?: boolean;
+  source: string;
+  target: string;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
   label?: string;
-  data?: Record<string, any>;
-  type?: string;
+  data?: Record<string, unknown>;
+  [key: string]: unknown;
 }
-
-export interface WorkflowDefinition {
-  nodes: WorkflowNode[];
-  edges: WorkflowEdge[];
-}
-
-export type WorkflowVersionStatus = "DRAFT" | "PUBLISHED" | "DEPRECATED" | string;
-
+export interface WorkflowGraph { nodes: WorkflowNode[]; edges: WorkflowEdge[] }
 export interface Workflow {
   id: string;
   name: string;
+  code: string;
   description?: string;
-  /** Danh sách (list) không trả graph; dùng getOne để lấy sơ đồ. */
-  definition?: WorkflowDefinition;
-  /** Trạng thái phiên bản mới nhất theo WorkflowResponse.status */
-  status?: WorkflowVersionStatus;
-  /** @deprecated Backend không trả trường này; dùng isWorkflowPublished(). */
-  active?: boolean;
-  trigger: string;
-  code?: string;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
+  status?: string;
+  version?: number;
+  definition?: WorkflowGraph | { graph?: WorkflowGraph };
+  bpmnLogic?: WorkflowGraph;
+  uiMetadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
-export const isWorkflowPublished = (w?: Pick<Workflow, "status" | "active"> | null) =>
-  !!w && (w.status === "PUBLISHED" || w.active === true);
-
 export interface WorkflowInstance {
   id: string;
-  workflowId: string;
+  workflowId?: string;
+  workflowName?: string;
   status: string;
   currentNodeId?: string;
-  context: any;
-  createdAt: string;
-  updatedAt: string;
-  workflowName?: string;
   processType?: string;
   businessId?: string;
   correlationId?: string;
-  allowedActions?: string[];
-  stateVersion?: number;
-  organizationId?: string;
-  businessType?: string;
-  lastCommandId?: string;
-  lastCommandStatus?: string;
-  lastCommandError?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+export interface ProcessType {
+  id?: string;
+  code: string;
+  name: string;
+  description?: string;
+  ownerService?: string;
+  validTriggers?: string[];
+  validActions?: string[];
+  isActive?: boolean;
+}
+export interface WorkflowModule { id: string; code: string; name: string; description?: string }
+export interface WorkflowRole { code: string; name: string; rank: number; authorityLevel?: string; category?: string }
+export interface WorkflowBinding {
+  id: string;
+  processTypeCode?: string;
+  processType?: { code?: string; name?: string };
+  definitionId?: string;
+  definition?: { id?: string; name?: string; code?: string };
+  pinnedVersionId?: string;
+  trigger: string;
+  status: string;
+  priority?: number;
+  organizationId?: string | null;
+  createdAt?: string;
+}
+export interface PageMeta { total?: number; page?: number; pageSize?: number; totalPages?: number; hasNext?: boolean; hasPrev?: boolean }
+export interface PageResult<T> { data: T[]; meta?: PageMeta }
+export interface CreateBindingInput {
+  processTypeCode: string;
+  definitionId: string;
+  trigger: string;
+  pinnedVersionId?: string;
+  priority?: number;
+  criteria?: Record<string, unknown>;
+  reason?: string;
+}
+export interface SaveWorkflowInput {
+  name: string;
+  code: string;
+  description?: string;
+  definition: WorkflowGraph;
+}
+export interface WorkflowActionInput {
+  actionName: string;
+  actionData?: Record<string, unknown>;
+  expectedVersion?: number;
+  idempotencyKey?: string;
+  correlationId?: string;
+  note?: string;
 }
 
-/**
- * Helper để bóc tách dữ liệu từ Gateway response chuẩn hóa.
- */
-function unwrapData<T>(res: any): T {
-  const axiosData = res.data;
-  if (axiosData && typeof axiosData === 'object' && 'success' in axiosData && 'data' in axiosData) {
-    return axiosData.data as T;
-  }
-  return axiosData as T;
+type GatewayEnvelope<T> = T | { success?: boolean; data: T; meta?: PageMeta };
+function unwrap<T>(response: AxiosResponse<GatewayEnvelope<T>>): T {
+  const body = response.data;
+  return typeof body === "object" && body !== null && "data" in body ? body.data : body as T;
 }
-
-function unwrapMeta(res: any): any {
-  const axiosData = res.data;
-  if (axiosData && typeof axiosData === 'object' && 'success' in axiosData && 'meta' in axiosData) {
-    return axiosData.meta;
+function page<T>(response: AxiosResponse<GatewayEnvelope<T[]>>): PageResult<T> {
+  const body = response.data;
+  if (typeof body === "object" && body !== null && "data" in body) {
+    return { data: body.data, meta: body.meta };
   }
-  return axiosData?.meta;
+  return { data: body as T[] };
 }
 
 export const workflowApi = {
   list: (params: { skip?: number; take?: number; search?: string } = {}) =>
-    apiClient.get("/workflow", { params }).then((res: any) => ({
-      data: unwrapData<Workflow[]>(res),
-      meta: unwrapMeta(res),
-    })),
-
-  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string; processType?: string; businessId?: string; } = {}) =>
-    apiClient.get("/workflow/instances", { params }).then((res: any) => ({
-      data: unwrapData<WorkflowInstance[]>(res),
-      meta: unwrapMeta(res),
-    })),
-
-  getOne: (id: string) =>
-    apiClient.get(`/workflow/${id}`).then((res: any) => unwrapData<Workflow>(res)),
-
-  create: (data: Partial<Workflow>) =>
-    apiClient.post("/workflow", data).then((res: any) => unwrapData<Workflow>(res)),
-
-  update: (id: string, data: Partial<Workflow>) =>
-    apiClient.put(`/workflow/${id}`, data).then((res: any) => unwrapData<Workflow>(res)),
-
-  delete: (id: string) =>
-    apiClient.delete(`/workflow/${id}`).then((res: any) => unwrapData<any>(res)),
-
-  start: (id: string, initialContext: any = {}) =>
-    apiClient.post(`/workflow/${id}/start`, { initialContext }).then((res: any) => unwrapData<WorkflowInstance>(res)),
-
-  resume: (instanceId: string, nodeId: string, actionData: any = {}) =>
-    apiClient.post(`/workflow/instances/${instanceId}/resume/${nodeId}`, { actionData }).then((res: any) => unwrapData<WorkflowInstance>(res)),
-
-  startByProcessType: (data: { processTypeCode: string; trigger?: string; businessId?: string; businessType?: string; initialContext?: any; idempotencyKey?: string; correlationId?: string; }) =>
-    apiClient.post('/workflow/instances/start-by-type', data).then((res: any) => unwrapData<WorkflowInstance>(res)),
-
-  submitAction: (instanceId: string, data: { actionName: string; actionData?: any; expectedVersion?: number; idempotencyKey?: string; correlationId?: string; note?: string; }) =>
-    apiClient.post(`/workflow/instances/${instanceId}/action`, data).then((res: any) => unwrapData<{ accepted: boolean; status: string; commandId: string; newVersion: number; }>(res)),
-
-  getInstance: (id: string) =>
-    apiClient.get(`/workflow/instances/${id}`).then((res: any) => unwrapData<WorkflowInstance>(res)),
-
-  getLogs: (instanceId: string) =>
-    apiClient.get(`/workflow/instances/${instanceId}/logs`).then((res: any) => unwrapData<any[]>(res)),
-
-  // Catalog & Binding
-  getProcessTypes: (activeOnly?: boolean) =>
-    apiClient.get('/workflow/catalog/process-types', { params: { activeOnly } }).then((res: any) => unwrapData<any[]>(res)),
-  
-  getProcessBindings: (params: { processTypeCode?: string; organizationId?: string; status?: string; skip?: number; take?: number; } = {}) =>
-    apiClient.get('/workflow/bindings', { params }).then((res: any) => ({
-      data: unwrapData<any[]>(res),
-      meta: unwrapMeta(res),
-    })),
-
-  createProcessBinding: (data: any) =>
-    apiClient.post('/workflow/bindings', data).then((res: any) => unwrapData<any>(res)),
-
-  deactivateProcessBinding: (id: string, reason?: string) =>
-    apiClient.post(`/workflow/bindings/${id}/deactivate`, { reason }).then((res: any) => unwrapData<any>(res)),
-
-  getServices: () =>
-    apiClient.get('/workflow/services').then((res: any) => unwrapData<any[]>(res)),
-
-  getTriggers: () =>
-    apiClient.get('/workflow/triggers').then((res: any) => unwrapData<any[]>(res)),
-
-  getTaskRoles: () =>
-    apiClient.get('/categories', { params: { group: 'TASK_ROLE' } }).then((res: any) => unwrapData<any[]>(res)),
-
-  getStatuses: () =>
-    apiClient.get('/categories', { params: { group: 'WORKFLOW_STATUS' } }).then((res: any) => unwrapData<any[]>(res)),
-
-  getModules: () =>
-    apiClient.get('/workflow/modules').then((res: any) => unwrapData<{ id: string; code: string; name: string; description?: string }[]>(res)),
-
-  getOrgRoles: () =>
-    apiClient.get('/workflow/org-roles').then((res: any) => unwrapData<{ code: string; name: string; rank: number; authorityLevel?: string; category?: string }[]>(res)),
-
-  publish: (id: string) =>
-    apiClient.post(`/workflow/${id}/publish`).then((res: any) => unwrapData<Workflow>(res)),
-
-  applyModule: (id: string, moduleCode: string) =>
-    apiClient.post(`/workflow/${id}/apply-module`, { moduleCode }).then((res: any) => unwrapData<Workflow>(res)),
+    apiClient.get<GatewayEnvelope<Workflow[]>>("/workflow", { params }).then(page<Workflow>),
+  getOne: (id: string) => apiClient.get<GatewayEnvelope<Workflow>>(`/workflow/${encodeURIComponent(id)}`).then(unwrap<Workflow>),
+  create: (data: SaveWorkflowInput) => apiClient.post<GatewayEnvelope<Workflow>>("/workflow", data).then(unwrap<Workflow>),
+  update: (id: string, data: SaveWorkflowInput) => apiClient.put<GatewayEnvelope<Workflow>>(`/workflow/${encodeURIComponent(id)}`, data).then(unwrap<Workflow>),
+  delete: (id: string) => apiClient.delete<GatewayEnvelope<{ success: boolean }>>(`/workflow/${encodeURIComponent(id)}`).then(unwrap),
+  publish: (id: string) => apiClient.post<GatewayEnvelope<Workflow>>(`/workflow/${encodeURIComponent(id)}/publish`).then(unwrap<Workflow>),
+  getModules: () => apiClient.get<GatewayEnvelope<WorkflowModule[]>>("/workflow/modules").then(unwrap<WorkflowModule[]>),
+  getOrgRoles: () => apiClient.get<GatewayEnvelope<WorkflowRole[]>>("/workflow/org-roles").then(unwrap<WorkflowRole[]>),
+  getProcessTypes: (activeOnly = true) => apiClient.get<GatewayEnvelope<ProcessType[]>>("/workflow/catalog/process-types", { params: { activeOnly } }).then(unwrap<ProcessType[]>),
+  getTriggers: () => apiClient.get<GatewayEnvelope<Array<{ code?: string; value?: string; name?: string; label?: string }>>>("/workflow/triggers").then(unwrap),
+  listBindings: (params: { processTypeCode?: string; status?: string; skip?: number; take?: number } = {}) => apiClient.get<GatewayEnvelope<WorkflowBinding[]>>("/workflow/bindings", { params }).then(page<WorkflowBinding>),
+  createBinding: (input: CreateBindingInput) => apiClient.post<GatewayEnvelope<WorkflowBinding>>("/workflow/bindings", input).then(unwrap<WorkflowBinding>),
+  deactivateBinding: (id: string, reason?: string) => apiClient.post<GatewayEnvelope<WorkflowBinding>>(`/workflow/bindings/${encodeURIComponent(id)}/deactivate`, { reason }).then(unwrap<WorkflowBinding>),
+  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string } = {}) => apiClient.get<GatewayEnvelope<WorkflowInstance[]>>("/workflow/instances", { params }).then(page<WorkflowInstance>),
+  getInstance: (id: string) => apiClient.get<GatewayEnvelope<WorkflowInstance>>(`/workflow/instances/${encodeURIComponent(id)}`).then(unwrap<WorkflowInstance>),
+  getLogs: (id: string) => apiClient.get<GatewayEnvelope<Array<Record<string, unknown>>>>(`/workflow/instances/${encodeURIComponent(id)}/logs`).then(unwrap),
+  submitAction: (instanceId: string, input: WorkflowActionInput) => apiClient.post<GatewayEnvelope<{ accepted: boolean; status: string; commandId: string; newVersion: number }>>(`/workflow/instances/${encodeURIComponent(instanceId)}/action`, input).then(unwrap),
 };

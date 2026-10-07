@@ -146,6 +146,7 @@ message UpdateProcessBindingRequest {
 
 message GetProcessBindingRequest {
   string id = 1;
+  string organizationId = 2;
 }
 
 message ListProcessBindingsRequest {
@@ -160,6 +161,7 @@ message DeactivateProcessBindingRequest {
   string id = 1;
   string actorId = 2;
   string reason = 3;
+  string organizationId = 4;
 }
 
 message ProcessBindingResponse {

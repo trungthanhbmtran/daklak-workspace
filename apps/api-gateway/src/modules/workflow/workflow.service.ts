@@ -46,6 +46,10 @@ export class WorkflowService implements OnModuleInit {
     );
   }
 
+  private getOrganizationId(user?: any): string | undefined {
+    return user?.organizationId || user?.orgId || user?.unitId;
+  }
+
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
     const code = e?.code;
     const message = e?.details || e?.message || defaultMsg;
@@ -99,19 +103,25 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async getProcessBinding(id: string) {
+  async getProcessBinding(id: string, organizationId?: string) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.GetProcessBinding({ id }),
+      this.workflowGrpcService.GetProcessBinding({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result, message: 'OK' };
   }
 
-  async deactivateProcessBinding(id: string, actorId: string, reason: string) {
+  async deactivateProcessBinding(
+    id: string,
+    actorId: string,
+    reason: string,
+    organizationId?: string,
+  ) {
     const result = await firstValueFrom(
       this.workflowGrpcService.DeactivateProcessBinding({
         id,
         actorId,
         reason,
+        organizationId,
       }),
     ).catch((e) => this.handleRpcError(e));
     return { success: true, data: result, message: 'Binding deactivated' };
@@ -140,7 +150,7 @@ export class WorkflowService implements OnModuleInit {
     if (res.definitionJson) {
       try {
         res.definition = JSON.parse(res.definitionJson);
-      } catch (e) {
+      } catch {
         res.definition = {};
       }
       delete res.definitionJson;
@@ -148,12 +158,12 @@ export class WorkflowService implements OnModuleInit {
     if (res.bpmnLogic) {
       try {
         res.bpmnLogic = JSON.parse(res.bpmnLogic);
-      } catch (e) {}
+      } catch {}
     }
     if (res.uiMetadata) {
       try {
         res.uiMetadata = JSON.parse(res.uiMetadata);
-      } catch (e) {}
+      } catch {}
     }
     return res;
   }
@@ -204,7 +214,7 @@ export class WorkflowService implements OnModuleInit {
         : undefined,
       bpmnLogic: body.bpmnLogic ? JSON.stringify(body.bpmnLogic) : undefined,
       uiMetadata: body.uiMetadata ? JSON.stringify(body.uiMetadata) : undefined,
-      organizationId: user?.organizationId || user?.orgId,
+      organizationId: this.getOrganizationId(user),
       createdBy: user?.id?.toString(),
     };
     const result = (await firstValueFrom(
@@ -229,7 +239,7 @@ export class WorkflowService implements OnModuleInit {
         : undefined,
       bpmnLogic: body.bpmnLogic ? JSON.stringify(body.bpmnLogic) : undefined,
       uiMetadata: body.uiMetadata ? JSON.stringify(body.uiMetadata) : undefined,
-      organizationId: user?.organizationId || user?.orgId,
+      organizationId: this.getOrganizationId(user),
     };
     const result = (await firstValueFrom(
       this.workflowGrpcService.UpdateWorkflow(payload),
@@ -246,7 +256,7 @@ export class WorkflowService implements OnModuleInit {
     const skip = query.skip || 0;
     const take = query.take || 20;
     const search = query.search;
-    const organizationId = user?.organizationId || user?.orgId;
+    const organizationId = this.getOrganizationId(user);
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListWorkflows({
         skip,
@@ -272,7 +282,7 @@ export class WorkflowService implements OnModuleInit {
         instanceId,
         nodeId,
         actionData: body.actionData || body,
-        userRoles: [],
+        userRoles: user?.roles || [],
       }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
@@ -316,7 +326,7 @@ export class WorkflowService implements OnModuleInit {
   }
 
   async findOne(id: string, user?: any) {
-    const organizationId = user?.organizationId || user?.orgId;
+    const organizationId = this.getOrganizationId(user);
     const result = (await firstValueFrom(
       this.workflowGrpcService.FindOneWorkflow({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e))) as any;
@@ -329,7 +339,7 @@ export class WorkflowService implements OnModuleInit {
   }
 
   async delete(id: string, user?: any) {
-    const organizationId = user?.organizationId || user?.orgId;
+    const organizationId = this.getOrganizationId(user);
     const result = (await firstValueFrom(
       this.workflowGrpcService.DeleteWorkflow({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e))) as any;
@@ -342,7 +352,7 @@ export class WorkflowService implements OnModuleInit {
   }
 
   async publish(id: string, user?: any) {
-    const organizationId = user?.organizationId || user?.orgId;
+    const organizationId = this.getOrganizationId(user);
     const actorId = user?.id?.toString();
     const result = (await firstValueFrom(
       this.workflowGrpcService.PublishWorkflow({ id, actorId, organizationId }),

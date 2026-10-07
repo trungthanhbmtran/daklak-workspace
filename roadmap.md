@@ -72,3 +72,10 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - Vô hiệu hoá adapter cũ / schema cũ sau thời gian hỗ trợ tương thích.
   - Hoàn thiện tài liệu, hồ sơ An toàn thông tin (ATTT) và runbook.
   - Đảm bảo traffic và tham chiếu từ legacy consumer trở về 0 trước khi xóa.
+
+- [x] **Dựng lại module Workflow động trong admin_khcn (07/10/2026)**
+  - Xây dựng lại danh sách/designer, binding và theo dõi instance theo API Gateway `/admin/workflow` làm nguồn dữ liệu và nguồn quyết định trạng thái.
+  - Graph được lưu qua API; publish được backend validate. Catalog node/binding lấy từ backend, không dùng mock làm dữ liệu vận hành.
+  - Bật JWT guard cho Workflow Gateway; actor và phạm vi đơn vị lấy từ JWT khi tạo/lọc binding, thay vì nhận actor/phạm vi do client tự gửi.
+  - Ghi contract và ranh giới API trong `apps/admin_khcn/docs/WORKFLOW_ADMIN_MODULE.md`.
+  - Kiểm tra: `admin_khcn` typecheck/lint; `api-gateway` build tsconfig typecheck/lint; `workflow-service` build tsconfig typecheck.

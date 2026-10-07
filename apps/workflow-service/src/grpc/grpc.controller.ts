@@ -151,7 +151,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'GetProcessBinding')
   async getProcessBinding(@Payload() data: any) {
-    return this.bindingService.findById(data.id);
+    return this.bindingService.findById(data.id, data.organizationId);
   }
 
   @GrpcMethod('WorkflowService', 'ListProcessBindings')
@@ -159,13 +159,18 @@ export class GrpcWorkflowController {
     const { items, total } = await this.bindingService.list(data);
     return {
       data: items,
-      meta: { total, skip: data.skip || 0, take: data.take || 20 }
+      meta: { total, skip: data.skip || 0, take: data.take || 20 },
     };
   }
 
   @GrpcMethod('WorkflowService', 'DeactivateProcessBinding')
   async deactivateProcessBinding(@Payload() data: any) {
-    return this.bindingService.deactivate(data.id, data.actorId, data.reason);
+    return this.bindingService.deactivate(
+      data.id,
+      data.actorId,
+      data.reason,
+      data.organizationId,
+    );
   }
 
   @GrpcMethod('WorkflowService', 'ResolveBinding')

@@ -85,7 +85,7 @@ export class BindingService {
           trigger: dto.trigger,
           criteria: dto.criteria,
           priority: dto.priority ?? 100,
-          status: "ACTIVE",
+          status: 'ACTIVE',
           effectiveFrom: dto.effectiveFrom ?? null,
           effectiveTo: dto.effectiveTo ?? null,
           createdBy: dto.createdBy,
@@ -97,7 +97,7 @@ export class BindingService {
       await tx.bindingAudit.create({
         data: {
           bindingId: created.id,
-          action: "CREATED",
+          action: 'CREATED',
           actorId: dto.createdBy,
           reason: dto.reason,
           snapshot: created as any,
@@ -113,9 +113,9 @@ export class BindingService {
     return binding;
   }
 
-  async findById(id: string) {
-    const binding = await this.prisma.processBinding.findUnique({
-      where: { id },
+  async findById(id: string, organizationId?: string) {
+    const binding = await this.prisma.processBinding.findFirst({
+      where: { id, ...(organizationId ? { organizationId } : {}) },
       include: { processType: true, definition: true, pinnedVersion: true },
     });
     if (!binding) throw new NotFoundException(`Binding ${id} not found`);
@@ -198,21 +198,28 @@ export class BindingService {
     });
   }
 
-  async deactivate(id: string, actorId: string, reason?: string) {
+  async deactivate(
+    id: string,
+    actorId: string,
+    reason?: string,
+    organizationId?: string,
+  ) {
     return this.prisma.$transaction(async (tx) => {
-      const binding = await tx.processBinding.findUnique({ where: { id } });
+      const binding = await tx.processBinding.findFirst({
+        where: { id, ...(organizationId ? { organizationId } : {}) },
+      });
       if (!binding) throw new NotFoundException(`Binding ${id} not found`);
-      if (binding.status === "INACTIVE") return binding;
+      if (binding.status === 'INACTIVE') return binding;
 
       const updated = await tx.processBinding.update({
         where: { id },
-        data: { status: "INACTIVE", updatedAt: new Date() },
+        data: { status: 'INACTIVE', updatedAt: new Date() },
       });
 
       await tx.bindingAudit.create({
         data: {
           bindingId: id,
-          action: "DEACTIVATED",
+          action: 'DEACTIVATED',
           actorId,
           reason,
           snapshot: updated as any,
