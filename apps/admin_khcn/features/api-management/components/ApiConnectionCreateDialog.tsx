@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -12,7 +12,13 @@ export function ApiConnectionCreateDialog() {
   const [open, setOpen] = useState(false);
   const createMut = useCreateConnection();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    code: string;
+    displayName: string;
+    baseUrl: string;
+    networkZone: 'internal' | 'external';
+    timeoutMs: number;
+  }>({
     code: '',
     displayName: '',
     baseUrl: '',
