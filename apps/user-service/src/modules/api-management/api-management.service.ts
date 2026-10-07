@@ -59,11 +59,7 @@ export class ApiManagementService {
     };
   }
 
-  private async bindCredential(
-    tx: any,
-    auth: any,
-    userId: string,
-  ): Promise<any> {
+  private async bindCredential(tx: any, auth: any): Promise<any> {
     if (!auth || typeof auth !== 'object') return auth;
 
     // If there is a raw secret, encrypt it and create a binding
@@ -111,7 +107,7 @@ export class ApiManagementService {
   }
 
   async createConnection(data: any, userId: string) {
-    const boundAuth = await this.bindCredential(this.prisma, data.auth, userId);
+    const boundAuth = await this.bindCredential(this.prisma, data.auth);
     data.auth = boundAuth;
     return this.prisma.apiConnection.create({
       data: {
@@ -130,7 +126,7 @@ export class ApiManagementService {
     userId: string,
   ) {
     if (data.auth) {
-      data.auth = await this.bindCredential(this.prisma, data.auth, userId);
+      data.auth = await this.bindCredential(this.prisma, data.auth);
     }
     const conn = await this.getConnection(id);
     if (conn.version !== expectedVersion) {
@@ -155,7 +151,7 @@ export class ApiManagementService {
 
   // --- T009: Validate / Publish / Disable ---
 
-  async disableConnection(id: string, expectedVersion: number) {
+  async disableConnection(id: string, expectedVersion: number, userId: string) {
     const conn = await this.getConnection(id);
     if (conn.version !== expectedVersion)
       throw new Error('Version mismatch (OCC)');
@@ -448,3 +444,5 @@ export class ApiManagementService {
     return result;
   }
 }
+
+
