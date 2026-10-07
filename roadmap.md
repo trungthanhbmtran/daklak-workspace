@@ -79,3 +79,7 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - Bật JWT guard cho Workflow Gateway; actor và phạm vi đơn vị lấy từ JWT khi tạo/lọc binding, thay vì nhận actor/phạm vi do client tự gửi.
   - Ghi contract và ranh giới API trong `apps/admin_khcn/docs/WORKFLOW_ADMIN_MODULE.md`.
   - Kiểm tra: `admin_khcn` typecheck/lint; `api-gateway` build tsconfig typecheck/lint; `workflow-service` build tsconfig typecheck.
+
+- [x] **[Hotfix] Sửa lỗi API Gateway gọi nhầm gRPC localhost và bổ sung nút Tạo thủ công trong API Manager (07/10/2026)**
+  - Sửa URL  .0.0.0:50051 hardcoded trong ApiManagementGatewayModule thành constant MICROSERVICES.API_MANAGEMENT.URL.
+  - Triển khai Dialog component cho nút "Tạo thủ công" (gọi useCreateConnection từ UI) cho phần quản trị API.

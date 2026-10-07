@@ -51,10 +51,7 @@ export function ApiManagementDashboard() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="outline">
-          <Plus className="mr-2 h-4 w-4" />
-          Tạo thủ công
-        </Button>
+        <ApiConnectionCreateDialog />
       </div>
 
       {isLoading ? (
