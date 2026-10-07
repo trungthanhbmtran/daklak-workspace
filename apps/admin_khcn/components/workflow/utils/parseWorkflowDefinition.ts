@@ -3,23 +3,6 @@ export function parseWorkflowDefinition(data: any): { nodes: any[], edges: any[]
     return { nodes: [], edges: [] };
   }
 
-  if (data.bpmnLogic || data.uiMetadata) {
-    const bpmnLogic = typeof data.bpmnLogic === 'string' ? JSON.parse(data.bpmnLogic || '{"nodes":[],"edges":[]}') : (data.bpmnLogic || { nodes: [], edges: [] });
-    const uiMetadata = typeof data.uiMetadata === 'string' ? JSON.parse(data.uiMetadata || '{"nodes":[],"edges":[]}') : (data.uiMetadata || { nodes: [], edges: [] });
-    
-    const mergedNodes = (bpmnLogic.nodes || []).map((bNode: any) => {
-      const uiNode = (uiMetadata.nodes || []).find((u: any) => u.id === bNode.id) || {};
-      return { ...bNode, ...uiNode, data: { ...bNode.data, ...uiNode.data } };
-    });
-    
-    const mergedEdges = (bpmnLogic.edges || []).map((bEdge: any) => {
-      const uiEdge = (uiMetadata.edges || []).find((u: any) => u.id === bEdge.id) || {};
-      return { ...bEdge, ...uiEdge, data: { ...bEdge.data, ...uiEdge.data } };
-    });
-    
-    return { nodes: mergedNodes, edges: mergedEdges };
-  }
-
   let definition = data.definition;
 
   // Handle cases where the definition might be wrapped or named differently
@@ -46,10 +29,37 @@ export function parseWorkflowDefinition(data: any): { nodes: any[], edges: any[]
     definition = definition.definition;
   }
 
+  const bpmnLogic = data.bpmnLogic || (definition && definition.bpmnLogic);
+  const uiMetadata = data.uiMetadata || (definition && definition.uiMetadata);
+
+  if (bpmnLogic || uiMetadata) {
+    const parsedBpmn = typeof bpmnLogic === 'string' ? JSON.parse(bpmnLogic || '{"nodes":[],"edges":[]}') : (bpmnLogic || { nodes: [], edges: [] });
+    const parsedUi = typeof uiMetadata === 'string' ? JSON.parse(uiMetadata || '{"nodes":[],"edges":[]}') : (uiMetadata || { nodes: [], edges: [] });
+    
+    const mergedNodes = (parsedBpmn.nodes || []).map((bNode: any) => {
+      const uiNode = (parsedUi.nodes || []).find((u: any) => u.id === bNode.id) || {};
+      return { ...bNode, ...uiNode, data: { ...bNode.data, ...uiNode.data } };
+    });
+    
+    const mergedEdges = (parsedBpmn.edges || []).map((bEdge: any) => {
+      const uiEdge = (parsedUi.edges || []).find((u: any) => u.id === bEdge.id) || {};
+      return { ...bEdge, ...uiEdge, data: { ...bEdge.data, ...uiEdge.data } };
+    });
+    
+    return { nodes: mergedNodes, edges: mergedEdges };
+  }
+
   if (definition && (definition.nodes || definition.edges)) {
     return {
       nodes: Array.isArray(definition.nodes) ? definition.nodes : [],
       edges: Array.isArray(definition.edges) ? definition.edges : []
+    };
+  }
+
+  if (data.nodes || data.edges) {
+    return {
+      nodes: Array.isArray(data.nodes) ? data.nodes : [],
+      edges: Array.isArray(data.edges) ? data.edges : []
     };
   }
 
