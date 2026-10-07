@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { Activity, Search } from "lucide-react";
 import { PageHeader } from "@/components/layouts/page-header";

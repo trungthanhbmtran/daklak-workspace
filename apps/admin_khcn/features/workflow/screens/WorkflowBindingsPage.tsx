@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Layers3, Plus, Power } from "lucide-react";
