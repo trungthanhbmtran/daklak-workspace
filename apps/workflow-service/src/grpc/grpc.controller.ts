@@ -298,7 +298,6 @@ export class GrpcWorkflowController {
       publishedBy: version?.publishedBy,
       publishedAt: version?.publishedAt?.toISOString(),
     };
-    console.log("SENDING GRPC RESPONSE:", JSON.stringify(result));
     return result;
   }
 

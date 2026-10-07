@@ -2,49 +2,28 @@
 import { MarkerType, type Edge, type Node } from "@xyflow/react";
 import { parseWorkflowDefinition } from "./parseWorkflowDefinition";
 
-const GRID_X = 280;
-const GRID_Y = 160;
-
 /**
  * Chuẩn hoá graph đã lưu thành node/edge hợp lệ cho React Flow ở chế độ chỉ xem.
- * - Node thiếu `position` (bị rơi khi qua gRPC) được xếp lưới xác định, không random.
- * - Node thiếu `data` được gán `{ label: name }` để node component không bị lỗi.
- * - Edge hỗ trợ cả cặp `source/target` lẫn `sourceNodeId/targetNodeId`.
+ * Dùng parseWorkflowDefinition làm source of truth để tái sử dụng logic parse/normalize.
  */
 export function normalizeWorkflowGraph(workflow: any): { nodes: Node[]; edges: Edge[] } {
-  const definition = parseWorkflowDefinition(workflow);
+  const { nodes: parsedNodes, edges: parsedEdges } = parseWorkflowDefinition(workflow);
 
-  const typeMap: Record<string, string> = {
-    userTask: 'user_task',
-    serviceTask: 'service_task',
-    scriptTask: 'script_task',
-    exclusiveGateway: 'exclusive_gateway',
-    parallelGateway: 'parallel_gateway',
-  };
-
-  const nodes: Node[] = definition.nodes
+  const nodes: Node[] = parsedNodes
     .filter((n: any) => n && n.id)
-    .map((n: any, index: number) => {
-      const hasPosition =
-        n.position && Number.isFinite(n.position.x) && Number.isFinite(n.position.y);
-      const fallbackX = Number.isFinite(n.x) ? n.x : (index % 4) * GRID_X;
-      const fallbackY = Number.isFinite(n.y) ? n.y : Math.floor(index / 4) * GRID_Y;
-      const nodeType = typeMap[n.type] || n.type;
-      
-      return {
-        id: String(n.id),
-        type: nodeType,
-        position: hasPosition ? n.position : { x: fallbackX, y: fallbackY },
-        data: { label: n.name, ...(n.data || {}) },
-        draggable: false,
-        selectable: false,
-        connectable: false,
-      };
-    });
+    .map((n: any) => ({
+      id: String(n.id),
+      type: n.type,
+      position: n.position,
+      data: n.data || { label: n.name || n.id },
+      draggable: false,
+      selectable: false,
+      connectable: false,
+    }));
 
   const nodeIds = new Set(nodes.map((n) => n.id));
 
-  const edges: Edge[] = definition.edges
+  const edges: Edge[] = parsedEdges
     .map((e: any, index: number) => {
       const source = String(e.source || e.sourceNodeId || "");
       const target = String(e.target || e.targetNodeId || "");

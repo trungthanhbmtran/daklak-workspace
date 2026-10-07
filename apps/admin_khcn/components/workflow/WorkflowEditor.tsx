@@ -110,7 +110,6 @@ const Flow = ({ id, onBack, readOnly = false }: WorkflowEditorProps) => {
   const { fitView } = useReactFlow();
 
   const onInit = useCallback((instance: any) => {
-    console.log("ReactFlow initialized");
     instance.fitView();
   }, []);
 

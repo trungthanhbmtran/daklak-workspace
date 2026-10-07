@@ -32,58 +32,25 @@ export function useWorkflowData({
   const loadWorkflow = useCallback(async (loadId: string) => {
     setIsLoading(true);
     try {
-      console.log(`Loading workflow: ${loadId}`);
       const data = await workflowApi.getOne(loadId);
-      console.log("Loaded data:", data);
 
       if (data) {
         setWorkflowName(data.name);
         setWorkflowDesc(data.description || "");
         setWorkflowCode(data.code || data.trigger || "");
 
+        // parseWorkflowDefinition đã xử lý: type mapping, position fallback, label
         const definition = parseWorkflowDefinition(data);
+        const rawNodes = (definition.nodes || []).filter((n: any) => n && n.id);
 
-        if (definition && definition.nodes) {
-          console.log("Definition found:", definition);
-          const rawNodes = definition.nodes || [];
-          const loadedNodes = rawNodes
-            .filter((n: any) => n && n.id)
-            .map((node: any, index: number) => {
-              const hasPosition = node.position && typeof node.position.x === 'number' && typeof node.position.y === 'number';
-              const fallbackX = typeof node.x === 'number' ? node.x : (index % 4) * 280;
-              const fallbackY = typeof node.y === 'number' ? node.y : Math.floor(index / 4) * 160;
-              const typeMap: Record<string, string> = {
-                userTask: 'user_task',
-                serviceTask: 'service_task',
-                scriptTask: 'script_task',
-                exclusiveGateway: 'exclusive_gateway',
-                parallelGateway: 'parallel_gateway',
-              };
-              const type = typeMap[node.type] || node.type;
+        if (rawNodes.length > 0) {
+          setNodes(rawNodes);
 
-              return {
-                ...node,
-                id: String(node.id),
-                type,
-                position: hasPosition ? node.position : { x: fallbackX, y: fallbackY },
-                data: {
-                  label: node.name || node.data?.label || node.data?.name || `Node ${index + 1}`,
-                  ...node.data
-                },
-              };
-            });
-
-          console.log(`Setting ${loadedNodes.length} nodes`);
-          setNodes(loadedNodes.length > 0 ? loadedNodes : initialNodes);
-
-          const nodeIds = new Set(loadedNodes.map((n: any) => n.id));
-
-          const rawEdges = definition.edges || [];
-          const loadedEdges = rawEdges.map(
-            (edge: any, index: number) => {
+          const nodeIds = new Set(rawNodes.map((n: any) => n.id));
+          const loadedEdges = (definition.edges || [])
+            .map((edge: any, index: number) => {
               const source = String(edge.source || edge.sourceNodeId || "");
               const target = String(edge.target || edge.targetNodeId || "");
-              
               return {
                 ...edge,
                 source,
@@ -104,15 +71,13 @@ export function useWorkflowData({
                 style: edge.style || {
                   strokeWidth: 2,
                   stroke: '#3b82f6',
-                }
+                },
               };
-            }
-          ).filter((e: any) => nodeIds.has(e.source) && nodeIds.has(e.target));
+            })
+            .filter((e: any) => nodeIds.has(e.source) && nodeIds.has(e.target));
 
-          console.log(`Setting ${loadedEdges.length} edges`);
           setEdges(loadedEdges);
         } else {
-          console.warn("No definition found in workflow data");
           setNodes(initialNodes);
         }
       }

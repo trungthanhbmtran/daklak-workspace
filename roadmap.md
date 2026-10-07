@@ -4,6 +4,9 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **Rà soát chức năng hệ thống so với Đề bài kiểm tra năng lực (Câu 2)**
+  - Tác vụ: Đánh giá hệ thống theo 9 tiêu chí của Câu 2 trong tài liệu kiểm tra năng lực và viết báo cáo vào `docs/Ra_soat_chuc_nang_cau_2.md`.
+
 - [x] **[Hotfix] Sửa lỗi parse JSON bị corrupted thành `"[object Object]"` trong Integration Upstream (07/10/2026)**
   - **Vấn đề**: Các thiết lập endpoints của API trong `/admin/hub` không lưu được và làm crash UI, dữ liệu ở database hiển thị thành `"[object Object]"`.
   - **Nguyên nhân**: Lỗi xảy ra do dữ liệu rỗng (`""`) hoặc stringified json bị nest trong `parseDto` (user-service) và `mapToUpstreamResponse` khi đi qua gRPC, dẫn đến việc parse thất bại và đẩy nguyên chuỗi lỗi xuống Prisma lưu trữ dưới dạng JSON của 1 string.
