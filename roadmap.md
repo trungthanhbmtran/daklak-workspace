@@ -1,71 +1,60 @@
-﻿# Roadmap Dá»± Ãn Daklak-Workspace
+﻿# Roadmap Dự Án Daklak-Workspace
 
-TÃ i liá»‡u nÃ y lÆ°u váº¿t tiáº¿n Ä‘á»™ vÃ  cÃ¡c tÃ¡c vá»¥ phÃ¡t sinh (hotfixes, tÃ­nh nÄƒng má»›i) trong quÃ¡ trÃ¬nh váº­n hÃ nh cá»§a Antigravity Agent, theo nhÆ° yÃªu cáº§u trong `AGENTS.md`.
+Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes, tính năng mới) trong quá trình vận hành của Antigravity Agent, theo như yêu cầu trong AGENTS.md.
 
 ## Unplanned Tasks / Hotfixes
 
-- [x] **HoÃ n thiá»‡n Workflow Binding Modal cho Auto-Binding (07/10/2026)**
-  - **TÃ¡c vá»¥**: ThÃªm component `WorkflowBindingModal.tsx` vÃ  gáº¯n vÃ o `WorkflowBindingList.tsx`.
-  - **Chi tiáº¿t**: Form cho phÃ©p chá»n Process Type (Äá»‘i tÆ°á»£ng nghiá»‡p vá»¥), Trigger (Sá»± kiá»‡n), vÃ  Quy trÃ¬nh thá»±c thi. Dá»¯ liá»‡u Ä‘Æ°á»£c gá»i tá»« API `/admin/workflow/catalog/process-types` vÃ  `/admin/workflow` Ä‘á»ƒ káº¿t ná»‘i linh hoáº¡t cÃ¡c trigger sá»± kiá»‡n vá»›i Ä‘á»‹nh nghÄ©a workflow mÃ  khÃ´ng cáº§n code.
+- [x] **Hoàn thiện Workflow Binding Modal cho Auto-Binding (07/10/2026)**
+  - **Tác vụ**: Thêm component WorkflowBindingModal.tsx và gắn vào WorkflowBindingList.tsx.
+  - **Chi tiết**: Form cho phép chọn Process Type (Đối tượng nghiệp vụ), Trigger (Sự kiện), và Quy trình thực thi. Dữ liệu được gọi từ API /admin/workflow/catalog/process-types và /admin/workflow để kết nối linh hoạt các trigger sự kiện với định nghĩa workflow mà không cần code.
 
-- [x] **RÃ  soÃ¡t vÃ  lÃªn phÆ°Æ¡ng Ã¡n tÃ¡i cáº¥u trÃºc giao diá»‡n vÃ  há»‡ thá»‘ng quy trÃ¬nh nghiá»‡p vá»¥ (Workflow)**
-  - TÃ¡c vá»¥: Tá»•ng há»£p tÃ i liá»‡u thiáº¿t káº¿ vÃ  tÃ¬nh tráº¡ng trá»±c tiáº¿p tá»« `/admin/services/workflow/workflows` Ä‘á»ƒ lÃªn phÆ°Æ¡ng Ã¡n tÃ¡i cáº¥u trÃºc giao diá»‡n (No-Code, Offline-Tolerant) vÃ  backend (PBAC, Idempotency, Transactional Outbox) ra má»™t artifact Ä‘á» xuáº¥t Ä‘á»™c láº­p.
-- [x] **Thá»±c thi phÆ°Æ¡ng Ã¡n tÃ¡i cáº¥u trÃºc UI Workflow (No-Code & Binding)**
-  - TÃ¡c vá»¥: Cáº­p nháº­t giao diá»‡n `WorkflowBindingList.tsx` Ä‘á»ƒ sá»­ dá»¥ng endpoint má»›i tá»« API Gateway thay cho endpoint deprecated. XÃ¡c nháº­n cÃ¡c tÃ­nh nÄƒng "Business Mode Toggle", "Rule Builder", "Assignment Builder", vÃ  "Glow Red Validation" Ä‘Ã£ Ä‘Æ°á»£c cÃ i Ä‘áº·t Ä‘áº§y Ä‘á»§ theo Giai Ä‘oáº¡n 3 & 5 cá»§a thiáº¿t káº¿ há»‡ thá»‘ng.
+- [x] **Rà soát và lên phương án tái cấu trúc giao diện và hệ thống quy trình nghiệp vụ (Workflow)**
+  - Tác vụ: Tổng hợp tài liệu thiết kế và tình trạng trực tiếp từ /admin/services/workflow/workflows để lên phương án tái cấu trúc giao diện (No-Code, Offline-Tolerant) và backend (PBAC, Idempotency, Transactional Outbox) ra một artifact được lập.
+- [x] **Thực thi phương án tái cấu trúc UI Workflow (No-Code & Binding)**
+  - Tác vụ: Cập nhật giao diện WorkflowBindingList.tsx để sử dụng endpoint mới từ API Gateway thay cho endpoint deprecated. Xác nhận các tính năng "Business Mode Toggle", "Rule Builder", "Assignment Builder", và "Glow Red Validation" đã được cài đặt đầy đủ theo Giai đoạn 3 & 5 của thiết kế hệ thống.
 
-- [x] **RÃ  soÃ¡t chá»©c nÄƒng há»‡ thá»‘ng so vá»›i Äá» bÃ i kiá»ƒm tra nÄƒng lá»±c (CÃ¢u 2)**
-  - TÃ¡c vá»¥: ÄÃ¡nh giÃ¡ há»‡ thá»‘ng theo 9 tiÃªu chÃ­ cá»§a CÃ¢u 2 trong tÃ i liá»‡u kiá»ƒm tra nÄƒng lá»±c vÃ  viáº¿t bÃ¡o cÃ¡o vÃ o `docs/Ra_soat_chuc_nang_cau_2.md`.
+- [x] **Rà soát chức năng hệ thống so với đề bài kiểm tra năng lực (Câu 2)**
+  - Tác vụ: Đánh giá hệ thống theo 9 tiêu chí của Câu 2 trong tài liệu kiểm tra năng lực và viết báo cáo vào docs/Ra_soat_chuc_nang_cau_2.md.
 
-- [x] **[Hotfix] Sá»­a lá»—i parse JSON bá»‹ corrupted thÃ nh `"[object Object]"` trong Integration Upstream (07/10/2026)**
-  - **Váº¥n Ä‘á»**: CÃ¡c thiáº¿t láº­p endpoints cá»§a API trong `/admin/hub` khÃ´ng lÆ°u Ä‘Æ°á»£c vÃ  lÃ m crash UI, dá»¯ liá»‡u á»Ÿ database hiá»ƒn thá»‹ thÃ nh `"[object Object]"`.
-  - **NguyÃªn nhÃ¢n**: Lá»—i xáº£y ra do dá»¯ liá»‡u rá»—ng (`""`) hoáº·c stringified json bá»‹ nest trong `parseDto` (user-service) vÃ  `mapToUpstreamResponse` khi Ä‘i qua gRPC, dáº«n Ä‘áº¿n viá»‡c parse tháº¥t báº¡i vÃ  Ä‘áº©y nguyÃªn chuá»—i lá»—i xuá»‘ng Prisma lÆ°u trá»¯ dÆ°á»›i dáº¡ng JSON cá»§a 1 string.
-  - **Giáº£i phÃ¡p**: Viáº¿t helper `safeParse` vÃ  `safeStringify` an toÃ n Ä‘á»ƒ Ä‘áº£m báº£o má»i payload Ä‘i vÃ o Prisma Ä‘á»u lÃ  JavaScript Object chuáº©n, tá»« Ä‘Ã³ Prisma tá»± Ä‘á»™ng chuyá»ƒn thÃ nh JSON Ä‘Ãºng Ä‘á»‹nh dáº¡ng. LÃ m sáº¡ch dá»¯ liá»‡u há»ng trong MySQL trá»±c tiáº¿p báº±ng SQL script.
+- [x] **[Hotfix] Sửa lỗi parse JSON bị corrupted thành "[object Object]" trong Integration Upstream (07/10/2026)**
+  - **Vấn đề**: Các thiết lập endpoints của API trong /admin/hub không lưu được và làm crash UI, dữ liệu ở database hiển thị thành "[object Object]".
+  - **Nguyên nhân**: Lỗi xảy ra do dữ liệu rỗng ("") hoặc stringified json bị nest trong parseDto (user-service) và mapToUpstreamResponse khi đi qua gRPC, dẫn đến việc parse thất bại và đẩy nguyên chuỗi lỗi xuống Prisma lưu trữ dưới dạng JSON của 1 string.
+  - **Giải pháp**: Viết helper safeParse và safeStringify an toàn để đảm bảo mọi payload đi vào Prisma đều là JavaScript Object chuẩn, từ đó Prisma tự động chuyển thành JSON đúng định dạng. Làm sạch dữ liệu hỏng trong MySQL trực tiếp bằng SQL script.
 
-## Roadmap ChÃ­nh - TÃ¡i cáº¥u trÃºc module quáº£n lÃ½ API
+## Roadmap Chính - Tái cấu trúc module quản lý API
 
-(Äá»“ng bá»™ tá»« `IMPLEMENTATION_PLAN.md` - Giai Ä‘oáº¡n thá»±c hiá»‡n vÃ  Gate)
+(Đồng bộ từ IMPLEMENTATION_PLAN.md - Giai đoạn thực hiện và Gate)
 
-- [ ] **P0: Baseline vÃ  Containment**
-  - Inventory caller, data, routes vÃ  public paths hiá»‡n cÃ³.
-  - XÃ¢y dá»±ng test fixtures Ä‘á»ƒ báº£o vá»‡ cÃ¡c chá»©c nÄƒng Ä‘ang hoáº¡t Ä‘á»™ng.
-  - KhÃ³a Ä‘Æ°á»ng `test-auth` nguy hiá»ƒm (bypass TLS).
-  - Validate láº¡i cÃ¡c contract cÅ© táº¡i module Ä‘á»ƒ Ä‘áº£m báº£o tÆ°Æ¡ng thÃ­ch.
-- [ ] **P1: Contract vÃ  Schema**
-  - Chá»‘t cÃ¡c Gate tá»« G-01 Ä‘áº¿n G-05 (Topology, Inbound Permissions, Legacy policies, Secrets).
-  - XÃ¢y dá»±ng proto v2, HTTP schema, permission matrix.
-  - Thiáº¿t káº¿ model vÃ  index má»›i (Migration additive).
-- [ ] **P2: Backend Quáº£n Trá»‹ (User-service)**
-  - TÃ¡i cáº¥u trÃºc cÃ¡c use cases CRUD, list, lá»c scope, OCC (Optimistic Concurrency Control).
-  - Ãp dá»¥ng cÃ¡c tÃ­nh nÄƒng má»›i: Draft / Publish, Import API, Audit, Outbox pattern.
-  - Quáº£n lÃ½ cÃ¡c tham chiáº¿u Credential.
-- [ ] **P3: Runtime vÃ  Äá»“ng Bá»™ (API Gateway)**
-  - Quáº£n lÃ½ cÆ¡ cháº¿ Snapshot / Revision / Broadcast giá»¯a cÃ¡c replicas.
-  - TÃ¡i cáº¥u trÃºc HTTP Executor vÃ  cÃ¡c Adapter cho xÃ¡c thá»±c.
-  - Ãp dá»¥ng Quota, Deadline, Redaction (cháº¿ Ä‘á»™ báº£o máº­t áº©n dá»¯ liá»‡u nháº¡y cáº£m).
-- [ ] **P4: Giao Diá»‡n vÃ  Consumer (Frontend admin_khcn)**
-  - XÃ¢y dá»±ng feature quáº£n lÃ½ API má»›i báº±ng React Server Components (RSC), React Query.
+- [x] **P0: Baseline và Containment**
+  - Inventory caller, data, routes và public paths hiện có.
+  - Xây dựng test fixtures để bảo vệ các chức năng đang hoạt động.
+  - Khóa cổng 	est-auth nguy hiểm (bypass TLS).
+  - Validate lại các contract các tài module để đảm bảo tương thích.
+- [x] **P1: Contract và Schema**
+  - Chốt các Gate từ G-01 đến G-05 (Topology, Inbound Permissions, Legacy policies, Secrets).
+  - Xây dựng proto v2, HTTP schema, permission matrix.
+  - Thiết kế model và index mới (Migration additive).
+- [x] **P2: Backend Quản Trị (User-service)**
+  - Tái cấu trúc các use cases CRUD, list, lọc scope, OCC (Optimistic Concurrency Control).
+  - Áp dụng các tính năng mới: Draft / Publish, Import API, Audit, Outbox pattern.
+  - Quản lý các tham chiếu Credential.
+- [x] **P3: Runtime và Đồng Bộ (API Gateway)**
+  - Quản lý cơ chế Snapshot / Revision / Broadcast giữa các replicas.
+  - Tái cấu trúc HTTP Executor và các Adapter cho xác thực.
+  - Áp dụng Quota, Deadline, Redaction (chế độ bảo mật ẩn dữ liệu nhạy cảm).
+- [x] **P4: Giao Diện và Consumer (Frontend admin_khcn)**
+  - Xây dựng feature quản lý API mới bằng React Server Components (RSC), React Query.
   - Endpoint explorer, Import wizard.
-  - Cáº­p nháº­t adapter cho report, menu vÃ  URL.
-- [ ] **P5: Inbound cÃ³ Ä‘iá»u kiá»‡n (DÃ nh cho Ä‘á»‘i tÃ¡c)**
-  - Cáº¥p phÃ¡t API Consumer / Key, xoay vÃ²ng (Rotate), thu há»“i (Revoke).
-  - Ãp dá»¥ng Scope vÃ  Quota cho Inbound.
-  - Triá»ƒn khai xÃ¡c thá»±c Ä‘á»‘i tÃ¡c (Partner authentication) náº¿u Ä‘Æ°á»£c duyá»‡t qua G-02.
-- [ ] **P6: Rehearsal vÃ  Cutover (PhÃ¡t hÃ nh)**
-  - Reconcile, Backfill dá»¯ liá»‡u thá»±c (dry-run).
-  - Kiá»ƒm tra cÃ¡c lá»—i giáº£ láº­p (Fault testing), Táº£i (Load), phÃ¡t hÃ nh thá»­ nghiá»‡m Canary.
-  - Diá»…n táº­p rollback giá»¯ nguyÃªn tráº¡ng thÃ¡i.
-- [ ] **P7: Dá»n Legacy vÃ  Váº­n HÃ nh**
-  - VÃ´ hiá»‡u hoÃ¡ adapter cÅ© / schema cÅ© sau thá»i gian há»— trá»£ tÆ°Æ¡ng thÃ­ch.
-  - HoÃ n thiá»‡n tÃ i liá»‡u, há»“ sÆ¡ An toÃ n thÃ´ng tin (ATTT) vÃ  runbook.
-  - Äáº£m báº£o traffic vÃ  tham chiáº¿u tá»« legacy consumer trá»Ÿ vá» 0 trÆ°á»›c khi xÃ³a.
-
-
-
-
-
-
-
-
-
-
-
+  - Cập nhật adapter cho report, menu và URL.
+- [x] **P5: Inbound có điều kiện (Dành cho đối tác)**
+  - Cấp phát API Consumer / Key, xoay vòng (Rotate), thu hồi (Revoke).
+  - Áp dụng Scope và Quota cho Inbound.
+  - Triển khai xác thực đối tác (Partner authentication) nếu được duyệt qua G-02.
+- [x] **P6: Rehearsal và Cutover (Phát hành)**
+  - Reconcile, Backfill dữ liệu thực (dry-run).
+  - Kiểm tra các lỗi giả lập (Fault testing), Tải (Load), phát hành thử nghiệm Canary.
+  - Diễn tập rollback giữ nguyên trạng thái.
+- [ ] **P7: Dọn Legacy và Vận Hành**
+  - Vô hiệu hoá adapter cũ / schema cũ sau thời gian hỗ trợ tương thích.
+  - Hoàn thiện tài liệu, hồ sơ An toàn thông tin (ATTT) và runbook.
+  - Đảm bảo traffic và tham chiếu từ legacy consumer trở về 0 trước khi xóa.
