@@ -267,6 +267,54 @@ const processDefinitions = [
   }
 ];
 
+const processTypes = [
+  {
+    code: 'LEAVE_REQUEST',
+    name: 'Xin nghỉ phép',
+    description: 'Nghiệp vụ xin nghỉ phép cá nhân',
+    ownerService: 'hrm-service',
+    validTriggers: ['ON_CREATE', 'ON_SUBMIT'],
+    validActions: ['APPROVE', 'REJECT', 'CANCEL'],
+    isActive: true,
+  },
+  {
+    code: 'DOCUMENT_APPROVAL',
+    name: 'Phê duyệt văn bản',
+    description: 'Nghiệp vụ phê duyệt văn bản đi',
+    ownerService: 'doc-service',
+    validTriggers: ['ON_DRAFT', 'ON_SUBMIT_REVIEW'],
+    validActions: ['SIGN', 'REJECT', 'RETURN'],
+    isActive: true,
+  },
+  {
+    code: 'BUSINESS_LICENSE',
+    name: 'Cấp phép kinh doanh',
+    description: 'Cấp giấy phép kinh doanh cho hộ cá thể',
+    ownerService: 'license-service',
+    validTriggers: ['ON_RECEIVE_APPLICATION', 'ON_PAYMENT_COMPLETED'],
+    validActions: ['VERIFY', 'APPROVE', 'REJECT'],
+    isActive: true,
+  },
+  {
+    code: 'TASK_PROCESSING_ID',
+    name: 'Quản lý công việc',
+    description: 'Giao và xử lý công việc nội bộ',
+    ownerService: 'task-service',
+    validTriggers: ['ON_ASSIGN', 'ON_UPDATE'],
+    validActions: ['ACCEPT', 'COMPLETE', 'REWORK'],
+    isActive: true,
+  },
+  {
+    code: 'UNEXPECTED_TASK_PROCESSING',
+    name: 'Xử lý việc phát sinh',
+    description: 'Nhân viên tự tạo và đề xuất công việc',
+    ownerService: 'task-service',
+    validTriggers: ['ON_PROPOSE'],
+    validActions: ['APPROVE_PROPOSAL', 'REJECT_PROPOSAL'],
+    isActive: true,
+  }
+];
+
 // ============================================================================
 // MAIN SEED FUNCTION
 // ============================================================================
@@ -302,6 +350,24 @@ async function main() {
         create: conn,
       });
       console.log(`  ✅ Upserted: ${conn.code} (${conn.protocol})`);
+    }
+
+    // 1.5. Seed ProcessTypes
+    console.log('\n📋 Seeding ProcessTypes...');
+    for (const type of processTypes) {
+      await (prisma as any).processType.upsert({
+        where: { code: type.code },
+        update: {
+          name: type.name,
+          description: type.description,
+          ownerService: type.ownerService,
+          validTriggers: type.validTriggers,
+          validActions: type.validActions,
+          isActive: type.isActive,
+        },
+        create: type,
+      });
+      console.log(`  ✅ Upserted ProcessType: ${type.code}`);
     }
 
     // 2. Seed ProcessDefinitions & Versions
