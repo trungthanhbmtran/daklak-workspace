@@ -20,7 +20,7 @@ const protoPath = [
   join(userDir, 'ai_assistant.proto'),
   join(userDir, 'ai.proto'),
   
-  join(protoRoot,  'api-management.proto'),
+  join(protoRoot, 'integration', 'api-management.proto'),
 ];
 
 async function bootstrap() {
