@@ -38,8 +38,6 @@ async function bootstrap() {
           'users',
           'auth',
           'user_config',
-          'ai_assistant',
-          'ai',
           'integration',
           'api_management.v2',
         ],
