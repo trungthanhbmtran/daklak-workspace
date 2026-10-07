@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const upstreams = await prisma.integrationUpstream.findMany(); console.log(upstreams.map(u => u.metadata)); } main().finally(() => prisma.$disconnect());

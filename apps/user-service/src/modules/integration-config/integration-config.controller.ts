@@ -33,16 +33,21 @@ export class IntegrationConfigController {
   }
 
   private mapToUpstreamResponse(r: any) {
+    const safeStringify = (val: any) => {
+      if (!val) return '{}';
+      return typeof val === 'string' ? val : JSON.stringify(val);
+    };
+
     return {
       ...r,
-      auth: r.auth ? JSON.stringify(r.auth) : '{}',
+      auth: safeStringify(r.auth),
       allowedPaths: Array.isArray(r.allowedPaths) ? r.allowedPaths : [],
       allowedMethods: Array.isArray(r.allowedMethods) ? r.allowedMethods : [],
-      retry: r.retry ? JSON.stringify(r.retry) : '{}',
-      rateLimit: r.rateLimit ? JSON.stringify(r.rateLimit) : '{}',
+      retry: safeStringify(r.retry),
+      rateLimit: safeStringify(r.rateLimit),
       roles: Array.isArray(r.roles) ? r.roles : [],
       scopes: Array.isArray(r.scopes) ? r.scopes : [],
-      metadata: r.metadata ? (typeof r.metadata === 'string' ? r.metadata : JSON.stringify(r.metadata)) : '{}',
+      metadata: safeStringify(r.metadata),
       createdAt: r.createdAt?.toISOString() || '',
       updatedAt: r.updatedAt?.toISOString() || '',
     };
@@ -50,18 +55,24 @@ export class IntegrationConfigController {
 
   private parseDto(data: any) {
     const dto = { ...data };
-    if (typeof dto.auth === 'string') {
-      try { dto.auth = JSON.parse(dto.auth); } catch(e) {}
-    }
-    if (typeof dto.retry === 'string') {
-      try { dto.retry = JSON.parse(dto.retry); } catch(e) {}
-    }
-    if (typeof dto.rateLimit === 'string') {
-      try { dto.rateLimit = JSON.parse(dto.rateLimit); } catch(e) {}
-    }
-    if (typeof dto.metadata === 'string') {
-      try { dto.metadata = JSON.parse(dto.metadata); } catch(e) {}
-    }
+    
+    const safeParse = (val: any) => {
+      if (!val) return {};
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          return {};
+        }
+      }
+      return val;
+    };
+
+    dto.auth = safeParse(dto.auth);
+    dto.retry = safeParse(dto.retry);
+    dto.rateLimit = safeParse(dto.rateLimit);
+    dto.metadata = safeParse(dto.metadata);
+    
     return dto;
   }
 
