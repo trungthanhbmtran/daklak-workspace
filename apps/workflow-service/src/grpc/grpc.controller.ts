@@ -130,7 +130,7 @@ export class GrpcWorkflowController {
   // =========================================================================
   @GrpcMethod('WorkflowService', 'CreateProcessBinding')
   async createProcessBinding(@Payload() data: any) {
-    return this.bindingService.create({
+    const result = await this.bindingService.create({
       processTypeCode: data.processTypeCode,
       definitionId: data.definitionId,
       pinnedVersionId: data.pinnedVersionId || undefined,
@@ -143,6 +143,7 @@ export class GrpcWorkflowController {
       createdBy: data.createdBy,
       reason: data.reason || undefined,
     });
+    return this.mapProcessBindingToResponse(result);
   }
 
   @GrpcMethod('WorkflowService', 'UpdateProcessBinding')
@@ -151,7 +152,7 @@ export class GrpcWorkflowController {
     if (!data?.updatedBy) {
       throw new RpcException({ code: status.INVALID_ARGUMENT, message: 'updatedBy is required' });
     }
-    return this.bindingService.update(data.id, {
+    const result = await this.bindingService.update(data.id, {
       pinnedVersionId: data.pinnedVersionId || undefined,
       status: data.status || undefined,
       priority: data.priority ? Number(data.priority) : undefined,
@@ -159,30 +160,33 @@ export class GrpcWorkflowController {
       reason: data.reason || undefined,
       updatedBy: data.updatedBy,
     });
+    return this.mapProcessBindingToResponse(result);
   }
 
   @GrpcMethod('WorkflowService', 'GetProcessBinding')
   async getProcessBinding(@Payload() data: any) {
-    return this.bindingService.findById(data.id, data.organizationId);
+    const result = await this.bindingService.findById(data.id, data.organizationId);
+    return this.mapProcessBindingToResponse(result);
   }
 
   @GrpcMethod('WorkflowService', 'ListProcessBindings')
   async listProcessBindings(@Payload() data: any) {
     const { items, total } = await this.bindingService.list(data);
     return {
-      data: items,
+      data: items.map(item => this.mapProcessBindingToResponse(item)),
       meta: { total, skip: data.skip || 0, take: data.take || 20 },
     };
   }
 
   @GrpcMethod('WorkflowService', 'DeactivateProcessBinding')
   async deactivateProcessBinding(@Payload() data: any) {
-    return this.bindingService.deactivate(
+    const result = await this.bindingService.deactivate(
       data.id,
       data.actorId,
       data.reason,
       data.organizationId,
     );
+    return this.mapProcessBindingToResponse(result);
   }
 
   @GrpcMethod('WorkflowService', 'ResolveBinding')
@@ -281,6 +285,24 @@ export class GrpcWorkflowController {
   }
 
   // =========================================================================
+  private mapProcessBindingToResponse(binding: any) {
+    if (!binding) return {};
+    return {
+      id: binding.id,
+      processTypeCode: binding.processType?.code || binding.processTypeId || '',
+      definitionId: binding.definitionId,
+      pinnedVersionId: binding.pinnedVersionId || '',
+      organizationId: binding.organizationId || '',
+      trigger: binding.trigger || '',
+      priority: binding.priority || 100,
+      status: binding.status || '',
+      effectiveFrom: binding.effectiveFrom?.toISOString() || '',
+      effectiveTo: binding.effectiveTo?.toISOString() || '',
+      createdBy: binding.createdBy || '',
+      createdAt: binding.createdAt?.toISOString() || '',
+    };
+  }
+
   private parseGraphPayload(data: any): any {
     if (data.bpmnLogic) {
       const bpmnLogic = typeof data.bpmnLogic === 'string' ? JSON.parse(data.bpmnLogic) : data.bpmnLogic;
