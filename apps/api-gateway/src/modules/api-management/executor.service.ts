@@ -80,7 +80,7 @@ export class ExecutorService {
       })
       .catch((err) => {
         this.singleFlight.delete(opaqueRef);
-        // Dependency failure khÃ´ng má»Ÿ quyá»n (Fail-closed)
+        // Dependency failure không mở quyền (Fail-closed)
         throw new HttpException(
           'Credential resolution failed (dependency down)',
           HttpStatus.BAD_GATEWAY,
