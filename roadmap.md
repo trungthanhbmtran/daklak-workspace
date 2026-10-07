@@ -4,6 +4,11 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **Rà soát và lên phương án tái cấu trúc giao diện và hệ thống quy trình nghiệp vụ (Workflow)**
+  - Tác vụ: Tổng hợp tài liệu thiết kế và tình trạng trực tiếp từ `/admin/services/workflow/workflows` để lên phương án tái cấu trúc giao diện (No-Code, Offline-Tolerant) và backend (PBAC, Idempotency, Transactional Outbox) ra một artifact đề xuất độc lập.
+- [x] **Thực thi phương án tái cấu trúc UI Workflow (No-Code & Binding)**
+  - Tác vụ: Cập nhật giao diện `WorkflowBindingList.tsx` để sử dụng endpoint mới từ API Gateway thay cho endpoint deprecated. Xác nhận các tính năng "Business Mode Toggle", "Rule Builder", "Assignment Builder", và "Glow Red Validation" đã được cài đặt đầy đủ theo Giai đoạn 3 & 5 của thiết kế hệ thống.
+
 - [x] **Rà soát chức năng hệ thống so với Đề bài kiểm tra năng lực (Câu 2)**
   - Tác vụ: Đánh giá hệ thống theo 9 tiêu chí của Câu 2 trong tài liệu kiểm tra năng lực và viết báo cáo vào `docs/Ra_soat_chuc_nang_cau_2.md`.
 
