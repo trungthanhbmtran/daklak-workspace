@@ -291,6 +291,7 @@ export class GrpcWorkflowController {
       status: version?.status || 'DRAFT',
       bpmnLogic: version?.graph ? JSON.stringify({ nodes: version.graph.nodes || [], edges: version.graph.edges || [] }) : '{}',
       uiMetadata: version?.graph?._uiMetadata ? JSON.stringify(version.graph._uiMetadata) : '{}',
+      definitionJson: version?.graph ? JSON.stringify(version.graph) : '{}',
       trigger: def.code,
       createdAt: def.createdAt?.toISOString(),
       updatedAt: def.updatedAt?.toISOString(),
