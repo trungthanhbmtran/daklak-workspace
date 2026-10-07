@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -18,7 +18,7 @@ import {
   UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
-import { ImportParserService } from '../integration/import.service';
+import { ImportParserService } from './import.service';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RequirePermissions } from '../../core/decorators/permissions.decorator';
@@ -34,7 +34,7 @@ export class ApiManagementController implements OnModuleInit {
   constructor(
     private readonly importParserService: ImportParserService,
 
-    @Inject(MICROSERVICES.INTEGRATION.SYMBOL)
+    @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
   ) {}
 

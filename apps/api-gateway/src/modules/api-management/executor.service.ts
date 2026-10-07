@@ -13,8 +13,8 @@ import { GatewayRegistryService } from './registry.service';
 import {
   guardedUpstreamLookup,
   upstreamUrl,
-} from '../integration/upstream-network';
-import { canAccessUpstream } from '../integration/upstream-access';
+} from '../../core/utils/upstream-network';
+import { canAccessUpstream } from '../../core/utils/upstream-access';
 import * as http from 'http';
 import * as https from 'https';
 import axios, { AxiosRequestConfig } from 'axios';
@@ -47,7 +47,7 @@ export class ExecutorService {
 
   constructor(
     private readonly registry: GatewayRegistryService,
-    @Inject(MICROSERVICES.INTEGRATION.SYMBOL)
+    @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
   ) {}
 

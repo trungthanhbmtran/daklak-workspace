@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
@@ -15,7 +15,7 @@ export class GatewayRegistryService implements OnModuleInit {
   private currentRevisionChecksum = '';
 
   constructor(
-    @Inject(MICROSERVICES.INTEGRATION.SYMBOL)
+    @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
   ) {}
 
@@ -97,5 +97,9 @@ export class GatewayRegistryService implements OnModuleInit {
 
   getActiveConnection(id: string) {
     return this.activeConnections.get(id);
+  }
+
+  getAllConnections() {
+    return Array.from(this.activeConnections.values());
   }
 }

@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@/config/config.module';
 import { PrismaModule } from '@/database/prisma.module';
 import { UsersModule } from '@/modules/users/users.module';
@@ -10,7 +10,7 @@ import { ConfigsModule } from './configs/configs.module';
 import { UserConfigsModule } from './modules/user-configs/user-configs.module';
 import { AiAssistantModule } from './modules/ai-assistant/ai-assistant.module';
 import { AiModule } from './modules/ai/ai.module';
-import { IntegrationConfigModule } from './modules/integration-config/integration-config.module';
+
 import { ApiManagementModule } from './modules/api-management/api-management.module';
 
 import { InternalAuthModule } from './core/auth/gateway-context.service';
@@ -29,7 +29,7 @@ import { InternalAuthModule } from './core/auth/gateway-context.service';
     UserConfigsModule,
     AiAssistantModule,
     AiModule,
-    IntegrationConfigModule,
+    
     ApiManagementModule,
   ],
 })

@@ -75,12 +75,12 @@ export const MICROSERVICES = {
     URL: getUserUrl(),
     SERVICE: 'AiAssistantService',
   },
-  INTEGRATION: {
-    PACKAGE: 'integration',
-    SYMBOL: 'INTEGRATION_PACKAGE',
-    PROTO: 'users/integration.proto',
+  API_MANAGEMENT: {
+    PACKAGE: 'api_management.v2',
+    SYMBOL: 'API_MANAGEMENT_PACKAGE',
+    PROTO: 'integration/api-management.proto',
     URL: getUserUrl(),
-    SERVICE: 'IntegrationConfigService',
+    SERVICE: 'ApiManagementService',
   },
   AI: {
     PACKAGE: 'users',

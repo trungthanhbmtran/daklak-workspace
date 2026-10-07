@@ -1,4 +1,4 @@
-﻿import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthCryptoModule } from './core/auth/auth-crypto.module';
@@ -7,16 +7,17 @@ import { UsersModule } from './modules/users/users.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { SecretsModule } from './core/secrets/secrets.module';
 import { AppController } from './modules/app/app.controller';
 import { MediaModule } from './modules/media/media.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
 import { RedisModule } from './core/redis/redis.module';
 import { GlobalClientModule } from './core/global-client.module';
-import { IntegrationModule } from './modules/integration/integration.module';
+
 import { ApiManagementGatewayModule } from './modules/api-management/api-management.module';
 import { GatewayModule } from './modules/gateway/gateway.module';
-import { DynamicProxyMiddleware } from './core/middlewares/dynamic-proxy.middleware';
+
 import { SecurityMiddleware } from './core/middlewares/security.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
@@ -43,8 +44,9 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
     WorkflowModule,
     TranslateModule,
     RedisModule,
-    IntegrationModule,
+    
     ApiManagementGatewayModule,
+    SecretsModule,
     GatewayModule,
     PrismaModule,
     ChatModule,
@@ -58,10 +60,10 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // SecurityMiddleware PHáº¢I Ä‘á»©ng TRÆ¯á»šC táº¥t cáº£ â€” cháº·n IP bá»‹ block táº¡i cá»•ng vÃ o
+    // SecurityMiddleware PHẢI đứng TRƯỚC tất cả — chặn IP bị block tại cổng vào
     consumer.apply(SecurityMiddleware).forRoutes('*');
 
-    consumer.apply(DynamicProxyMiddleware).forRoutes('*');
+    
 
     consumer
       .apply((req: any, res: any, next: () => void) => {

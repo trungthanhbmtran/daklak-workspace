@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   CanActivate,
   ExecutionContext,
@@ -22,7 +22,7 @@ export class PartnerAuthGuard implements CanActivate, OnModuleInit {
   >();
 
   constructor(
-    @Inject(MICROSERVICES.INTEGRATION.SYMBOL)
+    @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
   ) {}
 

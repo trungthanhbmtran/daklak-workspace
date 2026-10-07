@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { clientIp } from '../client-ip';
-import { TokenValidatorService } from '../../modules/integration/token-validator.service';
+import { TokenValidatorService } from '../auth/token-validator.service';
 import {
   ThreatIntelService,
   THREAT_SCORES,

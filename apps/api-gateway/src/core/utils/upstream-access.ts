@@ -1,4 +1,20 @@
-import type { UpstreamConfig } from './registry.service';
+export interface UpstreamConfig {
+  name: string;
+  type: string;
+  baseUrl: string;
+  allowedPaths: string[];
+  allowedMethods: string[];
+  auth: any;
+  timeoutMs: number;
+  retry: any;
+  cacheTtlSec: number;
+  rateLimit: any;
+  rateLimitWindow?: number;
+  roles: string[];
+  scopes: string[];
+  version: number;
+  enabled?: boolean;
+}
 
 export interface UpstreamCaller {
   id?: number;

@@ -1,5 +1,6 @@
 import { Global, Module, Controller, Get } from '@nestjs/common';
 import { TokenIssuerService } from './token-issuer.service';
+import { TokenValidatorService } from './token-validator.service';
 
 @Controller('admin/auth')
 class JwksController {
@@ -13,7 +14,7 @@ class JwksController {
 @Global()
 @Module({
   controllers: [JwksController],
-  providers: [TokenIssuerService],
-  exports: [TokenIssuerService],
+  providers: [TokenIssuerService, TokenValidatorService],
+  exports: [TokenIssuerService, TokenValidatorService],
 })
 export class AuthCryptoModule {}

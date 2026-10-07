@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
-import { IntegrationConfigModule } from '../integration-config/integration-config.module';
+
 import { AuthSessionStore } from './auth-session.store';
 import { AuthDeviceStore } from './auth-device.store';
 import { AuthStateSyncWorker } from './auth-state-sync.worker';
@@ -15,7 +15,7 @@ const protoRoot =
 
 @Module({
   imports: [
-    IntegrationConfigModule,
+    
     // Profile cache only. Shared authentication state uses AuthSessionStore/ioredis.
     CacheModule.register({ isGlobal: true, ttl: 600_000 }),
     ClientsModule.register([

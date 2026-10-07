@@ -14,7 +14,7 @@ import {
 import * as jwt from 'jsonwebtoken';
 import { Pool, type Dispatcher } from 'undici';
 import { RedisService } from '../../../core/redis/redis.service';
-import { guardedUpstreamLookup } from '../../integration/upstream-network';
+import { guardedUpstreamLookup } from '../../../core/utils/upstream-network';
 import { loadSsoProviders, SsoProvider } from './sso.config';
 
 interface Transaction {

@@ -49,31 +49,10 @@ const PROTO_ROOT =
         });
       },
     },
-    {
-      provide: MICROSERVICES.INTEGRATION.SYMBOL,
-      useFactory: () => {
-        return ClientProxyFactory.create({
-          transport: Transport.GRPC,
-          options: {
-            package: MICROSERVICES.INTEGRATION.PACKAGE,
-            protoPath: join(PROTO_ROOT, MICROSERVICES.INTEGRATION.PROTO),
-            url: MICROSERVICES.INTEGRATION.URL,
-            loader: {
-              keepCase: false,
-              longs: String,
-              enums: String,
-              defaults: true,
-              includeDirs: [PROTO_ROOT],
-            },
-          },
-        });
-      },
-    },
   ],
   exports: [
     MICROSERVICES.USER.SYMBOL,
     MICROSERVICES.PBAC.SYMBOL,
-    MICROSERVICES.INTEGRATION.SYMBOL,
   ],
 })
 export class GlobalClientModule {}
