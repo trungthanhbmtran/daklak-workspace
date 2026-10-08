@@ -26,6 +26,9 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Metadata } from '@grpc/grpc-js';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
+import { randomUUID } from 'crypto';
 
 @Controller('admin/api-management/connections')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -34,6 +37,7 @@ export class ApiManagementController implements OnModuleInit {
 
   constructor(
     private readonly importParserService: ImportParserService,
+    private readonly issuer: TokenIssuerService,
 
     @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
@@ -47,6 +51,14 @@ export class ApiManagementController implements OnModuleInit {
     const metadata = new Metadata();
     if (req.user?.id) {
       metadata.add('user-id', req.user.id.toString());
+      metadata.set(
+        'authorization',
+        'Bearer ' +
+          this.issuer.signDelegation(req.user, {
+            requestId: randomUUID(),
+            ipAddress: clientIp(req),
+          }),
+      );
     }
     return metadata;
   }

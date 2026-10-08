@@ -110,3 +110,8 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - S?a l?i g�i Response th? c�ng t?i api-gateway (TransformInterceptor).
   - Kh?c ph?c l?i vi ph?m import axios tr?c ti?p ? apps/admin_khcn.
 
+- [x] **[Hotfix] Sửa lỗi Invalid delegation token trong module quản lý API (08/10/2026)**
+  - **Vấn đề**: Khi truy cập vào quản lý API, bị văng ra trang login do lỗi "16 UNAUTHENTICATED: Invalid delegation token".
+  - **Nguyên nhân**: "ApiManagementController" trong "api-gateway" khi chuyển tiếp request qua gRPC sang "api-management-service" đã không truyền token uỷ quyền đúng chuẩn (GatewayContextToken) mà chỉ truyền "user-id".
+  - **Giải pháp**: Inject "TokenIssuerService" vào "ApiManagementController" và sử dụng hàm "signDelegation" để tạo delegation token chuẩn (chứa id, sid, exp ngắn, audience nội bộ), sau đó truyền qua header "authorization" (gRPC metadata) giống như các module khác.
+
