@@ -30,11 +30,213 @@ service ApiManagementService {
   rpc GetEndpoint (GetResourceRequest) returns (EndpointResponse) {}
   rpc UpdateEndpoint (UpdateEndpointRequest) returns (EndpointResponse) {}
   rpc DeleteEndpoint (GetResourceRequest) returns (DeleteResponse) {}
+
   // Partner Management
   rpc CreatePartner (CreatePartnerRequest) returns (PartnerResponse) {}
   rpc ListPartners (ListPartnersRequest) returns (PartnerListResponse) {}
   rpc IssuePartnerKey (IssuePartnerKeyRequest) returns (IssuePartnerKeyResponse) {}
   rpc RevokePartnerKey (RevokePartnerKeyRequest) returns (DeleteResponse) {}
+}
+
+message SnapshotRequest {
+  string currentEtag = 1;
+}
+
+message SnapshotResponse {
+  int32 version = 1;
+  string etag = 2;
+  repeated ConnectionConfig connections = 3;
+}
+
+message ConnectionConfig {
+  string id = 1;
+  string code = 2;
+  string networkZone = 3;
+  string baseUrl = 4;
+  AuthBinding auth = 5;
+  int32 timeoutMs = 6;
+  bool enabled = 7;
+  repeated EndpointConfig endpoints = 8;
+  int32 version = 9;
+}
+
+message EndpointConfig {
+  string id = 1;
+  string method = 2;
+  string pathTemplate = 3;
+}
+
+message AuthBinding {
+  string kind = 1;
+  optional string secretRef = 2;
+}
+
+message GetResourceRequest {
+  string id = 1;
+}
+
+message CreateConnectionRequest {
+  string code = 1;
+  string displayName = 2;
+  string networkZone = 3;
+  string baseUrl = 4;
+  optional AuthBinding auth = 5;
+  optional int32 timeoutMs = 6;
+  string organizationId = 7;
+}
+
+message UpdateConnectionRequest {
+  string id = 1;
+  optional string displayName = 2;
+  optional string baseUrl = 3;
+  optional AuthBinding auth = 4;
+  optional int32 timeoutMs = 5;
+  optional bool enabled = 6;
+  int32 expectedVersion = 7;
+}
+
+message ConnectionResponse {
+  string id = 1;
+  string code = 2;
+  string displayName = 3;
+  string networkZone = 4;
+  string baseUrl = 5;
+  AuthBinding auth = 6;
+  int32 timeoutMs = 7;
+  string organizationId = 8;
+  bool enabled = 9;
+  int32 version = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+}
+
+message ListConnectionsRequest {
+  string organizationId = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+message ConnectionListResponse {
+  repeated ConnectionResponse data = 1;
+  int32 total = 2;
+}
+
+message CreateEndpointRequest {
+  string connectionId = 1;
+  string method = 2;
+  string pathTemplate = 3;
+  string schema = 4;
+}
+
+message UpdateEndpointRequest {
+  string id = 1;
+  optional string method = 2;
+  optional string pathTemplate = 3;
+  optional string schema = 4;
+}
+
+message EndpointResponse {
+  string id = 1;
+  string connectionId = 2;
+  string method = 3;
+  string pathTemplate = 4;
+  string schema = 5;
+}
+
+message ListEndpointsRequest {
+  string connectionId = 1;
+}
+
+message EndpointListResponse {
+  repeated EndpointResponse data = 1;
+}
+
+message DeleteResponse {
+  bool success = 1;
+}
+
+message DisableConnectionRequest {
+  string id = 1;
+  int32 expectedVersion = 2;
+}
+
+message PublishRequest {
+}
+
+message PublishResponse {
+  string id = 1;
+  int32 version = 2;
+  string checksum = 3;
+  string createdAt = 4;
+}
+
+message CreateImportSessionRequest {
+  string systemName = 1;
+  string baseUrl = 2;
+  repeated ParsedEndpoint endpoints = 3;
+  string targetConnectionId = 4; // optional: if updating an existing connection
+  string organizationId = 5;
+}
+
+message ParsedEndpoint {
+  string method = 1;
+  string path = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message ImportSessionResponse {
+  string sessionId = 1;
+  string inputHash = 2;
+  repeated ImportDiff diffs = 3;
+}
+
+message ImportDiff {
+  string method = 1;
+  string path = 2;
+  string status = 3; // "NEW", "CONFLICT_OVERWRITE", "CONFLICT_SKIP", "UNCHANGED"
+  string existingEndpointId = 4; // if conflict
+}
+
+message CommitImportSessionRequest {
+  string sessionId = 1;
+  repeated Resolution resolutions = 2;
+  string userId = 3;
+}
+
+message Resolution {
+  string method = 1;
+  string path = 2;
+  string action = 3; // "OVERWRITE", "SKIP"
+}
+
+message CommitImportSessionResponse {
+  string connectionId = 1;
+  int32 endpointsCreated = 2;
+  int32 endpointsUpdated = 3;
+}
+
+message ResolveCredentialRequest {
+  string opaqueRef = 1;
+}
+
+message ResolveCredentialResponse {
+  string rawSecret = 1;
+  string kind = 2;
+}
+
+message ValidatePartnerKeyRequest {
+  string hashedKey = 1;
+}
+
+message ValidatePartnerKeyResponse {
+  string partnerId = 1;
+  string partnerCode = 2;
+  string organizationId = 3;
+  // scopes could be JSON stringified for simplicity, or bytes, or repeated string
+  // Using string for JSON serialization to avoid complex proto mapping
+  string scopes = 4;
+}
 
 message CreatePartnerRequest {
   string code = 1;
@@ -87,3 +289,4 @@ message IssuePartnerKeyResponse {
 message RevokePartnerKeyRequest {
   string keyId = 1;
 }
+

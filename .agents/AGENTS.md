@@ -27,6 +27,7 @@ Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trìn
 - **Viết Code**: Tuân thủ tuyệt đối quy định kiến trúc: Domain first, Service data sovereignty (không query chéo DB).
 - **Backend & Frontend**: Backend xử lý toàn bộ logic và phân quyền (PBAC). Client-side (Frontend) chỉ dùng để nâng cao UX, không mang tính uỷ quyền (non-authoritative).
 - **UI/UX**: Giữ nguyên tính thẩm mỹ, cấu trúc CSS/Tailwind hiện có nếu không có yêu cầu thay đổi.
+- **Quản lý file `.proto` (gRPC)**: BẤT KỲ khi nào thao tác sửa đổi file `.proto`, Agent BẮT BUỘC phải sử dụng công cụ an toàn (ghi đè toàn bộ hoặc multi_replace, tuyệt đối KHÔNG cắt ghép chuỗi bằng script dễ gây mất ký tự). Ngay sau khi sửa, PHẢI kiểm tra kỹ cú pháp đóng mở block `{ }` và bắt buộc chạy thử/build lại microservice tương ứng để xác nhận bộ tải gRPC đọc được file (không bị lỗi `illegal token` hoặc `InvalidProtoDefinitionException`).
 
 ### Bước 4: Chạy kiểm chứng & Tự sửa lỗi (Test Execution & Self-Correction)
 - Sau khi viết code, BẮT BUỘC dùng lệnh (un_command để build, start app, hoặc chạy test) để verify logic vừa thực hiện.
