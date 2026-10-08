@@ -7,7 +7,7 @@ import { MessageModule } from "./modules/message/message.module";
 import { ParticipantModule } from "./modules/participant/participant.module";
 import { PresenceModule } from "./modules/presence/presence.module";
 
-import { GrpcAuthModule } from '../../../../shared/security/grpc-auth';
+import { GrpcAuthModule } from '../../../shared/security/grpc-auth';
 
 @Module({
   imports: [
@@ -24,5 +24,6 @@ import { GrpcAuthModule } from '../../../../shared/security/grpc-auth';
   providers: [],
 })
 export class AppModule {}
+
 
 

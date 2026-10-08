@@ -8,7 +8,6 @@ export class AppController {
   @ApiOperation({ summary: 'Health check' })
   health() {
     return {
-      success: true,
       data: {
         status: 'UP',
         timestamp: new Date().toISOString(),
@@ -21,7 +20,6 @@ export class AppController {
   @ApiOperation({ summary: 'Thông tin gateway' })
   root() {
     return {
-      success: true,
       data: {
         service: 'API Gateway',
         version: '1.0.0',

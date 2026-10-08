@@ -472,7 +472,7 @@ export class AuthService implements OnModuleInit {
         });
       }
     }
-    return { success: true };
+    return { };
   }
 
   /* ----------------------------------- me ---------------------------------- */

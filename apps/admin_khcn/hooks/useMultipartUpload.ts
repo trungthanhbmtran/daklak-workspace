@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
-// Giả sử Mạnh đang dùng một instance axios có gắn sẵn token cho API nội bộ
+// Giả sử dùng apiClient cho API nội bộ
 import apiClient from "@/lib/axiosInstance";
 
 // Hằng số S3: Cắt mỗi cục 5MB
@@ -58,20 +57,19 @@ export const useMultipartUpload = () => {
       let completedParts = 0;
 
       // BƯỚC 3: Cắt file và bắn phá song song lên MinIO
-      // Lưu ý: Dùng axios gốc (không dùng api instance) để tránh việc vô tình gửi kèm Token JWT của Sở lên MinIO gây lỗi CORS/Auth
+      // Dùng fetch (không dùng api instance) để tránh việc vô tình gửi kèm Token JWT lên MinIO gây lỗi CORS/Auth
       const uploadPromises = presignedUrls.map(async (url, index) => {
         const start = index * CHUNK_SIZE;
         const end = Math.min(start + CHUNK_SIZE, file.size);
-        const chunk = file.slice(start, end); // Hàm cắt băm file của Javascript
+        const chunk = file.slice(start, end);
 
-        const response = await axios.put(url, chunk, {
-          headers: {
-            // KHÔNG set Content-Type ở đây vì backend lúc tạo Part URL không ép kiểu
-          }
+        const response = await fetch(url, {
+          method: 'PUT',
+          body: chunk,
         });
 
         // MinIO trả về một cái tem (ETag) nằm trong Headers
-        const eTag = response.headers.etag;
+        const eTag = response.headers.get('etag');
 
         // Cập nhật thanh tiến độ
         completedParts++;

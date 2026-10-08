@@ -12,26 +12,26 @@ datasource db {
 }
 
 model ReportTemplate {
-  id          Int            @id @default(autoincrement())
-  title       String         @db.VarChar(255)
-  description String?        @db.Text
+  id          Int                @id @default(autoincrement())
+  title       String             @db.VarChar(255)
+  description String?            @db.Text
   layout      Json? // Lưu trữ lưới (Grid layout) của các Widget
   widgets     ReportWidget[]
   assignments ReportAssignment[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 }
 
 model ReportAssignment {
-  id           Int            @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   templateId   Int
-  assigneeType String         @db.VarChar(50) // "USER", "UNIT", "GROUP"
-  assigneeId   String         @db.VarChar(255) // user ID, unit ID, etc.
-  permissions  String         @default("VIEW") @db.VarChar(50) // "VIEW", "EDIT"
-  createdAt    DateTime       @default(now())
+  assigneeType String   @db.VarChar(50) // "USER", "UNIT", "GROUP"
+  assigneeId   String   @db.VarChar(255) // user ID, unit ID, etc.
+  permissions  String   @default("VIEW") @db.VarChar(50) // "VIEW", "EDIT"
+  createdAt    DateTime @default(now())
 
-  template     ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  
+  template ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
   @@unique([templateId, assigneeType, assigneeId])
 }
 

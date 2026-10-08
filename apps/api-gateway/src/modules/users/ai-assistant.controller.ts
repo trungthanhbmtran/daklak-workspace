@@ -133,7 +133,7 @@ export class AiAssistantGatewayController implements OnModuleInit {
   async deleteAssistant(@Param('id') id: string) {
     try {
       await firstValueFrom(this.aiAssistantService.DeleteAssistant({ id }));
-      return { success: true };
+      return { };
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }
@@ -163,7 +163,7 @@ export class AiAssistantGatewayController implements OnModuleInit {
           qdrantId: body.qdrant_id || '',
         }),
       );
-      return { success: true };
+      return { };
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }
@@ -175,7 +175,7 @@ export class AiAssistantGatewayController implements OnModuleInit {
       await firstValueFrom(
         this.aiAssistantService.RemoveKnowledgeSource({ id: sourceId }),
       );
-      return { success: true };
+      return { };
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }

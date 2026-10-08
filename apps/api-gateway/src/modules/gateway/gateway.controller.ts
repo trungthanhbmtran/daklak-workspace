@@ -47,7 +47,7 @@ export class GatewayConfigController {
   @RequirePermissions('INTEGRATION:MANAGE')
   async deleteService(@Param('id', ParseIntPipe) id: number) {
     await this.service.deleteService(id);
-    return { success: true };
+    return { };
   }
 
   // Routes
@@ -76,7 +76,7 @@ export class GatewayConfigController {
   @RequirePermissions('INTEGRATION:MANAGE')
   async deleteRoute(@Param('id', ParseIntPipe) id: number) {
     await this.service.deleteRoute(id);
-    return { success: true };
+    return { };
   }
 
   // ApiKeys
@@ -105,6 +105,6 @@ export class GatewayConfigController {
   @RequirePermissions('INTEGRATION:MANAGE')
   async deleteApiKey(@Param('id', ParseIntPipe) id: number) {
     await this.service.deleteApiKey(id);
-    return { success: true };
+    return { };
   }
 }

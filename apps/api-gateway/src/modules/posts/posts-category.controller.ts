@@ -67,7 +67,6 @@ export class PostsCategoryController {
     });
     console.log('Gateway: ListCategories response received');
     return {
-      success: true,
       data: result?.data,
       meta: result?.meta || {},
     };

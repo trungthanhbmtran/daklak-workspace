@@ -7,7 +7,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
 
-import { GrpcAuthModule } from '../../../../shared/security/grpc-auth';
+import { GrpcAuthModule } from '../../../shared/security/grpc-auth';
 
 @Module({
   imports: [
@@ -22,5 +22,6 @@ import { GrpcAuthModule } from '../../../../shared/security/grpc-auth';
   providers: [AppService],
 })
 export class AppModule {}
+
 
 

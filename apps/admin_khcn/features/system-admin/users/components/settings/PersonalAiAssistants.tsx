@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import axios from 'axios';
+import apiClient from '@/lib/axiosInstance';
+import type { ApiResponse } from '@/lib/api.types';
 import { toast } from 'sonner';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { Loader2 } from 'lucide-react';
@@ -113,10 +114,10 @@ export function PersonalAiAssistants() {
     setIsChatting(true);
     
     try {
-      const { data } = await axios.post(`/api/v1/admin/ai-assistants/${activeChatAssistant.id}/chat`, {
+      const res = await apiClient.post<any, ApiResponse<{ reply: string }>>(`/api/v1/admin/ai-assistants/${activeChatAssistant.id}/chat`, {
         message: userMsg
       });
-      setChatLog(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      setChatLog(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
     } catch (e) {
       setChatLog(prev => [...prev, { role: 'assistant', content: "Lỗi kết nối tới AI hoặc hết quota." }]);
     } finally {

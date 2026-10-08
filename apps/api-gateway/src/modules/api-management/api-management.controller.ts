@@ -63,7 +63,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = (await firstValueFrom(
       this.grpcService.ListConnections(payload, this.getGrpcMetadata(req)),
     )) as any;
-    return { success: true, data: res.data || [], total: res.total || 0 };
+    return { data: res.data || [], total: res.total || 0 };
   }
 
   @Get(':id')
@@ -72,7 +72,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.GetConnection({ id }, this.getGrpcMetadata(req)),
     );
-    return { success: true, data: res };
+    return { data: res };
   }
 
   @Post()
@@ -81,7 +81,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.CreateConnection(dto, this.getGrpcMetadata(req)),
     );
-    return { success: true, data: res };
+    return { data: res };
   }
 
   @Put(':id')
@@ -94,7 +94,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.UpdateConnection({ id, ...dto }, this.getGrpcMetadata(req)),
     );
-    return { success: true, data: res };
+    return { data: res };
   }
 
   @Delete(':id')
@@ -103,7 +103,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = (await firstValueFrom(
       this.grpcService.DeleteConnection({ id }, this.getGrpcMetadata(req)),
     )) as any;
-    return { success: res.success };
+    return { };
   }
 
   @Put(':id/disable')
@@ -119,7 +119,7 @@ export class ApiManagementController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { success: true, data: res };
+    return { data: res };
   }
 
   @Post('publish')
@@ -128,6 +128,6 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.PublishRevision({}, this.getGrpcMetadata(req)),
     );
-    return { success: true, data: res };
+    return { data: res };
   }
 }

@@ -1,4 +1,5 @@
-﻿import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+﻿import { firstValueFrom } from 'rxjs';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { Reflector } from '@nestjs/core';
@@ -52,7 +53,7 @@ export class GrpcAuthGuard implements CanActivate {
     // Giai đoạn 5: Khi miss cache, không đọc từ Payload nữa mà query gRPC sang user-service
     if (!permissionsFlatten) {
       try {
-        const { firstValueFrom } = await import('rxjs');
+        
         const userData = await firstValueFrom(this.gatewayContext.userClient.FindOne({ id: userId }));
         
         permissionsFlatten = Array.isArray(userData.permissionsFlatten) ? userData.permissionsFlatten : [];
@@ -86,6 +87,7 @@ export class GrpcAuthGuard implements CanActivate {
     return true;
   }
 }
+
 
 
 

@@ -28,7 +28,7 @@ export class ReportsController {
   @Post('table/sources')
   @RequirePermissions('INTEGRATION:READ', 'INTEGRATION:MANAGE')
   tableSources(@Req() req: any) {
-    return { success: true, data: this.sources.list(req.user) };
+    return { data: this.sources.list(req.user) };
   }
 
   @Post('table/preview')

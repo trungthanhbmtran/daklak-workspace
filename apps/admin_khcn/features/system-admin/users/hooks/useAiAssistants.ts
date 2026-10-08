@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import apiClient from '@/lib/axiosInstance';
+import type { ApiResponse } from '@/lib/api.types';
 import { toast } from 'sonner';
 
 export interface AiAssistant {
@@ -17,8 +18,8 @@ export const useGetAiAssistants = () => {
   return useQuery({
     queryKey: ['aiAssistants'],
     queryFn: async () => {
-      const { data } = await axios.get<AiAssistant[]>('/api/v1/admin/ai-assistants');
-      return data;
+      const res = await apiClient.get<any, ApiResponse<AiAssistant[]>>('/api/v1/admin/ai-assistants');
+      return res.data;
     },
   });
 };
@@ -27,8 +28,8 @@ export const useCreateAiAssistant = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { name: string; description?: string; system_prompt: string; is_public: boolean }) => {
-      const { data } = await axios.post('/api/v1/admin/ai-assistants', payload);
-      return data;
+      const res = await apiClient.post<any, ApiResponse<AiAssistant>>('/api/v1/admin/ai-assistants', payload);
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });
@@ -44,8 +45,8 @@ export const useUpdateAiAssistant = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { id: string; name: string; description?: string; system_prompt: string; is_public: boolean }) => {
-      const { data } = await axios.put(`/api/v1/admin/ai-assistants/${payload.id}`, payload);
-      return data;
+      const res = await apiClient.put<any, ApiResponse<AiAssistant>>(`/api/v1/admin/ai-assistants/${payload.id}`, payload);
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });
@@ -61,7 +62,7 @@ export const useDeleteAiAssistant = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await axios.delete(`/api/v1/admin/ai-assistants/${id}`);
+      await apiClient.delete(`/api/v1/admin/ai-assistants/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });
@@ -77,8 +78,8 @@ export const useAddKnowledgeSource = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { assistantId: string; type: string; title: string; content: string }) => {
-      const { data } = await axios.post(`/api/v1/admin/ai-assistants/${payload.assistantId}/knowledge-sources`, payload);
-      return data;
+      const res = await apiClient.post<any, ApiResponse<any>>(`/api/v1/admin/ai-assistants/${payload.assistantId}/knowledge-sources`, payload);
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });

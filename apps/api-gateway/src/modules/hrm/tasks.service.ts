@@ -449,7 +449,7 @@ export class TasksService implements OnModuleInit {
       );
     } catch (e) {
       console.error('Failed to call recommendAssignees from taskService:', e);
-      res = { success: true, data: { topEmployees: [], topDepartments: [] } };
+      res = { data: { topEmployees: [], topDepartments: [] } };
     }
 
     let topEmployees = Array.isArray(res?.data)
@@ -481,7 +481,7 @@ export class TasksService implements OnModuleInit {
       };
     });
 
-    return { success: true, data: { topEmployees, topDepartments } };
+    return { data: { topEmployees, topDepartments } };
   }
 
   async assignTask(req: any, id: number, body: any) {

@@ -106,3 +106,7 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - **Giải pháp**: 
     1. Sửa GrpcAuthGuard đọc Metadata object trực tiếp và lưu user vào rgs[2] (ServerUnaryCall) để PbacGuard đọc.
     2. Sửa đổi error mapping trong AllExceptionsFilter: map gRPC code 13 (INTERNAL) thành HTTP 503 thay vì 401 để ngăn chặn lỗi internal service trigger logout. Rebuild user-service và api-gateway.
+- [x] **[Refactor] T�i c?u tr�c to�n b? d? �n theo quy t?c m?i (08/10/2026)**
+  - S?a l?i g�i Response th? c�ng t?i api-gateway (TransformInterceptor).
+  - Kh?c ph?c l?i vi ph?m import axios tr?c ti?p ? apps/admin_khcn.
+

@@ -92,3 +92,16 @@ export const useGetDatasetSnapshot = (runId: string) => {
     enabled: !!runId,
   });
 };
+
+export const useAssignReport = () => {
+  return useMutation({
+    mutationFn: async (payload: { templateId: number; assigneeType: string; assigneeId: string; permissions?: string }) => {
+      const { data } = await axiosInstance.post(`/reports/templates/${payload.templateId}/assignments`, {
+        assigneeType: payload.assigneeType,
+        assigneeId: payload.assigneeId,
+        permissions: payload.permissions || 'VIEW'
+      });
+      return data;
+    },
+  });
+};

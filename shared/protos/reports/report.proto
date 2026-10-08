@@ -29,6 +29,10 @@ service ReportService {
   rpc RunReport (GenericRequest) returns (GenericResponse);
   rpc GetReportRunStatus (GenericRequest) returns (GenericResponse);
   rpc GetDatasetSnapshot (GenericRequest) returns (GenericResponse);
+  
+  // Assignment methods
+  rpc AssignReport (GenericRequest) returns (GenericResponse);
+  rpc GetMyAssignedReports (GenericRequest) returns (GenericResponse);
 }
 
 message GenericRequest {

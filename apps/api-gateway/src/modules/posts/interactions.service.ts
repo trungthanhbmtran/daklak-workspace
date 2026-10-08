@@ -26,7 +26,6 @@ export class InteractionsService implements OnModuleInit {
       return null;
     });
     return {
-      success: true,
       data: response.data,
       meta: {
         total: response.meta?.pagination?.total || 0,
@@ -63,7 +62,6 @@ export class InteractionsService implements OnModuleInit {
       return null;
     });
     return {
-      success: true,
       data: response.data,
       meta: {
         total: response.meta?.pagination?.total || 0,
@@ -104,7 +102,6 @@ export class InteractionsService implements OnModuleInit {
       return null;
     });
     return {
-      success: true,
       data: response.data,
       meta: {
         total: response.meta?.pagination?.total || 0,

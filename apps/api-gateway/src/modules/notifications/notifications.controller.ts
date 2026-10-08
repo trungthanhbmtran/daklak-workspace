@@ -70,7 +70,7 @@ export class NotificationsController {
     const email = req.user?.email;
     return this.notificationsService
       .markAllRead(userId, employeeCode, email)
-      .then((count) => ({ success: true, count }));
+      .then((count) => ({ count }));
   }
 
   @Patch(':id/read')
@@ -93,7 +93,7 @@ export class NotificationsController {
       employeeCode,
       email,
     );
-    return { success: ok };
+    return { };
   }
 
   @EventPattern('send_inapp_notification')

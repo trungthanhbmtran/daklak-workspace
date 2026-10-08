@@ -64,7 +64,7 @@ export class TranslateService implements OnModuleInit {
         targetLang,
       });
 
-      return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
+      return { data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing translation task', err);
       throw new InternalServerErrorException('Không thể tạo tác vụ dịch thuật');
@@ -96,7 +96,7 @@ export class TranslateService implements OnModuleInit {
       if (!jobData) {
         throw new NotFoundException('Không tìm thấy tác vụ (hoặc đã hết hạn)');
       }
-      return { success: true, data: JSON.parse(jobData) };
+      return { data: JSON.parse(jobData) };
     } catch (err: any) {
       if (err instanceof NotFoundException) throw err;
       throw new InternalServerErrorException(err.message);

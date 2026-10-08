@@ -77,7 +77,7 @@ export class ResourcesController implements OnModuleInit {
       name: r.name ?? r.code ?? '',
       serviceCode: r.serviceCode ?? null,
     }));
-    return { success: true, data: resources };
+    return { data: resources };
   }
 
   @Get('permission-matrix')
@@ -102,7 +102,7 @@ export class ResourcesController implements OnModuleInit {
         });
       }
     }
-    return { success: true, data: out };
+    return { data: out };
   }
 
   @Post()
@@ -118,7 +118,7 @@ export class ResourcesController implements OnModuleInit {
         serviceCode: body.serviceCode,
       }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result };
+    return { data: result };
   }
 
   @Put(':id')
@@ -136,6 +136,6 @@ export class ResourcesController implements OnModuleInit {
         serviceCode: body.serviceCode,
       }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result };
+    return { data: result };
   }
 }

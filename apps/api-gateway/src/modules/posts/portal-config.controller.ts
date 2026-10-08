@@ -58,7 +58,7 @@ export class PortalConfigController {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
-    return { success: true, data: res.data };
+    return { data: res.data };
   }
 
   @Get()
@@ -68,7 +68,7 @@ export class PortalConfigController {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
     );
-    return { success: true, data: res.data };
+    return { data: res.data };
   }
 
   @Put(':id')
@@ -80,7 +80,7 @@ export class PortalConfigController {
     const res: any = await firstValueFrom(
       this.configService.update({ id, ...dto }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: res.data };
+    return { data: res.data };
   }
 
   @Post('upsert')
@@ -95,7 +95,7 @@ export class PortalConfigController {
         description: dto.description,
       }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: res.data };
+    return { data: res.data };
   }
 
   /**
@@ -113,6 +113,6 @@ export class PortalConfigController {
     const res: any = await firstValueFrom(
       this.configService.batchUpsert({ data: dto.data }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: res.data };
+    return { data: res.data };
   }
 }

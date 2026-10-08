@@ -20,6 +20,7 @@ import {
   GatewayContext,
   InvalidGatewayContext,
   validateGatewayContext,
+  verifyGatewayContextToken,
 } from '../gateway-context';
 
 @Injectable()
@@ -90,7 +91,7 @@ export class GatewayContextService implements OnModuleInit, OnModuleDestroy {
         message: 'Authentication required',
       });
     try {
-      const { verifyGatewayContextToken } = await import('../gateway-context');
+      
       return verifyGatewayContextToken(header.slice(7), process.env.JWT_PUBLIC_KEY || '');
     } catch (error) {
       throw new RpcException({
@@ -123,6 +124,7 @@ export class GatewayContextService implements OnModuleInit, OnModuleDestroy {
   exports: [GatewayContextService],
 })
 export class InternalAuthModule {}
+
 
 
 

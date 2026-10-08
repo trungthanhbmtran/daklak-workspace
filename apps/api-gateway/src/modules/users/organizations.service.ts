@@ -107,7 +107,7 @@ export class OrganizationsService implements OnModuleInit {
           scope: body.scope,
         }),
       );
-      return { success: true, data: result };
+      return { data: result };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi tạo đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -126,7 +126,7 @@ export class OrganizationsService implements OnModuleInit {
       categoryCode: this.getCategoryCodeFromTypeCode(t.code),
     }));
 
-    return { success: true, data: dataWithCategory };
+    return { data: dataWithCategory };
   }
 
   async getFullTree(user: any, q?: string) {
@@ -184,7 +184,6 @@ export class OrganizationsService implements OnModuleInit {
     }
 
     return {
-      success: true,
       data: nodes.map((n) => this.mapToOrganizationNode(n)),
       meta: { allowedActions },
     };
@@ -228,7 +227,6 @@ export class OrganizationsService implements OnModuleInit {
     }
 
     return {
-      success: true,
       data: flatList.map((n) => this.mapToOrganizationNode(n)),
     };
   }
@@ -248,7 +246,7 @@ export class OrganizationsService implements OnModuleInit {
     const partyTitles = data.filter(isParty);
     const govTitles = data.filter((j: any) => !isParty(j));
 
-    return { success: true, data: { partyTitles, govTitles, allTitles: data } };
+    return { data: { partyTitles, govTitles, allTitles: data } };
   }
 
   async updateJobTitle(id: number, body: any) {
@@ -259,7 +257,7 @@ export class OrganizationsService implements OnModuleInit {
           domainId: body.domainId,
         }),
       );
-      return { success: true, data: result };
+      return { data: result };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi cập nhật chức danh';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -271,7 +269,7 @@ export class OrganizationsService implements OnModuleInit {
   async getOne(id: number) {
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetOne({ id }));
-      return { success: true, data: this.mapToOrganizationNode(result) };
+      return { data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -284,7 +282,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(
         this.orgGrpcService.GetOrganizationByCode({ code }),
       );
-      return { success: true, data: this.mapToOrganizationNode(result) };
+      return { data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -319,7 +317,7 @@ export class OrganizationsService implements OnModuleInit {
         this.mapToOrganizationNode(result),
         result.id,
       );
-      return { success: true, data: mapped };
+      return { data: mapped };
     } catch (err: any) {
       if (isNumeric && err?.code === 5) {
         try {
@@ -330,7 +328,7 @@ export class OrganizationsService implements OnModuleInit {
             this.mapToOrganizationNode(resultById),
             resultById.id,
           );
-          return { success: true, data: mapped };
+          return { data: mapped };
         } catch (e2: any) {
           const message = e2?.details ?? e2?.message ?? 'Đơn vị không tồn tại';
           if (e2?.code === 5) throw new NotFoundException(message);
@@ -350,7 +348,6 @@ export class OrganizationsService implements OnModuleInit {
       );
       const data = result?.data ?? result;
       return {
-        success: true,
         ...data,
         domains: data.domains ?? [],
         domainIds: (data.domains ?? []).map((x: any) => x.id),
@@ -386,7 +383,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(
         this.orgGrpcService.UpdateUnit(payload as any),
       );
-      return { success: true, data: result };
+      return { data: result };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi cập nhật đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -401,7 +398,6 @@ export class OrganizationsService implements OnModuleInit {
         this.orgGrpcService.DeleteUnit({ id }),
       )) as any;
       return {
-        success: res?.success ?? true,
         message: res?.message ?? 'Đã xóa đơn vị',
       };
     } catch (err: any) {
@@ -424,7 +420,7 @@ export class OrganizationsService implements OnModuleInit {
           scope: body.scope,
         }),
       );
-      return { success: true, data: result };
+      return { data: result };
     } catch (err: any) {
       const message =
         err?.details ?? err?.message ?? 'Lỗi cập nhật phạm vi phụ trách';
@@ -438,7 +434,6 @@ export class OrganizationsService implements OnModuleInit {
       this.orgGrpcService.GetSubTree({ id }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: (res.nodes || []).map((n) => this.mapToOrganizationNode(n)),
     };
   }
@@ -452,7 +447,7 @@ export class OrganizationsService implements OnModuleInit {
           quantity: body.quantity,
         }),
       );
-      return { success: true, data: result };
+      return { data: result };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi thiết lập biên chế';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -525,7 +520,6 @@ export class OrganizationsService implements OnModuleInit {
       });
 
       return {
-        success: true,
         data: { partyReport, govReport, allReport: reportData },
       };
     } catch (err: any) {
@@ -557,7 +551,7 @@ export class OrganizationsService implements OnModuleInit {
           monitoredUnitIds: body.monitoredUnitIds,
         }),
       );
-      return { success: true, data: result };
+      return { data: result };
     } catch (err: any) {
       const message =
         err?.details ?? err?.message ?? 'Lỗi thiết lập vị trí biên chế';
@@ -574,7 +568,7 @@ export class OrganizationsService implements OnModuleInit {
       )) as any;
       const nodes = res.nodes || [];
       const flatList = this.flattenTree(nodes);
-      return { success: true, data: flatList };
+      return { data: flatList };
     } catch (error: any) {
       throw new InternalServerErrorException(
         error?.message || 'Failed to fetch public org units',
@@ -601,7 +595,7 @@ export class OrganizationsService implements OnModuleInit {
       const res = (await firstValueFrom(
         this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }),
       )) as any;
-      return { success: true, data: res.jobTitleIds || [] };
+      return { data: res.jobTitleIds || [] };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi lấy mẫu chức danh';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -617,7 +611,7 @@ export class OrganizationsService implements OnModuleInit {
           jobTitleIds,
         }),
       )) as any;
-      return { success: res.success };
+      return { };
     } catch (err: any) {
       const message =
         err?.details ?? err?.message ?? 'Lỗi cập nhật mẫu chức danh';

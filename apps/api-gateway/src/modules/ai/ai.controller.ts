@@ -94,7 +94,7 @@ export class AiGatewayController implements OnModuleInit {
           apiKey: body.apiKey,
         }),
       )) as any;
-      return { success: response.success, data: response.data || [] };
+      return { data: response.data || [] };
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }

@@ -329,7 +329,6 @@ export class MenusService implements OnModuleInit {
       this.menuGrpcService.Delete({ id }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: res?.success ?? true,
       message: res?.message ?? 'Đã xóa menu',
     };
   }

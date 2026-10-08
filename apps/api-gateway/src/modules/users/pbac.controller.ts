@@ -64,7 +64,7 @@ export class PbacController implements OnModuleInit {
     const result: any = await firstValueFrom(
       this.pbacService.FindAllUserGroups({}),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result?.userGroups || [] };
+    return { data: result?.userGroups || [] };
   }
 
   @Get(':id')
@@ -94,7 +94,7 @@ export class PbacController implements OnModuleInit {
         return { ...p, conditions: parsedConditions };
       });
     }
-    return { success: true, data: result };
+    return { data: result };
   }
 
   @Post()
@@ -124,7 +124,7 @@ export class PbacController implements OnModuleInit {
         policies,
       }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result };
+    return { data: result };
   }
 
   @Put(':id')
@@ -159,7 +159,7 @@ export class PbacController implements OnModuleInit {
         policies,
       }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result };
+    return { data: result };
   }
 
   @Delete(':id')
@@ -171,6 +171,6 @@ export class PbacController implements OnModuleInit {
     const result = await firstValueFrom(
       this.pbacService.DeleteUserGroup({ id }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result };
+    return { data: result };
   }
 }

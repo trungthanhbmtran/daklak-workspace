@@ -93,4 +93,49 @@ export class TemplatesService {
       where: { id },
     });
   }
+
+  async assignReport(templateId: number, assigneeType: string, assigneeId: string, permissions: string = 'VIEW') {
+    // Check if template exists
+    const template = await this.prisma.reportTemplate.findUnique({ where: { id: templateId } });
+    if (!template) throw new RpcException({ code: 5, message: 'Template not found' });
+    
+    // Upsert assignment
+    return this.prisma.reportAssignment.upsert({
+      where: {
+        templateId_assigneeType_assigneeId: {
+          templateId,
+          assigneeType,
+          assigneeId,
+        }
+      },
+      update: { permissions },
+      create: {
+        templateId,
+        assigneeType,
+        assigneeId,
+        permissions,
+      }
+    });
+  }
+
+  async getMyAssignedReports(userId: number, unitId?: number) {
+    const OR = [];
+    if (userId) OR.push({ assigneeType: 'USER', assigneeId: userId.toString() });
+    if (unitId) OR.push({ assigneeType: 'UNIT', assigneeId: unitId.toString() });
+    
+    if (OR.length === 0) return [];
+    
+    // Admin is bypassed normally at Gateway, but if here, we only fetch what is assigned
+    return this.prisma.reportTemplate.findMany({
+      where: {
+        assignments: {
+          some: {
+            OR
+          }
+        }
+      },
+      include: { widgets: true, assignments: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

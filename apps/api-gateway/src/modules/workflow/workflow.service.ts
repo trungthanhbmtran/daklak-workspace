@@ -66,21 +66,21 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.RegisterProcessType(body),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'ProcessType registered' };
+    return { data: result, message: 'ProcessType registered' };
   }
 
   async listProcessTypes(activeOnly: boolean) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListProcessTypes({ activeOnly }),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { success: true, data: result?.data || [], message: 'OK' };
+    return { data: result?.data || [], message: 'OK' };
   }
 
   async getProcessType(code: string) {
     const result = await firstValueFrom(
       this.workflowGrpcService.GetProcessType({ code }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'OK' };
+    return { data: result, message: 'OK' };
   }
 
   // --- Process Bindings ---
@@ -88,7 +88,7 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.CreateProcessBinding(body),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'Binding created' };
+    return { data: result, message: 'Binding created' };
   }
 
   async listProcessBindings(query: any) {
@@ -96,7 +96,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.ListProcessBindings(query),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: result?.data || [],
       meta: result?.meta,
       message: 'OK',
@@ -107,7 +106,7 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.GetProcessBinding({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'OK' };
+    return { data: result, message: 'OK' };
   }
 
   async deactivateProcessBinding(
@@ -124,7 +123,7 @@ export class WorkflowService implements OnModuleInit {
         organizationId,
       }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'Binding deactivated' };
+    return { data: result, message: 'Binding deactivated' };
   }
 
   // --- Process Execution ---
@@ -132,14 +131,14 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.StartByProcessType(body),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'Workflow started' };
+    return { data: result, message: 'Workflow started' };
   }
 
   async submitAction(body: any) {
     const result = await firstValueFrom(
       this.workflowGrpcService.SubmitAction(body),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result, message: 'Action submitted' };
+    return { data: result, message: 'Action submitted' };
   }
 
   // --- Backward Compatible (Legacy APIs) ---
@@ -172,21 +171,21 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' }),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
+    return { data: result?.data || [], meta: {}, message: 'OK' };
   }
 
   async getTriggers() {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
+    return { data: result?.data || [], meta: {}, message: 'OK' };
   }
 
   async getModules() {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListModules({}),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { success: true, data: result?.data || [], meta: {}, message: 'OK' };
+    return { data: result?.data || [], meta: {}, message: 'OK' };
   }
 
   async getOrgRoles() {
@@ -201,7 +200,7 @@ export class WorkflowService implements OnModuleInit {
       category: j.category,
     }));
     items.sort((a: any, b: any) => (a.rank ?? 99) - (b.rank ?? 99));
-    return { success: true, data: items || [], meta: {}, message: 'OK' };
+    return { data: items || [], meta: {}, message: 'OK' };
   }
 
   async create(body: CreateWorkflowDto, user?: any) {
@@ -221,7 +220,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.CreateWorkflow(payload),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: this.mapResponse(result) || {},
       meta: {},
       message: 'Created successfully',
@@ -245,7 +243,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.UpdateWorkflow(payload),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: this.mapResponse(result) || {},
       meta: {},
       message: 'Updated successfully',
@@ -269,7 +266,6 @@ export class WorkflowService implements OnModuleInit {
       this.mapResponse(item),
     );
     return {
-      success: true,
       data: items,
       meta: result?.meta || {},
       message: 'OK',
@@ -286,7 +282,6 @@ export class WorkflowService implements OnModuleInit {
       }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: result || {},
       meta: {},
       message: 'Task resumed successfully',
@@ -299,7 +294,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.ListInstances(payload),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: result?.data || [],
       meta: result?.meta || {},
       message: 'OK',
@@ -310,7 +304,7 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.GetInstance({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e));
-    return { success: true, data: result || {}, meta: {}, message: 'OK' };
+    return { data: result || {}, meta: {}, message: 'OK' };
   }
 
   async getLogs(instanceId: string, organizationId?: string) {
@@ -318,7 +312,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.GetLogs({ instanceId, organizationId }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: response?.logs || [],
       meta: {},
       message: 'OK',
@@ -331,7 +324,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.FindOneWorkflow({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: this.mapResponse(result) || {},
       meta: {},
       message: 'OK',
@@ -344,7 +336,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.DeleteWorkflow({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: result?.success ?? true,
       data: {},
       meta: {},
       message: 'Deleted successfully',
@@ -358,7 +349,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.PublishWorkflow({ id, actorId, organizationId }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: this.mapResponse(result) || {},
       meta: {},
       message: 'Workflow published successfully',
@@ -370,7 +360,6 @@ export class WorkflowService implements OnModuleInit {
       this.workflowGrpcService.ApplyModule({ id, moduleCode }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: result || {},
       meta: {},
       message: 'Module applied successfully',
@@ -387,7 +376,6 @@ export class WorkflowService implements OnModuleInit {
       }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: result || {},
       meta: {},
       message: 'Workflow started',

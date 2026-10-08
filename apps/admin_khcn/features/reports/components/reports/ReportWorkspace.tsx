@@ -1,8 +1,13 @@
 "use client";
 import React, { useState } from 'react';
-import { useGetReportDefinitions, useCreateReportDefinition } from '../../api';
+import { useGetReportDefinitions, useCreateReportDefinition, useAssignReport } from '../../api';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+
 import { ReportDesigner } from './designer/ReportDesigner';
 import { ReportViewer } from './ReportViewer';
 import { ReportConfigAST } from '../../types';
@@ -10,8 +15,12 @@ import { ReportConfigAST } from '../../types';
 export const ReportWorkspace = () => {
   const { data: reports, isLoading } = useGetReportDefinitions();
   const createMutation = useCreateReportDefinition();
+  const assignMutation = useAssignReport();
   const [isDesigning, setIsDesigning] = useState(false);
   const [viewingReport, setViewingReport] = useState<{ id: number, config: any } | null>(null);
+  const [sharingReport, setSharingReport] = useState<number | null>(null);
+  const [assigneeType, setAssigneeType] = useState('USER');
+  const [assigneeId, setAssigneeId] = useState('');
 
   const handleSaveConfig = async (config: ReportConfigAST) => {
     await createMutation.mutateAsync({
@@ -77,7 +86,8 @@ export const ReportWorkspace = () => {
                   <p className="text-sm text-slate-500 line-clamp-2 h-10">
                     {report.description || 'Báo cáo cấu hình động, cho phép tự định nghĩa biểu đồ và truy xuất nguồn dữ liệu tuỳ chọn.'}
                   </p>
-                  <div className="mt-6 flex gap-3">
+                  <div className="mt-6 flex flex-col gap-3">
+                    <div className="flex gap-3">
                     <Button variant="outline" className="flex-1 bg-white border-slate-200 hover:bg-slate-50 text-slate-700" size="sm" onClick={() => setIsDesigning(true)}>Thiết kế lại</Button>
                     <Button variant="default" className="flex-1 bg-indigo-600 hover:bg-indigo-700 shadow-sm" size="sm" onClick={() => setViewingReport({ id: report.id, config: report.configuration })}>
                       <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,9 +97,14 @@ export const ReportWorkspace = () => {
                       Chạy báo cáo
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <Button variant="outline" className="w-full mt-3 text-indigo-600 border-indigo-200 hover:bg-indigo-50" size="sm" onClick={() => setSharingReport(report.id)}>
+                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    Chia sẻ báo cáo
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
             {!reports?.length && (
               <div className="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 bg-white border border-dashed border-slate-200 rounded-2xl">
                 <svg className="w-16 h-16 mb-4 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -100,6 +115,72 @@ export const ReportWorkspace = () => {
           </div>
         )}
       </div>
+
+      
+      <Dialog open={sharingReport !== null} onOpenChange={(open) => {
+        if (!open) {
+          setSharingReport(null);
+          setAssigneeId('');
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chia sẻ Báo cáo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="assigneeType">Loại đối tượng</Label>
+              <Select value={assigneeType} onValueChange={setAssigneeType}>
+                <SelectTrigger id="assigneeType">
+                  <SelectValue placeholder="Chọn loại đối tượng" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USER">Cá nhân (User ID)</SelectItem>
+                  <SelectItem value="UNIT">Đơn vị (Unit ID)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="assigneeId">ID (User hoặc Unit)</Label>
+              <Input
+                id="assigneeId"
+                placeholder="Nhập ID..."
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setSharingReport(null);
+              setAssigneeId('');
+            }}>
+              Hủy
+            </Button>
+            <Button
+              disabled={assignMutation.isPending || !assigneeId}
+              onClick={async () => {
+                if (!sharingReport) return;
+                try {
+                  await assignMutation.mutateAsync({
+                    templateId: sharingReport,
+                    assigneeType,
+                    assigneeId,
+                    permissions: 'VIEW'
+                  });
+                  alert('Gán báo cáo thành công!');
+                  setSharingReport(null);
+                  setAssigneeId('');
+                } catch(err) {
+                  alert('Có lỗi xảy ra khi gán báo cáo.');
+                }
+              }}
+            >
+              {assignMutation.isPending ? 'Đang xử lý...' : 'Xác nhận Gán'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

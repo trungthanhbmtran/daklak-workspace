@@ -67,7 +67,7 @@ export class UserService implements OnModuleInit {
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
-        return { success: true, data: [], meta: { total: 0 } };
+        return { data: [], meta: { total: 0 } };
       }
       unitCodeStartsWith = userInfo!.unitCode;
     }
@@ -81,7 +81,6 @@ export class UserService implements OnModuleInit {
       }),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
-      success: true,
       data: response?.data,
       meta: response?.meta,
     };
@@ -91,10 +90,9 @@ export class UserService implements OnModuleInit {
     const data: any = await firstValueFrom(
       this.userGrpcService.FindOne({ id }),
     ).catch((e) => this.handleRpcError(e));
-    if (!data) return { success: true, data: null };
+    if (!data) return { data: null };
 
     return {
-      success: true,
       data: {
         id: data.id,
         email: data.email,
@@ -117,7 +115,7 @@ export class UserService implements OnModuleInit {
     const data: any = await firstValueFrom(
       this.userGrpcService.FindOne({ id }),
     ).catch((e) => this.handleRpcError(e));
-    if (!data) return { success: true, data: [] };
+    if (!data) return { data: [] };
 
     const policies: any[] = Array.isArray(data.policies) ? data.policies : [];
 
@@ -135,7 +133,6 @@ export class UserService implements OnModuleInit {
     }
 
     return {
-      success: true,
       data: Array.from(policiesMap.values()),
     };
   }
@@ -175,7 +172,7 @@ export class UserService implements OnModuleInit {
         `Tài khoản đã được tạo: ${fullName || email} (${email}). Thông báo đăng nhập đã gửi tới email người dùng.`,
       );
     }
-    return { success: true, data: created };
+    return { data: created };
   }
 
   async assignPosition(id: number, body: any) {
@@ -192,7 +189,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on assignPosition:', err);
     }
-    return { success: true, data: result };
+    return { data: result };
   }
 
   async setActive(id: number, isActive: boolean) {
@@ -207,7 +204,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on setActive:', err);
     }
-    return { success: true, data: result };
+    return { data: result };
   }
 
   async assignUserGroups(id: number, userGroupIds: number[]) {
@@ -222,7 +219,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on assignUserGroups:', err);
     }
-    return { success: true, data: result };
+    return { data: result };
   }
 
   async update(id: string, body: any) {
@@ -245,7 +242,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on update:', err);
     }
-    return { success: true, data: result };
+    return { data: result };
   }
 
   async delete(id: string) {
@@ -262,6 +259,6 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       console.error('Failed to clear user cache on delete:', err);
     }
-    return { success: true };
+    return { };
   }
 }

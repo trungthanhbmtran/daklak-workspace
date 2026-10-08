@@ -56,7 +56,7 @@ export class CategoriesService implements OnModuleInit {
       const res: any = await firstValueFrom(
         this.categoryService.GetAllGroups({}),
       );
-      return { success: true, data: res.groups };
+      return { data: res.groups };
     } catch (error) {
       throw new InternalServerErrorException(
         'Chưa thể kết nối tới dịch vụ danh mục',
@@ -73,7 +73,7 @@ export class CategoriesService implements OnModuleInit {
           order: body.order ?? 0,
         }),
       );
-      return { success: true, data: res };
+      return { data: res };
     } catch (error) {
       throw new InternalServerErrorException('Lỗi cập nhật nhóm danh mục');
     }
@@ -110,7 +110,6 @@ export class CategoriesService implements OnModuleInit {
         this.categoryService.GetAllCategories({}),
       ).catch((e) => this.handleRpcError(e));
       const response = {
-        success: true,
         data: result?.data?.map(toFrontendItem) || [],
         meta: { total: result?.total || result?.data?.length || 0 },
       };
@@ -128,7 +127,6 @@ export class CategoriesService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
 
     const response = {
-      success: true,
       data: result?.data?.map(toFrontendItem) || [],
       meta: { total: result?.total || 0 },
     };
@@ -156,7 +154,7 @@ export class CategoriesService implements OnModuleInit {
     await this.redisService.delPattern(`category_group:${body.group}*`);
     await this.redisService.delPattern(`category_group:all*`);
 
-    return { success: true, data: toFrontendItem(res as any) };
+    return { data: toFrontendItem(res as any) };
   }
 
   async update(
@@ -186,7 +184,7 @@ export class CategoriesService implements OnModuleInit {
     // or we can just invalidate all to be safe.
     await this.redisService.delPattern(`category_group:*`);
 
-    return { success: true, data: toFrontendItem(res as any) };
+    return { data: toFrontendItem(res as any) };
   }
 
   async delete(id: number) {
@@ -197,7 +195,6 @@ export class CategoriesService implements OnModuleInit {
     await this.redisService.delPattern(`category_group:*`);
 
     return {
-      success: res?.success ?? true,
       message: res?.message ?? 'Đã xóa danh mục',
     };
   }
@@ -214,7 +211,6 @@ export class CategoriesService implements OnModuleInit {
         this.categoryService.GetAllCategories({ lang }),
       ).catch((e) => this.handleRpcError(e));
       return {
-        success: true,
         data: result?.data,
         meta: { total: result?.total || result?.data?.length || 0 },
       };
@@ -229,7 +225,6 @@ export class CategoriesService implements OnModuleInit {
       }),
     ).catch((e) => this.handleRpcError(e));
     return {
-      success: true,
       data: result?.data,
       meta: { total: result?.total || result?.data?.length || 0 },
     };
