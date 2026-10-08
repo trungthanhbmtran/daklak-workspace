@@ -168,6 +168,8 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException(
         'Tên đăng nhập hoặc mật khẩu không hợp lệ',
       );
+    // Xóa các cookie cũ ở các path khác (vd: /admin) để tránh bị đè (shadow) khi login lại
+    clearAuthCookies(res);
     setAuthCookies(res, {
       ...result,
       accessToken: this.issuer.signAccessToken(
