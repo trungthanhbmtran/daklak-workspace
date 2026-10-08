@@ -1,4 +1,4 @@
-import {
+﻿import {
   Global,
   Injectable,
   Module,
@@ -20,10 +20,11 @@ import {
   GatewayContext,
   InvalidGatewayContext,
   validateGatewayContext,
-} from '../../../../../shared/security/gateway-context';
+} from '../gateway-context';
 
 @Injectable()
 export class GatewayContextService implements OnModuleInit, OnModuleDestroy {
+  public get userClient() { return this.user; }
   private readonly client = ClientProxyFactory.create({
     transport: Transport.GRPC,
     options: {
@@ -48,12 +49,7 @@ export class GatewayContextService implements OnModuleInit, OnModuleDestroy {
       commandTimeout: 5000,
     },
   );
-  private user!: {
-    GetAuthState(data: {
-      id: number;
-      sessionId: string;
-    }): Observable<AuthState>;
-  };
+  private user!: { GetAuthState(data: { id: number; sessionId: string }): Observable<AuthState>; FindOne(data: { id: number }): Observable<any>; };
   onModuleInit() {
     this.user = this.client.getService('UserService');
     this.redis.on('error', () => undefined);
@@ -85,6 +81,37 @@ export class GatewayContextService implements OnModuleInit, OnModuleDestroy {
       });
     }
   }
+
+  async verifyFast(metadata: Metadata): Promise<GatewayContext> {
+    const header = metadata?.get?.('authorization')?.[0];
+    if (typeof header !== 'string' || !header.startsWith('Bearer '))
+      throw new RpcException({
+        code: status.UNAUTHENTICATED,
+        message: 'Authentication required',
+      });
+    try {
+      const { verifyGatewayContextToken } = await import('../gateway-context');
+      return verifyGatewayContextToken(header.slice(7), process.env.JWT_PUBLIC_KEY || '');
+    } catch (error) {
+      throw new RpcException({
+        code: status.UNAUTHENTICATED,
+        message: 'Invalid delegation token signature',
+      });
+    }
+  }
+
+  async getPolicyCache(userId: number, pv: number): Promise<{ permissionsFlatten: string[], employeeCode?: string, unitId?: number } | null> {
+    const key = `policy:${userId}:${pv}`;
+    const data = await this.redis.get(key);
+    return data ? JSON.parse(data) : null;
+  }
+
+  async setPolicyCache(userId: number, pv: number, data: { permissionsFlatten: string[], employeeCode?: string, unitId?: number }): Promise<void> {
+    const key = `policy:${userId}:${pv}`;
+    // TTL = 1 hour (3600 seconds)
+    await this.redis.set(key, JSON.stringify(data), 'EX', 3600);
+  }
+
   onModuleDestroy() {
     this.redis.disconnect();
     this.client.close();
@@ -96,3 +123,8 @@ export class GatewayContextService implements OnModuleInit, OnModuleDestroy {
   exports: [GatewayContextService],
 })
 export class InternalAuthModule {}
+
+
+
+
+

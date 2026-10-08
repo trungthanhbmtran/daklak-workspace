@@ -1,11 +1,13 @@
 {
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.5",
     "@modelcontextprotocol/sdk": "^1.32.0",
     "@nestjs/common": "^11.1.28",
     "@nestjs/core": "^11.1.28",
     "@nestjs/microservices": "^11.1.28",
     "@qdrant/js-client-rest": "^1.19.0",
     "@types/pdf-parse": "^1.1.5",
+    "ioredis": "^6.0.0",
     "mammoth": "^1.12.3",
     "mysql2": "^3.24.5",
     "pdf-parse": "^2.4.5",

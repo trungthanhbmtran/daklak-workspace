@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@/config/config.module';
 import { PrismaModule } from '@/database/prisma.module';
@@ -10,16 +10,16 @@ import { TaskHistoryModule } from './modules/task-history/task-history.module';
 import { TaskCatalogModule } from './modules/task-catalog/task-catalog.module';
 import { TaskKpiModule } from './modules/task-kpi/task-kpi.module';
 
-import { InternalAuthModule } from './core/auth/gateway-context.service';
+import { GrpcAuthModule } from '../../../shared/security/grpc-auth';
 
 @Module({
   imports: [
-    InternalAuthModule,
+    GrpcAuthModule,
     ConfigModule,
     PrismaModule,
     ScheduleModule.forRoot(),
     EmployeesModule,
-    // TasksModule imports TaskSharedModule (@Global) — tự động available toàn app
+    // TasksModule imports TaskSharedModule (@Global) â€” tá»± Ä‘á»™ng available toÃ n app
     TasksModule,
     MasterPlansModule,
     KpiEvaluationsModule,
@@ -29,4 +29,6 @@ import { InternalAuthModule } from './core/auth/gateway-context.service';
   ],
 })
 export class AppModule {}
+
+
 

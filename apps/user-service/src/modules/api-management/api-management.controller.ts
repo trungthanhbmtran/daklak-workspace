@@ -2,8 +2,8 @@
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { ApiManagementService } from './api-management.service';
-import { GrpcAuthGuard, GRPC_USER_KEY } from '@/common/guards/grpc-auth.guard';
-import { PbacGuard } from '@/common/guards/pbac.guard';
+import { GrpcAuthGuard, GRPC_USER_KEY } from '../../../../../shared/security/grpc-auth';
+import { PbacGuard } from '../../../../../shared/security/grpc-auth';
 import { Permissions } from '@/common/decorators/permissions.decorator';
 
 @Controller()
@@ -188,3 +188,4 @@ export class ApiManagementController {
     }
   }
 }
+

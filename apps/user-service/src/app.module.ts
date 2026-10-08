@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { ConfigModule } from '@/config/config.module';
 import { PrismaModule } from '@/database/prisma.module';
 import { UsersModule } from '@/modules/users/users.module';
@@ -13,11 +13,11 @@ import { AiModule } from './modules/ai/ai.module';
 
 import { ApiManagementModule } from './modules/api-management/api-management.module';
 
-import { InternalAuthModule } from './core/auth/gateway-context.service';
+import { GrpcAuthModule } from '../../../shared/security/grpc-auth';
 
 @Module({
   imports: [
-    InternalAuthModule,
+    GrpcAuthModule,
     ConfigModule,
     PrismaModule,
     UsersModule,
@@ -34,3 +34,5 @@ import { InternalAuthModule } from './core/auth/gateway-context.service';
   ],
 })
 export class AppModule {}
+
+

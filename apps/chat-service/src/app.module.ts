@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+﻿import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { InfraModule } from "./infra/infra.module";
@@ -7,11 +7,11 @@ import { MessageModule } from "./modules/message/message.module";
 import { ParticipantModule } from "./modules/participant/participant.module";
 import { PresenceModule } from "./modules/presence/presence.module";
 
-import { InternalAuthModule } from './core/auth/gateway-context.service';
+import { GrpcAuthModule } from '../../../../shared/security/grpc-auth';
 
 @Module({
   imports: [
-    InternalAuthModule,
+    GrpcAuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     EventEmitterModule.forRoot(),
     InfraModule,
@@ -24,4 +24,5 @@ import { InternalAuthModule } from './core/auth/gateway-context.service';
   providers: [],
 })
 export class AppModule {}
+
 

@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
-import { GrpcAuthGuard } from '@/common/guards/grpc-auth.guard';
-import { PbacGuard } from '@/common/guards/pbac.guard';
+import { GrpcAuthGuard } from '../../../../shared/security/grpc-auth';
+import { PbacGuard } from '../../../../shared/security/grpc-auth';
 
 @Global()
 @Module({

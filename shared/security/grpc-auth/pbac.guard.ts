@@ -1,10 +1,15 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+﻿import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
-import { PERMISSIONS_KEY } from '@/common/decorators/permissions.decorator';
-import { GRPC_USER_KEY } from '@/common/guards/grpc-auth.guard';
-import type { UserWithPbac } from '@/common/types/grpc-user.type';
+import { GRPC_USER_KEY } from './grpc-auth.guard';
+
+export const PERMISSIONS_KEY = 'REQUIRE_PERMISSIONS';
+export const RequirePermission = (...permissions: string[]) => {
+  return (target: any, key?: string | symbol, descriptor?: TypedPropertyDescriptor<any>) => {
+    Reflector.createDecorator<string[]>()(permissions)(target, key as any, descriptor as any);
+  };
+};
 
 @Injectable()
 export class PbacGuard implements CanActivate {
@@ -16,15 +21,11 @@ export class PbacGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    if (!requiredPermissions?.length) {
-      return true;
-    }
+    if (!requiredPermissions?.length) return true;
 
-    // GrpcAuthGuard lưu user vào call object (args[2] = ServerUnaryCall).
-    // Trong NestJS gRPC @GrpcMethod, args là [request, metadata, call].
     const args = context.getArgs();
     const callObject = args[2] as Record<string, unknown> | undefined;
-    const user = callObject?.[GRPC_USER_KEY] as UserWithPbac | undefined;
+    const user = callObject?.[GRPC_USER_KEY] as any | undefined;
 
     if (!user) {
       throw new RpcException({
@@ -34,9 +35,7 @@ export class PbacGuard implements CanActivate {
     }
 
     const userPermissions = user.permissionsFlatten ?? [];
-    const hasPermission = requiredPermissions.some((p) =>
-      userPermissions.includes(p),
-    );
+    const hasPermission = requiredPermissions.some((p) => userPermissions.includes(p));
 
     if (!hasPermission) {
       throw new RpcException({
@@ -48,3 +47,4 @@ export class PbacGuard implements CanActivate {
     return true;
   }
 }
+

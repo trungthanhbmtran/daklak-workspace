@@ -5,7 +5,7 @@ export interface AuthState { userId: number; isActive: boolean; authVersion: num
 export interface GatewayContext {
   id: number; sub: string; sid: string; authVersion: number;
   employeeCode?: string; unitId?: string | number; username?: string;
-  permissionsFlatten: string[]; jti: string; originJti?: string;
+  permissionsFlatten?: string[]; jti: string; originJti?: string;
   requestId?: string; ipAddress?: string; exp: number;
   [key: string]: unknown;
 }
@@ -27,10 +27,17 @@ export function verifyGatewayContextToken(token: string, pem: string): GatewayCo
       typeof claims.iat !== 'number' || claims.iat > now + 30 || claims.exp - claims.iat > 60 ||
       !Number.isSafeInteger(claims.id) || claims.id < 1 || claims.sub !== String(claims.id) ||
       !Number.isSafeInteger(claims.authVersion) || claims.authVersion < 0 ||
-      !/^[a-f0-9-]{36}$/i.test(claims.sid) || typeof claims.jti !== 'string' ||
-      !Array.isArray(claims.permissionsFlatten) || claims.permissionsFlatten.length > 2048 ||
-      claims.permissionsFlatten.some((permission) => typeof permission !== 'string' || permission.length > 128)
+      !/^[a-f0-9-]{36}$/i.test(claims.sid) || typeof claims.jti !== 'string'
     ) throw fail();
+    
+    // permissionsFlatten is now optional to reduce JWT payload size.
+    if (claims.permissionsFlatten !== undefined) {
+      if (!Array.isArray(claims.permissionsFlatten) || claims.permissionsFlatten.length > 2048 ||
+          claims.permissionsFlatten.some((permission) => typeof permission !== 'string' || permission.length > 128)) {
+        throw fail();
+      }
+    }
+    
     return claims;
   } catch { throw fail(); }
 }

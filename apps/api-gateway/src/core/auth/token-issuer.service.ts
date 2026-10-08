@@ -136,20 +136,9 @@ export class TokenIssuerService {
       exp: now + 60,
       jti: crypto.randomUUID(),
       originJti: user.jti,
-      permissionsFlatten: Array.isArray(user.permissionsFlatten)
-        ? user.permissionsFlatten
-        : [],
       ...trace,
     };
-    for (const field of [
-      'employeeCode',
-      'unitId',
-      'unitCode',
-      'username',
-      'jobTitleCode',
-      'jobTitleName',
-    ])
-      if (user[field] != null) context[field] = user[field];
+    
     return this.signToken(context);
   }
 

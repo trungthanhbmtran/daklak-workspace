@@ -1,33 +1,76 @@
 import { Controller, UseInterceptors } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { TaskCatalogService } from './task-catalog.service';
-import { GrpcContextInterceptor } from '../../core/interceptors/grpc-context.interceptor';
+import { GrpcAuthGuard, CurrentUser } from '../../../../../shared/security/grpc-auth';
+import { UseGuards } from '@nestjs/common';
 
 @Controller()
-@UseInterceptors(GrpcContextInterceptor)
+@UseGuards(GrpcAuthGuard)
 export class TaskCatalogController {
   constructor(private readonly service: TaskCatalogService) {}
 
   // --- Rank Quotas ---
   @GrpcMethod('TaskService', 'SaveRankQuotas')
-  saveRankQuotas(data: any) { return this.service.saveRankQuotas(data); }
+  saveRankQuotas(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.saveRankQuotas(data); }
 
   @GrpcMethod('TaskService', 'GetRankQuotasByRank')
-  getRankQuotasByRank(data: any) { return this.service.getRankQuotasByRank(data); }
+  getRankQuotasByRank(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.getRankQuotasByRank(data); }
 
   // --- Task Templates ---
   @GrpcMethod('TaskService', 'FindTaskTemplates')
-  findTaskTemplates(data: any) { return this.service.findTaskTemplates(data); }
+  findTaskTemplates(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.findTaskTemplates(data); }
 
   @GrpcMethod('TaskService', 'CreateTaskTemplate')
-  createTaskTemplate(data: any) { return this.service.createTaskTemplate(data); }
+  createTaskTemplate(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.createTaskTemplate(data); }
 
   @GrpcMethod('TaskService', 'UpdateTaskTemplate')
-  updateTaskTemplate(data: any) { return this.service.updateTaskTemplate(data.id, data); }
+  updateTaskTemplate(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.updateTaskTemplate(data.id, data); }
 
   @GrpcMethod('TaskService', 'DeleteTaskTemplate')
-  deleteTaskTemplate(data: any) { return this.service.deleteTaskTemplate(data.id); }
+  deleteTaskTemplate(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.deleteTaskTemplate(data.id); }
 
   @GrpcMethod('TaskService', 'BulkUpdateTaskTemplates')
-  bulkUpdateTaskTemplates(data: any) { return this.service.bulkUpdateTaskTemplates(data.templates); }
+  bulkUpdateTaskTemplates(data: any, @CurrentUser() user: any) {
+    if (user) {
+      data.currentEmployeeCode = user.employeeCode;
+      data.currentUserId = user.id;
+      data.currentUserDept = user.unitId;
+      data.currentUserPermissions = user.permissionsFlatten;
+    } return this.service.bulkUpdateTaskTemplates(data.templates); }
 }
