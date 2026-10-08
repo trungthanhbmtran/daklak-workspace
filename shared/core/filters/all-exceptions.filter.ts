@@ -67,6 +67,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
           statusCode = HttpStatus.FORBIDDEN;
           code = 'PERMISSION_DENIED';
           break;
+        case 13: // INTERNAL - lỗi của chính internal service (metadata bị thiếu, v.v.)
+          // Dùng 503 thay vì 500 để phân biệt "upstream service error" với lỗi gateway
+          statusCode = HttpStatus.SERVICE_UNAVAILABLE;
+          code = 'SERVICE_UNAVAILABLE';
+          break;
         case 16: // UNAUTHENTICATED
           statusCode = HttpStatus.UNAUTHORIZED;
           code = 'UNAUTHENTICATED';

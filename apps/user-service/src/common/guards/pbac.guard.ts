@@ -20,10 +20,11 @@ export class PbacGuard implements CanActivate {
       return true;
     }
 
-    const rpcContext = context
-      .switchToRpc()
-      .getContext<Record<string, unknown>>();
-    const user = rpcContext?.[GRPC_USER_KEY] as UserWithPbac | undefined;
+    // GrpcAuthGuard lưu user vào call object (args[2] = ServerUnaryCall).
+    // Trong NestJS gRPC @GrpcMethod, args là [request, metadata, call].
+    const args = context.getArgs();
+    const callObject = args[2] as Record<string, unknown> | undefined;
+    const user = callObject?.[GRPC_USER_KEY] as UserWithPbac | undefined;
 
     if (!user) {
       throw new RpcException({

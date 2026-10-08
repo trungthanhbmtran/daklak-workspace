@@ -99,3 +99,10 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - **V?n d?**: Ngu?i d�ng b? vang ra m�n h�nh dang nh?p li�n t?c khi truy c?p c�c ch?c nang nhu Task Templates, L?ch s? Task, M?u b�o c�o d� d� du?c c?p quy?n.
   - **Nguy�n nh�n**: API Gateway g?i t?i m?t s? controller c?a hrm-service (TaskCatalogController, TaskHistoryController) du?c b?o v? b?i GrpcContextInterceptor (b?t bu?c ph?i c� Metadata Delegation Token), nhung API Gateway l?i g?i gRPC chay m� kh�ng attach metadata (thi?u this.getGrpcMetadata(req)). �i?u n�y d?n d?n microservice tr? m� l?i 16 (UNAUTHENTICATED), API Gateway quang l?i 401, khi?n client trigger h�m session-recovery nhung l?i b? d�nh infinite loop do replay request v?n l?i 401.
   - **Gi?i ph�p**: Truy?n req xu?ng service, g?i this.getGrpcMetadata(req) v� d�nh k�m v�o t?t c? c�c l?nh g?i gRPC b? thi?u trong tasks.service.ts v� task-templates.controller.ts.
+
+- [x] **[Hotfix] Sửa lỗi văng ra login 401 khi vào API Management (08/10/2026)**
+  - **Vấn đề**: Người dùng bị văng ra màn hình đăng nhập (lỗi 401) khi vào trang Quản lý API, tạo thành infinite logout loop.
+  - **Nguyên nhân**: Lỗi lấy metadata trong GrpcAuthGuard của NestJS @GrpcMethod. Thay vì nhận object { metadata }, switchToRpc().getContext() trong phiên bản này trả về trực tiếp Metadata object. Khi gọi pcContext?.metadata sẽ trả về undefined, dẫn đến báo lỗi UNAUTHENTICATED: Missing metadata từ internal service, bị AllExceptionsFilter map thành HTTP 401, gây ra trigger logout sai lệch trên frontend.
+  - **Giải pháp**: 
+    1. Sửa GrpcAuthGuard đọc Metadata object trực tiếp và lưu user vào rgs[2] (ServerUnaryCall) để PbacGuard đọc.
+    2. Sửa đổi error mapping trong AllExceptionsFilter: map gRPC code 13 (INTERNAL) thành HTTP 503 thay vì 401 để ngăn chặn lỗi internal service trigger logout. Rebuild user-service và api-gateway.
