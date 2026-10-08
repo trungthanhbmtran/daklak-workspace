@@ -23,45 +23,9 @@ function CallbackHandler() {
     if (code) {
       const exchangeToken = async () => {
         try {
-          const clientId = process.env.NEXT_PUBLIC_SSO_CLIENT_ID;
-          const tokenUrl = process.env.NEXT_PUBLIC_SSO_TOKEN_URL;
-          const redirectUri = process.env.NEXT_PUBLIC_SSO_REDIRECT_URI;
+          const response = await axios.post("/api/auth/sso/exchange", { code });
           
-          if (!clientId || !tokenUrl || !redirectUri) {
-            throw new Error("Missing SSO configuration");
-          }
-
-          const body = new URLSearchParams();
-          body.append("grant_type", "authorization_code");
-          body.append("code", code);
-          body.append("client_id", clientId);
-          body.append("redirect_uri", redirectUri);
-
-          const response = await axios.post(tokenUrl, body, {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            }
-          });
-
-          const { access_token } = response.data;
-          
-          const userInfoUrl = process.env.NEXT_PUBLIC_SSO_USERINFO_URL;
-          let userInfo = { sub: "unknown" };
-          
-          if (userInfoUrl) {
-            try {
-              const userResponse = await axios.get(userInfoUrl, {
-                headers: {
-                  Authorization: `Bearer ${access_token}`
-                }
-              });
-              
-              userInfo = userResponse.data;
-              
-            } catch (err) {
-              console.error("Failed to fetch user info", err);
-            }
-          }
+          const { access_token, userInfo } = response.data;
           
           setAuthData(access_token, userInfo);
           router.replace("/"); // Redirect to home

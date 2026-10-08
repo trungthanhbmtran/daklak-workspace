@@ -218,6 +218,29 @@ export function LoginClient() {
 
           <Button 
             type="button" 
+            className="w-full bg-[#00529C] hover:bg-[#003B70] text-white font-medium mb-3" 
+            disabled={isPending} 
+            onClick={() => {
+              setIsRedirecting(true);
+              const clientId = process.env.NEXT_PUBLIC_SSO_CLIENT_ID;
+              const authorizeUrl = process.env.NEXT_PUBLIC_SSO_AUTHORIZE_URL;
+              const redirectUri = process.env.NEXT_PUBLIC_SSO_REDIRECT_URI;
+              
+              const params = new URLSearchParams({
+                response_type: "code",
+                client_id: clientId || "",
+                redirect_uri: redirectUri || "",
+                scope: "openid email groups profile roles",
+                state: Math.random().toString(36).substring(7),
+              });
+              window.location.href = `${authorizeUrl}?${params.toString()}`;
+            }}
+          >
+            Đăng nhập Dân cư (LifeSSO / VNeID)
+          </Button>
+
+          <Button 
+            type="button" 
             className="w-full bg-[#E52B2B] hover:bg-[#C92222] text-white font-medium" 
             disabled={isPending} 
             onClick={() => {

@@ -8,9 +8,7 @@ import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Đang tải...</div>}>
-      <LoginClient />
-    </Suspense>
+    <LoginClient />
   );
 }
 
