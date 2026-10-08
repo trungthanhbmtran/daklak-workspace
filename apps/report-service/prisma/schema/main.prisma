@@ -18,6 +18,7 @@ model ReportTemplate {
   description String?        @db.Text
   layout      Json? // LÆ°u trá»¯ lÆ°á»›i (Grid layout) cá»§a cÃ¡c Widget
   widgets     ReportWidget[]
+  assignments ReportAssignment[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 }
@@ -32,6 +33,20 @@ model ReportWidget {
   yAxisKey       String         @db.VarChar(100)
   config         Json? // Cáº¥u hÃ¬nh mÃ u sáº¯c, bá»™ lá»c...
   template       ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model ReportAssignment {
+  id           Int            @id @default(autoincrement())
+  templateId   Int
+  assigneeType String         @db.VarChar(50) // "USER", "UNIT"
+  assigneeId   String         @db.VarChar(50)
+  permissions  String         @default("VIEW") @db.VarChar(50)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  template     ReportTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, assigneeType, assigneeId])
 }
 
 // Báº£ng dÃ¹ng Ä‘á»ƒ lÆ°u thá»‘ng kÃª dáº¡ng Read-Model (CQRS) do RabbitMQ Ä‘áº©y vÃ o
