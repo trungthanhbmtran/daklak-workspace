@@ -1,4 +1,4 @@
-﻿import { Controller, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { ApiManagementService } from './api-management.service';
@@ -183,6 +183,32 @@ export class ApiManagementController {
     } catch (e: any) {
       throw new RpcException({
         code: GrpcStatus.INVALID_ARGUMENT,
+        message: e.message,
+      });
+    }
+  }
+
+  @GrpcMethod('ApiManagementService', 'CreateImportSession')
+  @Permissions('INTEGRATION:MANAGE')
+  async createImportSession(data: any) {
+    try {
+      return await this.service.createImportSession(data);
+    } catch (e: any) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: e.message,
+      });
+    }
+  }
+
+  @GrpcMethod('ApiManagementService', 'CommitImportSession')
+  @Permissions('INTEGRATION:MANAGE')
+  async commitImportSession(data: any) {
+    try {
+      return await this.service.commitImportSession(data, 'system-admin');
+    } catch (e: any) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
         message: e.message,
       });
     }
