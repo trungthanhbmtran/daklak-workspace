@@ -1,29 +1,27 @@
 model OrganizationUnit {
-  id            Int                    @id @default(autoincrement())
-  code          String                 @unique
-  name          String
-  shortName     String?                @map("short_name")
-  typeId        Int                    @map("type_id")
-  parentId      Int?                   @map("parent_id")
-  hierarchyPath String?                @map("hierarchy_path")
-  address       String?
-  phoneNumber   String?                @map("phone_number")
-  email         String?
-  website       String?
-  taxCode       String?                @map("tax_code")
-  isActive      Boolean                @default(true) @map("is_active")
-  createdAt     DateTime               @default(now()) @map("created_at")
-  updatedAt     DateTime               @updatedAt @map("updated_at")
-  jobPositions  JobPosition[]
-  staffingPlans OrganizationStaffing[]
-  unitDomains   UnitDomain[]
-
+  id                       Int                         @id @default(autoincrement())
+  code                     String                      @unique
+  name                     String
+  shortName                String?                     @map("short_name")
+  typeId                   Int                         @map("type_id")
+  parentId                 Int?                        @map("parent_id")
+  hierarchyPath            String?                     @map("hierarchy_path")
+  address                  String?
+  phoneNumber              String?                     @map("phone_number")
+  email                    String?
+  website                  String?
+  taxCode                  String?                     @map("tax_code")
+  isActive                 Boolean                     @default(true) @map("is_active")
+  createdAt                DateTime                    @default(now()) @map("created_at")
+  updatedAt                DateTime                    @updatedAt @map("updated_at")
+  organizationId           String                      @default("DEFAULT") @map("organization_id")
+  jobPositions             JobPosition[]
+  staffingPlans            OrganizationStaffing[]
+  unitDomains              UnitDomain[]
   parent                   OrganizationUnit?           @relation("OrgHierarchy", fields: [parentId], references: [id])
   children                 OrganizationUnit[]          @relation("OrgHierarchy")
   type                     UnitType                    @relation(fields: [typeId], references: [id])
   monitoredByStaffingSlots StaffingSlotMonitoredUnit[]
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@index([typeId])
   @@index([parentId])
@@ -32,12 +30,11 @@ model OrganizationUnit {
 }
 
 model UnitDomain {
-  unitId   Int              @map("unit_id")
-  domainId Int              @map("domain_id")
-  domain   Category         @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  unit     OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  unitId         Int              @map("unit_id")
+  domainId       Int              @map("domain_id")
+  organizationId String           @default("DEFAULT") @map("organization_id")
+  domain         Category         @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  unit           OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([unitId, domainId, organizationId])
   @@index([domainId], map: "organization_unit_domains_domain_id_fkey")
@@ -54,34 +51,33 @@ model JobTitle {
   authorityLevel          String?                @map("authority_level")
   reportsToJobTitleId     Int?                   @map("reports_to_position_id")
   type                    String?                @default("GOVERNMENT")
+  categoryId              Int?                   @map("category_id")
+  organizationId          String                 @default("DEFAULT") @map("organization_id")
   jobPositions            JobPosition[]
+  group                   Category?              @relation(fields: [categoryId], references: [id])
   reportsTo               JobTitle?              @relation("JobTitleReportsTo", fields: [reportsToJobTitleId], references: [id])
   directReports           JobTitle[]             @relation("JobTitleReportsTo")
   staffingPlans           OrganizationStaffing[]
   applicableUnitTemplates UnitTypeJobTemplate[]
-  categoryId              Int?                   @map("category_id")
-  group                   Category?              @relation(fields: [categoryId], references: [id])
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@index([reportsToJobTitleId])
+  @@index([categoryId], map: "job_titles_category_id_fkey")
   @@map("job_titles")
 }
 
 model OrganizationStaffing {
-  id           Int              @id @default(autoincrement())
-  unitId       Int              @map("unit_id")
-  jobTitleId   Int              @map("job_title_id")
-  quantity     Int              @default(1)
-  currentCount Int              @default(0) @map("current_count")
-  description  String?
-  createdAt    DateTime         @default(now()) @map("created_at")
-  updatedAt    DateTime         @updatedAt @map("updated_at")
-  jobTitle     JobTitle         @relation(fields: [jobTitleId], references: [id])
-  unit         OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  slots        StaffingSlot[]
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             Int              @id @default(autoincrement())
+  unitId         Int              @map("unit_id")
+  jobTitleId     Int              @map("job_title_id")
+  quantity       Int              @default(1)
+  currentCount   Int              @default(0) @map("current_count")
+  description    String?
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  organizationId String           @default("DEFAULT") @map("organization_id")
+  jobTitle       JobTitle         @relation(fields: [jobTitleId], references: [id])
+  unit           OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  slots          StaffingSlot[]
 
   @@unique([unitId, jobTitleId])
   @@index([jobTitleId], map: "org_staffing_job_title_id_fkey")
@@ -94,12 +90,11 @@ model StaffingSlot {
   slotOrder            Int                          @map("slot_order")
   description          String?                      @map("description")
   assignedEmployeeCode String?                      @map("assigned_employee_code")
-  monitoredUnits       StaffingSlotMonitoredUnit[]
-  geographicAreas      StaffingSlotGeographicArea[]
+  organizationId       String                       @default("DEFAULT") @map("organization_id")
   domains              StaffingSlotDomain[]
+  geographicAreas      StaffingSlotGeographicArea[]
+  monitoredUnits       StaffingSlotMonitoredUnit[]
   staffing             OrganizationStaffing         @relation(fields: [staffingId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@unique([staffingId, slotOrder])
   @@index([staffingId])
@@ -107,12 +102,11 @@ model StaffingSlot {
 }
 
 model StaffingSlotMonitoredUnit {
-  slotId Int              @map("slot_id")
-  unitId Int              @map("unit_id")
-  slot   StaffingSlot     @relation(fields: [slotId], references: [id], onDelete: Cascade)
-  unit   OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  slotId         Int              @map("slot_id")
+  unitId         Int              @map("unit_id")
+  organizationId String           @default("DEFAULT") @map("organization_id")
+  slot           StaffingSlot     @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  unit           OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
   @@id([slotId, unitId, organizationId])
   @@index([unitId], map: "staffing_slot_monitored_units_unit_id_fkey")
@@ -122,10 +116,9 @@ model StaffingSlotMonitoredUnit {
 model StaffingSlotGeographicArea {
   slotId           Int          @map("slot_id")
   geographicAreaId Int          @map("geographic_area_id")
-  slot             StaffingSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  organizationId   String       @default("DEFAULT") @map("organization_id")
   geographicArea   Category     @relation(fields: [geographicAreaId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  slot             StaffingSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
 
   @@id([slotId, geographicAreaId, organizationId])
   @@index([geographicAreaId], map: "staffing_slot_geographic_areas_geographic_area_id_fkey")
@@ -133,12 +126,11 @@ model StaffingSlotGeographicArea {
 }
 
 model StaffingSlotDomain {
-  slotId   Int          @map("slot_id")
-  domainId Int          @map("domain_id")
-  slot     StaffingSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
-  domain   Category     @relation(fields: [domainId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  slotId         Int          @map("slot_id")
+  domainId       Int          @map("domain_id")
+  organizationId String       @default("DEFAULT") @map("organization_id")
+  domain         Category     @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  slot           StaffingSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
 
   @@id([slotId, domainId, organizationId])
   @@index([domainId], map: "staffing_slot_domains_domain_id_fkey")

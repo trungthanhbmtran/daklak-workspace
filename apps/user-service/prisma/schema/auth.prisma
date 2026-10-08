@@ -1,12 +1,11 @@
 model Credential {
-  id           String   @id @default(cuid())
-  userId       Int      @unique @map("user_id")
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             String   @id @default(cuid())
+  userId         Int      @unique @map("user_id")
+  passwordHash   String   @map("password_hash") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  organizationId String   @default("DEFAULT") @map("organization_id")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("auth_credentials")
 }
@@ -24,9 +23,8 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
+  organizationId    String  @default("DEFAULT") @map("organization_id")
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@unique([provider, providerAccountId, organizationId])
   @@index([userId], map: "auth_accounts_user_id_fkey")
@@ -43,9 +41,8 @@ model RefreshToken {
   expiresAt       DateTime @map("expires_at")
   createdAt       DateTime @default(now()) @map("created_at")
   replacedByToken String?  @map("replaced_by_token")
+  organizationId  String   @default("DEFAULT") @map("organization_id")
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@index([userId])
   @@map("auth_refresh_tokens")

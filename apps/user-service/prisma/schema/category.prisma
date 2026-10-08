@@ -4,14 +4,13 @@ model Category {
   code                        String
   order                       Int                          @default(0)
   isActive                    Boolean                      @default(true) @map("is_active")
+  organizationId              String                       @default("DEFAULT") @map("organization_id")
+  jobTitles                   JobTitle[]
   unitDomains                 UnitDomain[]
   staffingSlotDomains         StaffingSlotDomain[]
   staffingSlotGeographicAreas StaffingSlotGeographicArea[]
   group                       CategoryGroup                @relation(fields: [groupCode], references: [code])
   translations                CategoryTranslation[]
-  jobTitles                   JobTitle[]
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@unique([groupCode, code])
   @@index([groupCode])
@@ -20,14 +19,13 @@ model Category {
 }
 
 model CategoryTranslation {
-  id          Int      @id @default(autoincrement())
-  categoryId  Int      @map("category_id")
-  langCode    String   @map("lang_code")
-  name        String   @db.Text
-  description String?  @db.Text
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             Int      @id @default(autoincrement())
+  categoryId     Int      @map("category_id")
+  langCode       String   @map("lang_code")
+  name           String   @db.Text
+  description    String?  @db.Text
+  organizationId String   @default("DEFAULT") @map("organization_id")
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, langCode])
   @@index([langCode])
@@ -35,13 +33,12 @@ model CategoryTranslation {
 }
 
 model CategoryGroup {
-  code       String     @id
-  name       String
-  order      Int        @default(0)
-  isActive   Boolean    @default(true)
-  categories Category[]
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  code           String     @id
+  name           String
+  order          Int        @default(0)
+  isActive       Boolean    @default(true)
+  organizationId String     @default("DEFAULT") @map("organization_id")
+  categories     Category[]
 
   @@map("sys_category_groups")
 }

@@ -192,7 +192,8 @@ export class ApiManagementController {
   @Permissions('INTEGRATION:MANAGE')
   async createImportSession(data: any) {
     try {
-      return await this.service.createImportSession(data);
+      const orgId = data.organizationId || 'DEFAULT';
+      return await this.service.createImportSession({ ...data, organizationId: orgId });
     } catch (e: any) {
       throw new RpcException({
         code: GrpcStatus.INTERNAL,

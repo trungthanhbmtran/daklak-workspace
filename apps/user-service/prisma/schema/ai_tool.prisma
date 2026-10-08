@@ -1,13 +1,10 @@
 model AiAssistantTool {
-  id          String @id @default(cuid())
-  assistantId String @map("assistant_id")
-  toolName    String @map("tool_name") // Predefined tool name (e.g. GET_WEATHER, GET_TASKS)
-
-  createdAt DateTime @default(now()) @map("created_at")
-
-  assistant AiAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             String      @id @default(cuid())
+  assistantId    String      @map("assistant_id")
+  toolName       String      @map("tool_name")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  organizationId String      @default("DEFAULT") @map("organization_id")
+  assistant      AiAssistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
 
   @@index([assistantId])
   @@map("ai_assistant_tools")

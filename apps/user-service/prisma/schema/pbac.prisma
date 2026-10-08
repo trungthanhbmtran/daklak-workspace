@@ -1,27 +1,25 @@
 model Policy {
-  id         Int         @id @default(autoincrement())
-  resourceId Int         @map("resource_id")
-  action     String
-  effect     String      @default("ALLOW")
-  conditions Json?
-  resource   Resource    @relation(fields: [resourceId], references: [id])
-  users      User[]      @relation("PolicyToUser")
-  userGroups UserGroup[] @relation("PolicyToUserGroup")
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             Int         @id @default(autoincrement())
+  resourceId     Int         @map("resource_id")
+  action         String
+  effect         String      @default("ALLOW")
+  conditions     Json?
+  organizationId String      @default("DEFAULT") @map("organization_id")
+  resource       Resource    @relation(fields: [resourceId], references: [id])
+  users          User[]      @relation("PolicyToUser")
+  userGroups     UserGroup[] @relation("PolicyToUserGroup")
 
   @@index([resourceId], map: "policies_resource_id_fkey")
   @@map("policies")
 }
 
 model Resource {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique
-  name        String
-  serviceCode String?  @map("service_code")
-  policies    Policy[]
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             Int      @id @default(autoincrement())
+  code           String   @unique
+  name           String
+  serviceCode    String?  @map("service_code")
+  organizationId String   @default("DEFAULT") @map("organization_id")
+  policies       Policy[]
 
   @@map("resources")
 }

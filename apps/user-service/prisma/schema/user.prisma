@@ -8,19 +8,18 @@ model User {
   cccd            String?           @map("cccd")
   employeeCode    String?           @map("employee_code")
   isActive        Boolean           @default(true) @map("is_active")
-  authVersion     Int               @default(0) @map("auth_version")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @updatedAt @map("updated_at")
+  authVersion     Int               @default(0) @map("auth_version")
+  organizationId  String            @default("DEFAULT") @map("organization_id")
   UserToUserGroup UserToUserGroup[]
-  accounts        Account[]
-  credential      Credential?
-  refreshTokens   RefreshToken[]
-  jobPositions    JobPosition[]
-  policies        Policy[]          @relation("PolicyToUser")
-  userConfigs     UserConfig[]
   aiAssistants    AiAssistant[]
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  accounts        Account?
+  credential      Credential?
+  refreshTokens   RefreshToken?
+  jobPositions    JobPosition[]
+  userConfigs     UserConfig[]
+  policies        Policy[]          @relation("PolicyToUser")
 
   @@map("users")
 }
@@ -35,11 +34,10 @@ model JobPosition {
   isDeputyLeader Boolean          @default(false) @map("is_deputy_leader")
   startDate      DateTime         @default(now()) @map("start_date")
   endDate        DateTime?        @map("end_date")
+  organizationId String           @default("DEFAULT") @map("organization_id")
   jobTitle       JobTitle         @relation(fields: [jobTitleId], references: [id])
   unit           OrganizationUnit @relation(fields: [unitId], references: [id])
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@index([jobTitleId], map: "job_positions_job_title_id_fkey")
   @@index([unitId], map: "job_positions_unit_id_fkey")
@@ -50,10 +48,9 @@ model JobPosition {
 model UserGroup {
   id              Int               @id @default(autoincrement())
   name            String            @unique
+  organizationId  String            @default("DEFAULT") @map("organization_id")
   UserToUserGroup UserToUserGroup[]
   policies        Policy[]          @relation("PolicyToUserGroup")
-
-  organizationId String @default("DEFAULT") @map("organization_id")
 
   @@map("user_groups")
 }

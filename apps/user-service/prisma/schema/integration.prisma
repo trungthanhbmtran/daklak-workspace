@@ -1,82 +1,74 @@
 model IntegrationUpstream {
-  id             String  @id @default(uuid())
-  name           String  @unique
-  type           String // 'internal' | 'external'
+  id             String   @id @default(uuid())
+  name           String   @unique
+  type           String
   baseUrl        String
-  allowedPaths   Json // Array of strings, e.g., ["/api/*", "/v1/docs"]
-  allowedMethods Json // Array of strings, e.g., ["GET", "POST"]
-  auth           Json // { kind: 'none'|'bearer'|'apiKey'|'basic'|'mtls'|'oauth2_client_credentials', secretRef?: string }
-  timeoutMs      Int     @default(5000)
-  retry          Json? // { times: number, backoff: number }
+  allowedPaths   Json
+  allowedMethods Json
+  auth           Json
+  timeoutMs      Int      @default(5000)
+  retry          Json?
   cacheTtlSec    Int?
-  rateLimit      Json? // { windowMs: number, max: number }
-  roles          Json? // Array of strings
-  scopes         Json? // Array of strings
-  requestSchema  Json? // JSON schema for validation
-  responseLimit  Int? // bytes limit
-  metadata       Json? // Store _parsedEndpoints or other UI configs
-  enabled        Boolean @default(true)
-  version        Int     @default(1)
-
-  createdBy String?
-  updatedBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  rateLimit      Json?
+  roles          Json?
+  scopes         Json?
+  requestSchema  Json?
+  responseLimit  Int?
+  enabled        Boolean  @default(true)
+  version        Int      @default(1)
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  metadata       Json?
+  organizationId String   @default("DEFAULT") @map("organization_id")
 
   @@map("integration_upstreams")
 }
 
 model IntegrationUpstreamAudit {
-  id           String   @id @default(uuid())
-  upstreamName String
-  action       String // 'CREATE' | 'UPDATE' | 'DELETE'
-  changedBy    String?
-  changes      Json // Stores before/after values (masks secretRef if needed)
-  version      Int
-  createdAt    DateTime @default(now())
-
-  organizationId String @default("DEFAULT") @map("organization_id")
+  id             String   @id @default(uuid())
+  upstreamName   String
+  action         String
+  changedBy      String?
+  changes        Json
+  version        Int
+  createdAt      DateTime @default(now())
+  organizationId String   @default("DEFAULT") @map("organization_id")
 
   @@index([upstreamName])
   @@map("integration_upstream_audits")
 }
 
-// V2 Models for Rebuild API Manager
 model ApiConnection {
-  id             String  @id @default(uuid())
-  code           String  @unique
+  id             String        @id @default(uuid())
+  code           String        @unique
   displayName    String
-  networkZone    String // internal, external
+  networkZone    String
   baseUrl        String
-  auth           Json // { kind: 'none'|'basic'|'apiKey'|'bearer', secretRef?: string }
-  timeoutMs      Int     @default(5000)
-  organizationId String  @map("organization_id")
-  enabled        Boolean @default(false)
-  version        Int     @default(1)
-
-  endpoints ApiEndpoint[]
-
-  createdBy String?
-  updatedBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  auth           Json
+  timeoutMs      Int           @default(5000)
+  organizationId String        @map("organization_id")
+  enabled        Boolean       @default(false)
+  version        Int           @default(1)
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  endpoints      ApiEndpoint[]
 
   @@map("api_connections")
 }
 
 model ApiEndpoint {
-  id           String @id @default(uuid())
-  connectionId String @map("connection_id")
+  id           String        @id @default(uuid())
+  connectionId String        @map("connection_id")
   method       String
-  pathTemplate String @map("path_template")
+  pathTemplate String        @map("path_template")
   schema       Json?
-
-  connection ApiConnection @relation(fields: [connectionId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  connection   ApiConnection @relation(fields: [connectionId], references: [id])
 
   @@unique([connectionId, method, pathTemplate])
   @@map("api_endpoints")
@@ -97,79 +89,68 @@ model ApiImportSession {
   inputHash   String   @map("input_hash")
   previewData Json     @map("preview_data")
   ttl         DateTime
-  status      String   @default("PENDING") // PENDING, COMMITTED, FAILED
-
-  createdAt DateTime @default(now())
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
 
   @@map("api_import_sessions")
 }
 
 model ApiOutbox {
-  id         String @id @default(uuid())
+  id         String   @id @default(uuid())
   topic      String
   payload    Json
-  status     String @default("PENDING") // PENDING, SENT, DEAD_LETTER
-  retryCount Int    @default(0) @map("retry_count")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status     String   @default("PENDING")
+  retryCount Int      @default(0) @map("retry_count")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("api_outboxes")
 }
 
 model CredentialBinding {
-  id        String @id @default(uuid())
-  opaqueRef String @unique @map("opaque_ref")
-  kind      String
-  version   Int    @default(1)
-  encryptedData String? @map("encrypted_data")
-  status    String @default("ACTIVE")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  opaqueRef     String   @unique @map("opaque_ref")
+  kind          String
+  version       Int      @default(1)
+  encryptedData String?  @map("encrypted_data")
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("api_credential_bindings")
 }
 
-
-// ============================================
-// P5 - INBOUND PARTNER INTEGRATION
-// ============================================
 model ApiPartner {
-  id             String  @id @default(uuid())
-  code           String  @unique
+  id             String          @id @default(uuid())
+  code           String          @unique
   name           String
   description    String?
-  status         String  @default("ACTIVE") // ACTIVE, SUSPENDED
-  organizationId String  @map("organization_id")
-  
+  status         String          @default("ACTIVE")
+  organizationId String          @map("organization_id")
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   keys           ApiPartnerKey[]
-
-  createdBy String?
-  updatedBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@map("api_partners")
 }
 
 model ApiPartnerKey {
-  id             String   @id @default(uuid())
-  partnerId      String   @map("partner_id")
-  name           String
-  keyPrefix      String   @map("key_prefix") // For UI identification, e.g., "daklak_..."
-  hashedKey      String   @map("hashed_key")
-  scopes         Json     // Array of allowed endpoints or logical scopes
-  status         String   @default("ACTIVE") // ACTIVE, REVOKED
-  expiresAt      DateTime? @map("expires_at")
-  lastUsedAt     DateTime? @map("last_used_at")
-
-  partner        ApiPartner @relation(fields: [partnerId], references: [id])
-
-  createdBy String?
-  updatedBy String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String     @id @default(uuid())
+  partnerId  String     @map("partner_id")
+  name       String
+  keyPrefix  String     @map("key_prefix")
+  hashedKey  String     @map("hashed_key")
+  scopes     Json
+  status     String     @default("ACTIVE")
+  expiresAt  DateTime?  @map("expires_at")
+  lastUsedAt DateTime?  @map("last_used_at")
+  createdBy  String?
+  updatedBy  String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  partner    ApiPartner @relation(fields: [partnerId], references: [id])
 
   @@index([partnerId])
   @@map("api_partner_keys")
