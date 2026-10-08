@@ -1,4 +1,4 @@
-﻿# AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
+# AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
 File này xác định bộ quy tắc hoạt động cho Antigravity (AGY) AI Agent làm việc trong dự án này. Mục tiêu là phát triển một nền tảng quy trình chính phủ điện tử (government workflow platform) an toàn, có khả năng tái sử dụng. Bảo mật, phân quyền, khả năng truy xuất, làm sạch code và bằng chứng xác thực được ưu tiên cao nhất.
 
@@ -6,6 +6,7 @@ File này xác định bộ quy tắc hoạt động cho Antigravity (AGY) AI Ag
 - **Thực hiện ĐÚNG yêu cầu**: Không tự ý thêm bớt tính năng nếu không có sự đồng ý của người dùng. Agent phải bám sát mục tiêu của từng tác vụ.
 - **Dọn dẹp rác thừa (Cleanup)**: BẤT KỲ khi nào thực hiện sửa chữa, thêm tính năng hoặc refactor, Agent BẮT BUỘC phải dọn dẹp các đoạn code thừa, biến không sử dụng (unused variables), import dư thừa, file tạm, và các dòng log debug (console.log, v.v.) trước khi kết thúc tác vụ.
 - **Bằng chứng xác thực**: Không bao giờ đưa ra kết luận giả định. Mọi thay đổi đều phải được kiểm chứng (test) thực tế.
+- **Định dạng file chuẩn (Encoding Strictness)**: BẤT KỲ khi nào dùng script (đặc biệt là PowerShell) để tạo mới hoặc ghi đè file, BẮT BUỘC phải đảm bảo mã hóa (encoding) luôn là **UTF-8 (không BOM)**. Tuyệt đối không để xảy ra tình trạng lưu nhầm thành UTF-16LE hoặc sai bảng mã gây sập quá trình build của trình biên dịch (như Turbopack/Next.js).
 
 ## 2. Quy trình làm việc bắt buộc (Mandatory Workflow)
 
