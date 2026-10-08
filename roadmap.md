@@ -115,3 +115,13 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - **Nguyên nhân**: "ApiManagementController" trong "api-gateway" khi chuyển tiếp request qua gRPC sang "api-management-service" đã không truyền token uỷ quyền đúng chuẩn (GatewayContextToken) mà chỉ truyền "user-id".
   - **Giải pháp**: Inject "TokenIssuerService" vào "ApiManagementController" và sử dụng hàm "signDelegation" để tạo delegation token chuẩn (chứa id, sid, exp ngắn, audience nội bộ), sau đó truyền qua header "authorization" (gRPC metadata) giống như các module khác.
 
+- [x] **[Hotfix] Bổ sung endpoint phân tích API (08/10/2026)**
+  - **Vấn đề**: Báo lỗi "Cannot POST /api/v1/admin/api-management/connections/import/upload" khi thực hiện tải lên file phân tích Swagger/Postman.
+  - **Nguyên nhân**: Trong quá trình tái cấu trúc API Gateway, Controller ApiManagementController đã bị thiếu việc khai báo 2 endpoint import/upload và import/commit.
+  - **Giải pháp**: Đã bổ sung hai endpoint này để nhận file upload, gọi đến ImportParserService để phân tích (YAML, JSON), và sau đó gọi gRPC CreateImportSession / CommitImportSession sang API Manager.
+
+- [x] **[Hotfix] Khôi phục API Quản lý Partner (08/10/2026)**
+  - **Vấn đề**: Client gọi /api/v1/admin/api-management/partners báo lỗi 404 Cannot GET/POST.
+  - **Nguyên nhân**: PartnerController được cài đặt bằng HTTP decorators bên trong user-service, nhưng API Gateway không cấu hình route proxy nào cả.
+  - **Giải pháp**: Mở rộng pi-management.proto với các method quản lý Partner; thay đổi PartnerController trong user-service thành gRPC endpoint; và tạo mới PartnerController trong pi-gateway để expose ra HTTP rồi forward bằng gRPC.
+

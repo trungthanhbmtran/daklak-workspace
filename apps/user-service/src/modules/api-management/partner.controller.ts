@@ -1,50 +1,42 @@
-﻿import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Body,
-  Param,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { PartnerService } from './partner.service';
-import { GrpcMethod } from '@nestjs/microservices';
-import { RpcException } from '@nestjs/microservices';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 
-@Controller('admin/api-management/partners')
+@Controller()
 export class PartnerController {
   constructor(private readonly partnerService: PartnerService) {}
 
-  @Post()
-  async createPartner(@Body() data: any, @Req() req: any) {
-    const orgId = req.user?.organizationId || 'DEFAULT';
+  @GrpcMethod('ApiManagementService', 'CreatePartner')
+  async createPartner(data: any) {
+    // If organizationId is missing from gateway payload, fallback to DEFAULT
     return this.partnerService.createPartner({
       ...data,
-      organizationId: orgId,
+      organizationId: data.organizationId || 'DEFAULT',
     });
   }
 
-  @Get()
-  async listPartners(@Req() req: any) {
-    const orgId = req.user?.organizationId || 'DEFAULT';
-    return this.partnerService.listPartners(orgId);
+  @GrpcMethod('ApiManagementService', 'ListPartners')
+  async listPartners(data: { organizationId: string }) {
+    const orgId = data.organizationId || 'DEFAULT';
+    const result = await this.partnerService.listPartners(orgId);
+    return { data: result };
   }
 
-  @Post(':id/keys')
-  async issueKey(@Param('id') id: string, @Body() data: any) {
+  @GrpcMethod('ApiManagementService', 'IssuePartnerKey')
+  async issueKey(data: any) {
     return this.partnerService.issueKey(
-      id,
+      data.partnerId,
       data.name,
       data.scopes,
       data.expiresAt ? new Date(data.expiresAt) : undefined,
     );
   }
 
-  @Put('keys/:keyId/revoke')
-  async revokeKey(@Param('keyId') keyId: string) {
-    return this.partnerService.revokeKey(keyId);
+  @GrpcMethod('ApiManagementService', 'RevokePartnerKey')
+  async revokeKey(data: { keyId: string }) {
+    await this.partnerService.revokeKey(data.keyId);
+    return { success: true };
   }
 
   // gRPC for API Gateway to validate Bearer tokens

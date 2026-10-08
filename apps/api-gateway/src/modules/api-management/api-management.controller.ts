@@ -142,4 +142,40 @@ export class ApiManagementController implements OnModuleInit {
     );
     return { data: res };
   }
+
+  @Post('import/upload')
+  @RequirePermissions('INTEGRATION:MANAGE')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImport(
+    @Req() req: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('targetConnectionId') targetConnectionId?: string,
+  ) {
+    if (!file) throw new BadRequestException('File is required');
+    
+    const content = file.buffer.toString('utf-8');
+    const parsedData = await this.importParserService.parseFileOrText(content, file.originalname);
+    
+    const res = await firstValueFrom(
+      this.grpcService.CreateImportSession(
+        { 
+          targetConnectionId: targetConnectionId || '',
+          systemName: parsedData.systemName,
+          baseUrl: parsedData.baseUrl,
+          endpoints: parsedData.endpoints
+        }, 
+        this.getGrpcMetadata(req)
+      ),
+    );
+    return { data: res }; 
+  }
+
+  @Post('import/commit')
+  @RequirePermissions('INTEGRATION:MANAGE')
+  async commitImport(@Req() req: any, @Body() dto: any) {
+    const res = await firstValueFrom(
+      this.grpcService.CommitImportSession(dto, this.getGrpcMetadata(req)),
+    );
+    return { data: res };
+  }
 }

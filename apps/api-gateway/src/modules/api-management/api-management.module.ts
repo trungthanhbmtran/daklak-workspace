@@ -5,6 +5,7 @@ import { GatewayRegistryService } from './registry.service';
 import { GatewayRegistryController } from './registry.controller';
 import { ExecutorController } from './executor.controller';
 import { ExecutorService } from './executor.service';
+import { PartnerController } from './partner.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MICROSERVICES } from '../../core/constants/services';
 import { join } from 'path';
@@ -38,6 +39,7 @@ const protoRoot =
     ApiManagementController,
     GatewayRegistryController,
     ExecutorController,
+    PartnerController,
   ],
   providers: [ImportParserService, GatewayRegistryService, ExecutorService],
   exports: [GatewayRegistryService, ExecutorService],
