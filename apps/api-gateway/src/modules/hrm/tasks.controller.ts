@@ -156,8 +156,8 @@ export class TasksController {
   }
 
   @Get(':id/history')
-  async getTaskHistory(@Param('id', ParseIntPipe) id: number) {
-    return this.tasksService.getTaskHistory(id);
+  async getTaskHistory(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.getTaskHistory(req, id);
   }
 
   @Get(':id')

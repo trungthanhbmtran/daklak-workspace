@@ -45,6 +45,7 @@ export async function requireAuth() {
   if (!token) {
     const cookieStore = await cookies();
     const path = await getCurrentPathname();
+    console.log(`[requireAuth] Redirecting to login for path: ${path}. Token missing.`);
     const target = cookieStore.get("refreshToken")?.value
       ? "/session/refresh"
       : "/login";

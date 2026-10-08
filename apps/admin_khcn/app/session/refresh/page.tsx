@@ -20,7 +20,7 @@ function RestoreSession() {
   });
   useEffect(() => {
     if (session.isSuccess && session.isFetchedAfterMount && !session.isFetching)
-      router.replace(target);
+      window.location.assign("/admin" + target);
   }, [
     session.isSuccess,
     session.isFetchedAfterMount,
@@ -36,7 +36,7 @@ function RestoreSession() {
             Không thể khôi phục phiên lúc này. Vui lòng thử lại hoặc đăng nhập.
           </p>
           <Button onClick={() => session.refetch()}>Thử lại</Button>
-          <Button variant="outline" onClick={() => router.replace("/login")}>
+          <Button variant="outline" onClick={() => window.location.assign("/admin/login")}>
             Đăng nhập
           </Button>
         </>

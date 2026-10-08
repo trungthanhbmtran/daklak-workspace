@@ -689,21 +689,30 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async getTaskHistory(id: number) {
+  async getTaskHistory(req: any, id: number) {
     return firstValueFrom(
-      this.taskService.GetTaskHistory({ taskId: id }),
+      this.taskService.GetTaskHistory(
+        { taskId: id },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async upsertTaskKpiSetting(id: number, body: any) {
+  async upsertTaskKpiSetting(req: any, id: number, body: any) {
     return firstValueFrom(
-      this.taskService.UpsertTaskKpiSetting({ taskId: id, ...body }),
+      this.taskService.UpsertTaskKpiSetting(
+        { taskId: id, ...body },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async getTaskKpiSetting(id: number) {
+  async getTaskKpiSetting(req: any, id: number) {
     return firstValueFrom(
-      this.taskService.GetTaskKpiSetting({ taskId: id }),
+      this.taskService.GetTaskKpiSetting(
+        { taskId: id },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
   }
 

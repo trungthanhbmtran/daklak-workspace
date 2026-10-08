@@ -95,3 +95,7 @@ TÃ i liá»‡u nÃ y lÆ°u váº¿t tiáº¿n Ä‘á»™ vÃ  cÃ¡c tÃ¡c vá»¥ phÃ¡t sinh (hotfixes
 - [x] **[Feature] TÃ­ch há»£p SSO LifeSSO & VNeID cho portal-goverment (08/10/2026)**
   - TÃ­ch há»£p Ä‘Äƒng nháº­p SSO cÃ´ng dÃ¢n báº±ng VNeID thÃ´ng qua LifeSSO IS.
   - Implement Authorization Code flow trÃªn Next.js (portal-goverment).
+- [x] **[Hotfix] S?a l?i 401 Logout Loop liên t?c trên h? th?ng (08/10/2026)**
+  - **V?n d?**: Ngu?i dùng b? vang ra màn hình dang nh?p liên t?c khi truy c?p các ch?c nang nhu Task Templates, L?ch s? Task, M?u báo cáo dù dã du?c c?p quy?n.
+  - **Nguyên nhân**: API Gateway g?i t?i m?t s? controller c?a hrm-service (TaskCatalogController, TaskHistoryController) du?c b?o v? b?i GrpcContextInterceptor (b?t bu?c ph?i có Metadata Delegation Token), nhung API Gateway l?i g?i gRPC chay mà không attach metadata (thi?u this.getGrpcMetadata(req)). Ði?u này d?n d?n microservice tr? mã l?i 16 (UNAUTHENTICATED), API Gateway quang l?i 401, khi?n client trigger hàm session-recovery nhung l?i b? dính infinite loop do replay request v?n l?i 401.
+  - **Gi?i pháp**: Truy?n req xu?ng service, g?i this.getGrpcMetadata(req) và dính kèm vào t?t c? các l?nh g?i gRPC b? thi?u trong tasks.service.ts và task-templates.controller.ts.

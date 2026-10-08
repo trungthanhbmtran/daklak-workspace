@@ -83,8 +83,7 @@ export function LoginClient() {
         message: "Đăng nhập thành công! Chào mừng bạn quay trở lại.",
         duration: 4000,
       });
-      router.replace(safeAuthCallback(callbackUrl));
-      router.refresh();
+      window.location.assign("/admin" + safeAuthCallback(callbackUrl));
     },
 
     onError: (error: any) => {
