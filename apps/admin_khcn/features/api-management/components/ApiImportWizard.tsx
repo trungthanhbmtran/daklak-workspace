@@ -9,10 +9,14 @@ import { Loader2, UploadCloud, AlertCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 
 export function ApiImportWizard({ targetConnectionId, onComplete }: { targetConnectionId?: string; onComplete?: () => void }) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [textMode, setTextMode] = useState('file');
+  const [rawText, setRawText] = useState('');
   
   const uploadMut = useUploadImport();
   const commitMut = useCommitImport();
@@ -21,8 +25,13 @@ export function ApiImportWizard({ targetConnectionId, onComplete }: { targetConn
   const [resolutions, setResolutions] = useState<Record<string, 'OVERWRITE'|'SKIP'>>({});
 
   const handleUpload = () => {
-    if (!file) return;
-    uploadMut.mutate({ file, targetConnectionId }, {
+    let targetFile = file;
+    if (textMode === 'text' && rawText.trim()) {
+      targetFile = new File([rawText], 'pasted.txt', { type: 'text/plain' });
+    }
+    if (!targetFile) return;
+
+    uploadMut.mutate({ file: targetFile, targetConnectionId }, {
       onSuccess: (data) => {
         setSession(data);
         // Default all to OVERWRITE
@@ -47,6 +56,7 @@ export function ApiImportWizard({ targetConnectionId, onComplete }: { targetConn
         setOpen(false);
         setSession(null);
         setFile(null);
+        setRawText('');
         if (onComplete) onComplete();
       }
     });
@@ -61,18 +71,41 @@ export function ApiImportWizard({ targetConnectionId, onComplete }: { targetConn
       </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import Cấu hình API (Swagger/OpenAPI)</DialogTitle>
+          <DialogTitle>Import Cấu hình API (Swagger/OpenAPI/cURL)</DialogTitle>
         </DialogHeader>
 
         {!session ? (
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>File cấu hình (.json, .yaml)</Label>
-              <Input type="file" accept=".json,.yaml,.yml" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-            </div>
-            <Button onClick={handleUpload} disabled={!file || uploadMut.isPending}>
+            <Tabs value={textMode} onValueChange={setTextMode} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="file">Tải lên file</TabsTrigger>
+                <TabsTrigger value="text">Dán mã nguồn (cURL/JSON)</TabsTrigger>
+              </TabsList>
+              <TabsContent value="file" className="pt-4">
+                <div className="grid gap-2">
+                  <Label>File cấu hình (.json, .yaml)</Label>
+                  <Input type="file" accept=".json,.yaml,.yml" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                </div>
+              </TabsContent>
+              <TabsContent value="text" className="pt-4">
+                <div className="grid gap-2">
+                  <Label>Dán nội dung lệnh cURL, Swagger JSON hoặc YAML</Label>
+                  <Textarea 
+                    placeholder="curl --location 'http://...' ..." 
+                    className="min-h-[150px] font-mono text-sm"
+                    value={rawText}
+                    onChange={(e) => setRawText(e.target.value)}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+            
+            <Button 
+              onClick={handleUpload} 
+              disabled={(textMode === 'file' && !file) || (textMode === 'text' && !rawText.trim()) || uploadMut.isPending}
+            >
               {uploadMut.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Tải lên và Phân tích
+              Tiến hành Phân tích
             </Button>
           </div>
         ) : (

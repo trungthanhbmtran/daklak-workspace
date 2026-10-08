@@ -349,7 +349,7 @@ export class ImportParserService {
 
       return {
         systemName: urlObj.hostname || 'Imported cURL',
-        baseUrl: `${urlObj.protocol}//${urlObj.host}${urlObj.port ? ':' + urlObj.port : ''}`,
+        baseUrl: `${urlObj.protocol}//${urlObj.host}`,
         endpoints: [
           {
             id: `ep-${Math.random().toString(36).substring(2, 9)}`,
