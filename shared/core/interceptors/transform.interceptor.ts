@@ -3,213 +3,249 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  StreamableFile,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-/**
- * Clean null/undefined values recursively from an object/array.
- * Keeps {} instead of null when an object is empty.
- * Tối ưu hoá (Expert Level): Áp dụng kỹ thuật Structural Sharing.
- * Chỉ cấp phát bộ nhớ tạo object/array mới nếu thực sự có giá trị bị thay đổi (xóa null/undefined).
- * Nếu payload hoàn toàn sạch, trả về nguyên bản tham chiếu gốc để tiết kiệm CPU & RAM (Garbage Collection).
- */
-function deepClean(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return undefined;
-  }
+type PlainObject = Record<string, unknown>;
 
-  if (Array.isArray(obj)) {
-    let hasChanges = false;
-    const result = [];
-    for (let i = 0; i < obj.length; i++) {
-      const val = obj[i];
-      if (val === null || val === undefined) {
-        hasChanges = true;
-      } else {
-        const cleaned = deepClean(val);
-        result.push(cleaned);
-        if (cleaned !== val) {
-          hasChanges = true;
-        }
-      }
-    }
-    // Trả về original array nếu không có gì thay đổi
-    return hasChanges ? result : obj;
-  }
-
-  if (typeof obj === 'object' && !(obj instanceof Date)) {
-    let hasChanges = false;
-    const cleaned: any = {};
-    const keys = Object.keys(obj);
-    
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const val = obj[key];
-      
-      if (val === null || val === undefined) {
-        hasChanges = true;
-      } else {
-        const cleanedVal = deepClean(val);
-        cleaned[key] = cleanedVal;
-        if (cleanedVal !== val) {
-          hasChanges = true;
-        }
-      }
-    }
-    // Trả về original object nếu không có gì thay đổi
-    return hasChanges ? cleaned : obj;
-  }
-
-  return obj;
+interface ApiResponse {
+  success: boolean;
+  data: unknown;
+  meta: PlainObject;
+  timestamp: string;
+  message?: unknown;
+  [extra: string]: unknown;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Constants (hoisted: không tạo lại mỗi request)                              */
+/* -------------------------------------------------------------------------- */
+
+const UUID_TAIL_RE =
+  /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NUMERIC_TAIL_RE = /\/\d+$/;
+const STATS_RE = /\/(reports|stats|metrics|dashboard|kpis)/i;
+
+const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report'];
+const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles'];
+
+/* -------------------------------------------------------------------------- */
+/* deepClean                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/** Chỉ recurse vào array / object "thường"; bỏ qua Date, Decimal, ObjectId (toJSON), Buffer, Map, Set... */
+function isCleanable(v: unknown): v is PlainObject {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    typeof (v as any).toJSON !== 'function' &&
+    !ArrayBuffer.isView(v) &&
+    !(v instanceof Map) &&
+    !(v instanceof Set)
+  );
+}
+
+/**
+ * Xoá null/undefined đệ quy.
+ * - Structural sharing: trả về đúng tham chiếu gốc nếu không có gì thay đổi.
+ * - Copy-on-write: chỉ cấp phát array/object mới ở lần thay đổi đầu tiên
+ *   (code cũ cấp phát sẵn kết quả ngay từ đầu dù payload sạch).
+ */
+function deepClean(value: unknown): unknown {
+  if (value === null || value === undefined) return undefined;
+
+  if (Array.isArray(value)) {
+    let result: unknown[] | null = null;
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i];
+      const cleaned = deepClean(item);
+      const changed = item == null || cleaned !== item;
+
+      if (result === null) {
+        if (!changed) continue;
+        result = value.slice(0, i); // copy phần đã duyệt (không đổi)
+      }
+      if (cleaned !== undefined) result.push(cleaned);
+    }
+    return result ?? value;
+  }
+
+  if (isCleanable(value)) {
+    const keys = Object.keys(value);
+    let result: PlainObject | null = null;
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const val = value[key];
+      const cleaned = deepClean(val);
+      const changed = val == null || cleaned !== val;
+
+      if (result === null) {
+        if (!changed) continue;
+        result = {};
+        for (let j = 0; j < i; j++) result[keys[j]] = value[keys[j]];
+      }
+      if (cleaned !== undefined) result[key] = cleaned;
+    }
+    return result ?? value;
+  }
+
+  return value;
+}
+
+const isEmptyObject = (v: unknown): boolean =>
+  typeof v === 'object' && v !== null && Object.keys(v).length === 0;
+
+/* -------------------------------------------------------------------------- */
+/* Interceptor                                                                 */
+/* -------------------------------------------------------------------------- */
+
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, any> {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = context.switchToHttp().getRequest();
-    const isListRequest = this.detectListRequest(req);
+    const isList = this.detectListRequest(req);
 
-    return next.handle().pipe(
-      map((response) => {
-        const timestamp = new Date().toISOString();
-        let payload = response;
+    return next.handle().pipe(map((res) => this.transform(res, isList)));
+  }
 
-        // Strip null/undefined entirely
-        payload = deepClean(payload);
+  private transform(response: unknown, isList: boolean): unknown {
+    // File download / stream: không được bọc
+    if (response instanceof StreamableFile || Buffer.isBuffer(response)) {
+      return response;
+    }
 
-        // Primitive or empty response
-        if (typeof payload !== 'object' || payload === undefined) {
-          return {
-            success: true,
-            data: isListRequest ? [] : {},
-            meta: {},
-            timestamp,
-          };
-        }
+    const timestamp = new Date().toISOString();
 
-        // Array response
-        if (Array.isArray(payload)) {
-          return {
-            success: true,
-            data: payload,
-            meta: {
-              pagination: {
-                total: payload.length,
-                page: 1,
-                pageSize: payload.length || 20,
-                totalPages: 1,
-              },
-            },
-            timestamp,
-          };
-        }
+    // Response đã có cấu trúc { success | data | status }
+    // (kiểm tra trên raw để key không bị mất do deepClean)
+    if (
+      isCleanable(response) &&
+      !Array.isArray(response) &&
+      ('success' in response || 'data' in response || 'status' in response)
+    ) {
+      return this.buildStructured(response, isList, timestamp);
+    }
 
-        // If it's already structured { success, data, meta }
-        if ('success' in payload || 'data' in payload || 'status' in payload) {
-          const isOk = payload.status === 'success' || payload.success !== false;
-          let data = payload.data !== undefined ? payload.data : payload;
-          if (isListRequest && !Array.isArray(data)) {
-            data = typeof data === 'object' && Object.keys(data).length === 0 ? [] : [data];
-          }
+    const payload = deepClean(response);
 
-          const meta = this.normalizeMeta(payload.meta);
-          const message = payload.message;
+    // Rỗng / primitive
+    if (payload === undefined || typeof payload !== 'object') {
+      return {
+        success: true,
+        data: isList ? [] : {},
+        meta: {},
+        timestamp,
+      } satisfies ApiResponse;
+    }
 
-          const result: any = {
-            success: isOk,
-            data: data || (isListRequest ? [] : {}),
-            meta: meta || {},
-            timestamp,
-          };
-          if (message) result.message = message;
-          if (payload.hubApps) result.hubApps = payload.hubApps;
-          if (payload.sidebarMenus) result.sidebarMenus = payload.sidebarMenus;
-          if (payload.allowedPaths) result.allowedPaths = payload.allowedPaths;
-          if (payload.allowed_paths) result.allowedPaths = payload.allowed_paths;
-          return result;
-        }
+    if (Array.isArray(payload)) {
+      return {
+        success: true,
+        data: payload,
+        meta: {
+          pagination: {
+            total: payload.length,
+            page: 1,
+            pageSize: payload.length || 20,
+            totalPages: 1,
+          },
+        },
+        timestamp,
+      } satisfies ApiResponse;
+    }
 
-        // Object response
-        return {
-          success: true,
-          data: payload,
-          meta: {},
-          timestamp,
-        };
-      }),
-    );
+    return { success: true, data: payload, meta: {}, timestamp } satisfies ApiResponse;
+  }
+
+  private buildStructured(raw: PlainObject, isList: boolean, timestamp: string): ApiResponse {
+    let data = deepClean('data' in raw ? raw.data : raw);
+
+    if (data === undefined) {
+      data = isList ? [] : {};
+    } else if (isList && !Array.isArray(data)) {
+      data = isEmptyObject(data) ? [] : [data];
+    }
+
+    const result: ApiResponse = {
+      success: raw.success !== false && raw.status !== 'error',
+      data,
+      meta: this.normalizeMeta(deepClean(raw.meta)),
+      timestamp,
+    };
+
+    if (raw.message) result.message = raw.message;
+
+    const hubApps = deepClean(raw.hubApps);
+    if (hubApps) result.hubApps = hubApps;
+
+    const sidebarMenus = deepClean(raw.sidebarMenus);
+    if (sidebarMenus) result.sidebarMenus = sidebarMenus;
+
+    // allowed_paths (snake_case) ưu tiên hơn allowedPaths như code cũ
+    const allowedPaths = deepClean(raw.allowed_paths ?? raw.allowedPaths);
+    if (allowedPaths) result.allowedPaths = allowedPaths;
+
+    return result;
   }
 
   private detectListRequest(req: any): boolean {
     if (!req || req.method !== 'GET') return false;
-    const path = req.path ?? '';
+
+    const path: string = req.path ?? '';
+
     if (
-      path.includes('/code/') ||
-      path.includes('/detail/') ||
-      path.endsWith('/scope') ||
-      path.endsWith('/staffing') ||
-      path.includes('/staffing-report') ||
-      path.endsWith('/subtree') ||
-      path.endsWith('/info') ||
-      path.endsWith('/job-titles')
+      NON_LIST_CONTAINS.some((s) => path.includes(s)) ||
+      NON_LIST_SUFFIXES.some((s) => path.endsWith(s))
     ) {
       return false;
     }
-    
-    const endsWithId =
-      /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        path,
-      ) || /\/\d+$/.test(path);
-    const hasPaginationQuery = !!(
-      req.query?.page ||
-      req.query?.limit ||
-      req.query?.pageSize
-    );
-    const isStats = /\/(reports|stats|metrics|dashboard|kpis)/i.test(path);
-    if (isStats && !hasPaginationQuery) return false;
+
+    const q = req.query;
+    const hasPaginationQuery = !!(q?.page || q?.limit || q?.pageSize);
+
+    if (!hasPaginationQuery && STATS_RE.test(path)) return false;
+
+    const endsWithId = UUID_TAIL_RE.test(path) || NUMERIC_TAIL_RE.test(path);
     return !endsWithId || hasPaginationQuery;
   }
 
-  private normalizeMeta(meta: any): any {
+  private normalizeMeta(meta: unknown): PlainObject {
     if (!meta) return {};
     if (typeof meta !== 'object') return { raw: meta };
 
-    if ('pagination' in meta) {
-      const p = meta.pagination;
+    const m = meta as PlainObject;
+
+    if ('pagination' in m) {
+      const p = (m.pagination ?? {}) as PlainObject;
       return {
-        ...meta,
+        ...m,
         pagination: {
-          total: Number(p?.total ?? 0),
-          page: Number(p?.page ?? 1),
-          pageSize: Number(p?.pageSize ?? 20),
-          totalPages: Number(p?.totalPages ?? 1),
+          total: Number(p.total ?? 0),
+          page: Number(p.page ?? 1),
+          pageSize: Number(p.pageSize ?? 20),
+          totalPages: Number(p.totalPages ?? 1),
         },
       };
     }
 
-    if ('total' in meta) {
-      const total = Number(meta.total ?? 0);
-      const page = Number(meta.page ?? 1);
-      const pageSize = Number(meta.pageSize ?? 20);
-      const {
-        total: _t,
-        page: _p,
-        pageSize: _ps,
-        totalPages: _tp,
-        ...rest
-      } = meta;
+    if ('total' in m) {
+      const { total, page, pageSize, totalPages: _ignored, ...rest } = m;
+      const t = Number(total ?? 0);
+      const ps = Number(pageSize ?? 20);
       return {
         pagination: {
-          total,
-          page,
-          pageSize,
-          totalPages: pageSize > 0 ? Math.ceil(total / pageSize) : 1,
+          total: t,
+          page: Number(page ?? 1),
+          pageSize: ps,
+          totalPages: ps > 0 ? Math.ceil(t / ps) : 1,
         },
         ...rest,
       };
     }
 
-    return meta;
+    return m;
   }
 }
