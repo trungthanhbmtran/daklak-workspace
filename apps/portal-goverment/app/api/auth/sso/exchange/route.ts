@@ -9,11 +9,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing code' }, { status: 400 });
     }
 
-    const clientId = process.env.NEXT_PUBLIC_SSO_CLIENT_ID;
-    const clientSecret = process.env.SSO_CLIENT_SECRET;
-    const tokenUrl = process.env.NEXT_PUBLIC_SSO_TOKEN_URL;
-    const redirectUri = process.env.NEXT_PUBLIC_SSO_REDIRECT_URI;
-    const userInfoUrl = process.env.NEXT_PUBLIC_SSO_USERINFO_URL;
+    const clientId = process.env.NEXT_PUBLIC_SSO_CLIENT_ID || 'CiA_7dKL3zw7JnhhliTMwyU_Wssa';
+    const clientSecret = process.env.SSO_CLIENT_SECRET || '2RqvpMaJWIMOGIF8gQkfHMg6msU4iiBtvBAA8km1TZ4a';
+    const tokenUrl = process.env.NEXT_PUBLIC_SSO_TOKEN_URL || 'https://lifesso.lifetex.vn:9445/oauth2/token';
+    const redirectUri = process.env.NEXT_PUBLIC_SSO_REDIRECT_URI || (request.headers.get('origin') || 'http://localhost:3000') + '/auth/callback';
+    const userInfoUrl = process.env.NEXT_PUBLIC_SSO_USERINFO_URL || 'https://lifesso.lifetex.vn:9445/oauth2/userinfo';
 
     if (!clientId || !clientSecret || !tokenUrl || !redirectUri) {
       return NextResponse.json({ error: 'Server missing SSO configuration' }, { status: 500 });

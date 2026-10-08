@@ -40,9 +40,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = () => {
-    const clientId = process.env.NEXT_PUBLIC_SSO_CLIENT_ID;
-    const authorizeUrl = process.env.NEXT_PUBLIC_SSO_AUTHORIZE_URL;
-    const redirectUri = process.env.NEXT_PUBLIC_SSO_REDIRECT_URI;
+    const clientId = process.env.NEXT_PUBLIC_SSO_CLIENT_ID || "CiA_7dKL3zw7JnhhliTMwyU_Wssa";
+    const authorizeUrl = process.env.NEXT_PUBLIC_SSO_AUTHORIZE_URL || "https://lifesso.lifetex.vn:9445/oauth2/authorize";
+    const redirectUri = process.env.NEXT_PUBLIC_SSO_REDIRECT_URI || `${window.location.origin}/auth/callback`;
     
     const params = new URLSearchParams({
       response_type: "code",
