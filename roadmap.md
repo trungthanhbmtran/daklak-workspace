@@ -1,3 +1,23 @@
+
+
+## Kiến Trúc và Ràng Buộc Hệ Thống (Architecture Guidelines & Design Decisions)
+
+Phần này mô tả các thiết kế chuẩn bắt buộc tuân thủ để tránh dư thừa và hiểu sai kiến trúc:
+
+- **Workflow Authority:** workflow-service nắm giữ sinh mệnh của mọi quy trình. Các service khác (như HRM, Document) KHÔNG tự code luồng duyệt, phải gọi RPC sang workflow-service.
+- **Fail-Fast Error Handling:** Bắt lỗi từng bước, ném RpcException ngay lập tức, không gộp điều kiện bằng ||. Trách nhiệm map lỗi sang HTTP thuộc về API Gateway.
+- **Data Envelope:** API Gateway tự động bọc response (Envelope) qua TransformInterceptor. Các service/controller con tuyệt đối không được tự bọc tay { success, data }.
+- **Dynamic gRPC Payload (Phi cấu trúc):** Dữ liệu phi cấu trúc (ví dụ JSON config) truyền qua gRPC bằng kiểu string (kết hợp JSON.stringify/parse), tuyệt đối không dùng google.protobuf.Struct.
+- **Performance:** Bắt buộc áp dụng Structural Sharing, tránh .map().filter() lặp dư thừa. Các List query phải dùng Pagination chuẩn.
+
+## Giai đoạn triển khai Agent Engineering System (Thực thi & Giám sát)
+
+- [x] Khởi tạo bộ khung .agents/ (Rules, Skills, Commands).
+- [x] Chốt cấu trúc critical-review (20 modules đánh giá kiến trúc).
+- [x] Ánh xạ service-map.md, cấm truy vấn chéo cơ sở dữ liệu.
+- [x] Chuẩn hóa Response Envelope & Cấm chuyển đổi dữ liệu dư thừa tại Gateway/Microservice.
+- [x] Cấm dùng Struct trong gRPC, thay bằng string JSON.
+- [x] Tạo performance-optimization.md bắt buộc Structural Sharing.
 # Roadmap Dự Án Daklak-Workspace
 
 Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes, tính năng mới) trong quá trình vận hành của Antigravity Agent, theo như yêu cầu trong AGENTS.md.
@@ -83,11 +103,16 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 - [x] **[Hotfix] Sửa lỗi API Gateway gọi nhầm gRPC localhost và bổ sung nút Tạo thủ công trong API Manager (07/10/2026)**
   - Sửa URL  .0.0.0:50051 hardcoded trong ApiManagementGatewayModule thành constant MICROSERVICES.API_MANAGEMENT.URL.
   - Triển khai Dialog component cho nút "Tạo thủ công" (gọi useCreateConnection từ UI) cho phần quản trị API.
-- [x] **[Hotfix] S?a l?i b? redirect ra m�n h�nh login khi v�o trang Qu?n l� API (07/10/2026)**
-  - ApiManagementController trong pi-gateway thi?u gRPC metadata (user-id) n�n b? user-service t? ch?i (UNAUTHENTICATED), g�y ra l?i 401 Unauthorized d?y user ra login.
-  - �� b? sung ti?n �ch d?c v� ch�n metadata v�o l?i g?i gRPC trong Controller c?a gateway.
+- [x] **[Hotfix] S?a l?i b? redirect ra m�n h�nh login khi v�o trang Qu?n l� API (07/10/2026)**
+  - ApiManagementController trong pi-gateway thi?u gRPC metadata (user-id) n�n b? user-service t? ch?i (UNAUTHENTICATED), g�y ra l?i 401 Unauthorized d?y user ra login.
+  - �� b? sung ti?n �ch d?c v� ch�n metadata v�o l?i g?i gRPC trong Controller c?a gateway.
 
-- [x] **[Hotfix] S?a l?i danh s�ch workflow bindings kh�ng hi?n th? (07/10/2026)**
-  - **V?n d?**: Truy c?p trang Qu?n l� G?n nghi?p v? (Bindings) nhung b?ng b�o "Chua c� binding".
-  - **Nguy�n nh�n**: gRPC t? d?ng cast organizationId t? undefined (khi admin kh�ng thu?c don v? n�o) sang chu?i r?ng "". Service d�ng "" query DB trong khi DB luu l� null, d?n d?n kh�ng t�m th?y data.
-  - **Gi?i ph�p**: S?a logic trong workflow-service (binding.service.ts) d? khi t�m ki?m s? cho ph�p l?y c�c global bindings (organizationId = null) ho?c bindings c?a t? ch?c.
+- [x] **[Hotfix] S?a l?i danh s�ch workflow bindings kh�ng hi?n th? (07/10/2026)**
+  - **V?n d?**: Truy c?p trang Qu?n l� G?n nghi?p v? (Bindings) nhung b?ng b�o "Chua c� binding".
+  - **Nguy�n nh�n**: gRPC t? d?ng cast organizationId t? undefined (khi admin kh�ng thu?c don v? n�o) sang chu?i r?ng "". Service d�ng "" query DB trong khi DB luu l� null, d?n d?n kh�ng t�m th?y data.
+  - **Gi?i ph�p**: S?a logic trong workflow-service (binding.service.ts) d? khi t�m ki?m s? cho ph�p l?y c�c global bindings (organizationId = null) ho?c bindings c?a t? ch?c.
+
+- [x] **[Hotfix] S?a l?i API Manager (v� c�c Service kh�c) b? l?i redirect login (401) do thi?u Server-Side Auth Guard (08/10/2026)**
+  - **V?n d?**: Ngu?i d�ng truy c?p /services/api-manager (ho?c c�c service kh�c) khi chua c� quy?n (ho?c token d� h?t h?n) b? b�o 401 tr�n client v� vang ra m�n h�nh dang nh?p.
+  - **Nguy�n nh�n**: File layout.tsx c?a pi-manager, hrm, documents, v.v... b? thi?u h�m equireMenuAccess(pathname). �i?u n�y khi?n trang Next.js render unprotected tr�n server, g?i xu?ng client. Client sau d� g?i API l?y Menu Sidebar v?i token h?ng/thi?u quy?n, d?n t?i Backend tr? v? 401, k�ch ho?t interceptor redirect v? /login.
+  - **Gi?i ph�p**: B? sung equireMenuAccess(pathname) v�o to�n b? c�c file layout.tsx c?a c�c ph�n h? d? ch?n ngay t? Server. N?u thi?u quy?n s? hi?n th? Not Found (404), n?u h?t token s? Redirect an to�n tr�n server thay v� b�o 401 tr�n client.

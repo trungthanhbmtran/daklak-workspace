@@ -10,28 +10,57 @@ import { map } from 'rxjs/operators';
 /**
  * Clean null/undefined values recursively from an object/array.
  * Keeps {} instead of null when an object is empty.
+ * Tối ưu hoá (Expert Level): Áp dụng kỹ thuật Structural Sharing.
+ * Chỉ cấp phát bộ nhớ tạo object/array mới nếu thực sự có giá trị bị thay đổi (xóa null/undefined).
+ * Nếu payload hoàn toàn sạch, trả về nguyên bản tham chiếu gốc để tiết kiệm CPU & RAM (Garbage Collection).
  */
 function deepClean(obj: any): any {
   if (obj === null || obj === undefined) {
     return undefined;
   }
+
   if (Array.isArray(obj)) {
-    return obj
-      .map((item) => deepClean(item))
-      .filter((item) => item !== undefined);
-  }
-  if (typeof obj === 'object' && !(obj instanceof Date)) {
-    const cleaned: any = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const val = deepClean(obj[key]);
-        if (val !== undefined && val !== null) {
-          cleaned[key] = val;
+    let hasChanges = false;
+    const result = [];
+    for (let i = 0; i < obj.length; i++) {
+      const val = obj[i];
+      if (val === null || val === undefined) {
+        hasChanges = true;
+      } else {
+        const cleaned = deepClean(val);
+        result.push(cleaned);
+        if (cleaned !== val) {
+          hasChanges = true;
         }
       }
     }
-    return cleaned;
+    // Trả về original array nếu không có gì thay đổi
+    return hasChanges ? result : obj;
   }
+
+  if (typeof obj === 'object' && !(obj instanceof Date)) {
+    let hasChanges = false;
+    const cleaned: any = {};
+    const keys = Object.keys(obj);
+    
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const val = obj[key];
+      
+      if (val === null || val === undefined) {
+        hasChanges = true;
+      } else {
+        const cleanedVal = deepClean(val);
+        cleaned[key] = cleanedVal;
+        if (cleanedVal !== val) {
+          hasChanges = true;
+        }
+      }
+    }
+    // Trả về original object nếu không có gì thay đổi
+    return hasChanges ? cleaned : obj;
+  }
+
   return obj;
 }
 
