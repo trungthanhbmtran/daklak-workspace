@@ -10,6 +10,7 @@ import { seedJobTitles } from './06-job-titles.seed';
 import { seedOrganizationsDakLakProvince } from "./07-organizations-dak-lak-province.seed";
 import { seedJobPositions } from "./08-job-positions.seed";
 import { seedCategoriesDanhMCDNgChung } from './09-categories-danh-m-c-d-ng-chung.seed';
+import { seedMenus } from './menus.seed';
 
 export async function runSeeds(prisma: PrismaClient) {
   console.log('Running seedResources...');
@@ -30,4 +31,6 @@ export async function runSeeds(prisma: PrismaClient) {
   await seedJobPositions(prisma);
   console.log('Running seedCategoriesDanhMCDNgChung...');
   await seedCategoriesDanhMCDNgChung(prisma);
+  console.log('Running seedMenus...');
+  await seedMenus(prisma);
 }

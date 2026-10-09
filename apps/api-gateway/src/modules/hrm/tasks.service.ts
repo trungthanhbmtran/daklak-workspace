@@ -719,7 +719,7 @@ export class TasksService implements OnModuleInit {
   async getTask(req: any, id: number) {
     const user = req.user;
     const response = (await firstValueFrom(
-      this.taskService.getTask(
+      this.taskService.GetTask(
         {
           id,
           currentEmployeeCode: user?.employeeCode,
