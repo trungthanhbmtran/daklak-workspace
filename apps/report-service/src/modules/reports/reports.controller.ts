@@ -27,31 +27,23 @@ export class ReportsController {
     }
   }
 
-  @GrpcMethod('ReportService', 'GetStaffingReport')
-  async getStaffingReport(data: { unitId: number }) {
-    return this.reportsService.getStaffingReport(data.unitId);
-  }
 
-  @GrpcMethod('ReportService', 'GetEmployeeQualityReport')
-  async getEmployeeQualityReport(data: { payload: string; userData: string }) {
-    return this.reportsService.getEmployeeQualityReport(data.payload, data.userData);
-  }
 
   // --- V2: Dynamic Report Designer ---
 
   @GrpcMethod('ReportService', 'CreateReportDefinition')
   async createReportDefinition(data: { payload: string; userData: string }) {
-    return { success: true, data: '{}', message: 'Tạo cấu hình báo cáo thành công (skeleton)' };
+    return this.reportsService.createReportDefinition(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetReportDefinitions')
   async getReportDefinitions(data: { payload: string; userData: string }) {
-    return { success: true, data: '[]', message: 'Lấy danh sách cấu hình báo cáo thành công' };
+    return this.reportsService.getReportDefinitions(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetReportDefinitionById')
   async getReportDefinitionById(data: { payload: string; userData: string }) {
-    return { success: true, data: '{}', message: 'Lấy chi tiết cấu hình báo cáo thành công' };
+    return this.reportsService.getReportDefinitionById(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetReportCatalog')
@@ -61,20 +53,16 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'RunReport')
   async runReport(data: { payload: string; userData: string }) {
-    // 1. Fetch ReportDefinition
-    // 2. ReportCompiler.compile(config)
-    // 3. Create ReportRun record as QUEUED / RUNNING
-    // 4. SourceExecutor.executePlan() (sync/async)
-    return { success: true, data: '{"runId": 1}', message: 'Đã đưa báo cáo vào hàng đợi chạy' };
+    return this.reportsService.runReport(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetReportRunStatus')
   async getReportRunStatus(data: { payload: string; userData: string }) {
-    return { success: true, data: '{"status": "QUEUED"}', message: 'Lấy trạng thái chạy thành công' };
+    return this.reportsService.getReportRunStatus(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetDatasetSnapshot')
   async getDatasetSnapshot(data: { payload: string; userData: string }) {
-    return { success: true, data: '{"schema": [], "data": []}', message: 'Lấy dữ liệu kết quả thành công' };
+    return this.reportsService.getDatasetSnapshot(data.payload, data.userData);
   }
 }

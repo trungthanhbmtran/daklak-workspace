@@ -5,9 +5,8 @@ import type {
   CreateUnitPayload,
   UpdateUnitPayload,
   JobTitleItem,
-  StaffingReportItem,
-  SetStaffingPayload,
-  SetStaffingSlotPayload,
+
+
   UpdateJobTitlePayload,
 } from "./types";
 
@@ -92,23 +91,7 @@ export const organizationApi = {
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
     apiClient.put(`/organizations/job-titles/${id}`, payload).then((r: any) => r?.data ?? r),
 
-  setStaffing: (payload: SetStaffingPayload) =>
-    apiClient.post("/organizations/staffing", payload).then((r: any) => r?.data ?? r),
 
-  getStaffingReport: (unitId: number): Promise<{ partyReport: StaffingReportItem[], govReport: StaffingReportItem[], allReport: StaffingReportItem[] }> =>
-    apiClient
-      .get(`/organizations/${unitId}/staffing-report`)
-      .then((r: any) => {
-        const data = r?.data ?? r;
-        return {
-          partyReport: data.partyReport || [],
-          govReport: data.govReport || [],
-          allReport: data.allReport || [],
-        };
-      }),
-
-  setStaffingSlot: (payload: SetStaffingSlotPayload) =>
-    apiClient.post("/organizations/staffing-slots", payload).then((r: any) => r?.data ?? r),
 
   getUnitTypes: (): Promise<{ data: any[] }> =>
     apiClient.get("/organizations/unit-types").then((r: any) => ({

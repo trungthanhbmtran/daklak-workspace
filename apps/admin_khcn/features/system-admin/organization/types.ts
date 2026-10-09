@@ -53,37 +53,7 @@ export interface JobTitleItem {
   type?: string;
 }
 
-/** Phân công riêng từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực theo slot */
-export interface StaffingSlotItem {
-  id: number;
-  staffingId: number;
-  slotOrder: number;
-  description?: string;
-  geographicAreas?: { id: number; name: string }[];
-  geographicAreaIds?: number[];
-  domains?: { id: number; name: string }[];
-  domainIds?: number[];
-  monitoredUnits?: { id: number; name: string }[];
-  monitoredUnitIds?: number[];
-  assignedEmployeeName?: string;
-  assignedEmployeeCode?: string;
-}
 
-/** Một dòng báo cáo định biên của đơn vị */
-export interface StaffingReportItem {
-  id: number;
-  unitId: number;
-  jobTitleId: number;
-  jobTitleName: string;
-  quantity: number;
-  currentCount: number;
-  currentEmployeeNames?: string[];
-  jobTitleDomainName?: string;
-  jobTitleMonitoredUnitNames?: string[];
-  jobTitleGeographicAreaName?: string;
-  slots?: StaffingSlotItem[];
-  assignedUserBySlot?: Record<number, { fullName: string; employeeCode: string | null }>;
-}
 
 export interface UpdateJobTitlePayload {
   domainId?: number;
@@ -91,17 +61,3 @@ export interface UpdateJobTitlePayload {
   monitoredUnitIds?: number[];
 }
 
-export interface SetStaffingPayload {
-  unitId: number;
-  jobTitleId: number;
-  quantity: number;
-}
-
-export interface SetStaffingSlotPayload {
-  staffingId: number;
-  slotOrder: number;
-  description?: string;
-  geographicAreaIds?: number[];
-  domainIds?: number[];
-  monitoredUnitIds?: number[];
-}

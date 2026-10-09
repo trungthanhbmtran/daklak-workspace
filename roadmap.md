@@ -130,3 +130,6 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - C?p nh?t ReportSourceOption contract d? ch?a upstream alias.
   - C?u h�nh gRPC d? li�n k?t eport-service v?i pi-management.
   - Fetch danh s�ch API endpoint t? API Manager d? t�ch h?p v�o V2 Report Catalog.
+
+## Unplanned Tasks
+- [x] Chuyển đổi thiết kế báo cáo động (Dynamic Report Designer), xóa logic hardcode trong reports.service.ts và reports.controller.ts.

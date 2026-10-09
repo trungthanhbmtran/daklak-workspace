@@ -11,7 +11,7 @@ import { useOrganizationDetailQuery } from "@/features/system-admin/organization
 import { useOrganizationContext } from "@/features/system-admin/organization/context/OrganizationContext";
 import { OrganizationUnitEdit } from "@/features/system-admin/organization/components/OrganizationUnitEdit";
 import { UnitScopePanel } from "@/features/system-admin/organization/components/UnitScopePanel";
-import { OrganizationStaffing } from "@/features/system-admin/organization/components/OrganizationStaffing";
+
 
 export default function OrganizationDetailPage() {
   const params = useParams<{ code: string }>();
@@ -93,13 +93,7 @@ export default function OrganizationDetailPage() {
               <MapPin className="h-4 w-4 shrink-0" />
               <span>Phạm vi phụ trách</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="staffing" 
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-            >
-              <Users className="h-4 w-4 shrink-0" />
-              <span>Định biên & Chức danh</span>
-            </TabsTrigger>
+
           </TabsList>
         </div>
 
@@ -113,11 +107,7 @@ export default function OrganizationDetailPage() {
               <UnitScopePanel />
             </div>
           </TabsContent>
-          <TabsContent value="staffing" className="flex-1 min-h-0 m-0 outline-none data-[state=inactive]:hidden data-[state=active]:flex data-[state=active]:flex-col h-full">
-            <div className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 flex flex-col focus-visible:outline-none h-full">
-              <OrganizationStaffing />
-            </div>
-          </TabsContent>
+
         </div>
       </Tabs>
     </div>
