@@ -20,19 +20,12 @@ const parameterSchema = z.object({
   description: z.string().optional(),
 });
 
-const responseFieldSchema = z.object({
-  name: z.string().min(1, "Bắt buộc"),
-  type: z.string().min(1, "Bắt buộc"), // string, number, boolean, object, array
-  description: z.string().optional(),
-});
-
 const formSchema = z.object({
   method: z.string().min(1, "Vui lòng chọn phương thức"),
   pathTemplate: z.string().min(1, "Vui lòng nhập đường dẫn"),
   name: z.string().optional(),
   description: z.string().optional(),
   parameters: z.array(parameterSchema),
-  responseFields: z.array(responseFieldSchema).optional(),
   bodySchema: z.string().optional(),
 });
 
@@ -57,7 +50,6 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
       name: "",
       description: "",
       parameters: [],
-      responseFields: [],
       bodySchema: "",
     }
   });
@@ -67,10 +59,7 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
     name: "parameters"
   });
 
-  const { fields: resFields, append: appendRes, remove: removeRes } = useFieldArray({
-    control: form.control,
-    name: "responseFields"
-  });
+
 
   useEffect(() => {
     if (open) {
@@ -89,7 +78,6 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
             ...p,
             required: p.required ? "true" : "false"
           })),
-          responseFields: schemaObj.responseFields || [],
           bodySchema: schemaObj.body ? (typeof schemaObj.body === 'string' ? schemaObj.body : JSON.stringify(schemaObj.body, null, 2)) : "",
         });
       } else {
@@ -99,7 +87,6 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
           name: "",
           description: "",
           parameters: [],
-          responseFields: [],
           bodySchema: "",
         });
       }
@@ -126,7 +113,6 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
           ...p,
           required: p.required === "true"
         })),
-        responseFields: values.responseFields,
         body: bodyObj
       })
     };
@@ -155,11 +141,10 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
             
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="w-full grid grid-cols-4">
+              <TabsList className="w-full grid grid-cols-3">
                 <TabsTrigger value="general">Thông tin chung</TabsTrigger>
                 <TabsTrigger value="params">Tham số (Params)</TabsTrigger>
                 <TabsTrigger value="body">Body Payload</TabsTrigger>
-                <TabsTrigger value="response">Cột Trả Về (Response)</TabsTrigger>
               </TabsList>
               
               <TabsContent value="general" className="space-y-4 mt-4">
@@ -363,83 +348,6 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
                     </FormItem>
                   )}
                 />
-              </TabsContent>
-              
-              <TabsContent value="response" className="mt-4 space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <FormLabel>Các cột dữ liệu trả về (Response Fields)</FormLabel>
-                    <p className="text-xs text-slate-500 mt-1">Định nghĩa các cột để có thể chọn làm trục X, Y khi vẽ biểu đồ báo cáo.</p>
-                  </div>
-                  <Button type="button" variant="outline" size="sm" onClick={() => appendRes({ name: "", type: "string", description: "" })}>
-                    <Plus className="w-4 h-4 mr-1" /> Thêm cột
-                  </Button>
-                </div>
-                
-                {resFields.length === 0 && (
-                  <div className="text-center text-sm text-gray-500 py-4 border rounded-md border-dashed">
-                    Chưa định nghĩa cột dữ liệu trả về. Báo cáo vẽ biểu đồ sẽ không có trường để chọn.
-                  </div>
-                )}
-                
-                <div className="space-y-4">
-                  {resFields.map((field, index) => (
-                    <div key={field.id} className="grid grid-cols-12 gap-2 items-start border p-3 rounded-md relative">
-                      <div className="col-span-4">
-                        <FormField
-                          control={form.control as any}
-                          name={`responseFields.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Tên cột (Field Name)</FormLabel>
-                              <FormControl><Input placeholder="vd: totalCount, departmentName" {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <FormField
-                          control={form.control as any}
-                          name={`responseFields.${index}.type`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Kiểu Dữ liệu</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                  <SelectItem value="string">String (Văn bản)</SelectItem>
-                                  <SelectItem value="number">Number (Số)</SelectItem>
-                                  <SelectItem value="boolean">Boolean</SelectItem>
-                                  <SelectItem value="date">Date (Ngày tháng)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="col-span-4">
-                        <FormField
-                          control={form.control as any}
-                          name={`responseFields.${index}.description`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Ghi chú (Hiển thị cho user)</FormLabel>
-                              <FormControl><Input placeholder="vd: Tổng số lượng..." {...field} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="col-span-1 pt-6 flex justify-end">
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeRes(index)}>
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </TabsContent>
             </Tabs>
 
