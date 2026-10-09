@@ -37,6 +37,21 @@ export const useUpdateConnection = () => {
   });
 };
 
+export const useDeleteConnection = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiManagementApi.deleteConnection(id),
+    onSuccess: () => {
+      toast.success("Xóa kết nối thành công");
+      qc.invalidateQueries({ queryKey: ['api-connections'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || "Lỗi khi xóa kết nối");
+    }
+  });
+};
+
+
 export const useDisableConnection = () => {
   const qc = useQueryClient();
   return useMutation({
