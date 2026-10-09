@@ -1,4 +1,4 @@
-import { Controller, UseInterceptors } from '@nestjs/common';
+﻿import { Controller, UseInterceptors } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { TaskKpiService } from './task-kpi.service';
 import { GrpcAuthGuard, CurrentUser } from '../../../../../shared/security/grpc-auth';
@@ -22,12 +22,21 @@ export class TaskKpiController {
 
   @GrpcMethod('TaskService', 'GetTaskKpiSetting')
   getTaskKpiSetting(data: any, @CurrentUser() user: any) {
-    if (user) {
-      data.currentEmployeeCode = user.employeeCode;
-      data.currentUserId = user.id;
-      data.currentUserDept = user.unitId;
-      data.currentUserPermissions = user.permissionsFlatten;
-    }
-    return this.service.getTaskKpiSetting(data.taskId);
+    return this.service.getTaskKpiSetting();
+  }
+
+  @GrpcMethod('TaskService', 'GetKpiSystemVariables')
+  getKpiSystemVariables() {
+    return this.service.getSystemVariables();
+  }
+
+  @GrpcMethod('TaskService', 'GetGlobalKpiSettings')
+  getGlobalKpiSettings() {
+    return this.service.getTaskKpiSetting();
+  }
+
+  @GrpcMethod('TaskService', 'SaveGlobalKpiSettings')
+  saveGlobalKpiSettings(data: any) {
+    return this.service.upsertTaskKpiSetting(data);
   }
 }

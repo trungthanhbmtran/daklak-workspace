@@ -141,3 +141,16 @@ eport-service v?i pi-management.
 - [x] Chuyển đổi thiết kế báo cáo động (Dynamic Report Designer), xóa logic hardcode trong reports.service.ts và reports.controller.ts.
 - [x] Nâng cấp giao diện Trung tâm Báo cáo (Enterprise UI): Chuyển đổi ReportWorkspace.tsx sang giao diện nâng cao với Tabs, KPIs, Grid/List view toggle và filters.
 - [x] Nâng cấp giao diện Quản lý API (API Manager): Chuyển đổi giao diện `ApiManagementDashboard`, `PartnerManagement` và `ApiConnectionCard` sang chuẩn Enterprise UI/UX với Dashboards, KPIs, Gradient Cards và Layout cao cấp.
+- [x] **[Hotfix] Sửa danh sách nguồn và xem dữ liệu API trong thiết kế báo cáo (09/10/2026)**
+  - Chuyển delegation token người dùng từ API Gateway qua report-service khi đọc API Manager catalog.
+- Hiện đường dẫn endpoint, schema khai báo và dữ liệu mẫu thực tế (qua endpoint preview có lọc dữ liệu nhạy cảm).
+
+- [x] **[Hotfix] Hiển thị đầy đủ nhánh và nét nối trong Workflow Designer (09/10/2026)**
+  - Chuẩn hóa cạnh từ API, bao gồm graph legacy dùng `sourceNodeId`/`targetNodeId`.
+  - Render đúng cổng nhánh `true`/`false` của gateway, nhãn action/condition và tăng độ tương phản của đường nối.
+  - Lint các file workflow đã pass; toàn bộ typecheck đang vướng lỗi import `Percentage` không liên quan trong `KpiFormulasClient.tsx`.
+  - Đã xác nhận lỗi trên trang production trước sửa; cần triển khai frontend để xác nhận trực quan sau sửa.
+- [x] **[Hotfix] Nhận tọa độ API và tự bố trí sơ đồ workflow theo cây (09/10/2026)**
+  - Đọc vị trí từ `position`, `positionAbsolute`, `uiMetadata` và `_uiMetadata`.
+  - Khi backend không có tọa độ hợp lệ, xếp node theo tầng từ quan hệ cạnh; ưu tiên nhánh `true` phía trên và `false` phía dưới.
+  - Lưu vị trí trên node vào `definition` để giữ bố cục sau khi kéo thả; cần xác nhận trực quan sau khi frontend được triển khai.

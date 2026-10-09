@@ -25,10 +25,10 @@ export function ConfigureRankTasksClient() {
         <Card className="max-w-5xl mx-auto mt-6 shadow-sm border">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-xl font-black text-foreground">
-                    <Settings2 className="w-5 h-5 text-primary" /> Cấu hình Thư viện Định biên theo Ngạch & Chức danh Công vụ
+                    <Settings2 className="w-5 h-5 text-primary" /> Cấu hình Thư viện Nhiệm vụ theo Vị trí việc làm
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground mt-1">
-                    Hệ thống hóa danh mục công việc dựa trên phân hạng Ngạch giúp phân rã khối lượng công việc đúng năng lực, đúng thẩm quyền pháp lý.
+                    Hệ thống hóa danh mục công việc dựa trên phân hạng Vị trí việc làm giúp phân rã khối lượng công việc đúng năng lực, đúng thẩm quyền pháp lý.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -69,7 +69,7 @@ export function ConfigureRankTasksClient() {
                     {isSaving ? (
                         <>Đang lưu...</>
                     ) : (
-                        <><Save className="w-4 h-4" /> LƯU ĐỒNG BỘ THƯ VIỆN NGẠCH</>
+                        <><Save className="w-4 h-4" /> LƯU ĐỒNG BỘ THƯ VIỆN VTVL</>
                     )}
                 </Button>
             </CardFooter>

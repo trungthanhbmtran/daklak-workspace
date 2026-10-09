@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package task;
 
@@ -15,6 +15,9 @@ service TaskService {
   rpc DeleteTaskTemplate (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}
   rpc BulkUpdateTaskTemplates (BulkUpdateTemplatesRequest) returns (BulkUpdateTemplatesResponse) {}
 
+  rpc GetKpiSystemVariables (common.Empty) returns (KpiSystemVariablesResponse) {}
+  rpc GetGlobalKpiSettings (common.Empty) returns (GlobalKpiSettingsResponse) {}
+  rpc SaveGlobalKpiSettings (SaveGlobalKpiSettingsRequest) returns (GlobalKpiSettingsResponse) {}
   rpc UpsertTaskKpiSetting (UpsertTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
   rpc GetTaskKpiSetting (GetTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
   rpc GetTaskHistory (GetTaskHistoryRequest) returns (TaskHistoryResponse) {}
@@ -138,9 +141,9 @@ message TaskResponse {
   string startDate = 19;
   int32 parentId = 20;
   string rejectReason = 21;
-  string assignerName = 22;  // TÃªn ngÆ°á» i giao viá»‡c
-  string priority = 23;      // Má»©c Ä‘á»™ Æ°u tiÃªn
-  string supervisorName = 24; // TÃªn ngÆ°á» i theo dÃµi chá»‰ Ä‘áº¡o
+  string assignerName = 22;  // TÃƒÂªn ngÃ†Â°Ã¡Â» i giao viÃ¡Â»â€¡c
+  string priority = 23;      // MÃ¡Â»Â©c Ã„â€˜Ã¡Â»â„¢ Ã†Â°u tiÃƒÂªn
+  string supervisorName = 24; // TÃƒÂªn ngÃ†Â°Ã¡Â» i theo dÃƒÂµi chÃ¡Â»â€° Ã„â€˜Ã¡ÂºÂ¡o
   repeated string coassigneeCodes = 25;
   repeated string allowedActions = 26;
   TaskPlan plan = 27;
@@ -200,12 +203,12 @@ message ListTasksRequest {
   int32 page = 6;
   int32 limit = 7;
   string currentEmployeeCode = 8;
-  string assignerCode = 9; // optional - lá»c theo ngÆ°á»i giao viá»‡c (tab ÄÃ£ giao)
-  string status = 10; // optional - lá»c theo tráº¡ng thÃ¡i
-  string priority = 11; // optional - lá»c theo má»©c Ä‘á»™ Æ°u tiÃªn
-  int32 planId = 12; // optional - id káº¿ hoáº¡ch
+  string assignerCode = 9; // optional - lÃ¡Â»Âc theo ngÃ†Â°Ã¡Â»Âi giao viÃ¡Â»â€¡c (tab Ã„ÂÃƒÂ£ giao)
+  string status = 10; // optional - lÃ¡Â»Âc theo trÃ¡ÂºÂ¡ng thÃƒÂ¡i
+  string priority = 11; // optional - lÃ¡Â»Âc theo mÃ¡Â»Â©c Ã„â€˜Ã¡Â»â„¢ Ã†Â°u tiÃƒÂªn
+  int32 planId = 12; // optional - id kÃ¡ÂºÂ¿ hoÃ¡ÂºÂ¡ch
   string statsFilter = 13;
-  string role = 14; // optional - lá»c theo vai trÃ² (ASSIGNEE, OWNER)
+  string role = 14; // optional - lÃ¡Â»Âc theo vai trÃƒÂ² (ASSIGNEE, OWNER)
   bool isAdmin = 15;
   bool isLeader = 16;
   repeated int32 allowedDepartmentIds = 17;
@@ -279,8 +282,8 @@ message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
   string rejectReason = 3;         // optional
-  string actorCode = 4;             // ngÆ°á» i thá»±c hiá»‡n (tá»« JWT)
-  string actionName = 5;            // optional â€” tÃªn action workflow (máº·c Ä‘á»‹nh = status)
+  string actorCode = 4;             // ngÃ†Â°Ã¡Â» i thÃ¡Â»Â±c hiÃ¡Â»â€¡n (tÃ¡Â»Â« JWT)
+  string actionName = 5;            // optional Ã¢â‚¬â€ tÃƒÂªn action workflow (mÃ¡ÂºÂ·c Ã„â€˜Ã¡Â»â€¹nh = status)
   int32 currentUserId = 6;
   string currentEmployeeCode = 7;
   repeated string currentUserPermissions = 8;
@@ -413,7 +416,7 @@ message GetCommentsResponse {
   repeated TaskCommentResponse data = 3;
 }
 
-// Chuá»—i giao viá»‡c - má»—i node lÃ  má»™t bÆ°á»›c trong timeline
+// ChuÃ¡Â»â€”i giao viÃ¡Â»â€¡c - mÃ¡Â»â€”i node lÃƒÂ  mÃ¡Â»â„¢t bÃ†Â°Ã¡Â»â€ºc trong timeline
 message DelegationNode {
   int32 id = 1;
   string title = 2;
@@ -427,11 +430,11 @@ message DelegationNode {
   int32 parentId = 10;
   string dueDate = 11;
   string createdAt = 12;
-  bool isParent = 13;      // Ä Ã¢y lÃ  task cha (cáº¥p trÃªn Ä‘Ã£ giao task nÃ y)
-  bool isCurrent = 14;     // Ä Ã¢y lÃ  task Ä‘ang xem
-  bool isChild = 15;       // Task con (báº¥t ká»³ cáº¥p nÃ o)
-  bool isGrandChild = 16;  // Giá»¯ láº¡i Ä‘á»ƒ tÆ°Æ¡ng thÃ­ch
-  int32 level = 17;        // Cáº¥p Ä‘á»™: -1=cha, 0=hiá»‡n táº¡i, 1,2,3...=cÃ¡c cáº¥p con (khÃ´ng giá»›i háº¡n)
+  bool isParent = 13;      // Ã„ ÃƒÂ¢y lÃƒÂ  task cha (cÃ¡ÂºÂ¥p trÃƒÂªn Ã„â€˜ÃƒÂ£ giao task nÃƒÂ y)
+  bool isCurrent = 14;     // Ã„ ÃƒÂ¢y lÃƒÂ  task Ã„â€˜ang xem
+  bool isChild = 15;       // Task con (bÃ¡ÂºÂ¥t kÃ¡Â»Â³ cÃ¡ÂºÂ¥p nÃƒÂ o)
+  bool isGrandChild = 16;  // GiÃ¡Â»Â¯ lÃ¡ÂºÂ¡i Ã„â€˜Ã¡Â»Æ’ tÃ†Â°Ã†Â¡ng thÃƒÂ­ch
+  int32 level = 17;        // CÃ¡ÂºÂ¥p Ã„â€˜Ã¡Â»â„¢: -1=cha, 0=hiÃ¡Â»â€¡n tÃ¡ÂºÂ¡i, 1,2,3...=cÃƒÂ¡c cÃ¡ÂºÂ¥p con (khÃƒÂ´ng giÃ¡Â»â€ºi hÃ¡ÂºÂ¡n)
   repeated string allowedActions = 18;
   string description = 19;
   string supervisorCode = 20;
@@ -457,7 +460,7 @@ message GetSubTasksResponse {
   repeated DelegationNode data = 3;
 }
 
-// â”€â”€â”€ GetTask â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ GetTask Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 message GetTaskRequest {
   int32 id = 1;
   int32 currentUserId = 2;
@@ -466,7 +469,7 @@ message GetTaskRequest {
   repeated string currentUserPermissions = 5;
 }
 
-// â”€â”€â”€ BreakdownTask â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ BreakdownTask Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 message BreakdownTaskRequest {
   int32 parentId = 1;
   string title = 2;
@@ -484,12 +487,12 @@ message BreakdownTaskRequest {
   repeated string currentUserPermissions = 14;
 }
 
-// â”€â”€â”€ RequestCoordination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ RequestCoordination Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 message RequestCoordinationRequest {
   int32 taskId = 1;
   string requesterCode = 2;
   string message = 3;
-  string leadId = 4;             // if set â†’ supervisor assigns lead role
+  string leadId = 4;             // if set Ã¢â€ â€™ supervisor assigns lead role
   repeated string coordinatorIds = 5;
   string leadCode = 6;
   repeated string coordinatorCodes = 7;
@@ -594,7 +597,7 @@ message TaskHistoryResponse {
   repeated TaskHistoryData data = 3;
 }
 
-// â”€â”€â”€ TaskStep Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ TaskStep Messages Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 message TaskStep {
   int32 id = 1;
   int32 taskId = 2;
@@ -692,4 +695,45 @@ message GetAttendanceStatsResponse {
   bool success = 1;
   string message = 2;
   AttendanceStatsData data = 3;
+}
+
+message VariableDef {
+  string code = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message KpiSystemVariablesResponse {
+  bool success = 1;
+  repeated VariableDef data = 2;
+}
+
+message CustomRule {
+  string domainCode = 1;
+  string formula = 2;
+  string name = 3;
+}
+
+message GlobalKpiSettingsData {
+  string baseFormula = 1;
+  bool enableQualityScore = 2;
+  float qualityWeight = 3;
+  bool enablePenalty = 4;
+  float penaltyPerDay = 5;
+  repeated CustomRule customRules = 6;
+}
+
+message GlobalKpiSettingsResponse {
+  bool success = 1;
+  string message = 2;
+  GlobalKpiSettingsData data = 3;
+}
+
+message SaveGlobalKpiSettingsRequest {
+  string baseFormula = 1;
+  bool enableQualityScore = 2;
+  float qualityWeight = 3;
+  bool enablePenalty = 4;
+  float penaltyPerDay = 5;
+  repeated CustomRule customRules = 6;
 }

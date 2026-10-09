@@ -27,6 +27,21 @@ export class TasksController {
     return this.tasksService.create(req, body);
   }
 
+  @Get('kpi/variables')
+  async getKpiSystemVariables() {
+    return this.tasksService.getKpiSystemVariables();
+  }
+
+  @Get('kpi/global-settings')
+  async getGlobalKpiSettings() {
+    return this.tasksService.getGlobalKpiSettings();
+  }
+
+  @Put('kpi/global-settings')
+  async saveGlobalKpiSettings(@Body() body: any) {
+    return this.tasksService.saveGlobalKpiSettings(body);
+  }
+
   @Get()
   async list(
     @Req() req: any,

@@ -148,11 +148,7 @@ export function EmployeeListClient() {
                             </span>
                           )}
                         </div>
-                        {rank && rank !== govt && (
-                          <Text variant="small" className="flex items-center text-muted-foreground font-normal">
-                            Ngạch: <Text as="span" variant="small" weight="medium" className="text-foreground ml-1">{rank}</Text>
-                          </Text>
-                        )}
+
                       </div>
                       <Text variant="small" className="flex items-center text-muted-foreground font-normal pt-2 mt-1 border-t border-border">
                         <Building2 className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" /> {getUnitName(emp)}

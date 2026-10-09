@@ -2,9 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { 
-  ListTodo, 
-  LayoutDashboard
+import {
+  ListTodo,
+  LayoutDashboard,
+  Library,
+  Settings,
+  Calculator
 } from "lucide-react";
 
 export default function WorkPlansLayout({ children }: { children: React.ReactNode }) {
@@ -17,10 +20,20 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
       icon: ListTodo,
     },
     {
-      name: "Tổng quan tiến độ",
-      href: "/services/hrm/work-plans/tasks/dashboard",
-      icon: LayoutDashboard,
+      name: "Thư viện nhiệm vụ (VTVL)",
+      href: "/services/hrm/work-plans/rank-templates",
+      icon: Library,
     },
+    {
+      name: "Định mức theo VTVL",
+      href: "/services/hrm/work-plans/manual-selector",
+      icon: Settings,
+    },
+    {
+      name: "Công thức tính KPI",
+      href: "/services/hrm/work-plans/kpi-formulas",
+      icon: Calculator,
+    }
   ];
 
   return (
@@ -40,11 +53,10 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                isActive
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${isActive
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                }`}
             >
               <Icon className="w-4 h-4" />
               {tab.name}

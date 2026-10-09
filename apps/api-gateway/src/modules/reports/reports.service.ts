@@ -52,7 +52,9 @@ export class ReportsService implements OnModuleInit {
 
   private parseResponse(res: any) {
     return {
+      success: res?.success !== false,
       data: res.data ? JSON.parse(res.data) : null,
+      ...(res?.message ? { message: res.message } : {}),
     };
   }
 

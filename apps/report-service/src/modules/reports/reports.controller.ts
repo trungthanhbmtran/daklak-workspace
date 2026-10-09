@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { executeTable } from './table-engine';
 import { ReportsService } from './reports.service';
+import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
 export class ReportsController {
@@ -27,28 +28,43 @@ export class ReportsController {
     }
   }
 
-
-
   // --- V2: Dynamic Report Designer ---
 
   @GrpcMethod('ReportService', 'CreateReportDefinition')
   async createReportDefinition(data: { payload: string; userData: string }) {
-    return this.reportsService.createReportDefinition(data.payload, data.userData);
+    return this.reportsService.createReportDefinition(
+      data.payload,
+      data.userData,
+    );
   }
 
   @GrpcMethod('ReportService', 'GetReportDefinitions')
   async getReportDefinitions(data: { payload: string; userData: string }) {
-    return this.reportsService.getReportDefinitions(data.payload, data.userData);
+    return this.reportsService.getReportDefinitions(
+      data.payload,
+      data.userData,
+    );
   }
 
   @GrpcMethod('ReportService', 'GetReportDefinitionById')
   async getReportDefinitionById(data: { payload: string; userData: string }) {
-    return this.reportsService.getReportDefinitionById(data.payload, data.userData);
+    return this.reportsService.getReportDefinitionById(
+      data.payload,
+      data.userData,
+    );
   }
 
   @GrpcMethod('ReportService', 'GetReportCatalog')
-  async getReportCatalog(data: { payload: string; userData: string }) {
-    return this.reportsService.getReportCatalog(data.payload, data.userData);
+  async getReportCatalog(
+    data: { payload: string; userData: string },
+    metadata: Metadata,
+  ) {
+    const authorization = metadata?.get('authorization')?.[0];
+    return this.reportsService.getReportCatalog(
+      data.payload,
+      data.userData,
+      typeof authorization === 'string' ? authorization : undefined,
+    );
   }
 
   @GrpcMethod('ReportService', 'RunReport')
@@ -68,6 +84,9 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'GetReportDashboardStats')
   async getReportDashboardStats(data: { payload: string; userData: string }) {
-    return this.reportsService.getReportDashboardStats(data.payload, data.userData);
+    return this.reportsService.getReportDashboardStats(
+      data.payload,
+      data.userData,
+    );
   }
 }

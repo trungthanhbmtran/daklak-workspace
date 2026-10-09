@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, timeout, type Observable } from 'rxjs';
 import { executeTable } from './table-engine';
+import { Metadata } from '@grpc/grpc-js';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -52,7 +53,11 @@ export class ReportsService implements OnModuleInit {
   private docGrpcService: any;
   private apiGrpcService: any;
 
-  private catalogCache: { expiresAt: number; value: CatalogEntry[] } | null = null;
+  private catalogCache: {
+    expiresAt: number;
+    includesApiSources: boolean;
+    value: CatalogEntry[];
+  } | null = null;
   private statsCache: { expiresAt: number; value: any } | null = null;
   private defsCache: { expiresAt: number; value: any } | null = null;
 
@@ -62,7 +67,7 @@ export class ReportsService implements OnModuleInit {
     @Inject('DOCUMENT_SERVICE') private docClient: ClientGrpc,
     @Inject('API_MANAGEMENT_SERVICE') private apiClient: ClientGrpc,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgGrpcService = this.userClient.getService<any>('OrganizationService');
@@ -85,7 +90,7 @@ export class ReportsService implements OnModuleInit {
           organizationId: payload.organizationId,
         },
       });
-      
+
       // Invalidate caches
       this.defsCache = null;
       this.statsCache = null;
@@ -210,7 +215,7 @@ export class ReportsService implements OnModuleInit {
       const definition = await this.prisma.reportDefinition.findUnique({
         where: { id: Number(payload.reportDefinitionId) },
       });
-      
+
       if (!definition) {
         return { success: false, data: '{}', message: 'Không tìm thấy cấu hình báo cáo' };
       }
@@ -270,11 +275,11 @@ export class ReportsService implements OnModuleInit {
         orderBy: { chunkIndex: 'asc' },
         take: 2, // Chỉ lấy 2 chunks đầu tiên để preview, tránh sập hệ thống
       });
-      
+
       if (snapshots.length === 0) {
         return { success: false, data: JSON.stringify({ schema: [], data: [] }), message: 'Không có dữ liệu snapshot' };
       }
-      
+
       const schema = snapshots[0].schema;
       const combinedData = snapshots.flatMap((s: any) => (s.data as any[]) || []).slice(0, limit);
 
@@ -291,20 +296,36 @@ export class ReportsService implements OnModuleInit {
 
   // ───────────────────────── Catalog ─────────────────────────
 
-  async getReportCatalog(_payloadStr: string, _userDataStr: string) {
+  async getReportCatalog(
+    _payloadStr: string,
+    userDataStr: string,
+    authorization?: string,
+  ) {
     try {
+      const user = userDataStr ? JSON.parse(userDataStr) : {};
+      const includesApiSources =
+        Array.isArray(user.permissionsFlatten) &&
+        user.permissionsFlatten.includes('INTEGRATION:VIEW');
       const now = Date.now();
-      if (this.catalogCache && this.catalogCache.expiresAt > now) {
+      if (
+        this.catalogCache &&
+        this.catalogCache.expiresAt > now &&
+        this.catalogCache.includesApiSources === includesApiSources
+      ) {
         return this.catalogResponse(this.catalogCache.value);
       }
 
-      const [dbCatalog, apiCatalog] = await Promise.all([
-        this.loadDbCatalog(),
-        this.loadApiCatalog(),
-      ]);
+      const dbCatalog = await this.loadDbCatalog();
+      const apiCatalog = includesApiSources
+        ? await this.loadApiCatalog(authorization)
+        : [];
 
       const catalog = [...dbCatalog, ...apiCatalog];
-      this.catalogCache = { expiresAt: now + CATALOG_TTL_MS, value: catalog };
+      this.catalogCache = {
+        expiresAt: now + CATALOG_TTL_MS,
+        includesApiSources,
+        value: catalog,
+      };
 
       return this.catalogResponse(catalog);
     } catch (error: any) {
@@ -347,16 +368,30 @@ export class ReportsService implements OnModuleInit {
     }));
   }
 
-  private async loadApiCatalog(): Promise<CatalogEntry[]> {
+  private async loadApiCatalog(
+    authorization?: string,
+  ): Promise<CatalogEntry[]> {
     if (!this.apiGrpcService) return [];
+    if (!authorization?.startsWith('Bearer ')) {
+      this.logger.warn(
+        'Skipping API catalog: delegated authorization is missing',
+      );
+      return [];
+    }
+
+    const metadata = new Metadata();
+    metadata.set('authorization', authorization);
 
     try {
       const connections = await this.fetchAll<any>(
         (page, limit) =>
-          this.apiGrpcService.ListConnections({
-            limit,
-            offset: (page - 1) * limit,
-          }),
+          this.apiGrpcService.ListConnections(
+            {
+              limit,
+              offset: (page - 1) * limit,
+            },
+            metadata,
+          ),
         1000,
       );
 

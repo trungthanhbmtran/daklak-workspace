@@ -51,7 +51,6 @@ const formSchema = z.object({
   identityCard: z.string().optional(),
   departmentId: z.number({ message: "Vui lòng chọn đơn vị" }),
   jobTitleId: z.number().optional(),
-  civilServantRankId: z.number({ message: "Vui lòng chọn ngạch công chức" }),
   partyTitleId: z.number().optional(),
   startDate: z.string().optional(),
   birthday: z.string().optional(),
@@ -108,7 +107,6 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
         identityCard: employee.identityCard || "",
         departmentId: (employee.departmentId && employee.departmentId > 0) ? employee.departmentId : undefined as any,
         jobTitleId: (employee.jobTitleId && employee.jobTitleId > 0) ? employee.jobTitleId : undefined,
-        civilServantRankId: (employee.civilServantRankId && employee.civilServantRankId > 0) ? employee.civilServantRankId : undefined as any,
         partyTitleId: (employee.partyTitleId && employee.partyTitleId > 0) ? employee.partyTitleId : undefined,
         startDate: employee.startDate ? employee.startDate.toString().slice(0, 10) : new Date().toISOString().slice(0, 10),
         birthday: employee.birthday ? employee.birthday.toString().slice(0, 10) : "",
@@ -143,7 +141,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
     enabled: !!departmentId,
   });
 
-  const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
+
 
   const selectedUnit = units.find(u => u.id === departmentId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,14 +153,12 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSubmitting(true);
     try {
-      const finalJobTitleId = values.jobTitleId || values.civilServantRankId;
       await updateEmployee({
         id: employeeId,
         payload: {
           ...values,
           departmentId: values.departmentId,
-          jobTitleId: finalJobTitleId,
-          civilServantRankId: values.civilServantRankId,
+          jobTitleId: values.jobTitleId,
           partyTitleId: values.partyTitleId || 0,
         }
       });
@@ -289,32 +285,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="civilServantRankId"
-                      render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">3. Ngạch công chức *</FormLabel>
-                          <Select
-                            disabled={!departmentId}
-                            onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
-                            value={field.value ? String(field.value) : undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
-                                <SelectValue placeholder="-- Chọn ngạch công chức --" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {rankTitles.map((j: any) => (
-                                <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
 
                     <FormField
                       control={form.control}

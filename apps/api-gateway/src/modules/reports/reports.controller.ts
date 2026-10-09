@@ -15,6 +15,9 @@ import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { ReportsService } from './reports.service';
 import { ReportSourceService } from './report-source.service';
 import { RequirePermissions } from '../../core/decorators/permissions.decorator';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
+import { randomUUID } from 'crypto';
 
 @Controller('admin/reports')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -23,16 +26,25 @@ export class ReportsController {
   constructor(
     private readonly reportsService: ReportsService,
     private readonly sources: ReportSourceService,
+    private readonly issuer: TokenIssuerService,
   ) {}
 
   @Post('table/sources')
-  @RequirePermissions('INTEGRATION:READ', 'INTEGRATION:MANAGE')
+  @RequirePermissions(
+    'INTEGRATION:VIEW',
+    'INTEGRATION:READ',
+    'INTEGRATION:MANAGE',
+  )
   tableSources(@Req() req: any) {
     return { data: this.sources.list(req.user) };
   }
 
   @Post('table/preview')
-  @RequirePermissions('INTEGRATION:READ', 'INTEGRATION:MANAGE')
+  @RequirePermissions(
+    'INTEGRATION:VIEW',
+    'INTEGRATION:READ',
+    'INTEGRATION:MANAGE',
+  )
   async previewTable(
     @Body() body: { source?: unknown; config?: unknown },
     @Req() req: any,
@@ -143,7 +155,11 @@ export class ReportsController {
   async getReportCatalog(@Req() req: any) {
     return this.reportsService.getReportCatalog(
       req.user,
-      req.headers.authorization,
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
     );
   }
 

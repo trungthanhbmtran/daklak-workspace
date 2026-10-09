@@ -66,14 +66,14 @@ export function ManualPlanSelectorByRankClient() {
     ];
 
     const { data: congChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
-        queryFn: async () => (await categoryApi.fetchByGroup('CIVIL_SERVANT_RANK')).data,
+        queryKey: ['categories', 'JOB_TITLE'],
+        queryFn: async () => (await categoryApi.fetchByGroup('JOB_TITLE')).data,
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: vienChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
-        queryFn: async () => (await categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK')).data,
+        queryKey: ['categories', 'JOB_TITLE'],
+        queryFn: async () => (await categoryApi.fetchByGroup('JOB_TITLE')).data,
         staleTime: 5 * 60 * 1000,
     });
 
@@ -119,7 +119,7 @@ export function ManualPlanSelectorByRankClient() {
             }
         });
         const groups = Array.from(groupsMap.entries()).map(([id, name]) => ({ id, name }));
-        groups.unshift({ id: 'ALL', name: 'Tất cả các ngành/ngạch' });
+        groups.unshift({ id: 'ALL', name: 'Tất cả các ngành/vị trí' });
         return groups;
     }, [activeRanksList]);
 
@@ -196,7 +196,7 @@ export function ManualPlanSelectorByRankClient() {
 
     const handleSubmitPlan = async () => {
         if (!activeRankFilter) {
-            toast.error('Vui lòng chọn ngạch trước khi lưu định biên.');
+            toast.error('Vui lòng chọn vị trí việc làm trước khi lưu định biên.');
             return;
         }
 
@@ -228,10 +228,10 @@ export function ManualPlanSelectorByRankClient() {
                         <div className="p-2.5 bg-primary/10 rounded-xl">
                             <Target className="w-6 h-6 text-primary" />
                         </div>
-                        Cấu Hình Chỉ Tiêu Định Biên Theo Ngạch
+                        Cấu Hình Chỉ Tiêu Định Biên Theo Vị Trí Việc Làm
                     </CardTitle>
                     <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                        Thiết lập và phân bổ danh mục công việc bắt buộc cho từng ngạch chức danh. Giúp tự động hóa việc giao việc và đánh giá KPI một cách khoa học.
+                        Thiết lập và phân bổ danh mục công việc bắt buộc cho từng vị trí việc làm. Giúp tự động hóa việc giao việc và đánh giá KPI một cách khoa học.
                     </CardDescription>
                 </div>
             </CardHeader>
@@ -390,7 +390,7 @@ export function ManualPlanSelectorByRankClient() {
                                                     <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
                                                         <Target className="w-8 h-8 opacity-20" />
                                                     </div>
-                                                    <Text variant="small" className="font-normal">Chưa có nhiệm vụ bắt buộc nào cho ngạch này.</Text>
+                                                    <Text variant="small" className="font-normal">Chưa có nhiệm vụ bắt buộc nào cho vị trí việc làm này.</Text>
                                                     // eslint-disable-next-line react/no-unescaped-entities
                                                     <Text variant="small" className="opacity-60 font-normal">Hãy chọn một nhiệm vụ mẫu từ thư viện và nhấn "Thêm"</Text>
                                                 </div>
@@ -406,7 +406,7 @@ export function ManualPlanSelectorByRankClient() {
                 {/* RIGHT COLUMN: FILTER SECTION */}
                 <div className="w-full lg:w-[350px] xl:w-[400px] shrink-0 flex flex-col gap-4 bg-card text-card-foreground rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
                     <div className="space-y-3 shrink-0">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại Ngạch</Label>
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại VTVL</Label>
                         <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
                             <TabsList className="w-full grid grid-cols-2 p-1 bg-muted rounded-xl">
                                 <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Khối Công chức</TabsTrigger>
@@ -457,7 +457,7 @@ export function ManualPlanSelectorByRankClient() {
                         </div>
 
                         <div className="flex items-center justify-between shrink-0 mt-1">
-                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Ngạch / Hạng</Label>
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Vị trí việc làm</Label>
                         </div>
                         <div className="relative shrink-0">
                             <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />

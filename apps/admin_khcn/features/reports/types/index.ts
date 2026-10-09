@@ -1,12 +1,15 @@
-export type JoinType = 'INNER' | 'LEFT';
-export type FilterOperator = 'eq' | 'contains' | 'gt' | 'lt';
-export type AggregateFunction = 'none' | 'count' | 'sum' | 'avg' | 'min' | 'max';
-export type ColumnType = 'string' | 'number' | 'boolean' | 'mixed';
+export type JoinType = "INNER" | "LEFT";
+export type FilterOperator = "eq" | "contains" | "gt" | "lt";
+export type AggregateFunction =
+  "none" | "count" | "sum" | "avg" | "min" | "max";
+export type ColumnType = "string" | "number" | "boolean" | "mixed";
 
 export interface ReportSourceDef {
   id: string;
   endpoint: string;
   fields: string[];
+  upstream?: string;
+  path?: string;
 }
 
 export interface JoinDef {
@@ -36,7 +39,7 @@ export interface ColumnDef {
 }
 
 export interface ChartConfig {
-  type: 'bar' | 'line' | 'pie';
+  type: "bar" | "line" | "pie";
   xAxis: string;
   yAxis: string;
   title?: string;
@@ -51,7 +54,7 @@ export interface ReportConfigAST {
   groupBy: Array<{ source: string; field: string }>;
   sort?: {
     key: string;
-    direction: 'asc' | 'desc';
+    direction: "asc" | "desc";
   };
   charts?: ChartConfig[];
 }
@@ -71,7 +74,8 @@ export interface ReportRun {
   id: number;
   reportDefinitionId: number;
   definitionVersion: number;
-  status: 'QUEUED' | 'RUNNING' | 'SUCCEEDED' | 'FAILED' | 'CANCELLED' | 'PARTIAL';
+  status:
+    "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED" | "PARTIAL";
   rowCount?: number;
   errors?: any;
   startedAt?: string;

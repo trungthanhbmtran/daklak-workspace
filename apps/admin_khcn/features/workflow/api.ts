@@ -7,28 +7,40 @@ export interface WorkflowNodeData {
   assignmentStrategy?: string;
   targetRole?: string;
   employeeCode?: string;
+  inputHandles?: Array<string | null>;
+  outputHandles?: Array<string | null>;
   [key: string]: unknown;
 }
 export interface WorkflowAssignmentRule { id: string; type: string; value: string }
 export interface WorkflowNode {
   id: string;
   type: string;
-  position: WorkflowPosition;
+  position?: WorkflowPosition;
+  positionAbsolute?: WorkflowPosition;
   data: WorkflowNodeData;
   assignments?: WorkflowAssignmentRule[];
   [key: string]: unknown;
 }
 export interface WorkflowEdge {
   id: string;
-  source: string;
-  target: string;
+  source?: string;
+  target?: string;
+  sourceNodeId?: string;
+  targetNodeId?: string;
   sourceHandle?: string | null;
   targetHandle?: string | null;
+  action?: string;
+  condition?: unknown;
   label?: string;
   data?: Record<string, unknown>;
   [key: string]: unknown;
 }
-export interface WorkflowGraph { nodes: WorkflowNode[]; edges: WorkflowEdge[] }
+export interface WorkflowGraph {
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  _uiMetadata?: Record<string, unknown>;
+  viewport?: { x: number; y: number; zoom: number };
+}
 export interface Workflow {
   id: string;
   name: string;

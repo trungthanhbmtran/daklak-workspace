@@ -19,22 +19,16 @@ export function useConfigureRankTasks() {
         staleTime: 5 * 60 * 1000,
     });
 
-    const { data: congChucRanks = [], isLoading: isLoadingCC } = useQuery({
-        queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
-        queryFn: async () => (await categoryApi.fetchByGroup('CIVIL_SERVANT_RANK')).data,
-        staleTime: 5 * 60 * 1000,
-    });
-
-    const { data: vienChucRanks = [], isLoading: isLoadingVC } = useQuery({
-        queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
-        queryFn: async () => (await categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK')).data,
+    const { data: jobTitles = [], isLoading: isLoadingJobTitles } = useQuery({
+        queryKey: ['categories', 'JOB_TITLE'],
+        queryFn: async () => (await categoryApi.fetchByGroup('JOB_TITLE')).data,
         staleTime: 5 * 60 * 1000,
     });
 
     const congChucTemplates = templates.filter(t => t.classification === 'CONG_CHUC');
     const vienChucTemplates = templates.filter(t => t.classification === 'VIEN_CHUC');
 
-    const isLoading = isLoadingTemplates || isLoadingUnits || isLoadingCC || isLoadingVC;
+    const isLoading = isLoadingTemplates || isLoadingUnits || isLoadingJobTitles;
 
     const [isSaving, setIsSaving] = useState(false);
 
@@ -43,7 +37,7 @@ export function useConfigureRankTasks() {
         try {
             await hrmTaskTemplatesApi.bulkUpdate([...congChucTemplates, ...vienChucTemplates]);
             setIsSaved(true);
-            toast.success("Đồng bộ thư viện ngạch thành công!");
+            toast.success("Đồng bộ thư viện vị trí việc làm thành công!");
             setTimeout(() => setIsSaved(false), 2000);
         } catch (error) {
             console.error("Lỗi khi lưu cấu hình:", error);
@@ -60,8 +54,8 @@ export function useConfigureRankTasks() {
         isSaving,
         handleSave,
         units,
-        congChucRanks,
-        vienChucRanks,
+        congChucRanks: jobTitles,
+        vienChucRanks: jobTitles,
         congChucTemplates,
         vienChucTemplates,
         isLoading

@@ -46,7 +46,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
             {/* Left Sidebar: Ranks */}
             <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-full border rounded-xl overflow-hidden bg-background shadow-sm">
                 <div className="p-4 bg-muted/30 border-b flex-shrink-0">
-                    <Heading level="h4" className="font-semibold uppercase tracking-wider">Chức danh nghề nghiệp</Heading>
+                    <Heading level="h4" className="font-semibold uppercase tracking-wider">Danh mục Vị trí việc làm</Heading>
                 </div>
                 <ScrollArea className="flex-1 w-full">
                     <div className="flex flex-col gap-1 p-3">
@@ -123,7 +123,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                         {filteredTemplates.length === 0 ? (
                             <div className="p-10 flex flex-col items-center justify-center text-center text-muted-foreground text-sm">
                                 <Award className="w-8 h-8 mb-3 opacity-20" />
-                                <p>Chưa có nhiệm vụ mẫu nào được cấu hình cho ngạch này.</p>
+                                <p>Chưa có nhiệm vụ mẫu nào được cấu hình cho vị trí này.</p>
                             </div>
                         ) : filteredTemplates.map(item => (
                             <div key={item.id} className="p-3 px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-muted/50 transition-colors">

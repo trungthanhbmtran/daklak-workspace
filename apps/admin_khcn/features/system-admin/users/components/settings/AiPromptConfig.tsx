@@ -158,7 +158,7 @@ Hãy sinh ra một danh sách 3-5 chỉ tiêu/hành động chính cho Kế ho�
 Tên kế hoạch: "{planTitle}"
 Mục tiêu: "{planObjective}"
 Các phòng ban hiện có: {orgContext}
-Các chức danh/ngạch hiện có: {rolesContext}
+Các chức danh/vị trí việc làm hiện có: {rolesContext}
 
 Trả về một mảng JSON thuần túy (KHÔNG CÓ markdown format \`\`\`json, chỉ mảng []) với cấu trúc:
 [
@@ -170,7 +170,7 @@ Trả về một mảng JSON thuần túy (KHÔNG CÓ markdown format \`\`\`json
     "targetValue": 100, // Định mức mục tiêu
     "unit": "Tỉ lệ % hoặc số lượng",
     "supervisor": "Tên phòng ban giám sát",
-    "rankType": "Tên Ngạch/Chức danh phù hợp nhất"
+    "rankType": "Tên Vị trí việc làm phù hợp nhất"
   }
 ]`);
     }
@@ -206,7 +206,7 @@ Thông tin công việc lớn:
 Tên: "{parentTitle}"
 Mô tả/Yêu cầu: "{parentDescription}"
 
-Danh sách nhân sự hiện có (kèm Ngạch/Chức danh, mã nhân viên):
+Danh sách nhân sự hiện có (kèm Vị trí việc làm, mã nhân viên):
 {employeesContext}
 
 Hãy phân rã công việc này thành 3-5 subtask chi tiết để hoàn thành mục tiêu. Đối với mỗi subtask, hãy đề xuất 1 người thực hiện phù hợp nhất dựa trên danh sách nhân sự.

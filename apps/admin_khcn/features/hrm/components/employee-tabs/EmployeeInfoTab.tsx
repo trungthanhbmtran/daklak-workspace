@@ -40,10 +40,7 @@ export function EmployeeInfoTab({ employee }: EmployeeInfoTabProps) {
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Chức vụ chính quyền</Text>
               <Text as="span" weight="semibold" className="text-foreground">{govtTitleName}</Text>
             </div>
-            <div className="flex flex-col space-y-1.5">
-              <Text as="span" variant="small" className="text-muted-foreground font-normal">Ngạch công chức</Text>
-              <Text as="span" weight="semibold" className="text-foreground">{rankTitleName}</Text>
-            </div>
+
             <div className="flex flex-col space-y-1.5">
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Chức vụ Đảng</Text>
               <Text as="span" weight="semibold" className="text-foreground">{partyTitleName}</Text>
