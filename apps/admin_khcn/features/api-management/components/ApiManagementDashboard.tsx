@@ -9,10 +9,13 @@ import { ApiConnectionCard } from "./ApiConnectionCard";
 import { ApiConnectionDetail } from "./ApiConnectionDetail";
 import { ApiImportWizard } from "./ApiImportWizard";
 import { ApiConnectionCreateDialog } from "./ApiConnectionCreateDialog";
+import { ApiConnectionEditDialog } from "./ApiConnectionEditDialog";
+import { ApiConnection } from "../api";
 
 export function ApiManagementDashboard() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingConnection, setEditingConnection] = useState<ApiConnection | null>(null);
   const { data: connections, isLoading } = useConnections(search);
   const publishMut = usePublishRevision();
 
@@ -73,9 +76,19 @@ export function ApiManagementDashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {connections?.map((conn) => (
-            <div key={conn.id} onClick={() => setSelectedId(conn.id)} className="cursor-pointer"><ApiConnectionCard connection={conn} /></div>
+            <div key={conn.id} onClick={() => setSelectedId(conn.id)} className="cursor-pointer">
+              <ApiConnectionCard connection={conn} onEdit={(c) => setEditingConnection(c)} />
+            </div>
           ))}
         </div>
+      )}
+
+      {editingConnection && (
+        <ApiConnectionEditDialog 
+          connection={editingConnection} 
+          open={!!editingConnection} 
+          onOpenChange={(open) => !open && setEditingConnection(null)} 
+        />
       )}
     </div>
   );
