@@ -65,4 +65,9 @@ export class ReportsController {
   async getDatasetSnapshot(data: { payload: string; userData: string }) {
     return this.reportsService.getDatasetSnapshot(data.payload, data.userData);
   }
+
+  @GrpcMethod('ReportService', 'GetReportDashboardStats')
+  async getReportDashboardStats(data: { payload: string; userData: string }) {
+    return this.reportsService.getReportDashboardStats(data.payload, data.userData);
+  }
 }

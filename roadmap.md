@@ -134,6 +134,10 @@ eport-service v?i pi-management.
   - Fetch danh sch API endpoint t? API Manager d? tch h?p vo V2 Report Catalog.
 
 ## Unplanned Tasks
+- [x] **[Hotfix] Khắc phục sơ đồ quy trình không hiển thị trong editor (09/10/2026)**
+  - **Vấn đề**: Danh sách workflow hiển thị đủ 5 quy trình nhưng mở chi tiết lại thấy tên, mô tả và sơ đồ rỗng.
+  - **Nguyên nhân**: ID quy trình là CUID nhưng bộ bọc response chung chỉ nhận diện UUID hoặc ID số, khiến GET detail bị coi là list và đối tượng workflow bị chuyển thành mảng.
+  - **Giải pháp**: Bổ sung nhận diện CUID khi phân loại response; typecheck frontend thành công. Giao diện trên máy chủ cần được xác minh sau khi triển khai.
 - [x] Chuyển đổi thiết kế báo cáo động (Dynamic Report Designer), xóa logic hardcode trong reports.service.ts và reports.controller.ts.
 - [x] Nâng cấp giao diện Trung tâm Báo cáo (Enterprise UI): Chuyển đổi ReportWorkspace.tsx sang giao diện nâng cao với Tabs, KPIs, Grid/List view toggle và filters.
 - [x] Nâng cấp giao diện Quản lý API (API Manager): Chuyển đổi giao diện `ApiManagementDashboard`, `PartnerManagement` và `ApiConnectionCard` sang chuẩn Enterprise UI/UX với Dashboards, KPIs, Gradient Cards và Layout cao cấp.

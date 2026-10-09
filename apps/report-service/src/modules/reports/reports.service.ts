@@ -21,6 +21,7 @@ const GRPC_TIMEOUT_MS = 10_000;
 const PAGE_SIZE = 500;
 const MAX_PAGES = 200; // chặn vòng lặp vô hạn (tối đa 100.000 bản ghi / nguồn)
 const CATALOG_TTL_MS = 60_000;
+const DASHBOARD_TTL_MS = 15_000; // 15 seconds for dashboard caching
 
 const SCHEMA_META_KEYS = new Set([
   'name',
@@ -51,8 +52,9 @@ export class ReportsService implements OnModuleInit {
   private docGrpcService: any;
   private apiGrpcService: any;
 
-  private catalogCache: { expiresAt: number; value: CatalogEntry[] } | null =
-    null;
+  private catalogCache: { expiresAt: number; value: CatalogEntry[] } | null = null;
+  private statsCache: { expiresAt: number; value: any } | null = null;
+  private defsCache: { expiresAt: number; value: any } | null = null;
 
   constructor(
     @Inject('USER_SERVICE') private userClient: ClientGrpc,
@@ -83,6 +85,11 @@ export class ReportsService implements OnModuleInit {
           organizationId: payload.organizationId,
         },
       });
+      
+      // Invalidate caches
+      this.defsCache = null;
+      this.statsCache = null;
+
       return {
         success: true,
         data: JSON.stringify(definition),
@@ -96,9 +103,33 @@ export class ReportsService implements OnModuleInit {
 
   async getReportDefinitions(_payloadStr: string, _userDataStr: string) {
     try {
+      const now = Date.now();
+      if (this.defsCache && this.defsCache.expiresAt > now) {
+        return {
+          success: true,
+          data: JSON.stringify(this.defsCache.value),
+          message: 'Lấy danh sách cấu hình báo cáo thành công (Cache)',
+        };
+      }
+
+      // Tối ưu: Không lấy cột 'configuration' (chứa dữ liệu JSON lớn) để tránh OOM / sập hệ thống.
       const definitions = await this.prisma.reportDefinition.findMany({
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          description: true,
+          version: true,
+          organizationId: true,
+          ownerId: true,
+          createdAt: true,
+          updatedAt: true,
+        },
         orderBy: { updatedAt: 'desc' },
       });
+
+      this.defsCache = { expiresAt: now + DASHBOARD_TTL_MS, value: definitions };
+
       return {
         success: true,
         data: JSON.stringify(definitions),
@@ -130,6 +161,49 @@ export class ReportsService implements OnModuleInit {
     }
   }
 
+  async getReportDashboardStats(_payloadStr: string, _userDataStr: string) {
+    try {
+      const now = Date.now();
+      if (this.statsCache && this.statsCache.expiresAt > now) {
+        return {
+          success: true,
+          data: JSON.stringify(this.statsCache.value),
+          message: 'Lấy thống kê dashboard thành công (Cache)',
+        };
+      }
+
+      const [totalReports, runsGroup, totalShared] = await Promise.all([
+        this.prisma.reportDefinition.count(),
+        this.prisma.reportRun.groupBy({
+          by: ['status'],
+          _count: true,
+        }),
+        this.prisma.reportAssignment.count(),
+      ]);
+
+      const totalRuns = runsGroup.reduce((acc, curr) => acc + curr._count, 0);
+      const processingRuns = runsGroup
+        .filter((g) => g.status === 'QUEUED' || g.status === 'RUNNING')
+        .reduce((acc, curr) => acc + curr._count, 0);
+
+      const stats = { totalReports, totalRuns, totalShared, processingRuns };
+      this.statsCache = { expiresAt: now + DASHBOARD_TTL_MS, value: stats };
+
+      return {
+        success: true,
+        data: JSON.stringify(stats),
+        message: 'Lấy thống kê dashboard thành công',
+      };
+    } catch (error: any) {
+      this.logger.error('Error fetching report dashboard stats', error?.stack);
+      return {
+        success: false,
+        data: '{}',
+        message: 'Lỗi lấy thống kê báo cáo',
+      };
+    }
+  }
+
   async runReport(payloadStr: string, _userDataStr: string) {
     try {
       const payload = JSON.parse(payloadStr);
@@ -149,6 +223,8 @@ export class ReportsService implements OnModuleInit {
           organizationId: payload.organizationId,
         },
       });
+
+      this.statsCache = null; // Invalidate stats cache
 
       return {
         success: true,
@@ -183,10 +259,16 @@ export class ReportsService implements OnModuleInit {
 
   async getDatasetSnapshot(payloadStr: string, _userDataStr: string) {
     try {
-      const { runId } = JSON.parse(payloadStr);
+      // Tối ưu: Lấy có giới hạn để tránh gRPC Payload Too Large và OOM
+      const payload = JSON.parse(payloadStr);
+      const runId = payload.runId;
+      const page = payload.page || 1;
+      const limit = payload.limit || 500;
+
       const snapshots = await this.prisma.datasetSnapshot.findMany({
         where: { runId: Number(runId) },
         orderBy: { chunkIndex: 'asc' },
+        take: 2, // Chỉ lấy 2 chunks đầu tiên để preview, tránh sập hệ thống
       });
       
       if (snapshots.length === 0) {
@@ -194,12 +276,12 @@ export class ReportsService implements OnModuleInit {
       }
       
       const schema = snapshots[0].schema;
-      const combinedData = snapshots.flatMap((s: any) => (s.data as any[]) || []);
+      const combinedData = snapshots.flatMap((s: any) => (s.data as any[]) || []).slice(0, limit);
 
       return {
         success: true,
         data: JSON.stringify({ schema, data: combinedData }),
-        message: 'Lấy dữ liệu kết quả thành công',
+        message: 'Lấy dữ liệu kết quả thành công (Preview)',
       };
     } catch (error: any) {
       this.logger.error('Error fetching dataset snapshot', error?.stack);

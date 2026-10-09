@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../../../lib/axiosInstance';
 import { ReportDefinition, ReportRun, DatasetSnapshot } from '../types';
@@ -12,6 +13,7 @@ export const reportKeys = {
   runs: (id: string) => [...reportKeys.detail(id), 'runs'] as const,
   runStatus: (runId: string) => [...reportKeys.all, 'runStatus', runId] as const,
   snapshot: (runId: string) => [...reportKeys.all, 'snapshot', runId] as const,
+  dashboardStats: () => [...reportKeys.all, 'dashboardStats'] as const,
 };
 
 export const useGetReportCatalog = () => {
@@ -68,16 +70,23 @@ export const useRunReport = () => {
 };
 
 export const useGetReportRunStatus = (runId: string, enabled = true) => {
+  const [retryCount, setRetryCount] = useState(0);
+
   return useQuery({
     queryKey: reportKeys.runStatus(runId),
     queryFn: async () => {
       const { data } = await axiosInstance.get(`/reports/runs/${runId}/status`);
+      setRetryCount(prev => prev + 1);
       return data.data as ReportRun;
     },
     enabled: !!runId && enabled,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      return status === 'QUEUED' || status === 'RUNNING' ? 2000 : false;
+      if (status === 'QUEUED' || status === 'RUNNING') {
+        // Exponential backoff: 2s, 3s, 4.5s, 6.75s... max 10s
+        return Math.min(2000 * Math.pow(1.5, retryCount), 10000);
+      }
+      return false;
     },
   });
 };
@@ -102,6 +111,21 @@ export const useAssignReport = () => {
         permissions: payload.permissions || 'VIEW'
       });
       return data;
+    },
+  });
+};
+
+export const useGetReportDashboardStats = () => {
+  return useQuery({
+    queryKey: reportKeys.dashboardStats(),
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/reports/dashboard-stats');
+      return data.data as {
+        totalReports: number;
+        totalRuns: number;
+        totalShared: number;
+        processingRuns: number;
+      };
     },
   });
 };

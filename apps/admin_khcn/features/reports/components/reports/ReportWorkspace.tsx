@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { useGetReportDefinitions, useCreateReportDefinition, useAssignReport } from '../../api';
+import { useGetReportDefinitions, useCreateReportDefinition, useAssignReport, useGetReportDashboardStats } from '../../api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
@@ -20,6 +20,7 @@ import { ReportConfigAST } from '../../types';
 export const ReportWorkspace = () => {
   const router = useRouter();
   const { data: reports, isLoading } = useGetReportDefinitions();
+  const { data: stats } = useGetReportDashboardStats();
   const createMutation = useCreateReportDefinition();
   const assignMutation = useAssignReport();
   
@@ -108,17 +109,14 @@ export const ReportWorkspace = () => {
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-slate-500">Tổng số báo cáo</p>
-                  <p className="text-3xl font-bold text-slate-900">{reports?.length || 0}</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats?.totalReports ?? reports?.length ?? 0}</p>
                 </div>
                 <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
                   <FileSpreadsheet className="w-5 h-5" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="text-emerald-600 font-medium flex items-center">
-                  +12% 
-                </span>
-                <span className="text-slate-400 ml-2">so với tháng trước</span>
+                <span className="text-slate-400">Dữ liệu thực tế từ hệ thống</span>
               </div>
             </CardContent>
           </Card>
@@ -128,17 +126,14 @@ export const ReportWorkspace = () => {
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-slate-500">Lượt chạy báo cáo</p>
-                  <p className="text-3xl font-bold text-slate-900">1,248</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats?.totalRuns ?? 0}</p>
                 </div>
                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                   <Activity className="w-5 h-5" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="text-emerald-600 font-medium flex items-center">
-                  +4.5% 
-                </span>
-                <span className="text-slate-400 ml-2">so với tuần trước</span>
+                <span className="text-slate-400">Tổng số lượt truy xuất dữ liệu</span>
               </div>
             </CardContent>
           </Card>
@@ -148,14 +143,14 @@ export const ReportWorkspace = () => {
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-slate-500">Đã chia sẻ (Shared)</p>
-                  <p className="text-3xl font-bold text-slate-900">42</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats?.totalShared ?? 0}</p>
                 </div>
                 <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
                   <Share2 className="w-5 h-5" />
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className="text-slate-400">Cho 15 phòng ban & đơn vị</span>
+                <span className="text-slate-400">Tổng số phân quyền đã cấp</span>
               </div>
             </CardContent>
           </Card>
@@ -165,7 +160,7 @@ export const ReportWorkspace = () => {
               <div className="flex justify-between items-start">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-indigo-100">Báo cáo đang phân tích</p>
-                  <p className="text-3xl font-bold text-white">3</p>
+                  <p className="text-3xl font-bold text-white">{stats?.processingRuns ?? 0}</p>
                 </div>
                 <div className="p-3 bg-white/20 rounded-xl">
                   <PieChart className="w-5 h-5 text-white" />
@@ -290,10 +285,10 @@ export const ReportWorkspace = () => {
                         </div>
                         {viewMode === 'grid' && (
                           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
-                            <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-medium hover:bg-slate-200">Bản thảo V2</Badge>
-                            <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-100">Sẵn sàng</Badge>
+                            <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-medium hover:bg-slate-200">Phiên bản V{report.version || 1}</Badge>
+                            <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 hover:bg-emerald-100">Hoạt động</Badge>
                             <span className="text-xs text-slate-400 ml-auto flex items-center">
-                              Cập nhật 2 giờ trước
+                              {report.updatedAt ? new Date(report.updatedAt).toLocaleDateString('vi-VN') : 'Mới cập nhật'}
                             </span>
                           </div>
                         )}
@@ -303,8 +298,9 @@ export const ReportWorkspace = () => {
                         {viewMode === 'list' ? (
                           <div className="flex items-center justify-end gap-3 w-64 shrink-0">
                             <div className="flex -space-x-2 mr-2">
-                              <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-700">A</div>
-                              <div className="w-8 h-8 rounded-full bg-emerald-100 border-2 border-white flex items-center justify-center text-xs font-bold text-emerald-700">T</div>
+                              <div className="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-bold text-indigo-700">
+                                {report.name ? report.name.charAt(0).toUpperCase() : 'R'}
+                              </div>
                             </div>
                             <Button variant="outline" size="sm" className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700" onClick={() => setIsDesigning(true)}>Thiết kế</Button>
                             <Button variant="default" size="sm" className="bg-indigo-600 hover:bg-indigo-700 shadow-sm" onClick={() => setViewingReport({ id: report.id, config: report.configuration })}>

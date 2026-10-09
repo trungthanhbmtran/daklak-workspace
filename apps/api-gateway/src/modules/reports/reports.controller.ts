@@ -187,4 +187,13 @@ export class ReportsController {
       req.headers.authorization,
     );
   }
+
+  @Get('dashboard-stats')
+  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  async getReportDashboardStats(@Req() req: any) {
+    return this.reportsService.getReportDashboardStats(
+      req.user,
+      req.headers.authorization,
+    );
+  }
 }

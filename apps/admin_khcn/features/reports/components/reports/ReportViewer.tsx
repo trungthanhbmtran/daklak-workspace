@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { useGetReportRunStatus, useGetDatasetSnapshot, useRunReport } from '../../api';
+import { useGetReportRunStatus, useGetDatasetSnapshot, useRunReport, useGetReportDefinition } from '../../api';
 import { Button } from '../../../../components/ui/button';
 
 interface ReportViewerProps {
@@ -11,6 +11,8 @@ interface ReportViewerProps {
 
 export const ReportViewer: React.FC<ReportViewerProps> = ({ definitionId, config, onBack }) => {
   const [runId, setRunId] = React.useState<string | null>(null);
+  const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(definitionId.toString());
+  const actualConfig = config || reportDef?.configuration;
   
   const runMutation = useRunReport();
   const { data: runStatus, isLoading: isStatusLoading } = useGetReportRunStatus(runId!, !!runId);
@@ -22,10 +24,10 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({ definitionId, config
 
   const handleRun = async () => {
     try {
-      const result = await runMutation.mutateAsync({ definitionId, config });
+      const result = await runMutation.mutateAsync({ definitionId, config: actualConfig });
       setRunId(result.runId.toString());
     } catch (e) {
-      console.error(e);
+      alert('Có lỗi xảy ra khi chạy báo cáo');
     }
   };
 
@@ -72,11 +74,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({ definitionId, config
             {runStatus?.status === 'SUCCEEDED' && (
               <div className="space-y-6">
                 {/* Khu vực Biểu đồ (Aesthetic View) */}
-                {config?.charts && config.charts.length > 0 && (
+                {actualConfig?.charts && actualConfig.charts.length > 0 && (
                   <div className="mt-8 border-t border-slate-200 pt-6">
                     <h3 className="text-xl font-bold text-slate-800 mb-6">Trực quan hóa Dữ liệu</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {config.charts.map((chart: any, index: number) => (
+                      {actualConfig.charts.map((chart: any, index: number) => (
                         <div key={index} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
                           <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-gradient-to-r from-slate-50 to-white">
                             <h4 className="font-bold text-slate-700 truncate">{chart.title || 'Biểu đồ'}</h4>

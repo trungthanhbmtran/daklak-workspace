@@ -187,4 +187,10 @@ export class ReportsService implements OnModuleInit {
       ),
     );
   }
+
+  async getReportDashboardStats(user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GetReportDashboardStats', {}, user, authHeader),
+    );
+  }
 }

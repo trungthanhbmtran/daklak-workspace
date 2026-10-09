@@ -26,6 +26,7 @@ interface ApiResponse {
 const UUID_TAIL_RE =
   /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const NUMERIC_TAIL_RE = /\/\d+$/;
+const CUID_TAIL_RE = /\/c[a-z0-9]{24}$/i;
 const STATS_RE = /\/(reports|stats|metrics|dashboard|kpis)/i;
 
 const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report'];
@@ -208,7 +209,10 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
 
     if (!hasPaginationQuery && STATS_RE.test(path)) return false;
 
-    const endsWithId = UUID_TAIL_RE.test(path) || NUMERIC_TAIL_RE.test(path);
+    const endsWithId =
+      UUID_TAIL_RE.test(path) ||
+      NUMERIC_TAIL_RE.test(path) ||
+      CUID_TAIL_RE.test(path);
     return !endsWithId || hasPaginationQuery;
   }
 
