@@ -95,19 +95,20 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 - [x] **[Feature] Tích hợp SSO LifeSSO & VNeID cho portal-goverment (08/10/2026)**
   - Tích hợp đăng nhập SSO công dân bằng VNeID thông qua LifeSSO IS.
   - Implement Authorization Code flow trên Next.js (portal-goverment).
-- [x] **[Hotfix] S?a l?i 401 Logout Loop li�n t?c tr�n h? th?ng (08/10/2026)**
-  - **V?n d?**: Ngu?i d�ng b? vang ra m�n h�nh dang nh?p li�n t?c khi truy c?p c�c ch?c nang nhu Task Templates, L?ch s? Task, M?u b�o c�o d� d� du?c c?p quy?n.
-  - **Nguy�n nh�n**: API Gateway g?i t?i m?t s? controller c?a hrm-service (TaskCatalogController, TaskHistoryController) du?c b?o v? b?i GrpcContextInterceptor (b?t bu?c ph?i c� Metadata Delegation Token), nhung API Gateway l?i g?i gRPC chay m� kh�ng attach metadata (thi?u this.getGrpcMetadata(req)). �i?u n�y d?n d?n microservice tr? m� l?i 16 (UNAUTHENTICATED), API Gateway quang l?i 401, khi?n client trigger h�m session-recovery nhung l?i b? d�nh infinite loop do replay request v?n l?i 401.
-  - **Gi?i ph�p**: Truy?n req xu?ng service, g?i this.getGrpcMetadata(req) v� d�nh k�m v�o t?t c? c�c l?nh g?i gRPC b? thi?u trong tasks.service.ts v� task-templates.controller.ts.
+- [x] **[Hotfix] S?a l?i 401 Logout Loop li�n t?c tr�n h? th?ng (08/10/2026)**
+  - **V?n d?**: Ngu?i d�ng b? vang ra m�n h�nh dang nh?p li�n t?c khi truy c?p c�c ch?c nang nhu Task Templates, L?ch s? Task, M?u b�o c�o d� d� du?c c?p quy?n.
+  - **Nguy�n nh�n**: API Gateway g?i t?i m?t s? controller c?a hrm-service (TaskCatalogController, TaskHistoryController) du?c b?o v? b?i GrpcContextInterceptor (b?t bu?c ph?i c� Metadata Delegation Token), nhung API Gateway l?i g?i gRPC chay m� kh�ng attach metadata (thi?u this.getGrpcMetadata(req)). �i?u n�y d?n d?n microservice tr? m� l?i 16 (UNAUTHENTICATED), API Gateway quang l?i 401, khi?n client trigger h�m session-recovery nhung l?i b? d�nh infinite loop do replay request v?n l?i 401.
+  - **Gi?i ph�p**: Truy?n req xu?ng service, g?i this.getGrpcMetadata(req) v� d�nh k�m v�o t?t c? c�c l?nh g?i gRPC b? thi?u trong tasks.service.ts v� task-templates.controller.ts.
 
 - [x] **[Hotfix] Sửa lỗi văng ra login 401 khi vào API Management (08/10/2026)**
   - **Vấn đề**: Người dùng bị văng ra màn hình đăng nhập (lỗi 401) khi vào trang Quản lý API, tạo thành infinite logout loop.
-  - **Nguyên nhân**: Lỗi lấy metadata trong GrpcAuthGuard của NestJS @GrpcMethod. Thay vì nhận object { metadata }, switchToRpc().getContext() trong phiên bản này trả về trực tiếp Metadata object. Khi gọi pcContext?.metadata sẽ trả về undefined, dẫn đến báo lỗi UNAUTHENTICATED: Missing metadata từ internal service, bị AllExceptionsFilter map thành HTTP 401, gây ra trigger logout sai lệch trên frontend.
+  - **Nguyên nhân**: Lỗi lấy metadata trong GrpcAuthGuard của NestJS @GrpcMethod. Thay vì nhận object { metadata }, switchToRpc().getContext() trong phiên bản này trả về trực tiếp Metadata object. Khi gọi 
+pcContext?.metadata sẽ trả về undefined, dẫn đến báo lỗi UNAUTHENTICATED: Missing metadata từ internal service, bị AllExceptionsFilter map thành HTTP 401, gây ra trigger logout sai lệch trên frontend.
   - **Giải pháp**: 
     1. Sửa GrpcAuthGuard đọc Metadata object trực tiếp và lưu user vào rgs[2] (ServerUnaryCall) để PbacGuard đọc.
     2. Sửa đổi error mapping trong AllExceptionsFilter: map gRPC code 13 (INTERNAL) thành HTTP 503 thay vì 401 để ngăn chặn lỗi internal service trigger logout. Rebuild user-service và api-gateway.
-- [x] **[Refactor] T�i c?u tr�c to�n b? d? �n theo quy t?c m?i (08/10/2026)**
-  - S?a l?i g�i Response th? c�ng t?i api-gateway (TransformInterceptor).
+- [x] **[Refactor] T�i c?u tr�c to�n b? d? �n theo quy t?c m?i (08/10/2026)**
+  - S?a l?i g�i Response th? c�ng t?i api-gateway (TransformInterceptor).
   - Kh?c ph?c l?i vi ph?m import axios tr?c ti?p ? apps/admin_khcn.
 
 - [x] **[Hotfix] Sửa lỗi Invalid delegation token trong module quản lý API (08/10/2026)**
@@ -126,12 +127,13 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - **Giải pháp**: Mở rộng pi-management.proto với các method quản lý Partner; thay đổi PartnerController trong user-service thành gRPC endpoint; và tạo mới PartnerController trong pi-gateway để expose ra HTTP rồi forward bằng gRPC.
 
 
-- [x] **[Feature] �?ng b? API Manager m?i v�o h? th?ng B�o c�o (09/10/2026)**
+- [x] **[Feature] ?ng b? API Manager m?i vo h? th?ng Bo co (09/10/2026)** 
   - C?p nh?t ReportSourceOption contract d? ch?a upstream alias.
-  - C?u h�nh gRPC d? li�n k?t eport-service v?i pi-management.
-  - Fetch danh s�ch API endpoint t? API Manager d? t�ch h?p v�o V2 Report Catalog.
+  - C?u hnh gRPC d? lin k?t 
+eport-service v?i pi-management.
+  - Fetch danh sch API endpoint t? API Manager d? tch h?p vo V2 Report Catalog.
 
 ## Unplanned Tasks
 - [x] Chuyển đổi thiết kế báo cáo động (Dynamic Report Designer), xóa logic hardcode trong reports.service.ts và reports.controller.ts.
-
-  - [x] Nâng cấp giao diện Trung tâm Báo cáo (Enterprise UI): Chuyển đổi ReportWorkspace.tsx sang giao diện nâng cao với Tabs, KPIs, Grid/List view toggle và filters.
+- [x] Nâng cấp giao diện Trung tâm Báo cáo (Enterprise UI): Chuyển đổi ReportWorkspace.tsx sang giao diện nâng cao với Tabs, KPIs, Grid/List view toggle và filters.
+- [x] Nâng cấp giao diện Quản lý API (API Manager): Chuyển đổi giao diện `ApiManagementDashboard`, `PartnerManagement` và `ApiConnectionCard` sang chuẩn Enterprise UI/UX với Dashboards, KPIs, Gradient Cards và Layout cao cấp.

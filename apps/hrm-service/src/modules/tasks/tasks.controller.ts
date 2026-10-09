@@ -13,6 +13,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'CreateTask')
   createTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -22,6 +23,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'ListTasks')
   listTasks(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -31,6 +33,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'GetTask')
   getTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -40,6 +43,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'UpdateTask')
   updateTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -49,6 +53,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'ExtendTask')
   extendTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -58,6 +63,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'DeleteTask')
   deleteTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -70,6 +76,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'GetTaskTree')
   getTaskTree(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -79,6 +86,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'RecordAttendance')
   recordAttendance(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -92,6 +100,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
   updateTaskStatus(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -106,6 +115,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'BreakdownTask')
   breakdownTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -115,6 +125,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'GetSubTasks')
   getSubTasks(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -126,6 +137,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'AssignTask')
   assignTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -135,6 +147,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'RecommendAssignees')
   recommendAssignees(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -144,6 +157,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'RequestCoordination')
   requestCoordination(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -153,6 +167,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'RespondTask')
   respondTask(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -164,6 +179,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'AddComment')
   addComment(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -173,6 +189,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'GetComments')
   getComments(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -184,6 +201,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'CreateStep')
   createStep(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -193,6 +211,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'UpdateStep')
   updateStep(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -202,6 +221,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'ListSteps')
   listSteps(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -211,6 +231,7 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'DeleteStep')
   deleteStep(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;

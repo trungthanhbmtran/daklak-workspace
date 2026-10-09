@@ -9,14 +9,16 @@ import { Input } from '../../../../components/ui/input';
 import { Label } from '../../../../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../components/ui/tabs';
 import { Badge } from '../../../../components/ui/badge';
-import { BarChart3, PieChart, Plus, Search, Filter, LayoutGrid, List, FileSpreadsheet, Activity, Share2, Play, Settings2, MoreHorizontal } from 'lucide-react';
+import { BarChart3, PieChart, Plus, Search, Filter, LayoutGrid, List, FileSpreadsheet, Activity, Share2, Play, Settings2, MoreHorizontal, ArrowLeft } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../../../../components/ui/dropdown-menu';
+import { useRouter } from 'next/navigation';
 
 import { ReportDesigner } from './designer/ReportDesigner';
 import { ReportViewer } from './ReportViewer';
 import { ReportConfigAST } from '../../types';
 
 export const ReportWorkspace = () => {
+  const router = useRouter();
   const { data: reports, isLoading } = useGetReportDefinitions();
   const createMutation = useCreateReportDefinition();
   const assignMutation = useAssignReport();
@@ -65,6 +67,15 @@ export const ReportWorkspace = () => {
         {/* Enterprise Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">
           <div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="mb-4 -ml-2 text-slate-500 hover:text-slate-800"
+              onClick={() => router.push('/hub')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Về Hub điều khiển
+            </Button>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2.5 bg-indigo-100 text-indigo-700 rounded-xl">
                 <BarChart3 className="w-6 h-6" />
