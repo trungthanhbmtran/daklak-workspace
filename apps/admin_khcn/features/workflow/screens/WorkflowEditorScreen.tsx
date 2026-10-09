@@ -99,7 +99,7 @@ function hasUsablePositionSet(positions: Map<string, { x: number; y: number }>, 
   if (nodeCount <= 1) return true;
   return new Set([...positions.values()].map(({ x, y }) => `${x}:${y}`)).size === nodeCount;
 }
-function treePositions(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edges"]): Map<string, { x: number; y: number }> {
+function layeredPositions(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edges"]): Map<string, { x: number; y: number }> {
   const outgoing = new Map(nodes.map((node) => [node.id, [] as Array<{ id: string; priority: number; index: number }>]));
   const incomingCount = new Map(nodes.map((node) => [node.id, 0]));
   edges.forEach((edge, index) => {
@@ -159,6 +159,93 @@ function treePositions(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edge
   }
   return positions;
 }
+function autoLayoutPositions(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edges"]): Map<string, { x: number; y: number }> {
+  const children = new Map(nodes.map((node) => [node.id, [] as Array<{ id: string; priority: number; index: number }>]));
+  const parents = new Map(nodes.map((node) => [node.id, new Set<string>()]));
+  edges.forEach((edge, index) => {
+    const source = edgeEndpoint(edge.source, edge.sourceNodeId);
+    const target = edgeEndpoint(edge.target, edge.targetNodeId);
+    if (!children.has(source) || !parents.has(target) || parents.get(target)?.has(source)) return;
+    const handle = (edge.sourceHandle || "").toLowerCase();
+    const priority = handle === "true" || handle === "yes" ? 0 : handle === "false" || handle === "no" ? 2 : 1;
+    children.get(source)?.push({ id: target, priority, index });
+    parents.get(target)?.add(source);
+  });
+  for (const items of children.values()) items.sort((left, right) => left.priority - right.priority || left.index - right.index);
+
+  const roots = nodes
+    .filter((node) => parents.get(node.id)?.size === 0)
+    .sort((left, right) => Number(right.type === "start") - Number(left.type === "start"));
+  const remainingParents = new Map(nodes.map((node) => [node.id, parents.get(node.id)?.size ?? 0]));
+  const queue = roots.map((node) => node.id);
+  for (let cursor = 0; cursor < queue.length; cursor += 1) {
+    for (const child of children.get(queue[cursor]) ?? []) {
+      const remaining = (remainingParents.get(child.id) ?? 0) - 1;
+      remainingParents.set(child.id, remaining);
+      if (remaining === 0) queue.push(child.id);
+    }
+  }
+
+  // A tree gives each node at most one parent. Put each leaf on its own row,
+  // then center each parent over its child branches. Use layered layout for joins and cycles.
+  const isTree = queue.length === nodes.length && nodes.every((node) => (parents.get(node.id)?.size ?? 0) <= 1);
+  if (!isTree) return layeredPositions(nodes, edges);
+
+  const positions = new Map<string, { x: number; y: number }>();
+  let leafIndex = 0;
+  const placeSubtree = (nodeId: string, depth: number): number => {
+    const childIds = (children.get(nodeId) ?? []).map((child) => child.id);
+    const childRows = childIds.map((childId) => placeSubtree(childId, depth + 1));
+    const y = childRows.length
+      ? (childRows[0] + childRows[childRows.length - 1]) / 2
+      : 100 + leafIndex++ * 190;
+    positions.set(nodeId, { x: 80 + depth * 280, y });
+    return y;
+  };
+  for (const root of roots) placeSubtree(root.id, 0);
+  return positions;
+}
+function positionsMatchFlow(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edges"], positions: Map<string, { x: number; y: number }>) {
+  if (!hasUsablePositionSet(positions, nodes.length)) return false;
+  for (let left = 0; left < nodes.length; left += 1) {
+    const first = positions.get(nodes[left].id)!;
+    for (let right = left + 1; right < nodes.length; right += 1) {
+      const second = positions.get(nodes[right].id)!;
+      if (Math.abs(first.x - second.x) < 170 && Math.abs(first.y - second.y) < 90) return false;
+    }
+  }
+
+  const outgoing = new Map<string, Array<{ target: string; handle: string }>>();
+  let forwardEdges = 0;
+  let validEdges = 0;
+  for (const edge of edges) {
+    const source = edgeEndpoint(edge.source, edge.sourceNodeId);
+    const target = edgeEndpoint(edge.target, edge.targetNodeId);
+    const from = positions.get(source);
+    const to = positions.get(target);
+    if (!from || !to) continue;
+    validEdges += 1;
+    const handle = (edge.sourceHandle || "").toLowerCase();
+    if (to.x - from.x >= 120 || ((handle === "true" || handle === "false" || handle === "yes" || handle === "no") && Math.abs(to.y - from.y) >= 120)) forwardEdges += 1;
+    outgoing.set(source, [...(outgoing.get(source) ?? []), { target, handle }]);
+  }
+  if (validEdges > 0 && forwardEdges / validEdges < 0.65) return false;
+  for (const branches of outgoing.values()) {
+    if (branches.length < 2) continue;
+    const branchPositions = branches.flatMap((branch) => {
+      const position = positions.get(branch.target);
+      return position ? [{ ...position, handle: branch.handle }] : [];
+    });
+    if (branchPositions.length > 1) {
+      const yValues = branchPositions.map((position) => position.y);
+      if (Math.max(...yValues) - Math.min(...yValues) < 110) return false;
+      const trueBranch = branchPositions.find((position) => position.handle === "true" || position.handle === "yes");
+      const falseBranch = branchPositions.find((position) => position.handle === "false" || position.handle === "no");
+      if (trueBranch && falseBranch && trueBranch.y >= falseBranch.y) return false;
+    }
+  }
+  return true;
+}
 function nextNodeId(type: string, nodes: CanvasNode[]) {
   let sequence = nodes.length + 1;
   let id = `${type}-${sequence}`;
@@ -182,8 +269,9 @@ function graphNodes(workflow?: Workflow): CanvasNode[] {
   if (!positions) {
     const combined = new Map<string, { x: number; y: number }>();
     for (const source of positionSources) for (const [nodeId, position] of source) if (!combined.has(nodeId)) combined.set(nodeId, position);
-    positions = hasUsablePositionSet(combined, graph.nodes.length) ? combined : treePositions(graph.nodes, graph.edges ?? []);
+    positions = hasUsablePositionSet(combined, graph.nodes.length) ? combined : autoLayoutPositions(graph.nodes, graph.edges ?? []);
   }
+  if (!positionsMatchFlow(graph.nodes, graph.edges ?? [], positions)) positions = autoLayoutPositions(graph.nodes, graph.edges ?? []);
   return graph.nodes.map((node, index) => {
     const assignment = node.assignments?.[0];
     return {

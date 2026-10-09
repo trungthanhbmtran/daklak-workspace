@@ -152,5 +152,6 @@ eport-service v?i pi-management.
   - Đã xác nhận lỗi trên trang production trước sửa; cần triển khai frontend để xác nhận trực quan sau sửa.
 - [x] **[Hotfix] Nhận tọa độ API và tự bố trí sơ đồ workflow theo cây (09/10/2026)**
   - Đọc vị trí từ `position`, `positionAbsolute`, `uiMetadata` và `_uiMetadata`.
-  - Khi backend không có tọa độ hợp lệ, xếp node theo tầng từ quan hệ cạnh; ưu tiên nhánh `true` phía trên và `false` phía dưới.
+  - Giữ bố cục backend khi khớp hướng luồng; nếu sai, xếp graph dạng cây theo nhánh cha-con hoặc theo tầng với luồng có điểm hội tụ/vòng lặp.
+  - Ưu tiên nhánh `true` phía trên và `false` phía dưới, đồng thời tránh node chồng nhau.
   - Lưu vị trí trên node vào `definition` để giữ bố cục sau khi kéo thả; cần xác nhận trực quan sau khi frontend được triển khai.
