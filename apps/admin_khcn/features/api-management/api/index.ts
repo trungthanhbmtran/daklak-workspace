@@ -50,7 +50,7 @@ export const apiManagementApi = {
     return res?.data;
   },
 
-  updateConnection: async (id: string, data: Partial<ApiConnection>) => {
+  updateConnection: async (id: string, data: Partial<ApiConnection> & { expectedVersion?: number }) => {
     const res = await apiClient.put("/api-management/connections/" + id, data) as any;
     return res?.data;
   },

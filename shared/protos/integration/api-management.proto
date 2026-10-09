@@ -108,6 +108,7 @@ message ConnectionResponse {
   int32 version = 10;
   string createdAt = 11;
   string updatedAt = 12;
+  repeated EndpointResponse endpoints = 13;
 }
 
 message ListConnectionsRequest {

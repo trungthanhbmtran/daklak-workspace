@@ -1,4 +1,4 @@
-﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiManagementApi, ApiConnection } from "../api";
 import { toast } from "sonner";
 
@@ -26,7 +26,7 @@ export const useCreateConnection = () => {
 export const useUpdateConnection = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<ApiConnection> }) => apiManagementApi.updateConnection(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<ApiConnection> & { expectedVersion?: number } }) => apiManagementApi.updateConnection(id, data),
     onSuccess: () => {
       toast.success("Cập nhật kết nối thành công");
       qc.invalidateQueries({ queryKey: ['api-connections'] });
