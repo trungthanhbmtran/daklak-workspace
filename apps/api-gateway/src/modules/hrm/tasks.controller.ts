@@ -68,14 +68,6 @@ export class TasksController {
     );
   }
 
-  @Put(':id')
-  async update(
-    @Req() req: any,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
-  ) {
-    return this.tasksService.update(req, id, body);
-  }
 
   @Post(':id/extend')
   async extendTask(
@@ -160,10 +152,6 @@ export class TasksController {
     return this.tasksService.getTaskHistory(req, id);
   }
 
-  @Get(':id')
-  async getTask(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
-    return this.tasksService.getTask(req, id);
-  }
 
   @Get(':id/steps')
   async listSteps(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
@@ -203,5 +191,19 @@ export class TasksController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.tasksService.getAttendanceStats(req, id);
+  }
+
+  @Put(':id')
+  async update(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: any,
+  ) {
+    return this.tasksService.update(req, id, body);
+  }
+
+  @Get(':id')
+  async getTask(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.tasksService.getTask(req, id);
   }
 }
