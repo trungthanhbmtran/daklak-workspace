@@ -27,8 +27,6 @@ const menuData: MenuSeed[] = [
 
   { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: null, type: 'SERVICE_ITEM' },
   { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/hub/notifications/config', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
-  { code: 'API_GATEWAY_GROUP', name: 'Quản lý API Gateway', route: '/admin/gateway', icon: 'Server', order: 11, linkedResourceCode: null, type: 'SERVICE_ITEM' },
-
   { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/services/hrm', icon: 'Users', order: 2, linkedResourceCode: null, type: 'SERVICE_ITEM' },
   { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/services/hrm/employees', icon: 'UserCircle', order: 2, parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE', type: 'MENU' },
   { code: 'HRM_TASK_MENU', name: 'Danh sách nhiệm vụ', route: '/services/hrm/work-plans/tasks', icon: 'CheckSquare', order: 3, parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK', type: 'MENU' },
@@ -74,6 +72,7 @@ export async function seedMenus(prisma: PrismaClient) {
   console.log('🔹 Seeding Menus...');
 
   await prisma.menu.deleteMany({ where: { code: 'HRM_DASHBOARD_MENU' } });
+  await prisma.menu.deleteMany({ where: { code: 'API_GATEWAY_GROUP' } });
 
   for (const menu of menuData) {
     const parent = menu.parentCode
