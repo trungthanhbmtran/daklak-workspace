@@ -272,10 +272,17 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
                           </Button>
                         </div>
                       ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {paramFields.map((field, index) => (
-                            <div key={field.id} className="grid grid-cols-12 gap-3 items-start p-4 bg-background border rounded-lg relative hover:border-primary/30 transition-all group shadow-sm">
-                              <div className="col-span-12 md:col-span-3">
+                            <div key={field.id} className="p-4 bg-background border rounded-lg relative hover:border-primary/30 transition-all group shadow-sm flex flex-col gap-4">
+                              <div className="flex justify-between items-center border-b pb-3">
+                                <h5 className="text-sm font-semibold text-primary">Tham số {index + 1}</h5>
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50" onClick={() => removeParam(index)}>
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <FormField
                                   control={form.control as any}
                                   name={`parameters.${index}.name`}
@@ -287,8 +294,7 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
                                     </FormItem>
                                   )}
                                 />
-                              </div>
-                              <div className="col-span-6 md:col-span-2">
+                                
                                 <FormField
                                   control={form.control as any}
                                   name={`parameters.${index}.in`}
@@ -307,8 +313,7 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
                                     </FormItem>
                                   )}
                                 />
-                              </div>
-                              <div className="col-span-6 md:col-span-2">
+                                
                                 <FormField
                                   control={form.control as any}
                                   name={`parameters.${index}.type`}
@@ -327,8 +332,7 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
                                     </FormItem>
                                   )}
                                 />
-                              </div>
-                              <div className="col-span-6 md:col-span-2">
+                                
                                 <FormField
                                   control={form.control as any}
                                   name={`parameters.${index}.required`}
@@ -347,24 +351,18 @@ export function ApiEndpointEditDialog({ open, onOpenChange, connectionId, endpoi
                                   )}
                                 />
                               </div>
-                              <div className="col-span-6 md:col-span-2">
-                                <FormField
-                                  control={form.control as any}
-                                  name={`parameters.${index}.description`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-xs text-muted-foreground font-medium">Mô tả</FormLabel>
-                                      <FormControl><Input placeholder="Ghi chú..." className="h-9" {...field} /></FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-                              <div className="col-span-12 md:col-span-1 flex justify-end md:justify-center items-center md:pt-6 absolute right-2 top-2 md:relative md:right-auto md:top-auto">
-                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeParam(index)}>
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
+                              
+                              <FormField
+                                control={form.control as any}
+                                name={`parameters.${index}.description`}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-xs text-muted-foreground font-medium">Mô tả chi tiết</FormLabel>
+                                    <FormControl><Input placeholder="Giải thích ý nghĩa hoặc cách sử dụng của tham số này..." className="h-9" {...field} /></FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
                             </div>
                           ))}
                         </div>
