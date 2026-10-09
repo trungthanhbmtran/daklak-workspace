@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -89,7 +89,7 @@ export class ApiManagementService {
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' },
-      include: { endpoints: true },
+      // OPTIMIZED: Removed include: { endpoints: true } to prevent N+1 and OOM issues
     });
     const total = await this.prisma.apiConnection.count({
       where: { organizationId },
@@ -149,6 +149,60 @@ export class ApiManagementService {
     return { success: true };
   }
 
+  // --- Endpoints CRUD ---
+  async createEndpoint(data: any, userId: string) {
+    const conn = await this.getConnection(data.connectionId);
+    const existing = await this.prisma.apiEndpoint.findFirst({
+      where: { connectionId: data.connectionId, method: data.method, pathTemplate: data.pathTemplate }
+    });
+    if (existing) {
+      throw new BadRequestException('Endpoint with same method and path already exists');
+    }
+    const ep = await this.prisma.apiEndpoint.create({
+      data: {
+        connectionId: data.connectionId,
+        method: data.method,
+        pathTemplate: data.pathTemplate,
+        schema: data.schema ? JSON.parse(data.schema) : {},
+      }
+    });
+    await this.prisma.apiConnection.update({
+      where: { id: data.connectionId },
+      data: { version: { increment: 1 }, updatedBy: userId }
+    });
+    return { ...ep, schema: JSON.stringify(ep.schema) };
+  }
+
+  async updateEndpoint(id: string, data: any, userId: string) {
+    const ep = await this.prisma.apiEndpoint.findUnique({ where: { id } });
+    if (!ep) throw new NotFoundException('Endpoint not found');
+    
+    const updated = await this.prisma.apiEndpoint.update({
+      where: { id },
+      data: {
+        method: data.method,
+        pathTemplate: data.pathTemplate,
+        schema: data.schema ? JSON.parse(data.schema) : undefined,
+      }
+    });
+    await this.prisma.apiConnection.update({
+      where: { id: ep.connectionId },
+      data: { version: { increment: 1 }, updatedBy: userId }
+    });
+    return { ...updated, schema: JSON.stringify(updated.schema) };
+  }
+
+  async deleteEndpoint(id: string, userId: string) {
+    const ep = await this.prisma.apiEndpoint.findUnique({ where: { id } });
+    if (!ep) throw new NotFoundException('Endpoint not found');
+    
+    await this.prisma.apiEndpoint.delete({ where: { id } });
+    await this.prisma.apiConnection.update({
+      where: { id: ep.connectionId },
+      data: { version: { increment: 1 }, updatedBy: userId }
+    });
+    return { success: true };
+  }
   // --- T009: Validate / Publish / Disable ---
 
   async disableConnection(id: string, expectedVersion: number, userId: string) {
@@ -396,6 +450,9 @@ export class ApiManagementService {
         where: { connectionId: connId },
       });
 
+      const createData: any[] = [];
+      const updatePromises: any[] = [];
+
       for (const ep of preview.endpoints) {
         const resolution = data.resolutions?.find(
           (r: any) => r.method === ep.method && r.path === ep.path,
@@ -409,24 +466,35 @@ export class ApiManagementService {
         );
 
         if (match && action === 'OVERWRITE') {
-          await tx.apiEndpoint.update({
-            where: { id: match.id },
-            data: {
-              schema: { name: ep.name, description: ep.description },
-            },
-          });
+          updatePromises.push(
+            tx.apiEndpoint.update({
+              where: { id: match.id },
+              data: {
+                schema: { name: ep.name, description: ep.description },
+              },
+            })
+          );
           updated++;
         } else if (!match) {
-          await tx.apiEndpoint.create({
-            data: {
-              connectionId: connId,
-              method: ep.method,
-              pathTemplate: ep.path,
-              schema: { name: ep.name, description: ep.description },
-            },
+          createData.push({
+            connectionId: connId,
+            method: ep.method,
+            pathTemplate: ep.path,
+            schema: { name: ep.name, description: ep.description },
           });
           created++;
         }
+      }
+
+      // OPTIMIZED: Bulk insert using createMany
+      if (createData.length > 0) {
+        await tx.apiEndpoint.createMany({ data: createData });
+      }
+
+      // OPTIMIZED: Chunked parallel updates
+      const CHUNK_SIZE = 50;
+      for (let i = 0; i < updatePromises.length; i += CHUNK_SIZE) {
+        await Promise.all(updatePromises.slice(i, i + CHUNK_SIZE));
       }
 
       await tx.apiImportSession.update({

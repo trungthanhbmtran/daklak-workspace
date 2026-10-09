@@ -18,11 +18,15 @@ export default function ApiConnectionAuthDialog({ id, data }: Props) {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authKind, setAuthKind] = useState<string>('none');
   const [authSecret, setAuthSecret] = useState<string>('');
+  const [clientId, setClientId] = useState<string>('');
+  const [tokenUrl, setTokenUrl] = useState<string>('');
   const updateMut = useUpdateConnection();
 
   useEffect(() => {
     if (data?.auth) {
       setAuthKind(data.auth.kind || 'none');
+      setClientId(data.auth.clientId || '');
+      setTokenUrl(data.auth.tokenUrl || '');
     }
   }, [data]);
 
@@ -33,6 +37,7 @@ export default function ApiConnectionAuthDialog({ id, data }: Props) {
       data: {
         auth: {
           kind: authKind as any,
+          ...(authKind === 'oauth2' ? { clientId, tokenUrl } : {}),
           ...(authSecret ? { secret: authSecret } : {})
         },
         expectedVersion: data.version
@@ -68,18 +73,41 @@ export default function ApiConnectionAuthDialog({ id, data }: Props) {
                 <SelectItem value="basic">Basic Auth</SelectItem>
                 <SelectItem value="apiKey">API Key (Header)</SelectItem>
                 <SelectItem value="bearer">Bearer Token</SelectItem>
+                <SelectItem value="oauth2">OAuth 2.0 (Liên thông)</SelectItem>
                 <SelectItem value="mtls">mTLS (Chứng thư số)</SelectItem>
               </SelectContent>
             </Select>
           </div>
+          
+          {authKind === 'oauth2' && (
+            <>
+              <div className="grid gap-2">
+                <Label>Client ID</Label>
+                <Input 
+                  value={clientId} 
+                  onChange={e => setClientId(e.target.value)} 
+                  placeholder="Nhập Client ID..." 
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Token URL</Label>
+                <Input 
+                  value={tokenUrl} 
+                  onChange={e => setTokenUrl(e.target.value)} 
+                  placeholder="https://oauth.example.com/token" 
+                />
+              </div>
+            </>
+          )}
+
           {authKind !== 'none' && (
             <div className="grid gap-2">
-              <Label>Secret / Token / API Key</Label>
+              <Label>{authKind === 'oauth2' ? 'Client Secret' : 'Secret / Token / API Key'}</Label>
               <Input 
                 type="password" 
                 value={authSecret} 
                 onChange={e => setAuthSecret(e.target.value)} 
-                placeholder={data.auth?.secretRef ? "(Đã thiết lập - nhập để thay đổi)" : "Nhập secret key..."} 
+                placeholder={data.auth?.secretRef ? "(Đã thiết lập - nhập để thay đổi)" : "Nhập secret..."} 
               />
             </div>
           )}

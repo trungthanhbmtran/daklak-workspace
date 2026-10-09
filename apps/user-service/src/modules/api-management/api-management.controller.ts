@@ -137,6 +137,37 @@ export class ApiManagementController {
     }
   }
 
+  @GrpcMethod('ApiManagementService', 'CreateEndpoint')
+  @Permissions('INTEGRATION:MANAGE')
+  async createEndpoint(data: any) {
+    try {
+      return await this.service.createEndpoint(data, 'system-admin');
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e.message });
+    }
+  }
+
+  @GrpcMethod('ApiManagementService', 'UpdateEndpoint')
+  @Permissions('INTEGRATION:MANAGE')
+  async updateEndpoint(data: any) {
+    try {
+      const { id, ...updateData } = data;
+      return await this.service.updateEndpoint(id, updateData, 'system-admin');
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e.message });
+    }
+  }
+
+  @GrpcMethod('ApiManagementService', 'DeleteEndpoint')
+  @Permissions('INTEGRATION:MANAGE')
+  async deleteEndpoint(data: { id: string }) {
+    try {
+      return await this.service.deleteEndpoint(data.id, 'system-admin');
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
   @GrpcMethod('ApiManagementService', 'DisableConnection')
   @Permissions('INTEGRATION:MANAGE')
   async disableConnection(data: any) {

@@ -86,8 +86,7 @@ export function ApiConnectionDetail({ id, onBack }: { id: string, onBack: () => 
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-4">Danh sách Endpoints</h3>
-        <ApiConnectionEndpoints endpoints={data.endpoints} />
+        <ApiConnectionEndpoints connectionId={id} endpoints={data.endpoints} />
       </div>
     </div>
   );

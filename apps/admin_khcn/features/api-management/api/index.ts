@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 export interface AuthBinding {
   kind: 'none' | 'basic' | 'apiKey' | 'bearer' | 'oauth2' | 'mtls';
   secretRef?: string;
+  clientId?: string;
+  tokenUrl?: string;
 }
 
 export interface ApiConnection {
@@ -57,6 +59,21 @@ export const apiManagementApi = {
 
   deleteConnection: async (id: string) => {
     const res = await apiClient.delete("/api-management/connections/" + id) as any;
+    return res?.data;
+  },
+
+  createEndpoint: async (connectionId: string, data: any) => {
+    const res = await apiClient.post(`/api-management/connections/${connectionId}/endpoints`, data) as any;
+    return res?.data;
+  },
+
+  updateEndpoint: async (endpointId: string, data: any) => {
+    const res = await apiClient.put(`/api-management/connections/endpoints/${endpointId}`, data) as any;
+    return res?.data;
+  },
+
+  deleteEndpoint: async (endpointId: string) => {
+    const res = await apiClient.delete(`/api-management/connections/endpoints/${endpointId}`) as any;
     return res?.data;
   },
 

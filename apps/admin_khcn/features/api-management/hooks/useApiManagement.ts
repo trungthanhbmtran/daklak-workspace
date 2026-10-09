@@ -52,6 +52,43 @@ export const useDeleteConnection = () => {
 };
 
 
+
+export const useCreateEndpoint = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ connectionId, data }: { connectionId: string; data: any }) => apiManagementApi.createEndpoint(connectionId, data),
+    onSuccess: () => {
+      toast.success("Thêm Endpoint thành công");
+      qc.invalidateQueries({ queryKey: ['api-connections'] });
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Lỗi khi thêm Endpoint")
+  });
+};
+
+export const useUpdateEndpoint = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ endpointId, data }: { endpointId: string; data: any }) => apiManagementApi.updateEndpoint(endpointId, data),
+    onSuccess: () => {
+      toast.success("Cập nhật Endpoint thành công");
+      qc.invalidateQueries({ queryKey: ['api-connections'] });
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Lỗi khi cập nhật Endpoint")
+  });
+};
+
+export const useDeleteEndpoint = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (endpointId: string) => apiManagementApi.deleteEndpoint(endpointId),
+    onSuccess: () => {
+      toast.success("Xóa Endpoint thành công");
+      qc.invalidateQueries({ queryKey: ['api-connections'] });
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || "Lỗi khi xóa Endpoint")
+  });
+};
+
 export const useDisableConnection = () => {
   const qc = useQueryClient();
   return useMutation({

@@ -118,6 +118,8 @@ export class ApiManagementController implements OnModuleInit {
     return { };
   }
 
+  // Manual endpoint CRUD methods removed
+
   @Put(':id/disable')
   @RequirePermissions('INTEGRATION:MANAGE')
   async disableConnection(
@@ -128,6 +130,42 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.DisableConnection(
         { id, expectedVersion },
+        this.getGrpcMetadata(req),
+      ),
+    );
+    return { data: res };
+  }
+
+  @Post(':id/endpoints')
+  @RequirePermissions('INTEGRATION:MANAGE')
+  async createEndpoint(@Req() req: any, @Param('id') connectionId: string, @Body() body: any) {
+    const res = await firstValueFrom(
+      this.grpcService.CreateEndpoint(
+        { connectionId, ...body },
+        this.getGrpcMetadata(req),
+      ),
+    );
+    return { data: res };
+  }
+
+  @Put('endpoints/:endpointId')
+  @RequirePermissions('INTEGRATION:MANAGE')
+  async updateEndpoint(@Req() req: any, @Param('endpointId') id: string, @Body() body: any) {
+    const res = await firstValueFrom(
+      this.grpcService.UpdateEndpoint(
+        { id, ...body },
+        this.getGrpcMetadata(req),
+      ),
+    );
+    return { data: res };
+  }
+
+  @Delete('endpoints/:endpointId')
+  @RequirePermissions('INTEGRATION:MANAGE')
+  async deleteEndpoint(@Req() req: any, @Param('endpointId') id: string) {
+    const res = await firstValueFrom(
+      this.grpcService.DeleteEndpoint(
+        { id },
         this.getGrpcMetadata(req),
       ),
     );
