@@ -28,6 +28,7 @@ export interface TableSource {
   params: Record<string, string>;
 }
 export interface ReportSourceOption {
+  upstream: string;
   name: string;
   paths: string[];
 }

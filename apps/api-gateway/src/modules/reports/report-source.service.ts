@@ -92,7 +92,7 @@ export class ReportSourceService {
         .map((e: any) => e.pathTemplate);
         
       if (paths.length > 0) {
-        options.push({ name: c.displayName || c.code, paths });
+        options.push({ upstream: c.code, name: c.displayName || c.code, paths });
       }
     }
     

@@ -125,3 +125,8 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - **Nguyên nhân**: PartnerController được cài đặt bằng HTTP decorators bên trong user-service, nhưng API Gateway không cấu hình route proxy nào cả.
   - **Giải pháp**: Mở rộng pi-management.proto với các method quản lý Partner; thay đổi PartnerController trong user-service thành gRPC endpoint; và tạo mới PartnerController trong pi-gateway để expose ra HTTP rồi forward bằng gRPC.
 
+
+- [x] **[Feature] �?ng b? API Manager m?i v�o h? th?ng B�o c�o (09/10/2026)**
+  - C?p nh?t ReportSourceOption contract d? ch?a upstream alias.
+  - C?u h�nh gRPC d? li�n k?t eport-service v?i pi-management.
+  - Fetch danh s�ch API endpoint t? API Manager d? t�ch h?p v�o V2 Report Catalog.

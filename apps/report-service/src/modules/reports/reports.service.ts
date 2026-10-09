@@ -11,11 +11,13 @@ export class ReportsService implements OnModuleInit {
   private orgGrpcService: any;
   private taskGrpcService: any;
   private docGrpcService: any;
+  private apiGrpcService: any;
 
   constructor(
     @Inject('USER_SERVICE') private userClient: ClientGrpc,
     @Inject('TASK_SERVICE') private taskClient: ClientGrpc,
     @Inject('DOCUMENT_SERVICE') private docClient: ClientGrpc,
+    @Inject('API_MANAGEMENT_SERVICE') private apiClient: ClientGrpc,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -23,6 +25,7 @@ export class ReportsService implements OnModuleInit {
     this.orgGrpcService = this.userClient.getService<any>('OrganizationService');
     this.taskGrpcService = this.taskClient.getService<any>('TaskService');
     this.docGrpcService = this.docClient.getService<any>('DocumentService');
+    this.apiGrpcService = this.apiClient.getService<any>('ApiManagementService');
   }
 
   async getStaffingReport(unitId: number) {
@@ -184,7 +187,7 @@ export class ReportsService implements OnModuleInit {
       });
 
       // If DB is empty, provide fallback defaults or just empty array
-      const catalog = sources.length > 0 ? sources.map(s => ({
+      const dbCatalog = sources.length > 0 ? sources.map(s => ({
         endpoint: s.code, // Alias for frontend compatibility
         upstream: s.upstream,
         path: s.path,
@@ -202,6 +205,45 @@ export class ReportsService implements OnModuleInit {
           fields: ['docId', 'departmentId', 'type', 'issueDate'],
         },
       ];
+
+      // Fetch from API Manager to sync external sources
+      let apiCatalog: any[] = [];
+      try {
+        if (this.apiGrpcService) {
+          const apiRes = await firstValueFrom(
+            this.apiGrpcService.ListConnections({ limit: 1000, offset: 0 })
+          ) as any;
+          if (apiRes && apiRes.data) {
+            for (const conn of apiRes.data) {
+              if (!conn.enabled) continue;
+              for (const ep of conn.endpoints) {
+                if (ep.method === 'GET' || ep.method === 'get') {
+                  let fields: string[] = [];
+                  if (ep.schema) {
+                    try {
+                      const parsed = JSON.parse(ep.schema);
+                      if (parsed && typeof parsed === 'object') {
+                        fields = Object.keys(parsed);
+                      }
+                    } catch(e) {}
+                  }
+                  apiCatalog.push({
+                    endpoint: `${conn.code}|${ep.pathTemplate}`,
+                    upstream: conn.code,
+                    path: ep.pathTemplate,
+                    name: `[Liên thông API] ${conn.displayName || conn.code} - ${ep.pathTemplate}`,
+                    fields: fields
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        this.logger.warn('Could not sync catalog with API Manager:', err);
+      }
+
+      const catalog = [...dbCatalog, ...apiCatalog];
 
       return {
         success: true,
