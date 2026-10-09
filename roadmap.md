@@ -133,3 +133,5 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks
 - [x] Chuyển đổi thiết kế báo cáo động (Dynamic Report Designer), xóa logic hardcode trong reports.service.ts và reports.controller.ts.
+
+  - [x] Nâng cấp giao diện Trung tâm Báo cáo (Enterprise UI): Chuyển đổi ReportWorkspace.tsx sang giao diện nâng cao với Tabs, KPIs, Grid/List view toggle và filters.
