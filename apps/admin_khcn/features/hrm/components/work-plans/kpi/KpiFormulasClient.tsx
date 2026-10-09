@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Calculator, Save, Plus, Trash2, Info, FunctionSquare, Percentage, ShieldCheck, Activity } from 'lucide-react';
+import { Calculator, Save, Plus, Trash2, Info, FunctionSquare, Percent, ShieldCheck, Activity } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Text } from "@/components/ui/typography";
 import { toast } from 'sonner';
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { taskKpiApi, VariableDef, CustomRule } from '../../api/task-kpi.api';
+import { taskKpiApi, VariableDef, CustomRule } from '../../../api/task-kpi.api';
 
 export function KpiFormulasClient() {
     const queryClient = useQueryClient();
@@ -159,7 +159,7 @@ export function KpiFormulasClient() {
                                         onChange={e => setQualityWeight(Number(e.target.value))}
                                         className="font-bold font-mono"
                                     />
-                                    <Percentage className="w-4 h-4 text-muted-foreground" />
+                                    <Percent className="w-4 h-4 text-muted-foreground" />
                                 </div>
                             </div>
                         </div>
@@ -201,11 +201,11 @@ export function KpiFormulasClient() {
                         
                         <div className="space-y-3">
                             {customRules.map((rule, idx) => (
-                                <div key={rule.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-muted/20 border p-3 rounded-xl transition-all hover:bg-muted/40">
+                                <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-muted/20 border p-3 rounded-xl transition-all hover:bg-muted/40">
                                     <div className="flex items-center justify-center w-6 h-6 rounded-full bg-background font-semibold text-xs border shadow-sm shrink-0">
                                         {idx + 1}
                                     </div>
-                                    <Select value={rule.domainCode} onValueChange={(val) => setCustomRules(customRules.map(r => r.id === rule.id ? {...r, domainCode: val} : r))}>
+                                    <Select value={rule.domainCode} onValueChange={(val) => setCustomRules(customRules.map((r, i) => i === idx ? {...r, domainCode: val} : r))}>
                                         <SelectTrigger className="w-[180px] bg-background">
                                             <SelectValue placeholder="Chọn lĩnh vực" />
                                         </SelectTrigger>
@@ -220,11 +220,11 @@ export function KpiFormulasClient() {
                                     <Input 
                                         placeholder="Công thức..." 
                                         value={rule.formula}
-                                        onChange={e => setCustomRules(customRules.map(r => r.id === rule.id ? {...r, formula: e.target.value} : r))}
+                                        onChange={e => setCustomRules(customRules.map((r, i) => i === idx ? {...r, formula: e.target.value} : r))}
                                         className="font-mono bg-background flex-1"
                                     />
                                     
-                                    <Button variant="ghost" size="icon" onClick={() => removeCustomRule(rule.id)} className="text-muted-foreground hover:text-red-500 hover:bg-red-50">
+                                    <Button variant="ghost" size="icon" onClick={() => removeCustomRule(idx)} className="text-muted-foreground hover:text-red-500 hover:bg-red-50">
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
