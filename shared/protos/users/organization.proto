@@ -19,6 +19,7 @@ service OrganizationService {
   rpc SetStaffing (SetStaffingRequest) returns (StaffingResponse);
   rpc GetStaffingReport (GetStaffingReportRequest) returns (StaffingReportResponse);
   rpc SetStaffingSlot (SetStaffingSlotRequest) returns (StaffingSlotItem);  // Phân công từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực riêng
+  rpc SyncStaffingSlot (SyncStaffingSlotRequest) returns (common.Empty);
   rpc ListJobTitles (ListJobTitlesRequest) returns (ListJobTitlesResponse);
   rpc UpdateJobTitle (UpdateJobTitleRequest) returns (JobTitleItem);
   rpc ListUnitTypes (common.Empty) returns (ListUnitTypesResponse);
@@ -37,6 +38,13 @@ message GetUnitTypeJobTemplatesResponse {
 message UpdateUnitTypeJobTemplatesRequest {
   int32 unit_type_id = 1;
   repeated int32 job_title_ids = 2;
+}
+
+message SyncStaffingSlotRequest {
+  string employee_code = 1;
+  int32 unit_id = 2;
+  int32 job_title_id = 3;
+  bool is_active = 4; // true nếu đang làm việc, false nếu nghỉ hưu/thôi việc
 }
 
 message UpdateUnitTypeJobTemplatesResponse {

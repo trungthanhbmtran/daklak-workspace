@@ -11,10 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Heading } from "@/components/ui/typography";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 import { useTaskConfigForm } from './hooks/useTaskConfigForm';
 
-export function PublicEmployeeTaskConfig({ templates, units, ranks }: { templates: any[], units: CategoryItem[], ranks: CategoryItem[] }) {
+export function PublicEmployeeTaskConfig({ templates, units, ranks }: { templates: any[], units: CategoryItem[], ranks: any[] }) {
     const [searchQuery, setSearchQuery] = useState('');
     
     const {
@@ -41,6 +42,19 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
         t.taskName.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const groupRanks = (allRanks: any[]) => {
+        const groups: Record<string, any[]> = {};
+        allRanks.forEach(r => {
+            const cat = r.category || 'Khác';
+            if (!groups[cat]) {
+                groups[cat] = [];
+            }
+            groups[cat].push(r);
+        });
+        return groups;
+    };
+    const rankGroups = groupRanks(ranks);
+
     return (
         <div className="flex flex-col md:flex-row gap-6 h-[600px]">
             {/* Left Sidebar: Ranks */}
@@ -49,20 +63,34 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                     <Heading level="h4" className="font-semibold uppercase tracking-wider">Danh mục Vị trí việc làm</Heading>
                 </div>
                 <ScrollArea className="flex-1 w-full">
-                    <div className="flex flex-col gap-1 p-3">
-                        {ranks.map(r => (
-                            <Button
-                                key={r.id}
-                                variant={selectedRank === r.code ? "secondary" : "ghost"}
-                                onClick={() => setSelectedRank(r.code)}
-                                className={`justify-start text-left h-auto py-2.5 px-3 transition-colors ${selectedRank === r.code ? 'border-l-4 border-primary rounded-l-none bg-secondary' : ''}`}
-                            >
-                                <span className={`text-xs font-semibold whitespace-normal leading-tight ${selectedRank === r.code ? 'text-primary' : 'text-muted-foreground'}`}>
-                                    {(r as any).nameVi || r.name}
-                                </span>
-                            </Button>
-                        ))}
-                    </div>
+                    <Accordion type="multiple" defaultValue={Object.keys(rankGroups)} className="w-full">
+                        {Object.entries(rankGroups).map(([groupName, groupRanks]) => {
+                            if (groupRanks.length === 0) return null;
+                            return (
+                                <AccordionItem value={groupName} key={groupName} className="border-b-0">
+                                    <AccordionTrigger className="px-4 py-3 bg-muted/10 hover:bg-muted/30 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:no-underline">
+                                        {groupName} ({groupRanks.length})
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pb-0">
+                                        <div className="flex flex-col gap-0.5 p-2">
+                                            {groupRanks.map(r => (
+                                                <Button
+                                                    key={r.id}
+                                                    variant={selectedRank === r.code ? "secondary" : "ghost"}
+                                                    onClick={() => setSelectedRank(r.code)}
+                                                    className={`justify-start text-left h-auto py-2 px-3 transition-colors ${selectedRank === r.code ? 'border-l-4 border-primary rounded-l-none bg-secondary/70' : 'hover:bg-muted/50'}`}
+                                                >
+                                                    <span className={`text-xs font-medium whitespace-normal leading-snug ${selectedRank === r.code ? 'text-primary font-bold' : 'text-foreground/80'}`}>
+                                                        {r.name}
+                                                    </span>
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            );
+                        })}
+                    </Accordion>
                 </ScrollArea>
             </div>
 

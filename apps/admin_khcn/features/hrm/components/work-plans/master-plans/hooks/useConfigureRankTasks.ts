@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { categoryApi } from '@/features/system-admin/categories/api';
+import { organizationApi } from '@/features/system-admin/organization/api';
 import { useTaskTemplatesList } from '@/features/hrm/hooks';
 import { GovClassification } from '../ConfigureRankTasksClient';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
@@ -20,8 +21,8 @@ export function useConfigureRankTasks() {
     });
 
     const { data: jobTitles = [], isLoading: isLoadingJobTitles } = useQuery({
-        queryKey: ['categories', 'JOB_TITLE'],
-        queryFn: async () => (await categoryApi.fetchByGroup('JOB_TITLE')).data,
+        queryKey: ['job-titles-all'],
+        queryFn: async () => (await organizationApi.getJobTitles()).data.allTitles,
         staleTime: 5 * 60 * 1000,
     });
 

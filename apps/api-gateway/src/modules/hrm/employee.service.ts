@@ -222,23 +222,69 @@ export class EmployeeService implements OnModuleInit {
   }
 
   async create(body: any) {
-    return this.executeWithDicts(
+    const res = await this.executeWithDicts(
       firstValueFrom(this.employeeService.CreateEmployee(body)),
     );
+    if (res?.data?.employeeCode) {
+      await firstValueFrom(
+        this.orgService.SyncStaffingSlot({
+          employeeCode: res.data.employeeCode,
+          unitId: res.data.department?.id || res.data.departmentId || 0,
+          jobTitleId: res.data.jobTitle?.id || res.data.jobTitleId || 0,
+          isActive: res.data.employmentStatus !== 'retired' && res.data.employmentStatus !== 'resigned',
+        })
+      ).catch(() => {});
+    }
+    return res;
   }
 
   async update(id: string, body: any) {
     const payload = { ...body, id: parseInt(id) };
-    return this.executeWithDicts(
+    const res = await this.executeWithDicts(
       firstValueFrom(this.employeeService.UpdateEmployee(payload)),
     );
+    if (res?.data?.employeeCode) {
+      await firstValueFrom(
+        this.orgService.SyncStaffingSlot({
+          employeeCode: res.data.employeeCode,
+          unitId: res.data.department?.id || res.data.departmentId || 0,
+          jobTitleId: res.data.jobTitle?.id || res.data.jobTitleId || 0,
+          isActive: res.data.employmentStatus !== 'retired' && res.data.employmentStatus !== 'resigned',
+        })
+      ).catch(() => {});
+    }
+    return res;
   }
 
   async delete(id: string) {
-    return firstValueFrom(
+    // 1. Lấy mã NV trước khi xóa
+    let empCode = '';
+    try {
+      const emp = await this.getDetail(id);
+      empCode = emp?.data?.employeeCode || '';
+    } catch (e) {
+      // ignore
+    }
+
+    // 2. Xóa
+    const res = await firstValueFrom(
       this.employeeService.DeleteEmployee({ id: parseInt(id) }),
     ).catch((e: any) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
+
+    // 3. Giải phóng slot nếu có mã NV
+    if (empCode) {
+      await firstValueFrom(
+        this.orgService.SyncStaffingSlot({
+          employeeCode: empCode,
+          unitId: 0,
+          jobTitleId: 0,
+          isActive: false,
+        })
+      ).catch(() => {});
+    }
+
+    return res;
   }
 }

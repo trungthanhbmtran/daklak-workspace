@@ -8,7 +8,7 @@ import Image from "next/image";
 import {
   ArrowLeft, Save, User, Camera,
   Loader2, Mail, Phone, CreditCard, Calendar,
-  Building2, Check, Hash, AlertCircle
+  Building2, Check, Hash, AlertCircle, ShieldAlert
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { hrmApi, hrmKeys } from "@/features/hrm";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { cn } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -121,6 +120,25 @@ export function EmployeeCreateClient() {
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
   const partyTitles = useMemo(() => jobTitles.filter(j => j.type === "PARTY"), [jobTitles]);
+
+  // Lấy báo cáo định biên khi user chọn đơn vị
+  const { data: staffingReport } = useQuery({
+    queryKey: ["staffing-report", departmentId],
+    queryFn: () => organizationApi.getStaffingReport(departmentId!),
+    enabled: !!departmentId,
+    staleTime: 60 * 1000,
+  });
+
+  const staffingMap = useMemo(() => {
+    const map = new Map<number, { quantity: number; currentCount: number }>();
+    (staffingReport?.data ?? []).forEach((s: any) => {
+      map.set(s.jobTitleId, { quantity: s.quantity, currentCount: s.currentCount ?? 0 });
+    });
+    return map;
+  }, [staffingReport]);
+
+  const selectedJobTitleId = form.watch("jobTitleId");
+  const quotaInfo = selectedJobTitleId ? staffingMap.get(selectedJobTitleId) : undefined;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSubmitting(true);
@@ -245,11 +263,47 @@ export function EmployeeCreateClient() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {govtTitles.map((j: any) => (
-                                <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
-                              ))}
+                              {govtTitles.map((j: any) => {
+                                const q = staffingMap.get(j.id);
+                                const remaining = q ? q.quantity - q.currentCount : null;
+                                return (
+                                  <SelectItem key={j.id} value={String(j.id)}>
+                                    <div className="flex items-center justify-between gap-2 w-full">
+                                      <span>{j.name}</span>
+                                      {q !== undefined && (
+                                        <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                                          remaining !== null && remaining <= 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                                        }`}>
+                                          {remaining !== null && remaining <= 0 ? 'Hết biên chế' : `Còn ${remaining} biên chế`}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
+
+                          {/* Cảnh báo biên chế ngay dưới Select */}
+                          {quotaInfo !== undefined && (
+                            <div className={`flex items-center gap-2 text-xs font-semibold mt-1.5 px-3 py-2 rounded-lg ${
+                              quotaInfo.currentCount >= quotaInfo.quantity
+                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                : 'bg-green-50 text-green-700 border border-green-200'
+                            }`}>
+                              {quotaInfo.currentCount >= quotaInfo.quantity
+                                ? <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+                                : <Check className="h-3.5 w-3.5 shrink-0" />
+                              }
+                              <span>
+                                Định biên: {quotaInfo.currentCount}/{quotaInfo.quantity} &mdash;
+                                {quotaInfo.currentCount >= quotaInfo.quantity
+                                  ? ' Đã hết chỉ tiêu! Hệ thống sẽ tự từ chối khi lưu.'
+                                  : ` Còn ${quotaInfo.quantity - quotaInfo.currentCount} vị trí trống.`
+                                }
+                              </span>
+                            </div>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}

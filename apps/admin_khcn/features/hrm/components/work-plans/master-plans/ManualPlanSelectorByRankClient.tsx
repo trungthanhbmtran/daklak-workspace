@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Target, Trash2, Save, Plus, Search, Check, ChevronsUpDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { hrmRankQuotasApi } from '@/features/hrm/api';
-import { categoryApi } from "@/features/system-admin/categories/api";
+import { organizationApi } from "@/features/system-admin/organization/api";
 import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
 import { toast } from 'sonner';
 
@@ -39,22 +39,7 @@ interface SelectedPlanItem {
     weight: number;
 }
 
-const PREFIX_NAMES: Record<string, string> = {
-    'V.04': 'Kiến trúc, Xây dựng',
-    'V.05': 'Khoa học & Công nghệ',
-    'V.06': 'Y tế dự phòng',
-    'V.07': 'Ngành Giáo dục',
-    'V.08': 'Ngành Y tế',
-    'V.09': 'Ngành Lưu trữ',
-    'V.10': 'Văn hóa, Thể thao',
-    'V.11': 'Thông tin & Truyền thông',
-    '01.': 'Hành chính / Dùng chung',
-    '02.': 'Ngành Thanh tra',
-    '03.': 'Ngành Hải quan',
-    '04.': 'Ngành Thuế',
-    '06.': 'Ngành Kế toán',
-    'STAFF': 'Nhân viên'
-};
+
 
 export function ManualPlanSelectorByRankClient() {
     const DOMAINS = [
@@ -65,17 +50,15 @@ export function ManualPlanSelectorByRankClient() {
         { code: 'EDUCATION', name: 'Giáo dục' },
     ];
 
-    const { data: congChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'JOB_TITLE'],
-        queryFn: async () => (await categoryApi.fetchByGroup('JOB_TITLE')).data,
+    const { data: jobTitlesRes = { allTitles: [], govTitles: [], partyTitles: [] } } = useQuery({
+        queryKey: ['job-titles-all'],
+        queryFn: async () => (await organizationApi.getJobTitles()).data,
         staleTime: 5 * 60 * 1000,
     });
 
-    const { data: vienChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'JOB_TITLE'],
-        queryFn: async () => (await categoryApi.fetchByGroup('JOB_TITLE')).data,
-        staleTime: 5 * 60 * 1000,
-    });
+    // Phân loại chức danh: Công chức (GOVERNMENT) vs Viên chức (VIEN_CHUC)
+    const congChucRanks = jobTitlesRes.govTitles;
+    const vienChucRanks = jobTitlesRes.allTitles.filter((j: any) => j.category && j.category.includes('Viên chức'));
 
     const { data: templatesData } = useTaskTemplatesList();
     const serverTemplates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
@@ -106,27 +89,19 @@ export function ManualPlanSelectorByRankClient() {
     const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
 
     const currentGroups = React.useMemo(() => {
-        const groupsMap = new Map<string, string>();
+        const catSet = new Map<string, string>();
         activeRanksList.forEach((r: any) => {
-            let prefix = r.code;
-            if (r.code.startsWith('V.')) {
-                prefix = r.code.substring(0, 4);
-            } else if (r.code.match(/^\d{2}\./)) {
-                prefix = r.code.substring(0, 3);
-            }
-            if (!groupsMap.has(prefix)) {
-                groupsMap.set(prefix, PREFIX_NAMES[prefix] || `Nhóm ${prefix}`);
-            }
+            const cat = r.category || 'Khác';
+            if (!catSet.has(cat)) catSet.set(cat, cat);
         });
-        const groups = Array.from(groupsMap.entries()).map(([id, name]) => ({ id, name }));
-        groups.unshift({ id: 'ALL', name: 'Tất cả các ngành/vị trí' });
+        const groups = Array.from(catSet.entries()).map(([id, name]) => ({ id, name }));
+        groups.unshift({ id: 'ALL', name: 'Tất cả các nhóm VTVL' });
         return groups;
     }, [activeRanksList]);
 
-    // Auto select first group correctly
+    // Auto-reset group khi chuyển phân loại
     useEffect(() => {
         if (currentGroups.length > 1 && !currentGroups.find(g => g.id === activeGroup)) {
-            // Default to ALL if changing classification
             setActiveGroup('ALL');
         }
     }, [classification, currentGroups, activeGroup]);
@@ -155,18 +130,14 @@ export function ManualPlanSelectorByRankClient() {
     }, [existingQuotasData, activeRankFilter]);
 
     const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter && item.domainCode === activeDomainFilter);
-    console.log("DEBUG_TASKS: serverTemplates =", serverTemplates);
-    console.log("DEBUG_TASKS: activeRankFilter =", activeRankFilter);
-    console.log("DEBUG_TASKS: activeDomainFilter =", activeDomainFilter);
-    console.log("DEBUG_TASKS: availableTasks =", availableTasks);
 
-    // Filter ranks by activeGroup
-    const groupedRanksList = activeGroup === 'ALL' 
-        ? activeRanksList 
-        : activeRanksList.filter((r: any) => r.code.startsWith(activeGroup) || r.code === activeGroup);
+    // Lọc VTVL theo nhóm (category) đã chọn
+    const groupedRanksList = activeGroup === 'ALL'
+        ? activeRanksList
+        : activeRanksList.filter((r: any) => (r.category || 'Khác') === activeGroup);
 
-    const filteredRanksList = groupedRanksList.filter((r: any) => 
-        (r.nameVi || r.name).toLowerCase().includes(searchRankText.toLowerCase()) || 
+    const filteredRanksList = groupedRanksList.filter((r: any) =>
+        r.name.toLowerCase().includes(searchRankText.toLowerCase()) ||
         r.code.toLowerCase().includes(searchRankText.toLowerCase())
     );
 
@@ -175,6 +146,7 @@ export function ManualPlanSelectorByRankClient() {
             setActiveRankFilter(groupedRanksList[0].code);
         }
     }, [classification, activeGroup, groupedRanksList, activeRankFilter]);
+
 
     const handleAssignTask = () => {
         const task = availableTasks.find(t => t.id === selectedTaskId);
@@ -481,7 +453,7 @@ export function ManualPlanSelectorByRankClient() {
                                                 }`}
                                         >
                                             <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-foreground'}`}>
-                                                {rank.nameVi || rank.name}
+                                                {rank.name}
                                             </h4>
                                             <Text variant="small" className="text-[11px] text-muted-foreground font-mono mt-1 font-normal">{rank.code}</Text>
                                         </div>

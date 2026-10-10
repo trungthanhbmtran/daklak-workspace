@@ -394,6 +394,17 @@ export class OrganizationsController {
     };
   }
 
+  @GrpcMethod('OrganizationService', 'SyncStaffingSlot')
+  async syncStaffingSlot(data: {
+    employeeCode: string;
+    unitId: number;
+    jobTitleId: number;
+    isActive: boolean;
+  }) {
+    await this.orgService.syncStaffingSlot(data);
+    return {};
+  }
+
   @GrpcMethod('OrganizationService', 'ListJobTitles')
   async listJobTitles(data: { unitId?: number }) {
     const res = await this.orgService.listJobTitles(data?.unitId);

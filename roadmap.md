@@ -170,3 +170,9 @@ eport-service v?i pi-management.
   - Tích hợp thư viện xử lý template (docxtemplater, pizzip) vào report-service.
   - Viết API nhận yêu cầu và parse ra file PDF/Word (Mẫu 05).
   - Tích hợp UI Frontend nút tải xuống Báo cáo/Quyết định tự động trên Task Dashboard.
+- [x] **Phase 3: Tái cấu trúc Tổ chức & Nhân sự (HRM & Org)**
+  - Đồng bộ Cấu hình Nhiệm vụ mẫu với DB JobTitle của Organization.
+  - Sửa lỗi API trong ManualPlanSelectorByRankClient.tsx và các component HRM liên quan.
+  - Bổ sung kiểm soát biên chế (Staffing Slot) tự động khi tạo/sửa đổi Hồ sơ nhân sự qua RPC `SyncStaffingSlot`.
+  - Thiết lập cơ chế "nhả" slot khi cập nhật nhân viên chuyển trạng thái "Nghỉ hưu", "Thôi việc".
+  - Kiểm soát PBAC Scope cho danh sách nhân viên, chỉ trả về đúng danh sách nhân viên thuộc sự quản lý của Account đăng nhập.

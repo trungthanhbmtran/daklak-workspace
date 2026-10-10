@@ -110,4 +110,12 @@ export const organizationApi = {
     apiClient.get("/categories", { params: { group: "JOB_TITLE_GROUP", limit: 100 } }).then((r: any) => ({
       data: r?.data?.data || r?.data || [],
     })),
+
+  /**
+   * Lấy báo cáo định biên của một đơn vị: số lượng chỉ tiêu, hiện tại, slot từng vị trí
+   */
+  getStaffingReport: (unitId: number): Promise<{ data: any[] }> =>
+    apiClient.get(`/organizations/${unitId}/staffing-report`).then((r: any) => ({
+      data: r?.data ?? [],
+    })),
 };

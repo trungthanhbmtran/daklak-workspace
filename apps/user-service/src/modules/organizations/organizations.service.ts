@@ -682,4 +682,85 @@ export class OrganizationsService {
 
     return { success: true };
   }
+
+  async syncStaffingSlot(data: {
+    employeeCode: string;
+    unitId: number;
+    jobTitleId: number;
+    isActive: boolean;
+  }) {
+    if (!data.employeeCode) return;
+
+    await this.prisma.$transaction(async (tx: any) => {
+      // 1. Release all currently assigned slots for this employeeCode
+      const currentSlots = await tx.staffingSlot.findMany({
+        where: { assignedEmployeeCode: data.employeeCode },
+      });
+
+      if (currentSlots.length > 0) {
+        await tx.staffingSlot.updateMany({
+          where: { assignedEmployeeCode: data.employeeCode },
+          data: { assignedEmployeeCode: null },
+        });
+
+        // Cập nhật currentCount cho các staffing bị ảnh hưởng
+        const staffingIds = [...new Set(currentSlots.map((s: any) => s.staffingId))];
+        for (const sId of staffingIds) {
+          const c = await tx.staffingSlot.count({
+            where: {
+              staffingId: sId as number,
+              assignedEmployeeCode: { not: null },
+            },
+          });
+          await tx.organizationStaffing.update({
+            where: { id: sId as number },
+            data: { currentCount: c },
+          });
+        }
+      }
+
+      // 2. Nếu employee active, tìm slot trống và gán
+      if (data.isActive && data.unitId && data.jobTitleId) {
+        const staffing = await tx.organizationStaffing.findUnique({
+          where: {
+            unitId_jobTitleId: {
+              unitId: data.unitId,
+              jobTitleId: data.jobTitleId,
+            },
+          },
+        });
+
+        if (staffing) {
+          const availableSlot = await tx.staffingSlot.findFirst({
+            where: {
+              staffingId: staffing.id,
+              OR: [
+                { assignedEmployeeCode: null },
+                { assignedEmployeeCode: '' },
+              ],
+            },
+            orderBy: { slotOrder: 'asc' },
+          });
+
+          if (availableSlot) {
+            await tx.staffingSlot.update({
+              where: { id: availableSlot.id },
+              data: { assignedEmployeeCode: data.employeeCode },
+            });
+
+            const c = await tx.staffingSlot.count({
+              where: {
+                staffingId: staffing.id,
+                assignedEmployeeCode: { not: null },
+              },
+            });
+            await tx.organizationStaffing.update({
+              where: { id: staffing.id },
+              data: { currentCount: c },
+            });
+          }
+        }
+      }
+    });
+  }
 }
