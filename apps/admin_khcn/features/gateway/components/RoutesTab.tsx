@@ -22,11 +22,24 @@ import { Route as RouteIcon, Plus, Trash2, CheckCircle2, Loader2, MoreHorizontal
 function RouteConfigDialog({ route, isOpen, onOpenChange }: { route: any, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
   const [isSaving, setIsSaving] = useState(false);
   const [config, setConfig] = useState({
-    rateLimit: route.rateLimit || 100,
-    cacheTtl: route.cacheTtl || 0,
-    timeout: route.timeout || 30000,
-    corsEnabled: route.corsEnabled ?? true
+    rateLimit: 100,
+    cacheTtl: 0,
+    timeout: 30000,
+    corsEnabled: true
   });
+
+  React.useEffect(() => {
+    if (route) {
+      setConfig({
+        rateLimit: route.rateLimit || 100,
+        cacheTtl: route.cacheTtl || 0,
+        timeout: route.timeout || 30000,
+        corsEnabled: route.corsEnabled ?? true
+      });
+    }
+  }, [route]);
+
+  if (!route) return null;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -95,9 +108,8 @@ function RouteConfigDialog({ route, isOpen, onOpenChange }: { route: any, isOpen
 }
 
 // ─── RouteRow — memoized, handles own delete mutation ────────────────────────
-const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, services: any[] }) {
+const RouteRow = React.memo(function RouteRow({ r, services, onConfig }: { r: any, services: any[], onConfig: (r: any) => void }) {
   const queryClient = useQueryClient();
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: gatewayApi.deleteRoute,
@@ -176,7 +188,7 @@ const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, service
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px]">
-            <DropdownMenuItem className="cursor-pointer" onClick={() => setIsConfigOpen(true)}>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => onConfig(r)}>
               <Settings className="w-4 h-4 mr-2" /> Cấu hình Route
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={handleDelete}>
@@ -184,8 +196,6 @@ const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, service
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <RouteConfigDialog route={r} isOpen={isConfigOpen} onOpenChange={setIsConfigOpen} />
       </TableCell>
     </TableRow>
   );
@@ -195,6 +205,7 @@ const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, service
 export function RoutesTab() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [configRoute, setConfigRoute] = useState<any>(null);
   const [newRoute, setNewRoute] = useState({
     path: "",
     serviceId: "",
@@ -326,11 +337,17 @@ export function RoutesTab() {
                 </TableCell>
               </TableRow>
             ) : (
-              routes.map((r: any) => <RouteRow key={r.id} r={r} services={services} />)
+              routes.map((r: any) => <RouteRow key={r.id} r={r} services={services} onConfig={setConfigRoute} />)
             )}
           </TableBody>
         </Table>
       </div>
+
+      <RouteConfigDialog 
+        route={configRoute} 
+        isOpen={!!configRoute} 
+        onOpenChange={(open) => !open && setConfigRoute(null)} 
+      />
     </div>
   );
 }
