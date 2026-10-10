@@ -264,7 +264,7 @@ export function ApiEndpointEditDialog({
                 defaultValue="general"
                 className="w-full h-full flex flex-col"
               >
-                <TabsList className="grid grid-cols-3 w-full max-w-[500px] mb-6 mx-auto bg-muted/50 p-1">
+                <TabsList className="flex flex-col sm:grid sm:grid-cols-3 w-full sm:max-w-[600px] mb-6 mx-auto bg-muted/50 p-1 h-auto sm:h-10 gap-1 sm:gap-0">
                   <TabsTrigger
                     value="general"
                     className="flex items-center justify-center gap-2 rounded-md"
@@ -467,16 +467,16 @@ export function ApiEndpointEditDialog({
                           </Button>
                         </div>
                       ) : (
-                        <div className="border rounded-md overflow-hidden bg-background">
-                          <Table>
+                        <div className="border rounded-md overflow-x-auto bg-background">
+                          <Table className="min-w-[900px]">
                             <TableHeader className="bg-muted/50">
                               <TableRow>
-                                <TableHead className="w-[180px]">Tên biến</TableHead>
-                                <TableHead className="w-[120px]">Vị trí</TableHead>
-                                <TableHead className="w-[120px]">Kiểu</TableHead>
-                                <TableHead className="w-[100px]">Bắt buộc</TableHead>
-                                <TableHead className="w-[180px]">Giá trị mẫu</TableHead>
-                                <TableHead>Mô tả</TableHead>
+                                <TableHead className="min-w-[180px]">Tên biến</TableHead>
+                                <TableHead className="min-w-[120px]">Vị trí</TableHead>
+                                <TableHead className="min-w-[120px]">Kiểu</TableHead>
+                                <TableHead className="min-w-[100px]">Bắt buộc</TableHead>
+                                <TableHead className="min-w-[180px]">Giá trị mẫu</TableHead>
+                                <TableHead className="min-w-[200px]">Mô tả</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                               </TableRow>
                             </TableHeader>

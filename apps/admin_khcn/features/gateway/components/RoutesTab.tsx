@@ -5,30 +5,20 @@ import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { gatewayApi } from "../api/gateway.api";
-import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { Route as RouteIcon, Plus, Trash2, CheckCircle2, Loader2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Route as RouteIcon, Plus, Trash2, CheckCircle2, Loader2, MoreHorizontal, Settings, ArrowRight } from "lucide-react";
 
 // ─── RouteRow — memoized, handles own delete mutation ────────────────────────
-
-interface RouteRowProps {
-  r: any;
-}
-
-const RouteRow = React.memo(function RouteRow({ r }: RouteRowProps) {
+const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, services: any[] }) {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -36,6 +26,7 @@ const RouteRow = React.memo(function RouteRow({ r }: RouteRowProps) {
     onSuccess: () => {
       toast.success("Đã xóa Route");
       queryClient.invalidateQueries({ queryKey: ["gateway", "routes"] });
+      queryClient.invalidateQueries({ queryKey: ["gateway", "services"] });
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || "Lỗi khi xóa";
@@ -44,25 +35,41 @@ const RouteRow = React.memo(function RouteRow({ r }: RouteRowProps) {
   });
 
   const handleDelete = useCallback(() => {
-    if (!confirm("Bạn có chắc muốn xóa route này?")) return;
+    if (!confirm("Bạn có chắc muốn xóa route này? Các request tương ứng sẽ bị từ chối.")) return;
     deleteMutation.mutate(r.id);
   }, [r.id, deleteMutation]);
 
+  const service = services.find((s: any) => s.id === r.serviceId) || r.service;
+
+  const getMethodColor = (m: string) => {
+    switch (m.trim().toUpperCase()) {
+      case 'GET': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      case 'POST': return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+      case 'PUT': return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+      case 'DELETE': return 'bg-rose-500/10 text-rose-600 border-rose-500/20';
+      case 'PATCH': return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
+      default: return 'bg-muted text-muted-foreground border-border';
+    }
+  };
+
   return (
     <TableRow className="hover:bg-muted/30 transition-colors group">
-      <TableCell className="px-6 py-4 font-mono font-medium text-primary">{r.path}</TableCell>
       <TableCell className="px-6 py-4">
-        <Badge variant="secondary" className="bg-muted border-transparent text-foreground hover:bg-muted/80 rounded-md font-medium px-2.5 py-1">
-          {r.service?.name || `ID:${r.serviceId}`}
-        </Badge>
+        <div className="font-mono text-sm font-semibold text-foreground/90">{r.path}</div>
+      </TableCell>
+      <TableCell className="px-6 py-4">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="bg-background hover:bg-muted font-medium px-2 py-0.5 rounded-md">
+            {service?.name || `Unknown (ID:${r.serviceId})`}
+          </Badge>
+          <ArrowRight className="w-3 h-3 text-muted-foreground" />
+          <span className="text-[10px] text-muted-foreground truncate max-w-[150px] font-mono" title={service?.url}>{service?.url || '---'}</span>
+        </div>
       </TableCell>
       <TableCell className="px-6 py-4">
         <div className="flex gap-1.5 flex-wrap max-w-xs">
           {r.methods.split(",").map((m: string) => (
-            <span
-              key={m}
-              className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase bg-muted text-muted-foreground"
-            >
+            <span key={m} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase border ${getMethodColor(m)}`}>
               {m.trim()}
             </span>
           ))}
@@ -78,29 +85,30 @@ const RouteRow = React.memo(function RouteRow({ r }: RouteRowProps) {
         )}
       </TableCell>
       <TableCell className="px-6 py-4 text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-          className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          {deleteMutation.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Trash2 className="w-4 h-4" />
-          )}
-          Xóa
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+              {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <MoreHorizontal className="w-4 h-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuItem className="cursor-pointer">
+              <Settings className="w-4 h-4 mr-2" /> Cấu hình
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={handleDelete}>
+              <Trash2 className="w-4 h-4 mr-2" /> Xóa Route
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     </TableRow>
   );
 });
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-
 export function RoutesTab() {
   const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
   const [newRoute, setNewRoute] = useState({
     path: "",
     serviceId: "",
@@ -108,133 +116,127 @@ export function RoutesTab() {
     stripPath: true,
   });
 
-  const { data: services = [] } = useQuery({
-    queryKey: ["gateway", "services"],
-    queryFn: gatewayApi.getServices,
-  });
-
-  const { data: routes = [], isLoading } = useQuery({
-    queryKey: ["gateway", "routes"],
-    queryFn: gatewayApi.getRoutes,
-  });
+  const { data: services = [] } = useQuery({ queryKey: ["gateway", "services"], queryFn: gatewayApi.getServices });
+  const { data: routes = [], isLoading } = useQuery({ queryKey: ["gateway", "routes"], queryFn: gatewayApi.getRoutes });
 
   const createMutation = useMutation({
     mutationFn: gatewayApi.createRoute,
     onSuccess: () => {
       toast.success("Đã thêm Route mới");
       setNewRoute({ path: "", serviceId: "", methods: "GET,POST,PUT,DELETE,PATCH", stripPath: true });
+      setIsOpen(false);
       queryClient.invalidateQueries({ queryKey: ["gateway", "routes"] });
+      queryClient.invalidateQueries({ queryKey: ["gateway", "services"] });
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || "Lỗi khi thêm Route";
-      toast.error(message);
+      toast.error(error.response?.data?.message || "Lỗi khi thêm Route");
     },
   });
 
   const handleCreate = useCallback(() => {
-    if (!newRoute.path || !newRoute.serviceId)
-      return toast.error("Vui lòng nhập đường dẫn và chọn Service");
+    if (!newRoute.path || !newRoute.serviceId) return toast.error("Vui lòng nhập đường dẫn và chọn Service");
     createMutation.mutate({ ...newRoute, serviceId: Number(newRoute.serviceId) });
   }, [newRoute, createMutation]);
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
-      {/* Create form */}
-      <Card className="shrink-0 border-none shadow-sm rounded-md overflow-hidden bg-card border border-border">
-        <CardHeader className="bg-muted/30 border-b border-border pb-6">
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <RouteIcon className="w-5 h-5 text-primary" /> Đăng ký Route mới
-          </CardTitle>
-          <CardDescription>
-            Thiết lập quy tắc ánh xạ (mapping) từ đường dẫn API ngoài vào service đích tương ứng.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6 pb-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
-            <div className="space-y-2 md:col-span-5">
-              <Label className="text-foreground">Đường dẫn Request (Path Matcher)</Label>
-              <Input
-                className="h-10 rounded-md bg-background border-input focus-visible:ring-primary font-mono text-sm"
-                placeholder="/api/v1/external/users/*"
-                value={newRoute.path}
-                onChange={(e) => setNewRoute({ ...newRoute, path: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2 md:col-span-3">
-              <Label className="text-foreground">Service đích (Target)</Label>
-              <Select value={newRoute.serviceId} onValueChange={(v) => setNewRoute({ ...newRoute, serviceId: v })}>
-                <SelectTrigger className="h-10 rounded-md bg-background border-input focus:ring-primary">
-                  <SelectValue placeholder="Chọn Service..." />
-                </SelectTrigger>
-                <SelectContent className="rounded-md border-border shadow-md">
-                  {services.map((s: any) => (
-                    <SelectItem key={s.id} value={s.id.toString()} className="cursor-pointer">
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 md:col-span-2 flex flex-col items-center">
-              <Label className="text-foreground">Strip Path</Label>
-              <div className="h-10 flex items-center">
-                <Switch
-                  checked={newRoute.stripPath}
-                  onCheckedChange={(v) => setNewRoute({ ...newRoute, stripPath: v })}
-                />
+    <div className="flex-1 min-h-0 flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-hidden pb-4">
+      <div className="flex justify-between items-center px-1">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">API Routes</h2>
+          <p className="text-sm text-muted-foreground mt-1">Định nghĩa các quy tắc ánh xạ từ đường dẫn vào tới Service đích.</p>
+        </div>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary text-primary-foreground shadow-sm">
+              <Plus className="w-4 h-4 mr-2" /> Thêm Route
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><RouteIcon className="w-5 h-5 text-primary" /> Đăng ký Route mới</DialogTitle>
+              <DialogDescription>
+                Thiết lập quy tắc ánh xạ (mapping matcher) cho Gateway.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label>Đường dẫn Request (Path Matcher)</Label>
+                <Input className="font-mono text-sm" placeholder="e.g. /api/v1/external/users/*" value={newRoute.path} onChange={(e) => setNewRoute({ ...newRoute, path: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Service đích (Target)</Label>
+                <Select value={newRoute.serviceId} onValueChange={(v) => setNewRoute({ ...newRoute, serviceId: v })}>
+                  <SelectTrigger><SelectValue placeholder="Chọn Service..." /></SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {services.map((s: any) => (
+                      <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Methods cho phép</Label>
+                <Input className="font-mono text-sm uppercase" value={newRoute.methods} onChange={(e) => setNewRoute({ ...newRoute, methods: e.target.value })} />
+                <p className="text-[10px] text-muted-foreground">Ví dụ: GET,POST,PUT hoặc ALL</p>
+              </div>
+              <div className="flex items-center justify-between mt-2 p-3 bg-muted/50 rounded-lg border border-border">
+                <div className="space-y-0.5">
+                  <Label>Strip Path (Cắt tiền tố)</Label>
+                  <p className="text-[10px] text-muted-foreground">Cắt bỏ đoạn đường dẫn trùng khớp trước khi gửi tới upstream.</p>
+                </div>
+                <Switch checked={newRoute.stripPath} onCheckedChange={(v) => setNewRoute({ ...newRoute, stripPath: v })} />
               </div>
             </div>
-            <Button
-              onClick={handleCreate}
-              disabled={createMutation.isPending}
-              className="h-10 md:col-span-2 rounded-md bg-primary hover:bg-primary/90 shadow-sm text-primary-foreground w-full"
-            >
-              {createMutation.isPending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Plus className="w-5 h-5" />
-              )}
-              Thêm Route
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex justify-end gap-3 mt-4">
+              <Button variant="outline" onClick={() => setIsOpen(false)}>Hủy</Button>
+              <Button onClick={handleCreate} disabled={createMutation.isPending}>
+                {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Lưu Route
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-      <div className="flex-1 min-h-0 bg-card border border-border shadow-sm rounded-md overflow-y-auto custom-scrollbar">
-          <Table>
-            <TableHeader className="sticky top-0 z-10 bg-muted/50">
-              <TableRow className="text-muted-foreground uppercase text-xs font-semibold tracking-wider">
-                <TableHead className="px-6 py-5">Đường dẫn (Path)</TableHead>
-                <TableHead className="px-6 py-5">Service Target</TableHead>
-                <TableHead className="px-6 py-5">Methods</TableHead>
-                <TableHead className="px-6 py-5 text-center">Strip Path</TableHead>
-                <TableHead className="px-6 py-5 text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    {Array.from({ length: 5 }).map((__, j) => (
-                      <TableCell key={j} className="px-6 py-4">
-                        <Skeleton className="h-4 w-full" />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : routes.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="px-6 py-16 text-center text-muted-foreground bg-muted/10">
-                    <RouteIcon className="w-10 h-10 mx-auto mb-3 text-muted-foreground/50" />
-                    Chưa có quy tắc định tuyến nào được cấu hình
-                  </TableCell>
+      <div className="flex-1 min-h-0 bg-card border border-border shadow-sm rounded-lg overflow-y-auto custom-scrollbar">
+        <Table>
+          <TableHeader className="sticky top-0 z-10 bg-muted/50 backdrop-blur-sm">
+            <TableRow>
+              <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Đường dẫn (Path)</TableHead>
+              <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Service Target</TableHead>
+              <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider">Methods</TableHead>
+              <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-center">Strip Path</TableHead>
+              <TableHead className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-right">Thao tác</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="px-6 py-4"><Skeleton className="h-5 w-[200px]" /></TableCell>
+                  <TableCell className="px-6 py-4"><Skeleton className="h-5 w-[150px]" /></TableCell>
+                  <TableCell className="px-6 py-4"><Skeleton className="h-5 w-[120px]" /></TableCell>
+                  <TableCell className="px-6 py-4"><Skeleton className="h-5 w-[30px] mx-auto" /></TableCell>
+                  <TableCell className="px-6 py-4 text-right"><Skeleton className="h-8 w-8 ml-auto rounded-full" /></TableCell>
                 </TableRow>
-              ) : (
-                // Mỗi row tự xử lý delete mutation riêng
-                routes.map((r: any) => <RouteRow key={r.id} r={r} />)
-              )}
-            </TableBody>
-          </Table>
+              ))
+            ) : routes.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-[400px] text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                      <RouteIcon className="w-8 h-8 opacity-50" />
+                    </div>
+                    <p className="font-medium text-lg text-foreground">Không có Route nào</p>
+                    <p className="text-sm mt-1">Bấm "Thêm Route" để định tuyến luồng dữ liệu.</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              routes.map((r: any) => <RouteRow key={r.id} r={r} services={services} />)
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
