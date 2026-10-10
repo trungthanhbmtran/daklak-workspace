@@ -31,6 +31,9 @@ Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trìn
   - LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không có dấu cách (như API Key, Token, ID, URL) để ép text tự động xuống dòng và không đâm xuyên qua các card/container.
   - Sử dụng `truncate` hoặc `line-clamp-x` đúng cách ở các thẻ `Title`/`Description` để cắt chữ nếu quá dài.
   - **Fluid Layout**: Hạn chế sử dụng các class giới hạn chiều rộng cứng (như `max-w-5xl`, `max-w-[1400px]`) ở các trang Dashboard lớn. Hãy ưu tiên dùng `w-full flex-1` để nội dung luôn bám sát theo kích cỡ màn hình cha, tránh để lại các mảng khoảng trắng (whitespace) dư thừa quá lớn trên các màn hình độ phân giải cao.
+  - **Quy định sử dụng Sheet vs Dialog (Modal)**: 
+    - **Dùng `<Sheet>` (Trượt từ cạnh phải màn hình):** BẮT BUỘC dùng cho các form dài, cấu hình chi tiết, phức tạp (ví dụ: Cấu hình Endpoint API, Flow builder), hoặc các dữ liệu cần đối chiếu song song với màn hình chính. Sheet cung cấp không gian rộng rãi (như `sm:max-w-xl` hoặc `w-[600px]`) và scroll dọc tự nhiên, không làm ngợp người dùng.
+    - **Dùng `<Dialog>` (Hiển thị giữa màn hình):** CHỈ dùng cho các tương tác ngắn, đòi hỏi sự quyết định tức thời như: Xác nhận Xóa, Cảnh báo, hoặc form cực ngắn (1-3 input). TUYỆT ĐỐI KHÔNG nhồi nhét form cấu hình dài, nhiều tab vào Dialog vì sẽ gây chật chội, khó kéo thả và mất bối cảnh (context).
 - **Quản lý file `.proto` (gRPC)**: BẤT KỲ khi nào thao tác sửa đổi file `.proto`, Agent BẮT BUỘC phải sử dụng công cụ an toàn (ghi đè toàn bộ hoặc multi_replace, tuyệt đối KHÔNG cắt ghép chuỗi bằng script dễ gây mất ký tự). Ngay sau khi sửa, PHẢI kiểm tra kỹ cú pháp đóng mở block `{ }` và bắt buộc chạy thử/build lại microservice tương ứng để xác nhận bộ tải gRPC đọc được file (không bị lỗi `illegal token` hoặc `InvalidProtoDefinitionException`).
 
 ### Bước 4: Chạy kiểm chứng & Tự sửa lỗi (Test Execution & Self-Correction)

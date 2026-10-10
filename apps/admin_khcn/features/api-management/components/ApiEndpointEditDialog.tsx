@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -243,23 +243,23 @@ export function ApiEndpointEditDialog({
   const isPending = createMut.isPending || updateMut.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden flex flex-col rounded-xl sm:rounded-2xl">
-        <DialogHeader className="px-6 py-5 border-b bg-card">
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl lg:max-w-[800px] p-0 overflow-hidden flex flex-col h-full border-l shadow-2xl">
+        <SheetHeader className="px-6 py-5 border-b bg-card">
+          <SheetTitle className="text-xl font-bold flex items-center gap-2">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Globe className="w-5 h-5" />
             </div>
             {endpoint ? "Cập nhật Endpoint" : "Thêm mới Endpoint"}
-          </DialogTitle>
-        </DialogHeader>
+          </SheetTitle>
+        </SheetHeader>
 
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col flex-1 overflow-hidden h-[calc(90vh-140px)] min-h-[500px]"
+            className="flex flex-col flex-1 overflow-hidden"
           >
-            <div className="flex-1 overflow-y-auto px-6 py-6 bg-slate-50/50 dark:bg-zinc-950/50">
+            <div className="flex-1 overflow-y-auto px-6 py-6 bg-slate-50/50 dark:bg-zinc-950/50 custom-scrollbar">
               <Tabs
                 defaultValue="general"
                 className="w-full h-full flex flex-col"
@@ -735,7 +735,7 @@ export function ApiEndpointEditDialog({
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
