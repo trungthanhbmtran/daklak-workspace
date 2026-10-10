@@ -4,20 +4,20 @@ import { PageHeader } from "@/components/layouts/page-header";
 import { GATEWAY_ROUTES } from "@/features/gateway/routes";
 
 export const metadata = {
-  title: "Quản lý API Gateway | Cổng Ứng dụng Nội bộ",
+  title: "Quản lý Gateway & Kết nối | Cổng Ứng dụng Nội bộ",
 };
 
 const MODULES = [
   {
     href: GATEWAY_ROUTES.gateway,
-    title: "Cấu hình API Gateway",
-    description: "Quản trị định tuyến, bảo mật và cấu hình cho các microservice.",
+    title: "Cấu hình API Gateway (Inbound)",
+    description: "Quản trị định tuyến (Routes), microservices nội bộ (Upstreams) và cấp phát khóa bảo mật (API Keys) cho các luồng Inbound.",
     icon: Network,
   },
   {
     href: GATEWAY_ROUTES.apis,
-    title: "Kết nối API đầu vào",
-    description: "Quản lý cấu hình, xác thực kết nối với hệ thống ngoài (LGSP, Webhook).",
+    title: "Kết nối API Outbound",
+    description: "Khai báo cấu hình và xác thực để gọi ra các hệ thống bên ngoài (LGSP, webhook, thanh toán).",
     icon: Plug,
   },
 ] as const;
@@ -26,8 +26,8 @@ export default function ApiManagerPage() {
   return (
     <div className="flex flex-col gap-5">
       <PageHeader
-        title="Quản lý API Gateway"
-        description="Quản trị giao tiếp dữ liệu giữa các phân hệ và hệ thống bên ngoài."
+        title="Quản lý Gateway & API"
+        description="Trung tâm điều khiển luồng dữ liệu vào (Inbound) và các kết nối hướng ra (Outbound)."
       />
       <nav aria-label="Phân hệ API Gateway" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {MODULES.map((m) => (
