@@ -17,6 +17,13 @@ model GatewayService {
   ignoreTlsVerify     Boolean  @default(true)
   description         String?
   isActive            Boolean  @default(true)
+  
+  // Advanced Config
+  healthCheckPath     String?  @default("/health")
+  healthCheckInterval Int?     @default(30000)
+  connectTimeout      Int?     @default(5000)
+  readTimeout         Int?     @default(30000)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -31,6 +38,13 @@ model GatewayRoute {
   service     GatewayService @relation(fields: [serviceId], references: [id])
   methods     String   @default("GET,POST,PUT,DELETE,PATCH") // Comma separated allowed methods
   isActive    Boolean  @default(true)
+
+  // Advanced Config
+  rateLimit   Int?     @default(100)
+  cacheTtl    Int?     @default(0)
+  timeout     Int?     @default(30000)
+  corsEnabled Boolean? @default(true)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -44,4 +58,15 @@ model ApiKey {
   expiresAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model GatewaySetting {
+  id                 Int      @id @default(autoincrement())
+  globalTimeout      Int      @default(30000)
+  enableRateLimiting Boolean  @default(true)
+  defaultRateLimit   Int      @default(100)
+  enableCors         Boolean  @default(true)
+  allowedOrigins     String   @default("*")
+  logLevel           String   @default("info")
+  updatedAt          DateTime @updatedAt
 }

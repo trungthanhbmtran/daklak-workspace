@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Save, Loader2, Shield, Clock, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { gatewayApi } from "../api/gateway.api";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,20 +31,10 @@ type GatewaySettingsValues = z.infer<typeof gatewaySettingsSchema>;
 export function SettingsTab() {
   const { data: currentSettings, isLoading } = useQuery({
     queryKey: ["gateway", "settings"],
-    queryFn: async () => {
-      await new Promise(r => setTimeout(r, 600));
-      return {
-        globalTimeout: 30000,
-        enableRateLimiting: true,
-        defaultRateLimit: 100,
-        enableCors: true,
-        allowedOrigins: "*",
-        logLevel: "info",
-      } as GatewaySettingsValues;
-    },
+    queryFn: gatewayApi.getSettings,
   });
 
-  const form = useForm<GatewaySettingsValues>({
+  const form = useForm<any>({
     resolver: zodResolver(gatewaySettingsSchema) as any,
     defaultValues: {
       globalTimeout: 30000,
@@ -57,11 +48,7 @@ export function SettingsTab() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: GatewaySettingsValues) => {
-      await new Promise(r => setTimeout(r, 800));
-      console.log("Saving gateway settings", values);
-      return values;
-    },
+    mutationFn: gatewayApi.updateSettings,
     onSuccess: () => {
       toast.success("Đã lưu cấu hình Gateway thành công!");
     },

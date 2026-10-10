@@ -41,13 +41,21 @@ function RouteConfigDialog({ route, isOpen, onOpenChange }: { route: any, isOpen
 
   if (!route) return null;
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    // Mocking API delay for UX
-    await new Promise(r => setTimeout(r, 600));
-    toast.success("Đã lưu cấu hình chuyên sâu cho Route");
-    setIsSaving(false);
-    onOpenChange(false);
+  const queryClient = useQueryClient();
+  const updateMutation = useMutation({
+    mutationFn: (data: any) => gatewayApi.updateRoute(route.id, data),
+    onSuccess: () => {
+      toast.success("Đã lưu cấu hình chuyên sâu cho Route");
+      onOpenChange(false);
+      queryClient.invalidateQueries({ queryKey: ["gateway", "routes"] });
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Lỗi khi lưu thiết lập");
+    }
+  });
+
+  const handleSave = () => {
+    updateMutation.mutate(config);
   };
 
   return (
@@ -97,8 +105,8 @@ function RouteConfigDialog({ route, isOpen, onOpenChange }: { route: any, isOpen
 
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Đóng</Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+          <Button onClick={handleSave} disabled={updateMutation.isPending}>
+            {updateMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
             Lưu thiết lập
           </Button>
         </div>

@@ -78,4 +78,21 @@ export class GatewayConfigService {
   async deleteApiKey(id: number) {
     return this.prisma.apiKey.delete({ where: { id } });
   }
+
+  // Settings
+  async getSettings() {
+    let settings = await this.prisma.gatewaySetting.findFirst();
+    if (!settings) {
+      settings = await this.prisma.gatewaySetting.create({ data: {} });
+    }
+    return settings;
+  }
+
+  async updateSettings(data: any) {
+    const settings = await this.getSettings();
+    return this.prisma.gatewaySetting.update({
+      where: { id: settings.id },
+      data,
+    });
+  }
 }

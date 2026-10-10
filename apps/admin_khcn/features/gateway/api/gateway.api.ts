@@ -36,6 +36,15 @@ export interface ApiKey {
   createdAt: string;
   updatedAt: string;
 }
+export interface GatewaySettings {
+  id?: number;
+  globalTimeout: number;
+  enableRateLimiting: boolean;
+  defaultRateLimit: number;
+  enableCors: boolean;
+  allowedOrigins: string;
+  logLevel: "debug" | "info" | "warn" | "error";
+}
 
 export const gatewayApi = {
   // Services
@@ -87,5 +96,15 @@ export const gatewayApi = {
   },
   deleteApiKey: async (id: number): Promise<void> => {
     await apiClient.delete(`/integration/apikeys/${id}`);
+  },
+
+  // Settings
+  getSettings: async (): Promise<GatewaySettings> => {
+    const res = await apiClient.get('/integration/settings');
+    return (res as any)?.data || {};
+  },
+  updateSettings: async (data: Partial<GatewaySettings>): Promise<GatewaySettings> => {
+    const res = await apiClient.put('/integration/settings', data);
+    return (res as any)?.data;
   }
 };

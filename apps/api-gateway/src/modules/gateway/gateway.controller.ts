@@ -107,4 +107,19 @@ export class GatewayConfigController {
     await this.service.deleteApiKey(id);
     return { };
   }
+
+  // Settings
+  @Get('settings')
+  @RequirePermissions('INTEGRATION:MANAGE', 'INTEGRATION:READ')
+  async getSettings() {
+    const data = await this.service.getSettings();
+    return { data };
+  }
+
+  @Put('settings')
+  @RequirePermissions('INTEGRATION:MANAGE')
+  async updateSettings(@Body() dto: any) {
+    const data = await this.service.updateSettings(dto);
+    return { data };
+  }
 }
