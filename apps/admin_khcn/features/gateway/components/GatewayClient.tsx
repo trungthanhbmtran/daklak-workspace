@@ -5,11 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { gatewayApi } from "../api/gateway.api";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Key, Network, Route as RouteIcon, Server, ArrowRightLeft, ShieldCheck, Zap } from "lucide-react";
+import { Key, Network, Route as RouteIcon, Server, ArrowRightLeft, ShieldCheck, Zap, Settings } from "lucide-react";
 
 import { ServicesTab } from "./ServicesTab";
 import { RoutesTab } from "./RoutesTab";
 import { ApiKeysTab } from "./ApiKeysTab";
+import { SettingsTab } from "./SettingsTab";
 
 export function GatewayClient() {
   const { data: services = [] } = useQuery({ queryKey: ['gateway', 'services'], queryFn: gatewayApi.getServices });
@@ -106,6 +107,12 @@ export function GatewayClient() {
             >
               <Key className="w-4 h-4 mr-2" /> Security (API Keys)
             </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+            >
+              <Settings className="w-4 h-4 mr-2" /> Cấu hình
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -119,6 +126,10 @@ export function GatewayClient() {
 
         <TabsContent value="apikeys" className="data-[state=active]:flex data-[state=active]:flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none mt-0">
           <ApiKeysTab />
+        </TabsContent>
+
+        <TabsContent value="settings" className="data-[state=active]:flex data-[state=active]:flex-col flex-1 min-h-0 overflow-hidden focus-visible:outline-none mt-0">
+          <SettingsTab />
         </TabsContent>
       </Tabs>
     </div>
