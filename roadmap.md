@@ -5,9 +5,9 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 ## Unplanned Tasks / Hotfixes
 
 - [x] **[Hotfix] Khôi phục danh sách nhân sự HRM (10/10/2026)**
-  - **Nguyên nhân**: Prisma `Employee` đã khai báo `department_path` nhưng bảng `admin_hrm.employees` trên runtime chưa có cột, làm mọi truy vấn Prisma `findMany`/`findUnique` thất bại với `P2022`.
-  - **Khắc phục**: Thêm migration cộng dồn cho cột nullable `department_path` và index; áp dụng trên DB HRM đang chạy, giữ nguyên dữ liệu nhân sự hiện có.
-  - **Kiểm chứng**: Chờ ghi nhận sau khi migration được áp dụng.
+  - **Nguyên nhân**: Log `hrm-service` cho thấy Prisma `Employee` lỗi `P2022` vì `admin_hrm.employees.department_path` chưa tồn tại; bảng cũng thiếu migration được theo dõi cho `organization_id` đã bổ sung trước đó.
+  - **Khắc phục**: Dùng hai migration đã có trong source cho `organization_id` và `department_path`; áp dụng phần `department_path` vào DB đang chạy và đồng bộ lịch sử Prisma, không sửa 49 dòng dữ liệu nhân sự.
+  - **Kiểm chứng**: `EmployeesService.list` trả thành công 20/49 nhân sự; `prisma migrate status` báo schema up to date.
 
 - [x] **[Hotfix] Sửa lỗi URL gọi API KPI Formula bị dư tiền tố /admin (10/10/2026)**
   - **Vấn đề**: Các API getSystemVariables và getGlobalSettings của task-kpi gọi URL bị sai thành `/api/v1/admin/admin/hrm/tasks/kpi/...` gây ra lỗi 404.
