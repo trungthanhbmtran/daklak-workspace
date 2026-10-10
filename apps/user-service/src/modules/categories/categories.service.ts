@@ -6,9 +6,15 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
-  async getAll(lang?: string) {
+  async getAll(lang?: string, ids?: number[]) {
     const targetLang = lang || 'vi';
+    let where: any = {};
+    if (ids && ids.length > 0) {
+      where.id = { in: ids };
+    }
+    
     const items = await this.prisma.category.findMany({
+      where,
       orderBy: [{ groupCode: 'asc' }, { order: 'asc' }],
       include: {
         translations: {

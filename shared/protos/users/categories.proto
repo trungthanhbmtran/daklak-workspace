@@ -21,6 +21,7 @@ message GetAllCategoriesRequest {
   int32 skip = 2;
   int32 take = 3;
   string search = 4;
+  repeated int32 ids = 5;
 }
 
 message Group {

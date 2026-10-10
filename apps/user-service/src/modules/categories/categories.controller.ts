@@ -20,8 +20,8 @@ export class CategoriesController {
   constructor(private readonly catService: CategoriesService) {}
 
   @GrpcMethod('CategoryService', 'GetAllCategories')
-  async getAllCategories(data: { lang?: string }) {
-    const list = await this.catService.getAll(data?.lang);
+  async getAllCategories(data: { lang?: string; ids?: number[] }) {
+    const list = await this.catService.getAll(data?.lang, data?.ids);
     return { data: list.data.map(toItem), total: list.total };
   }
 

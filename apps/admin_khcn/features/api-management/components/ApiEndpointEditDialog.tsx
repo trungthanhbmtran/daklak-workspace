@@ -65,6 +65,7 @@ const parameterSchema = z.object({
   in: z.string().min(1, "Bắt buộc"), // query, header, path
   type: z.string().min(1, "Bắt buộc"), // string, number, boolean
   required: z.string(), // "true" or "false"
+  enabled: z.string(), // "true" or "false"
   value: z.string().optional(),
   description: z.string().optional(),
 });
@@ -140,13 +141,19 @@ export function ApiEndpointEditDialog({
           parameters: (schemaObj.parameters || []).map((p: any) => ({
             ...p,
             required: p.required ? "true" : "false",
+            enabled: p.enabled === false ? "false" : "true",
           })),
-          bodySchema: schemaObj.body
-            ? typeof schemaObj.body === "string"
-              ? schemaObj.body
-              : JSON.stringify(schemaObj.body, null, 2)
-            : "",
-          bodyType: schemaObj.bodyType || (schemaObj.body ? "raw" : "none"),
+          bodySchema:
+            schemaObj.body !== undefined && schemaObj.body !== null
+              ? typeof schemaObj.body === "string"
+                ? schemaObj.body
+                : JSON.stringify(schemaObj.body, null, 2)
+              : "",
+          bodyType:
+            schemaObj.bodyType ||
+            (schemaObj.body !== undefined && schemaObj.body !== null
+              ? "raw"
+              : "none"),
           formItemsJson: Array.isArray(schemaObj.formItems)
             ? JSON.stringify(schemaObj.formItems, null, 2)
             : "",
@@ -200,6 +207,7 @@ export function ApiEndpointEditDialog({
         parameters: values.parameters.map((p) => ({
           ...p,
           required: p.required === "true",
+          enabled: p.enabled === "true",
         })),
         body: bodyObj,
         bodyType: values.bodyType,
@@ -413,6 +421,7 @@ export function ApiEndpointEditDialog({
                             in: "query",
                             type: "string",
                             required: "false",
+                            enabled: "true",
                             value: "",
                             description: "",
                           })
@@ -439,6 +448,7 @@ export function ApiEndpointEditDialog({
                                 in: "query",
                                 type: "string",
                                 required: "false",
+                                enabled: "true",
                                 value: "",
                                 description: "",
                               })
@@ -470,7 +480,7 @@ export function ApiEndpointEditDialog({
                                 </Button>
                               </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                                 <FormField
                                   control={form.control as any}
                                   name={`parameters.${index}.name`}
@@ -582,6 +592,37 @@ export function ApiEndpointEditDialog({
                                           </SelectItem>
                                           <SelectItem value="false">
                                             Không
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control as any}
+                                  name={`parameters.${index}.enabled`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel className="text-xs text-muted-foreground font-medium">
+                                        Trạng thái
+                                      </FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger className="h-9">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="true">
+                                            Bật
+                                          </SelectItem>
+                                          <SelectItem value="false">
+                                            Tắt
                                           </SelectItem>
                                         </SelectContent>
                                       </Select>

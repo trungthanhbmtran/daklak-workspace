@@ -37,8 +37,12 @@ model Employee {
   kpiReviews       KpiEvaluation[]   @relation("KpiReviewer")
   taskParticipants TaskParticipant[] @relation("EmployeeTasks")
 
-  organizationId String @default("DEFAULT") @map("organization_id")
+  organizationId String  @default("DEFAULT") @map("organization_id")
+  departmentPath String? @map("department_path")
 
+  @@index([departmentId, employmentStatus, isDeleted])
+  @@index([departmentPath])
+  @@index([jobTitleId])
   @@map("employees")
 }
 

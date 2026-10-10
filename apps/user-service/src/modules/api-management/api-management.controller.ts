@@ -2,7 +2,10 @@ import { Controller, UseGuards } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { ApiManagementService } from './api-management.service';
-import { GrpcAuthGuard, GRPC_USER_KEY } from '../../../../../shared/security/grpc-auth';
+import {
+  GrpcAuthGuard,
+  GRPC_USER_KEY,
+} from '../../../../../shared/security/grpc-auth';
 import { PbacGuard } from '../../../../../shared/security/grpc-auth';
 import { Permissions } from '@/common/decorators/permissions.decorator';
 
@@ -10,6 +13,27 @@ import { Permissions } from '@/common/decorators/permissions.decorator';
 @UseGuards(GrpcAuthGuard, PbacGuard)
 export class ApiManagementController {
   constructor(private readonly service: ApiManagementService) {}
+
+  private mapConnectionResponse(conn: any) {
+    return {
+      ...conn,
+      auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
+      endpoints: Array.isArray(conn.endpoints)
+        ? conn.endpoints.map((endpoint: any) => ({
+            ...endpoint,
+            // The proto contract declares schema as a string. Prisma returns
+            // JSON columns as objects, which proto-loader otherwise coerces
+            // to "[object Object]" and the client cannot parse.
+            schema:
+              typeof endpoint.schema === 'string'
+                ? endpoint.schema
+                : JSON.stringify(endpoint.schema ?? {}),
+          }))
+        : conn.endpoints,
+      createdAt: conn.createdAt.toISOString(),
+      updatedAt: conn.updatedAt.toISOString(),
+    };
+  }
 
   private getUser(metadata: any): any {
     // metadata is actually the ServerUnaryCall in NestJS for gRPC, but NestJS passes (data, metadata, call)
@@ -33,12 +57,7 @@ export class ApiManagementController {
         data.offset,
       );
       return {
-        data: result.data.map((conn) => ({
-          ...conn,
-          auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
-          createdAt: conn.createdAt.toISOString(),
-          updatedAt: conn.updatedAt.toISOString(),
-        })),
+        data: result.data.map((conn) => this.mapConnectionResponse(conn)),
         total: result.total,
       };
     } catch (e: any) {
@@ -51,12 +70,7 @@ export class ApiManagementController {
   async getConnection(data: { id: string }) {
     try {
       const conn = await this.service.getConnection(data.id);
-      return {
-        ...conn,
-        auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
-        createdAt: conn.createdAt.toISOString(),
-        updatedAt: conn.updatedAt.toISOString(),
-      };
+      return this.mapConnectionResponse(conn);
     } catch (e: any) {
       throw new RpcException({
         code: GrpcStatus.NOT_FOUND,
@@ -75,12 +89,7 @@ export class ApiManagementController {
         { ...data, organizationId: orgId },
         userId,
       );
-      return {
-        ...conn,
-        auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
-        createdAt: conn.createdAt.toISOString(),
-        updatedAt: conn.updatedAt.toISOString(),
-      };
+      return this.mapConnectionResponse(conn);
     } catch (e: any) {
       if (e.code === 'P2002') {
         throw new RpcException({
@@ -107,12 +116,7 @@ export class ApiManagementController {
         expectedVersion,
         userId,
       );
-      return {
-        ...conn,
-        auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
-        createdAt: conn.createdAt.toISOString(),
-        updatedAt: conn.updatedAt.toISOString(),
-      };
+      return this.mapConnectionResponse(conn);
     } catch (e: any) {
       if (e.message.includes('OCC')) {
         throw new RpcException({
@@ -143,7 +147,10 @@ export class ApiManagementController {
     try {
       return await this.service.createEndpoint(data, 'system-admin');
     } catch (e: any) {
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e.message });
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: e.message,
+      });
     }
   }
 
@@ -154,7 +161,10 @@ export class ApiManagementController {
       const { id, ...updateData } = data;
       return await this.service.updateEndpoint(id, updateData, 'system-admin');
     } catch (e: any) {
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e.message });
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: e.message,
+      });
     }
   }
 
@@ -179,12 +189,7 @@ export class ApiManagementController {
         expectedVersion,
         userId,
       );
-      return {
-        ...conn,
-        auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
-        createdAt: conn.createdAt.toISOString(),
-        updatedAt: conn.updatedAt.toISOString(),
-      };
+      return this.mapConnectionResponse(conn);
     } catch (e: any) {
       if (e.message.includes('OCC')) {
         throw new RpcException({
@@ -224,7 +229,10 @@ export class ApiManagementController {
   async createImportSession(data: any) {
     try {
       const orgId = data.organizationId || 'DEFAULT';
-      return await this.service.createImportSession({ ...data, organizationId: orgId });
+      return await this.service.createImportSession({
+        ...data,
+        organizationId: orgId,
+      });
     } catch (e: any) {
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
@@ -246,4 +254,3 @@ export class ApiManagementController {
     }
   }
 }
-

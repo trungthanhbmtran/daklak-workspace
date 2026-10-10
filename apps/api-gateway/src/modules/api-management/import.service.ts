@@ -33,6 +33,7 @@ export interface ParsedEndpoint {
     key: string;
     value: string;
     enabled?: boolean;
+    required?: boolean;
     description?: string;
   }>;
 }
@@ -108,6 +109,9 @@ export class ImportParserService {
 
           const headers: any[] = [];
           const params: any[] = [];
+          let body = '';
+          let bodyType: ParsedEndpoint['bodyType'] = 'none';
+          let formItems: ParsedEndpoint['formItems'] = [];
           const pathParameters = Array.isArray((methods as any).parameters)
             ? (methods as any).parameters
             : [];
@@ -146,10 +150,35 @@ export class ImportParserService {
                 description: p.description,
                 enabled: true,
               });
+            if (p.in === 'body') {
+              bodyType = 'raw';
+              const bodySchema = p.schema;
+              const bodyExample = p.example ?? bodySchema?.example;
+              if (bodyExample !== undefined) {
+                body =
+                  typeof bodyExample === 'string'
+                    ? bodyExample
+                    : JSON.stringify(bodyExample, null, 2);
+              } else if (bodySchema) {
+                body = JSON.stringify(bodySchema, null, 2);
+              }
+            }
+            if (p.in === 'formData') {
+              const consumes = details.consumes || apiObj.consumes || [];
+              const consumesText = consumes.join(' ').toLowerCase();
+              bodyType = consumesText.includes('multipart/form-data')
+                ? 'form-data'
+                : 'x-www-form-urlencoded';
+              formItems!.push({
+                key: p.name,
+                value: String(p.example ?? p.default ?? ''),
+                enabled: true,
+                required: p.required === true,
+                description: p.description,
+              });
+            }
           });
 
-          let body = '';
-          let bodyType = 'none';
           if (details.requestBody && details.requestBody.content) {
             const contentTypes = Object.keys(details.requestBody.content);
             if (contentTypes.length > 0) {
@@ -188,7 +217,8 @@ export class ImportParserService {
             headers,
             params,
             body,
-            bodyType: bodyType as any,
+            bodyType,
+            formItems,
           });
         }
       }
@@ -251,14 +281,26 @@ export class ImportParserService {
               }))
             : [];
           const params =
-            typeof req.url !== 'string' && req.url?.query
-              ? req.url.query.map((q: any) => ({
-                  key: q.key,
-                  value: q.value,
-                  enabled: q.disabled !== true,
-                  description: q.description,
+            typeof req.url === 'string'
+              ? Array.from(
+                  new URL(
+                    rawUrl.startsWith('http')
+                      ? rawUrl
+                      : `http://dummy${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`,
+                  ).searchParams.entries(),
+                ).map(([key, value]) => ({
+                  key,
+                  value,
+                  enabled: true,
                 }))
-              : [];
+              : req.url?.query
+                ? req.url.query.map((q: any) => ({
+                    key: q.key,
+                    value: q.value,
+                    enabled: q.disabled !== true,
+                    description: q.description,
+                  }))
+                : [];
 
           let body = '';
           let bodyType = 'none';

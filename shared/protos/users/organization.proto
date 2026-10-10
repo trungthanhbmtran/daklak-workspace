@@ -54,6 +54,7 @@ message UpdateUnitTypeJobTemplatesResponse {
 // unit_id: nếu có thì chỉ trả về chức danh áp dụng cho loại đơn vị đó (VD Sở không có Chủ tịch)
 message ListJobTitlesRequest {
   int32 unit_id = 1;
+  repeated int32 ids = 2; // Hỗ trợ Data Loader
 }
 
 message UpdateJobTitleRequest {
@@ -162,6 +163,7 @@ message GetSubTreeRequest {
 
 message GetOrganizationsRequest {
   string q = 1;
+  repeated int32 ids = 2; // Thêm bộ lọc mảng ID để hỗ trợ DataLoader
 }
 
 message SetStaffingRequest {

@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { firstValueFrom } from 'rxjs';
@@ -112,6 +112,7 @@ export class EmployeesService {
     employmentStatus?: string;
     address?: string;
     avatar?: string;
+    departmentPath?: string;
   }) {
     const code = (data.employeeCode ?? '').trim() || this.generateEmployeeCode();
 
@@ -145,6 +146,7 @@ export class EmployeesService {
           identityCard: data.identityCard ?? null,
           address: data.address ?? null,
           departmentId: data.departmentId,
+          departmentPath: data.departmentPath ?? null,
           jobTitleId: data.jobTitleId,
           civilServantRankId: data.civilServantRankId ?? null,
           partyTitleId: data.partyTitleId ?? null,
@@ -181,6 +183,7 @@ export class EmployeesService {
       jobTitleId: number;
       civilServantRankId: number;
       partyTitleId: number;
+      departmentPath: string;
       employmentStatus: string;
       address: string;
       avatar: string;
@@ -209,8 +212,9 @@ export class EmployeesService {
       ...(data.employmentStatus != null && { employmentStatus: data.employmentStatus }),
       ...(data.address != null && { address: data.address }),
       ...(data.avatar != null && { avatar: data.avatar }),
-      ...(data.departmentId != null && { department: { connect: { id: data.departmentId } } }),
-      ...(data.jobTitleId != null && { jobTitle: { connect: { id: data.jobTitleId } } }),
+      ...(data.departmentId != null && { departmentId: data.departmentId }),
+      ...(data.departmentPath !== undefined && { departmentPath: data.departmentPath }),
+      ...(data.jobTitleId != null && { jobTitleId: data.jobTitleId }),
       ...(data.civilServantRankId !== undefined && { civilServantRankId: data.civilServantRankId }),
       ...(data.partyTitleId !== undefined && { partyTitleId: data.partyTitleId }),
       ...(data.startDate != null && { startDate: this.parseDateOrThrow(data.startDate, 'startDate') }),
@@ -300,7 +304,7 @@ export class EmployeesService {
     excludeEmployeeCode?: string;
     ids?: number[];
     codes?: string[];
-
+    departmentPathPrefix?: string;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));

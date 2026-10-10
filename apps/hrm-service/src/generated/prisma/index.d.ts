@@ -2851,6 +2851,7 @@ export namespace Prisma {
     updatedAt: Date | null
     isDeleted: boolean | null
     organizationId: string | null
+    departmentPath: string | null
   }
 
   export type EmployeeMaxAggregateOutputType = {
@@ -2878,6 +2879,7 @@ export namespace Prisma {
     updatedAt: Date | null
     isDeleted: boolean | null
     organizationId: string | null
+    departmentPath: string | null
   }
 
   export type EmployeeCountAggregateOutputType = {
@@ -2906,6 +2908,7 @@ export namespace Prisma {
     updatedAt: number
     isDeleted: number
     organizationId: number
+    departmentPath: number
     _all: number
   }
 
@@ -2951,6 +2954,7 @@ export namespace Prisma {
     updatedAt?: true
     isDeleted?: true
     organizationId?: true
+    departmentPath?: true
   }
 
   export type EmployeeMaxAggregateInputType = {
@@ -2978,6 +2982,7 @@ export namespace Prisma {
     updatedAt?: true
     isDeleted?: true
     organizationId?: true
+    departmentPath?: true
   }
 
   export type EmployeeCountAggregateInputType = {
@@ -3006,6 +3011,7 @@ export namespace Prisma {
     updatedAt?: true
     isDeleted?: true
     organizationId?: true
+    departmentPath?: true
     _all?: true
   }
 
@@ -3121,6 +3127,7 @@ export namespace Prisma {
     updatedAt: Date
     isDeleted: boolean
     organizationId: string
+    departmentPath: string | null
     _count: EmployeeCountAggregateOutputType | null
     _avg: EmployeeAvgAggregateOutputType | null
     _sum: EmployeeSumAggregateOutputType | null
@@ -3168,6 +3175,7 @@ export namespace Prisma {
     updatedAt?: boolean
     isDeleted?: boolean
     organizationId?: boolean
+    departmentPath?: boolean
     kpiEvaluations?: boolean | Employee$kpiEvaluationsArgs<ExtArgs>
     kpiReviews?: boolean | Employee$kpiReviewsArgs<ExtArgs>
     taskParticipants?: boolean | Employee$taskParticipantsArgs<ExtArgs>
@@ -3202,9 +3210,10 @@ export namespace Prisma {
     updatedAt?: boolean
     isDeleted?: boolean
     organizationId?: boolean
+    departmentPath?: boolean
   }
 
-  export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "firstname" | "lastname" | "fullName" | "employeeCode" | "email" | "phone" | "gender" | "birthday" | "identityCard" | "employmentType" | "employmentStatus" | "contractInfo" | "address" | "avatar" | "departmentId" | "jobTitleId" | "civilServantRankId" | "partyTitleId" | "startDate" | "createdAt" | "updatedAt" | "isDeleted" | "organizationId", ExtArgs["result"]["employee"]>
+  export type EmployeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "firstname" | "lastname" | "fullName" | "employeeCode" | "email" | "phone" | "gender" | "birthday" | "identityCard" | "employmentType" | "employmentStatus" | "contractInfo" | "address" | "avatar" | "departmentId" | "jobTitleId" | "civilServantRankId" | "partyTitleId" | "startDate" | "createdAt" | "updatedAt" | "isDeleted" | "organizationId" | "departmentPath", ExtArgs["result"]["employee"]>
   export type EmployeeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     kpiEvaluations?: boolean | Employee$kpiEvaluationsArgs<ExtArgs>
     kpiReviews?: boolean | Employee$kpiReviewsArgs<ExtArgs>
@@ -3245,6 +3254,7 @@ export namespace Prisma {
       updatedAt: Date
       isDeleted: boolean
       organizationId: string
+      departmentPath: string | null
     }, ExtArgs["result"]["employee"]>
     composites: {}
   }
@@ -3642,6 +3652,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"Employee", 'DateTime'>
     readonly isDeleted: FieldRef<"Employee", 'Boolean'>
     readonly organizationId: FieldRef<"Employee", 'String'>
+    readonly departmentPath: FieldRef<"Employee", 'String'>
   }
     
 
@@ -24235,7 +24246,8 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     isDeleted: 'isDeleted',
-    organizationId: 'organizationId'
+    organizationId: 'organizationId',
+    departmentPath: 'departmentPath'
   };
 
   export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
@@ -24628,7 +24640,8 @@ export namespace Prisma {
     employmentStatus: 'employmentStatus',
     address: 'address',
     avatar: 'avatar',
-    organizationId: 'organizationId'
+    organizationId: 'organizationId',
+    departmentPath: 'departmentPath'
   };
 
   export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
@@ -24931,6 +24944,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Employee"> | Date | string
     isDeleted?: BoolFilter<"Employee"> | boolean
     organizationId?: StringFilter<"Employee"> | string
+    departmentPath?: StringNullableFilter<"Employee"> | string | null
     kpiEvaluations?: KpiEvaluationListRelationFilter
     kpiReviews?: KpiEvaluationListRelationFilter
     taskParticipants?: TaskParticipantListRelationFilter
@@ -24962,6 +24976,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
+    departmentPath?: SortOrderInput | SortOrder
     kpiEvaluations?: KpiEvaluationOrderByRelationAggregateInput
     kpiReviews?: KpiEvaluationOrderByRelationAggregateInput
     taskParticipants?: TaskParticipantOrderByRelationAggregateInput
@@ -24997,6 +25012,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Employee"> | Date | string
     isDeleted?: BoolFilter<"Employee"> | boolean
     organizationId?: StringFilter<"Employee"> | string
+    departmentPath?: StringNullableFilter<"Employee"> | string | null
     kpiEvaluations?: KpiEvaluationListRelationFilter
     kpiReviews?: KpiEvaluationListRelationFilter
     taskParticipants?: TaskParticipantListRelationFilter
@@ -25028,6 +25044,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
+    departmentPath?: SortOrderInput | SortOrder
     _count?: EmployeeCountOrderByAggregateInput
     _avg?: EmployeeAvgOrderByAggregateInput
     _max?: EmployeeMaxOrderByAggregateInput
@@ -25064,6 +25081,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Employee"> | Date | string
     isDeleted?: BoolWithAggregatesFilter<"Employee"> | boolean
     organizationId?: StringWithAggregatesFilter<"Employee"> | string
+    departmentPath?: StringNullableWithAggregatesFilter<"Employee"> | string | null
   }
 
   export type KpiRuleSetWhereInput = {
@@ -26816,6 +26834,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
@@ -26847,6 +26866,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
@@ -26877,6 +26897,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
@@ -26908,6 +26929,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -26939,6 +26961,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
   }
 
   export type EmployeeUpdateManyMutationInput = {
@@ -26966,6 +26989,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmployeeUncheckedUpdateManyInput = {
@@ -26994,6 +27018,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type KpiRuleSetCreateInput = {
@@ -29031,6 +29056,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
+    departmentPath?: SortOrder
   }
 
   export type EmployeeAvgOrderByAggregateInput = {
@@ -29066,6 +29092,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
+    departmentPath?: SortOrder
   }
 
   export type EmployeeMinOrderByAggregateInput = {
@@ -29093,6 +29120,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
+    departmentPath?: SortOrder
   }
 
   export type EmployeeSumOrderByAggregateInput = {
@@ -32541,6 +32569,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
   }
@@ -32571,6 +32600,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
     taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   }
@@ -32605,6 +32635,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
     taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
   }
@@ -32635,6 +32666,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
     taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   }
@@ -32836,6 +32868,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
   }
@@ -32866,6 +32899,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
     taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   }
@@ -32906,6 +32940,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
     taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
   }
@@ -32936,6 +32971,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
     taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   }
@@ -34603,6 +34639,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
   }
@@ -34633,6 +34670,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
+    departmentPath?: string | null
     kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
     kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
   }
@@ -34758,6 +34796,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
   }
@@ -34788,6 +34827,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
     kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
     kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
   }

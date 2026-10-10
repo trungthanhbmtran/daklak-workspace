@@ -355,7 +355,7 @@ export class OrganizationsService {
   }
 
   // Lấy danh sách phẳng (có thể lọc theo tên, mã)
-  async getOrganizations(q?: string) {
+  async getOrganizations(q?: string, ids?: number[]) {
     const where: any = q
       ? {
           OR: [
@@ -365,6 +365,11 @@ export class OrganizationsService {
           ],
         }
       : {};
+      
+    if (ids && ids.length > 0) {
+      where.id = { in: ids };
+    }
+    
     const units = await this.prisma.organizationUnit.findMany({
       where,
       orderBy: { hierarchyPath: 'asc' },
@@ -530,10 +535,18 @@ export class OrganizationsService {
   }
 
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
-  async listJobTitles(unitId?: number) {
+  async listJobTitles(unitId?: number, ids?: number[]) {
+    let where: any = {};
+    if (ids && ids.length > 0) {
+      where.id = { in: ids };
+    }
+
     if (!unitId || unitId === 0) {
       return {
-        data: await this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' } }),
+        data: await this.prisma.jobTitle.findMany({ 
+          where,
+          orderBy: { code: 'asc' } 
+        }),
       };
     }
 
@@ -543,11 +556,11 @@ export class OrganizationsService {
     });
     if (!unit) return { data: [] };
 
+    where.applicableUnitTemplates = { some: { unitTypeId: unit.typeId } };
+
     const items = await this.prisma.jobTitle.findMany({
       orderBy: { code: 'asc' },
-      where: {
-        applicableUnitTemplates: { some: { unitTypeId: unit.typeId } },
-      },
+      where,
     });
     return { data: items };
   }

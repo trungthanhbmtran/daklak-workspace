@@ -223,8 +223,8 @@ export class OrganizationsController {
   }
 
   @GrpcMethod('OrganizationService', 'GetOrganizations')
-  async getOrganizations(data: { q?: string }) {
-    const res = await this.orgService.getOrganizations(data.q);
+  async getOrganizations(data: { q?: string; ids?: number[] }) {
+    const res = await this.orgService.getOrganizations(data.q, data.ids);
     const list = res?.data ?? [];
     return {
       nodes: list.map((node: any) => this.mapUnitNode(node)),
@@ -406,8 +406,8 @@ export class OrganizationsController {
   }
 
   @GrpcMethod('OrganizationService', 'ListJobTitles')
-  async listJobTitles(data: { unitId?: number }) {
-    const res = await this.orgService.listJobTitles(data?.unitId);
+  async listJobTitles(data: { unitId?: number; ids?: number[] }) {
+    const res = await this.orgService.listJobTitles(data?.unitId, data?.ids);
     const list = res?.data ?? [];
     return {
       data: list.map((j: any) => this.mapJobTitleItem(j)),

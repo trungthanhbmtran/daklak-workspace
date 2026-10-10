@@ -52,6 +52,7 @@ message CreateEmployeeRequest {
   string avatar = 14;
   int32 civilServantRankId = 20;
   int32 partyTitleId = 21;
+  string departmentPath = 22;
 }
 
 message UpdateEmployeeRequest {
@@ -73,6 +74,7 @@ message UpdateEmployeeRequest {
   string startDate = 15;
   int32 civilServantRankId = 20;
   int32 partyTitleId = 21;
+  string departmentPath = 22;
 }
 
 message DeleteEmployeeRequest {
@@ -114,6 +116,7 @@ message ListEmployeesRequest {
   int32 callerUserId = 14;
   repeated int32 ids = 15;
   repeated string codes = 16;
+  string departmentPathPrefix = 17;
 }
 
 // ---------------- RESPONSES ----------------

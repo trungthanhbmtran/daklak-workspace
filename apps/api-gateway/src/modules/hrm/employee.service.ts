@@ -13,10 +13,6 @@ export class EmployeeService implements OnModuleInit {
   private orgService: any;
   private catService: any;
 
-  // Cache for dictionaries to optimize API speed
-  private dictCache: { data: any; expiresAt: number } | null = null;
-  private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
   constructor(
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
@@ -35,15 +31,33 @@ export class EmployeeService implements OnModuleInit {
     );
   }
 
-  private async fetchDictionaries() {
-    if (this.dictCache && this.dictCache.expiresAt > Date.now()) {
-      return this.dictCache.data;
-    }
+  private async fetchDictionaries(empList: any[]) {
     try {
+      const jobTitleIds = new Set<number>();
+      const unitIds = new Set<number>();
+      const catIds = new Set<number>();
+
+      empList.forEach((e) => {
+        if (e.jobTitleId) jobTitleIds.add(e.jobTitleId);
+        if (e.partyTitleId) jobTitleIds.add(e.partyTitleId);
+        if (e.departmentId) unitIds.add(e.departmentId);
+        if (e.civilServantRankId) catIds.add(e.civilServantRankId);
+      });
+
+      const jtArray = Array.from(jobTitleIds);
+      const unitArray = Array.from(unitIds);
+      const catArray = Array.from(catIds);
+
       const results = await Promise.allSettled([
-        firstValueFrom(this.orgService.ListJobTitles({})),
-        firstValueFrom(this.orgService.GetOrganizations({})),
-        firstValueFrom(this.catService.GetAllCategories({})),
+        jtArray.length > 0
+          ? firstValueFrom(this.orgService.ListJobTitles({ ids: jtArray }))
+          : Promise.resolve({ data: [] }),
+        unitArray.length > 0
+          ? firstValueFrom(this.orgService.GetOrganizations({ ids: unitArray }))
+          : Promise.resolve({ nodes: [] }),
+        catArray.length > 0
+          ? firstValueFrom(this.catService.GetAllCategories({ ids: catArray }))
+          : Promise.resolve({ data: [] }),
       ]);
 
       const jobTitlesRes: any =
@@ -81,13 +95,7 @@ export class EmployeeService implements OnModuleInit {
         }
       });
 
-      const data = { jtMap, unitMap, catMap };
-      this.dictCache = {
-        data,
-        expiresAt: Date.now() + this.CACHE_TTL_MS,
-      };
-
-      return data;
+      return { jtMap, unitMap, catMap };
     } catch (_error) {
       return { jtMap: {}, unitMap: {}, catMap: {} };
     }
@@ -121,14 +129,14 @@ export class EmployeeService implements OnModuleInit {
   }
 
   private async executeWithDicts(rpcCall: Promise<any>, isList = false) {
-    const [res, dicts]: [any, any] = await Promise.all([
-      rpcCall.catch((e: any) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      }),
-      this.fetchDictionaries(),
-    ]);
+    const res = await rpcCall.catch((e: any) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
 
     if (res && res.data) {
+      const empList = isList && Array.isArray(res.data) ? res.data : [res.data];
+      const dicts = await this.fetchDictionaries(empList);
+
       if (isList && Array.isArray(res.data)) {
         res.data = res.data.map((e: any) =>
           this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
@@ -185,12 +193,14 @@ export class EmployeeService implements OnModuleInit {
     if (req.callerUnitId && !isAdmin) {
       const callerUnitId = parseInt(req.callerUnitId, 10);
       try {
-        const descRes: any = await firstValueFrom(
-          this.orgService.GetDescendants({ id: callerUnitId }),
+        const resOrg: any = await firstValueFrom(
+          this.orgService.GetOrganizations({ ids: [callerUnitId] }),
         );
-        req.descendantUnitIds = descRes.ids || [];
+        if (resOrg?.nodes?.[0]?.hierarchyPath) {
+          req.departmentPathPrefix = resOrg.nodes[0].hierarchyPath;
+        }
       } catch (e) {
-        req.descendantUnitIds = [];
+        // Fallback
       }
       req.excludeEmployeeCode = req.callerEmployeeCode;
     }
@@ -222,6 +232,17 @@ export class EmployeeService implements OnModuleInit {
   }
 
   async create(body: any) {
+    if (body.departmentId) {
+      try {
+        const resOrg: any = await firstValueFrom(
+          this.orgService.GetOrganizations({ ids: [parseInt(body.departmentId)] }),
+        );
+        if (resOrg?.nodes?.[0]?.hierarchyPath) {
+          body.departmentPath = resOrg.nodes[0].hierarchyPath;
+        }
+      } catch (e) {}
+    }
+
     const res = await this.executeWithDicts(
       firstValueFrom(this.employeeService.CreateEmployee(body)),
     );
@@ -240,6 +261,18 @@ export class EmployeeService implements OnModuleInit {
 
   async update(id: string, body: any) {
     const payload = { ...body, id: parseInt(id) };
+
+    if (payload.departmentId) {
+      try {
+        const resOrg: any = await firstValueFrom(
+          this.orgService.GetOrganizations({ ids: [parseInt(payload.departmentId)] }),
+        );
+        if (resOrg?.nodes?.[0]?.hierarchyPath) {
+          payload.departmentPath = resOrg.nodes[0].hierarchyPath;
+        }
+      } catch (e) {}
+    }
+
     const res = await this.executeWithDicts(
       firstValueFrom(this.employeeService.UpdateEmployee(payload)),
     );

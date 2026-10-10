@@ -145,7 +145,8 @@ exports.Prisma.EmployeeScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted',
-  organizationId: 'organizationId'
+  organizationId: 'organizationId',
+  departmentPath: 'departmentPath'
 };
 
 exports.Prisma.KpiRuleSetScalarFieldEnum = {
@@ -460,7 +461,8 @@ exports.Prisma.EmployeeOrderByRelevanceFieldEnum = {
   employmentStatus: 'employmentStatus',
   address: 'address',
   avatar: 'avatar',
-  organizationId: 'organizationId'
+  organizationId: 'organizationId',
+  departmentPath: 'departmentPath'
 };
 
 exports.Prisma.KpiRuleSetOrderByRelevanceFieldEnum = {

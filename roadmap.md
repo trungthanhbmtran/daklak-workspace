@@ -134,10 +134,12 @@ eport-service v?i pi-management.
   - Fetch danh sch API endpoint t? API Manager d? tch h?p vo V2 Report Catalog.
 
 ## Unplanned Tasks
-- [x] **[Hotfix] Giữ headers, params và body khi import API (10/10/2026)**
-  - Truyền metadata đầy đủ qua gRPC bằng `metadataJson`, chuẩn hóa vào `ApiEndpoint.schema` khi commit import, tránh làm mất schema hiện có khi ghi đè.
-  - Cho phép xem nhanh và chỉnh sửa headers, query/path params, body đã import trong API Manager.
-  - Typecheck frontend, API Gateway và user-service thành công.
+  - [x] **[Hotfix] Giữ headers, params và body khi import API (10/10/2026)**
+    - Truyền metadata đầy đủ qua gRPC bằng `metadataJson`, chuẩn hóa vào `ApiEndpoint.schema` khi commit import, tránh làm mất schema hiện có khi ghi đè.
+    - Cho phép xem nhanh và chỉnh sửa headers, query/path params, body đã import trong API Manager.
+    - Chuẩn hóa endpoint schema thành JSON string trong mọi response connection qua gRPC, tránh proto-loader biến object thành `"[object Object]"` khiến client hiển thị rỗng.
+    - Sửa phân giải conflict với path chứa `:`, đọc query của Postman URL dạng chuỗi, hỗ trợ body/formData Swagger 2 và giữ body `false`/`0` cùng trạng thái tham số khi sửa.
+    - Typecheck frontend và build API Gateway/user-service thành công.
 
 - [x] **[Hotfix] Khắc phục sơ đồ quy trình không hiển thị trong editor (09/10/2026)**
   - **Vấn đề**: Danh sách workflow hiển thị đủ 5 quy trình nhưng mở chi tiết lại thấy tên, mô tả và sơ đồ rỗng.
