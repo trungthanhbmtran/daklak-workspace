@@ -60,9 +60,9 @@ const menuData: MenuSeed[] = [
   { code: 'WORKFLOW_SYSTEM_MENU', name: 'Định nghĩa quy trình', route: '/services/workflow/workflows', icon: 'GitBranch', order: 2, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
   { code: 'WORKFLOW_INSTANCE_MENU', name: 'Quy trình đang chạy', route: '/services/workflow/instances', icon: 'Activity', order: 3, parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW', type: 'MENU' },
 
-  { code: 'API_MANAGER_GROUP', name: 'Quản lý API Gateway', route: '/services/api-manager', icon: 'Network', order: 6, linkedResourceCode: null, type: 'SERVICE_ITEM' },
-  { code: 'API_MANAGER_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/api-manager/gateway', icon: 'Network', order: 1, parentCode: 'API_MANAGER_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
-  { code: 'API_MANAGER_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/api-manager/apis', icon: 'Plug', order: 2, parentCode: 'API_MANAGER_GROUP', linkedResourceCode: 'INTEGRATION', type: 'MENU' },
+  { code: 'API_MANAGER_GROUP', name: 'Quản lý API Gateway', route: '/services/api-manager', icon: 'Network', order: 6, linkedResourceCode: 'API_GATEWAY', type: 'SERVICE_ITEM' },
+  { code: 'API_MANAGER_GATEWAY_MENU', name: 'Cấu hình Gateway', route: '/services/api-manager/gateway', icon: 'Network', order: 1, parentCode: 'API_MANAGER_GROUP', linkedResourceCode: 'API_GATEWAY', type: 'MENU' },
+  { code: 'API_MANAGER_API_MENU', name: 'Kết nối API Đầu vào', route: '/services/api-manager/apis', icon: 'Plug', order: 2, parentCode: 'API_MANAGER_GROUP', linkedResourceCode: 'API_GATEWAY', type: 'MENU' },
 
   { code: 'REPORT_GROUP', name: 'Phân tích, báo cáo', route: '/services/reports', icon: 'BarChart3', order: 7, linkedResourceCode: null, type: 'SERVICE_ITEM' },
   { code: 'REPORT_DASHBOARD_MENU', name: 'Dashboard Thống kê', route: '/services/reports', icon: 'LayoutDashboard', order: 1, parentCode: 'REPORT_GROUP', linkedResourceCode: 'REPORT', type: 'MENU' },

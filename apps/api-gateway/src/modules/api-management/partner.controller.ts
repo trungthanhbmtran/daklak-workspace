@@ -54,7 +54,7 @@ export class PartnerController implements OnModuleInit {
   }
 
   @Post()
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async createPartner(@Req() req: any, @Body() data: any) {
     const res = await firstValueFrom(
       this.grpcService.CreatePartner(
@@ -69,7 +69,7 @@ export class PartnerController implements OnModuleInit {
   }
 
   @Get()
-  @RequirePermissions('INTEGRATION:VIEW')
+  @RequirePermissions('API_GATEWAY:VIEW')
   async listPartners(@Req() req: any) {
     const res = (await firstValueFrom(
       this.grpcService.ListPartners(
@@ -81,7 +81,7 @@ export class PartnerController implements OnModuleInit {
   }
 
   @Post(':id/keys')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async issueKey(@Req() req: any, @Param('id') id: string, @Body() data: any) {
     const res = await firstValueFrom(
       this.grpcService.IssuePartnerKey(
@@ -98,7 +98,7 @@ export class PartnerController implements OnModuleInit {
   }
 
   @Put('keys/:keyId/revoke')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async revokeKey(@Req() req: any, @Param('keyId') keyId: string) {
     await firstValueFrom(
       this.grpcService.RevokePartnerKey({ keyId }, this.getGrpcMetadata(req)),

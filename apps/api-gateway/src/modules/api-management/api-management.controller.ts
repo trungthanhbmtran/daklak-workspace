@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -64,7 +64,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Get()
-  @RequirePermissions('INTEGRATION:VIEW')
+  @RequirePermissions('API_GATEWAY:VIEW')
   async listConnections(
     @Req() req: any,
     @Query('search') search?: string,
@@ -79,7 +79,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Get(':id')
-  @RequirePermissions('INTEGRATION:VIEW')
+  @RequirePermissions('API_GATEWAY:VIEW')
   async getConnection(@Req() req: any, @Param('id') id: string) {
     const res = await firstValueFrom(
       this.grpcService.GetConnection({ id }, this.getGrpcMetadata(req)),
@@ -88,7 +88,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Post()
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async createConnection(@Req() req: any, @Body() dto: any) {
     const res = await firstValueFrom(
       this.grpcService.CreateConnection(dto, this.getGrpcMetadata(req)),
@@ -97,7 +97,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Put(':id')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async updateConnection(
     @Req() req: any,
     @Param('id') id: string,
@@ -110,7 +110,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async deleteConnection(@Req() req: any, @Param('id') id: string) {
     const res = (await firstValueFrom(
       this.grpcService.DeleteConnection({ id }, this.getGrpcMetadata(req)),
@@ -121,7 +121,7 @@ export class ApiManagementController implements OnModuleInit {
   // Manual endpoint CRUD methods removed
 
   @Put(':id/disable')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async disableConnection(
     @Req() req: any,
     @Param('id') id: string,
@@ -137,7 +137,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Post(':id/endpoints')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async createEndpoint(@Req() req: any, @Param('id') connectionId: string, @Body() body: any) {
     const res = await firstValueFrom(
       this.grpcService.CreateEndpoint(
@@ -149,7 +149,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Put('endpoints/:endpointId')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async updateEndpoint(@Req() req: any, @Param('endpointId') id: string, @Body() body: any) {
     const res = await firstValueFrom(
       this.grpcService.UpdateEndpoint(
@@ -161,7 +161,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Delete('endpoints/:endpointId')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async deleteEndpoint(@Req() req: any, @Param('endpointId') id: string) {
     const res = await firstValueFrom(
       this.grpcService.DeleteEndpoint(
@@ -173,7 +173,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Post('publish')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async publishRevision(@Req() req: any) {
     const res = await firstValueFrom(
       this.grpcService.PublishRevision({}, this.getGrpcMetadata(req)),
@@ -182,7 +182,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Post('import/upload')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   @UseInterceptors(FileInterceptor('file'))
   async uploadImport(
     @Req() req: any,
@@ -221,7 +221,7 @@ export class ApiManagementController implements OnModuleInit {
   }
 
   @Post('import/commit')
-  @RequirePermissions('INTEGRATION:MANAGE')
+  @RequirePermissions('API_GATEWAY:MANAGE')
   async commitImport(@Req() req: any, @Body() dto: any) {
     const res = await firstValueFrom(
       this.grpcService.CommitImportSession(dto, this.getGrpcMetadata(req)),

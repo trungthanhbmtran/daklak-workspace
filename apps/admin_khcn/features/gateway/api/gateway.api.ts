@@ -49,62 +49,62 @@ export interface GatewaySettings {
 export const gatewayApi = {
   // Services
   getServices: async (): Promise<GatewayService[]> => {
-    const res = await apiClient.get('/integration/services');
+    const res = await apiClient.get('/admin/integration/services');
     return (res as any)?.data || [];
   },
   createService: async (data: Partial<GatewayService>): Promise<GatewayService> => {
-    const res = await apiClient.post('/integration/services', data);
+    const res = await apiClient.post('/admin/integration/services', data);
     return (res as any)?.data;
   },
   updateService: async (id: number, data: Partial<GatewayService>): Promise<GatewayService> => {
-    const res = await apiClient.put(`/integration/services/${id}`, data);
+    const res = await apiClient.put(`/admin/integration/services/${id}`, data);
     return (res as any)?.data;
   },
   deleteService: async (id: number): Promise<void> => {
-    await apiClient.delete(`/integration/services/${id}`);
+    await apiClient.delete(`/admin/integration/services/${id}`);
   },
 
   // Routes
   getRoutes: async (): Promise<GatewayRoute[]> => {
-    const res = await apiClient.get('/integration/routes');
+    const res = await apiClient.get('/admin/integration/routes');
     return (res as any)?.data || [];
   },
   createRoute: async (data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
-    const res = await apiClient.post('/integration/routes', data);
+    const res = await apiClient.post('/admin/integration/routes', data);
     return (res as any)?.data;
   },
   updateRoute: async (id: number, data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
-    const res = await apiClient.put(`/integration/routes/${id}`, data);
+    const res = await apiClient.put(`/admin/integration/routes/${id}`, data);
     return (res as any)?.data;
   },
   deleteRoute: async (id: number): Promise<void> => {
-    await apiClient.delete(`/integration/routes/${id}`);
+    await apiClient.delete(`/admin/integration/routes/${id}`);
   },
 
   // ApiKeys
   getApiKeys: async (): Promise<ApiKey[]> => {
-    const res = await apiClient.get('/integration/apikeys');
+    const res = await apiClient.get('/admin/integration/apikeys');
     return (res as any)?.data || [];
   },
   createApiKey: async (data: Partial<ApiKey>): Promise<ApiKey> => {
-    const res = await apiClient.post('/integration/apikeys', data);
+    const res = await apiClient.post('/admin/integration/apikeys', data);
     return (res as any)?.data;
   },
   updateApiKey: async (id: number, data: Partial<ApiKey>): Promise<ApiKey> => {
-    const res = await apiClient.put(`/integration/apikeys/${id}`, data);
+    const res = await apiClient.put(`/admin/integration/apikeys/${id}`, data);
     return (res as any)?.data;
   },
   deleteApiKey: async (id: number): Promise<void> => {
-    await apiClient.delete(`/integration/apikeys/${id}`);
+    await apiClient.delete(`/admin/integration/apikeys/${id}`);
   },
 
   // Settings
   getSettings: async (): Promise<GatewaySettings> => {
-    const res = await apiClient.get('/integration/settings');
+    const res = await apiClient.get('/admin/integration/settings');
     return (res as any)?.data || {};
   },
   updateSettings: async (data: Partial<GatewaySettings>): Promise<GatewaySettings> => {
-    const res = await apiClient.put('/integration/settings', data);
+    const res = await apiClient.put('/admin/integration/settings', data);
     return (res as any)?.data;
   }
 };

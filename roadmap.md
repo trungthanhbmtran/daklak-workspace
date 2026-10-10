@@ -197,6 +197,11 @@ eport-service v?i pi-management.
   - Ưu tiên nhánh `true` phía trên và `false` phía dưới, đồng thời tránh node chồng nhau.
   - Lưu vị trí trên node vào `definition` để giữ bố cục sau khi kéo thả; cần xác nhận trực quan sau khi frontend được triển khai.
 
+- [x] **[Hotfix] Sửa lỗi API cấu hình service Gateway Manager do sai path (11/10/2026)**
+  - **Vấn đề**: Khi nhấn "Cấu hình Service" hoặc truy cập Gateway Manager báo lỗi API (404).
+  - **Nguyên nhân**: Frontend (`gateway.api.ts`) gọi đến `/integration/...` trong khi Backend Controller cấu hình đường dẫn là `@Controller('admin/integration')`.
+  - **Giải pháp**: Cập nhật lại đường dẫn trong `gateway.api.ts` để thêm `/admin/` vào trước `/integration/...` cho toàn bộ các hàm get/post/put/delete Services, Routes, ApiKeys và Settings.
+
 ## Kế hoạch Bổ sung: Hoàn thiện module Quản lý công việc & KPI (Câu 2)
 - [x] **Phase 1: Xây dựng Rule Engine tính điểm KPI tự động**
   - Khảo sát và thiết kế schema lưu trữ công thức (KpiFormula) hoặc Node tính toán trên Workflow.
@@ -212,3 +217,6 @@ eport-service v?i pi-management.
   - Bổ sung kiểm soát biên chế (Staffing Slot) tự động khi tạo/sửa đổi Hồ sơ nhân sự qua RPC `SyncStaffingSlot`.
   - Thiết lập cơ chế "nhả" slot khi cập nhật nhân viên chuyển trạng thái "Nghỉ hưu", "Thôi việc".
   - Kiểm soát PBAC Scope cho danh sách nhân viên, chỉ trả về đúng danh sách nhân viên thuộc sự quản lý của Account đăng nhập.
+
+### Unplanned Tasks & Hotfixes
+- Phân quyền nghiêm ngặt cho API Gateway: Chuyển đổi mã tài nguyên INTEGRATION (dùng chung cho Workflow) thành API_GATEWAY trên các Controllers của NestJS Backend và file menus.seed.ts. Đảm bảo chỉ những người có quyền System Admin hoặc Org Admin mới thấy được menu và truy xuất được cấu hình.
