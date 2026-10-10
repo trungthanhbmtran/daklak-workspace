@@ -31,6 +31,9 @@ service ReportService {
   rpc GetDatasetSnapshot (GenericRequest) returns (GenericResponse);
   rpc GetReportDashboardStats (GenericRequest) returns (GenericResponse);
   
+  // Document Generator
+  rpc GenerateDocument (GenericRequest) returns (GenericResponse);
+  
   // Assignment methods
   rpc AssignReport (GenericRequest) returns (GenericResponse);
   rpc GetMyAssignedReports (GenericRequest) returns (GenericResponse);

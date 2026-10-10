@@ -2,7 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Text } from "@/components/ui/typography";
-import { CheckCircle, Clock, AlertTriangle, FileText, Loader2 } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, FileText, Loader2, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useState } from "react";
+import axiosInstance from "@/lib/axiosInstance";
 import { useTaskStats } from "../../hooks/useTasks";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
@@ -30,6 +34,35 @@ export function TaskDashboard() {
 
   const departmentStats = Array.isArray(stats.departmentStats) ? stats.departmentStats : [];
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const { data: result } = await axiosInstance.post('/admin/reports/document/generate', {
+        templateName: 'Mau_05_QDKT.docx',
+        data: stats
+      });
+      
+      if (result.success && result.data) {
+        const parsedData = typeof result.data === 'string' ? JSON.parse(result.data) : result.data;
+        const base64 = parsedData.fileData;
+        const link = document.createElement('a');
+        link.href = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + base64;
+        link.download = parsedData.fileName || 'Bao_Cao.docx';
+        link.click();
+        toast.success("Xuất báo cáo thành công");
+      } else {
+        toast.error("Lỗi: " + result.message);
+      }
+    } catch (error) {
+      toast.error("Lỗi khi kết nối đến máy chủ xuất báo cáo");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+
   if (isLoading) {
     return (
       <div className="flex h-[400px] w-full items-center justify-center">
@@ -39,8 +72,17 @@ export function TaskDashboard() {
   }
 
   return (
+    
     <div className="space-y-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold tracking-tight">Tổng quan KPI & Công việc</h2>
+        <Button onClick={handleExport} disabled={isExporting}>
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+          Xuất Báo cáo (Mẫu 05)
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Tổng số công việc</CardTitle>

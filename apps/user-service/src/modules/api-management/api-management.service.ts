@@ -153,10 +153,16 @@ export class ApiManagementService {
   async createEndpoint(data: any, userId: string) {
     const conn = await this.getConnection(data.connectionId);
     const existing = await this.prisma.apiEndpoint.findFirst({
-      where: { connectionId: data.connectionId, method: data.method, pathTemplate: data.pathTemplate }
+      where: {
+        connectionId: data.connectionId,
+        method: data.method,
+        pathTemplate: data.pathTemplate,
+      },
     });
     if (existing) {
-      throw new BadRequestException('Endpoint with same method and path already exists');
+      throw new BadRequestException(
+        'Endpoint with same method and path already exists',
+      );
     }
     const ep = await this.prisma.apiEndpoint.create({
       data: {
@@ -164,11 +170,11 @@ export class ApiManagementService {
         method: data.method,
         pathTemplate: data.pathTemplate,
         schema: data.schema ? JSON.parse(data.schema) : {},
-      }
+      },
     });
     await this.prisma.apiConnection.update({
       where: { id: data.connectionId },
-      data: { version: { increment: 1 }, updatedBy: userId }
+      data: { version: { increment: 1 }, updatedBy: userId },
     });
     return { ...ep, schema: JSON.stringify(ep.schema) };
   }
@@ -176,18 +182,18 @@ export class ApiManagementService {
   async updateEndpoint(id: string, data: any, userId: string) {
     const ep = await this.prisma.apiEndpoint.findUnique({ where: { id } });
     if (!ep) throw new NotFoundException('Endpoint not found');
-    
+
     const updated = await this.prisma.apiEndpoint.update({
       where: { id },
       data: {
         method: data.method,
         pathTemplate: data.pathTemplate,
         schema: data.schema ? JSON.parse(data.schema) : undefined,
-      }
+      },
     });
     await this.prisma.apiConnection.update({
       where: { id: ep.connectionId },
-      data: { version: { increment: 1 }, updatedBy: userId }
+      data: { version: { increment: 1 }, updatedBy: userId },
     });
     return { ...updated, schema: JSON.stringify(updated.schema) };
   }
@@ -195,11 +201,11 @@ export class ApiManagementService {
   async deleteEndpoint(id: string, userId: string) {
     const ep = await this.prisma.apiEndpoint.findUnique({ where: { id } });
     if (!ep) throw new NotFoundException('Endpoint not found');
-    
+
     await this.prisma.apiEndpoint.delete({ where: { id } });
     await this.prisma.apiConnection.update({
       where: { id: ep.connectionId },
-      data: { version: { increment: 1 }, updatedBy: userId }
+      data: { version: { increment: 1 }, updatedBy: userId },
     });
     return { success: true };
   }
@@ -453,6 +459,54 @@ export class ApiManagementService {
       const createData: any[] = [];
       const updatePromises: any[] = [];
 
+      const toEndpointSchema = (ep: any) => {
+        const normalizeType = (type: any) => {
+          if (type === 'number' || type === 'integer') return 'number';
+          if (type === 'boolean') return 'boolean';
+          return 'string';
+        };
+        const parameters = [
+          ...(Array.isArray(ep.params) ? ep.params : []).map((param: any) => ({
+            name: param.name || param.key || '',
+            in: param.in || 'query',
+            type: normalizeType(param.type),
+            required: Boolean(param.required),
+            value: param.value ?? '',
+            enabled: param.enabled !== false,
+            description: param.description || '',
+          })),
+          ...(Array.isArray(ep.headers) ? ep.headers : []).map(
+            (header: any) => ({
+              name: header.name || header.key || '',
+              in: 'header',
+              type: normalizeType(header.type),
+              required: Boolean(header.required),
+              value: header.value ?? '',
+              enabled: header.enabled !== false,
+              description: header.description || '',
+            }),
+          ),
+        ].filter((parameter: any) => parameter.name);
+
+        let body = ep.body ?? '';
+        if (typeof body === 'string' && body.trim()) {
+          try {
+            body = JSON.parse(body);
+          } catch {
+            // Preserve text and non-JSON request bodies as strings.
+          }
+        }
+
+        return {
+          name: ep.name || '',
+          description: ep.description || '',
+          parameters,
+          body,
+          bodyType: ep.bodyType || (body ? 'raw' : 'none'),
+          formItems: Array.isArray(ep.formItems) ? ep.formItems : [],
+        };
+      };
+
       for (const ep of preview.endpoints) {
         const resolution = data.resolutions?.find(
           (r: any) => r.method === ep.method && r.path === ep.path,
@@ -466,13 +520,27 @@ export class ApiManagementService {
         );
 
         if (match && action === 'OVERWRITE') {
+          const schema = toEndpointSchema(ep);
+          let existingSchema = match.schema;
+          if (typeof existingSchema === 'string') {
+            try {
+              existingSchema = JSON.parse(existingSchema);
+            } catch {
+              existingSchema = {};
+            }
+          }
           updatePromises.push(
             tx.apiEndpoint.update({
               where: { id: match.id },
               data: {
-                schema: { name: ep.name, description: ep.description },
+                schema: {
+                  ...(existingSchema && typeof existingSchema === 'object'
+                    ? existingSchema
+                    : {}),
+                  ...schema,
+                },
               },
-            })
+            }),
           );
           updated++;
         } else if (!match) {
@@ -480,7 +548,7 @@ export class ApiManagementService {
             connectionId: connId,
             method: ep.method,
             pathTemplate: ep.path,
-            schema: { name: ep.name, description: ep.description },
+            schema: toEndpointSchema(ep),
           });
           created++;
         }
@@ -512,5 +580,3 @@ export class ApiManagementService {
     return result;
   }
 }
-
-

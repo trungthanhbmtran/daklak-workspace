@@ -363,9 +363,11 @@ export class ExecutionService {
       case 'end':
         await this.handleEndTask(instance.id);
         break;
+      case 'serviceTask':
+        await this.handleServiceTask(instance, node, graph, depth, visited);
+        break;
       case 'start':
       case 'userTask':
-      case 'serviceTask':
       default:
         // Trigger next node
         const nextEdges = graph.edges?.filter((e: any) => e.source === node.id && !e.action) || [];
@@ -375,6 +377,79 @@ export class ExecutionService {
           await this.handleUserTask(instance, node);
         }
         break;
+    }
+  }
+
+  private async handleServiceTask(instance: any, node: any, graph: any, depth: number, visited: any) {
+    try {
+      const script = node.data?.script;
+      const action = node.data?.action || node.data?.commandType;
+
+      if (script) {
+        // 1. Thực thi Workflow Rule Engine Script cục bộ
+        this.logger.log(`Executing Script Node ${node.id} for instance ${instance.id}`);
+        const variables = typeof instance.variables === 'string' ? JSON.parse(instance.variables) : (instance.variables || {});
+        
+        const vmContext = { variables: { ...variables }, Math, Number, Date, String };
+        // eslint-disable-next-line no-new-func
+        const fn = new Function('context', `
+          "use strict";
+          with(context) {
+             ${script}
+          }
+          return context.variables;
+        `);
+        
+        const newVars = fn(vmContext);
+        
+        // Cập nhật lại variables
+        await this.prisma.processInstance.update({
+          where: { id: instance.id },
+          data: { variables: newVars }
+        });
+        instance.variables = newVars;
+        
+        // Tự động đi tiếp (Auto-advance)
+        const nextEdges = graph.edges?.filter((e: any) => e.source === node.id && !e.action) || [];
+        if (nextEdges.length > 0) {
+          await this.advanceProcess(instance.id, nextEdges[0].target, depth + 1, visited);
+        }
+      } else if (action) {
+        // 2. Gọi Domain Service (Saga / Outbox)
+        this.logger.log(`Emitting Service Command ${action} for instance ${instance.id}`);
+        const pt = instance.processType ? await this.catalogService.findByCode(instance.processType) : null;
+        const targetService = node.data?.targetService || pt?.ownerService || 'default-service';
+        
+        await this.prisma.$transaction(async tx => {
+          const cmd = await tx.workflowCommand.create({
+            data: {
+              instanceId: instance.id,
+              commandType: action,
+              targetService: targetService,
+              payload: { nodeId: node.id, businessId: instance.businessKey, ...node.data },
+              status: 'PENDING'
+            }
+          });
+          
+          await tx.workflowEvent.create({
+            data: {
+              instanceId: instance.id,
+              eventType: 'workflow.command.sent',
+              payload: { commandId: cmd.id, businessId: instance.businessKey, nodeId: node.id, ...node.data },
+              status: 'PENDING'
+            }
+          });
+        });
+        // Không gọi advanceProcess ở đây, đợi DOMAIN_ACK từ Outbox
+      } else {
+        // Fallback: Skip
+        const nextEdges = graph.edges?.filter((e: any) => e.source === node.id && !e.action) || [];
+        if (nextEdges.length > 0) {
+          await this.advanceProcess(instance.id, nextEdges[0].target, depth + 1, visited);
+        }
+      }
+    } catch (e: any) {
+      this.logger.error(`Error executing serviceTask ${node.id} in instance ${instance.id}: ${e.message}`);
     }
   }
 

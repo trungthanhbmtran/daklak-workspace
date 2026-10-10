@@ -1,12 +1,36 @@
-'use client';
-import React, { useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash } from 'lucide-react';
-import { useDeleteEndpoint } from '../hooks/useApiManagement';
-import { ApiEndpointEditDialog } from './ApiEndpointEditDialog';
+"use client";
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Plus, Edit, Trash } from "lucide-react";
+import { useDeleteEndpoint } from "../hooks/useApiManagement";
+import { ApiEndpointEditDialog } from "./ApiEndpointEditDialog";
+import { Badge } from "@/components/ui/badge";
 
-export default function ApiConnectionEndpoints({ connectionId, endpoints }: { connectionId: string, endpoints?: any[] }) {
+function getEndpointSchema(endpoint: any) {
+  if (!endpoint?.schema) return {};
+  if (typeof endpoint.schema === "object") return endpoint.schema;
+  try {
+    return JSON.parse(endpoint.schema);
+  } catch {
+    return {};
+  }
+}
+
+export default function ApiConnectionEndpoints({
+  connectionId,
+  endpoints,
+}: {
+  connectionId: string;
+  endpoints?: any[];
+}) {
   const [editingEp, setEditingEp] = useState<any | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const deleteMut = useDeleteEndpoint();
@@ -40,23 +64,71 @@ export default function ApiConnectionEndpoints({ connectionId, endpoints }: { co
           <TableRow>
             <TableHead className="w-[100px]">Method</TableHead>
             <TableHead>Path</TableHead>
+            <TableHead>Thông tin import</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {endpoints?.map((ep: any) => (
-            <TableRow key={ep.id}>
-              <TableCell className="font-mono font-medium text-xs">{ep.method}</TableCell>
-              <TableCell className="font-mono text-sm">{ep.pathTemplate}</TableCell>
-              <TableCell className="text-right">
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(ep)}><Edit className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDelete(ep.id)}><Trash className="w-4 h-4" /></Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {endpoints?.map((ep: any) => {
+            const schema = getEndpointSchema(ep);
+            const parameters = Array.isArray(schema.parameters)
+              ? schema.parameters
+              : [];
+            const headers = parameters.filter(
+              (parameter: any) => parameter.in === "header",
+            ).length;
+            const params = parameters.filter(
+              (parameter: any) => parameter.in !== "header",
+            ).length;
+            const hasBody = Boolean(
+              schema.body ||
+              schema.formItems?.length ||
+              (schema.bodyType && schema.bodyType !== "none"),
+            );
+            return (
+              <TableRow key={ep.id}>
+                <TableCell className="font-mono font-medium text-xs">
+                  {ep.method}
+                </TableCell>
+                <TableCell className="font-mono text-sm">
+                  {ep.pathTemplate}
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="outline">Headers: {headers}</Badge>
+                    <Badge variant="outline">Params: {params}</Badge>
+                    <Badge variant={hasBody ? "secondary" : "outline"}>
+                      Body:{" "}
+                      {hasBody ? schema.bodyType || "có dữ liệu" : "không có"}
+                    </Badge>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(ep)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-500"
+                    onClick={() => handleDelete(ep.id)}
+                  >
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
           {(!endpoints || endpoints.length === 0) && (
             <TableRow>
-              <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+              <TableCell
+                colSpan={4}
+                className="text-center py-8 text-muted-foreground"
+              >
                 Chưa có endpoint nào được định nghĩa
               </TableCell>
             </TableRow>
@@ -64,11 +136,11 @@ export default function ApiConnectionEndpoints({ connectionId, endpoints }: { co
         </TableBody>
       </Table>
 
-      <ApiEndpointEditDialog 
-        open={showEdit} 
-        onOpenChange={setShowEdit} 
-        connectionId={connectionId} 
-        endpoint={editingEp} 
+      <ApiEndpointEditDialog
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        connectionId={connectionId}
+        endpoint={editingEp}
       />
     </div>
   );

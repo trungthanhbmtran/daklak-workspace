@@ -13,12 +13,17 @@ export interface ParsedEndpoint {
   headers?: Array<{
     key: string;
     value: string;
+    type?: string;
+    required?: boolean;
     enabled?: boolean;
     description?: string;
   }>;
   params?: Array<{
     key: string;
     value: string;
+    in?: 'query' | 'path';
+    type?: string;
+    required?: boolean;
     enabled?: boolean;
     description?: string;
   }>;
@@ -103,24 +108,45 @@ export class ImportParserService {
 
           const headers: any[] = [];
           const params: any[] = [];
-          if (details.parameters && Array.isArray(details.parameters)) {
-            details.parameters.forEach((p: any) => {
-              if (p.in === 'header')
-                headers.push({
-                  key: p.name,
-                  value: p.example || '',
-                  description: p.description,
-                  enabled: true,
-                });
-              if (p.in === 'query')
-                params.push({
-                  key: p.name,
-                  value: p.example || '',
-                  description: p.description,
-                  enabled: true,
-                });
-            });
-          }
+          const pathParameters = Array.isArray((methods as any).parameters)
+            ? (methods as any).parameters
+            : [];
+          const operationParameters = Array.isArray(details.parameters)
+            ? details.parameters
+            : [];
+          [...pathParameters, ...operationParameters].forEach((p: any) => {
+            const value =
+              p.example ?? p.schema?.example ?? p.schema?.default ?? '';
+            if (p.in === 'header')
+              headers.push({
+                key: p.name,
+                value,
+                type: p.schema?.type || 'string',
+                required: p.required === true,
+                description: p.description,
+                enabled: true,
+              });
+            if (p.in === 'query')
+              params.push({
+                key: p.name,
+                value,
+                in: 'query',
+                type: p.schema?.type || 'string',
+                required: p.required === true,
+                description: p.description,
+                enabled: true,
+              });
+            if (p.in === 'path')
+              params.push({
+                key: p.name,
+                value,
+                in: 'path',
+                type: p.schema?.type || 'string',
+                required: p.required !== false,
+                description: p.description,
+                enabled: true,
+              });
+          });
 
           let body = '';
           let bodyType = 'none';
@@ -133,19 +159,21 @@ export class ImportParserService {
                 mainType.includes('xml') ||
                 mainType.includes('text')
                   ? 'raw'
-                  : mainType.includes('form')
-                    ? 'form-data'
-                    : 'raw';
-              if (details.requestBody.content[mainType].example) {
+                  : mainType.includes('x-www-form-urlencoded')
+                    ? 'x-www-form-urlencoded'
+                    : mainType.includes('form')
+                      ? 'form-data'
+                      : 'raw';
+              const mediaType = details.requestBody.content[mainType];
+              const bodyExample =
+                mediaType.example ?? mediaType.schema?.example;
+              if (bodyExample !== undefined) {
                 body =
-                  typeof details.requestBody.content[mainType].example ===
-                  'string'
-                    ? details.requestBody.content[mainType].example
-                    : JSON.stringify(
-                        details.requestBody.content[mainType].example,
-                        null,
-                        2,
-                      );
+                  typeof bodyExample === 'string'
+                    ? bodyExample
+                    : JSON.stringify(bodyExample, null, 2);
+              } else if (mediaType.schema) {
+                body = JSON.stringify(mediaType.schema, null, 2);
               }
             }
           }

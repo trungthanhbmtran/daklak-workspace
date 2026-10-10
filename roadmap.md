@@ -134,6 +134,11 @@ eport-service v?i pi-management.
   - Fetch danh sch API endpoint t? API Manager d? tch h?p vo V2 Report Catalog.
 
 ## Unplanned Tasks
+- [x] **[Hotfix] Giữ headers, params và body khi import API (10/10/2026)**
+  - Chuẩn hóa metadata parser vào `ApiEndpoint.schema` khi commit import, tránh làm mất schema hiện có khi ghi đè.
+  - Cho phép xem nhanh và chỉnh sửa headers, query/path params, body đã import trong API Manager.
+  - Typecheck frontend, API Gateway và user-service thành công.
+
 - [x] **[Hotfix] Khắc phục sơ đồ quy trình không hiển thị trong editor (09/10/2026)**
   - **Vấn đề**: Danh sách workflow hiển thị đủ 5 quy trình nhưng mở chi tiết lại thấy tên, mô tả và sơ đồ rỗng.
   - **Nguyên nhân**: ID quy trình là CUID nhưng bộ bọc response chung chỉ nhận diện UUID hoặc ID số, khiến GET detail bị coi là list và đối tượng workflow bị chuyển thành mảng.
@@ -155,3 +160,13 @@ eport-service v?i pi-management.
   - Giữ bố cục backend khi khớp hướng luồng; nếu sai, xếp graph dạng cây theo nhánh cha-con hoặc theo tầng với luồng có điểm hội tụ/vòng lặp.
   - Ưu tiên nhánh `true` phía trên và `false` phía dưới, đồng thời tránh node chồng nhau.
   - Lưu vị trí trên node vào `definition` để giữ bố cục sau khi kéo thả; cần xác nhận trực quan sau khi frontend được triển khai.
+
+## Kế hoạch Bổ sung: Hoàn thiện module Quản lý công việc & KPI (Câu 2)
+- [x] **Phase 1: Xây dựng Rule Engine tính điểm KPI tự động**
+  - Khảo sát và thiết kế schema lưu trữ công thức (KpiFormula) hoặc Node tính toán trên Workflow.
+  - Viết logic Rule Engine xử lý phép nhân ma trận trọng số phức tạp.
+  - Tích hợp vào workflow-service (hỗ trợ Script Node & Domain Command) để tự động tính điểm trước khi chốt hồ sơ.
+- [x] **Phase 2: Xây dựng Document Generator (Sinh file Quyết định/Báo cáo)**
+  - Tích hợp thư viện xử lý template (docxtemplater, pizzip) vào report-service.
+  - Viết API nhận yêu cầu và parse ra file PDF/Word (Mẫu 05).
+  - Tích hợp UI Frontend nút tải xuống Báo cáo/Quyết định tự động trên Task Dashboard.

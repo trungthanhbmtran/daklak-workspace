@@ -212,4 +212,13 @@ export class ReportsController {
       req.headers.authorization,
     );
   }
+
+  @Post('document/generate')
+  async generateDocument(@Body() body: any, @Req() req: any) {
+    return this.reportsService.generateDocument(
+      body,
+      req.user,
+      req.headers.authorization,
+    );
+  }
 }

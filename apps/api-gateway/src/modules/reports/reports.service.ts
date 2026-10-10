@@ -195,4 +195,10 @@ export class ReportsService implements OnModuleInit {
       await this.callGrpc('GetReportDashboardStats', {}, user, authHeader),
     );
   }
+
+  async generateDocument(body: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('GenerateDocument', body, user, authHeader),
+    );
+  }
 }
