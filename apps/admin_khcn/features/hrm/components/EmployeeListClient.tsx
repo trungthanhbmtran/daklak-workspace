@@ -30,7 +30,7 @@ export function EmployeeListClient() {
   } = useEmployeeListClient();
 
   return (
-    <div className="flex flex-col h-full gap-6 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto min-h-0">
+    <div className="flex flex-col h-full gap-6 p-4 sm:p-6 lg:p-8 w-full flex-1 mx-auto min-h-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div>
           <Heading level="h2" className="tracking-tight">Danh sách nhân sự</Heading>
@@ -104,21 +104,21 @@ export function EmployeeListClient() {
                 cell: (emp) => {
                   const fullName = emp.fullName || [emp.firstname, emp.lastname].filter(Boolean).join(" ") || "—";
                   return (
-                    <div className="flex items-center space-x-4">
-                      <Avatar className="h-10 w-10 border border-border">
+                    <div className="flex items-center space-x-4 min-w-0">
+                      <Avatar className="h-10 w-10 border border-border shrink-0">
                         <AvatarImage src={undefined} />
                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
                           {fullName.charAt(0) || "?"}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
+                      <div className="min-w-0">
                         <Link
                           href={`/services/hrm/employees/${emp.id}`}
-                          className="font-semibold text-foreground group-hover:text-primary transition-colors"
+                          className="font-semibold text-foreground group-hover:text-primary transition-colors block truncate"
                         >
                           {fullName} <Text as="span" variant="small" weight="normal" className="text-muted-foreground ml-1">#{emp.employeeCode || emp.id}</Text>
                         </Link>
-                        <Text variant="muted">{emp.email || "—"}</Text>
+                        <Text variant="muted" className="truncate">{emp.email || "—"}</Text>
                       </div>
                     </div>
                   );

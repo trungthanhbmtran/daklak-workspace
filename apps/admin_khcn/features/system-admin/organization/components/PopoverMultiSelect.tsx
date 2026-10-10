@@ -140,9 +140,14 @@ export function PopoverMultiSelect({
   if (isAsync && search !== prevSearch) {
     setPrevSearch(search);
     const next = search ?? "";
-    emittedRef.current = next;
     setInputValue(next);
   }
+
+  useEffect(() => {
+    if (isAsync) {
+      emittedRef.current = search ?? "";
+    }
+  }, [search, isAsync]);
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
 

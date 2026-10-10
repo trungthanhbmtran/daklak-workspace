@@ -44,11 +44,12 @@ export function UnitTypeJobTemplateModal({ isOpen, onClose, category }: UnitType
     enabled: !!unitType?.id && isOpen,
   });
 
-  useEffect(() => {
-    if (templatesData?.data) {
-      setSelectedIds(new Set(templatesData.data));
-    }
-  }, [templatesData]);
+  const [prevData, setPrevData] = useState<number[] | undefined>(undefined);
+  
+  if (templatesData?.data && templatesData.data !== prevData) {
+    setPrevData(templatesData.data);
+    setSelectedIds(new Set(templatesData.data));
+  }
 
   const updateMutation = useMutation({
     mutationFn: (jobTitleIds: number[]) => organizationApi.updateUnitTypeJobTemplates(unitType!.id, jobTitleIds),
@@ -81,7 +82,7 @@ export function UnitTypeJobTemplateModal({ isOpen, onClose, category }: UnitType
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Cấu hình chức danh cho "{category.name}"</DialogTitle>
+          <DialogTitle>Cấu hình chức danh cho &quot;{category.name}&quot;</DialogTitle>
           <DialogDescription>
             Chọn các chức danh được phép sử dụng khi định biên cho loại đơn vị này.
           </DialogDescription>

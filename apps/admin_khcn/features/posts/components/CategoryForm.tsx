@@ -180,7 +180,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       form.setValue("attachmentId", confirmRes.id, { shouldDirty: true });
       toast.success("Tải lên văn bản thành công!");
     } catch (error) {
-      console.error(error);
+
       toast.error((error as any)?.response?.data?.message || "Lỗi khi tải văn bản!");
     } finally {
       setIsUploadingDoc(false);
@@ -191,23 +191,23 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     const payload = {
       ...values,
       translations: values.translations ? JSON.stringify(values.translations) : "{}"
-    };
-    mutation.mutate(payload as any);
+    } as unknown as CategoryFormValues;
+    mutation.mutate(payload);
   };
 
   if (isFetching) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto h-8 w-8 text-blue-500" /></div>;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-20">
+    <div className="w-full flex-1 mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm" iconStart={<ArrowLeft className="h-4 w-4" />}></Button>
-          <div>
-            <Heading level="h1" className="font-bold tracking-tight">{isEdit ? "Chỉnh sửa chuyên mục" : "Tạo chuyên mục mới"}</Heading>
-            <Text className="text-muted-foreground font-normal">Phân loại nội dung để người dùng dễ dàng tìm kiếm.</Text>
+        <div className="flex items-center gap-4 min-w-0">
+          <Button variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm shrink-0" iconStart={<ArrowLeft className="h-4 w-4" />}></Button>
+          <div className="min-w-0">
+            <Heading level="h1" className="font-bold tracking-tight truncate">{isEdit ? "Chỉnh sửa chuyên mục" : "Tạo chuyên mục mới"}</Heading>
+            <Text className="text-muted-foreground font-normal truncate">Phân loại nội dung để người dùng dễ dàng tìm kiếm.</Text>
           </div>
         </div>
-        <Button onClick={form.handleSubmit(((v: any) => onSubmit(v)) as any)} className="bg-blue-600 hover:bg-blue-700 shadow-md min-w-[140px]" disabled={mutation.isPending}>
+        <Button onClick={form.handleSubmit(onSubmit)} className="bg-blue-600 hover:bg-blue-700 shadow-md min-w-[140px]" disabled={mutation.isPending}>
           {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isEdit ? "Cập nhật ngay" : "Tạo chuyên mục"}
         </Button>
