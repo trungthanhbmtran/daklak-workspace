@@ -32,11 +32,14 @@ export class PermissionsGuard implements CanActivate {
 
     const userPermissions = user.permissionsFlatten || [];
 
-    // Kiểm tra xem user có ÍT NHẤT MỘT trong các quyền yêu cầu hay không (hoặc có thể cấu hình yêu cầu TẤT CẢ)
-    // Thông thường, nếu decorator truyền ['USER:CREATE', 'USER:MANAGE'] thì chỉ cần có 1 trong 2 là pass.
-    const hasPermission = requiredPermissions.some((permission) =>
-      userPermissions.includes(permission),
-    );
+    // Kiểm tra xem user có ÍT NHẤT MỘT trong các quyền yêu cầu hay không
+    // Cấp quyền nếu có quyền cụ thể, hoặc có quyền wildcard (VD: RESOURCE:*)
+    const hasPermission = requiredPermissions.some((permission) => {
+      if (userPermissions.includes(permission)) return true;
+      const resource = permission.split(':')[0];
+      if (resource && userPermissions.includes(`${resource}:*`)) return true;
+      return false;
+    });
 
     if (!hasPermission) {
       throw new ForbiddenException(
