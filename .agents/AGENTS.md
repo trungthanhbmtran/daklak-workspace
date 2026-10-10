@@ -26,7 +26,11 @@ Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trìn
 ### Bước 3: Thực thi (Execution)
 - **Viết Code**: Tuân thủ tuyệt đối quy định kiến trúc: Domain first, Service data sovereignty (không query chéo DB).
 - **Backend & Frontend**: Backend xử lý toàn bộ logic và phân quyền (PBAC). Client-side (Frontend) chỉ dùng để nâng cao UX, không mang tính uỷ quyền (non-authoritative).
-- **UI/UX**: Giữ nguyên tính thẩm mỹ, cấu trúc CSS/Tailwind hiện có nếu không có yêu cầu thay đổi.
+- **UI/UX & CSS Layout (Bắt buộc)**: Giữ nguyên tính thẩm mỹ và tuân thủ chặt chẽ các nguyên tắc CSS Grid/Flexbox để tránh vỡ giao diện:
+  - LUÔN LUÔN thêm `min-w-0` vào các thẻ con trực tiếp của `flex` hoặc `grid` container nếu bên trong có chứa text dài hoặc thẻ con có thể phình to. Điều này giúp container có thể thu hẹp lại (shrink) đúng với kích thước thật thay vì tràn ra ngoài màn hình (overflow).
+  - LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không có dấu cách (như API Key, Token, ID, URL) để ép text tự động xuống dòng và không đâm xuyên qua các card/container.
+  - Sử dụng `truncate` hoặc `line-clamp-x` đúng cách ở các thẻ `Title`/`Description` để cắt chữ nếu quá dài.
+  - **Fluid Layout**: Hạn chế sử dụng các class giới hạn chiều rộng cứng (như `max-w-5xl`, `max-w-[1400px]`) ở các trang Dashboard lớn. Hãy ưu tiên dùng `w-full flex-1` để nội dung luôn bám sát theo kích cỡ màn hình cha, tránh để lại các mảng khoảng trắng (whitespace) dư thừa quá lớn trên các màn hình độ phân giải cao.
 - **Quản lý file `.proto` (gRPC)**: BẤT KỲ khi nào thao tác sửa đổi file `.proto`, Agent BẮT BUỘC phải sử dụng công cụ an toàn (ghi đè toàn bộ hoặc multi_replace, tuyệt đối KHÔNG cắt ghép chuỗi bằng script dễ gây mất ký tự). Ngay sau khi sửa, PHẢI kiểm tra kỹ cú pháp đóng mở block `{ }` và bắt buộc chạy thử/build lại microservice tương ứng để xác nhận bộ tải gRPC đọc được file (không bị lỗi `illegal token` hoặc `InvalidProtoDefinitionException`).
 
 ### Bước 4: Chạy kiểm chứng & Tự sửa lỗi (Test Execution & Self-Correction)

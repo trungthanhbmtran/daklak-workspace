@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ApiIntegrationPage() {
   return (
-    <div className="container mx-auto p-6 max-w-[1400px] flex-1 min-h-0 flex flex-col overflow-hidden bg-slate-50/30 dark:bg-transparent">
+    <div className="w-full p-6 flex-1 min-h-0 flex flex-col overflow-hidden bg-slate-50/30 dark:bg-transparent">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg text-primary">

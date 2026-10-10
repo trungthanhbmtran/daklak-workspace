@@ -10,7 +10,7 @@
  * Client chỉ hiển thị và gửi lại PUT /:id/scope khi lưu.
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useOrganizationContext } from "../context/OrganizationContext";
 import { useParams } from "next/navigation";
 import { useDomainSearch, type CatalogServerItem } from "../hooks/useScopeCatalog";

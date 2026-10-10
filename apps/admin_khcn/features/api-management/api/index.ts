@@ -1,5 +1,4 @@
 import apiClient from "@/lib/axiosInstance";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface AuthBinding {
   kind: 'none' | 'basic' | 'apiKey' | 'bearer' | 'oauth2' | 'mtls';

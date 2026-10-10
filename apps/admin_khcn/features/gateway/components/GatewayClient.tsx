@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { gatewayApi } from "../api/gateway.api";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Key, Network, Route as RouteIcon, Activity, Server, ArrowRightLeft, ShieldCheck, Zap } from "lucide-react";
+import { Key, Network, Route as RouteIcon, Server, ArrowRightLeft, ShieldCheck, Zap } from "lucide-react";
 
 import { ServicesTab } from "./ServicesTab";
 import { RoutesTab } from "./RoutesTab";
@@ -25,8 +25,8 @@ export function GatewayClient() {
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl opacity-60"></div>
         <div className="absolute bottom-0 left-40 -mb-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl opacity-60"></div>
 
-        <div className="relative z-10 flex-1 flex flex-col justify-center max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-4 w-fit shadow-sm">
+        <div className="relative z-10 flex-1 flex flex-col justify-center max-w-2xl min-w-0">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-4 w-fit shadow-sm max-w-full">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -36,13 +36,13 @@ export function GatewayClient() {
           <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground mb-3">
             Enterprise API Management
           </h1>
-          <p className="text-muted-foreground text-base leading-relaxed max-w-xl">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-xl break-words">
             Quản trị luồng dữ liệu (Traffic), cấu hình định tuyến (Routing) và giám sát quyền truy cập thông qua Gateway tập trung chuyên dụng.
           </p>
         </div>
 
-        <div className="relative z-10 flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-auto self-stretch items-center">
-          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
+        <div className="relative z-10 flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-auto self-stretch items-center min-w-0">
+          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all min-w-0">
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center mb-3">
               <Server className="w-4 h-4" />
             </div>
@@ -51,7 +51,7 @@ export function GatewayClient() {
               <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Upstreams</p>
             </div>
           </div>
-          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:primary/30 transition-all">
+          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all min-w-0">
             <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center mb-3">
               <ArrowRightLeft className="w-4 h-4" />
             </div>
@@ -60,7 +60,7 @@ export function GatewayClient() {
               <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Routes</p>
             </div>
           </div>
-          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:primary/30 transition-all">
+          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all min-w-0">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center mb-3">
               <ShieldCheck className="w-4 h-4" />
             </div>
@@ -69,7 +69,7 @@ export function GatewayClient() {
               <p className="text-[11px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-wider mt-1">Active Keys</p>
             </div>
           </div>
-          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:primary/30 transition-all relative overflow-hidden">
+          <div className="bg-background/60 backdrop-blur-md border border-border/50 rounded-xl p-5 flex flex-col justify-between h-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all relative overflow-hidden min-w-0">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
             <div className="relative z-10">
               <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-3">

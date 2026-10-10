@@ -17,13 +17,11 @@ export default function PasteLogPlugin() {
         const html = clipboardData.getData("text/html");
         const items = clipboardData.items;
 
-        console.log("=== KIỂM TRA CLIPBOARD CHI TIẾT ===");
-        console.log("- HTML Data:", html ? "CÓ" : "KHÔNG");
-        console.log("- Các kiểu dữ liệu hiện có:", Array.from(clipboardData.types));
+
 
         // TRƯỜNG HỢP 1: NẾU CÓ HTML (Sẽ để Lexical tự xử lý qua importDOM)
         if (html) {
-          console.log("👉 Đang để Lexical tự dịch HTML...");
+
           return false; 
         }
 
@@ -32,7 +30,7 @@ export default function PasteLogPlugin() {
           if (items[i].type.indexOf("image") !== -1) {
             const file = items[i].getAsFile();
             if (file) {
-              console.log("📸 PHÁT HIỆN FILE ẢNH TRONG CLIPBOARD!");
+
               
               // Tạo một đường dẫn tạm thời để hiển thị ảnh ngay lập tức
               const imageUrl = URL.createObjectURL(file);

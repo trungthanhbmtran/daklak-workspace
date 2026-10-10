@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 "use client";
 
 import React, { useState } from "react";
@@ -121,14 +121,14 @@ export function ApiKeysTab() {
           <div className="flex-1 overflow-y-auto custom-scrollbar h-full pr-2">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
               {apiKeys.map(k => (
-                <Card key={k.id} className="relative overflow-hidden group border border-border rounded-xl shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-300 bg-background">
+                <Card key={k.id} className="relative overflow-hidden group border border-border rounded-xl shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-300 bg-background min-w-0">
                   <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors duration-300 ${k.isActive ? 'bg-emerald-500' : 'bg-muted-foreground/30'}`}></div>
                   
                   <CardHeader className="pb-4 pt-5 pl-7 pr-5">
-                    <div className="flex justify-between items-start">
-                      <div className="pr-4">
-                        <CardTitle className="text-lg text-foreground font-semibold leading-tight">{k.name}</CardTitle>
-                        <CardDescription className="mt-1.5 text-sm text-muted-foreground line-clamp-2" title={k.description || ''}>
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="pr-4 flex-1 min-w-0">
+                        <CardTitle className="text-lg text-foreground font-semibold leading-tight truncate">{k.name}</CardTitle>
+                        <CardDescription className="mt-1.5 text-sm text-muted-foreground line-clamp-2 break-words" title={k.description || ''}>
                           {k.description || 'Không có mô tả'}
                         </CardDescription>
                       </div>
@@ -146,7 +146,7 @@ export function ApiKeysTab() {
                     <div className="mt-2">
                       <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2 block">X-API-KEY Token</Label>
                       <div className="relative group/copy">
-                        <div className="bg-muted/30 text-foreground px-4 py-3 pr-12 rounded-lg font-mono text-sm break-all leading-relaxed border border-border shadow-inner">
+                        <div className="bg-muted/30 text-foreground px-4 py-3 pr-12 rounded-lg font-mono text-sm break-all whitespace-pre-wrap leading-relaxed border border-border shadow-inner">
                           {k.isActive ? k.key : <span className="text-muted-foreground italic line-through">Key đã bị vô hiệu hóa</span>}
                         </div>
                         {k.isActive && (

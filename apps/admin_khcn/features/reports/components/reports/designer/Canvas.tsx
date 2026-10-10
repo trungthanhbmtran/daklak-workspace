@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { ReportConfigAST, JoinDef, ReportSourceDef } from '../../../types';
+import { ReportConfigAST } from '../../../types';
 import { Button } from '../../../../../components/ui/button';
 
 interface CanvasProps {

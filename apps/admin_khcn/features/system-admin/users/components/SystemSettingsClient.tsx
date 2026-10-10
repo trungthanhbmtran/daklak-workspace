@@ -18,7 +18,7 @@ export interface AiProviderConfig {
 
 export function SystemSettingsClient() {
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20 animate-in fade-in">
+    <div className="w-full flex-1 mx-auto space-y-8 pb-20 animate-in fade-in">
       <div className="border-b border-border pb-6">
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
           <Settings2 className="w-8 h-8 text-primary" />

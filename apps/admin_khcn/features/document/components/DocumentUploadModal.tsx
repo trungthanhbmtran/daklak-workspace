@@ -227,7 +227,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     }
 
     try {
-      console.log("[DocumentUpload] Starting submission with values:", values);
+
       const media = await uploadFile(uploadedFile);
 
       if (!media || !media.id) {
@@ -263,7 +263,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
         payload.transparencyCategory = values.transparencyCategory;
       }
 
-      console.log("[DocumentUpload] Final payload to API:", payload);
+
       await createDocument(payload);
 
       onClose();
@@ -522,7 +522,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   <div className="flex items-center justify-between mb-4">
                     <div className="space-y-0.5">
                       <FormLabel className="text-sm font-bold text-primary uppercase">Công khai tài chính</FormLabel>
-                      // eslint-disable-next-line react/no-unescaped-entities
+                      {/* eslint-disable-next-line react/no-unescaped-entities */}
                       <p className="text-[10px] text-muted-foreground">Văn bản sẽ hiển thị tại mục "Công khai ngân sách"</p>
                     </div>
                     <FormField name="isPublic" render={({ field }) => (

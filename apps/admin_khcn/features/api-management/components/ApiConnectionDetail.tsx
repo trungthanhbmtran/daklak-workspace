@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiManagementApi } from '../api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Server, Clock, Lock, Pencil, Power, PowerOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, Server, Clock, Lock, Power, PowerOff, Loader2 } from 'lucide-react';
 import { useUpdateConnection } from '../hooks/useApiManagement';
 import dynamic from 'next/dynamic';
 

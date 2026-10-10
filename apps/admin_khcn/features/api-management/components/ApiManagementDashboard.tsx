@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useConnections, usePublishRevision } from "../hooks/useApiManagement";
-import { Plus, Search, Network, CloudUpload, Loader2, ActivitySquare, AlertCircle } from "lucide-react";
+import { Search, Network, CloudUpload, Loader2, ActivitySquare, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApiConnectionCard } from "./ApiConnectionCard";

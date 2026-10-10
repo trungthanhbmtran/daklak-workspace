@@ -63,7 +63,7 @@ export const ReportWorkspace = () => {
 
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50 min-h-screen">
-      <div className="max-w-[1600px] mx-auto p-6 lg:p-8 space-y-8">
+      <div className="w-full flex-1 mx-auto p-6 lg:p-8 space-y-8">
         
         {/* Enterprise Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/60">

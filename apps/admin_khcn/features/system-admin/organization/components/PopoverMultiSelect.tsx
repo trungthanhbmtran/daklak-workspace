@@ -136,14 +136,13 @@ export function PopoverMultiSelect({
   const emittedRef = useRef(search ?? "");
 
   // Đồng bộ khi parent đổi `search` từ bên ngoài (ví dụ reset filter)
-  useEffect(() => {
-    if (!isAsync) return;
+  const [prevSearch, setPrevSearch] = useState(search);
+  if (isAsync && search !== prevSearch) {
+    setPrevSearch(search);
     const next = search ?? "";
-    if (next !== emittedRef.current) {
-      emittedRef.current = next;
-      setInputValue(next);
-    }
-  }, [search, isAsync]);
+    emittedRef.current = next;
+    setInputValue(next);
+  }
 
   useEffect(() => () => clearTimeout(timerRef.current), []);
 
@@ -200,15 +199,29 @@ export function PopoverMultiSelect({
    * làm `items` thay đổi, các item đã chọn không còn trong danh sách hiện tại
    * nhưng vẫn phải hiển thị ở khu vực "Đã chọn".
    */
-  const knownItemsRef = useRef(new Map<number, MultiSelectItem>());
+  const [knownItems, setKnownItems] = useState<Map<number, MultiSelectItem>>(() => new Map());
+  const [prevItems, setPrevItems] = useState(items);
+
+  if (items !== prevItems) {
+    setPrevItems(items);
+    setKnownItems(prev => {
+      let changed = false;
+      const next = new Map(prev);
+      for (const item of items) {
+        if (!next.has(item.id)) {
+          next.set(item.id, item);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }
 
   const selectedItems = useMemo(() => {
-    const known = knownItemsRef.current;
-    for (const item of items) known.set(item.id, item);
     return selectedIds
-      .map((id) => known.get(id))
+      .map((id) => knownItems.get(id))
       .filter((i): i is MultiSelectItem => i !== undefined);
-  }, [items, selectedIds]);
+  }, [knownItems, selectedIds]);
 
   /* ------------------------- Client-side filtering ------------------------- */
 
