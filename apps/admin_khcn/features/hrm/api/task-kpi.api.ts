@@ -23,14 +23,14 @@ export interface GlobalKpiSettings {
 
 export const taskKpiApi = {
     getSystemVariables: () => {
-        return apiClient.get('/admin/hrm/tasks/kpi/variables');
+        return apiClient.get('/hrm/tasks/kpi/variables');
     },
     
     getGlobalSettings: () => {
-        return apiClient.get('/admin/hrm/tasks/kpi/global-settings');
+        return apiClient.get('/hrm/tasks/kpi/global-settings');
     },
 
     saveGlobalSettings: (data: GlobalKpiSettings) => {
-        return apiClient.put('/admin/hrm/tasks/kpi/global-settings', data);
+        return apiClient.put('/hrm/tasks/kpi/global-settings', data);
     }
 };

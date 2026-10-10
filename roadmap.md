@@ -4,6 +4,27 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Hotfix] Khôi phục danh sách nhân sự HRM (10/10/2026)**
+  - **Nguyên nhân**: Prisma `Employee` đã khai báo `department_path` nhưng bảng `admin_hrm.employees` trên runtime chưa có cột, làm mọi truy vấn Prisma `findMany`/`findUnique` thất bại với `P2022`.
+  - **Khắc phục**: Thêm migration cộng dồn cho cột nullable `department_path` và index; áp dụng trên DB HRM đang chạy, giữ nguyên dữ liệu nhân sự hiện có.
+  - **Kiểm chứng**: Chờ ghi nhận sau khi migration được áp dụng.
+
+- [x] **[Hotfix] Sửa lỗi URL gọi API KPI Formula bị dư tiền tố /admin (10/10/2026)**
+  - **Vấn đề**: Các API getSystemVariables và getGlobalSettings của task-kpi gọi URL bị sai thành `/api/v1/admin/admin/hrm/tasks/kpi/...` gây ra lỗi 404.
+  - **Nguyên nhân**: `apiClient` đã được cấu hình sẵn `baseURL` có `/api/v1/admin`, nhưng trong `task-kpi.api.ts` lại nối thêm `/admin/` vào string path.
+  - **Khắc phục**: Xóa bỏ tiền tố `/admin/` dư thừa trong `apps/admin_khcn/features/hrm/api/task-kpi.api.ts`.
+  - **Kiểm chứng**: UI đã gọi đúng endpoint `/api/v1/admin/hrm/tasks/kpi/variables` và `global-settings`.
+
+- [x] **[Hotfix] Khôi phục danh sách nhân sự HRM (10/10/2026)**
+  - **Nguyên nhân**: Prisma `Employee` đã khai báo `department_path` nhưng bảng `admin_hrm.employees` trên runtime chưa có cột, làm mọi truy vấn Prisma `findMany`/`findUnique` thất bại với `P2022`.
+  - **Khắc phục**: Thêm migration cộng dồn cho cột nullable `department_path` và index; áp dụng trên DB HRM đang chạy, giữ nguyên dữ liệu nhân sự hiện có.
+  - **Kiểm chứng**: Chờ ghi nhận sau khi migration được áp dụng.
+
+- [x] **[Hotfix] Khôi phục danh sách nhân sự HRM (10/10/2026)**
+  - **Nguyên nhân**: Prisma `Employee` đã khai báo `department_path` nhưng bảng `admin_hrm.employees` trên runtime chưa có cột, làm mọi truy vấn Prisma `findMany`/`findUnique` thất bại với `P2022`.
+  - **Khắc phục**: Thêm migration cộng dồn cho cột nullable `department_path` và index; áp dụng trên DB HRM đang chạy, giữ nguyên dữ liệu nhân sự hiện có.
+  - **Kiểm chứng**: Chờ ghi nhận sau khi migration được áp dụng.
+
 - [x] **Hoàn thiện Workflow Binding Modal cho Auto-Binding (07/10/2026)**
   - **Tác vụ**: Thêm component WorkflowBindingModal.tsx và gắn vào WorkflowBindingList.tsx.
   - **Chi tiết**: Form cho phép chọn Process Type (Đối tượng nghiệp vụ), Trigger (Sự kiện), và Quy trình thực thi. Dữ liệu được gọi từ API /admin/workflow/catalog/process-types và /admin/workflow để kết nối linh hoạt các trigger sự kiện với định nghĩa workflow mà không cần code.

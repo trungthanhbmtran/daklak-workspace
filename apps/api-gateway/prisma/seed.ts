@@ -1,4 +1,4 @@
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+﻿import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { PrismaClient } from '../src/generated/prisma/client';
 
 import * as crypto from 'crypto';
@@ -31,6 +31,8 @@ async function main() {
     { name: 'document-service', url: 'http://document-service:50056', description: 'Document Service' },
     { name: 'translate-service', url: 'http://translate-service:50057', description: 'Translate Service' },
     { name: 'notification-service', url: 'http://notification-service:50059', description: 'Notification Service' },
+    { name: 'chat-service', url: 'http://chat-service:50061', description: 'Chat Service' },
+    { name: 'report-service', url: 'http://report-service:50062', description: 'Report Service' },
   ];
 
   for (const s of services) {
@@ -55,6 +57,8 @@ async function main() {
     { path: '/api/v1/external/posts/*', stripPath: true, serviceName: 'posts-service', methods: 'GET,POST,PUT,DELETE,PATCH' },
     { path: '/api/v1/external/documents/*', stripPath: true, serviceName: 'document-service', methods: 'GET,POST,PUT,DELETE,PATCH' },
     { path: '/api/v1/external/notifications/*', stripPath: true, serviceName: 'notification-service', methods: 'GET,POST,PUT,DELETE,PATCH' },
+    { path: '/api/v1/external/chat/*', stripPath: true, serviceName: 'chat-service', methods: 'GET,POST,PUT,DELETE,PATCH' },
+    { path: '/api/v1/external/reports/*', stripPath: true, serviceName: 'report-service', methods: 'GET,POST,PUT,DELETE,PATCH' },
   ];
 
   for (const r of routes) {
@@ -73,15 +77,15 @@ async function main() {
     });
   }
 
-  // 4. Seed 1 API Key for Demo (Cổng DVC Quốc gia)
+  // 4. Seed 1 API Key for Demo (Cá»•ng DVC Quá»‘c gia)
   const existingKey = await prisma.apiKey.findFirst();
   if (!existingKey) {
     const dvcKey = 'dvc-quoc-gia-demo-key-' + crypto.randomBytes(8).toString('hex');
     await prisma.apiKey.create({
       data: {
-        name: 'Cổng Dịch Vụ Công Quốc Gia (Demo)',
+        name: 'Cá»•ng Dá»‹ch Vá»¥ CÃ´ng Quá»‘c Gia (Demo)',
         key: dvcKey,
-        description: 'API Key dùng để đồng bộ hồ sơ thử nghiệm',
+        description: 'API Key dÃ¹ng Ä‘á»ƒ Ä‘á»“ng bá»™ há»“ sÆ¡ thá»­ nghiá»‡m',
         isActive: true,
       }
     });
