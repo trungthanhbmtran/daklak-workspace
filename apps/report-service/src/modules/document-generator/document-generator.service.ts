@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as PizZip from 'pizzip';
-import * as Docxtemplater from 'docxtemplater';
+import PizZip from 'pizzip';
+import Docxtemplater from 'docxtemplater';
 import * as fs from 'fs';
 import * as path from 'path';
 import { RpcException } from '@nestjs/microservices';
