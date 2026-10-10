@@ -269,6 +269,15 @@ const processDefinitions = [
 
 const processTypes = [
   {
+    code: 'TASK_MANAGEMENT',
+    name: 'Quản lý công việc',
+    description: 'Nghiệp vụ Quản lý công việc và giao việc',
+    ownerService: 'hrm-service',
+    validTriggers: ['Tạo công việc', 'Chuyển xử lý'],
+    validActions: ['ACCEPT', 'COMPLETE', 'REWORK'],
+    isActive: true,
+  },
+  {
     code: 'LEAVE_REQUEST',
     name: 'Xin nghỉ phép',
     description: 'Nghiệp vụ xin nghỉ phép cá nhân',
@@ -473,6 +482,27 @@ async function seedCustomInstance(prisma) {
            }
         });
         console.log('  -> Hoàn thành gán phiên chạy cho user [admin].');
+
+  console.log('  -> Đang tạo ProcessBinding cho TASK_MANAGEMENT...');
+  const taskType = await prisma.processType.findUnique({ where: { code: 'TASK_MANAGEMENT' } });
+  if (defData && taskType) {
+    // Clear old bindings
+    await prisma.processBinding.deleteMany({
+      where: { processTypeId: taskType.id }
+    });
+    // Create new binding
+    await prisma.processBinding.create({
+      data: {
+        processTypeId: taskType.id,
+        definitionId: defData.id,
+        trigger: 'ON_CREATE',
+        status: 'ACTIVE',
+        createdBy: 'admin'
+      }
+    });
+    console.log('  -> Đã tạo ProcessBinding thành công!');
+  }
+
      }
   }
 }

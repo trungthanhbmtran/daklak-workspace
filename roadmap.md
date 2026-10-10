@@ -135,7 +135,7 @@ eport-service v?i pi-management.
 
 ## Unplanned Tasks
 - [x] **[Hotfix] Giữ headers, params và body khi import API (10/10/2026)**
-  - Chuẩn hóa metadata parser vào `ApiEndpoint.schema` khi commit import, tránh làm mất schema hiện có khi ghi đè.
+  - Truyền metadata đầy đủ qua gRPC bằng `metadataJson`, chuẩn hóa vào `ApiEndpoint.schema` khi commit import, tránh làm mất schema hiện có khi ghi đè.
   - Cho phép xem nhanh và chỉnh sửa headers, query/path params, body đã import trong API Manager.
   - Typecheck frontend, API Gateway và user-service thành công.
 

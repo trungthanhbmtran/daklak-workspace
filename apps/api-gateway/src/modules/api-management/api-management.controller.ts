@@ -200,7 +200,19 @@ export class ApiManagementController implements OnModuleInit {
           targetConnectionId: targetConnectionId || '',
           systemName: parsedData.systemName,
           baseUrl: parsedData.baseUrl,
-          endpoints: parsedData.endpoints
+          endpoints: parsedData.endpoints.map((endpoint) => ({
+            method: endpoint.method,
+            path: endpoint.path,
+            name: endpoint.name,
+            description: endpoint.description,
+            metadataJson: JSON.stringify({
+              headers: endpoint.headers || [],
+              params: endpoint.params || [],
+              body: endpoint.body || '',
+              bodyType: endpoint.bodyType || 'none',
+              formItems: endpoint.formItems || [],
+            }),
+          })),
         }, 
         this.getGrpcMetadata(req)
       ),

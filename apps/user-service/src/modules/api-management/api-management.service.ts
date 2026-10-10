@@ -341,6 +341,19 @@ export class ApiManagementService {
   // --- T010: Importer Server ---
 
   async createImportSession(data: any) {
+    const endpoints = (data.endpoints || []).map((endpoint: any) => {
+      if (!endpoint.metadataJson) return endpoint;
+      try {
+        const metadata = JSON.parse(endpoint.metadataJson);
+        return { ...endpoint, ...metadata };
+      } catch {
+        throw new BadRequestException(
+          `Metadata import không hợp lệ cho endpoint ${endpoint.method} ${endpoint.path}`,
+        );
+      }
+    });
+    data = { ...data, endpoints };
+
     const contentToHash = JSON.stringify({
       sys: data.systemName,
       base: data.baseUrl,

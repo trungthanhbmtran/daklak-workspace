@@ -184,6 +184,7 @@ message ParsedEndpoint {
   string path = 2;
   string name = 3;
   string description = 4;
+  string metadataJson = 5; // headers, params, body, bodyType, formItems
 }
 
 message ImportSessionResponse {
