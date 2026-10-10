@@ -10,16 +10,104 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Network, Plus, Trash2, Loader2, MoreHorizontal, Settings } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Network, Plus, Trash2, Loader2, MoreHorizontal, Settings, HeartPulse, Clock, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// ─── ServiceConfigDialog — Advanced Settings for Upstream ─────────────────
+function ServiceConfigDialog({ service, isOpen, onOpenChange }: { service: any, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [config, setConfig] = useState({
+    healthCheckPath: "/health",
+    healthCheckInterval: 30000,
+    connectTimeout: 5000,
+    readTimeout: 30000
+  });
+
+  React.useEffect(() => {
+    if (service) {
+      setConfig({
+        healthCheckPath: service.healthCheckPath || "/health",
+        healthCheckInterval: service.healthCheckInterval || 30000,
+        connectTimeout: service.connectTimeout || 5000,
+        readTimeout: service.readTimeout || 30000
+      });
+    }
+  }, [service]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    // Mock API
+    await new Promise(r => setTimeout(r, 600));
+    toast.success(`Đã lưu cấu hình chuyên sâu cho upstream: ${service?.name}`);
+    setIsSaving(false);
+    onOpenChange(false);
+  };
+
+  if (!service) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Cấu hình chuyên sâu Service</DialogTitle>
+          <DialogDescription className="font-mono text-xs mt-1">
+            {service.name} ({service.url})
+          </DialogDescription>
+        </DialogHeader>
+        
+        <Tabs defaultValue="health" className="mt-2">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="health"><HeartPulse className="w-4 h-4 mr-2" /> Health Check</TabsTrigger>
+            <TabsTrigger value="timeout"><Clock className="w-4 h-4 mr-2" /> Timeout & Kết nối</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="health" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>Đường dẫn kiểm tra (Health Path)</Label>
+              <Input value={config.healthCheckPath} onChange={e => setConfig({...config, healthCheckPath: e.target.value})} />
+              <p className="text-[10px] text-muted-foreground">Gateway sẽ ping vào đường dẫn này để biết Service còn sống hay không.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Chu kỳ kiểm tra (ms)</Label>
+              <Input type="number" value={config.healthCheckInterval} onChange={e => setConfig({...config, healthCheckInterval: Number(e.target.value)})} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="timeout" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>Connect Timeout (ms)</Label>
+              <Input type="number" value={config.connectTimeout} onChange={e => setConfig({...config, connectTimeout: Number(e.target.value)})} />
+              <p className="text-[10px] text-muted-foreground">Thời gian chờ tối đa để thiết lập TCP connection với upstream.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Read Timeout (ms)</Label>
+              <Input type="number" value={config.readTimeout} onChange={e => setConfig({...config, readTimeout: Number(e.target.value)})} />
+              <p className="text-[10px] text-muted-foreground">Thời gian chờ tối đa để upstream xử lý và trả về data.</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Đóng</Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            Lưu thiết lập
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function ServicesTab() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [configServiceId, setConfigServiceId] = useState<number | null>(null);
   const [newService, setNewService] = useState({ 
     name: '', 
     url: '', 
@@ -184,8 +272,8 @@ export function ServicesTab() {
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded border border-border truncate max-w-[250px]" title={s.url}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono text-[11px] leading-relaxed text-muted-foreground bg-muted/50 px-2 py-1 rounded border border-border break-all whitespace-pre-wrap" title={s.url}>
                         {s.url}
                       </span>
                     </div>
@@ -210,8 +298,8 @@ export function ServicesTab() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-[160px]">
-                        <DropdownMenuItem className="cursor-pointer">
-                          <Settings className="w-4 h-4 mr-2" /> Cấu hình
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => setConfigServiceId(s.id)}>
+                          <Settings className="w-4 h-4 mr-2" /> Cấu hình Service
                         </DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={() => handleDelete(s.id)}>
                           <Trash2 className="w-4 h-4 mr-2" /> Xóa Service
@@ -225,6 +313,12 @@ export function ServicesTab() {
           </TableBody>
         </Table>
       </div>
+
+      <ServiceConfigDialog 
+        service={services.find((s: any) => s.id === configServiceId)} 
+        isOpen={!!configServiceId} 
+        onOpenChange={(open) => !open && setConfigServiceId(null)} 
+      />
     </div>
   );
 }

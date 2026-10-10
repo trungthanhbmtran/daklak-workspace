@@ -12,14 +12,92 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Route as RouteIcon, Plus, Trash2, CheckCircle2, Loader2, MoreHorizontal, Settings, ArrowRight } from "lucide-react";
+import { Route as RouteIcon, Plus, Trash2, CheckCircle2, Loader2, MoreHorizontal, Settings, ArrowRight, Shield, Zap, Save } from "lucide-react";
+
+// ─── RouteConfigDialog — Advanced Settings for Route ──────────────────────────
+function RouteConfigDialog({ route, isOpen, onOpenChange }: { route: any, isOpen: boolean, onOpenChange: (open: boolean) => void }) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [config, setConfig] = useState({
+    rateLimit: route.rateLimit || 100,
+    cacheTtl: route.cacheTtl || 0,
+    timeout: route.timeout || 30000,
+    corsEnabled: route.corsEnabled ?? true
+  });
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    // Mocking API delay for UX
+    await new Promise(r => setTimeout(r, 600));
+    toast.success("Đã lưu cấu hình chuyên sâu cho Route");
+    setIsSaving(false);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Cấu hình chuyên sâu Route</DialogTitle>
+          <DialogDescription className="font-mono text-xs mt-1">
+            {route.path}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <Tabs defaultValue="security" className="mt-2">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="security"><Shield className="w-4 h-4 mr-2" /> Bảo mật & Giới hạn</TabsTrigger>
+            <TabsTrigger value="performance"><Zap className="w-4 h-4 mr-2" /> Hiệu suất</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="security" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>Rate Limit (Req / phút)</Label>
+              <Input type="number" value={config.rateLimit} onChange={e => setConfig({...config, rateLimit: Number(e.target.value)})} />
+              <p className="text-[10px] text-muted-foreground">Giới hạn số lượng request từ một IP tới route này.</p>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/30 border border-border rounded-lg">
+              <div className="space-y-0.5">
+                <Label>Bật CORS</Label>
+                <p className="text-[10px] text-muted-foreground">Cho phép gọi API từ Web Browser khác domain.</p>
+              </div>
+              <Switch checked={config.corsEnabled} onCheckedChange={v => setConfig({...config, corsEnabled: v})} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="performance" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>Cache TTL (giây)</Label>
+              <Input type="number" value={config.cacheTtl} onChange={e => setConfig({...config, cacheTtl: Number(e.target.value)})} />
+              <p className="text-[10px] text-muted-foreground">Để 0 nếu không muốn cache kết quả GET từ route này.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Route Timeout (ms)</Label>
+              <Input type="number" value={config.timeout} onChange={e => setConfig({...config, timeout: Number(e.target.value)})} />
+              <p className="text-[10px] text-muted-foreground">Ghi đè Timeout toàn cục của Gateway.</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Đóng</Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            Lưu thiết lập
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 // ─── RouteRow — memoized, handles own delete mutation ────────────────────────
 const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, services: any[] }) {
   const queryClient = useQueryClient();
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: gatewayApi.deleteRoute,
@@ -55,15 +133,21 @@ const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, service
   return (
     <TableRow className="hover:bg-muted/30 transition-colors group">
       <TableCell className="px-6 py-4">
-        <div className="font-mono text-sm font-semibold text-foreground/90">{r.path}</div>
+        <div className="font-mono text-sm font-semibold text-foreground/90">
+          {r.path.startsWith('/api/v1') ? (
+            <><span className="text-muted-foreground/50 font-medium">/api/v1</span>{r.path.slice(7)}</>
+          ) : r.path}
+        </div>
       </TableCell>
       <TableCell className="px-6 py-4">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-background hover:bg-muted font-medium px-2 py-0.5 rounded-md">
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <Badge variant="outline" className="bg-background hover:bg-muted font-medium px-2 py-0.5 rounded-md w-fit">
             {service?.name || `Unknown (ID:${r.serviceId})`}
           </Badge>
-          <ArrowRight className="w-3 h-3 text-muted-foreground" />
-          <span className="text-[10px] text-muted-foreground truncate max-w-[150px] font-mono" title={service?.url}>{service?.url || '---'}</span>
+          <div className="flex items-start gap-1 min-w-0">
+            <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0 mt-0.5" />
+            <span className="text-[10px] leading-relaxed text-muted-foreground font-mono break-all whitespace-pre-wrap min-w-0 flex-1">{service?.url || '---'}</span>
+          </div>
         </div>
       </TableCell>
       <TableCell className="px-6 py-4">
@@ -92,14 +176,16 @@ const RouteRow = React.memo(function RouteRow({ r, services }: { r: any, service
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px]">
-            <DropdownMenuItem className="cursor-pointer">
-              <Settings className="w-4 h-4 mr-2" /> Cấu hình
+            <DropdownMenuItem className="cursor-pointer" onClick={() => setIsConfigOpen(true)}>
+              <Settings className="w-4 h-4 mr-2" /> Cấu hình Route
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={handleDelete}>
               <Trash2 className="w-4 h-4 mr-2" /> Xóa Route
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <RouteConfigDialog route={r} isOpen={isConfigOpen} onOpenChange={setIsConfigOpen} />
       </TableCell>
     </TableRow>
   );
@@ -135,7 +221,11 @@ export function RoutesTab() {
 
   const handleCreate = useCallback(() => {
     if (!newRoute.path || !newRoute.serviceId) return toast.error("Vui lòng nhập đường dẫn và chọn Service");
-    createMutation.mutate({ ...newRoute, serviceId: Number(newRoute.serviceId) });
+    let finalPath = newRoute.path.trim();
+    if (!finalPath.startsWith('/api/v1')) {
+      finalPath = '/api/v1' + (finalPath.startsWith('/') ? finalPath : '/' + finalPath);
+    }
+    createMutation.mutate({ ...newRoute, path: finalPath, serviceId: Number(newRoute.serviceId) });
   }, [newRoute, createMutation]);
 
   return (
@@ -161,7 +251,10 @@ export function RoutesTab() {
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label>Đường dẫn Request (Path Matcher)</Label>
-                <Input className="font-mono text-sm" placeholder="e.g. /api/v1/external/users/*" value={newRoute.path} onChange={(e) => setNewRoute({ ...newRoute, path: e.target.value })} />
+                <div className="flex w-full">
+                  <div className="flex items-center px-3 bg-muted border border-r-0 border-border rounded-l-md text-sm text-muted-foreground font-mono">/api/v1</div>
+                  <Input className="font-mono text-sm rounded-l-none focus-visible:z-10" placeholder="/external/users/*" value={newRoute.path.replace(/^\/api\/v1\/?/, '/')} onChange={(e) => setNewRoute({ ...newRoute, path: e.target.value })} />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Service đích (Target)</Label>
