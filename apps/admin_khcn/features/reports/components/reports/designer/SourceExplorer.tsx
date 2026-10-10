@@ -4,6 +4,7 @@ import { ReportSourceDef } from "../../../types";
 import { Button } from "../../../../../components/ui/button";
 import { useGetReportCatalog } from "../../../api";
 import axiosInstance from "../../../../../lib/axiosInstance";
+import type { ApiResponse } from "../../../../../lib/api.types";
 
 interface SourceExplorerProps {
   onAddSource: (source: ReportSourceDef) => void;
@@ -50,11 +51,11 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({
         page: 1,
         pageSize: 10,
       };
-      const inspected = await axiosInstance.post("/reports/table/preview", {
-        source,
-        config: baseConfig,
-      });
-      const schema = inspected.data?.data;
+      const inspected = await axiosInstance.post<ApiResponse<any>>(
+        "/reports/table/preview",
+        { source, config: baseConfig },
+      );
+      const schema = (inspected as unknown as ApiResponse<any>).data;
       if (
         !schema ||
         !Array.isArray(schema.candidates) ||
@@ -101,11 +102,11 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({
               : "string",
           aggregate: "none",
         }));
-      const result = await axiosInstance.post("/reports/table/preview", {
-        source,
-        config: { ...baseConfig, dataPath: selectedPath, columns },
-      });
-      const preview = result.data?.data;
+      const result = await axiosInstance.post<ApiResponse<any>>(
+        "/reports/table/preview",
+        { source, config: { ...baseConfig, dataPath: selectedPath, columns } },
+      );
+      const preview = (result as unknown as ApiResponse<any>).data;
       setPreviews((current) => ({
         ...current,
         [key]: {

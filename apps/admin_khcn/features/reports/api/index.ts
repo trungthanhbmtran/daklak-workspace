@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../../lib/axiosInstance";
-import { ReportDefinition, ReportRun, DatasetSnapshot } from "../types";
+import type { ApiResponse } from "../../../lib/api.types";
+import {
+  ReportDefinition,
+  ReportRun,
+  DatasetSnapshot,
+  ReportSourceDef,
+} from "../types";
 
 export const reportKeys = {
   all: ["reports"] as const,
@@ -21,19 +27,19 @@ export const useGetReportCatalog = () => {
   return useQuery({
     queryKey: reportKeys.catalog(),
     queryFn: async () => {
-      const { data } = await axiosInstance.get("/reports/catalog");
-      if (data?.success === false) {
+      // axiosInstance's response interceptor already unwraps AxiosResponse and
+      // returns the Gateway envelope: { success, data }.
+      type ReportCatalogItem = ReportSourceDef & { name: string };
+      const response = await axiosInstance.get<ApiResponse<ReportCatalogItem[]>>(
+        "/reports/catalog",
+      );
+      const envelope = response as unknown as ApiResponse<ReportCatalogItem[]>;
+      if (envelope?.success === false) {
         throw new Error(
-          data.message || "Không thể tải danh mục nguồn báo cáo.",
+          envelope.message || "Không thể tải danh mục nguồn báo cáo.",
         );
       }
-      return (Array.isArray(data?.data) ? data.data : []) as {
-        endpoint: string;
-        name: string;
-        fields: string[];
-        upstream?: string;
-        path?: string;
-      }[];
+      return Array.isArray(envelope?.data) ? envelope.data : [];
     },
   });
 };

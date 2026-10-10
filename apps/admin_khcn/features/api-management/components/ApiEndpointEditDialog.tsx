@@ -28,6 +28,14 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   useCreateEndpoint,
   useUpdateEndpoint,
 } from "../hooks/useApiManagement";
@@ -459,220 +467,153 @@ export function ApiEndpointEditDialog({
                           </Button>
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          {paramFields.map((field, index) => (
-                            <div
-                              key={field.id}
-                              className="p-4 bg-background border rounded-lg relative hover:border-primary/30 transition-all group shadow-sm flex flex-col gap-4"
-                            >
-                              <div className="flex justify-between items-center border-b pb-3">
-                                <h5 className="text-sm font-semibold text-primary">
-                                  Tham số {index + 1}
-                                </h5>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
-                                  onClick={() => removeParam(index)}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                                <FormField
-                                  control={form.control as any}
-                                  name={`parameters.${index}.name`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-xs text-muted-foreground font-medium">
-                                        Tên biến
-                                      </FormLabel>
-                                      <FormControl>
-                                        <Input
-                                          placeholder="Ví dụ: page"
-                                          className="h-9 font-mono text-sm"
-                                          {...field}
-                                        />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-
-                                <FormField
-                                  control={form.control as any}
-                                  name={`parameters.${index}.in`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-xs text-muted-foreground font-medium">
-                                        Vị trí
-                                      </FormLabel>
-                                      <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger className="h-9">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          <SelectItem value="query">
-                                            Query
-                                          </SelectItem>
-                                          <SelectItem value="header">
-                                            Header
-                                          </SelectItem>
-                                          <SelectItem value="path">
-                                            Path
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-
-                                <FormField
-                                  control={form.control as any}
-                                  name={`parameters.${index}.type`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-xs text-muted-foreground font-medium">
-                                        Kiểu dữ liệu
-                                      </FormLabel>
-                                      <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger className="h-9 font-mono text-xs">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          <SelectItem value="string">
-                                            String
-                                          </SelectItem>
-                                          <SelectItem value="number">
-                                            Number
-                                          </SelectItem>
-                                          <SelectItem value="boolean">
-                                            Boolean
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-
-                                <FormField
-                                  control={form.control as any}
-                                  name={`parameters.${index}.required`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-xs text-muted-foreground font-medium">
-                                        Bắt buộc
-                                      </FormLabel>
-                                      <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger className="h-9">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          <SelectItem value="true">
-                                            Có
-                                          </SelectItem>
-                                          <SelectItem value="false">
-                                            Không
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-
-                                <FormField
-                                  control={form.control as any}
-                                  name={`parameters.${index}.enabled`}
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-xs text-muted-foreground font-medium">
-                                        Trạng thái
-                                      </FormLabel>
-                                      <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value}
-                                      >
-                                        <FormControl>
-                                          <SelectTrigger className="h-9">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          <SelectItem value="true">
-                                            Bật
-                                          </SelectItem>
-                                          <SelectItem value="false">
-                                            Tắt
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                              </div>
-
-                              <FormField
-                                control={form.control as any}
-                                name={`parameters.${index}.value`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-xs text-muted-foreground font-medium">
-                                      Giá trị mẫu
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder="Giá trị mặc định hoặc ví dụ"
-                                        className="h-9 font-mono text-sm"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={form.control as any}
-                                name={`parameters.${index}.description`}
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel className="text-xs text-muted-foreground font-medium">
-                                      Mô tả chi tiết
-                                    </FormLabel>
-                                    <FormControl>
-                                      <Input
-                                        placeholder="Giải thích ý nghĩa hoặc cách sử dụng của tham số này..."
-                                        className="h-9"
-                                        {...field}
-                                      />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-                          ))}
+                        <div className="border rounded-md overflow-hidden bg-background">
+                          <Table>
+                            <TableHeader className="bg-muted/50">
+                              <TableRow>
+                                <TableHead className="w-[180px]">Tên biến</TableHead>
+                                <TableHead className="w-[120px]">Vị trí</TableHead>
+                                <TableHead className="w-[120px]">Kiểu</TableHead>
+                                <TableHead className="w-[100px]">Bắt buộc</TableHead>
+                                <TableHead className="w-[180px]">Giá trị mẫu</TableHead>
+                                <TableHead>Mô tả</TableHead>
+                                <TableHead className="w-[50px]"></TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {paramFields.map((field, index) => (
+                                <TableRow key={field.id} className="group hover:bg-muted/20">
+                                  <TableCell className="p-2 align-top">
+                                    <FormField
+                                      control={form.control as any}
+                                      name={`parameters.${index}.name`}
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-0">
+                                          <FormControl>
+                                            <Input
+                                              placeholder="Tên biến"
+                                              className="h-8 font-mono text-xs shadow-none"
+                                              {...field}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="p-2 align-top">
+                                    <FormField
+                                      control={form.control as any}
+                                      name={`parameters.${index}.in`}
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-0">
+                                          <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                              <SelectTrigger className="h-8 text-xs shadow-none">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              <SelectItem value="query">Query</SelectItem>
+                                              <SelectItem value="header">Header</SelectItem>
+                                              <SelectItem value="path">Path</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="p-2 align-top">
+                                    <FormField
+                                      control={form.control as any}
+                                      name={`parameters.${index}.type`}
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-0">
+                                          <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                              <SelectTrigger className="h-8 text-xs shadow-none font-mono">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              <SelectItem value="string">String</SelectItem>
+                                              <SelectItem value="number">Number</SelectItem>
+                                              <SelectItem value="boolean">Boolean</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="p-2 align-top">
+                                    <FormField
+                                      control={form.control as any}
+                                      name={`parameters.${index}.required`}
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-0">
+                                          <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                              <SelectTrigger className="h-8 text-xs shadow-none">
+                                                <SelectValue />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              <SelectItem value="true">Có</SelectItem>
+                                              <SelectItem value="false">Không</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="p-2 align-top">
+                                    <FormField
+                                      control={form.control as any}
+                                      name={`parameters.${index}.value`}
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-0">
+                                          <FormControl>
+                                            <Input
+                                              placeholder="Ví dụ..."
+                                              className="h-8 text-xs font-mono shadow-none"
+                                              {...field}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="p-2 align-top">
+                                    <FormField
+                                      control={form.control as any}
+                                      name={`parameters.${index}.description`}
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-0">
+                                          <FormControl>
+                                            <Input
+                                              placeholder="Mô tả..."
+                                              className="h-8 text-xs shadow-none"
+                                              {...field}
+                                            />
+                                          </FormControl>
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="p-2 align-top text-center">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                      onClick={() => removeParam(index)}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
                         </div>
                       )}
                     </div>

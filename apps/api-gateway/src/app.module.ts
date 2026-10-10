@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+﻿import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthCryptoModule } from './core/auth/auth-crypto.module';
@@ -19,6 +19,7 @@ import { ApiManagementGatewayModule } from './modules/api-management/api-managem
 import { GatewayModule } from './modules/gateway/gateway.module';
 
 import { SecurityMiddleware } from './core/middlewares/security.middleware';
+import { DynamicProxyMiddleware } from './core/middlewares/dynamic-proxy.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ReportsModule } from './modules/reports/reports.module';
@@ -60,8 +61,10 @@ import { ThreatIntelModule } from './core/threat-intel/threat-intel.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // SecurityMiddleware PHẢI đứng TRƯỚC tất cả — chặn IP bị block tại cổng vào
+    // SecurityMiddleware PHáº¢I Ä‘á»©ng TRÆ¯á»šC táº¥t cáº£ â€” cháº·n IP bá»‹ block táº¡i cá»•ng vÃ o
     consumer.apply(SecurityMiddleware).forRoutes('*');
+
+    consumer.apply(DynamicProxyMiddleware).forRoutes('/api/v1/external/*');
 
     
 

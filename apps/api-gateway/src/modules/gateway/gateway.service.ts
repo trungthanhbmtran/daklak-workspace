@@ -8,6 +8,7 @@ export class GatewayConfigService {
   // GatewayService
   async getServices() {
     return this.prisma.gatewayService.findMany({
+      include: { routes: true },
       orderBy: { createdAt: 'desc' },
     });
   }

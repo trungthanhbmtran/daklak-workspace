@@ -4,6 +4,14 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Feature] Đồng bộ tự động toàn bộ Router của API Gateway vào CSDL (10/10/2026)**
+  - **Tác vụ**: Khai thác (Scrape) mã nguồn để lấy đúng mô hình API thực tế đang chạy trên NestJS Controllers và đẩy vào CSDL GatewayRoute.
+  - **Chi tiết**: Viết Node.js script để tự động quét AST (bằng regex) của toàn bộ `apps/api-gateway/src/**/*.controller.ts`. Rút trích ra được hơn 100+ endpoints thực tế đang chạy, tự động cập nhật vào mảng `realRoutes` trong file `seed.ts`, và thực thi seed trên Docker để toàn bộ chúng xuất hiện chính xác trên giao diện API Manager.
+
+- [x] **[Feature] Xây dựng Dynamic API Gateway (Realtime Auto-Routing) (10/10/2026)**
+  - **Tác vụ**: Xây dựng cơ chế Dynamic Routing bên trong NestJS thay vì Nginx Config Generator để tự động chuyển tiếp request cho External APIs.
+  - **Chi tiết**: Đã xây dựng `DynamicProxyMiddleware` tự động intercept `/api/v1/external/*`. Middleware tự động đọc cấu hình `GatewayRoute` & `GatewayService` từ database (có cache 30s) và khởi tạo `http-proxy-middleware` linh hoạt, không yêu cầu reload Nginx khi thay đổi tuyến đường. Đã tích hợp thành công vào `app.module.ts`.
+
 - [x] **[Hotfix] Khôi phục danh sách nhân sự HRM (10/10/2026)**
   - **Nguyên nhân**: Log `hrm-service` cho thấy Prisma `Employee` lỗi `P2022` vì `admin_hrm.employees.department_path` chưa tồn tại; bảng cũng thiếu migration được theo dõi cho `organization_id` đã bổ sung trước đó.
   - **Khắc phục**: Dùng hai migration đã có trong source cho `organization_id` và `department_path`; áp dụng phần `department_path` vào DB đang chạy và đồng bộ lịch sử Prisma, không sửa 49 dòng dữ liệu nhân sự.
@@ -14,6 +22,11 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
   - **Nguyên nhân**: `apiClient` đã được cấu hình sẵn `baseURL` có `/api/v1/admin`, nhưng trong `task-kpi.api.ts` lại nối thêm `/admin/` vào string path.
   - **Khắc phục**: Xóa bỏ tiền tố `/admin/` dư thừa trong `apps/admin_khcn/features/hrm/api/task-kpi.api.ts`.
   - **Kiểm chứng**: UI đã gọi đúng endpoint `/api/v1/admin/hrm/tasks/kpi/variables` và `global-settings`.
+
+- [x] **[Feature] Nâng cấp giao diện Thêm/Cập nhật Endpoint chuẩn Enterprise (10/10/2026)**
+  - **Tác vụ**: Nâng cấp `ApiEndpointEditDialog.tsx` từ dạng lưới Card sang dạng Bảng (Table) chuyên nghiệp (giống Postman) giúp dễ dàng chỉnh sửa Tham số (Parameters) và Request Body.
+  - **Chi tiết**: Sử dụng Data Table để render FormField, thêm badge màu sắc cho Method. Nâng tầm trải nghiệm người dùng đối với API Manager.
+
 
 - [x] **[Hotfix] Khôi phục danh sách nhân sự HRM (10/10/2026)**
   - **Nguyên nhân**: Prisma `Employee` đã khai báo `department_path` nhưng bảng `admin_hrm.employees` trên runtime chưa có cột, làm mọi truy vấn Prisma `findMany`/`findUnique` thất bại với `P2022`.
