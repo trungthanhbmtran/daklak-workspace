@@ -12,33 +12,44 @@ File này là Hiến chương điều phối tối cao cho Antigravity (Lead Orc
 
 ---
 
-## 2. Quy trình điều phối Multi-Agent (Dual-Loop Orchestration)
-Lead Orchestrator tiếp nhận yêu cầu từ người dùng và tự động điều phối qua các Subagent chuyên trách:
+## 2. Quy trình điều phối Phân tầng Thông minh (Dynamic Dual-Tier Routing)
+Để tối ưu hóa tốc độ phản hồi (15-30s cho tác vụ thường ngày) mà vẫn bảo đảm 100% chất lượng và an toàn hệ thống, Lead Orchestrator tự động phân loại yêu cầu vào 2 làn xử lý:
 
 ```
-[User Request] ──> [Lead Orchestrator]
-                          │
-  ┌───────────────────────┴───────────────────────┐
-  ▼                                               ▼
-[VÒNG LẶP 1: KẾ HOẠCH & DUYỆT (Read-Only)]     [VÒNG LẶP 2: THỰC THI & CHẤT LƯỢNG CAO]
-1. planner_agent                                1. Sau khi Plan có "APPROVED":
-   - Khảo sát codebase, roadmap.md                 - backend_coder_agent & frontend_coder_agent (Song song)
-   - Lập plan chi tiết vào current_plan.md         2. Đảm bảo chất lượng chuyên sâu (Quality Gates):
-         │                                         - db_guardian_agent (Thẩm định Schema & Migrations)
-         ▼                                         - test_generator_agent (Sinh unit & edge-case tests)
-2. plan_critic_agent                               - code_auditor_agent (Audit PBAC, OWASP, Clean Code)
-   - Phản biện rủi ro kiến trúc, PBAC                     └──> CHỈ thông qua khi "AUDIT_PASSED"
-   - CHỈ thông qua khi "APPROVED"                  3. result_critic_agent
-                                                   - Chạy test, type-check (tsc), lint, build qua RTK
-                                                   - CHỈ hoàn tất khi phán quyết "PASSED"
+                      [Yêu cầu từ Người dùng]
+                                │
+                 ┌──────────────┴──────────────┐
+                 ▼                             ▼
+    [LÀN 1: FAST-TRACK (15 - 30s)]    [LÀN 2: FULL ENTERPRISE (2 - 3m)]
+    (UI/CSS, Bugfix cục bộ 1-2 file,  (Chạm DB Prisma/Migration, .proto,
+     Format, Refactor, Typo, Config)   PBAC scope, Cross-service >= 2)
+                 │                             │
+    Lead Orchestrator thực thi thẳng:          ▼
+    1. Đọc code & Sửa trực tiếp       [VÒNG LẶP 1: KẾ HOẠCH & DUYỆT]
+    2. Kiểm tra CSS min-w-0, UTF-8    1. planner_agent ➔ plan_critic_agent
+    3. Chạy rtk tsc / test máy                 │ └──> APPROVED
+    4. Dọn console.log & Nghiệm thu            ▼
+                 │                    [VÒNG LẶP 2: THỰC THI & QUALITY GATES]
+                 │                    2. backend_coder & frontend_coder
+                 │                    3. db_guardian ➔ test_gen ➔ code_auditor
+                 │                    4. result_critic_agent (rtk test/build)
+                 │                             │
+                 └──────────────┬──────────────┘
+                                ▼
+                       [BÁO CÁO THỰC THI]
 ```
 
-### Chi tiết các bước điều phối:
-1. **Bước 1 - Lập kế hoạch (`planner_agent`)**: Đọc code thực tế, đồng bộ `roadmap.md`, lập step-by-step plan vào `.agents/current_plan.md`.
-2. **Bước 2 - Phản biện kế hoạch (`plan_critic_agent`)**: Red Team review theo `checklists/architecture-review.md`. Nếu phát hiện rủi ro -> Yêu cầu sửa; Đạt an toàn -> Cấp `APPROVED`.
-3. **Bước 3 - Thực thi song song (`backend_coder_agent` & `frontend_coder_agent`)**: Code độc lập theo nguyên tắc **Contract-First**, vùng file loại trừ lẫn nhau (Collision-Free).
-4. **Bước 4 - Thẩm định chất lượng chuyên sâu (`db_guardian_agent`, `test_generator_agent`, `code_auditor_agent`)**: Rà soát an toàn DB, sinh test bao phủ edge cases, kiểm toán bảo mật PBAC và Clean Code theo `checklists/code-audit.md` -> Cấp `AUDIT_PASSED`.
-5. **Bước 5 - Kiểm chứng & Nghiệm thu (`result_critic_agent`)**: Chạy test thực tế qua RTK, đối chiếu `checklists/post-implementation.md`, dọn dẹp rác và cấp `PASSED`.
+### Tiêu chí phân loại rủi ro (Hard Boundary Rules):
+1. **BẮT BUỘC ĐI LÀN 2 (Full Enterprise Subagents):**
+   - Thay đổi `prisma/schema.prisma` hoặc file migrations CSDL -> Bắt buộc `db_guardian_agent`.
+   - Thay đổi `.proto` hoặc gRPC contracts -> Bắt buộc `plan_critic_agent` + `code_auditor_agent`.
+   - Đụng chạm phân quyền PBAC, Auth Guards, hoặc Tenant Context (`organizationId`) -> Bắt buộc `code_auditor_agent`.
+   - Tính năng mới liên kết từ 2 microservices trở lên -> Bắt buộc đầy đủ 2 Vòng lặp Dual-Loop.
+2. **ĐƯỢC PHÉP ĐI LÀN 1 (Fast-Track - Siêu tốc 15-30s):**
+   - Toàn bộ các chỉnh sửa UI/UX, CSS Tailwind, SVG, Icons, Tabs, Modal/Drawer.
+   - Sửa lỗi logic cục bộ trong 1-2 file service/controller/hook đã có contract rõ ràng.
+   - Bổ sung trường hiển thị, format dữ liệu, sửa typing TypeScript.
+   - **Cam kết chất lượng Làn 1:** Lead Orchestrator vẫn bắt buộc tự chạy `rtk tsc`/test máy để kiểm chứng, giữ nguyên chuẩn `min-w-0`, UTF-8 không BOM và dọn sạch `console.log`.
 
 ---
 

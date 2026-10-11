@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Download,
   BarChart3,
+  TrendingUp,
   Activity,
   CheckCircle2,
   AlertCircle,
@@ -96,6 +97,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const [runId, setRunId] = useState<string | null>(null);
   const [tableSearch, setTableSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [chartModes, setChartModes] = useState<Record<number, 'bar' | 'line' | 'pie'>>({});
   const pageSize = 20;
 
   const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(
@@ -357,6 +359,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 const totalVal =
                   chartData.reduce((acc, d) => acc + d.value, 0) || 1;
 
+                const effectiveType = chartModes[cIdx] || chart.type;
+
                 return (
                   <div
                     key={cIdx}
@@ -366,23 +370,65 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                       <h3 className="font-bold text-sm text-slate-800 truncate pr-2">
                         {chart.title || `Biểu đồ ${cIdx + 1}`}
                       </h3>
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700"
-                      >
-                        {chart.type}
-                      </Badge>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {chart.type !== 'pie' && (
+                          <div className="flex items-center bg-slate-100/90 p-0.5 rounded-lg border border-slate-200/60 shadow-inner">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setChartModes((prev) => ({
+                                  ...prev,
+                                  [cIdx]: 'bar',
+                                }))
+                              }
+                              className={`px-2 py-0.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-all ${
+                                effectiveType === 'bar'
+                                  ? 'bg-white text-indigo-600 shadow-sm'
+                                  : 'text-slate-400 hover:text-slate-600'
+                              }`}
+                              title="Xem dạng biểu đồ Cột"
+                            >
+                              <BarChart3 className="w-3 h-3" />
+                              Cột
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setChartModes((prev) => ({
+                                  ...prev,
+                                  [cIdx]: 'line',
+                                }))
+                              }
+                              className={`px-2 py-0.5 text-[11px] font-semibold rounded-md flex items-center gap-1 transition-all ${
+                                effectiveType === 'line'
+                                  ? 'bg-white text-indigo-600 shadow-sm'
+                                  : 'text-slate-400 hover:text-slate-600'
+                              }`}
+                              title="Xem dạng biểu đồ Đường cong"
+                            >
+                              <TrendingUp className="w-3 h-3" />
+                              Đường
+                            </button>
+                          </div>
+                        )}
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700"
+                        >
+                          {effectiveType}
+                        </Badge>
+                      </div>
                     </div>
 
-                    <div className="p-5 flex-1 flex flex-col justify-between min-h-[260px]">
+                    <div className="p-5 flex-1 flex flex-col justify-between min-h-[270px]">
                       {chartData.length === 0 ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-xs">
                           <AlertCircle className="w-6 h-6 mb-1 text-slate-300" />
                           Không có dữ liệu cho các trường {chart.xAxis} /{' '}
                           {chart.yAxis}
                         </div>
-                      ) : chart.type === 'bar' ? (
-                        /* Real Bar Chart */
+                      ) : effectiveType === 'bar' ? (
+                        /* Modern Crisp Bar Chart */
                         <div className="flex-1 flex flex-col justify-end space-y-3">
                           <div className="h-44 flex items-end justify-around gap-2 pt-6 pb-2">
                             {chartData.map((item, i) => {
@@ -396,13 +442,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   key={i}
                                   className="flex-1 flex flex-col items-center h-full justify-end group/bar relative min-w-0"
                                 >
-                                  {/* Value tooltip */}
-                                  <span className="text-[11px] font-bold text-slate-700 mb-1 opacity-80 group-hover/bar:opacity-100 transition-opacity">
-                                    {item.value}
+                                  {/* Value pill */}
+                                  <span className="text-[11px] font-bold text-slate-700 mb-1.5 opacity-90 group-hover/bar:opacity-100 group-hover/bar:text-indigo-600 transition-all">
+                                    {item.value.toLocaleString('vi-VN')}
                                   </span>
-                                  {/* Bar column */}
+                                  {/* Bar column with gradient & glow */}
                                   <div
-                                    className="w-full max-w-[42px] rounded-t-lg transition-all duration-500 ease-out shadow-sm group-hover/bar:brightness-110"
+                                    className="w-full max-w-[46px] rounded-t-xl transition-all duration-500 ease-out shadow-sm group-hover/bar:brightness-110 group-hover/bar:shadow-md cursor-pointer"
                                     style={{
                                       height: `${heightPct}%`,
                                       backgroundColor: color,
@@ -413,117 +459,189 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                             })}
                           </div>
                           {/* Labels row */}
-                          <div className="flex justify-around gap-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500 font-medium">
+                          <div className="flex justify-around items-start gap-1.5 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 font-medium">
                             {chartData.map((item, i) => (
                               <div
                                 key={i}
-                                className="flex-1 text-center truncate px-0.5"
+                                className="flex-1 text-center group/lbl px-0.5 min-w-0 cursor-pointer"
                                 title={item.label}
                               >
-                                {item.label}
+                                <div className="truncate text-slate-700 font-semibold group-hover/lbl:text-indigo-600 transition-colors">
+                                  {item.label.length > 18
+                                    ? `${item.label.slice(0, 16)}…`
+                                    : item.label}
+                                </div>
+                                <div className="text-[10px] text-slate-400 font-normal mt-0.5">
+                                  {item.value.toLocaleString('vi-VN')}
+                                </div>
                               </div>
                             ))}
                           </div>
                         </div>
-                      ) : chart.type === 'line' ? (
-                        /* Real Line Chart */
-                        <div className="flex-1 flex flex-col justify-end space-y-3">
-                          <div className="h-44 relative w-full pt-4">
-                            <svg
-                              className="w-full h-full overflow-visible"
-                              viewBox="0 0 100 50"
-                              preserveAspectRatio="none"
-                            >
-                              <defs>
-                                <linearGradient
-                                  id={`grad-${cIdx}`}
-                                  x1="0"
-                                  y1="0"
-                                  x2="0"
-                                  y2="1"
-                                >
-                                  <stop
-                                    offset="0%"
-                                    stopColor="#4f46e5"
-                                    stopOpacity="0.25"
-                                  />
-                                  <stop
-                                    offset="100%"
-                                    stopColor="#4f46e5"
-                                    stopOpacity="0.0"
-                                  />
-                                </linearGradient>
-                              </defs>
+                      ) : effectiveType === 'line' ? (
+                        /* Ultra-crisp Spline Area & Line Chart with Zero-Distortion HTML Badges & Markers */
+                        <div className="flex-1 flex flex-col justify-end space-y-2 pt-2">
+                          <div className="h-44 relative w-full flex">
+                            {/* Y-Axis Reference Scale */}
+                            <div className="w-8 shrink-0 flex flex-col justify-between text-[10px] text-slate-400 font-medium text-right pr-1.5 select-none pb-3 pt-3">
+                              <span>{maxVal.toLocaleString('vi-VN')}</span>
+                              <span>{Math.round(maxVal * 0.66).toLocaleString('vi-VN')}</span>
+                              <span>{Math.round(maxVal * 0.33).toLocaleString('vi-VN')}</span>
+                              <span>0</span>
+                            </div>
+
+                            {/* Chart Canvas Area */}
+                            <div className="flex-1 relative h-full">
+                              {/* Horizontal Dashed Grid Lines */}
+                              <div className="absolute inset-x-0 inset-y-0 pointer-events-none pb-3 pt-3 flex flex-col justify-between">
+                                <div className="border-b border-dashed border-slate-100 w-full" />
+                                <div className="border-b border-dashed border-slate-100 w-full" />
+                                <div className="border-b border-dashed border-slate-100 w-full" />
+                                <div className="border-b border-slate-200 w-full" />
+                              </div>
+
                               {(() => {
                                 const n = chartData.length;
-                                const step = n > 1 ? 80 / (n - 1) : 0;
+                                // Coordinate mapping in percentage [0..100]
+                                // Vertical: top 18% (maxVal) to bottom 88% (0)
                                 const pts = chartData.map((d, idx) => {
-                                  const x = 10 + idx * step;
+                                  const x =
+                                    n > 1
+                                      ? Math.round((idx / (n - 1)) * 90 + 5)
+                                      : 50;
                                   const y =
-                                    42 -
-                                    Math.round((d.value / maxVal) * 34);
+                                    maxVal > 0
+                                      ? Math.round(
+                                          88 - (d.value / maxVal) * 70,
+                                        )
+                                      : 88;
                                   return { x, y, ...d };
                                 });
-                                const polyPoints = pts
-                                  .map((p) => `${p.x},${p.y}`)
-                                  .join(' ');
-                                const areaPoints = `10,48 ${polyPoints} ${
-                                  pts[pts.length - 1].x
-                                },48`;
+
+                                // Smooth Cubic Spline Path
+                                let splineD = `M ${pts[0].x} ${pts[0].y}`;
+                                if (pts.length === 1) {
+                                  splineD = `M ${pts[0].x - 10} ${pts[0].y} L ${
+                                    pts[0].x + 10
+                                  } ${pts[0].y}`;
+                                } else {
+                                  for (let i = 0; i < pts.length - 1; i++) {
+                                    const p0 = pts[i];
+                                    const p1 = pts[i + 1];
+                                    const cx = (p0.x + p1.x) / 2;
+                                    splineD += ` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;
+                                  }
+                                }
+
+                                const areaD =
+                                  pts.length > 1
+                                    ? `${splineD} L ${
+                                        pts[pts.length - 1].x
+                                      } 88 L ${pts[0].x} 88 Z`
+                                    : `${splineD} L ${
+                                        pts[0].x + 10
+                                      } 88 L ${pts[0].x - 10} 88 Z`;
 
                                 return (
                                   <>
-                                    <polygon
-                                      points={areaPoints}
-                                      fill={`url(#grad-${cIdx})`}
-                                    />
-                                    <polyline
-                                      fill="none"
-                                      stroke="#4f46e5"
-                                      strokeWidth="2.5"
-                                      points={polyPoints}
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                    {pts.map((p, idx) => (
-                                      <g key={idx}>
-                                        <circle
-                                          cx={p.x}
-                                          cy={p.y}
-                                          r="3"
-                                          fill="#ffffff"
-                                          stroke="#4f46e5"
-                                          strokeWidth="2"
-                                        />
-                                        <text
-                                          x={p.x}
-                                          y={p.y - 4}
-                                          fontSize="4.5"
-                                          fontWeight="bold"
-                                          fill="#374151"
-                                          textAnchor="middle"
+                                    {/* SVG Layer: Only for smooth spline stroke & gradient fill */}
+                                    <svg
+                                      className="absolute inset-0 w-full h-full pointer-events-none"
+                                      viewBox="0 0 100 100"
+                                      preserveAspectRatio="none"
+                                    >
+                                      <defs>
+                                        <linearGradient
+                                          id={`line-grad-${cIdx}`}
+                                          x1="0"
+                                          y1="0"
+                                          x2="0"
+                                          y2="1"
                                         >
-                                          {p.value}
-                                        </text>
-                                      </g>
+                                          <stop
+                                            offset="0%"
+                                            stopColor="#4f46e5"
+                                            stopOpacity="0.22"
+                                          />
+                                          <stop
+                                            offset="100%"
+                                            stopColor="#4f46e5"
+                                            stopOpacity="0.0"
+                                          />
+                                        </linearGradient>
+                                      </defs>
+                                      <path
+                                        d={areaD}
+                                        fill={`url(#line-grad-${cIdx})`}
+                                      />
+                                      <path
+                                        d={splineD}
+                                        fill="none"
+                                        stroke="#4f46e5"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        vectorEffect="non-scaling-stroke"
+                                      />
+                                    </svg>
+
+                                    {/* HTML Overlays: 100% Round Dots & Crisp Badges (Completely immune to SVG stretching) */}
+                                    {pts.map((p, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group/pt pointer-events-auto cursor-pointer z-10"
+                                        style={{
+                                          left: `${p.x}%`,
+                                          top: `${p.y}%`,
+                                        }}
+                                      >
+                                        {/* Crisp Pill Badge */}
+                                        <div className="mb-1.5 px-2 py-0.5 bg-slate-900 text-white text-[10px] font-bold rounded-md shadow-md shadow-slate-900/25 whitespace-nowrap group-hover/pt:bg-indigo-600 group-hover/pt:scale-110 transition-all border border-slate-700/60">
+                                          {p.value.toLocaleString('vi-VN')}
+                                        </div>
+
+                                        {/* Perfect Circle Dot (Zero distortion) */}
+                                        <div className="relative flex items-center justify-center">
+                                          <div className="w-5 h-5 rounded-full bg-indigo-500/20 group-hover/pt:scale-125 transition-transform" />
+                                          <div className="absolute w-3.5 h-3.5 rounded-full bg-white border-[2.5px] border-indigo-600 shadow-sm group-hover/pt:border-indigo-700 group-hover/pt:scale-110 transition-all" />
+                                        </div>
+                                      </div>
                                     ))}
                                   </>
                                 );
                               })()}
-                            </svg>
+                            </div>
                           </div>
-                          {/* Labels row */}
-                          <div className="flex justify-between gap-1 pt-2 border-t border-slate-100 text-[11px] text-slate-500 font-medium">
-                            {chartData.map((item, i) => (
-                              <div
-                                key={i}
-                                className="text-center truncate px-0.5"
-                                style={{ width: `${100 / chartData.length}%` }}
-                                title={item.label}
-                              >
-                                {item.label}
-                              </div>
-                            ))}
+
+                          {/* Axis Labels: Exactly aligned under each data point */}
+                          <div className="relative w-full h-9 border-t border-slate-100 pt-2.5">
+                            {/* Left gutter offset matching Y-axis (w-8) */}
+                            <div className="ml-8 relative h-full">
+                              {chartData.map((item, i) => {
+                                const n = chartData.length;
+                                const xPct =
+                                  n > 1
+                                    ? Math.round((i / (n - 1)) * 90 + 5)
+                                    : 50;
+                                return (
+                                  <div
+                                    key={i}
+                                    className="absolute -translate-x-1/2 text-center group/lbl cursor-pointer max-w-[85px] px-0.5"
+                                    style={{ left: `${xPct}%` }}
+                                    title={item.label}
+                                  >
+                                    <div className="truncate text-slate-700 font-semibold text-[11px] group-hover/lbl:text-indigo-600 transition-colors">
+                                      {item.label.length > 14
+                                        ? `${item.label.slice(0, 12)}…`
+                                        : item.label}
+                                    </div>
+                                    <div className="text-[10px] text-slate-400 font-normal mt-0.5 whitespace-nowrap">
+                                      {item.value.toLocaleString('vi-VN')} lượt
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       ) : (

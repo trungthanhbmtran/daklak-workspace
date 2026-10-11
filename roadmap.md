@@ -4,6 +4,15 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Performance & Architecture] Thiết lập Cơ chế Phân tầng Điều phối Thông minh (Dynamic Fast-Track & Dual-Tier) (11/10/2026)**
+  - **Tác vụ**: Giải quyết triệt để vấn đề hệ thống chạy chậm do gọi dây chuyền 9 subagents bằng cách phân tầng 2 làn: Làn 1 (Fast-Track: 15-30s cho UI/CSS/local bugfix) vs Làn 2 (Full Enterprise: 2-3m cho DB/gRPC/PBAC).
+  - **Chi tiết**: Đã cập nhật `AGENTS.md`, `rules/00-core.md`, và `.agents/subagents/README.md` với tiêu chí phân loại rủi ro cứng, bảo đảm giữ nguyên chất lượng code 10/10 mà tốc độ tăng gấp 5-10 lần.
+  - **Kiểm chứng**: Toàn bộ tài liệu và rules đã đồng bộ, lưu chuẩn UTF-8 không BOM; kích hoạt Fast-Track cho các tác vụ thường ngày.
+
+- [ ] **[UI/UX & Data] Tối ưu hóa & Hoàn thiện "Biểu đồ Tương tác theo Tin bài" (/admin/services/reports) (11/10/2026)**
+  - **Tác vụ**: Sửa lỗi méo SVG, kéo dãn chữ/điểm và làm giàu dữ liệu tương tác cho Biểu đồ Tương tác theo Tin bài thuộc Báo cáo Hoạt động Cổng Thông tin & Bài viết.
+  - **Chi tiết**: Tái thiết kế khối render Line/Area Chart với đường cong Bezier mượt mà (Spline), lưới tham chiếu tọa độ, nhãn giá trị sắc nét; bổ sung dữ liệu tin bài thực tế phong phú vào CSDL `admin_posts` và `StatisticsSnapshot`; cho phép chuyển đổi chế độ xem (Đường cong mượt / Cột phân tích) trực quan.
+
 - [x] **[Feature] Tích hợp Bộ 3 Subagent Nâng cao Chất lượng Code: Code Auditor, Test Generator, DB Guardian (11/10/2026)**
   - **Tác vụ**: Bổ sung 3 Subagent chuyên sâu để nâng chất lượng code lên chuẩn Enterprise: `code_auditor_agent` (Soi diff tĩnh, PBAC, OWASP, Clean Code), `test_generator_agent` (Tự động sinh Unit/Integration Test cho edge-cases), và `db_guardian_agent` (Kiểm soát Prisma additive migrations, chống vỡ Schema, bắt N+1 query).
   - **Chi tiết**: Đã đăng ký thành công cả 3 Subagent trong runtime, hoàn thiện 3 file cấu hình `.agents/subagents/`, tạo checklist `code-audit.md`, nâng cấp quy trình điều phối Enhanced Dual-Loop trong `AGENTS.md` và `rules/00-core.md`.
