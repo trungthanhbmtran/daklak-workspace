@@ -1,78 +1,74 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này xác định bộ quy tắc hoạt động cho Antigravity (AGY) AI Agent làm việc trong dự án này. Mục tiêu là phát triển một nền tảng quy trình chính phủ điện tử (government workflow platform) an toàn, có khả năng tái sử dụng. Bảo mật, phân quyền, khả năng truy xuất, làm sạch code và bằng chứng xác thực được ưu tiên cao nhất.
+File này là Hiến chương điều phối tối cao cho Antigravity (Lead Orchestrator). Mọi tác vụ lập trình và kỹ thuật BẮT BUỘC phải tuân thủ nghiêm ngặt quy trình Multi-Agent Dual-Loop và các nguyên tắc bất biến dưới đây.
+
+---
 
 ## 1. Nguyên tắc cốt lõi (Core Principles)
-- **Thực hiện ĐÚNG yêu cầu**: Không tự ý thêm bớt tính năng nếu không có sự đồng ý của người dùng. Agent phải bám sát mục tiêu của từng tác vụ.
-- **Dọn dẹp rác thừa (Cleanup)**: BẤT KỲ khi nào thực hiện sửa chữa, thêm tính năng hoặc refactor, Agent BẮT BUỘC phải dọn dẹp các đoạn code thừa, biến không sử dụng (unused variables), import dư thừa, file tạm, và các dòng log debug (console.log, v.v.) trước khi kết thúc tác vụ.
-- **Bằng chứng xác thực**: Không bao giờ đưa ra kết luận giả định. Mọi thay đổi đều phải được kiểm chứng (test) thực tế.
-- **Định dạng file chuẩn (Encoding Strictness)**: BẤT KỲ khi nào dùng script (đặc biệt là PowerShell) để tạo mới hoặc ghi đè file, BẮT BUỘC phải đảm bảo mã hóa (encoding) luôn là **UTF-8 (không BOM)**. Tuyệt đối không để xảy ra tình trạng lưu nhầm thành UTF-16LE hoặc sai bảng mã gây sập quá trình build của trình biên dịch (như Turbopack/Next.js).
+- **Thực hiện ĐÚNG yêu cầu**: Không tự ý thêm bớt tính năng ngoài phạm vi được giao.
+- **Bằng chứng xác thực**: Không bao giờ kết luận giả định. Mọi kết quả phải dựa trên bằng chứng chạy lệnh kiểm thử thực tế.
+- **Dọn dẹp rác thừa (Cleanup Gate)**: Quét sạch import dư thừa, biến không dùng, file tạm, và toàn bộ debug logs (`console.log`, debugger) trước khi kết thúc tác vụ.
+- **Định dạng file chuẩn**: Mọi file tạo mới hoặc sửa đổi bằng script/PowerShell BẮT BUỘC phải mã hóa **UTF-8 (không BOM)**. Tuyệt đối không để lưu nhầm UTF-16LE làm crash Turbopack/Next.js.
 
-## 2. Quy trình làm việc bắt buộc (Mandatory Workflow)
+---
 
-Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trình 5 bước sau:
+## 2. Quy trình điều phối Multi-Agent (Dual-Loop Orchestration)
+Lead Orchestrator tiếp nhận yêu cầu từ người dùng và tự động điều phối qua các Subagent chuyên trách:
 
-### Bước 1: Lên kế hoạch (Planning)
-- **Phân tích yêu cầu & Bối cảnh (Deep Context Gathering)**: Đọc kỹ yêu cầu và code hiện tại. BẮT BUỘC phải tìm và đọc các file liên quan (schema, interface, dependencies) để nắm rõ cấu trúc. Tránh đoán mò dựa trên tên file. Nếu yêu cầu mập mờ, **PHẢI hỏi lại người dùng** để chốt phương án, không tự ý giả định.
-- **Đồng bộ Roadmap**: BẮT BUỘC phải kiểm tra và bám sát file oadmap.md để đảm bảo tác vụ hiện tại phù hợp với tiến độ và mục tiêu của dự án. Nếu tác vụ được giao KHÔNG có trong oadmap.md, Agent phải tự động thêm nó vào một mục (ví dụ: Unplanned Tasks hoặc Hotfixes) trong roadmap trước khi bắt đầu, để đảm bảo không có công việc nào bị sót dấu vết.
-- **Tạo Plan (Kế hoạch)**: BẮT BUỘC phải lên kế hoạch từng bước cụ thể (step-by-step) trước khi bắt tay vào code. Nếu tác vụ lớn, chia nhỏ thành nhiều bước độc lập (ví dụ: tạo schema -> viết service -> viết controller -> verify).
-- **Lưu và Giám sát Kế hoạch**: Trình bày rõ plan này và BẮT BUỘC lưu lại vào một file (ví dụ: .agents/current_plan.md). Trong quá trình thực thi, Agent phải liên tục cập nhật trạng thái (check-off) các bước đã hoàn thành trong file này để giám sát tiến độ, tránh việc quên hoặc lặp lại công việc.
+```
+[User Request] ──> [Lead Orchestrator]
+                          │
+  ┌───────────────────────┴───────────────────────┐
+  ▼                                               ▼
+[VÒNG LẶP 1: KẾ HOẠCH & DUYỆT (Read-Only)]     [VÒNG LẶP 2: THỰC THI & CHẤT LƯỢNG CAO]
+1. planner_agent                                1. Sau khi Plan có "APPROVED":
+   - Khảo sát codebase, roadmap.md                 - backend_coder_agent & frontend_coder_agent (Song song)
+   - Lập plan chi tiết vào current_plan.md         2. Đảm bảo chất lượng chuyên sâu (Quality Gates):
+         │                                         - db_guardian_agent (Thẩm định Schema & Migrations)
+         ▼                                         - test_generator_agent (Sinh unit & edge-case tests)
+2. plan_critic_agent                               - code_auditor_agent (Audit PBAC, OWASP, Clean Code)
+   - Phản biện rủi ro kiến trúc, PBAC                     └──> CHỈ thông qua khi "AUDIT_PASSED"
+   - CHỈ thông qua khi "APPROVED"                  3. result_critic_agent
+                                                   - Chạy test, type-check (tsc), lint, build qua RTK
+                                                   - CHỈ hoàn tất khi phán quyết "PASSED"
+```
 
-### Bước 2: Phản biện & Kiểm chứng Kế hoạch (Critique & Verification)
-- **Đánh giá rủi ro (Critique)**: Tự đóng vai trò phản biện để xem xét Plan có vi phạm kiến trúc (architecture), rò rỉ dữ liệu, hay gây lỗi hiệu năng (OOM/N+1) hay không.
-- **Đánh giá bảo mật & phân quyền**: Kiểm tra phân quyền (PBAC), phạm vi dữ liệu tổ chức (tenant boundaries), và giới hạn kết nối an toàn.
-- Nếu phát hiện rủi ro, mâu thuẫn hoặc lỗ hổng, Agent BẮT BUỘC phải dừng lại, điều chỉnh Kế hoạch và thông báo trước khi code.
+### Chi tiết các bước điều phối:
+1. **Bước 1 - Lập kế hoạch (`planner_agent`)**: Đọc code thực tế, đồng bộ `roadmap.md`, lập step-by-step plan vào `.agents/current_plan.md`.
+2. **Bước 2 - Phản biện kế hoạch (`plan_critic_agent`)**: Red Team review theo `checklists/architecture-review.md`. Nếu phát hiện rủi ro -> Yêu cầu sửa; Đạt an toàn -> Cấp `APPROVED`.
+3. **Bước 3 - Thực thi song song (`backend_coder_agent` & `frontend_coder_agent`)**: Code độc lập theo nguyên tắc **Contract-First**, vùng file loại trừ lẫn nhau (Collision-Free).
+4. **Bước 4 - Thẩm định chất lượng chuyên sâu (`db_guardian_agent`, `test_generator_agent`, `code_auditor_agent`)**: Rà soát an toàn DB, sinh test bao phủ edge cases, kiểm toán bảo mật PBAC và Clean Code theo `checklists/code-audit.md` -> Cấp `AUDIT_PASSED`.
+5. **Bước 5 - Kiểm chứng & Nghiệm thu (`result_critic_agent`)**: Chạy test thực tế qua RTK, đối chiếu `checklists/post-implementation.md`, dọn dẹp rác và cấp `PASSED`.
 
-### Bước 3: Thực thi (Execution)
-- **Viết Code**: Tuân thủ tuyệt đối quy định kiến trúc: Domain first, Service data sovereignty (không query chéo DB).
-- **Backend & Frontend**: Backend xử lý toàn bộ logic và phân quyền (PBAC). Client-side (Frontend) chỉ dùng để nâng cao UX, không mang tính uỷ quyền (non-authoritative).
-- **UI/UX & CSS Layout (Bắt buộc)**: Giữ nguyên tính thẩm mỹ và tuân thủ chặt chẽ các nguyên tắc CSS Grid/Flexbox để tránh vỡ giao diện:
-  - LUÔN LUÔN thêm `min-w-0` vào các thẻ con trực tiếp của `flex` hoặc `grid` container nếu bên trong có chứa text dài hoặc thẻ con có thể phình to. Điều này giúp container có thể thu hẹp lại (shrink) đúng với kích thước thật thay vì tràn ra ngoài màn hình (overflow).
-  - LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không có dấu cách (như API Key, Token, ID, URL) để ép text tự động xuống dòng và không đâm xuyên qua các card/container.
-  - Sử dụng `truncate` hoặc `line-clamp-x` đúng cách ở các thẻ `Title`/`Description` để cắt chữ nếu quá dài.
-  - **Fluid Layout**: Hạn chế sử dụng các class giới hạn chiều rộng cứng (như `max-w-5xl`, `max-w-[1400px]`) ở các trang Dashboard lớn. Hãy ưu tiên dùng `w-full flex-1` để nội dung luôn bám sát theo kích cỡ màn hình cha, tránh để lại các mảng khoảng trắng (whitespace) dư thừa quá lớn trên các màn hình độ phân giải cao.
-  - **Quy định sử dụng Sheet vs Dialog (Modal)**: 
-    - **Dùng `<Sheet>` (Trượt từ cạnh phải màn hình):** BẮT BUỘC dùng cho các form dài, cấu hình chi tiết, phức tạp (ví dụ: Cấu hình Endpoint API, Flow builder), hoặc các dữ liệu cần đối chiếu song song với màn hình chính. Sheet cung cấp không gian rộng rãi (như `sm:max-w-xl` hoặc `w-[600px]`) và scroll dọc tự nhiên, không làm ngợp người dùng.
-    - **Dùng `<Dialog>` (Hiển thị giữa màn hình):** CHỈ dùng cho các tương tác ngắn, đòi hỏi sự quyết định tức thời như: Xác nhận Xóa, Cảnh báo, hoặc form cực ngắn (1-3 input). TUYỆT ĐỐI KHÔNG nhồi nhét form cấu hình dài, nhiều tab vào Dialog vì sẽ gây chật chội, khó kéo thả và mất bối cảnh (context).
-- **Quản lý file `.proto` (gRPC)**: BẤT KỲ khi nào thao tác sửa đổi file `.proto`, Agent BẮT BUỘC phải sử dụng công cụ an toàn (ghi đè toàn bộ hoặc multi_replace, tuyệt đối KHÔNG cắt ghép chuỗi bằng script dễ gây mất ký tự). Ngay sau khi sửa, PHẢI kiểm tra kỹ cú pháp đóng mở block `{ }` và bắt buộc chạy thử/build lại microservice tương ứng để xác nhận bộ tải gRPC đọc được file (không bị lỗi `illegal token` hoặc `InvalidProtoDefinitionException`).
+---
 
-### Bước 4: Chạy kiểm chứng & Tự sửa lỗi (Test Execution & Self-Correction)
-- Sau khi viết code, BẮT BUỘC dùng lệnh (un_command để build, start app, hoặc chạy test) để verify logic vừa thực hiện.
-- **Vòng lặp khắc phục & Chống thử mù quáng (Anti-thrashing)**: Nếu gặp lỗi, Agent phải tự động đọc log và sửa lỗi. Tuy nhiên, nếu một lỗi lặp lại (hoặc không giải quyết được) sau 2-3 lần thử, Agent PHẢI dừng việc "thử sai", lùi lại để đọc kỹ log và phân tích nguyên nhân gốc rễ (root cause), hoặc giải trình rủi ro và xin ý kiến người dùng. Tuyệt đối không sửa mù quáng theo cảm tính.
-- **Kiểm tra hồi quy (Regression Check)**: Tuyệt đối không phá hỏng các tính năng đã hoàn thành trong Roadmap. Bắt buộc phải chạy lại toàn bộ test suite (hoặc tự động build/kiểm tra lại các endpoints bị ảnh hưởng) trước khi kết luận thành công.
+## 3. Ranh giới kiến trúc bất biến
+1. **Domain First & Service Data Sovereignty**: Logic nghiệp vụ là trung tâm; một Service tuyệt đối KHÔNG query trực tiếp Database của Service khác. Giao tiếp liên service phải qua gRPC hoặc message broker.
+2. **Smart Backend & Least Data**: Mọi validation, PBAC, tenant boundary xử lý tại Backend. Chỉ trả về đúng trường dữ liệu cần thiết.
+3. **Phân vùng Coder Loại trừ Lẫn nhau (Collision-Free)**:
+   - Backend Coder: `apps/api-gateway/**`, `apps/*-service/**`, `prisma/**`, `libs/**`. (Cấm sửa Frontend).
+   - Frontend Coder: `apps/admin_khcn/**`, `apps/portal-goverment/**`, `packages/ui/**`. (Cấm sửa Backend).
+4. **Tham chiếu Quy chuẩn Chuyên sâu (Progressive Disclosure)**:
+   - Quy chuẩn UI/UX, CSS `min-w-0`, Sheet vs Dialog, BaseURL API: [rules/frontend.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/frontend.md)
+   - Quy chuẩn gRPC .proto & An toàn hợp đồng: [rules/grpc.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/grpc.md)
+   - Chi tiết Subagents: [subagents/README.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/subagents/README.md)
+   - Tối ưu Token với RTK CLI (tiết kiệm 60-90%): [rules/antigravity-rtk-rules.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/antigravity-rtk-rules.md)
+   - Bộ Checklists kiểm định: [checklists/](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/checklists/)
 
-### Bước 5: Kiểm duyệt & Dọn rác (Quality Gate & Cleanup)
-- **Dọn rác (Bắt buộc)**: Quét lại toàn bộ các file vừa sửa. Xóa mọi imports thừa, biến không dùng, logs (console.log, debugger), mã giả tạm thời.
-- **Format**: Đảm bảo code được format chuẩn. Thêm JSDoc cho các logic phức tạp (ngôn ngữ JSDoc viết bằng Tiếng Việt có dấu).
-- **Verify Lần Cuối**: Chạy linter, type checks (nếu có thể) tương xứng với mức độ rủi ro.
-- **Cập nhật Roadmap & Plan (Tracking Strictness)**: 
-  - BẮT BUỘC phải cập nhật lại file oadmap.md và .agents/current_plan.md (đánh dấu hoàn thành [x], thêm ghi chú, v.v.) NGAY LẬP TỨC sau khi hoàn thành bất kỳ chức năng nào. 
-  - TUYỆT ĐỐI không được bỏ sót các checkbox [ ] của những task đã thực sự được code xong (như Frontend UI, Cleanup, QA). Phải luôn rà soát (cross-check) lại toàn bộ file current_plan.md và oadmap.md một lần cuối cùng trước khi báo cáo cho user để đảm bảo không có Task nào bị "lọt lưới" đánh dấu.
-- **Cập nhật Tài liệu (Documentation)**: Khi hoàn thành một tính năng API, model hay service mới, ngoài việc đánh dấu trên Roadmap, Agent bắt buộc phải cập nhật tài liệu kỹ thuật liên quan (ví dụ: file README, Swagger, .http files, hoặc thư mục docs) trước khi kết thúc.
-
-## 3. Ranh giới Kiến trúc không thỏa hiệp
-1. **Domain first**: Framework không định nghĩa model nghiệp vụ.
-2. **Quyền sở hữu dữ liệu (Service data sovereignty)**: Một Service tuyệt đối không được truy cập trực tiếp vào Database của Service khác.
-3. **Smart Backend**: Mọi validation, quyền hạn (PBAC), giới hạn tổ chức đều phải verify trên Server.
-4. **Least Data**: Chỉ truy vấn (query) và trả về (return) đúng những trường (fields) cần thiết cho use case, chống rò rỉ dữ liệu nhạy cảm.
-5. **BaseURL & API Endpoint Routing (Bắt buộc cho Frontend)**:
-   - Tại `admin_khcn`: `apiClient` và `serverFetch` đã có `baseURL = "/api/v1/admin"`. TUYỆT ĐỐI KHÔNG được thêm tiền tố `/admin` hoặc `/api/v1/admin` vào chuỗi URL khi gọi API (ví dụ: dùng `apiClient.get('/integration/routes')`, KHÔNG ĐƯỢC dùng `apiClient.get('/admin/integration/routes')` hay `apiClient.get('/api/v1/admin/integration/routes')` sẽ dẫn tới URL đúp `.../admin/admin/...` gây 404).
-   - Tại `portal-goverment`: `apiClient` đã có `baseURL = "/api/v1"`. TUYỆT ĐỐI KHÔNG được thêm `/api/v1` vào chuỗi URL.
-   - Khi tham chiếu controller backend (ví dụ `@Controller('admin/integration')`), Agent PHẢI nhận thức rõ NestJS global prefix là `api/v1`, controller path là `admin/integration`, do đó toàn bộ route là `/api/v1/admin/integration/*`. Vì `apiClient` của `admin_khcn` đã trỏ vào `/api/v1/admin`, phần path ở frontend CHỈ ĐƯỢC LÀ `/integration/*`.
+---
 
 ## 4. Báo cáo Thực thi (Execution Report)
-Kết thúc bất kỳ thay đổi nào, Agent phải xuất ra một báo cáo xác nhận theo định dạng sau:
+Kết thúc bất kỳ tác vụ nào, Lead Orchestrator bắt buộc xuất báo cáo nghiệm thu theo định dạng:
 
-`markdown
+```markdown
 ## Báo cáo Thực thi Antigravity
-- **Bước 1 - Lên Kế Hoạch (Planning):** [Xác nhận đã lập kế hoạch các bước & đối chiếu roadmap]
-- **Bước 2 - Phản biện & Kiểm chứng (Critique):** [Các rủi ro đã xét và giải quyết]
-- **Bước 3 & 4 - Thực Thi & Kiểm thử (Execution & Test):** [Lệnh đã chạy để test, lỗi đã tự fix nếu có]
-- **Bước 5 - Dọn rác, Roadmap & Tài liệu:** [Xác nhận đã xóa code thừa, cập nhật roadmap.md và các tài liệu kỹ thuật]
-`
-Mọi thông tin trong báo cáo phải là SỰ THẬT (không ngụy tạo kết quả test hay kiểm chứng).
+- **Bước 1 - Lên Kế Hoạch (Planning):** [Xác nhận đã lập kế hoạch & đối chiếu roadmap.md, current_plan.md]
+- **Bước 2 - Phản biện & Kiểm chứng (Critique):** [Phán quyết APPROVED từ plan_critic_agent, các rủi ro đã triệt tiêu]
+- **Bước 3 & 4 - Thực Thi & Kiểm thử (Execution & Test):** [Xác nhận Coder hoàn thành, lệnh test/build đã chạy và phán quyết PASSED từ result_critic_agent]
+- **Bước 5 - Dọn rác, Roadmap & Tài liệu:** [Xác nhận đã dọn rác, cập nhật roadmap.md, current_plan.md, execution_log.md]
+```
 
-## 5. Nhật ký & Quản lý tri thức (Execution Log & Knowledge Base)
-Để tránh lặp lại các lỗi đã giải quyết và tối ưu hóa thời gian xử lý, Agent phải tuân thủ:
-- **Lưu log các trường hợp đã xử lý**: Mọi bugs phức tạp đã được fix, các quyết định quan trọng về kiến trúc, cấu hình hoặc các workaround BẮT BUỘC phải được lưu lại vào một file nhật ký (ví dụ: .agents/execution_log.md hoặc thư mục knowledge/).
-- **Tra cứu trước khi thực hiện**: Trước khi bắt tay vào fix một lỗi hoặc xử lý một logic mới, Agent nên chủ động tìm kiếm và kiểm tra lại các file log/knowledge này xem vấn đề tương tự đã từng được giải quyết hay chưa, nhằm tái sử dụng giải pháp và tránh đi vào vết xe đổ.
+---
+
+## 5. Quản lý Tri thức (Execution Log)
+Các lỗi phức tạp đã fix, quyết định kiến trúc quan trọng bắt buộc phải lưu vết vào [.agents/execution_log.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_log.md) để tra cứu tái sử dụng, tránh lặp lại lỗi cũ.

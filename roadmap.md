@@ -4,6 +4,51 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Feature] Tích hợp Bộ 3 Subagent Nâng cao Chất lượng Code: Code Auditor, Test Generator, DB Guardian (11/10/2026)**
+  - **Tác vụ**: Bổ sung 3 Subagent chuyên sâu để nâng chất lượng code lên chuẩn Enterprise: `code_auditor_agent` (Soi diff tĩnh, PBAC, OWASP, Clean Code), `test_generator_agent` (Tự động sinh Unit/Integration Test cho edge-cases), và `db_guardian_agent` (Kiểm soát Prisma additive migrations, chống vỡ Schema, bắt N+1 query).
+  - **Chi tiết**: Đã đăng ký thành công cả 3 Subagent trong runtime, hoàn thiện 3 file cấu hình `.agents/subagents/`, tạo checklist `code-audit.md`, nâng cấp quy trình điều phối Enhanced Dual-Loop trong `AGENTS.md` và `rules/00-core.md`.
+  - **Kiểm chứng**: Cả 3 Subagent đã được đăng ký và sẵn sàng kích hoạt trong runtime; toàn bộ file cấu hình lưu chuẩn UTF-8 (không BOM).
+
+- [x] **[Feature] Tích hợp RTK (Rust Token Killer) vào Hệ thống AI Agents (11/10/2026)**
+  - **Tác vụ**: Tích hợp CLI proxy `rtk` (Rust Token Killer) từ repository `rtk-ai/rtk` để nén và giảm 60–90% token output từ các lệnh terminal (`git`, `npm`, `tsc`, `docker`, `cargo`, `test`).
+  - **Chi tiết**: Cài đặt binary `rtk.exe` (v0.51.0), thiết lập plugin `.agents/plugins/rtk/`, cấu hình quy tắc `.agents/rules/antigravity-rtk-rules.md`, cập nhật `AGENTS.md` và commands `test.md`, `implement.md`.
+  - **Kiểm chứng**: `rtk --version` (v0.51.0), `rtk git status` hoạt động chuẩn xác, `rtk gain` xác nhận tiết kiệm 44.2% token ở lệnh đầu tiên.
+
+- [x] **[Feature] Khởi tạo Hệ thống 4 Subagent Chuyên Biệt cho Quy Trình Phát Triển Phần Mềm (11/10/2026)**
+  - **Tác vụ**: Khởi tạo và thiết lập 4 subagents độc lập trong runtime: `planner_agent`, `plan_critic_agent`, `coder_agent`, `result_critic_agent`.
+  - **Chi tiết**: Phân tách ranh giới quyền hạn (Read-only vs Write/Command), tích hợp quy chuẩn `AGENTS.md` và skill `critical-review`, lưu trữ tài liệu quy chuẩn vào `.agents/subagents/README.md`.
+  - **Kiểm chứng**: Cả 4 subagent đã được đăng ký thành công trong Antigravity engine và sẵn sàng điều phối.
+
+- [x] **[Architecture & Docs] Đồng bộ hóa toàn bộ thư mục .agents theo cấu trúc 4 Subagent (11/10/2026)**
+  - **Tác vụ**: Cập nhật toàn bộ các file README, commands, checklists, và rules trong `.agents/` để liên kết chính xác với vai trò và quyền hạn của 4 Subagent.
+  - **Chi tiết**: Điều chỉnh `README.md`, `rules/00-core.md`, thư mục `commands/` (`plan`, `review`, `implement`, `test`, `analyze`, `fix`), và thư mục `checklists/` (`pre-implementation`, `architecture-review`, `post-implementation`).
+  - **Kiểm chứng**: Toàn bộ hệ thống tài liệu và checklists đã phân vai và liên kết đồng bộ 100% với 4 Subagents.
+
+- [x] **[Feature] Thiết lập Coder Subagent Tự Động Thực Thi Code từ Plan Đã Duyệt (11/10/2026)**
+  - **Tác vụ**: Nâng cấp và cấu hình chuyên biệt `coder_agent` / `auto_coder_agent` để tự động hóa toàn bộ việc chuyển tiếp từ Kế hoạch đã `APPROVED` sang viết mã nguồn.
+  - **Chi tiết**: Nâng cấp System Prompt cho `coder_agent` trong runtime, tạo file cấu hình `.agents/subagents/coder_agent.md`, thiết lập cơ chế tự động đọc `.agents/current_plan.md` và thực thi tuần tự mọi file mà không cần dừng lại hỏi.
+  - **Kiểm chứng**: Cấu hình `auto_coder_agent` đã nạp thành công và có file cấu hình minh bạch tại `.agents/subagents/coder_agent.md`.
+
+- [x] **[Feature] Tách Coder thành 2 Subagent Chuyên Biệt: Backend Coder & Frontend Coder chạy song song (11/10/2026)**
+  - **Tác vụ**: Khởi tạo và thiết lập 2 subagents viết code riêng biệt: `backend_coder_agent` và `frontend_coder_agent` có khả năng thực thi song song sau khi kế hoạch được duyệt.
+  - **Chi tiết**: Phân chia phạm vi ranh giới rõ ràng (Backend quản lý services, DB, gRPC; Frontend quản lý UI, CSS, routing). Tạo các file cấu hình tương ứng trong `.agents/subagents/` và cập nhật quy trình điều phối.
+  - **Kiểm chứng**: Cả 2 subagent đã được đăng ký thành công trong runtime và liên kết với file cấu hình chi tiết tại `.agents/subagents/backend_coder_agent.md` và `frontend_coder_agent.md`.
+
+- [x] **[Architecture & Rules] Thiết lập Cơ Chế Chống Xung Đột Song Song (Conflict Prevention Protocol) trong .agents (11/10/2026)**
+  - **Tác vụ**: Cập nhật toàn bộ các file rules, commands, checklists, và subagents để thiết lập ranh giới loại trừ lẫn nhau (Mutually Exclusive File Boundaries) và quy chuẩn Contract-First.
+  - **Chi tiết**: Ngăn chặn 100% nguy cơ ghi đè chéo file giữa `backend_coder_agent` và `frontend_coder_agent`, phân tách rõ task tracking trong `current_plan.md`, và bổ sung checklist kiểm duyệt rủi ro xung đột.
+  - **Kiểm chứng**: Toàn bộ hệ thống rules, commands, checklists đã thiết lập ranh giới loại trừ lẫn nhau, kiểm soát xung đột file 100%.
+
+- [x] **[Optimization & Refactor] Tinh gọn AGENTS.md theo Kiến trúc Multi-Agent mới (11/10/2026)**
+  - **Tác vụ**: Tái cấu trúc file `AGENTS.md`, loại bỏ các đoạn mô tả chi tiết trùng lặp của cấu trúc cũ (chuyển sang nạp theo nhu cầu qua các file rules chuyên biệt), tập trung vào nhiệm vụ Lead Orchestrator và điều phối Dual-Loop.
+  - **Chi tiết**: Giảm dung lượng `AGENTS.md` từ 14KB xuống dưới 5.8KB để tiết kiệm ~60% context tokens nạp tự động ở mỗi lượt chat mà vẫn bảo toàn 100% các nguyên tắc cốt lõi.
+  - **Kiểm chứng**: File `AGENTS.md` mới súc tích, lưu chuẩn UTF-8 không BOM, các quy tắc chi tiết được bảo toàn trong `rules/frontend.md` và `rules/grpc.md`.
+
+- [x] **[Feature] Kết nối Dữ liệu Thật Toàn diện cho Trung tâm Báo cáo (/admin/services/reports) (11/10/2026)**
+  - **Tác vụ**: Loại bỏ hoàn toàn mock/dummy data, kết nối dữ liệu thật từ các dịch vụ HRM, Document, Posts vào Trung tâm Báo cáo.
+  - **Chi tiết**: Sửa lỗi bóc tách response trong `features/reports/api/index.ts`, khởi tạo 4 cấu hình báo cáo thực tế vào CSDL `admin_report`, xử lý sinh Snapshot và chạy báo cáo thật trong `report-service`, nâng cấp `ReportViewer` vẽ biểu đồ động (Bar, Line, Pie) từ Snapshot thật và cho phép xuất file CSV thật.
+  - **Kiểm chứng**: Trực tiếp kiểm thử trình duyệt trên `http://113.184.220.82/admin/services/reports`, xác nhận hiển thị chính xác 4 báo cáo thật, chạy trích xuất 27 nhiệm vụ thật từ HRM, vẽ biểu đồ Bar/Pie/Line theo dữ liệu thật 100%, xuất file CSV/Excel thành công.
+
 - [x] **[Hotfix & Architecture] Loại bỏ triệt để tiền tố /admin dư thừa & Thiết lập phòng vệ chống tái diễn (11/10/2026)**
   - **Vấn đề**: Giao diện Gateway Manager gọi lỗi `Cannot GET /api/v1/admin/admin/integration/routes` do URL bị nối đúp tiền tố `/admin`. Ngoài ra một số API khác (AI Assistants, Task Report, Theme, Translation) cũng bị chèn dư thừa tiền tố `/api/v1/admin` hoặc `/admin`.
   - **Khắc phục**: 

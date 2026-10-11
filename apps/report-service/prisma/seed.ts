@@ -359,7 +359,426 @@ async function main() {
     },
   });
 
-  console.log('✅ Đã nạp thành công 4 Report Templates và 12 Widgets động!');
+  // 5. Seed Report Definitions cho V2 Dynamic Report Workspace
+  await prisma.reportDefinition.deleteMany({});
+
+  await prisma.reportDefinition.create({
+    data: {
+      code: 'REP_HRM_TASKS',
+      name: 'Báo cáo Tổng hợp Quản lý Công việc & Nhiệm vụ',
+      description:
+        'Thống kê chi tiết 27 nhiệm vụ phân công, theo dõi tiến độ, cơ cấu trạng thái và xếp loại theo phòng ban tại Sở KH&CN.',
+      version: 1,
+      configuration: {
+        version: 1,
+        sources: [
+          {
+            id: 'HRM_TASK_STATS',
+            endpoint: 'HRM_TASK_STATS',
+            name: 'Thống kê nhiệm vụ',
+            upstream: 'hrm-service',
+            path: '/admin/reports/tasks',
+            fields: [
+              'id',
+              'title',
+              'status',
+              'priority',
+              'progress',
+              'departmentName',
+              'assigneeName',
+              'isOverdue',
+              'isCompleted',
+            ],
+          },
+        ],
+        joins: [],
+        filters: [],
+        columns: [
+          {
+            key: 'id',
+            source: 'HRM_TASK_STATS',
+            field: 'id',
+            type: 'number',
+            label: 'Mã NV',
+            aggregate: 'none',
+          },
+          {
+            key: 'title',
+            source: 'HRM_TASK_STATS',
+            field: 'title',
+            type: 'string',
+            label: 'Tên nhiệm vụ',
+            aggregate: 'none',
+          },
+          {
+            key: 'departmentName',
+            source: 'HRM_TASK_STATS',
+            field: 'departmentName',
+            type: 'string',
+            label: 'Phòng ban',
+            aggregate: 'none',
+          },
+          {
+            key: 'assigneeName',
+            source: 'HRM_TASK_STATS',
+            field: 'assigneeName',
+            type: 'string',
+            label: 'Người phụ trách',
+            aggregate: 'none',
+          },
+          {
+            key: 'status',
+            source: 'HRM_TASK_STATS',
+            field: 'status',
+            type: 'string',
+            label: 'Trạng thái',
+            aggregate: 'none',
+          },
+          {
+            key: 'progress',
+            source: 'HRM_TASK_STATS',
+            field: 'progress',
+            type: 'number',
+            label: 'Tiến độ (%)',
+            aggregate: 'none',
+          },
+          {
+            key: 'isOverdue',
+            source: 'HRM_TASK_STATS',
+            field: 'isOverdue',
+            type: 'string',
+            label: 'Hạn định',
+            aggregate: 'none',
+          },
+        ],
+        groupBy: [],
+        charts: [
+          {
+            type: 'bar',
+            xAxis: 'status',
+            yAxis: 'progress',
+            title: 'Phân bổ Tiến độ theo Trạng thái Nhiệm vụ',
+          },
+          {
+            type: 'pie',
+            xAxis: 'status',
+            yAxis: 'id',
+            title: 'Cơ cấu Trạng thái Nhiệm vụ',
+          },
+          {
+            type: 'line',
+            xAxis: 'departmentName',
+            yAxis: 'progress',
+            title: 'Xu hướng Tiến độ theo Phòng ban',
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.reportDefinition.create({
+    data: {
+      code: 'REP_DOC_STATS',
+      name: 'Báo cáo Lưu chuyển và Xử lý Văn bản Hành chính',
+      description:
+        'Tổng hợp phân bổ văn bản đến/đi, cơ cấu theo mức độ khẩn và kết quả giải quyết văn bản hành chính công.',
+      version: 1,
+      configuration: {
+        version: 1,
+        sources: [
+          {
+            id: 'DOC_STATS',
+            endpoint: 'DOC_STATS',
+            name: 'Thống kê văn bản',
+            upstream: 'document-service',
+            path: '/admin/documents/stats',
+            fields: [
+              'id',
+              'documentNumber',
+              'abstract',
+              'status',
+              'isIncoming',
+              'urgency',
+              'securityLevel',
+              'pageCount',
+            ],
+          },
+        ],
+        joins: [],
+        filters: [],
+        columns: [
+          {
+            key: 'id',
+            source: 'DOC_STATS',
+            field: 'id',
+            type: 'number',
+            label: 'ID',
+            aggregate: 'none',
+          },
+          {
+            key: 'documentNumber',
+            source: 'DOC_STATS',
+            field: 'documentNumber',
+            type: 'string',
+            label: 'Số hiệu văn bản',
+            aggregate: 'none',
+          },
+          {
+            key: 'abstract',
+            source: 'DOC_STATS',
+            field: 'abstract',
+            type: 'string',
+            label: 'Trích yếu',
+            aggregate: 'none',
+          },
+          {
+            key: 'isIncoming',
+            source: 'DOC_STATS',
+            field: 'isIncoming',
+            type: 'string',
+            label: 'Loại văn bản',
+            aggregate: 'none',
+          },
+          {
+            key: 'status',
+            source: 'DOC_STATS',
+            field: 'status',
+            type: 'string',
+            label: 'Trạng thái',
+            aggregate: 'none',
+          },
+          {
+            key: 'urgency',
+            source: 'DOC_STATS',
+            field: 'urgency',
+            type: 'string',
+            label: 'Độ khẩn',
+            aggregate: 'none',
+          },
+        ],
+        groupBy: [],
+        charts: [
+          {
+            type: 'pie',
+            xAxis: 'urgency',
+            yAxis: 'id',
+            title: 'Tỷ lệ Văn bản theo Mức độ Khẩn',
+          },
+          {
+            type: 'bar',
+            xAxis: 'status',
+            yAxis: 'id',
+            title: 'Phân bố Văn bản theo Tình trạng Xử lý',
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.reportDefinition.create({
+    data: {
+      code: 'REP_POST_STATS',
+      name: 'Báo cáo Hoạt động Cổng Thông tin & Bài viết',
+      description:
+        'Thống kê xuất bản tin bài, cơ cấu bài viết theo chuyên mục khoa học công nghệ và lượt xem truy cập.',
+      version: 1,
+      configuration: {
+        version: 1,
+        sources: [
+          {
+            id: 'POST_STATS',
+            endpoint: 'POST_STATS',
+            name: 'Thống kê bài viết',
+            upstream: 'posts-service',
+            path: '/admin/posts/stats',
+            fields: [
+              'id',
+              'title',
+              'categoryName',
+              'status',
+              'viewCount',
+              'authorName',
+              'publishedAt',
+            ],
+          },
+        ],
+        joins: [],
+        filters: [],
+        columns: [
+          {
+            key: 'id',
+            source: 'POST_STATS',
+            field: 'id',
+            type: 'number',
+            label: 'ID',
+            aggregate: 'none',
+          },
+          {
+            key: 'title',
+            source: 'POST_STATS',
+            field: 'title',
+            type: 'string',
+            label: 'Tiêu đề bài viết',
+            aggregate: 'none',
+          },
+          {
+            key: 'categoryName',
+            source: 'POST_STATS',
+            field: 'categoryName',
+            type: 'string',
+            label: 'Chuyên mục',
+            aggregate: 'none',
+          },
+          {
+            key: 'status',
+            source: 'POST_STATS',
+            field: 'status',
+            type: 'string',
+            label: 'Trạng thái',
+            aggregate: 'none',
+          },
+          {
+            key: 'viewCount',
+            source: 'POST_STATS',
+            field: 'viewCount',
+            type: 'number',
+            label: 'Lượt xem',
+            aggregate: 'none',
+          },
+          {
+            key: 'authorName',
+            source: 'POST_STATS',
+            field: 'authorName',
+            type: 'string',
+            label: 'Tác giả',
+            aggregate: 'none',
+          },
+        ],
+        groupBy: [],
+        charts: [
+          {
+            type: 'bar',
+            xAxis: 'categoryName',
+            yAxis: 'viewCount',
+            title: 'Tổng Lượt xem theo Chuyên mục',
+          },
+          {
+            type: 'pie',
+            xAxis: 'status',
+            yAxis: 'id',
+            title: 'Cơ cấu Trạng thái Duyệt Bài viết',
+          },
+          {
+            type: 'line',
+            xAxis: 'title',
+            yAxis: 'viewCount',
+            title: 'Biểu đồ Tương tác theo Tin bài',
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.reportDefinition.create({
+    data: {
+      code: 'REP_EMP_QUALITY',
+      name: 'Báo cáo Đánh giá Năng suất & Chất lượng Cán bộ',
+      description:
+        'Đánh giá tổng hợp điểm chất lượng công việc, tỷ lệ hoàn thành nhiệm vụ của 49 cán bộ công chức thuộc Sở.',
+      version: 1,
+      configuration: {
+        version: 1,
+        sources: [
+          {
+            id: 'EMPLOYEE_QUALITY',
+            endpoint: 'EMPLOYEE_QUALITY',
+            name: 'Đánh giá chất lượng nhân sự',
+            upstream: 'hrm-service',
+            path: '/admin/reports/employee-quality',
+            fields: [
+              'employeeName',
+              'departmentName',
+              'taskCount',
+              'completedCount',
+              'qualityScore',
+              'ranking',
+            ],
+          },
+        ],
+        joins: [],
+        filters: [],
+        columns: [
+          {
+            key: 'employeeName',
+            source: 'EMPLOYEE_QUALITY',
+            field: 'employeeName',
+            type: 'string',
+            label: 'Họ và tên',
+            aggregate: 'none',
+          },
+          {
+            key: 'departmentName',
+            source: 'EMPLOYEE_QUALITY',
+            field: 'departmentName',
+            type: 'string',
+            label: 'Phòng ban',
+            aggregate: 'none',
+          },
+          {
+            key: 'taskCount',
+            source: 'EMPLOYEE_QUALITY',
+            field: 'taskCount',
+            type: 'number',
+            label: 'Tổng nhiệm vụ',
+            aggregate: 'none',
+          },
+          {
+            key: 'completedCount',
+            source: 'EMPLOYEE_QUALITY',
+            field: 'completedCount',
+            type: 'number',
+            label: 'Đã hoàn thành',
+            aggregate: 'none',
+          },
+          {
+            key: 'qualityScore',
+            source: 'EMPLOYEE_QUALITY',
+            field: 'qualityScore',
+            type: 'number',
+            label: 'Điểm chất lượng (100)',
+            aggregate: 'none',
+          },
+          {
+            key: 'ranking',
+            source: 'EMPLOYEE_QUALITY',
+            field: 'ranking',
+            type: 'string',
+            label: 'Xếp loại',
+            aggregate: 'none',
+          },
+        ],
+        groupBy: [],
+        charts: [
+          {
+            type: 'bar',
+            xAxis: 'employeeName',
+            yAxis: 'qualityScore',
+            title: 'Điểm Chất lượng Năng suất Cán bộ',
+          },
+          {
+            type: 'pie',
+            xAxis: 'ranking',
+            yAxis: 'taskCount',
+            title: 'Phân bổ Xếp loại Thi đua',
+          },
+        ],
+      },
+    },
+  });
+
+  console.log(
+    '✅ Đã nạp thành công 4 Report Templates, 12 Widgets và 4 Report Definitions chuẩn CSDL!',
+  );
 }
 
 main()

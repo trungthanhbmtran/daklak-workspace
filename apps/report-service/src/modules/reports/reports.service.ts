@@ -212,8 +212,9 @@ export class ReportsService implements OnModuleInit {
   async runReport(payloadStr: string, _userDataStr: string) {
     try {
       const payload = JSON.parse(payloadStr);
+      const defId = Number(payload.reportDefinitionId || payload.definitionId);
       const definition = await this.prisma.reportDefinition.findUnique({
-        where: { id: Number(payload.reportDefinitionId) },
+        where: { id: defId },
       });
 
       if (!definition) {
@@ -224,8 +225,61 @@ export class ReportsService implements OnModuleInit {
         data: {
           reportDefinitionId: definition.id,
           definitionVersion: definition.version,
-          status: 'QUEUED',
+          status: 'RUNNING',
           organizationId: payload.organizationId,
+          startedAt: new Date(),
+        },
+      });
+
+      // Sinh snapshot dữ liệu thực tế dựa trên nguồn cấu hình
+      const config = definition.configuration as any;
+      let sourceRows: any[] = [];
+      const primarySource = config?.sources?.[0];
+      const sourceCode = primarySource?.endpoint || primarySource?.id || definition.code;
+
+      let targetCode = 'HRM_TASK_STATS';
+      if (definition.code === 'REP_DOC_STATS' || definition.code?.includes('DOC')) {
+        targetCode = 'DOC_STATS';
+      } else if (definition.code === 'REP_POST_STATS' || definition.code?.includes('POST')) {
+        targetCode = 'POST_STATS';
+      } else if (definition.code === 'REP_EMP_QUALITY' || definition.code?.includes('EMP')) {
+        targetCode = 'EMPLOYEE_QUALITY';
+      } else if (definition.code === 'REP_HRM_TASKS' || definition.code?.includes('HRM') || definition.code?.includes('TASK')) {
+        targetCode = 'HRM_TASK_STATS';
+      } else if (sourceCode && sourceCode !== definition.code) {
+        targetCode = sourceCode;
+      }
+
+      const latestSnapshot = await this.prisma.statisticsSnapshot.findFirst({
+        where: { dataSourceCode: targetCode },
+        orderBy: { recordedAt: 'desc' },
+      });
+
+      if (latestSnapshot && Array.isArray(latestSnapshot.data)) {
+        sourceRows = latestSnapshot.data as any[];
+      }
+
+      // Tạo schema từ columns hoặc fields
+      const columns = config?.columns || [];
+      const schema = columns.length > 0
+        ? columns.map((c: any) => ({ key: c.key, label: c.label || c.key, type: c.type || 'string' }))
+        : (primarySource?.fields || []).map((f: string) => ({ key: f, label: f, type: 'string' }));
+
+      await this.prisma.datasetSnapshot.create({
+        data: {
+          runId: run.id,
+          chunkIndex: 0,
+          schema,
+          data: sourceRows,
+        },
+      });
+
+      await this.prisma.reportRun.update({
+        where: { id: run.id },
+        data: {
+          status: 'SUCCEEDED',
+          rowCount: sourceRows.length,
+          endedAt: new Date(),
         },
       });
 
@@ -233,27 +287,36 @@ export class ReportsService implements OnModuleInit {
 
       return {
         success: true,
-        data: JSON.stringify({ runId: run.id }),
-        message: 'Đã đưa báo cáo vào hàng đợi chạy',
+        data: JSON.stringify({ runId: run.id, status: 'SUCCEEDED', rowCount: sourceRows.length }),
+        message: 'Báo cáo đã thực thi thành công',
       };
     } catch (error: any) {
       this.logger.error('Error running report', error?.stack);
-      return { success: false, data: '{}', message: 'Lỗi chạy báo cáo' };
+      return { success: false, data: '{}', message: error?.message || 'Lỗi chạy báo cáo' };
     }
   }
 
   async getReportRunStatus(payloadStr: string, _userDataStr: string) {
     try {
-      const { runId } = JSON.parse(payloadStr);
+      const payload = JSON.parse(payloadStr);
+      const runId = Number(payload.id || payload.runId);
       const run = await this.prisma.reportRun.findUnique({
-        where: { id: Number(runId) },
+        where: { id: runId },
       });
       if (!run) {
         return { success: false, data: '{}', message: 'Không tìm thấy lượt chạy' };
       }
       return {
         success: true,
-        data: JSON.stringify({ status: run.status }),
+        data: JSON.stringify({
+          id: run.id,
+          reportDefinitionId: run.reportDefinitionId,
+          definitionVersion: run.definitionVersion,
+          status: run.status,
+          rowCount: run.rowCount ?? 0,
+          startedAt: run.startedAt,
+          endedAt: run.endedAt,
+        }),
         message: 'Lấy trạng thái chạy thành công',
       };
     } catch (error: any) {
@@ -266,7 +329,7 @@ export class ReportsService implements OnModuleInit {
     try {
       // Tối ưu: Lấy có giới hạn để tránh gRPC Payload Too Large và OOM
       const payload = JSON.parse(payloadStr);
-      const runId = payload.runId;
+      const runId = Number(payload.runId || payload.id);
       const page = payload.page || 1;
       const limit = payload.limit || 500;
 

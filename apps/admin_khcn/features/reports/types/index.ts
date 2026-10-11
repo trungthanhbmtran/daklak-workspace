@@ -65,6 +65,8 @@ export interface ReportDefinition {
   name: string;
   description?: string;
   version: number;
+  ownerId?: number;
+  organizationId?: number;
   configuration: ReportConfigAST;
   createdAt: string;
   updatedAt: string;

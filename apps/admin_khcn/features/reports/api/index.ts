@@ -23,12 +23,21 @@ export const reportKeys = {
   dashboardStats: () => [...reportKeys.all, "dashboardStats"] as const,
 };
 
+/**
+ * Helper an toàn để bóc tách dữ liệu từ Gateway envelope ({ success, data }).
+ */
+function unwrapData<T>(res: any, fallback: T): T {
+  if (res == null) return fallback;
+  if (typeof res === "object" && "data" in res && res.data !== undefined) {
+    return res.data as T;
+  }
+  return res as T;
+}
+
 export const useGetReportCatalog = () => {
   return useQuery({
     queryKey: reportKeys.catalog(),
     queryFn: async () => {
-      // axiosInstance's response interceptor already unwraps AxiosResponse and
-      // returns the Gateway envelope: { success, data }.
       type ReportCatalogItem = ReportSourceDef & { name: string };
       const response = await axiosInstance.get<ApiResponse<ReportCatalogItem[]>>(
         "/reports/catalog",
@@ -48,8 +57,9 @@ export const useGetReportDefinitions = () => {
   return useQuery({
     queryKey: reportKeys.lists(),
     queryFn: async () => {
-      const { data } = await axiosInstance.get("/reports/definitions");
-      return data.data as ReportDefinition[];
+      const res: any = await axiosInstance.get("/reports/definitions");
+      const list = unwrapData<ReportDefinition[]>(res, []);
+      return Array.isArray(list) ? list : [];
     },
   });
 };
@@ -58,8 +68,8 @@ export const useGetReportDefinition = (id: string) => {
   return useQuery({
     queryKey: reportKeys.detail(id),
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/reports/definitions/${id}`);
-      return data.data as ReportDefinition;
+      const res: any = await axiosInstance.get(`/reports/definitions/${id}`);
+      return unwrapData<ReportDefinition>(res, null as any);
     },
     enabled: !!id,
   });
@@ -69,23 +79,35 @@ export const useCreateReportDefinition = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<ReportDefinition>) => {
-      const { data } = await axiosInstance.post(
+      const res: any = await axiosInstance.post(
         "/reports/definitions",
         payload,
       );
-      return data.data;
+      return unwrapData(res, res);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reportKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: reportKeys.dashboardStats() });
     },
   });
 };
 
 export const useRunReport = () => {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { definitionId: number; config: any }) => {
-      const { data } = await axiosInstance.post("/reports/runs", payload);
-      return data.data as { runId: number };
+    mutationFn: async (payload: { definitionId: number; config?: any }) => {
+      const body = {
+        reportDefinitionId: payload.definitionId,
+        definitionId: payload.definitionId,
+        config: payload.config,
+      };
+      const res: any = await axiosInstance.post("/reports/runs", body);
+      const data = unwrapData<any>(res, res);
+      const runId = typeof data === "object" ? (data.runId ?? data.id) : data;
+      return { runId: Number(runId) };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reportKeys.dashboardStats() });
     },
   });
 };
@@ -96,16 +118,20 @@ export const useGetReportRunStatus = (runId: string, enabled = true) => {
   return useQuery({
     queryKey: reportKeys.runStatus(runId),
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/reports/runs/${runId}/status`);
+      const res: any = await axiosInstance.get(`/reports/runs/${runId}/status`);
       setRetryCount((prev) => prev + 1);
-      return data.data as ReportRun;
+      return unwrapData<ReportRun>(res, {
+        id: Number(runId),
+        reportDefinitionId: 0,
+        definitionVersion: 1,
+        status: "RUNNING",
+      });
     },
     enabled: !!runId && enabled,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "QUEUED" || status === "RUNNING") {
-        // Exponential backoff: 2s, 3s, 4.5s, 6.75s... max 10s
-        return Math.min(2000 * Math.pow(1.5, retryCount), 10000);
+        return Math.min(1500 * Math.pow(1.3, retryCount), 6000);
       }
       return false;
     },
@@ -116,16 +142,24 @@ export const useGetDatasetSnapshot = (runId: string) => {
   return useQuery({
     queryKey: reportKeys.snapshot(runId),
     queryFn: async () => {
-      const { data } = await axiosInstance.get(
+      const res: any = await axiosInstance.get(
         `/reports/runs/${runId}/snapshot`,
       );
-      return data.data as DatasetSnapshot;
+      const snapshot = unwrapData<DatasetSnapshot>(res, {
+        schema: [],
+        data: [],
+      });
+      return {
+        schema: Array.isArray(snapshot?.schema) ? snapshot.schema : [],
+        data: Array.isArray(snapshot?.data) ? snapshot.data : [],
+      };
     },
     enabled: !!runId,
   });
 };
 
 export const useAssignReport = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
       templateId: number;
@@ -133,7 +167,7 @@ export const useAssignReport = () => {
       assigneeId: string;
       permissions?: string;
     }) => {
-      const { data } = await axiosInstance.post(
+      const res: any = await axiosInstance.post(
         `/reports/templates/${payload.templateId}/assignments`,
         {
           assigneeType: payload.assigneeType,
@@ -141,7 +175,10 @@ export const useAssignReport = () => {
           permissions: payload.permissions || "VIEW",
         },
       );
-      return data;
+      return unwrapData(res, res);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reportKeys.dashboardStats() });
     },
   });
 };
@@ -150,12 +187,13 @@ export const useGetReportDashboardStats = () => {
   return useQuery({
     queryKey: reportKeys.dashboardStats(),
     queryFn: async () => {
-      const { data } = await axiosInstance.get("/reports/dashboard-stats");
-      return data.data as {
-        totalReports: number;
-        totalRuns: number;
-        totalShared: number;
-        processingRuns: number;
+      const res: any = await axiosInstance.get("/reports/dashboard-stats");
+      const stats = unwrapData<any>(res, {});
+      return {
+        totalReports: Number(stats?.totalReports ?? 0),
+        totalRuns: Number(stats?.totalRuns ?? 0),
+        totalShared: Number(stats?.totalShared ?? 0),
+        processingRuns: Number(stats?.processingRuns ?? 0),
       };
     },
   });
