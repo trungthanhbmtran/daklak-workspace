@@ -47,7 +47,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
       toast.info("Đang xử lý tải lên...");
       const mediaInfo = await uploadFile(selectedFile);
       if (!mediaInfo) throw new Error("Upload thất bại");
-      const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
+      const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/api/v1/admin/media/download/${mediaInfo.id}`;
       await updateComponent.mutateAsync({ id: selectedCompId, status: 'VALID', fileUrl, source: 'UPLOAD' });
       toast.success("Tải tài liệu thành công!");
      

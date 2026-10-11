@@ -13,6 +13,49 @@ const options = {
 const apiClient = axios.create(options);
 // Dedicated transport prevents refresh/logout from recursively entering the interceptor.
 const sessionTransport = axios.create(options);
+
+/**
+ * Tự động loại bỏ tiền tố thừa (/admin hoặc /api/v1/admin) nếu caller vô tình truyền vào,
+ * nhằm triệt tiêu hoàn toàn lỗi 404 do double prefix (.../admin/admin/...).
+ */
+function normalizeUrl(url?: string): string | undefined {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+
+  if (url.startsWith("/api/v1/admin/")) {
+    return url.slice("/api/v1/admin".length);
+  }
+  if (url.startsWith("/api/v1/admin")) {
+    return url.slice("/api/v1/admin".length) || "/";
+  }
+  if (url.startsWith("api/v1/admin/")) {
+    return "/" + url.slice("api/v1/admin/".length);
+  }
+  if (url.startsWith("/admin/")) {
+    return url.slice("/admin".length);
+  }
+  if (url.startsWith("admin/")) {
+    return "/" + url.slice("admin/".length);
+  }
+  if (url === "/admin" || url === "admin") {
+    return "/";
+  }
+  return url;
+}
+
+apiClient.interceptors.request.use((config) => {
+  if (config.url) {
+    config.url = normalizeUrl(config.url);
+  }
+  return config;
+});
+
+sessionTransport.interceptors.request.use((config) => {
+  if (config.url) {
+    config.url = normalizeUrl(config.url);
+  }
+  return config;
+});
 export async function clearBrowserSession() {
   await sessionLifecycle.logout();
 }

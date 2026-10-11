@@ -18,7 +18,7 @@ export const useGetAiAssistants = () => {
   return useQuery({
     queryKey: ['aiAssistants'],
     queryFn: async () => {
-      const res = await apiClient.get<any, ApiResponse<AiAssistant[]>>('/api/v1/admin/ai-assistants');
+      const res = await apiClient.get<any, ApiResponse<AiAssistant[]>>('/ai-assistants');
       return res.data;
     },
   });
@@ -28,7 +28,7 @@ export const useCreateAiAssistant = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { name: string; description?: string; system_prompt: string; is_public: boolean }) => {
-      const res = await apiClient.post<any, ApiResponse<AiAssistant>>('/api/v1/admin/ai-assistants', payload);
+      const res = await apiClient.post<any, ApiResponse<AiAssistant>>('/ai-assistants', payload);
       return res.data;
     },
     onSuccess: () => {
@@ -45,7 +45,7 @@ export const useUpdateAiAssistant = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { id: string; name: string; description?: string; system_prompt: string; is_public: boolean }) => {
-      const res = await apiClient.put<any, ApiResponse<AiAssistant>>(`/api/v1/admin/ai-assistants/${payload.id}`, payload);
+      const res = await apiClient.put<any, ApiResponse<AiAssistant>>(`/ai-assistants/${payload.id}`, payload);
       return res.data;
     },
     onSuccess: () => {
@@ -62,7 +62,7 @@ export const useDeleteAiAssistant = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.delete(`/api/v1/admin/ai-assistants/${id}`);
+      await apiClient.delete(`/ai-assistants/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });
@@ -78,7 +78,7 @@ export const useAddKnowledgeSource = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { assistantId: string; type: string; title: string; content: string }) => {
-      const res = await apiClient.post<any, ApiResponse<any>>(`/api/v1/admin/ai-assistants/${payload.assistantId}/knowledge-sources`, payload);
+      const res = await apiClient.post<any, ApiResponse<any>>(`/ai-assistants/${payload.assistantId}/knowledge-sources`, payload);
       return res.data;
     },
     onSuccess: () => {

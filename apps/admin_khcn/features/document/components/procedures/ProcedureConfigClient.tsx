@@ -64,7 +64,7 @@ export function ProcedureConfigClient() {
       const mediaInfo = await uploadFile(selectedFile);
       if (!mediaInfo) throw new Error("Upload thất bại");
 
-      const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
+      const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/api/v1/admin/media/download/${mediaInfo.id}`;
 
       setComponents(components.map(c => c.id === uploadingCompId ? { ...c, sampleFileUrl: fileUrl } : c));
       toast.success("Đã tải biểu mẫu lên!");

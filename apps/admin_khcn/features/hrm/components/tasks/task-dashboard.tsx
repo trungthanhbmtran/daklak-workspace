@@ -39,7 +39,7 @@ export function TaskDashboard() {
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const { data: result } = await axiosInstance.post('/admin/reports/document/generate', {
+      const { data: result } = await axiosInstance.post('/reports/document/generate', {
         templateName: 'Mau_05_QDKT.docx',
         data: stats
       });

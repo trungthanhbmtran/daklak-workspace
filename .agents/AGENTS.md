@@ -55,6 +55,10 @@ Mỗi khi nhận một tác vụ, Antigravity Agent phải tuân thủ quy trìn
 2. **Quyền sở hữu dữ liệu (Service data sovereignty)**: Một Service tuyệt đối không được truy cập trực tiếp vào Database của Service khác.
 3. **Smart Backend**: Mọi validation, quyền hạn (PBAC), giới hạn tổ chức đều phải verify trên Server.
 4. **Least Data**: Chỉ truy vấn (query) và trả về (return) đúng những trường (fields) cần thiết cho use case, chống rò rỉ dữ liệu nhạy cảm.
+5. **BaseURL & API Endpoint Routing (Bắt buộc cho Frontend)**:
+   - Tại `admin_khcn`: `apiClient` và `serverFetch` đã có `baseURL = "/api/v1/admin"`. TUYỆT ĐỐI KHÔNG được thêm tiền tố `/admin` hoặc `/api/v1/admin` vào chuỗi URL khi gọi API (ví dụ: dùng `apiClient.get('/integration/routes')`, KHÔNG ĐƯỢC dùng `apiClient.get('/admin/integration/routes')` hay `apiClient.get('/api/v1/admin/integration/routes')` sẽ dẫn tới URL đúp `.../admin/admin/...` gây 404).
+   - Tại `portal-goverment`: `apiClient` đã có `baseURL = "/api/v1"`. TUYỆT ĐỐI KHÔNG được thêm `/api/v1` vào chuỗi URL.
+   - Khi tham chiếu controller backend (ví dụ `@Controller('admin/integration')`), Agent PHẢI nhận thức rõ NestJS global prefix là `api/v1`, controller path là `admin/integration`, do đó toàn bộ route là `/api/v1/admin/integration/*`. Vì `apiClient` của `admin_khcn` đã trỏ vào `/api/v1/admin`, phần path ở frontend CHỈ ĐƯỢC LÀ `/integration/*`.
 
 ## 4. Báo cáo Thực thi (Execution Report)
 Kết thúc bất kỳ thay đổi nào, Agent phải xuất ra một báo cáo xác nhận theo định dạng sau:

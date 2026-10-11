@@ -3,7 +3,12 @@ import { serverApiBase } from "./server-api-url";
 
 export async function serverFetch<T>(path: string): Promise<T | null> {
   const baseUrl = serverApiBase();
-  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  let cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  if (cleanPath.startsWith("api/v1/admin/")) {
+    cleanPath = cleanPath.slice("api/v1/admin/".length);
+  } else if (cleanPath.startsWith("admin/")) {
+    cleanPath = cleanPath.slice("admin/".length);
+  }
   const rawUrl = `${baseUrl}/${cleanPath}`;
 
   // Next.js must propagate request/prerender control flow before network error handling.

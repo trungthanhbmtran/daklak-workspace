@@ -4,6 +4,14 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Hotfix & Architecture] Loại bỏ triệt để tiền tố /admin dư thừa & Thiết lập phòng vệ chống tái diễn (11/10/2026)**
+  - **Vấn đề**: Giao diện Gateway Manager gọi lỗi `Cannot GET /api/v1/admin/admin/integration/routes` do URL bị nối đúp tiền tố `/admin`. Ngoài ra một số API khác (AI Assistants, Task Report, Theme, Translation) cũng bị chèn dư thừa tiền tố `/api/v1/admin` hoặc `/admin`.
+  - **Khắc phục**: 
+    1. Cài đặt Request Interceptor tự động chuẩn hóa URL trong `axiosInstance.ts` và logic làm sạch path trong `serverFetch.ts` để triệt tiêu vĩnh viễn nguy cơ lỗi lặp lại.
+    2. Rà soát và loại bỏ sạch sẽ các tiền tố thừa trong mã nguồn (`gateway.api.ts`, `useAiAssistants.ts`, `PersonalAiAssistants.tsx`, `task-dashboard.tsx`, `ThemeService.ts`, v.v.).
+    3. Cập nhật quy tắc bất biến trong `.agents/AGENTS.md` và cẩm nang kinh nghiệm trong `.agents/execution_log.md`.
+  - **Kiểm chứng**: Typecheck và xác thực các endpoint không còn bị double prefix.
+
 - [x] **[Feature] Đồng bộ tự động toàn bộ Router của API Gateway vào CSDL (10/10/2026)**
   - **Tác vụ**: Khai thác (Scrape) mã nguồn để lấy đúng mô hình API thực tế đang chạy trên NestJS Controllers và đẩy vào CSDL GatewayRoute.
   - **Chi tiết**: Viết Node.js script để tự động quét AST (bằng regex) của toàn bộ `apps/api-gateway/src/**/*.controller.ts`. Rút trích ra được hơn 100+ endpoints thực tế đang chạy, tự động cập nhật vào mảng `realRoutes` trong file `seed.ts`, và thực thi seed trên Docker để toàn bộ chúng xuất hiện chính xác trên giao diện API Manager.
@@ -220,3 +228,5 @@ eport-service v?i pi-management.
 
 ### Unplanned Tasks & Hotfixes
 - Phân quyền nghiêm ngặt cho API Gateway: Chuyển đổi mã tài nguyên INTEGRATION (dùng chung cho Workflow) thành API_GATEWAY trên các Controllers của NestJS Backend và file menus.seed.ts. Đảm bảo chỉ những người có quyền System Admin hoặc Org Admin mới thấy được menu và truy xuất được cấu hình.
+
+- Hotfix: Sửa lỗi 403 Forbidden khi Admin cập nhật trạng thái bật/tắt (isActive) API Key và Services. Lý do: PermissionsGuard cũ không đọc được wildcard *.

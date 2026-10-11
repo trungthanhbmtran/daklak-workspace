@@ -97,8 +97,8 @@ export const postsApi = {
   // ─── Translation ──────────────────────────────────────────
   translateTextSync: async (text: string, targetLang: string): Promise<string> => {
     if (!text.trim()) return "";
-    const res = await apiClient.post<any, ApiResponse<{ translated_text: string }>>('/admin/translate/sync', { text, targetLang });
-    return res.data?.translated_text || "";
+    const res = await apiClient.post<any, any>('/translate', { text, targetLang });
+    return res.data?.result?.translated_text || res.data?.translated_text || "";
   },
 
   // ─── Interactions - Comments ──────────────────────────────

@@ -114,7 +114,7 @@ export function PersonalAiAssistants() {
     setIsChatting(true);
     
     try {
-      const res = await apiClient.post<any, ApiResponse<{ reply: string }>>(`/api/v1/admin/ai-assistants/${activeChatAssistant.id}/chat`, {
+      const res = await apiClient.post<any, ApiResponse<{ reply: string }>>(`/ai-assistants/${activeChatAssistant.id}/chat`, {
         message: userMsg
       });
       setChatLog(prev => [...prev, { role: 'assistant', content: res.data.reply }]);

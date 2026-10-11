@@ -10,7 +10,7 @@ export const ThemeService = {
     localStorage.setItem(key, JSON.stringify(data));
     // Placeholder for future API call
     try {
-      await apiClient.post('/api/theme', data);
+      await apiClient.post('/theme', data);
     // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (e) {
       // ignore errors, localStorage already saved

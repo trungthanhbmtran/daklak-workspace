@@ -47,7 +47,7 @@ export function DocumentCabinetClient() {
       // 2. Lưu vào Cabinet qua mutation — tự invalidate cache
       await addFile.mutateAsync({
         fileName: selectedFile.name,
-        fileUrl: mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`,
+        fileUrl: mediaInfo.downloadUrl || mediaInfo.fileUrl || `/api/v1/admin/media/download/${mediaInfo.id}`,
         fileType: selectedFile.name.split(".").pop()?.toLowerCase() || "unknown",
         fileSize: selectedFile.size,
       });
