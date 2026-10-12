@@ -163,8 +163,18 @@ export class ReportsService implements OnModuleInit {
   async getReportDefinitionById(payloadStr: string, _userDataStr: string) {
     try {
       const { id } = JSON.parse(payloadStr);
+      const numId = Number(id);
+      if (!numId || isNaN(numId)) {
+        return { success: false, data: '{}', message: 'ID báo cáo không hợp lệ' };
+      }
       const definition = await this.prisma.reportDefinition.findUnique({
-        where: { id: Number(id) },
+        where: { id: numId },
+        include: {
+          runs: {
+            orderBy: { id: 'desc' },
+            take: 1,
+          },
+        },
       });
       if (!definition) {
         return { success: false, data: '{}', message: 'Không tìm thấy cấu hình báo cáo' };

@@ -65,13 +65,14 @@ export const useGetReportDefinitions = () => {
 };
 
 export const useGetReportDefinition = (id: string) => {
+  const isValidId = !!id && id !== "NaN" && !isNaN(Number(id));
   return useQuery({
     queryKey: reportKeys.detail(id),
     queryFn: async () => {
       const res: any = await axiosInstance.get(`/reports/definitions/${id}`);
       return unwrapData<ReportDefinition>(res, null as any);
     },
-    enabled: !!id,
+    enabled: isValidId,
   });
 };
 

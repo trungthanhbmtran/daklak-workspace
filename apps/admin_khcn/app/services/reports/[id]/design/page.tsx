@@ -11,11 +11,28 @@ import { ReportConfigAST } from '@/features/reports/types';
 import { toast } from 'sonner';
 import { ChevronRight, FileSpreadsheet, RefreshCw } from 'lucide-react';
 
-export default function EditReportDesignPage() {
+interface PageProps {
+  params: Promise<{ id: string }> | { id: string };
+}
+
+export default function EditReportDesignPage(props: PageProps) {
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id as string;
-  const numId = Number(id);
+  const routeParams = useParams<{ id: string }>();
+
+  let rawId = routeParams?.id;
+  if (!rawId && props.params) {
+    try {
+      const resolved = typeof (props.params as any)?.then === 'function'
+        ? React.use(props.params as Promise<{ id: string }>)
+        : (props.params as { id: string });
+      rawId = resolved?.id;
+    } catch {
+      // Fallback to routeParams
+    }
+  }
+
+  const numId = Number(rawId);
+  const id = String(numId || '');
 
   const { data: reportDef, isLoading } = useGetReportDefinition(id);
   const updateMutation = useCreateReportDefinition();

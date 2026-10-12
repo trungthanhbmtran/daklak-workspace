@@ -103,11 +103,17 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const [chartModes, setChartModes] = useState<Record<number, 'bar' | 'line' | 'pie'>>({});
   const pageSize = 20;
 
-  const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(
-    definitionId.toString(),
-  );
+  const validIdStr = definitionId && !isNaN(definitionId) ? definitionId.toString() : '';
+  const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(validIdStr);
   const actualConfig = config || reportDef?.configuration;
   const reportName = reportDef?.name || 'Báo cáo Chi tiết';
+
+  // Khởi tạo runId từ lượt chạy gần nhất trong database nếu có
+  useEffect(() => {
+    if (!runId && (reportDef as any)?.runs?.[0]?.id) {
+      setRunId(String((reportDef as any).runs[0].id));
+    }
+  }, [reportDef, runId]);
 
   const runMutation = useRunReport();
   const { data: runStatus, isLoading: isStatusLoading } = useGetReportRunStatus(
@@ -120,7 +126,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     isCompleted ? runId! : '',
   );
 
-  // Tự động kích hoạt lượt chạy đầu tiên khi mở báo cáo
+  // Tự động kích hoạt lượt chạy đầu tiên nếu báo cáo chưa có bất kỳ lượt chạy nào trong DB
   useEffect(() => {
     let isMounted = true;
     const triggerInitialRun = async () => {
@@ -133,18 +139,25 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           setRunId(result.runId.toString());
         }
       } catch (err) {
-        // Fallback: nếu lỗi mutation, vẫn cho phép người dùng ấn Chạy lại thủ công
+        // Fallback: cho phép người dùng click "Chạy lại" thủ công
       }
     };
 
-    if (!runId && definitionId) {
+    if (
+      !runId &&
+      definitionId &&
+      !isNaN(definitionId) &&
+      !isDefLoading &&
+      reportDef &&
+      (!(reportDef as any)?.runs || (reportDef as any).runs.length === 0)
+    ) {
       triggerInitialRun();
     }
 
     return () => {
       isMounted = false;
     };
-  }, [definitionId]);
+  }, [definitionId, isDefLoading, reportDef, runId, actualConfig]);
 
   const handleRun = async () => {
     try {
@@ -309,13 +322,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 )}
               </div>
               <p className="text-sm font-semibold text-slate-800 mt-0.5">
-                {isStatusLoading || runMutation.isPending
-                  ? 'Đang kết nối hệ thống...'
-                  : runStatus?.status === 'SUCCEEDED'
-                    ? 'Thành công (Dữ liệu đã sẵn sàng)'
-                    : runStatus?.status === 'FAILED'
-                      ? 'Lỗi thực thi'
-                      : 'Đang xử lý trong hàng đợi (Queued)...'}
+                {runMutation.isPending
+                  ? 'Đang khởi tạo lượt chạy...'
+                  : isStatusLoading
+                    ? 'Đang kiểm tra tiến độ...'
+                    : runStatus?.status === 'SUCCEEDED'
+                      ? 'Thành công (Dữ liệu đã sẵn sàng)'
+                      : runStatus?.status === 'FAILED'
+                        ? 'Lỗi thực thi'
+                        : runStatus?.status === 'RUNNING'
+                          ? 'Đang xử lý dữ liệu...'
+                          : runStatus?.status === 'QUEUED'
+                            ? 'Đang xử lý trong hàng đợi (Queued)...'
+                            : isDefLoading
+                              ? 'Đang tải cấu hình báo cáo...'
+                              : !runId
+                                ? 'Chưa có dữ liệu (Nhấn "Chạy lại" để thực thi)'
+                                : 'Đang nạp dữ liệu...'}
               </p>
             </div>
           </div>
