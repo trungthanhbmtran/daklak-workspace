@@ -4,6 +4,15 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[UI/UX & Data Engine] Sửa lỗi Ghép nối Nguồn Dữ liệu (JOIN) và Cấu hình Cột Kết quả trong Trình Thiết kế Báo cáo (12/10/2026)**
+  - **Vấn đề**: Khi tạo/thiết kế báo cáo (`/admin/services/reports/[id]/design` và `/new`), phần "Nguồn Dữ Liệu Đã Chọn" không thể ghép nối do khối JOIN nhanh thiếu logic state và event handlers. Phần "Cột Kết Quả & Biến Đổi Dữ Liệu" hiển thị 0 cột, trắng data do chưa tự động đồng bộ trường từ nguồn và thiếu giao diện Thêm/Sửa nhãn tiếng Việt/Định dạng tính toán.
+  - **Khắc phục**:
+    1. Tự động đồng bộ fields từ nguồn dữ liệu được chọn sang `columns` với nhãn tiếng Việt chuẩn và kiểu dữ liệu phù hợp.
+    2. Nâng cấp khối Ghép nối Nguồn Dữ liệu (JOIN) tương tác trực quan: chọn bảng chính, trường khóa trái, loại JOIN (INNER/LEFT), bảng phụ, trường khóa phải; thêm/xóa phép nối; hiển thị trực quan các liên kết.
+    3. Hoàn thiện khối Cột Kết Quả & Biến Đổi Dữ Liệu: Thêm nút Tự động đồng bộ cột, Thêm cột thủ công qua `<Sheet>`, Sửa trực tiếp nhãn tiếng Việt (`label`), định dạng tính toán (`aggregate`: none, count, sum, avg, min, max), kiểu dữ liệu (`type`), và xóa cột.
+    4. Tăng cường phòng vệ trong `ReportViewer` và `report-service` để tự động suy luận schema từ `rows` nếu cột bị trống, chống triệt để tình trạng trắng bảng kết quả.
+  - **Kiểm chứng**: Typecheck `npx tsc --noEmit` cả admin_khcn và report-service thành công (0 errors), build tối ưu Next.js hoàn tất thành công 100% (81/81 pages prerendered). Không có debug log sót lại, mã hóa UTF-8 không BOM chuẩn xác.
+
 - [x] **[Architecture & Quality] Khôi phục Toàn diện Chất lượng Code & Tốc độ Xử lý (Re-unification & Inviolable Constraints) (12/10/2026)**
   - **Tác vụ**: Khắc phục triệt để tình trạng code hổng ràng buộc và chạy chậm sau khi tách subagents bằng cách tái hợp nhất vào mô hình Single Unified Lead Expert, nạp trực tiếp 7 bộ ràng buộc bắt buộc vào `AGENTS.md`, và tắt hook trễ của RTK.
   - **Chi tiết**: Viết lại `AGENTS.md` đầy đủ các ràng buộc (UI/UX CSS min-w-0, Sheet vs Dialog, BaseURL, Next.js 15, gRPC, Additive Migration, PBAC), tắt pre-tool hook RTK, tối ưu hóa thời gian xử lý về 15-30s với chất lượng cao nhất.

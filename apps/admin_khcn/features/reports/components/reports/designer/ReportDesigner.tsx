@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { ReportConfigAST } from '../../../types';
+import { ReportConfigAST, ColumnDef, ReportSourceDef } from '../../../types';
 import { Button } from '../../../../../components/ui/button';
 import { Badge } from '../../../../../components/ui/badge';
 import { SourceExplorer } from './SourceExplorer';
 import { Canvas } from './Canvas';
 import { ChartBuilder } from './ChartBuilder';
 import { BarChart3, Database, Save, X } from 'lucide-react';
+import { getFriendlyFieldLabel, inferFieldType } from '@/features/reports/utils/fieldHelpers';
+import { toast } from 'sonner';
 
 interface ReportDesignerProps {
   reportId?: number;
@@ -73,6 +75,56 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
 
   const chartCount = config.charts?.length || 0;
   const sourceCount = config.sources?.length || 0;
+
+  const handleAddSource = (source: ReportSourceDef) => {
+    const existingSources = config.sources || [];
+    if (existingSources.some((s) => s.id === source.id)) {
+      toast.info(`Nguồn dữ liệu "${source.name || source.id}" đã có trong mô hình.`);
+      return;
+    }
+
+    const updatedSources = [...existingSources, source];
+    let updatedColumns = [...(config.columns || [])];
+
+    // Tự động đồng bộ các cột từ nguồn mới nếu trường chưa tồn tại
+    if (Array.isArray(source.fields) && source.fields.length > 0) {
+      const existingKeys = new Set(updatedColumns.map((c) => c.key));
+      const newCols: ColumnDef[] = [];
+
+      source.fields.forEach((f: any) => {
+        const fieldName =
+          typeof f === 'string'
+            ? f
+            : f?.name || f?.field || f?.key || f?.path || '';
+        if (fieldName && !existingKeys.has(fieldName)) {
+          existingKeys.add(fieldName);
+          newCols.push({
+            key: fieldName,
+            source: source.id,
+            field: fieldName,
+            label: getFriendlyFieldLabel(fieldName),
+            type: inferFieldType(fieldName),
+            aggregate: 'none',
+          });
+        }
+      });
+
+      if (newCols.length > 0) {
+        updatedColumns = [...updatedColumns, ...newCols];
+      }
+    }
+
+    setConfig({
+      ...config,
+      sources: updatedSources,
+      columns: updatedColumns,
+    });
+    toast.success(
+      `Đã thêm nguồn "${source.name || source.id}" và tự động thiết lập ${
+        source.fields?.length || 0
+      } trường dữ liệu.`,
+    );
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-50 overflow-hidden min-w-0">
@@ -173,11 +225,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
         {/* Left Panel: Source Explorer (Only show in Model tab) */}
         {activeTab === 'model' && (
           <div className="w-1/4 min-w-[260px] max-w-[340px] border-r border-slate-200/80 bg-white overflow-y-auto shadow-sm z-0 shrink-0">
-            <SourceExplorer
-              onAddSource={(source) =>
-                setConfig({ ...config, sources: [...config.sources, source] })
-              }
-            />
+            <SourceExplorer onAddSource={handleAddSource} />
           </div>
         )}
 

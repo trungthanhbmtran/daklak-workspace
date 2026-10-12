@@ -7,6 +7,7 @@ export type ColumnType = "string" | "number" | "boolean" | "mixed";
 export interface ReportSourceDef {
   id: string;
   endpoint: string;
+  name?: string;
   fields: string[];
   upstream?: string;
   path?: string;

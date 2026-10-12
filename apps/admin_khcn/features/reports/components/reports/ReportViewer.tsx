@@ -22,6 +22,7 @@ import {
   Search,
   Settings2,
 } from 'lucide-react';
+import { getFriendlyFieldLabel } from '@/features/reports/utils/fieldHelpers';
 
 interface ReportViewerProps {
   definitionId: number;
@@ -117,7 +118,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const runMutation = useRunReport();
   const { data: runStatus, isLoading: isStatusLoading } = useGetReportRunStatus(runId);
 
-  const isCompleted = runStatus?.status === 'SUCCEEDED';
+  const latestStatus = runStatus?.status || (reportDef as any)?.runs?.[0]?.status;
+  const isCompleted = latestStatus === 'SUCCEEDED';
   const { data: snapshot, isLoading: isSnapshotLoading } = useGetDatasetSnapshot(
     isCompleted ? runId : null,
   );
@@ -168,7 +170,26 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   };
 
   const rows = useMemo(() => snapshot?.data || [], [snapshot]);
-  const schema = useMemo(() => snapshot?.schema || [], [snapshot]);
+  const schema = useMemo(() => {
+    if (snapshot?.schema && Array.isArray(snapshot.schema) && snapshot.schema.length > 0) {
+      return snapshot.schema;
+    }
+    if (actualConfig?.columns && Array.isArray(actualConfig.columns) && actualConfig.columns.length > 0) {
+      return actualConfig.columns.map((c: any) => ({
+        key: c.key || c.field,
+        label: c.label || c.key || c.field,
+        type: c.type || 'string',
+      }));
+    }
+    if (rows.length > 0 && typeof rows[0] === 'object') {
+      return Object.keys(rows[0]).map((k) => ({
+        key: k,
+        label: getFriendlyFieldLabel(k),
+        type: typeof (rows[0] as any)[k] === 'number' ? 'number' : 'string',
+      }));
+    }
+    return [];
+  }, [snapshot, actualConfig, rows]);
 
   // Bộ lọc dữ liệu bảng
   const filteredRows = useMemo(() => {

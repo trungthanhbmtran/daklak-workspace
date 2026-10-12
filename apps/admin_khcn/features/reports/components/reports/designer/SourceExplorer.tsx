@@ -182,22 +182,37 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({
                     {item.fields.length > 6 ? ", …" : ""}
                   </p>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs hover:bg-indigo-50 hover:text-indigo-600 border-slate-200"
-                  onClick={() =>
-                    onAddSource({
-                      id: item.endpoint,
-                      endpoint: item.endpoint,
-                      fields: item.fields,
-                      upstream: item.upstream,
-                      path: item.path,
-                    })
-                  }
-                >
-                  Thêm vào không gian
-                </Button>
+                {(() => {
+                  const previewFields = previews[item.endpoint]?.fields?.map(
+                    (f: any) => f.path,
+                  );
+                  const effectiveFields =
+                    Array.isArray(item.fields) && item.fields.length > 0
+                      ? item.fields
+                      : previewFields && previewFields.length > 0
+                        ? previewFields
+                        : [];
+
+                  return (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs hover:bg-indigo-50 hover:text-indigo-600 border-slate-200"
+                      onClick={() =>
+                        onAddSource({
+                          id: item.endpoint,
+                          endpoint: item.endpoint,
+                          name: item.name || item.endpoint,
+                          fields: effectiveFields,
+                          upstream: item.upstream,
+                          path: item.path,
+                        } as any)
+                      }
+                    >
+                      Thêm vào không gian
+                    </Button>
+                  );
+                })()}
                 {item.upstream && item.path && (
                   <Button
                     variant="outline"

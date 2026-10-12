@@ -285,9 +285,17 @@ export class ReportsService implements OnModuleInit {
 
       // Tạo schema từ columns hoặc fields
       const columns = config?.columns || [];
-      const schema = columns.length > 0
+      let schema = columns.length > 0
         ? columns.map((c: any) => ({ key: c.key, label: c.label || c.key, type: c.type || 'string' }))
         : (primarySource?.fields || []).map((f: string) => ({ key: f, label: f, type: 'string' }));
+
+      if (schema.length === 0 && sourceRows.length > 0 && typeof sourceRows[0] === 'object') {
+        schema = Object.keys(sourceRows[0]).map((k) => ({
+          key: k,
+          label: k,
+          type: typeof (sourceRows[0] as any)[k] === 'number' ? 'number' : 'string',
+        }));
+      }
 
       await this.prisma.datasetSnapshot.create({
         data: {
