@@ -239,13 +239,18 @@ export class DefinitionService {
     const take = Math.min(100, Math.max(1, Number(params.take) || 20));
     const search = params.search?.trim().slice(0, 100);
     
-    const where: any = {};
+    const conditions: any[] = [];
     if (search) {
-      where.OR = [{ name: { contains: search } }, { code: { contains: search } }];
+      conditions.push({
+        OR: [{ name: { contains: search } }, { code: { contains: search } }],
+      });
     }
-    if (params.organizationId) {
-      where.organizationId = params.organizationId;
+    if (params.organizationId && params.organizationId !== "DEFAULT") {
+      conditions.push({
+        OR: [{ organizationId: params.organizationId }, { organizationId: null }],
+      });
     }
+    const where = conditions.length > 0 ? { AND: conditions } : {};
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.processDefinition.findMany({
@@ -257,7 +262,14 @@ export class DefinitionService {
           versions: {
             orderBy: { version: "desc" },
             take: 1,
-            select: { version: true, status: true, createdAt: true, publishedAt: true },
+            select: {
+              version: true,
+              status: true,
+              createdAt: true,
+              publishedAt: true,
+              graph: true,
+              publishedBy: true,
+            },
           },
         },
       }),
@@ -269,7 +281,9 @@ export class DefinitionService {
 
   async getDefinition(code: string, organizationId?: string) {
     const whereClause: any = { code };
-    if (organizationId) whereClause.organizationId = organizationId;
+    if (organizationId && organizationId !== "DEFAULT") {
+      whereClause.OR = [{ organizationId }, { organizationId: null }];
+    }
 
     const def = await this.prisma.processDefinition.findFirst({
       where: whereClause,
@@ -287,7 +301,9 @@ export class DefinitionService {
 
   async getDefinitionById(id: string, organizationId?: string) {
     const whereClause: any = { id };
-    if (organizationId) whereClause.organizationId = organizationId;
+    if (organizationId && organizationId !== "DEFAULT") {
+      whereClause.OR = [{ organizationId }, { organizationId: null }];
+    }
 
     const def = await this.prisma.processDefinition.findFirst({
       where: whereClause,
@@ -301,6 +317,24 @@ export class DefinitionService {
 
     if (!def) throw new NotFoundException(`Process definition id ${id} not found`);
     return def;
+  }
+
+  async deleteProcess(id: string, organizationId?: string) {
+    const whereClause: any = { id };
+    if (organizationId && organizationId !== "DEFAULT") {
+      whereClause.OR = [{ organizationId }, { organizationId: null }];
+    }
+    const def = await this.prisma.processDefinition.findFirst({ where: whereClause });
+    if (!def) throw new NotFoundException(`Process definition ${id} not found`);
+
+    const activeBindings = await this.prisma.processBinding.count({
+      where: { definitionId: id, status: "ACTIVE" },
+    });
+    if (activeBindings > 0) {
+      throw new BadRequestException("Không thể xóa quy trình đang có gắn kết nghiệp vụ (Binding) hoạt động");
+    }
+
+    return this.prisma.processDefinition.delete({ where: { id } });
   }
 
   // ==========================================
@@ -340,20 +374,5 @@ export class DefinitionService {
 
   async deleteBinding(id: string) {
     return this.prisma.workflowBinding.delete({ where: { id } });
-  }
-
-  async deleteProcess(id: string, organizationId?: string) {
-    const whereClause: any = { id };
-    if (organizationId) whereClause.organizationId = organizationId;
-
-    const def = await this.prisma.processDefinition.findFirst({
-      where: whereClause,
-    });
-    if (!def) throw new NotFoundException(`Process definition ${id} not found`);
-
-    return this.prisma.processDefinition.update({
-      where: { id },
-      data: { isActive: false }
-    });
   }
 }

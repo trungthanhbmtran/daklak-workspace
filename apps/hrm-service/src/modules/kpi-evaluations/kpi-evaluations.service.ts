@@ -4,6 +4,8 @@ import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
 import { lastValueFrom } from 'rxjs';
 import { randomUUID } from 'crypto';
+import { TaskKpiService } from '../task-kpi/task-kpi.service';
+import { KpiFormulaSettings, KpiVariables } from '../task-kpi/kpi-calculator.engine';
 import {
   DEFAULT_KPI_FORM_TEMPLATES,
   getTemplateXmlContent,
@@ -19,6 +21,7 @@ export class KpiEvaluationsService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private cache: AppCacheService,
+    private readonly taskKpiService: TaskKpiService,
     @Inject('DOCUMENT_PACKAGE') private documentClient: ClientGrpc,
     @Inject('SYSTEM_CONFIG_PACKAGE') private systemConfigClient: ClientGrpc
   ) { }
@@ -188,25 +191,69 @@ export class KpiEvaluationsService implements OnModuleInit {
     const period = await this.prisma.kpiPeriod.findUnique({ where: { id: periodId } });
     if (!period) throw new RpcException({ message: 'Kỳ đánh giá không tồn tại', code: 3 });
 
-    // 1. Tính toán điểm Công việc Hệ thống
-    let taskScore = 0;
-    
-    // Tìm các công việc hoàn thành trong kỳ
+    // Điểm công việc dùng công thức đang được cấu hình tại màn hình KPI.
+    const periodEndExclusive = new Date(period.endDate);
+    periodEndExclusive.setDate(periodEndExclusive.getDate() + 1);
     const taskParticipants = await this.prisma.taskParticipant.findMany({
       where: {
-        employeeCode: employeeCode,
+        employeeCode,
         participantRole: { in: ['ASSIGNEE', 'COORDINATOR'] },
-        task: {
-          isCompleted: true,
-          completedAt: { gte: period.startDate, lte: period.endDate }
-        }
+        assignedAt: { gte: period.startDate, lt: periodEndExclusive },
+        task: { isDeleted: false },
       },
-      include: { task: true }
+      include: { task: { select: { isCompleted: true, completedAt: true, dueDate: true, progress: true, metadata: true } } },
     });
 
-    for (const tp of taskParticipants) {
-      // Giả sử mỗi công việc hoàn thành được 10 điểm cơ bản
-      taskScore += 10 * ((tp.contributionPercentage || 100) / 100);
+    const domainMetrics = new Map<string, { Q: number; C: number; D: number; qualities: number[] }>();
+    const dayNumber = (date: Date) => Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    for (const participant of taskParticipants) {
+      const task = participant.task;
+      const rawContribution = Number(participant.contributionPercentage ?? 100);
+      const contribution = Number.isFinite(rawContribution) ? Math.min(100, Math.max(0, rawContribution)) / 100 : 1;
+      if (!contribution) continue;
+      const metadata = task.metadata && typeof task.metadata === 'object' && !Array.isArray(task.metadata)
+        ? task.metadata as Record<string, unknown>
+        : {};
+      const domainCode = String(metadata.domainCode || 'GENERIC').trim().toUpperCase();
+      const metrics = domainMetrics.get(domainCode) || { Q: 0, C: 0, D: 0, qualities: [] };
+      const plannedQty = Math.max(0, Number(metadata.plannedQty ?? 1));
+      const difficultyK = Math.max(0, Number(metadata.difficultyK ?? 1));
+      const weightedQuota = (Number.isFinite(plannedQty) ? plannedQty : 1) * (Number.isFinite(difficultyK) ? difficultyK : 1) * contribution;
+      metrics.Q += weightedQuota;
+
+      const completedInPeriod = Boolean(task.isCompleted && task.completedAt && task.completedAt < periodEndExclusive);
+      const progress = completedInPeriod ? 100 : Math.max(0, Math.min(100, Number(task.progress) || 0));
+      metrics.C += weightedQuota * (progress / 100);
+      const referenceDate = completedInPeriod ? task.completedAt! : period.endDate;
+      if (task.dueDate) {
+        const lateDays = Math.max(0, Math.floor((dayNumber(referenceDate) - dayNumber(task.dueDate)) / 86_400_000));
+        metrics.D += lateDays * contribution;
+      }
+
+      const qualityScore = Number(metadata.qualityScore);
+      if (Number.isFinite(qualityScore) && qualityScore >= 0 && qualityScore <= 100) metrics.qualities.push(qualityScore);
+      domainMetrics.set(domainCode, metrics);
+    }
+
+    const settingsResponse = await this.taskKpiService.getTaskKpiSetting();
+    const settings = settingsResponse.data as KpiFormulaSettings;
+    const totalQuota = [...domainMetrics.values()].reduce((sum, metrics) => sum + metrics.Q, 0);
+    let taskScore = 0;
+    if (totalQuota > 0) {
+      for (const [domainCode, metrics] of domainMetrics) {
+        const variables: KpiVariables = {
+          Q: metrics.Q,
+          C: metrics.C,
+          W: 1,
+          D: metrics.D,
+          S: metrics.qualities.length
+            ? metrics.qualities.reduce((sum, score) => sum + score, 0) / metrics.qualities.length
+            : 0,
+        };
+        const score = this.taskKpiService.evaluateTaskScore(variables, settings, domainCode);
+        taskScore += score * (metrics.Q / totalQuota);
+      }
+      taskScore = Number(taskScore.toFixed(2));
     }
 
     // 2. Tính toán điểm LGSP (Trừ điểm nếu lỗi)

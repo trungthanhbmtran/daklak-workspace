@@ -55,15 +55,49 @@ export function UnitScopePanel() {
     }
   }
 
+  const isPartyUnit =
+    detailResponse?.data?.categoryCode === "DANG" ||
+    [
+      "CQ_DANG",
+      "CO_QUAN_DANG",
+      "BAN_DANG",
+      "PHONG_BAN_DANG",
+      "VAN_PHONG_DANG_UY",
+    ].includes(detailResponse?.data?.typeCode || "") ||
+    (code || "").startsWith("BTCTU_") ||
+    (code || "").startsWith("TU_");
+
   // Truyền selectedIds lên server để server sort + đánh dấu
   // Backend sẽ tự động lọc danh sách lĩnh vực theo parentId nếu có
-  const domains = useDomainSearch(domainIds, parentId ?? undefined);
+  const effectiveParentId = parentId ?? (isPartyUnit ? selectedId : undefined);
+  const domains = useDomainSearch(domainIds, effectiveParentId ?? undefined);
 
   // TanStack Query v5: isPending=true khi enabled=false (code rỗng) hoặc chưa fetch xong
   // isDetailPlaceholder=true khi keepPreviousData đang giữ data cũ trong lúc chuyển đơn vị
   // Không dùng early-return để form luôn render ngay, tránh bị ẩn khi chuyển tab
   const isDetailLoading = (isDetailPending || isDetailFetching || isDetailPlaceholder) && !detailResponse;
   const isLoading = isDetailLoading || (!isDetailError && isScopeLoading && !scopeData && !!selectedId);
+
+  const displayedDomainItems = isPartyUnit
+    ? domains.items.filter((item) => {
+        const c = item.code || "";
+        return (
+          c.startsWith("CONG_TAC_") ||
+          c.includes("DANG") ||
+          [
+            "TO_CHUC_XAY_DUNG_DANG",
+            "TO_CHUC_CAN_BO_DANG",
+            "VAN_PHONG_CAP_UY",
+            "XAY_DUNG_DANG",
+            "TUYEN_GIAO",
+            "DAN_VAN",
+            "NOI_CHINH",
+            "KIEM_TRA_GIAM_SAT_DANG",
+            "CO_QUAN_DANG",
+          ].includes(c)
+        );
+      })
+    : domains.items;
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];
@@ -87,9 +121,13 @@ export function UnitScopePanel() {
       {/* ─── Header ─── */}
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold">Phạm vi phụ trách</h3>
+          <h3 className="text-sm font-semibold">
+            {isPartyUnit ? "Lĩnh vực Công tác Đảng" : "Phạm vi phụ trách"}
+          </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Lĩnh vực chuyên môn được giao quản lý
+            {isPartyUnit
+              ? "Nhiệm vụ, lĩnh vực công tác Đảng theo Quy định 137-QĐ/TW của Ban Bí thư"
+              : "Lĩnh vực chuyên môn được giao quản lý"}
           </p>
         </div>
 
@@ -136,7 +174,9 @@ export function UnitScopePanel() {
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
               <Briefcase className="h-4 w-4" />
             </div>
-            <h4 className="text-sm font-semibold">Lĩnh vực chuyên môn</h4>
+            <h4 className="text-sm font-semibold">
+              {isPartyUnit ? "Lĩnh vực Công tác Đảng" : "Lĩnh vực chuyên môn"}
+            </h4>
             {isLoading
               ? <Skeleton className="ml-auto h-5 w-8 rounded-full" />
               : domainIds.length > 0 && (
@@ -158,7 +198,7 @@ export function UnitScopePanel() {
               </div>
             ) : (
               <ScopePicker
-                items={domains.items}
+                items={displayedDomainItems}
                 isFetching={domains.isFetching}
                 q={domains.q}
                 onSearch={domains.setQ}

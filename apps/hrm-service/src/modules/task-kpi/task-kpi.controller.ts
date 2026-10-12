@@ -39,4 +39,21 @@ export class TaskKpiController {
   saveGlobalKpiSettings(data: any) {
     return this.service.upsertTaskKpiSetting(data);
   }
+
+  @GrpcMethod('TaskService', 'PreviewGlobalKpiSettings')
+  previewGlobalKpiSettings(data: any) {
+    let settings: any;
+    try { settings = JSON.parse(data.settingsJson || '{}'); }
+    catch { return { success: true, valid: false, error: 'Cấu hình gửi lên không phải JSON hợp lệ.' }; }
+    return this.service.previewFormula({
+      settings,
+      variables: { Q: data.quota, C: data.completed, W: data.weight, D: data.delayDays, S: data.qualityScore },
+      domainCode: data.domainCode,
+    });
+  }
+
+  @GrpcMethod('TaskService', 'ListGlobalKpiSettingVersions')
+  listGlobalKpiSettingVersions() {
+    return this.service.listSettingsVersions();
+  }
 }

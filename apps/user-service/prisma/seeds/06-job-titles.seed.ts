@@ -280,9 +280,9 @@ export async function seedJobTitles(prisma: PrismaClient) {
     { jt: 'CHANH_THANH_TRA', types: ['THANH_TRA'] },
     { jt: 'PHO_CHANH_THANH_TRA', types: ['THANH_TRA'] },
     { jt: 'THANH_TRA_VIEN', types: ['THANH_TRA'] },
-    { jt: 'SPECIALIST', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'BAN_DANG', 'PHONG_BAN_DANG', 'VAN_PHONG_DANG_UY'] },
-    { jt: 'OFFICER', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM', 'BAN_DANG', 'PHONG_BAN_DANG', 'VAN_PHONG_DANG_UY'] },
-    { jt: 'STAFF', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'BAN_DANG', 'PHONG_BAN_DANG', 'VAN_PHONG_DANG_UY'] },
+    { jt: 'SPECIALIST', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'OFFICER', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'STAFF', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
     { jt: 'CONG_CHUC_PHU_TRACH', types: ['PHONG_BAN_SO', 'VAN_PHONG'] },
     { jt: 'CAN_BO_PHU_TRACH', types: ['PHONG_BAN_SO', 'VAN_PHONG'] },
     {
@@ -343,8 +343,8 @@ export async function seedJobTitles(prisma: PrismaClient) {
     { jt: 'PHO_BI_THU', types: ['CQ_DANG'] },
     { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH', 'BAN_DANG'] },
     { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH', 'BAN_DANG'] },
-    { jt: 'KE_TOAN', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'VAN_PHONG_DANG_UY', 'BAN_DANG'] },
-    { jt: 'VAN_THU', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'VAN_PHONG_DANG_UY', 'BAN_DANG'] },
+    { jt: 'KE_TOAN', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'VAN_THU', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
     { jt: 'VIEN_CHUC', types: ['DVSN', 'TRUNG_TAM'] },
 
     {
@@ -358,9 +358,9 @@ export async function seedJobTitles(prisma: PrismaClient) {
         'UBND_TINH',
       ],
     },
-    { jt: 'HOP_DONG', types: ['SO_NGANH', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'CHI_CUC', 'UBND_TINH', 'DVSN', 'TRUNG_TAM', 'BAN_DANG', 'VAN_PHONG_DANG_UY', 'PHONG_BAN_DANG'] },
-    { jt: 'NHAN_VIEN', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'BAN_DANG', 'VAN_PHONG_DANG_UY'] },
-    { jt: 'BAO_VE', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'BAN_DANG', 'VAN_PHONG_DANG_UY'] },
+    { jt: 'HOP_DONG', types: ['SO_NGANH', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'CHI_CUC', 'UBND_TINH', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'NHAN_VIEN', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'BAO_VE', types: ['PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
   ];
 
   // Dynamically add PHONG_BAN_TRUNG_TAM to any link that supports PHONG_BAN_SO

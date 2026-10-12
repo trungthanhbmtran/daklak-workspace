@@ -89,6 +89,35 @@ model KpiDomainWeight {
   @@map("kpi_domain_weights")
 }
 
+model KpiFormulaConfig {
+  id             Int      @id @default(autoincrement())
+  organizationId String   @unique @default("DEFAULT") @map("organization_id")
+  version        Int      @default(1)
+  settings       Json     @map("settings_json")
+  updatedBy      String?  @map("updated_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  versions KpiFormulaConfigVersion[]
+
+  @@map("kpi_formula_configs")
+}
+
+model KpiFormulaConfigVersion {
+  id             Int      @id @default(autoincrement())
+  organizationId String   @map("organization_id")
+  version        Int
+  settings       Json     @map("settings_json")
+  changedBy      String?  @map("changed_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  config KpiFormulaConfig @relation(fields: [organizationId], references: [organizationId], onDelete: Cascade)
+
+  @@unique([organizationId, version])
+  @@index([organizationId, createdAt])
+  @@map("kpi_formula_config_versions")
+}
+
 model KpiPeriod {
   id          Int             @id @default(autoincrement())
   name        String          @map("name")

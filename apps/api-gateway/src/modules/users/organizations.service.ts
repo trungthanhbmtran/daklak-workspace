@@ -57,7 +57,13 @@ export class OrganizationsService implements OnModuleInit {
       'PHONG_BAN_SO',
       'TO_CHUC_CTXH',
     ];
-    const DANG = ['CQ_DANG', 'BAN_DANG', 'PHONG_BAN_DANG', 'VAN_PHONG_DANG_UY'];
+    const DANG = [
+      'CQ_DANG',
+      'CO_QUAN_DANG',
+      'BAN_DANG',
+      'PHONG_BAN_DANG',
+      'VAN_PHONG_DANG_UY',
+    ];
     const THAM_MUU = ['VAN_PHONG', 'THANH_TRA'];
     const CHUYEN_MON = ['CHI_CUC'];
     const SU_NGHIEP = ['DVSN', 'TRUNG_TAM'];
@@ -240,6 +246,30 @@ export class OrganizationsService implements OnModuleInit {
       }),
     ).catch((e) => this.handleRpcError(e))) as any;
     const data = res.data || [];
+
+    let isPartyUnit = false;
+    if (unitIdNum && !Number.isNaN(unitIdNum)) {
+      try {
+        const unitRes: any = await firstValueFrom(
+          this.orgGrpcService.GetOne({ id: unitIdNum }),
+        );
+        const cat = this.getCategoryCodeFromTypeCode(unitRes?.typeCode);
+        if (
+          cat === 'DANG' ||
+          unitRes?.code?.startsWith('TU_') ||
+          unitRes?.code?.startsWith('BTCTU_')
+        ) {
+          isPartyUnit = true;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    if (isPartyUnit) {
+      return { data: { partyTitles: data, govTitles: [], allTitles: data } };
+    }
+
     const isParty = (j: any) =>
       ['DANG', 'PARTY'].includes(j.category?.toUpperCase() ?? '') ||
       ['DANG', 'PARTY'].includes(j.type?.toUpperCase() ?? '');
@@ -509,6 +539,29 @@ export class OrganizationsService implements OnModuleInit {
       const reportData = (res.data || []).map((r: any) =>
         this.mapStaffingReportItem(r),
       );
+
+      let isPartyUnit = false;
+      try {
+        const unitRes: any = await firstValueFrom(
+          this.orgGrpcService.GetOne({ id }),
+        );
+        const cat = this.getCategoryCodeFromTypeCode(unitRes?.typeCode);
+        if (
+          cat === 'DANG' ||
+          unitRes?.code?.startsWith('TU_') ||
+          unitRes?.code?.startsWith('BTCTU_')
+        ) {
+          isPartyUnit = true;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      if (isPartyUnit) {
+        return {
+          data: { partyReport: reportData, govReport: [], allReport: reportData },
+        };
+      }
 
       reportData.forEach((rep: any) => {
         const jt = allTitles.find(

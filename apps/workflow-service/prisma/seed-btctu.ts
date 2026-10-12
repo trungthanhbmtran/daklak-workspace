@@ -37,7 +37,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'start_btctu',
       type: 'start',
-      position: { x: 50, y: 300 },
+      position: { x: 60, y: 70 },
       data: {
         label: 'Khởi tạo nhiệm vụ / Chỉ đạo BTV Tỉnh ủy',
         description: 'Tiếp nhận chỉ đạo của Ban Thường vụ Tỉnh ủy hoặc Lãnh đạo Ban giao việc đột xuất / định kỳ',
@@ -46,7 +46,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_ldb_assign',
       type: 'userTask',
-      position: { x: 320, y: 300 },
+      position: { x: 340, y: 270 },
       data: {
         label: 'Lãnh đạo Ban tiếp nhận & Giao việc cấp Phòng',
         description: 'Phân loại mảng công tác và giao Trưởng phòng chuyên môn chủ trì (TCCB, TCĐ-ĐV, BVCTNB, Văn phòng)',
@@ -71,7 +71,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'gateway_dept_router',
       type: 'exclusiveGateway',
-      position: { x: 620, y: 300 },
+      position: { x: 650, y: 270 },
       data: {
         label: 'Phân luồng 04 Phòng chuyên môn',
         description: 'Định tuyến hồ sơ về Phòng TCCB, TCĐ-ĐV, BVCTNB hoặc Văn phòng Ban',
@@ -80,7 +80,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_ldp_dispatch',
       type: 'userTask',
-      position: { x: 920, y: 300 },
+      position: { x: 650, y: 510 },
       data: {
         label: 'Lãnh đạo Phòng phân rã việc & Giao Chuyên viên',
         description: 'Xác định hệ số độ khó K, thời hạn, trọng số thành tố A/B/C/D, checklist nghiệp vụ và chọn Chuyên viên chủ trì (22 VTVL)',
@@ -107,7 +107,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_officer_execute',
       type: 'userTask',
-      position: { x: 1240, y: 300 },
+      position: { x: 960, y: 730 },
       data: {
         label: 'Chuyên viên thụ lý & Phối hợp thực thi',
         description: 'Thực thi nghiệp vụ đặc thù theo mảng (TCCB: Mẫu 2C; TCĐ-ĐV: LGSP; BVCTNB: CSDL Mức 3; Văn phòng: Văn bản Mật & ATTT Cấp 3). Nộp sản phẩm kèm minh chứng.',
@@ -130,7 +130,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_ldp_review',
       type: 'userTask',
-      position: { x: 1560, y: 300 },
+      position: { x: 1280, y: 510 },
       data: {
         label: 'Lãnh đạo Phòng thẩm định & Kiểm soát 3 mức lỗi',
         description: 'Kiểm soát chất lượng sản phẩm theo 3 mức lỗi (-5% thể thức, -15% số liệu, -35% pháp lý/chính trị). Đạt chuẩn: ký nháy Tờ trình trình Lãnh đạo Ban; Có lỗi: trả lại sửa.',
@@ -153,7 +153,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'gateway_ldp_check',
       type: 'exclusiveGateway',
-      position: { x: 1840, y: 300 },
+      position: { x: 1600, y: 510 },
       data: {
         label: 'Kiểm tra Đạt chuẩn Phòng?',
         description: 'Đạt yêu cầu -> Trình Lãnh đạo Ban; Có lỗi -> Trả lại Chuyên viên',
@@ -162,7 +162,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_ldb_approve',
       type: 'userTask',
-      position: { x: 2100, y: 300 },
+      position: { x: 1600, y: 270 },
       data: {
         label: 'Lãnh đạo Ban thẩm định & Ký duyệt (Ký số)',
         description: 'Lãnh đạo Ban xem xét, phê duyệt kết quả, thực hiện ký số chứng thư CA Chuyên dùng phát hành hoặc trình Ban Thường vụ Tỉnh ủy',
@@ -184,7 +184,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'gateway_ldb_check',
       type: 'exclusiveGateway',
-      position: { x: 2380, y: 300 },
+      position: { x: 1900, y: 270 },
       data: {
         label: 'Kết luận Phê duyệt Ban?',
         description: 'Phê duyệt / Trình BTVTU -> Tự động tính KPI; Yêu cầu rà soát -> Trả về phòng; Đình chỉ -> Hủy',
@@ -193,7 +193,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_auto_kpi',
       type: 'serviceTask',
-      position: { x: 2640, y: 300 },
+      position: { x: 2200, y: 270 },
       data: {
         label: 'Hệ thống tự động tính điểm KPI 4 thành tố',
         description: 'Rule Engine tính điểm KPI_i = K * [A%*ScoreA + B%*ScoreB + C%*ScoreC + D%*ScoreD], tự động trừ điểm lỗi B% (5%/15%/35%) và đồng bộ dữ liệu sang HRM Service',
@@ -205,7 +205,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'end_completed',
       type: 'end',
-      position: { x: 2940, y: 300 },
+      position: { x: 2520, y: 270 },
       data: {
         label: 'Hoàn thành nhiệm vụ & Lưu trữ ATTT Cấp độ 3',
         description: 'Nhiệm vụ hoàn tất, chuyển trạng thái DONE, lưu vết hồ sơ điện tử an toàn',
@@ -215,7 +215,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'end_rejected',
       type: 'end',
-      position: { x: 2380, y: 520 },
+      position: { x: 1900, y: 440 },
       data: {
         label: 'Đình chỉ / Hủy nhiệm vụ theo chỉ đạo BTVTU',
         description: 'Nhiệm vụ dừng thực hiện, chuyển trạng thái CANCELLED',
@@ -229,6 +229,7 @@ export const btctuTaskManagementGraph = {
       source: 'start_btctu',
       target: 'task_ldb_assign',
       type: 'custom',
+      label: 'Khởi tạo & Giao việc',
       action: 'ASSIGN_START',
     },
     {
@@ -236,6 +237,7 @@ export const btctuTaskManagementGraph = {
       source: 'task_ldb_assign',
       target: 'gateway_dept_router',
       type: 'custom',
+      label: 'Phân luồng về phòng chuyên môn',
       action: 'DISPATCH_TO_DEPT',
     },
     {
@@ -243,6 +245,7 @@ export const btctuTaskManagementGraph = {
       source: 'gateway_dept_router',
       target: 'task_ldp_dispatch',
       type: 'custom',
+      label: 'Tiếp nhận nhiệm vụ cấp phòng',
       action: 'ROUTED_TO_DEPT',
     },
     {
@@ -250,6 +253,7 @@ export const btctuTaskManagementGraph = {
       source: 'task_ldp_dispatch',
       target: 'task_officer_execute',
       type: 'custom',
+      label: 'Giao Chuyên viên 22 VTVL chủ trì',
       action: 'ASSIGN_OFFICER',
     },
     {
@@ -257,6 +261,7 @@ export const btctuTaskManagementGraph = {
       source: 'task_officer_execute',
       target: 'task_ldp_review',
       type: 'custom',
+      label: 'Nộp sản phẩm kèm minh chứng',
       action: 'SUBMIT_FOR_REVIEW',
     },
     {
@@ -264,6 +269,7 @@ export const btctuTaskManagementGraph = {
       source: 'task_ldp_review',
       target: 'gateway_ldp_check',
       type: 'custom',
+      label: 'Thẩm định chất lượng (3 mức lỗi)',
       action: 'CHECK_QUALITY',
     },
     {
@@ -272,6 +278,7 @@ export const btctuTaskManagementGraph = {
       target: 'task_officer_execute',
       type: 'custom',
       sourceHandle: 'false',
+      label: 'Có lỗi · Trả lại sửa (-5% / -15% / -35%)',
       action: 'RETURN',
       condition: 'variables.reviewDecision === "TRA_LAI_CHINH_SUA"',
     },
@@ -281,14 +288,16 @@ export const btctuTaskManagementGraph = {
       target: 'task_ldb_approve',
       type: 'custom',
       sourceHandle: 'true',
+      label: 'Đạt chuẩn · Ký nháy trình Lãnh đạo Ban',
       action: 'SUBMIT_TO_BAN',
       condition: 'variables.reviewDecision === "DAT_YEU_CAU"',
     },
     {
       id: 'e_ldb_gw_eval',
       source: 'task_ldb_approve',
-      target: 'gateway_ldb_check',
+      target: 'gateway_ldp_check',
       type: 'custom',
+      label: 'Xem xét & Phê duyệt Tờ trình',
       action: 'EVALUATE_DECISION',
     },
     {
@@ -297,6 +306,7 @@ export const btctuTaskManagementGraph = {
       target: 'task_ldp_review',
       type: 'custom',
       sourceHandle: 'rework',
+      label: 'Chỉ đạo rà soát lại',
       action: 'BAN_REQUEST_REVIEW',
       condition: 'variables.banDecision === "YEU_CAU_RA_SOAT_LAI"',
     },
@@ -306,6 +316,7 @@ export const btctuTaskManagementGraph = {
       target: 'task_auto_kpi',
       type: 'custom',
       sourceHandle: 'approve',
+      label: 'Phê duyệt (Ký số CA) / Trình BTVTU',
       action: 'BAN_APPROVE',
       condition: 'variables.banDecision === "PHE_DUYET_BAN_HANH" || variables.banDecision === "TRINH_BTV_TINH_UY"',
     },
@@ -315,6 +326,7 @@ export const btctuTaskManagementGraph = {
       target: 'end_rejected',
       type: 'custom',
       sourceHandle: 'cancel',
+      label: 'Đình chỉ / Hủy nhiệm vụ',
       action: 'BAN_CANCEL',
       condition: 'variables.banDecision === "DINH_CHI"',
     },
@@ -323,6 +335,7 @@ export const btctuTaskManagementGraph = {
       source: 'task_auto_kpi',
       target: 'end_completed',
       type: 'custom',
+      label: 'Tính điểm KPI 4 thành tố & Lưu trữ ATTT Cấp 3',
       action: 'KPI_COMPLETED',
     },
   ],
@@ -338,7 +351,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'start_kpi_period',
       type: 'start',
-      position: { x: 50, y: 300 },
+      position: { x: 60, y: 150 },
       data: {
         label: 'Mở kỳ đánh giá KPI quý',
         description: 'Kích hoạt kỳ đánh giá định kỳ hằng quý tại Ban Tổ chức Tỉnh ủy',
@@ -347,7 +360,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau01_dangky',
       type: 'userTask',
-      position: { x: 280, y: 300 },
+      position: { x: 60, y: 350 },
       data: {
         label: 'Đăng ký danh mục đầu kỳ (MẪU 01)',
         description: 'Công chức đăng ký khung danh mục sản phẩm, nhiệm vụ trọng tâm đầu kỳ theo Mẫu 01',
@@ -368,7 +381,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau02_tucham',
       type: 'userTask',
-      position: { x: 580, y: 300 },
+      position: { x: 340, y: 350 },
       data: {
         label: 'Cá nhân tự chấm điểm KPI (MẪU 02)',
         description: 'Tự chấm điểm tiêu chí chung S_chung (tối đa 30đ) + Điểm nhiệm vụ S_nhiemvu (quy đổi từ KPI_i sang thang 70đ) theo Mẫu 02',
@@ -390,7 +403,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau04_noitroi',
       type: 'userTask',
-      position: { x: 880, y: 300 },
+      position: { x: 620, y: 350 },
       data: {
         label: 'Kê khai nhiệm vụ nổi trội (MẪU 04)',
         description: 'Lập Bảng kê khai nhiệm vụ nổi trội, vượt mức (Mẫu 04) - Điều kiện bắt buộc để xét danh hiệu Hoàn thành Xuất sắc',
@@ -412,7 +425,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau03_phong_hop',
       type: 'userTask',
-      position: { x: 1180, y: 300 },
+      position: { x: 940, y: 350 },
       data: {
         label: 'Họp phòng & Thẩm định tập thể (MẪU 03)',
         description: 'Tập thể phòng & Chi bộ họp nhận xét; Trưởng phòng thẩm định điểm từng cá nhân và lập Bảng tổng hợp tập thể phòng theo Mẫu 03',
@@ -433,7 +446,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_service_audit_sources',
       type: 'serviceTask',
-      position: { x: 1480, y: 300 },
+      position: { x: 1280, y: 240 },
       data: {
         label: 'Đối soát 08 nguồn CSDL & Rà soát kỷ luật',
         description: 'Tự động đối soát dữ liệu với CSDL Đảng viên, LGSP, Cán bộ 2C, BVCTNB Mức 3, Sổ văn bản mật, An toàn thông tin Cấp 3 để phát hiện vi phạm bắt buộc hạ bậc',
@@ -445,7 +458,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'gateway_discipline_check',
       type: 'exclusiveGateway',
-      position: { x: 1780, y: 300 },
+      position: { x: 1580, y: 240 },
       data: {
         label: 'Có vi phạm kỷ luật / Lọt lộ bí mật?',
         description: 'Vi phạm kỷ luật hoặc chỉ tiêu < 70% -> Hạ bậc bắt buộc; Không vi phạm -> Áp trần chất lượng',
@@ -454,7 +467,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_demote_unqualified',
       type: 'userTask',
-      position: { x: 1780, y: 520 },
+      position: { x: 1580, y: 480 },
       data: {
         label: 'Hạ bậc bắt buộc: Không hoàn thành nhiệm vụ',
         description: 'Ấn định mức xếp loại Không hoàn thành nhiệm vụ theo quy định đối với cá nhân có sai phạm',
@@ -474,7 +487,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_service_apply_caps',
       type: 'serviceTask',
-      position: { x: 2060, y: 300 },
+      position: { x: 1880, y: 240 },
       data: {
         label: 'Thuật toán Áp trần 20% & Áp trần Người đứng đầu',
         description: 'Áp trần 20% Xuất sắc per Quy định 348-QĐ/BTCTW: Số Xuất sắc <= INT(20% * Tổng số Tốt trở lên). Áp trần Người đứng đầu: Rank Trưởng phòng <= Rank Tập thể phòng',
@@ -486,7 +499,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_hoidong_thamdinh',
       type: 'userTask',
-      position: { x: 2360, y: 300 },
+      position: { x: 2180, y: 240 },
       data: {
         label: 'Hội đồng Thẩm định Ban xét duyệt kết quả',
         description: 'Hội đồng Thẩm định Ban Tổ chức Tỉnh ủy họp từ ngày 21 đến 25 để xem xét toàn diện kết quả chấm điểm và áp trần khống chế',
@@ -506,7 +519,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'gateway_council_check',
       type: 'exclusiveGateway',
-      position: { x: 2660, y: 300 },
+      position: { x: 2480, y: 240 },
       data: {
         label: 'Hội đồng Thông qua?',
         description: 'Đồng ý -> Dự thảo Quyết định; Yêu cầu điều chỉnh -> Họp phòng rà soát lại',
@@ -515,7 +528,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau05_quyetdinh',
       type: 'userTask',
-      position: { x: 2940, y: 300 },
+      position: { x: 2740, y: 240 },
       data: {
         label: 'Trưởng ban ký Quyết định phê duyệt (MẪU 05)',
         description: 'Dự thảo và ban hành Quyết định phê duyệt kết quả xếp loại chất lượng toàn cơ quan Ban Tổ chức Tỉnh ủy (Mẫu 05) trước ngày 28',
@@ -537,7 +550,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'end_kpi_published',
       type: 'end',
-      position: { x: 3240, y: 300 },
+      position: { x: 3040, y: 240 },
       data: {
         label: 'Công khai kết quả & Lưu trữ hồ sơ xếp loại',
         description: 'Công bố công khai kết quả xếp loại toàn cơ quan và báo cáo Ban Thường vụ Tỉnh ủy',
@@ -551,6 +564,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'start_kpi_period',
       target: 'task_mau01_dangky',
       type: 'custom',
+      label: 'Kích hoạt kỳ đánh giá quý',
       action: 'INITIATE_PERIOD',
     },
     {
@@ -558,6 +572,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_mau01_dangky',
       target: 'task_mau02_tucham',
       type: 'custom',
+      label: 'Đăng ký danh mục (Mẫu 01)',
       action: 'SUBMIT_MAU_01',
     },
     {
@@ -565,6 +580,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_mau02_tucham',
       target: 'task_mau04_noitroi',
       type: 'custom',
+      label: 'Tự chấm điểm (Mẫu 02)',
       action: 'SUBMIT_MAU_02',
     },
     {
@@ -572,6 +588,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_mau04_noitroi',
       target: 'task_mau03_phong_hop',
       type: 'custom',
+      label: 'Kê khai nổi trội (Mẫu 04)',
       action: 'SUBMIT_MAU_04',
     },
     {
@@ -579,6 +596,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_mau03_phong_hop',
       target: 'task_service_audit_sources',
       type: 'custom',
+      label: 'Họp phòng & Thẩm định (Mẫu 03)',
       action: 'SUBMIT_MAU_03',
     },
     {
@@ -586,6 +604,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_service_audit_sources',
       target: 'gateway_discipline_check',
       type: 'custom',
+      label: 'Đối soát 08 nguồn CSDL & Rà soát kỷ luật',
       action: 'CHECK_AUDIT',
     },
     {
@@ -594,6 +613,7 @@ export const btctuKpiEvaluationGraph = {
       target: 'task_demote_unqualified',
       type: 'custom',
       sourceHandle: 'violation',
+      label: 'Có vi phạm (Kỷ luật / Lọt lộ bí mật)',
       action: 'HAS_VIOLATION',
       condition: 'variables.hasDisciplineViolation === true',
     },
@@ -603,6 +623,7 @@ export const btctuKpiEvaluationGraph = {
       target: 'task_service_apply_caps',
       type: 'custom',
       sourceHandle: 'no_violation',
+      label: 'Không vi phạm (Đủ điều kiện xét)',
       action: 'NO_VIOLATION',
       condition: 'variables.hasDisciplineViolation !== true',
     },
@@ -611,6 +632,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_demote_unqualified',
       target: 'task_mau05_quyetdinh',
       type: 'custom',
+      label: 'Chuyển danh sách ấn định hạ bậc',
       action: 'FORWARD_DEMOTION',
     },
     {
@@ -618,6 +640,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_service_apply_caps',
       target: 'task_hoidong_thamdinh',
       type: 'custom',
+      label: 'Áp trần 20% & Trần người đứng đầu',
       action: 'CAPS_APPLIED',
     },
     {
@@ -625,6 +648,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_hoidong_thamdinh',
       target: 'gateway_council_check',
       type: 'custom',
+      label: 'Hội đồng Ban họp xét duyệt',
       action: 'COUNCIL_REVIEW',
     },
     {
@@ -633,6 +657,7 @@ export const btctuKpiEvaluationGraph = {
       target: 'task_mau03_phong_hop',
       type: 'custom',
       sourceHandle: 'rework',
+      label: 'Yêu cầu phòng rà soát lại',
       action: 'REQUEST_REWORK',
       condition: 'variables.councilVerdict === "YEU_CAU_DIEU_CHINH"',
     },
@@ -642,6 +667,7 @@ export const btctuKpiEvaluationGraph = {
       target: 'task_mau05_quyetdinh',
       type: 'custom',
       sourceHandle: 'approve',
+      label: 'Hội đồng thông qua kết quả',
       action: 'COUNCIL_APPROVED',
       condition: 'variables.councilVerdict === "DONG_Y_XEP_LOAI"',
     },
@@ -650,6 +676,7 @@ export const btctuKpiEvaluationGraph = {
       source: 'task_mau05_quyetdinh',
       target: 'end_kpi_published',
       type: 'custom',
+      label: 'Ban hành QĐ (Mẫu 05) & Công khai',
       action: 'PUBLISH_RESULTS',
     },
   ],
@@ -681,10 +708,14 @@ function compileGraphCanonical(graph: any) {
     id: e.id,
     source: e.source,
     target: e.target,
-    action: e.action ?? e.label ?? null,
+    label: e.label ?? null,
+    action: e.action ?? null,
     condition: e.condition ?? null,
     priority: e.priority ?? 0,
-    data: e.data ?? {},
+    data: {
+      ...(e.data ?? {}),
+      ...(e.label ? { label: e.label } : {}),
+    },
   }));
 
   return {

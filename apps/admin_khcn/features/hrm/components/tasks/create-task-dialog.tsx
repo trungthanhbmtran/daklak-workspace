@@ -39,6 +39,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
   const [isKpiTarget, setIsKpiTarget] = useState(false);
   const [plannedQty, setPlannedQty] = useState<number>(1);
   const [difficultyK, setDifficultyK] = useState<number>(1);
+  const [formulaDomainCode, setFormulaDomainCode] = useState('');
 
   const isSubTask = !!parentId;
 
@@ -121,6 +122,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
     setIsKpiTarget(false);
     setPlannedQty(1);
     setDifficultyK(1);
+    setFormulaDomainCode('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -140,7 +142,7 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
       type, // TASK, MEETING, STUDY
       meetingLink: (type === 'MEETING' || type === 'STUDY') && meetingLink.trim() ? meetingLink.trim() : undefined,
       recurrence: taskType === "PERIODIC" ? recurrence : undefined,
-      metadata: isKpiTarget ? { isKpiTarget: true, plannedQty, difficultyK } : undefined
+      metadata: isKpiTarget ? { isKpiTarget: true, plannedQty, difficultyK, ...(formulaDomainCode.trim() ? { domainCode: formulaDomainCode.trim().toUpperCase() } : {}) } : undefined
     };
 
     try {
@@ -238,6 +240,11 @@ export function CreateTaskDialog({ open, onOpenChange, parentId, initialDate }: 
                         onChange={(e) => setPlannedQty(Number(e.target.value))} 
                         className="bg-white dark:bg-slate-950"
                       />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Mã nhóm công thức (không bắt buộc)</Label>
+                      <Input value={formulaDomainCode} onChange={(e) => setFormulaDomainCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))} placeholder="Để trống dùng công thức chung; ví dụ THAM_DINH" className="bg-white font-mono dark:bg-slate-950" />
+                      <p className="text-xs text-muted-foreground">Nếu mã trùng với nhóm đã cấu hình, nhiệm vụ sẽ dùng công thức riêng của nhóm đó.</p>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">Hệ số độ khó (1.0 - 5.0)</Label>

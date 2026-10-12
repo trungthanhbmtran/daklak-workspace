@@ -42,8 +42,8 @@ export class CategoriesController {
         search: data.search,
         limit: data.take,
         skip: data.skip,
-        selectedIds: data.selectedIds ?? [],
-        parentUnitId: data.parentUnitId,
+        selectedIds: data.selectedIds ?? (data as any)?.selected_ids ?? [],
+        parentUnitId: data.parentUnitId ?? (data as any)?.parent_unit_id,
       },
     );
     return {

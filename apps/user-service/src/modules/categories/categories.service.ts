@@ -59,10 +59,46 @@ export class CategoriesService {
     if (parentUnitId && group === 'DOMAIN') {
       const parentUnit = await this.prisma.organizationUnit.findUnique({
         where: { id: parentUnitId },
-        include: { unitDomains: true },
+        include: { unitDomains: true, type: true },
       });
       if (parentUnit) {
-        restrictIds = parentUnit.unitDomains.map((ud) => ud.domainId);
+        if (parentUnit.unitDomains && parentUnit.unitDomains.length > 0) {
+          restrictIds = parentUnit.unitDomains.map((ud) => ud.domainId);
+        } else if (
+          [
+            'CQ_DANG',
+            'BAN_DANG',
+            'PHONG_BAN_DANG',
+            'VAN_PHONG_DANG_UY',
+            'CO_QUAN_DANG',
+          ].includes(parentUnit.type?.code || '') ||
+          parentUnit.code?.startsWith('TU_') ||
+          parentUnit.code?.startsWith('BTCTU_')
+        ) {
+          const partyDomains = await this.prisma.category.findMany({
+            where: {
+              groupCode: 'DOMAIN',
+              OR: [
+                { code: { startsWith: 'CONG_TAC_' } },
+                {
+                  code: {
+                    in: [
+                      'TO_CHUC_XAY_DUNG_DANG',
+                      'TO_CHUC_CAN_BO_DANG',
+                      'VAN_PHONG_CAP_UY',
+                      'XAY_DUNG_DANG',
+                      'TUYEN_GIAO',
+                      'DAN_VAN',
+                      'NOI_CHINH',
+                    ],
+                  },
+                },
+              ],
+            },
+            select: { id: true },
+          });
+          restrictIds = partyDomains.map((d) => d.id);
+        }
       }
     }
 

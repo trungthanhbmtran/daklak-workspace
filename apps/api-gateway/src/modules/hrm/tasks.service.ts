@@ -832,4 +832,24 @@ export class TasksService implements OnModuleInit {
       this.taskService.SaveGlobalKpiSettings(body)
     ).catch((e) => this.handleRpcError(e));
   }
+
+  async previewGlobalKpiSettings(body: any) {
+    return firstValueFrom(
+      this.taskService.PreviewGlobalKpiSettings({
+        settingsJson: JSON.stringify(body.settings || {}),
+        quota: Number(body.variables?.Q ?? 10),
+        completed: Number(body.variables?.C ?? 8),
+        weight: Number(body.variables?.W ?? 1),
+        delayDays: Number(body.variables?.D ?? 2),
+        qualityScore: Number(body.variables?.S ?? 80),
+        domainCode: String(body.domainCode || 'GENERIC'),
+      }),
+    ).catch((e) => this.handleRpcError(e));
+  }
+
+  async getGlobalKpiSettingVersions() {
+    return firstValueFrom(
+      this.taskService.ListGlobalKpiSettingVersions({}),
+    ).catch((e) => this.handleRpcError(e));
+  }
 }

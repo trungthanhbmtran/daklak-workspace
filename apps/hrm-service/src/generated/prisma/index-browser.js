@@ -174,6 +174,25 @@ exports.Prisma.KpiDomainWeightScalarFieldEnum = {
   organizationId: 'organizationId'
 };
 
+exports.Prisma.KpiFormulaConfigScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  version: 'version',
+  settings: 'settings',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.KpiFormulaConfigVersionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  version: 'version',
+  settings: 'settings',
+  changedBy: 'changedBy',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.KpiPeriodScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -513,6 +532,16 @@ exports.Prisma.KpiDomainWeightOrderByRelevanceFieldEnum = {
   organizationId: 'organizationId'
 };
 
+exports.Prisma.KpiFormulaConfigOrderByRelevanceFieldEnum = {
+  organizationId: 'organizationId',
+  updatedBy: 'updatedBy'
+};
+
+exports.Prisma.KpiFormulaConfigVersionOrderByRelevanceFieldEnum = {
+  organizationId: 'organizationId',
+  changedBy: 'changedBy'
+};
+
 exports.Prisma.KpiPeriodOrderByRelevanceFieldEnum = {
   name: 'name',
   organizationId: 'organizationId'
@@ -684,6 +713,8 @@ exports.Prisma.ModelName = {
   Employee: 'Employee',
   KpiRuleSet: 'KpiRuleSet',
   KpiDomainWeight: 'KpiDomainWeight',
+  KpiFormulaConfig: 'KpiFormulaConfig',
+  KpiFormulaConfigVersion: 'KpiFormulaConfigVersion',
   KpiPeriod: 'KpiPeriod',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationTask: 'KpiEvaluationTask',

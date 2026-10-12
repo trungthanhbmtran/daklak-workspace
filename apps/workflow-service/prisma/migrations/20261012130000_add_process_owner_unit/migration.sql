@@ -3,3 +3,6 @@ ALTER TABLE `process_definitions`
 
 CREATE INDEX `process_definitions_owner_unit_code_idx`
   ON `process_definitions`(`owner_unit_code`);
+
+ALTER TABLE `workflow_bindings`
+  ADD COLUMN `conditions` JSON NULL;

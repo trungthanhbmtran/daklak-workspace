@@ -37,9 +37,19 @@ export class TasksController {
     return this.tasksService.getGlobalKpiSettings();
   }
 
+  @Get('kpi/global-settings/versions')
+  async getGlobalKpiSettingVersions() {
+    return this.tasksService.getGlobalKpiSettingVersions();
+  }
+
   @Put('kpi/global-settings')
-  async saveGlobalKpiSettings(@Body() body: any) {
-    return this.tasksService.saveGlobalKpiSettings(body);
+  async saveGlobalKpiSettings(@Req() req: any, @Body() body: any) {
+    return this.tasksService.saveGlobalKpiSettings({ ...body, changedBy: String(req?.user?.id || '') });
+  }
+
+  @Post('kpi/preview')
+  async previewGlobalKpiSettings(@Body() body: any) {
+    return this.tasksService.previewGlobalKpiSettings(body);
   }
 
   @Get()

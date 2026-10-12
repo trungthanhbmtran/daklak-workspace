@@ -4,6 +4,64 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[UI/UX & Workflow Canvas] Chuẩn Hóa Sơ Đồ Nghiệp Vụ Trên Canvas Theo Tài Liệu docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md (12/10/2026)**
+  - **Yêu cầu**: Thể hiện trực quan, chuẩn xác 100% sơ đồ quy trình nghiệp vụ trên canvas thiết kế workflow (`WorkflowEditorScreen.tsx`) bám sát tài liệu thiết kế nghiệp vụ `docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md` (thay vì bị dồn phẳng thành 1 hàng ngang duy nhất co nhỏ không xem được).
+  - **Thực hiện**:
+    1. Cập nhật tọa độ 2D Swimlanes & 4 Giai đoạn trong `apps/workflow-service/prisma/seed-btctu.ts` và CSDL MySQL `admin_workflow`:
+       * *Sơ đồ 1 (Quản lý công việc `WF_BTCTU_QUAN_LY_CONG_VIEC`)*: Phân bổ rõ 4 Làn thẩm quyền theo trục Y: BTV Tỉnh ủy (`y: 70`), Lãnh đạo Ban (`y: 270`), Lãnh đạo Phòng (`y: 510`), Chuyên viên 22 VTVL (`y: 730`).
+       * *Sơ đồ 4 (Đánh giá KPI & Áp trần `WF_BTCTU_DANH_GIA_KPI`)*: Phân bổ rõ 4 Cột Giai đoạn theo trục X: GĐ 1: Tự đánh giá (`x: 60-620`), GĐ 2: Tập thể phòng (`x: 940`), GĐ 3: Hội đồng Ban & Siết trần (`x: 1280-2480`), GĐ 4: Ban hành QĐ (`x: 2740-3040`).
+    2. Nâng cấp giao diện canvas (`WorkflowEditorScreen.tsx`):
+       * Bổ sung component `WorkflowCanvasOverlay`: Tích hợp `useViewport()` vẽ trực quan các dải nền 4 Swimlanes và 4 Khung Giai đoạn KPI với viền nét đứt (dashed), nhãn cấp bậc và mô tả chức năng chi tiết.
+       * Thiết lập `pointer-events-none` và `z-0` để overlay hoàn toàn vô hại, không ảnh hưởng kéo thả và không ghi đè vào dữ liệu đồ thị khi lưu.
+       * Bổ sung 4 handles (`Left`, `Right`, `Top`, `Bottom`) trên mỗi card giúp đường nối giữa các làn uốn cong mượt mà theo 2D, không bị đâm xuyên card.
+       * Nâng cấp Panel chú giải (Legend) thích ứng tự động theo loại quy trình.
+       * Tối ưu `fitViewOptions`: `minZoom: 0.45`, `maxZoom: 1.15`, `padding: 0.15` đảm bảo các card luôn to rõ, sắc nét, không bị co nhỏ quá mức.
+  - **Kiểm chứng**:
+    * `npm run typecheck` trên `apps/admin_khcn`: PASSED (0 errors).
+    * Build Docker image `thanhtran1993/daklak-admin-khcn:latest`: PASSED (exit code 0), khởi động lại container sẵn sàng sau 184ms.
+    * Kiểm chứng bằng `browser_subagent` trên trình duyệt thực tế đối với cả 2 quy trình: Hiển thị đúng 4 Swimlanes và 4 Giai đoạn, các đường nối logic thẩm định - trả lời - phê duyệt - hạ bậc - áp trần rõ ràng, trực quan.
+
+- [x] **[Database & Seed Pipeline] Tích Hợp Nhiệm Vụ Đảng & Vị Trí Việc Làm Ban Tổ Chức Tỉnh Ủy Vào Seed Tổ Chức Hệ Thống (12/10/2026)**
+  - **Yêu cầu**: Cấu hình các nhiệm vụ Đảng (lĩnh vực công tác Đảng) và vị trí việc làm của Ban Tổ chức Tỉnh ủy vào bên trong seed tổ chức của hệ thống để khi chạy seed (`prisma db seed` hoặc `ts-node prisma/seed.ts`), toàn bộ dữ liệu cơ quan Đảng được tự động nạp đầy đủ 100%.
+  - **Thực hiện**:
+    1. Tạo file seed chính thức `apps/user-service/prisma/seeds/10-daklak-party-organizations.seed.ts` (chuẩn UTF-8 không BOM) gồm: 10 Lĩnh vực công tác Đảng (`DOMAIN`), 5 tổ chức Đảng (`TU_DAKLAK`, `BTCTU_DAKLAK` và 4 phòng ban), phân bổ `UnitDomain` Đảng, 22 VTVL Đề án BTCTU + Lãnh đạo Ban (`JobTitle`), làm sạch 100% chức danh generic chính quyền khỏi template của Đảng, định biên biên chế (`OrganizationStaffing`) và Slots (`StaffingSlot`) kèm `StaffingSlotDomain`, 25 Cán bộ công chức kèm `JobPosition`, `Credential`, `UserToUserGroup` và PBAC Policies.
+    2. Tích hợp `seedPartyOrganizationsDakLak` vào hàm `runSeeds` tại `apps/user-service/prisma/seeds/index.ts`.
+    3. Tinh gọn `apps/user-service/prisma/seed-daklak.ts` thành proxy gọi trực tiếp `seedPartyOrganizationsDakLak(prisma)`.
+  - **Kiểm chứng**: Chạy `npx ts-node prisma/seed-daklak.ts` thành công (exit code 0); `npx tsc --noEmit` trên `user-service`, `admin_khcn`, `api-gateway` đều 0 lỗi; kiểm tra BOM: 100% không có BOM.
+
+- [x] **[UI/UX & Feature] Nâng Cấp Bộ Chọn Đơn Vị Sở Hữu Quy Trình Thành Giao Diện Cây Phân Cấp & Tìm Kiếm Thông Minh (12/10/2026)**
+  - **Yêu cầu**: Chuyển đổi bộ chọn đơn vị sở hữu quy trình tại màn hình thiết kế quy trình từ thẻ `<Select>` thuần túy sang giao diện chuyên biệt có tìm kiếm nhanh (full-text search tiếng Việt/mã code/cơ quan cha) và duyệt cây cơ cấu tổ chức tỉnh Đắk Lắk (Tree Hierarchy) trực quan, giúp người dùng dễ dàng định vị và chọn đơn vị trong danh sách hàng trăm cơ quan, đơn vị.
+  - **Thực hiện**:
+    1. Xây dựng component chuyên biệt `OrganizationUnitSelector` (`apps/admin_khcn/features/workflow/components/OrganizationUnitSelector.tsx`):
+       - Trigger box trên sidebar 220px: gọn gàng, hiển thị icon phân biệt Đảng (`Landmark`) và Chính quyền (`Building2`), tên đơn vị, badge mã code, breadcrumb phân cấp, nút "Đổi đơn vị" và "Hủy gán".
+       - Modal Dialog tìm kiếm & duyệt cây: Tìm kiếm full-text tiếng Việt có/không dấu, lọc nhóm (Tất cả, Khối Đảng, Chính quyền, Đơn vị Sự nghiệp), 2 chế độ hiển thị (Danh sách kết quả có breadcrumbs hoặc Cây phân cấp tổ chức Expand/Collapse), tùy chọn "Quy trình dùng chung (Không gán đơn vị)".
+    2. Tích hợp vào `WorkflowEditorScreen.tsx`: Thay thế thẻ `<Select>` cũ, hỗ trợ cả chế độ chỉnh sửa và `readOnly`, giữ nguyên prop type `ownerUnitCode` an toàn tương thích 100% với backend.
+    3. Cải tiến hiển thị tên đơn vị thân thiện và badge phân loại trên `WorkflowListPage.tsx`.
+  - **Kiểm chứng**:
+    - Typecheck `npm run typecheck` trên `apps/admin_khcn` đạt 0 errors.
+    - Build Docker image `thanhtran1993/daklak-admin-khcn:latest` thành công (exit code 0), khởi động lại container `daklak-workspace-admin-frontend-1` hoạt động trơn tru.
+    - Kiểm chứng tương tác bằng `browser_subagent` trên trình duyệt thực tế (`http://113.184.220.82/admin/services/workflow/workflows/new`): Tìm kiếm mã `BTCTU` tức thời, duyệt cây phân cấp mở rộng/thu gọn, chọn đơn vị thành công hiển thị đầy đủ thông tin trên sidebar.
+
+- [x] **[Hotfix] Khắc Phục Lỗi Trang Quy Trình Động /admin/services/workflow/workflows (12/10/2026)**
+  - **Vấn đề**: Truy cập trang `http://113.184.220.82/admin/services/workflow/workflows` bị lỗi 500 `Internal server error` và banner `Không thể tải quy trình. Hãy kiểm tra kết nối API hoặc quyền tài khoản`.
+  - **Nguyên nhân**:
+    1. CSDL `admin_workflow` chưa chạy migration: Bảng `process_definitions` thiếu cột `owner_unit_code`, bảng `workflow_bindings` thiếu cột `conditions`, gây lỗi Prisma `P2022 Unknown column`.
+    2. Logic lọc `organizationId` trong `workflow-service`: Chưa nhận diện tài khoản root admin (`organizationId = 'DEFAULT'`) và chưa lấy kèm các quy trình hệ thống chung (`organizationId = null`).
+    3. `grpc.controller.ts` gọi `this.definitionService.deleteProcess()`, nhưng method này chưa được cài đặt trong `definition.service.ts`.
+  - **Khắc phục**:
+    1. Áp dụng migration bổ sung `owner_unit_code VARCHAR(191) NULL` (kèm index) và `conditions JSON NULL` vào MySQL container.
+    2. Nâng cấp `listProcesses`, `getDefinition`, `getDefinitionById` hỗ trợ multi-tenant an toàn (nhận diện `DEFAULT` và quy trình chung `organizationId = null`).
+    3. Cài đặt hàm `deleteProcess` với kiểm tra an toàn ràng buộc binding.
+  - **Kiểm chứng**: Kiểm tra log container sạch lỗi, kiểm tra trực tiếp giao diện trên trình duyệt và API hoạt động trơn tru.
+
+- [x] **[Business Logic & Refactor] Tách Biệt Lĩnh Vực Phụ Trách & Chuẩn Hóa Vị Trí Việc Làm Cơ Quan Đảng Theo Hướng Dẫn Trung Ương (12/10/2026)**
+  - **Yêu cầu**: Tại trang `http://113.184.220.82/admin/services/admin/organization/BTCTU_DAKLAK` (Ban Tổ chức Tỉnh ủy Đắk Lắk), khắc phục tình trạng nhiệm vụ, lĩnh vực phụ trách khối Đảng bị lẫn lộn với Chính quyền (150+ lĩnh vực quản lý nhà nước), và loại bỏ hoàn toàn các chức danh chính quyền ở cơ quan Đảng theo đúng hướng dẫn của Trung ương (Quy định 137-QĐ/TW của Ban Bí thư và Hướng dẫn của Ban Tổ chức Trung ương).
+  - **Thực hiện**:
+    1. CSDL: Gỡ bỏ 7 chức danh generic chính quyền (`POSITION`) khỏi template `BAN_DANG`; nạp 26 vị trí việc làm khối Đảng chuẩn cho `BAN_DANG`; bổ sung 7 Lĩnh vực Công tác Đảng chuẩn vào `unit_domains` của `BTCTU_DAKLAK`.
+    2. Backend (`api-gateway` & `user-service`): Bổ sung `CO_QUAN_DANG` vào danh sách `DANG`; phân loại toàn bộ chức danh và định biên cơ quan Đảng thành `partyTitles` và `partyReport` (chức danh chính quyền rỗng); forward `parent_unit_id` sang gRPC `GetByGroup` và lọc danh mục `DOMAIN` chỉ lấy lĩnh vực công tác Đảng cho cơ quan Đảng.
+    3. Frontend (`admin_khcn`): Tự động nhận diện `isPartyUnit`; ẩn tab và form "Chính quyền" tại cơ quan Đảng, hiển thị chuyên biệt "Định biên & Vị trí việc làm Cơ quan Đảng" (theo Quy định 137-QĐ/TW và Hướng dẫn BTCTW); tại "Phạm vi phụ trách", đổi tiêu đề thành "Lĩnh vực Công tác Đảng" và lọc sạch 150+ lĩnh vực chính quyền; chuẩn hóa tiếng Việt có dấu 100% trong `JobTitleConfigDialog`.
+  - **Kiểm chứng**: Kiểm tra CSDL thực tế đạt 0 chức danh chính quyền, 26 vị trí Đảng, 7 lĩnh vực Đảng; typecheck `apps/admin_khcn`, `apps/api-gateway`, `apps/user-service` đều 0 lỗi; 100% file lưu UTF-8 không BOM.
+
 - [x] **[Hotfix] Khôi phục cấu hình URL gRPC trong API Gateway - Sửa lỗi ECONNREFUSED ::1:5000 (12/10/2026)**
   - **Vấn đề**: API Gateway báo lỗi `InternalServerErrorException: No connection established. Last error: Error: connect ECONNREFUSED ::1:5000` tại `MenusService.getHubApps` và các lời gọi gRPC đến `user-service`.
   - **Nguyên nhân**: Khi thêm cấu hình trần payload 64MB (`channelOptions`) trong commit trước, dòng `url: serviceConfig.URL` trong `apps/api-gateway/src/core/factories/grpc.factory.ts` vô tình bị ghi đè/xóa mất. Khi thiếu thuộc tính `url`, NestJS gRPC client tự động fallback về `localhost:5000` (phân giải thành IPv6 `::1:5000` trong container Linux), dẫn đến từ chối kết nối.
@@ -389,3 +447,15 @@ eport-service v?i pi-management.
 - Phân quyền nghiêm ngặt cho API Gateway: Chuyển đổi mã tài nguyên INTEGRATION (dùng chung cho Workflow) thành API_GATEWAY trên các Controllers của NestJS Backend và file menus.seed.ts. Đảm bảo chỉ những người có quyền System Admin hoặc Org Admin mới thấy được menu và truy xuất được cấu hình.
 
 - Hotfix: Sửa lỗi 403 Forbidden khi Admin cập nhật trạng thái bật/tắt (isActive) API Key và Services. Lý do: PermissionsGuard cũ không đọc được wildcard *.
+
+- [x] **[Hotfix] Khôi phục Tab Định biên & Chức danh trong Chi tiết Đơn vị (/services/admin/organization/[code]) (12/10/2026)**
+  - Khôi phục component `OrganizationStaffing` và các sub-components (`StaffingTable`, `SlotCard`, `JobTitleConfigDialog`, `useStaffingData`).
+  - Khôi phục types (`StaffingReportItem`, `StaffingSlotItem`, payload) và các method API (`getStaffingReport`, `setStaffing`, `setStaffingSlot`).
+  - Gắn lại Tab `staffing` vào trang `[code]/page.tsx`.
+
+- [x] **[Hotfix] Chuẩn hóa Tiếng Việt toàn bộ Đường nối Quy trình (Workflow Edges) từ Backend đến Frontend (12/10/2026)**
+  - Chuẩn hóa toàn bộ nhãn đường nối mô tả (workflow graph edges) từ tiếng Anh sang Tiếng Việt hành chính chuẩn xác 100%.
+  - Cập nhật `definition-validator.service.ts` và `seed-btctu.ts` trong `workflow-service`: bảo toàn trường `label` Tiếng Việt trên các cạnh khi validate/compile.
+  - Cập nhật CSDL MySQL `admin_workflow` (`process_versions`): gán `label` Tiếng Việt cho toàn bộ edges của các quy trình trong hệ thống.
+  - Bổ sung từ điển dịch dự phòng `EDGE_ACTION_LABELS` trong `WorkflowEditorScreen.tsx` để canvas luôn hiển thị Tiếng Việt chuyên nghiệp, không lọt mã code tiếng Anh thô ráp.
+

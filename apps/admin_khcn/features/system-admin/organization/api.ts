@@ -5,8 +5,9 @@ import type {
   CreateUnitPayload,
   UpdateUnitPayload,
   JobTitleItem,
-
-
+  StaffingReportItem,
+  SetStaffingPayload,
+  SetStaffingSlotPayload,
   UpdateJobTitlePayload,
 } from "./types";
 
@@ -91,7 +92,11 @@ export const organizationApi = {
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
     apiClient.put(`/organizations/job-titles/${id}`, payload).then((r: any) => r?.data ?? r),
 
+  setStaffing: (payload: SetStaffingPayload) =>
+    apiClient.post("/organizations/staffing", payload).then((r: any) => r?.data ?? r),
 
+  setStaffingSlot: (payload: SetStaffingSlotPayload) =>
+    apiClient.post("/organizations/staffing-slots", payload).then((r: any) => r?.data ?? r),
 
   getUnitTypes: (): Promise<{ data: any[] }> =>
     apiClient.get("/organizations/unit-types").then((r: any) => ({
@@ -114,8 +119,22 @@ export const organizationApi = {
   /**
    * Lấy báo cáo định biên của một đơn vị: số lượng chỉ tiêu, hiện tại, slot từng vị trí
    */
-  getStaffingReport: (unitId: number): Promise<{ data: any[] }> =>
-    apiClient.get(`/organizations/${unitId}/staffing-report`).then((r: any) => ({
-      data: r?.data ?? [],
-    })),
+  getStaffingReport: (
+    unitId: number
+  ): Promise<{
+    data: StaffingReportItem[];
+    partyReport: StaffingReportItem[];
+    govReport: StaffingReportItem[];
+    allReport: StaffingReportItem[];
+  }> =>
+    apiClient.get(`/organizations/${unitId}/staffing-report`).then((r: any) => {
+      const d = r?.data ?? r;
+      const all = d?.allReport || (Array.isArray(d) ? d : []);
+      return {
+        data: all,
+        partyReport: d?.partyReport || [],
+        govReport: d?.govReport || [],
+        allReport: all,
+      };
+    }),
 };

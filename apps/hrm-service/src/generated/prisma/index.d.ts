@@ -1,6 +1,6 @@
 
 /**
- * Clien
+ * Client
 **/
 
 import * as runtime from './runtime/client.js';
@@ -8,7 +8,7 @@ import $Types = runtime.Types // general types
 import $Public = runtime.Types.Public
 import $Utils = runtime.Types.Utils
 import $Extensions = runtime.Types.Extensions
-import $Result = runtime.Types.Resul
+import $Result = runtime.Types.Result
 
 export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
@@ -19,15 +19,25 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type Employee = $Result.DefaultSelection<Prisma.$EmployeePayload>
 /**
- * Model KpiRuleSe
+ * Model KpiRuleSet
  *
  */
 export type KpiRuleSet = $Result.DefaultSelection<Prisma.$KpiRuleSetPayload>
 /**
- * Model KpiDomainWeigh
+ * Model KpiDomainWeight
  *
  */
 export type KpiDomainWeight = $Result.DefaultSelection<Prisma.$KpiDomainWeightPayload>
+/**
+ * Model KpiFormulaConfig
+ *
+ */
+export type KpiFormulaConfig = $Result.DefaultSelection<Prisma.$KpiFormulaConfigPayload>
+/**
+ * Model KpiFormulaConfigVersion
+ *
+ */
+export type KpiFormulaConfigVersion = $Result.DefaultSelection<Prisma.$KpiFormulaConfigVersionPayload>
 /**
  * Model KpiPeriod
  *
@@ -59,7 +69,7 @@ export type KpiFormTemplateVersion = $Result.DefaultSelection<Prisma.$KpiFormTem
  */
 export type KpiFormTemplateBinding = $Result.DefaultSelection<Prisma.$KpiFormTemplateBindingPayload>
 /**
- * Model KpiFormDocumen
+ * Model KpiFormDocument
  *
  */
 export type KpiFormDocument = $Result.DefaultSelection<Prisma.$KpiFormDocumentPayload>
@@ -79,12 +89,12 @@ export type Task = $Result.DefaultSelection<Prisma.$TaskPayload>
  */
 export type TaskStep = $Result.DefaultSelection<Prisma.$TaskStepPayload>
 /**
- * Model TaskAttachmen
+ * Model TaskAttachment
  *
  */
 export type TaskAttachment = $Result.DefaultSelection<Prisma.$TaskAttachmentPayload>
 /**
- * Model TaskParticipan
+ * Model TaskParticipant
  *
  */
 export type TaskParticipant = $Result.DefaultSelection<Prisma.$TaskParticipantPayload>
@@ -114,7 +124,7 @@ export type TaskRankTemplate = $Result.DefaultSelection<Prisma.$TaskRankTemplate
  */
 export type RankQuota = $Result.DefaultSelection<Prisma.$RankQuotaPayload>
 /**
- * Model OutboxEven
+ * Model OutboxEvent
  *
  */
 export type OutboxEvent = $Result.DefaultSelection<Prisma.$OutboxEventPayload>
@@ -294,6 +304,26 @@ export class PrismaClient<
     * ```
     */
   get kpiDomainWeight(): Prisma.KpiDomainWeightDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.kpiFormulaConfig`: Exposes CRUD operations for the **KpiFormulaConfig** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KpiFormulaConfigs
+    * const kpiFormulaConfigs = await prisma.kpiFormulaConfig.findMany()
+    * ```
+    */
+  get kpiFormulaConfig(): Prisma.KpiFormulaConfigDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.kpiFormulaConfigVersion`: Exposes CRUD operations for the **KpiFormulaConfigVersion** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KpiFormulaConfigVersions
+    * const kpiFormulaConfigVersions = await prisma.kpiFormulaConfigVersion.findMany()
+    * ```
+    */
+  get kpiFormulaConfigVersion(): Prisma.KpiFormulaConfigVersionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.kpiPeriod`: Exposes CRUD operations for the **KpiPeriod** model.
@@ -527,11 +557,11 @@ export namespace Prisma {
   * Extensions
   */
   export import Extension = $Extensions.UserArgs
-  export import getExtensionContext = runtime.Extensions.getExtensionContex
+  export import getExtensionContext = runtime.Extensions.getExtensionContext
   export import Args = $Public.Args
   export import Payload = $Public.Payload
-  export import Result = $Public.Resul
-  export import Exact = $Public.Exac
+  export import Result = $Public.Result
+  export import Exact = $Public.Exact
 
   /**
    * Prisma Client JS version: 7.9.0
@@ -550,10 +580,10 @@ export namespace Prisma {
 
 
   export import Bytes = runtime.Bytes
-  export import JsonObject = runtime.JsonObjec
+  export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
-  export import InputJsonObject = runtime.InputJsonObjec
+  export import InputJsonObject = runtime.InputJsonObject
   export import InputJsonArray = runtime.InputJsonArray
   export import InputJsonValue = runtime.InputJsonValue
 
@@ -662,7 +692,7 @@ export namespace Prisma {
   export type TrueKeys<T> = TruthyKeys<Prisma__Pick<T, RequiredKeys<T>>>
 
   /**
-   * Subse
+   * Subset
    * @desc From `T` pick properties that exist in `U`. Simple version of Intersection
    */
   export type Subset<T, U> = {
@@ -683,7 +713,7 @@ export namespace Prisma {
     [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
 
   /**
-   * SelectSubse
+   * SelectSubset
    * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
    * Additionally, it validates, if both select and include are present. If the case, it errors.
    */
@@ -714,7 +744,7 @@ export namespace Prisma {
   type XOR<T, U> =
     T extends object ?
     U extends object ?
-      ((Without<T, U> & U) | (Without<U, T> & T)) & objec
+      ((Without<T, U> & U) | (Without<U, T> & T)) & object
     : U : T
 
 
@@ -727,9 +757,9 @@ export namespace Prisma {
   ? False
   : T extends Uint8Array
   ? False
-  : T extends BigIn
+  : T extends BigInt
   ? False
-  : T extends objec
+  : T extends object
   ? True
   : False
 
@@ -740,7 +770,7 @@ export namespace Prisma {
   export type UnEnumerate<T extends unknown> = T extends Array<infer U> ? U : T
 
   /**
-   * From ts-toolbel
+   * From ts-toolbelt
    */
 
   type __Either<O extends object, K extends Key> = Omit<O, K> &
@@ -896,7 +926,7 @@ export namespace Prisma {
       Or<Extends<'OR', K>, Extends<'AND', K>>,
       Extends<'NOT', K>
     > extends True
-      ? // infer is only needed to not hit TS limi
+      ? // infer is only needed to not hit TS limit
         // based on the brilliant idea of Pierre-Antoine Mills
         // https://github.com/microsoft/TypeScript/issues/30188#issuecomment-478938437
         T[K] extends infer TK
@@ -934,6 +964,8 @@ export namespace Prisma {
     Employee: 'Employee',
     KpiRuleSet: 'KpiRuleSet',
     KpiDomainWeight: 'KpiDomainWeight',
+    KpiFormulaConfig: 'KpiFormulaConfig',
+    KpiFormulaConfigVersion: 'KpiFormulaConfigVersion',
     KpiPeriod: 'KpiPeriod',
     KpiEvaluation: 'KpiEvaluation',
     KpiEvaluationTask: 'KpiEvaluationTask',
@@ -968,7 +1000,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormTemplateVersion" | "kpiFormTemplateBinding" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskNotificationLog" | "taskRankTemplate" | "rankQuota" | "outboxEvent" | "processedCommand"
+      modelProps: "employee" | "kpiRuleSet" | "kpiDomainWeight" | "kpiFormulaConfig" | "kpiFormulaConfigVersion" | "kpiPeriod" | "kpiEvaluation" | "kpiEvaluationTask" | "kpiFormTemplate" | "kpiFormTemplateVersion" | "kpiFormTemplateBinding" | "kpiFormDocument" | "masterPlan" | "task" | "taskStep" | "taskAttachment" | "taskParticipant" | "taskClosure" | "taskHistory" | "taskNotificationLog" | "taskRankTemplate" | "rankQuota" | "outboxEvent" | "processedCommand"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1167,6 +1199,138 @@ export namespace Prisma {
           count: {
             args: Prisma.KpiDomainWeightCountArgs<ExtArgs>
             result: $Utils.Optional<KpiDomainWeightCountAggregateOutputType> | number
+          }
+        }
+      }
+      KpiFormulaConfig: {
+        payload: Prisma.$KpiFormulaConfigPayload<ExtArgs>
+        fields: Prisma.KpiFormulaConfigFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KpiFormulaConfigFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KpiFormulaConfigFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>
+          }
+          findFirst: {
+            args: Prisma.KpiFormulaConfigFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KpiFormulaConfigFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>
+          }
+          findMany: {
+            args: Prisma.KpiFormulaConfigFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>[]
+          }
+          create: {
+            args: Prisma.KpiFormulaConfigCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>
+          }
+          createMany: {
+            args: Prisma.KpiFormulaConfigCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.KpiFormulaConfigDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>
+          }
+          update: {
+            args: Prisma.KpiFormulaConfigUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>
+          }
+          deleteMany: {
+            args: Prisma.KpiFormulaConfigDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KpiFormulaConfigUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.KpiFormulaConfigUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigPayload>
+          }
+          aggregate: {
+            args: Prisma.KpiFormulaConfigAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKpiFormulaConfig>
+          }
+          groupBy: {
+            args: Prisma.KpiFormulaConfigGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KpiFormulaConfigGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KpiFormulaConfigCountArgs<ExtArgs>
+            result: $Utils.Optional<KpiFormulaConfigCountAggregateOutputType> | number
+          }
+        }
+      }
+      KpiFormulaConfigVersion: {
+        payload: Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>
+        fields: Prisma.KpiFormulaConfigVersionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KpiFormulaConfigVersionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KpiFormulaConfigVersionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>
+          }
+          findFirst: {
+            args: Prisma.KpiFormulaConfigVersionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KpiFormulaConfigVersionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>
+          }
+          findMany: {
+            args: Prisma.KpiFormulaConfigVersionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>[]
+          }
+          create: {
+            args: Prisma.KpiFormulaConfigVersionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>
+          }
+          createMany: {
+            args: Prisma.KpiFormulaConfigVersionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          delete: {
+            args: Prisma.KpiFormulaConfigVersionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>
+          }
+          update: {
+            args: Prisma.KpiFormulaConfigVersionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>
+          }
+          deleteMany: {
+            args: Prisma.KpiFormulaConfigVersionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KpiFormulaConfigVersionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.KpiFormulaConfigVersionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KpiFormulaConfigVersionPayload>
+          }
+          aggregate: {
+            args: Prisma.KpiFormulaConfigVersionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKpiFormulaConfigVersion>
+          }
+          groupBy: {
+            args: Prisma.KpiFormulaConfigVersionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KpiFormulaConfigVersionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KpiFormulaConfigVersionCountArgs<ExtArgs>
+            result: $Utils.Optional<KpiFormulaConfigVersionCountAggregateOutputType> | number
           }
         }
       }
@@ -2449,13 +2613,13 @@ export namespace Prisma {
     }
   }
   export const defineExtension: $Extensions.ExtendsHook<"define", Prisma.TypeMapCb, $Extensions.DefaultArgs>
-  export type DefaultPrismaClient = PrismaClien
+  export type DefaultPrismaClient = PrismaClient
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
   export interface PrismaClientOptions {
     /**
      * @default "colorless"
      */
-    errorFormat?: ErrorForma
+    errorFormat?: ErrorFormat
     /**
      * @example
      * ```
@@ -2470,7 +2634,7 @@ export namespace Prisma {
      *   { emit: 'event', level: 'error' }
      * ]
      *
-     * / Emit as events and log to stdou
+     * / Emit as events and log to stdout
      * og: [
      *  { emit: 'stdout', level: 'query' },
      *  { emit: 'stdout', level: 'info' },
@@ -2547,28 +2711,30 @@ export namespace Prisma {
     comments?: runtime.SqlCommenterPlugin[]
   }
   export type GlobalOmitConfig = {
-    employee?: EmployeeOmi
-    kpiRuleSet?: KpiRuleSetOmi
-    kpiDomainWeight?: KpiDomainWeightOmi
-    kpiPeriod?: KpiPeriodOmi
-    kpiEvaluation?: KpiEvaluationOmi
-    kpiEvaluationTask?: KpiEvaluationTaskOmi
-    kpiFormTemplate?: KpiFormTemplateOmi
-    kpiFormTemplateVersion?: KpiFormTemplateVersionOmi
-    kpiFormTemplateBinding?: KpiFormTemplateBindingOmi
-    kpiFormDocument?: KpiFormDocumentOmi
-    masterPlan?: MasterPlanOmi
-    task?: TaskOmi
-    taskStep?: TaskStepOmi
-    taskAttachment?: TaskAttachmentOmi
-    taskParticipant?: TaskParticipantOmi
-    taskClosure?: TaskClosureOmi
-    taskHistory?: TaskHistoryOmi
-    taskNotificationLog?: TaskNotificationLogOmi
-    taskRankTemplate?: TaskRankTemplateOmi
-    rankQuota?: RankQuotaOmi
-    outboxEvent?: OutboxEventOmi
-    processedCommand?: ProcessedCommandOmi
+    employee?: EmployeeOmit
+    kpiRuleSet?: KpiRuleSetOmit
+    kpiDomainWeight?: KpiDomainWeightOmit
+    kpiFormulaConfig?: KpiFormulaConfigOmit
+    kpiFormulaConfigVersion?: KpiFormulaConfigVersionOmit
+    kpiPeriod?: KpiPeriodOmit
+    kpiEvaluation?: KpiEvaluationOmit
+    kpiEvaluationTask?: KpiEvaluationTaskOmit
+    kpiFormTemplate?: KpiFormTemplateOmit
+    kpiFormTemplateVersion?: KpiFormTemplateVersionOmit
+    kpiFormTemplateBinding?: KpiFormTemplateBindingOmit
+    kpiFormDocument?: KpiFormDocumentOmit
+    masterPlan?: MasterPlanOmit
+    task?: TaskOmit
+    taskStep?: TaskStepOmit
+    taskAttachment?: TaskAttachmentOmit
+    taskParticipant?: TaskParticipantOmit
+    taskClosure?: TaskClosureOmit
+    taskHistory?: TaskHistoryOmit
+    taskNotificationLog?: TaskNotificationLogOmit
+    taskRankTemplate?: TaskRankTemplateOmit
+    rankQuota?: RankQuotaOmit
+    outboxEvent?: OutboxEventOmit
+    processedCommand?: ProcessedCommandOmit
   }
 
   /* Types for Logging */
@@ -2675,21 +2841,21 @@ export namespace Prisma {
    * EmployeeCountOutputType without action
    */
   export type EmployeeCountOutputTypeCountKpiEvaluationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
   }
 
   /**
    * EmployeeCountOutputType without action
    */
   export type EmployeeCountOutputTypeCountKpiReviewsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
   }
 
   /**
    * EmployeeCountOutputType without action
    */
   export type EmployeeCountOutputTypeCountTaskParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
   }
 
 
@@ -2722,14 +2888,45 @@ export namespace Prisma {
    * KpiRuleSetCountOutputType without action
    */
   export type KpiRuleSetCountOutputTypeCountDomainWeightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
   }
 
   /**
    * KpiRuleSetCountOutputType without action
    */
   export type KpiRuleSetCountOutputTypeCountEvaluationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
+  }
+
+
+  /**
+   * Count Type KpiFormulaConfigCountOutputType
+   */
+
+  export type KpiFormulaConfigCountOutputType = {
+    versions: number
+  }
+
+  export type KpiFormulaConfigCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    versions?: boolean | KpiFormulaConfigCountOutputTypeCountVersionsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * KpiFormulaConfigCountOutputType without action
+   */
+  export type KpiFormulaConfigCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigCountOutputType
+     */
+    select?: KpiFormulaConfigCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * KpiFormulaConfigCountOutputType without action
+   */
+  export type KpiFormulaConfigCountOutputTypeCountVersionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KpiFormulaConfigVersionWhereInput
   }
 
 
@@ -2760,7 +2957,7 @@ export namespace Prisma {
    * KpiPeriodCountOutputType without action
    */
   export type KpiPeriodCountOutputTypeCountEvaluationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
   }
 
 
@@ -2793,14 +2990,14 @@ export namespace Prisma {
    * KpiEvaluationCountOutputType without action
    */
   export type KpiEvaluationCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
   }
 
   /**
    * KpiEvaluationCountOutputType without action
    */
   export type KpiEvaluationCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
   }
 
 
@@ -2835,21 +3032,21 @@ export namespace Prisma {
    * KpiFormTemplateCountOutputType without action
    */
   export type KpiFormTemplateCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
   }
 
   /**
    * KpiFormTemplateCountOutputType without action
    */
   export type KpiFormTemplateCountOutputTypeCountBindingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
   }
 
   /**
    * KpiFormTemplateCountOutputType without action
    */
   export type KpiFormTemplateCountOutputTypeCountVersionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
   }
 
 
@@ -2880,7 +3077,7 @@ export namespace Prisma {
    * MasterPlanCountOutputType without action
    */
   export type MasterPlanCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
 
@@ -2925,56 +3122,56 @@ export namespace Prisma {
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountKpiEvaluationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountAttachmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountStepsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountAncestorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountDescendantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
   }
 
   /**
    * TaskCountOutputType without action
    */
   export type TaskCountOutputTypeCountNotificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
   }
 
 
@@ -3203,7 +3400,7 @@ export namespace Prisma {
     /**
      * Filter which Employee to aggregate.
      */
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -3215,7 +3412,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: EmployeeWhereUniqueInpu
+    cursor?: EmployeeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -3272,10 +3469,10 @@ export namespace Prisma {
 
 
   export type EmployeeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     orderBy?: EmployeeOrderByWithAggregationInput | EmployeeOrderByWithAggregationInput[]
     by: EmployeeScalarFieldEnum[] | EmployeeScalarFieldEnum
-    having?: EmployeeScalarWhereWithAggregatesInpu
+    having?: EmployeeScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: EmployeeCountAggregateInputType | true
@@ -3649,7 +3846,7 @@ export namespace Prisma {
      * // Count the number of Employees
      * const count = await prisma.employee.count({
      *   where: {
-     *     // ... the filter for the Employees we want to coun
+     *     // ... the filter for the Employees we want to count
      *   }
      * })
     **/
@@ -3695,7 +3892,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {EmployeeGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -3860,7 +4057,7 @@ export namespace Prisma {
     /**
      * Filter, which Employee to fetch.
      */
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
   }
 
   /**
@@ -3882,11 +4079,11 @@ export namespace Prisma {
     /**
      * Filter, which Employee to fetch.
      */
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
   }
 
   /**
-   * Employee findFirs
+   * Employee findFirst
    */
   export type EmployeeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -3904,7 +4101,7 @@ export namespace Prisma {
     /**
      * Filter, which Employee to fetch.
      */
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -3916,7 +4113,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for Employees.
      */
-    cursor?: EmployeeWhereUniqueInpu
+    cursor?: EmployeeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -3956,7 +4153,7 @@ export namespace Prisma {
     /**
      * Filter, which Employee to fetch.
      */
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -3968,7 +4165,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for Employees.
      */
-    cursor?: EmployeeWhereUniqueInpu
+    cursor?: EmployeeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -4008,7 +4205,7 @@ export namespace Prisma {
     /**
      * Filter, which Employees to fetch.
      */
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -4020,7 +4217,7 @@ export namespace Prisma {
      *
      * Sets the position for listing Employees.
      */
-    cursor?: EmployeeWhereUniqueInpu
+    cursor?: EmployeeWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -4097,7 +4294,7 @@ export namespace Prisma {
     /**
      * Choose, which Employee to update.
      */
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
   }
 
   /**
@@ -4111,7 +4308,7 @@ export namespace Prisma {
     /**
      * Filter which Employees to update
      */
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     /**
      * Limit how many Employees to update.
      */
@@ -4119,7 +4316,7 @@ export namespace Prisma {
   }
 
   /**
-   * Employee upser
+   * Employee upsert
    */
   export type EmployeeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -4137,7 +4334,7 @@ export namespace Prisma {
     /**
      * The filter to search for the Employee to update in case it exists.
      */
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
     /**
      * In case the Employee found by the `where` argument doesn't exist, create a new Employee with this data.
      */
@@ -4167,7 +4364,7 @@ export namespace Prisma {
     /**
      * Filter which Employee to delete.
      */
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
   }
 
   /**
@@ -4177,7 +4374,7 @@ export namespace Prisma {
     /**
      * Filter which Employees to delete
      */
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     /**
      * Limit how many Employees to delete.
      */
@@ -4200,9 +4397,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationInclude<ExtArgs> | null
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     orderBy?: KpiEvaluationOrderByWithRelationInput | KpiEvaluationOrderByWithRelationInput[]
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiEvaluationScalarFieldEnum | KpiEvaluationScalarFieldEnum[]
@@ -4224,9 +4421,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationInclude<ExtArgs> | null
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     orderBy?: KpiEvaluationOrderByWithRelationInput | KpiEvaluationOrderByWithRelationInput[]
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiEvaluationScalarFieldEnum | KpiEvaluationScalarFieldEnum[]
@@ -4237,20 +4434,20 @@ export namespace Prisma {
    */
   export type Employee$taskParticipantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: TaskParticipantInclude<ExtArgs> | null
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     orderBy?: TaskParticipantOrderByWithRelationInput | TaskParticipantOrderByWithRelationInput[]
-    cursor?: TaskParticipantWhereUniqueInpu
+    cursor?: TaskParticipantWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskParticipantScalarFieldEnum | TaskParticipantScalarFieldEnum[]
@@ -4276,7 +4473,7 @@ export namespace Prisma {
 
 
   /**
-   * Model KpiRuleSe
+   * Model KpiRuleSet
    */
 
   export type AggregateKpiRuleSet = {
@@ -4410,7 +4607,7 @@ export namespace Prisma {
     /**
      * Filter which KpiRuleSet to aggregate.
      */
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -4422,7 +4619,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiRuleSetWhereUniqueInpu
+    cursor?: KpiRuleSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -4479,10 +4676,10 @@ export namespace Prisma {
 
 
   export type KpiRuleSetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     orderBy?: KpiRuleSetOrderByWithAggregationInput | KpiRuleSetOrderByWithAggregationInput[]
     by: KpiRuleSetScalarFieldEnum[] | KpiRuleSetScalarFieldEnum
-    having?: KpiRuleSetScalarWhereWithAggregatesInpu
+    having?: KpiRuleSetScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiRuleSetCountAggregateInputType | true
@@ -4598,9 +4795,9 @@ export namespace Prisma {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiRuleSet'], meta: { name: 'KpiRuleSet' } }
     /**
      * Find zero or one KpiRuleSet that matches the filter.
-     * @param {KpiRuleSetFindUniqueArgs} args - Arguments to find a KpiRuleSe
+     * @param {KpiRuleSetFindUniqueArgs} args - Arguments to find a KpiRuleSet
      * @example
-     * // Get one KpiRuleSe
+     * // Get one KpiRuleSet
      * const kpiRuleSet = await prisma.kpiRuleSet.findUnique({
      *   where: {
      *     // ... provide filter here
@@ -4612,9 +4809,9 @@ export namespace Prisma {
     /**
      * Find one KpiRuleSet that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {KpiRuleSetFindUniqueOrThrowArgs} args - Arguments to find a KpiRuleSe
+     * @param {KpiRuleSetFindUniqueOrThrowArgs} args - Arguments to find a KpiRuleSet
      * @example
-     * // Get one KpiRuleSe
+     * // Get one KpiRuleSet
      * const kpiRuleSet = await prisma.kpiRuleSet.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -4627,9 +4824,9 @@ export namespace Prisma {
      * Find the first KpiRuleSet that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiRuleSetFindFirstArgs} args - Arguments to find a KpiRuleSe
+     * @param {KpiRuleSetFindFirstArgs} args - Arguments to find a KpiRuleSet
      * @example
-     * // Get one KpiRuleSe
+     * // Get one KpiRuleSet
      * const kpiRuleSet = await prisma.kpiRuleSet.findFirst({
      *   where: {
      *     // ... provide filter here
@@ -4643,9 +4840,9 @@ export namespace Prisma {
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiRuleSetFindFirstOrThrowArgs} args - Arguments to find a KpiRuleSe
+     * @param {KpiRuleSetFindFirstOrThrowArgs} args - Arguments to find a KpiRuleSet
      * @example
-     * // Get one KpiRuleSe
+     * // Get one KpiRuleSet
      * const kpiRuleSet = await prisma.kpiRuleSet.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -4676,10 +4873,10 @@ export namespace Prisma {
      * Create a KpiRuleSet.
      * @param {KpiRuleSetCreateArgs} args - Arguments to create a KpiRuleSet.
      * @example
-     * // Create one KpiRuleSe
+     * // Create one KpiRuleSet
      * const KpiRuleSet = await prisma.kpiRuleSet.create({
      *   data: {
-     *     // ... data to create a KpiRuleSe
+     *     // ... data to create a KpiRuleSet
      *   }
      * })
      *
@@ -4704,10 +4901,10 @@ export namespace Prisma {
      * Delete a KpiRuleSet.
      * @param {KpiRuleSetDeleteArgs} args - Arguments to delete one KpiRuleSet.
      * @example
-     * // Delete one KpiRuleSe
+     * // Delete one KpiRuleSet
      * const KpiRuleSet = await prisma.kpiRuleSet.delete({
      *   where: {
-     *     // ... filter to delete one KpiRuleSe
+     *     // ... filter to delete one KpiRuleSet
      *   }
      * })
      *
@@ -4718,7 +4915,7 @@ export namespace Prisma {
      * Update one KpiRuleSet.
      * @param {KpiRuleSetUpdateArgs} args - Arguments to update one KpiRuleSet.
      * @example
-     * // Update one KpiRuleSe
+     * // Update one KpiRuleSet
      * const kpiRuleSet = await prisma.kpiRuleSet.update({
      *   where: {
      *     // ... provide filter here
@@ -4768,10 +4965,10 @@ export namespace Prisma {
      * Create or update one KpiRuleSet.
      * @param {KpiRuleSetUpsertArgs} args - Arguments to update or create a KpiRuleSet.
      * @example
-     * // Update or create a KpiRuleSe
+     * // Update or create a KpiRuleSet
      * const kpiRuleSet = await prisma.kpiRuleSet.upsert({
      *   create: {
-     *     // ... data to create a KpiRuleSe
+     *     // ... data to create a KpiRuleSet
      *   },
      *   update: {
      *     // ... in case it already exists, update
@@ -4793,7 +4990,7 @@ export namespace Prisma {
      * // Count the number of KpiRuleSets
      * const count = await prisma.kpiRuleSet.count({
      *   where: {
-     *     // ... the filter for the KpiRuleSets we want to coun
+     *     // ... the filter for the KpiRuleSets we want to count
      *   }
      * })
     **/
@@ -4839,7 +5036,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiRuleSetGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -4974,11 +5171,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -4988,7 +5185,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiRuleSet to fetch.
      */
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
   }
 
   /**
@@ -4996,11 +5193,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5010,19 +5207,19 @@ export namespace Prisma {
     /**
      * Filter, which KpiRuleSet to fetch.
      */
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
   }
 
   /**
-   * KpiRuleSet findFirs
+   * KpiRuleSet findFirst
    */
   export type KpiRuleSetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5032,7 +5229,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiRuleSet to fetch.
      */
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -5044,7 +5241,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiRuleSets.
      */
-    cursor?: KpiRuleSetWhereUniqueInpu
+    cursor?: KpiRuleSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -5070,11 +5267,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5084,7 +5281,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiRuleSet to fetch.
      */
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -5096,7 +5293,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiRuleSets.
      */
-    cursor?: KpiRuleSetWhereUniqueInpu
+    cursor?: KpiRuleSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -5122,11 +5319,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5136,7 +5333,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiRuleSets to fetch.
      */
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -5148,7 +5345,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiRuleSets.
      */
-    cursor?: KpiRuleSetWhereUniqueInpu
+    cursor?: KpiRuleSetWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -5174,11 +5371,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5207,11 +5404,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5225,7 +5422,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiRuleSet to update.
      */
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
   }
 
   /**
@@ -5239,7 +5436,7 @@ export namespace Prisma {
     /**
      * Filter which KpiRuleSets to update
      */
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     /**
      * Limit how many KpiRuleSets to update.
      */
@@ -5247,15 +5444,15 @@ export namespace Prisma {
   }
 
   /**
-   * KpiRuleSet upser
+   * KpiRuleSet upsert
    */
   export type KpiRuleSetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5265,7 +5462,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiRuleSet to update in case it exists.
      */
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
     /**
      * In case the KpiRuleSet found by the `where` argument doesn't exist, create a new KpiRuleSet with this data.
      */
@@ -5281,11 +5478,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5295,7 +5492,7 @@ export namespace Prisma {
     /**
      * Filter which KpiRuleSet to delete.
      */
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
   }
 
   /**
@@ -5305,7 +5502,7 @@ export namespace Prisma {
     /**
      * Filter which KpiRuleSets to delete
      */
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     /**
      * Limit how many KpiRuleSets to delete.
      */
@@ -5317,20 +5514,20 @@ export namespace Prisma {
    */
   export type KpiRuleSet$domainWeightsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: KpiDomainWeightInclude<ExtArgs> | null
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     orderBy?: KpiDomainWeightOrderByWithRelationInput | KpiDomainWeightOrderByWithRelationInput[]
-    cursor?: KpiDomainWeightWhereUniqueInpu
+    cursor?: KpiDomainWeightWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiDomainWeightScalarFieldEnum | KpiDomainWeightScalarFieldEnum[]
@@ -5352,9 +5549,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationInclude<ExtArgs> | null
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     orderBy?: KpiEvaluationOrderByWithRelationInput | KpiEvaluationOrderByWithRelationInput[]
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiEvaluationScalarFieldEnum | KpiEvaluationScalarFieldEnum[]
@@ -5365,11 +5562,11 @@ export namespace Prisma {
    */
   export type KpiRuleSetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
@@ -5380,7 +5577,7 @@ export namespace Prisma {
 
 
   /**
-   * Model KpiDomainWeigh
+   * Model KpiDomainWeight
    */
 
   export type AggregateKpiDomainWeight = {
@@ -5500,7 +5697,7 @@ export namespace Prisma {
     /**
      * Filter which KpiDomainWeight to aggregate.
      */
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -5512,7 +5709,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiDomainWeightWhereUniqueInpu
+    cursor?: KpiDomainWeightWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -5569,10 +5766,10 @@ export namespace Prisma {
 
 
   export type KpiDomainWeightGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     orderBy?: KpiDomainWeightOrderByWithAggregationInput | KpiDomainWeightOrderByWithAggregationInput[]
     by: KpiDomainWeightScalarFieldEnum[] | KpiDomainWeightScalarFieldEnum
-    having?: KpiDomainWeightScalarWhereWithAggregatesInpu
+    having?: KpiDomainWeightScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiDomainWeightCountAggregateInputType | true
@@ -5671,9 +5868,9 @@ export namespace Prisma {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiDomainWeight'], meta: { name: 'KpiDomainWeight' } }
     /**
      * Find zero or one KpiDomainWeight that matches the filter.
-     * @param {KpiDomainWeightFindUniqueArgs} args - Arguments to find a KpiDomainWeigh
+     * @param {KpiDomainWeightFindUniqueArgs} args - Arguments to find a KpiDomainWeight
      * @example
-     * // Get one KpiDomainWeigh
+     * // Get one KpiDomainWeight
      * const kpiDomainWeight = await prisma.kpiDomainWeight.findUnique({
      *   where: {
      *     // ... provide filter here
@@ -5685,9 +5882,9 @@ export namespace Prisma {
     /**
      * Find one KpiDomainWeight that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {KpiDomainWeightFindUniqueOrThrowArgs} args - Arguments to find a KpiDomainWeigh
+     * @param {KpiDomainWeightFindUniqueOrThrowArgs} args - Arguments to find a KpiDomainWeight
      * @example
-     * // Get one KpiDomainWeigh
+     * // Get one KpiDomainWeight
      * const kpiDomainWeight = await prisma.kpiDomainWeight.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -5700,9 +5897,9 @@ export namespace Prisma {
      * Find the first KpiDomainWeight that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiDomainWeightFindFirstArgs} args - Arguments to find a KpiDomainWeigh
+     * @param {KpiDomainWeightFindFirstArgs} args - Arguments to find a KpiDomainWeight
      * @example
-     * // Get one KpiDomainWeigh
+     * // Get one KpiDomainWeight
      * const kpiDomainWeight = await prisma.kpiDomainWeight.findFirst({
      *   where: {
      *     // ... provide filter here
@@ -5716,9 +5913,9 @@ export namespace Prisma {
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiDomainWeightFindFirstOrThrowArgs} args - Arguments to find a KpiDomainWeigh
+     * @param {KpiDomainWeightFindFirstOrThrowArgs} args - Arguments to find a KpiDomainWeight
      * @example
-     * // Get one KpiDomainWeigh
+     * // Get one KpiDomainWeight
      * const kpiDomainWeight = await prisma.kpiDomainWeight.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -5749,10 +5946,10 @@ export namespace Prisma {
      * Create a KpiDomainWeight.
      * @param {KpiDomainWeightCreateArgs} args - Arguments to create a KpiDomainWeight.
      * @example
-     * // Create one KpiDomainWeigh
+     * // Create one KpiDomainWeight
      * const KpiDomainWeight = await prisma.kpiDomainWeight.create({
      *   data: {
-     *     // ... data to create a KpiDomainWeigh
+     *     // ... data to create a KpiDomainWeight
      *   }
      * })
      *
@@ -5777,10 +5974,10 @@ export namespace Prisma {
      * Delete a KpiDomainWeight.
      * @param {KpiDomainWeightDeleteArgs} args - Arguments to delete one KpiDomainWeight.
      * @example
-     * // Delete one KpiDomainWeigh
+     * // Delete one KpiDomainWeight
      * const KpiDomainWeight = await prisma.kpiDomainWeight.delete({
      *   where: {
-     *     // ... filter to delete one KpiDomainWeigh
+     *     // ... filter to delete one KpiDomainWeight
      *   }
      * })
      *
@@ -5791,7 +5988,7 @@ export namespace Prisma {
      * Update one KpiDomainWeight.
      * @param {KpiDomainWeightUpdateArgs} args - Arguments to update one KpiDomainWeight.
      * @example
-     * // Update one KpiDomainWeigh
+     * // Update one KpiDomainWeight
      * const kpiDomainWeight = await prisma.kpiDomainWeight.update({
      *   where: {
      *     // ... provide filter here
@@ -5841,10 +6038,10 @@ export namespace Prisma {
      * Create or update one KpiDomainWeight.
      * @param {KpiDomainWeightUpsertArgs} args - Arguments to update or create a KpiDomainWeight.
      * @example
-     * // Update or create a KpiDomainWeigh
+     * // Update or create a KpiDomainWeight
      * const kpiDomainWeight = await prisma.kpiDomainWeight.upsert({
      *   create: {
-     *     // ... data to create a KpiDomainWeigh
+     *     // ... data to create a KpiDomainWeight
      *   },
      *   update: {
      *     // ... in case it already exists, update
@@ -5866,7 +6063,7 @@ export namespace Prisma {
      * // Count the number of KpiDomainWeights
      * const count = await prisma.kpiDomainWeight.count({
      *   where: {
-     *     // ... the filter for the KpiDomainWeights we want to coun
+     *     // ... the filter for the KpiDomainWeights we want to count
      *   }
      * })
     **/
@@ -5912,7 +6109,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiDomainWeightGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -6043,11 +6240,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6057,7 +6254,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiDomainWeight to fetch.
      */
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
   }
 
   /**
@@ -6065,11 +6262,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6079,19 +6276,19 @@ export namespace Prisma {
     /**
      * Filter, which KpiDomainWeight to fetch.
      */
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
   }
 
   /**
-   * KpiDomainWeight findFirs
+   * KpiDomainWeight findFirst
    */
   export type KpiDomainWeightFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6101,7 +6298,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiDomainWeight to fetch.
      */
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -6113,7 +6310,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiDomainWeights.
      */
-    cursor?: KpiDomainWeightWhereUniqueInpu
+    cursor?: KpiDomainWeightWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -6139,11 +6336,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6153,7 +6350,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiDomainWeight to fetch.
      */
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -6165,7 +6362,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiDomainWeights.
      */
-    cursor?: KpiDomainWeightWhereUniqueInpu
+    cursor?: KpiDomainWeightWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -6191,11 +6388,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6205,7 +6402,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiDomainWeights to fetch.
      */
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -6217,7 +6414,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiDomainWeights.
      */
-    cursor?: KpiDomainWeightWhereUniqueInpu
+    cursor?: KpiDomainWeightWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -6243,11 +6440,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6276,11 +6473,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6294,7 +6491,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiDomainWeight to update.
      */
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
   }
 
   /**
@@ -6308,7 +6505,7 @@ export namespace Prisma {
     /**
      * Filter which KpiDomainWeights to update
      */
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     /**
      * Limit how many KpiDomainWeights to update.
      */
@@ -6316,15 +6513,15 @@ export namespace Prisma {
   }
 
   /**
-   * KpiDomainWeight upser
+   * KpiDomainWeight upsert
    */
   export type KpiDomainWeightUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6334,7 +6531,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiDomainWeight to update in case it exists.
      */
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
     /**
      * In case the KpiDomainWeight found by the `where` argument doesn't exist, create a new KpiDomainWeight with this data.
      */
@@ -6350,11 +6547,11 @@ export namespace Prisma {
    */
   export type KpiDomainWeightDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
@@ -6364,7 +6561,7 @@ export namespace Prisma {
     /**
      * Filter which KpiDomainWeight to delete.
      */
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
   }
 
   /**
@@ -6374,7 +6571,7 @@ export namespace Prisma {
     /**
      * Filter which KpiDomainWeights to delete
      */
-    where?: KpiDomainWeightWhereInpu
+    where?: KpiDomainWeightWhereInput
     /**
      * Limit how many KpiDomainWeights to delete.
      */
@@ -6386,17 +6583,2012 @@ export namespace Prisma {
    */
   export type KpiDomainWeightDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiDomainWeigh
+     * Select specific fields to fetch from the KpiDomainWeight
      */
     select?: KpiDomainWeightSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiDomainWeigh
+     * Omit specific fields from the KpiDomainWeight
      */
     omit?: KpiDomainWeightOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: KpiDomainWeightInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KpiFormulaConfig
+   */
+
+  export type AggregateKpiFormulaConfig = {
+    _count: KpiFormulaConfigCountAggregateOutputType | null
+    _avg: KpiFormulaConfigAvgAggregateOutputType | null
+    _sum: KpiFormulaConfigSumAggregateOutputType | null
+    _min: KpiFormulaConfigMinAggregateOutputType | null
+    _max: KpiFormulaConfigMaxAggregateOutputType | null
+  }
+
+  export type KpiFormulaConfigAvgAggregateOutputType = {
+    id: number | null
+    version: number | null
+  }
+
+  export type KpiFormulaConfigSumAggregateOutputType = {
+    id: number | null
+    version: number | null
+  }
+
+  export type KpiFormulaConfigMinAggregateOutputType = {
+    id: number | null
+    organizationId: string | null
+    version: number | null
+    updatedBy: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KpiFormulaConfigMaxAggregateOutputType = {
+    id: number | null
+    organizationId: string | null
+    version: number | null
+    updatedBy: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KpiFormulaConfigCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    version: number
+    settings: number
+    updatedBy: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type KpiFormulaConfigAvgAggregateInputType = {
+    id?: true
+    version?: true
+  }
+
+  export type KpiFormulaConfigSumAggregateInputType = {
+    id?: true
+    version?: true
+  }
+
+  export type KpiFormulaConfigMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    version?: true
+    updatedBy?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KpiFormulaConfigMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    version?: true
+    updatedBy?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KpiFormulaConfigCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    version?: true
+    settings?: true
+    updatedBy?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type KpiFormulaConfigAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KpiFormulaConfig to aggregate.
+     */
+    where?: KpiFormulaConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigs to fetch.
+     */
+    orderBy?: KpiFormulaConfigOrderByWithRelationInput | KpiFormulaConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: KpiFormulaConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned KpiFormulaConfigs
+    **/
+    _count?: true | KpiFormulaConfigCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: KpiFormulaConfigAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: KpiFormulaConfigSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: KpiFormulaConfigMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: KpiFormulaConfigMaxAggregateInputType
+  }
+
+  export type GetKpiFormulaConfigAggregateType<T extends KpiFormulaConfigAggregateArgs> = {
+        [P in keyof T & keyof AggregateKpiFormulaConfig]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKpiFormulaConfig[P]>
+      : GetScalarType<T[P], AggregateKpiFormulaConfig[P]>
+  }
+
+
+
+
+  export type KpiFormulaConfigGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KpiFormulaConfigWhereInput
+    orderBy?: KpiFormulaConfigOrderByWithAggregationInput | KpiFormulaConfigOrderByWithAggregationInput[]
+    by: KpiFormulaConfigScalarFieldEnum[] | KpiFormulaConfigScalarFieldEnum
+    having?: KpiFormulaConfigScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KpiFormulaConfigCountAggregateInputType | true
+    _avg?: KpiFormulaConfigAvgAggregateInputType
+    _sum?: KpiFormulaConfigSumAggregateInputType
+    _min?: KpiFormulaConfigMinAggregateInputType
+    _max?: KpiFormulaConfigMaxAggregateInputType
+  }
+
+  export type KpiFormulaConfigGroupByOutputType = {
+    id: number
+    organizationId: string
+    version: number
+    settings: JsonValue
+    updatedBy: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: KpiFormulaConfigCountAggregateOutputType | null
+    _avg: KpiFormulaConfigAvgAggregateOutputType | null
+    _sum: KpiFormulaConfigSumAggregateOutputType | null
+    _min: KpiFormulaConfigMinAggregateOutputType | null
+    _max: KpiFormulaConfigMaxAggregateOutputType | null
+  }
+
+  type GetKpiFormulaConfigGroupByPayload<T extends KpiFormulaConfigGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KpiFormulaConfigGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KpiFormulaConfigGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KpiFormulaConfigGroupByOutputType[P]>
+            : GetScalarType<T[P], KpiFormulaConfigGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KpiFormulaConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    version?: boolean
+    settings?: boolean
+    updatedBy?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    versions?: boolean | KpiFormulaConfig$versionsArgs<ExtArgs>
+    _count?: boolean | KpiFormulaConfigCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["kpiFormulaConfig"]>
+
+
+
+  export type KpiFormulaConfigSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    version?: boolean
+    settings?: boolean
+    updatedBy?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type KpiFormulaConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "version" | "settings" | "updatedBy" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiFormulaConfig"]>
+  export type KpiFormulaConfigInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    versions?: boolean | KpiFormulaConfig$versionsArgs<ExtArgs>
+    _count?: boolean | KpiFormulaConfigCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+  export type $KpiFormulaConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KpiFormulaConfig"
+    objects: {
+      versions: Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      organizationId: string
+      version: number
+      settings: Prisma.JsonValue
+      updatedBy: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["kpiFormulaConfig"]>
+    composites: {}
+  }
+
+  type KpiFormulaConfigGetPayload<S extends boolean | null | undefined | KpiFormulaConfigDefaultArgs> = $Result.GetResult<Prisma.$KpiFormulaConfigPayload, S>
+
+  type KpiFormulaConfigCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KpiFormulaConfigFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KpiFormulaConfigCountAggregateInputType | true
+    }
+
+  export interface KpiFormulaConfigDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiFormulaConfig'], meta: { name: 'KpiFormulaConfig' } }
+    /**
+     * Find zero or one KpiFormulaConfig that matches the filter.
+     * @param {KpiFormulaConfigFindUniqueArgs} args - Arguments to find a KpiFormulaConfig
+     * @example
+     * // Get one KpiFormulaConfig
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KpiFormulaConfigFindUniqueArgs>(args: SelectSubset<T, KpiFormulaConfigFindUniqueArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KpiFormulaConfig that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KpiFormulaConfigFindUniqueOrThrowArgs} args - Arguments to find a KpiFormulaConfig
+     * @example
+     * // Get one KpiFormulaConfig
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KpiFormulaConfigFindUniqueOrThrowArgs>(args: SelectSubset<T, KpiFormulaConfigFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KpiFormulaConfig that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigFindFirstArgs} args - Arguments to find a KpiFormulaConfig
+     * @example
+     * // Get one KpiFormulaConfig
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KpiFormulaConfigFindFirstArgs>(args?: SelectSubset<T, KpiFormulaConfigFindFirstArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KpiFormulaConfig that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigFindFirstOrThrowArgs} args - Arguments to find a KpiFormulaConfig
+     * @example
+     * // Get one KpiFormulaConfig
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KpiFormulaConfigFindFirstOrThrowArgs>(args?: SelectSubset<T, KpiFormulaConfigFindFirstOrThrowArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KpiFormulaConfigs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KpiFormulaConfigs
+     * const kpiFormulaConfigs = await prisma.kpiFormulaConfig.findMany()
+     *
+     * // Get first 10 KpiFormulaConfigs
+     * const kpiFormulaConfigs = await prisma.kpiFormulaConfig.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const kpiFormulaConfigWithIdOnly = await prisma.kpiFormulaConfig.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends KpiFormulaConfigFindManyArgs>(args?: SelectSubset<T, KpiFormulaConfigFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KpiFormulaConfig.
+     * @param {KpiFormulaConfigCreateArgs} args - Arguments to create a KpiFormulaConfig.
+     * @example
+     * // Create one KpiFormulaConfig
+     * const KpiFormulaConfig = await prisma.kpiFormulaConfig.create({
+     *   data: {
+     *     // ... data to create a KpiFormulaConfig
+     *   }
+     * })
+     *
+     */
+    create<T extends KpiFormulaConfigCreateArgs>(args: SelectSubset<T, KpiFormulaConfigCreateArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KpiFormulaConfigs.
+     * @param {KpiFormulaConfigCreateManyArgs} args - Arguments to create many KpiFormulaConfigs.
+     * @example
+     * // Create many KpiFormulaConfigs
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends KpiFormulaConfigCreateManyArgs>(args?: SelectSubset<T, KpiFormulaConfigCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a KpiFormulaConfig.
+     * @param {KpiFormulaConfigDeleteArgs} args - Arguments to delete one KpiFormulaConfig.
+     * @example
+     * // Delete one KpiFormulaConfig
+     * const KpiFormulaConfig = await prisma.kpiFormulaConfig.delete({
+     *   where: {
+     *     // ... filter to delete one KpiFormulaConfig
+     *   }
+     * })
+     *
+     */
+    delete<T extends KpiFormulaConfigDeleteArgs>(args: SelectSubset<T, KpiFormulaConfigDeleteArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KpiFormulaConfig.
+     * @param {KpiFormulaConfigUpdateArgs} args - Arguments to update one KpiFormulaConfig.
+     * @example
+     * // Update one KpiFormulaConfig
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends KpiFormulaConfigUpdateArgs>(args: SelectSubset<T, KpiFormulaConfigUpdateArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KpiFormulaConfigs.
+     * @param {KpiFormulaConfigDeleteManyArgs} args - Arguments to filter KpiFormulaConfigs to delete.
+     * @example
+     * // Delete a few KpiFormulaConfigs
+     * const { count } = await prisma.kpiFormulaConfig.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends KpiFormulaConfigDeleteManyArgs>(args?: SelectSubset<T, KpiFormulaConfigDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KpiFormulaConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KpiFormulaConfigs
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends KpiFormulaConfigUpdateManyArgs>(args: SelectSubset<T, KpiFormulaConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one KpiFormulaConfig.
+     * @param {KpiFormulaConfigUpsertArgs} args - Arguments to update or create a KpiFormulaConfig.
+     * @example
+     * // Update or create a KpiFormulaConfig
+     * const kpiFormulaConfig = await prisma.kpiFormulaConfig.upsert({
+     *   create: {
+     *     // ... data to create a KpiFormulaConfig
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KpiFormulaConfig we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KpiFormulaConfigUpsertArgs>(args: SelectSubset<T, KpiFormulaConfigUpsertArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KpiFormulaConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigCountArgs} args - Arguments to filter KpiFormulaConfigs to count.
+     * @example
+     * // Count the number of KpiFormulaConfigs
+     * const count = await prisma.kpiFormulaConfig.count({
+     *   where: {
+     *     // ... the filter for the KpiFormulaConfigs we want to count
+     *   }
+     * })
+    **/
+    count<T extends KpiFormulaConfigCountArgs>(
+      args?: Subset<T, KpiFormulaConfigCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KpiFormulaConfigCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KpiFormulaConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KpiFormulaConfigAggregateArgs>(args: Subset<T, KpiFormulaConfigAggregateArgs>): Prisma.PrismaPromise<GetKpiFormulaConfigAggregateType<T>>
+
+    /**
+     * Group by KpiFormulaConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends KpiFormulaConfigGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KpiFormulaConfigGroupByArgs['orderBy'] }
+        : { orderBy?: KpiFormulaConfigGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KpiFormulaConfigGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKpiFormulaConfigGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KpiFormulaConfig model
+   */
+  readonly fields: KpiFormulaConfigFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KpiFormulaConfig.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KpiFormulaConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    versions<T extends KpiFormulaConfig$versionsArgs<ExtArgs> = {}>(args?: Subset<T, KpiFormulaConfig$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KpiFormulaConfig model
+   */
+  interface KpiFormulaConfigFieldRefs {
+    readonly id: FieldRef<"KpiFormulaConfig", 'Int'>
+    readonly organizationId: FieldRef<"KpiFormulaConfig", 'String'>
+    readonly version: FieldRef<"KpiFormulaConfig", 'Int'>
+    readonly settings: FieldRef<"KpiFormulaConfig", 'Json'>
+    readonly updatedBy: FieldRef<"KpiFormulaConfig", 'String'>
+    readonly createdAt: FieldRef<"KpiFormulaConfig", 'DateTime'>
+    readonly updatedAt: FieldRef<"KpiFormulaConfig", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * KpiFormulaConfig findUnique
+   */
+  export type KpiFormulaConfigFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfig to fetch.
+     */
+    where: KpiFormulaConfigWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfig findUniqueOrThrow
+   */
+  export type KpiFormulaConfigFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfig to fetch.
+     */
+    where: KpiFormulaConfigWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfig findFirst
+   */
+  export type KpiFormulaConfigFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfig to fetch.
+     */
+    where?: KpiFormulaConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigs to fetch.
+     */
+    orderBy?: KpiFormulaConfigOrderByWithRelationInput | KpiFormulaConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KpiFormulaConfigs.
+     */
+    cursor?: KpiFormulaConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KpiFormulaConfigs.
+     */
+    distinct?: KpiFormulaConfigScalarFieldEnum | KpiFormulaConfigScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfig findFirstOrThrow
+   */
+  export type KpiFormulaConfigFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfig to fetch.
+     */
+    where?: KpiFormulaConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigs to fetch.
+     */
+    orderBy?: KpiFormulaConfigOrderByWithRelationInput | KpiFormulaConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KpiFormulaConfigs.
+     */
+    cursor?: KpiFormulaConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KpiFormulaConfigs.
+     */
+    distinct?: KpiFormulaConfigScalarFieldEnum | KpiFormulaConfigScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfig findMany
+   */
+  export type KpiFormulaConfigFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfigs to fetch.
+     */
+    where?: KpiFormulaConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigs to fetch.
+     */
+    orderBy?: KpiFormulaConfigOrderByWithRelationInput | KpiFormulaConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing KpiFormulaConfigs.
+     */
+    cursor?: KpiFormulaConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KpiFormulaConfigs.
+     */
+    distinct?: KpiFormulaConfigScalarFieldEnum | KpiFormulaConfigScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfig create
+   */
+  export type KpiFormulaConfigCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * The data needed to create a KpiFormulaConfig.
+     */
+    data: XOR<KpiFormulaConfigCreateInput, KpiFormulaConfigUncheckedCreateInput>
+  }
+
+  /**
+   * KpiFormulaConfig createMany
+   */
+  export type KpiFormulaConfigCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KpiFormulaConfigs.
+     */
+    data: KpiFormulaConfigCreateManyInput | KpiFormulaConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KpiFormulaConfig update
+   */
+  export type KpiFormulaConfigUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * The data needed to update a KpiFormulaConfig.
+     */
+    data: XOR<KpiFormulaConfigUpdateInput, KpiFormulaConfigUncheckedUpdateInput>
+    /**
+     * Choose, which KpiFormulaConfig to update.
+     */
+    where: KpiFormulaConfigWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfig updateMany
+   */
+  export type KpiFormulaConfigUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KpiFormulaConfigs.
+     */
+    data: XOR<KpiFormulaConfigUpdateManyMutationInput, KpiFormulaConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which KpiFormulaConfigs to update
+     */
+    where?: KpiFormulaConfigWhereInput
+    /**
+     * Limit how many KpiFormulaConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KpiFormulaConfig upsert
+   */
+  export type KpiFormulaConfigUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * The filter to search for the KpiFormulaConfig to update in case it exists.
+     */
+    where: KpiFormulaConfigWhereUniqueInput
+    /**
+     * In case the KpiFormulaConfig found by the `where` argument doesn't exist, create a new KpiFormulaConfig with this data.
+     */
+    create: XOR<KpiFormulaConfigCreateInput, KpiFormulaConfigUncheckedCreateInput>
+    /**
+     * In case the KpiFormulaConfig was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KpiFormulaConfigUpdateInput, KpiFormulaConfigUncheckedUpdateInput>
+  }
+
+  /**
+   * KpiFormulaConfig delete
+   */
+  export type KpiFormulaConfigDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+    /**
+     * Filter which KpiFormulaConfig to delete.
+     */
+    where: KpiFormulaConfigWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfig deleteMany
+   */
+  export type KpiFormulaConfigDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KpiFormulaConfigs to delete
+     */
+    where?: KpiFormulaConfigWhereInput
+    /**
+     * Limit how many KpiFormulaConfigs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KpiFormulaConfig.versions
+   */
+  export type KpiFormulaConfig$versionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    where?: KpiFormulaConfigVersionWhereInput
+    orderBy?: KpiFormulaConfigVersionOrderByWithRelationInput | KpiFormulaConfigVersionOrderByWithRelationInput[]
+    cursor?: KpiFormulaConfigVersionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: KpiFormulaConfigVersionScalarFieldEnum | KpiFormulaConfigVersionScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfig without action
+   */
+  export type KpiFormulaConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfig
+     */
+    select?: KpiFormulaConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfig
+     */
+    omit?: KpiFormulaConfigOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KpiFormulaConfigVersion
+   */
+
+  export type AggregateKpiFormulaConfigVersion = {
+    _count: KpiFormulaConfigVersionCountAggregateOutputType | null
+    _avg: KpiFormulaConfigVersionAvgAggregateOutputType | null
+    _sum: KpiFormulaConfigVersionSumAggregateOutputType | null
+    _min: KpiFormulaConfigVersionMinAggregateOutputType | null
+    _max: KpiFormulaConfigVersionMaxAggregateOutputType | null
+  }
+
+  export type KpiFormulaConfigVersionAvgAggregateOutputType = {
+    id: number | null
+    version: number | null
+  }
+
+  export type KpiFormulaConfigVersionSumAggregateOutputType = {
+    id: number | null
+    version: number | null
+  }
+
+  export type KpiFormulaConfigVersionMinAggregateOutputType = {
+    id: number | null
+    organizationId: string | null
+    version: number | null
+    changedBy: string | null
+    createdAt: Date | null
+  }
+
+  export type KpiFormulaConfigVersionMaxAggregateOutputType = {
+    id: number | null
+    organizationId: string | null
+    version: number | null
+    changedBy: string | null
+    createdAt: Date | null
+  }
+
+  export type KpiFormulaConfigVersionCountAggregateOutputType = {
+    id: number
+    organizationId: number
+    version: number
+    settings: number
+    changedBy: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type KpiFormulaConfigVersionAvgAggregateInputType = {
+    id?: true
+    version?: true
+  }
+
+  export type KpiFormulaConfigVersionSumAggregateInputType = {
+    id?: true
+    version?: true
+  }
+
+  export type KpiFormulaConfigVersionMinAggregateInputType = {
+    id?: true
+    organizationId?: true
+    version?: true
+    changedBy?: true
+    createdAt?: true
+  }
+
+  export type KpiFormulaConfigVersionMaxAggregateInputType = {
+    id?: true
+    organizationId?: true
+    version?: true
+    changedBy?: true
+    createdAt?: true
+  }
+
+  export type KpiFormulaConfigVersionCountAggregateInputType = {
+    id?: true
+    organizationId?: true
+    version?: true
+    settings?: true
+    changedBy?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type KpiFormulaConfigVersionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KpiFormulaConfigVersion to aggregate.
+     */
+    where?: KpiFormulaConfigVersionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigVersions to fetch.
+     */
+    orderBy?: KpiFormulaConfigVersionOrderByWithRelationInput | KpiFormulaConfigVersionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: KpiFormulaConfigVersionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigVersions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigVersions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned KpiFormulaConfigVersions
+    **/
+    _count?: true | KpiFormulaConfigVersionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: KpiFormulaConfigVersionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: KpiFormulaConfigVersionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: KpiFormulaConfigVersionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: KpiFormulaConfigVersionMaxAggregateInputType
+  }
+
+  export type GetKpiFormulaConfigVersionAggregateType<T extends KpiFormulaConfigVersionAggregateArgs> = {
+        [P in keyof T & keyof AggregateKpiFormulaConfigVersion]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKpiFormulaConfigVersion[P]>
+      : GetScalarType<T[P], AggregateKpiFormulaConfigVersion[P]>
+  }
+
+
+
+
+  export type KpiFormulaConfigVersionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KpiFormulaConfigVersionWhereInput
+    orderBy?: KpiFormulaConfigVersionOrderByWithAggregationInput | KpiFormulaConfigVersionOrderByWithAggregationInput[]
+    by: KpiFormulaConfigVersionScalarFieldEnum[] | KpiFormulaConfigVersionScalarFieldEnum
+    having?: KpiFormulaConfigVersionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KpiFormulaConfigVersionCountAggregateInputType | true
+    _avg?: KpiFormulaConfigVersionAvgAggregateInputType
+    _sum?: KpiFormulaConfigVersionSumAggregateInputType
+    _min?: KpiFormulaConfigVersionMinAggregateInputType
+    _max?: KpiFormulaConfigVersionMaxAggregateInputType
+  }
+
+  export type KpiFormulaConfigVersionGroupByOutputType = {
+    id: number
+    organizationId: string
+    version: number
+    settings: JsonValue
+    changedBy: string | null
+    createdAt: Date
+    _count: KpiFormulaConfigVersionCountAggregateOutputType | null
+    _avg: KpiFormulaConfigVersionAvgAggregateOutputType | null
+    _sum: KpiFormulaConfigVersionSumAggregateOutputType | null
+    _min: KpiFormulaConfigVersionMinAggregateOutputType | null
+    _max: KpiFormulaConfigVersionMaxAggregateOutputType | null
+  }
+
+  type GetKpiFormulaConfigVersionGroupByPayload<T extends KpiFormulaConfigVersionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KpiFormulaConfigVersionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KpiFormulaConfigVersionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KpiFormulaConfigVersionGroupByOutputType[P]>
+            : GetScalarType<T[P], KpiFormulaConfigVersionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KpiFormulaConfigVersionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    organizationId?: boolean
+    version?: boolean
+    settings?: boolean
+    changedBy?: boolean
+    createdAt?: boolean
+    config?: boolean | KpiFormulaConfigDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["kpiFormulaConfigVersion"]>
+
+
+
+  export type KpiFormulaConfigVersionSelectScalar = {
+    id?: boolean
+    organizationId?: boolean
+    version?: boolean
+    settings?: boolean
+    changedBy?: boolean
+    createdAt?: boolean
+  }
+
+  export type KpiFormulaConfigVersionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "organizationId" | "version" | "settings" | "changedBy" | "createdAt", ExtArgs["result"]["kpiFormulaConfigVersion"]>
+  export type KpiFormulaConfigVersionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    config?: boolean | KpiFormulaConfigDefaultArgs<ExtArgs>
+  }
+
+  export type $KpiFormulaConfigVersionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KpiFormulaConfigVersion"
+    objects: {
+      config: Prisma.$KpiFormulaConfigPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      organizationId: string
+      version: number
+      settings: Prisma.JsonValue
+      changedBy: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["kpiFormulaConfigVersion"]>
+    composites: {}
+  }
+
+  type KpiFormulaConfigVersionGetPayload<S extends boolean | null | undefined | KpiFormulaConfigVersionDefaultArgs> = $Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload, S>
+
+  type KpiFormulaConfigVersionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KpiFormulaConfigVersionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KpiFormulaConfigVersionCountAggregateInputType | true
+    }
+
+  export interface KpiFormulaConfigVersionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiFormulaConfigVersion'], meta: { name: 'KpiFormulaConfigVersion' } }
+    /**
+     * Find zero or one KpiFormulaConfigVersion that matches the filter.
+     * @param {KpiFormulaConfigVersionFindUniqueArgs} args - Arguments to find a KpiFormulaConfigVersion
+     * @example
+     * // Get one KpiFormulaConfigVersion
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KpiFormulaConfigVersionFindUniqueArgs>(args: SelectSubset<T, KpiFormulaConfigVersionFindUniqueArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KpiFormulaConfigVersion that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KpiFormulaConfigVersionFindUniqueOrThrowArgs} args - Arguments to find a KpiFormulaConfigVersion
+     * @example
+     * // Get one KpiFormulaConfigVersion
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KpiFormulaConfigVersionFindUniqueOrThrowArgs>(args: SelectSubset<T, KpiFormulaConfigVersionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KpiFormulaConfigVersion that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionFindFirstArgs} args - Arguments to find a KpiFormulaConfigVersion
+     * @example
+     * // Get one KpiFormulaConfigVersion
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KpiFormulaConfigVersionFindFirstArgs>(args?: SelectSubset<T, KpiFormulaConfigVersionFindFirstArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KpiFormulaConfigVersion that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionFindFirstOrThrowArgs} args - Arguments to find a KpiFormulaConfigVersion
+     * @example
+     * // Get one KpiFormulaConfigVersion
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KpiFormulaConfigVersionFindFirstOrThrowArgs>(args?: SelectSubset<T, KpiFormulaConfigVersionFindFirstOrThrowArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KpiFormulaConfigVersions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KpiFormulaConfigVersions
+     * const kpiFormulaConfigVersions = await prisma.kpiFormulaConfigVersion.findMany()
+     *
+     * // Get first 10 KpiFormulaConfigVersions
+     * const kpiFormulaConfigVersions = await prisma.kpiFormulaConfigVersion.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const kpiFormulaConfigVersionWithIdOnly = await prisma.kpiFormulaConfigVersion.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends KpiFormulaConfigVersionFindManyArgs>(args?: SelectSubset<T, KpiFormulaConfigVersionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KpiFormulaConfigVersion.
+     * @param {KpiFormulaConfigVersionCreateArgs} args - Arguments to create a KpiFormulaConfigVersion.
+     * @example
+     * // Create one KpiFormulaConfigVersion
+     * const KpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.create({
+     *   data: {
+     *     // ... data to create a KpiFormulaConfigVersion
+     *   }
+     * })
+     *
+     */
+    create<T extends KpiFormulaConfigVersionCreateArgs>(args: SelectSubset<T, KpiFormulaConfigVersionCreateArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KpiFormulaConfigVersions.
+     * @param {KpiFormulaConfigVersionCreateManyArgs} args - Arguments to create many KpiFormulaConfigVersions.
+     * @example
+     * // Create many KpiFormulaConfigVersions
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends KpiFormulaConfigVersionCreateManyArgs>(args?: SelectSubset<T, KpiFormulaConfigVersionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a KpiFormulaConfigVersion.
+     * @param {KpiFormulaConfigVersionDeleteArgs} args - Arguments to delete one KpiFormulaConfigVersion.
+     * @example
+     * // Delete one KpiFormulaConfigVersion
+     * const KpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.delete({
+     *   where: {
+     *     // ... filter to delete one KpiFormulaConfigVersion
+     *   }
+     * })
+     *
+     */
+    delete<T extends KpiFormulaConfigVersionDeleteArgs>(args: SelectSubset<T, KpiFormulaConfigVersionDeleteArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KpiFormulaConfigVersion.
+     * @param {KpiFormulaConfigVersionUpdateArgs} args - Arguments to update one KpiFormulaConfigVersion.
+     * @example
+     * // Update one KpiFormulaConfigVersion
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends KpiFormulaConfigVersionUpdateArgs>(args: SelectSubset<T, KpiFormulaConfigVersionUpdateArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KpiFormulaConfigVersions.
+     * @param {KpiFormulaConfigVersionDeleteManyArgs} args - Arguments to filter KpiFormulaConfigVersions to delete.
+     * @example
+     * // Delete a few KpiFormulaConfigVersions
+     * const { count } = await prisma.kpiFormulaConfigVersion.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends KpiFormulaConfigVersionDeleteManyArgs>(args?: SelectSubset<T, KpiFormulaConfigVersionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KpiFormulaConfigVersions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KpiFormulaConfigVersions
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends KpiFormulaConfigVersionUpdateManyArgs>(args: SelectSubset<T, KpiFormulaConfigVersionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one KpiFormulaConfigVersion.
+     * @param {KpiFormulaConfigVersionUpsertArgs} args - Arguments to update or create a KpiFormulaConfigVersion.
+     * @example
+     * // Update or create a KpiFormulaConfigVersion
+     * const kpiFormulaConfigVersion = await prisma.kpiFormulaConfigVersion.upsert({
+     *   create: {
+     *     // ... data to create a KpiFormulaConfigVersion
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KpiFormulaConfigVersion we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KpiFormulaConfigVersionUpsertArgs>(args: SelectSubset<T, KpiFormulaConfigVersionUpsertArgs<ExtArgs>>): Prisma__KpiFormulaConfigVersionClient<$Result.GetResult<Prisma.$KpiFormulaConfigVersionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KpiFormulaConfigVersions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionCountArgs} args - Arguments to filter KpiFormulaConfigVersions to count.
+     * @example
+     * // Count the number of KpiFormulaConfigVersions
+     * const count = await prisma.kpiFormulaConfigVersion.count({
+     *   where: {
+     *     // ... the filter for the KpiFormulaConfigVersions we want to count
+     *   }
+     * })
+    **/
+    count<T extends KpiFormulaConfigVersionCountArgs>(
+      args?: Subset<T, KpiFormulaConfigVersionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KpiFormulaConfigVersionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KpiFormulaConfigVersion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KpiFormulaConfigVersionAggregateArgs>(args: Subset<T, KpiFormulaConfigVersionAggregateArgs>): Prisma.PrismaPromise<GetKpiFormulaConfigVersionAggregateType<T>>
+
+    /**
+     * Group by KpiFormulaConfigVersion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KpiFormulaConfigVersionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends KpiFormulaConfigVersionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KpiFormulaConfigVersionGroupByArgs['orderBy'] }
+        : { orderBy?: KpiFormulaConfigVersionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KpiFormulaConfigVersionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKpiFormulaConfigVersionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KpiFormulaConfigVersion model
+   */
+  readonly fields: KpiFormulaConfigVersionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KpiFormulaConfigVersion.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KpiFormulaConfigVersionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    config<T extends KpiFormulaConfigDefaultArgs<ExtArgs> = {}>(args?: Subset<T, KpiFormulaConfigDefaultArgs<ExtArgs>>): Prisma__KpiFormulaConfigClient<$Result.GetResult<Prisma.$KpiFormulaConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KpiFormulaConfigVersion model
+   */
+  interface KpiFormulaConfigVersionFieldRefs {
+    readonly id: FieldRef<"KpiFormulaConfigVersion", 'Int'>
+    readonly organizationId: FieldRef<"KpiFormulaConfigVersion", 'String'>
+    readonly version: FieldRef<"KpiFormulaConfigVersion", 'Int'>
+    readonly settings: FieldRef<"KpiFormulaConfigVersion", 'Json'>
+    readonly changedBy: FieldRef<"KpiFormulaConfigVersion", 'String'>
+    readonly createdAt: FieldRef<"KpiFormulaConfigVersion", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * KpiFormulaConfigVersion findUnique
+   */
+  export type KpiFormulaConfigVersionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfigVersion to fetch.
+     */
+    where: KpiFormulaConfigVersionWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfigVersion findUniqueOrThrow
+   */
+  export type KpiFormulaConfigVersionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfigVersion to fetch.
+     */
+    where: KpiFormulaConfigVersionWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfigVersion findFirst
+   */
+  export type KpiFormulaConfigVersionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfigVersion to fetch.
+     */
+    where?: KpiFormulaConfigVersionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigVersions to fetch.
+     */
+    orderBy?: KpiFormulaConfigVersionOrderByWithRelationInput | KpiFormulaConfigVersionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KpiFormulaConfigVersions.
+     */
+    cursor?: KpiFormulaConfigVersionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigVersions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigVersions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KpiFormulaConfigVersions.
+     */
+    distinct?: KpiFormulaConfigVersionScalarFieldEnum | KpiFormulaConfigVersionScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfigVersion findFirstOrThrow
+   */
+  export type KpiFormulaConfigVersionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfigVersion to fetch.
+     */
+    where?: KpiFormulaConfigVersionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigVersions to fetch.
+     */
+    orderBy?: KpiFormulaConfigVersionOrderByWithRelationInput | KpiFormulaConfigVersionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for KpiFormulaConfigVersions.
+     */
+    cursor?: KpiFormulaConfigVersionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigVersions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigVersions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KpiFormulaConfigVersions.
+     */
+    distinct?: KpiFormulaConfigVersionScalarFieldEnum | KpiFormulaConfigVersionScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfigVersion findMany
+   */
+  export type KpiFormulaConfigVersionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * Filter, which KpiFormulaConfigVersions to fetch.
+     */
+    where?: KpiFormulaConfigVersionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of KpiFormulaConfigVersions to fetch.
+     */
+    orderBy?: KpiFormulaConfigVersionOrderByWithRelationInput | KpiFormulaConfigVersionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing KpiFormulaConfigVersions.
+     */
+    cursor?: KpiFormulaConfigVersionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` KpiFormulaConfigVersions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` KpiFormulaConfigVersions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of KpiFormulaConfigVersions.
+     */
+    distinct?: KpiFormulaConfigVersionScalarFieldEnum | KpiFormulaConfigVersionScalarFieldEnum[]
+  }
+
+  /**
+   * KpiFormulaConfigVersion create
+   */
+  export type KpiFormulaConfigVersionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a KpiFormulaConfigVersion.
+     */
+    data: XOR<KpiFormulaConfigVersionCreateInput, KpiFormulaConfigVersionUncheckedCreateInput>
+  }
+
+  /**
+   * KpiFormulaConfigVersion createMany
+   */
+  export type KpiFormulaConfigVersionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KpiFormulaConfigVersions.
+     */
+    data: KpiFormulaConfigVersionCreateManyInput | KpiFormulaConfigVersionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KpiFormulaConfigVersion update
+   */
+  export type KpiFormulaConfigVersionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a KpiFormulaConfigVersion.
+     */
+    data: XOR<KpiFormulaConfigVersionUpdateInput, KpiFormulaConfigVersionUncheckedUpdateInput>
+    /**
+     * Choose, which KpiFormulaConfigVersion to update.
+     */
+    where: KpiFormulaConfigVersionWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfigVersion updateMany
+   */
+  export type KpiFormulaConfigVersionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KpiFormulaConfigVersions.
+     */
+    data: XOR<KpiFormulaConfigVersionUpdateManyMutationInput, KpiFormulaConfigVersionUncheckedUpdateManyInput>
+    /**
+     * Filter which KpiFormulaConfigVersions to update
+     */
+    where?: KpiFormulaConfigVersionWhereInput
+    /**
+     * Limit how many KpiFormulaConfigVersions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KpiFormulaConfigVersion upsert
+   */
+  export type KpiFormulaConfigVersionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the KpiFormulaConfigVersion to update in case it exists.
+     */
+    where: KpiFormulaConfigVersionWhereUniqueInput
+    /**
+     * In case the KpiFormulaConfigVersion found by the `where` argument doesn't exist, create a new KpiFormulaConfigVersion with this data.
+     */
+    create: XOR<KpiFormulaConfigVersionCreateInput, KpiFormulaConfigVersionUncheckedCreateInput>
+    /**
+     * In case the KpiFormulaConfigVersion was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KpiFormulaConfigVersionUpdateInput, KpiFormulaConfigVersionUncheckedUpdateInput>
+  }
+
+  /**
+   * KpiFormulaConfigVersion delete
+   */
+  export type KpiFormulaConfigVersionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
+    /**
+     * Filter which KpiFormulaConfigVersion to delete.
+     */
+    where: KpiFormulaConfigVersionWhereUniqueInput
+  }
+
+  /**
+   * KpiFormulaConfigVersion deleteMany
+   */
+  export type KpiFormulaConfigVersionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KpiFormulaConfigVersions to delete
+     */
+    where?: KpiFormulaConfigVersionWhereInput
+    /**
+     * Limit how many KpiFormulaConfigVersions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KpiFormulaConfigVersion without action
+   */
+  export type KpiFormulaConfigVersionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KpiFormulaConfigVersion
+     */
+    select?: KpiFormulaConfigVersionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KpiFormulaConfigVersion
+     */
+    omit?: KpiFormulaConfigVersionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KpiFormulaConfigVersionInclude<ExtArgs> | null
   }
 
 
@@ -6495,7 +8687,7 @@ export namespace Prisma {
     /**
      * Filter which KpiPeriod to aggregate.
      */
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -6507,7 +8699,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiPeriodWhereUniqueInpu
+    cursor?: KpiPeriodWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -6564,10 +8756,10 @@ export namespace Prisma {
 
 
   export type KpiPeriodGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     orderBy?: KpiPeriodOrderByWithAggregationInput | KpiPeriodOrderByWithAggregationInput[]
     by: KpiPeriodScalarFieldEnum[] | KpiPeriodScalarFieldEnum
-    having?: KpiPeriodScalarWhereWithAggregatesInpu
+    having?: KpiPeriodScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiPeriodCountAggregateInputType | true
@@ -6859,7 +9051,7 @@ export namespace Prisma {
      * // Count the number of KpiPeriods
      * const count = await prisma.kpiPeriod.count({
      *   where: {
-     *     // ... the filter for the KpiPeriods we want to coun
+     *     // ... the filter for the KpiPeriods we want to count
      *   }
      * })
     **/
@@ -6905,7 +9097,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiPeriodGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -7049,7 +9241,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiPeriod to fetch.
      */
-    where: KpiPeriodWhereUniqueInpu
+    where: KpiPeriodWhereUniqueInput
   }
 
   /**
@@ -7071,11 +9263,11 @@ export namespace Prisma {
     /**
      * Filter, which KpiPeriod to fetch.
      */
-    where: KpiPeriodWhereUniqueInpu
+    where: KpiPeriodWhereUniqueInput
   }
 
   /**
-   * KpiPeriod findFirs
+   * KpiPeriod findFirst
    */
   export type KpiPeriodFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -7093,7 +9285,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiPeriod to fetch.
      */
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -7105,7 +9297,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiPeriods.
      */
-    cursor?: KpiPeriodWhereUniqueInpu
+    cursor?: KpiPeriodWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -7145,7 +9337,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiPeriod to fetch.
      */
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -7157,7 +9349,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiPeriods.
      */
-    cursor?: KpiPeriodWhereUniqueInpu
+    cursor?: KpiPeriodWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -7197,7 +9389,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiPeriods to fetch.
      */
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -7209,7 +9401,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiPeriods.
      */
-    cursor?: KpiPeriodWhereUniqueInpu
+    cursor?: KpiPeriodWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -7286,7 +9478,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiPeriod to update.
      */
-    where: KpiPeriodWhereUniqueInpu
+    where: KpiPeriodWhereUniqueInput
   }
 
   /**
@@ -7300,7 +9492,7 @@ export namespace Prisma {
     /**
      * Filter which KpiPeriods to update
      */
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     /**
      * Limit how many KpiPeriods to update.
      */
@@ -7308,7 +9500,7 @@ export namespace Prisma {
   }
 
   /**
-   * KpiPeriod upser
+   * KpiPeriod upsert
    */
   export type KpiPeriodUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -7326,7 +9518,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiPeriod to update in case it exists.
      */
-    where: KpiPeriodWhereUniqueInpu
+    where: KpiPeriodWhereUniqueInput
     /**
      * In case the KpiPeriod found by the `where` argument doesn't exist, create a new KpiPeriod with this data.
      */
@@ -7356,7 +9548,7 @@ export namespace Prisma {
     /**
      * Filter which KpiPeriod to delete.
      */
-    where: KpiPeriodWhereUniqueInpu
+    where: KpiPeriodWhereUniqueInput
   }
 
   /**
@@ -7366,7 +9558,7 @@ export namespace Prisma {
     /**
      * Filter which KpiPeriods to delete
      */
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     /**
      * Limit how many KpiPeriods to delete.
      */
@@ -7389,9 +9581,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationInclude<ExtArgs> | null
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     orderBy?: KpiEvaluationOrderByWithRelationInput | KpiEvaluationOrderByWithRelationInput[]
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiEvaluationScalarFieldEnum | KpiEvaluationScalarFieldEnum[]
@@ -7597,7 +9789,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluation to aggregate.
      */
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -7609,7 +9801,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -7666,10 +9858,10 @@ export namespace Prisma {
 
 
   export type KpiEvaluationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     orderBy?: KpiEvaluationOrderByWithAggregationInput | KpiEvaluationOrderByWithAggregationInput[]
     by: KpiEvaluationScalarFieldEnum[] | KpiEvaluationScalarFieldEnum
-    having?: KpiEvaluationScalarWhereWithAggregatesInpu
+    having?: KpiEvaluationScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiEvaluationCountAggregateInputType | true
@@ -8012,7 +10204,7 @@ export namespace Prisma {
      * // Count the number of KpiEvaluations
      * const count = await prisma.kpiEvaluation.count({
      *   where: {
-     *     // ... the filter for the KpiEvaluations we want to coun
+     *     // ... the filter for the KpiEvaluations we want to count
      *   }
      * })
     **/
@@ -8058,7 +10250,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiEvaluationGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -8216,7 +10408,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluation to fetch.
      */
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
   }
 
   /**
@@ -8238,11 +10430,11 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluation to fetch.
      */
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
   }
 
   /**
-   * KpiEvaluation findFirs
+   * KpiEvaluation findFirst
    */
   export type KpiEvaluationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -8260,7 +10452,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluation to fetch.
      */
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -8272,7 +10464,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiEvaluations.
      */
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -8312,7 +10504,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluation to fetch.
      */
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -8324,7 +10516,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiEvaluations.
      */
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -8364,7 +10556,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluations to fetch.
      */
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -8376,7 +10568,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiEvaluations.
      */
-    cursor?: KpiEvaluationWhereUniqueInpu
+    cursor?: KpiEvaluationWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -8453,7 +10645,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiEvaluation to update.
      */
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
   }
 
   /**
@@ -8467,7 +10659,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluations to update
      */
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     /**
      * Limit how many KpiEvaluations to update.
      */
@@ -8475,7 +10667,7 @@ export namespace Prisma {
   }
 
   /**
-   * KpiEvaluation upser
+   * KpiEvaluation upsert
    */
   export type KpiEvaluationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -8493,7 +10685,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiEvaluation to update in case it exists.
      */
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     /**
      * In case the KpiEvaluation found by the `where` argument doesn't exist, create a new KpiEvaluation with this data.
      */
@@ -8523,7 +10715,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluation to delete.
      */
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
   }
 
   /**
@@ -8533,7 +10725,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluations to delete
      */
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     /**
      * Limit how many KpiEvaluations to delete.
      */
@@ -8556,26 +10748,26 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: EmployeeInclude<ExtArgs> | null
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
   }
 
   /**
-   * KpiEvaluation.ruleSe
+   * KpiEvaluation.ruleSet
    */
   export type KpiEvaluation$ruleSetArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiRuleSe
+     * Select specific fields to fetch from the KpiRuleSet
      */
     select?: KpiRuleSetSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiRuleSe
+     * Omit specific fields from the KpiRuleSet
      */
     omit?: KpiRuleSetOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: KpiRuleSetInclude<ExtArgs> | null
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
   }
 
   /**
@@ -8594,9 +10786,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationTaskInclude<ExtArgs> | null
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     orderBy?: KpiEvaluationTaskOrderByWithRelationInput | KpiEvaluationTaskOrderByWithRelationInput[]
-    cursor?: KpiEvaluationTaskWhereUniqueInpu
+    cursor?: KpiEvaluationTaskWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiEvaluationTaskScalarFieldEnum | KpiEvaluationTaskScalarFieldEnum[]
@@ -8607,20 +10799,20 @@ export namespace Prisma {
    */
   export type KpiEvaluation$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: KpiFormDocumentInclude<ExtArgs> | null
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     orderBy?: KpiFormDocumentOrderByWithRelationInput | KpiFormDocumentOrderByWithRelationInput[]
-    cursor?: KpiFormDocumentWhereUniqueInpu
+    cursor?: KpiFormDocumentWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiFormDocumentScalarFieldEnum | KpiFormDocumentScalarFieldEnum[]
@@ -8888,7 +11080,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluationTask to aggregate.
      */
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -8900,7 +11092,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiEvaluationTaskWhereUniqueInpu
+    cursor?: KpiEvaluationTaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -8957,10 +11149,10 @@ export namespace Prisma {
 
 
   export type KpiEvaluationTaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     orderBy?: KpiEvaluationTaskOrderByWithAggregationInput | KpiEvaluationTaskOrderByWithAggregationInput[]
     by: KpiEvaluationTaskScalarFieldEnum[] | KpiEvaluationTaskScalarFieldEnum
-    having?: KpiEvaluationTaskScalarWhereWithAggregatesInpu
+    having?: KpiEvaluationTaskScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiEvaluationTaskCountAggregateInputType | true
@@ -9317,7 +11509,7 @@ export namespace Prisma {
      * // Count the number of KpiEvaluationTasks
      * const count = await prisma.kpiEvaluationTask.count({
      *   where: {
-     *     // ... the filter for the KpiEvaluationTasks we want to coun
+     *     // ... the filter for the KpiEvaluationTasks we want to count
      *   }
      * })
     **/
@@ -9363,7 +11555,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiEvaluationTaskGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -9524,7 +11716,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluationTask to fetch.
      */
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
   }
 
   /**
@@ -9546,11 +11738,11 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluationTask to fetch.
      */
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
   }
 
   /**
-   * KpiEvaluationTask findFirs
+   * KpiEvaluationTask findFirst
    */
   export type KpiEvaluationTaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -9568,7 +11760,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluationTask to fetch.
      */
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -9580,7 +11772,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiEvaluationTasks.
      */
-    cursor?: KpiEvaluationTaskWhereUniqueInpu
+    cursor?: KpiEvaluationTaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -9620,7 +11812,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluationTask to fetch.
      */
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -9632,7 +11824,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiEvaluationTasks.
      */
-    cursor?: KpiEvaluationTaskWhereUniqueInpu
+    cursor?: KpiEvaluationTaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -9672,7 +11864,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiEvaluationTasks to fetch.
      */
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -9684,7 +11876,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiEvaluationTasks.
      */
-    cursor?: KpiEvaluationTaskWhereUniqueInpu
+    cursor?: KpiEvaluationTaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -9761,7 +11953,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiEvaluationTask to update.
      */
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
   }
 
   /**
@@ -9775,7 +11967,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluationTasks to update
      */
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     /**
      * Limit how many KpiEvaluationTasks to update.
      */
@@ -9783,7 +11975,7 @@ export namespace Prisma {
   }
 
   /**
-   * KpiEvaluationTask upser
+   * KpiEvaluationTask upsert
    */
   export type KpiEvaluationTaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -9801,7 +11993,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiEvaluationTask to update in case it exists.
      */
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     /**
      * In case the KpiEvaluationTask found by the `where` argument doesn't exist, create a new KpiEvaluationTask with this data.
      */
@@ -9831,7 +12023,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluationTask to delete.
      */
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
   }
 
   /**
@@ -9841,7 +12033,7 @@ export namespace Prisma {
     /**
      * Filter which KpiEvaluationTasks to delete
      */
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     /**
      * Limit how many KpiEvaluationTasks to delete.
      */
@@ -9864,7 +12056,7 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskInclude<ExtArgs> | null
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   /**
@@ -10017,7 +12209,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplate to aggregate.
      */
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -10029,7 +12221,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiFormTemplateWhereUniqueInpu
+    cursor?: KpiFormTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -10086,10 +12278,10 @@ export namespace Prisma {
 
 
   export type KpiFormTemplateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     orderBy?: KpiFormTemplateOrderByWithAggregationInput | KpiFormTemplateOrderByWithAggregationInput[]
     by: KpiFormTemplateScalarFieldEnum[] | KpiFormTemplateScalarFieldEnum
-    having?: KpiFormTemplateScalarWhereWithAggregatesInpu
+    having?: KpiFormTemplateScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiFormTemplateCountAggregateInputType | true
@@ -10411,7 +12603,7 @@ export namespace Prisma {
      * // Count the number of KpiFormTemplates
      * const count = await prisma.kpiFormTemplate.count({
      *   where: {
-     *     // ... the filter for the KpiFormTemplates we want to coun
+     *     // ... the filter for the KpiFormTemplates we want to count
      *   }
      * })
     **/
@@ -10457,7 +12649,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiFormTemplateGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -10609,7 +12801,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplate to fetch.
      */
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
   }
 
   /**
@@ -10631,11 +12823,11 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplate to fetch.
      */
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
   }
 
   /**
-   * KpiFormTemplate findFirs
+   * KpiFormTemplate findFirst
    */
   export type KpiFormTemplateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -10653,7 +12845,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplate to fetch.
      */
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -10665,7 +12857,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormTemplates.
      */
-    cursor?: KpiFormTemplateWhereUniqueInpu
+    cursor?: KpiFormTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -10705,7 +12897,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplate to fetch.
      */
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -10717,7 +12909,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormTemplates.
      */
-    cursor?: KpiFormTemplateWhereUniqueInpu
+    cursor?: KpiFormTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -10757,7 +12949,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplates to fetch.
      */
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -10769,7 +12961,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiFormTemplates.
      */
-    cursor?: KpiFormTemplateWhereUniqueInpu
+    cursor?: KpiFormTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -10846,7 +13038,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiFormTemplate to update.
      */
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
   }
 
   /**
@@ -10860,7 +13052,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplates to update
      */
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     /**
      * Limit how many KpiFormTemplates to update.
      */
@@ -10868,7 +13060,7 @@ export namespace Prisma {
   }
 
   /**
-   * KpiFormTemplate upser
+   * KpiFormTemplate upsert
    */
   export type KpiFormTemplateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -10886,7 +13078,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiFormTemplate to update in case it exists.
      */
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
     /**
      * In case the KpiFormTemplate found by the `where` argument doesn't exist, create a new KpiFormTemplate with this data.
      */
@@ -10916,7 +13108,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplate to delete.
      */
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
   }
 
   /**
@@ -10926,7 +13118,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplates to delete
      */
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     /**
      * Limit how many KpiFormTemplates to delete.
      */
@@ -10938,20 +13130,20 @@ export namespace Prisma {
    */
   export type KpiFormTemplate$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: KpiFormDocumentInclude<ExtArgs> | null
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     orderBy?: KpiFormDocumentOrderByWithRelationInput | KpiFormDocumentOrderByWithRelationInput[]
-    cursor?: KpiFormDocumentWhereUniqueInpu
+    cursor?: KpiFormDocumentWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiFormDocumentScalarFieldEnum | KpiFormDocumentScalarFieldEnum[]
@@ -10973,9 +13165,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiFormTemplateBindingInclude<ExtArgs> | null
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     orderBy?: KpiFormTemplateBindingOrderByWithRelationInput | KpiFormTemplateBindingOrderByWithRelationInput[]
-    cursor?: KpiFormTemplateBindingWhereUniqueInpu
+    cursor?: KpiFormTemplateBindingWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiFormTemplateBindingScalarFieldEnum | KpiFormTemplateBindingScalarFieldEnum[]
@@ -10997,9 +13189,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiFormTemplateVersionInclude<ExtArgs> | null
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     orderBy?: KpiFormTemplateVersionOrderByWithRelationInput | KpiFormTemplateVersionOrderByWithRelationInput[]
-    cursor?: KpiFormTemplateVersionWhereUniqueInpu
+    cursor?: KpiFormTemplateVersionWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiFormTemplateVersionScalarFieldEnum | KpiFormTemplateVersionScalarFieldEnum[]
@@ -11135,7 +13327,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateVersion to aggregate.
      */
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -11147,7 +13339,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiFormTemplateVersionWhereUniqueInpu
+    cursor?: KpiFormTemplateVersionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -11204,10 +13396,10 @@ export namespace Prisma {
 
 
   export type KpiFormTemplateVersionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     orderBy?: KpiFormTemplateVersionOrderByWithAggregationInput | KpiFormTemplateVersionOrderByWithAggregationInput[]
     by: KpiFormTemplateVersionScalarFieldEnum[] | KpiFormTemplateVersionScalarFieldEnum
-    having?: KpiFormTemplateVersionScalarWhereWithAggregatesInpu
+    having?: KpiFormTemplateVersionScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiFormTemplateVersionCountAggregateInputType | true
@@ -11505,7 +13697,7 @@ export namespace Prisma {
      * // Count the number of KpiFormTemplateVersions
      * const count = await prisma.kpiFormTemplateVersion.count({
      *   where: {
-     *     // ... the filter for the KpiFormTemplateVersions we want to coun
+     *     // ... the filter for the KpiFormTemplateVersions we want to count
      *   }
      * })
     **/
@@ -11551,7 +13743,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiFormTemplateVersionGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -11697,7 +13889,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateVersion to fetch.
      */
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
   }
 
   /**
@@ -11719,11 +13911,11 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateVersion to fetch.
      */
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
   }
 
   /**
-   * KpiFormTemplateVersion findFirs
+   * KpiFormTemplateVersion findFirst
    */
   export type KpiFormTemplateVersionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -11741,7 +13933,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateVersion to fetch.
      */
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -11753,7 +13945,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormTemplateVersions.
      */
-    cursor?: KpiFormTemplateVersionWhereUniqueInpu
+    cursor?: KpiFormTemplateVersionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -11793,7 +13985,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateVersion to fetch.
      */
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -11805,7 +13997,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormTemplateVersions.
      */
-    cursor?: KpiFormTemplateVersionWhereUniqueInpu
+    cursor?: KpiFormTemplateVersionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -11845,7 +14037,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateVersions to fetch.
      */
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -11857,7 +14049,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiFormTemplateVersions.
      */
-    cursor?: KpiFormTemplateVersionWhereUniqueInpu
+    cursor?: KpiFormTemplateVersionWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -11934,7 +14126,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiFormTemplateVersion to update.
      */
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
   }
 
   /**
@@ -11948,7 +14140,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateVersions to update
      */
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     /**
      * Limit how many KpiFormTemplateVersions to update.
      */
@@ -11956,7 +14148,7 @@ export namespace Prisma {
   }
 
   /**
-   * KpiFormTemplateVersion upser
+   * KpiFormTemplateVersion upsert
    */
   export type KpiFormTemplateVersionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -11974,7 +14166,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiFormTemplateVersion to update in case it exists.
      */
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
     /**
      * In case the KpiFormTemplateVersion found by the `where` argument doesn't exist, create a new KpiFormTemplateVersion with this data.
      */
@@ -12004,7 +14196,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateVersion to delete.
      */
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
   }
 
   /**
@@ -12014,7 +14206,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateVersions to delete
      */
-    where?: KpiFormTemplateVersionWhereInpu
+    where?: KpiFormTemplateVersionWhereInput
     /**
      * Limit how many KpiFormTemplateVersions to delete.
      */
@@ -12187,7 +14379,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateBinding to aggregate.
      */
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -12199,7 +14391,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiFormTemplateBindingWhereUniqueInpu
+    cursor?: KpiFormTemplateBindingWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -12256,10 +14448,10 @@ export namespace Prisma {
 
 
   export type KpiFormTemplateBindingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     orderBy?: KpiFormTemplateBindingOrderByWithAggregationInput | KpiFormTemplateBindingOrderByWithAggregationInput[]
     by: KpiFormTemplateBindingScalarFieldEnum[] | KpiFormTemplateBindingScalarFieldEnum
-    having?: KpiFormTemplateBindingScalarWhereWithAggregatesInpu
+    having?: KpiFormTemplateBindingScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiFormTemplateBindingCountAggregateInputType | true
@@ -12581,7 +14773,7 @@ export namespace Prisma {
      * // Count the number of KpiFormTemplateBindings
      * const count = await prisma.kpiFormTemplateBinding.count({
      *   where: {
-     *     // ... the filter for the KpiFormTemplateBindings we want to coun
+     *     // ... the filter for the KpiFormTemplateBindings we want to count
      *   }
      * })
     **/
@@ -12627,7 +14819,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiFormTemplateBindingGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -12779,7 +14971,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateBinding to fetch.
      */
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
   }
 
   /**
@@ -12801,11 +14993,11 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateBinding to fetch.
      */
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
   }
 
   /**
-   * KpiFormTemplateBinding findFirs
+   * KpiFormTemplateBinding findFirst
    */
   export type KpiFormTemplateBindingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -12823,7 +15015,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateBinding to fetch.
      */
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -12835,7 +15027,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormTemplateBindings.
      */
-    cursor?: KpiFormTemplateBindingWhereUniqueInpu
+    cursor?: KpiFormTemplateBindingWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -12875,7 +15067,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateBinding to fetch.
      */
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -12887,7 +15079,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormTemplateBindings.
      */
-    cursor?: KpiFormTemplateBindingWhereUniqueInpu
+    cursor?: KpiFormTemplateBindingWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -12927,7 +15119,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormTemplateBindings to fetch.
      */
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -12939,7 +15131,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiFormTemplateBindings.
      */
-    cursor?: KpiFormTemplateBindingWhereUniqueInpu
+    cursor?: KpiFormTemplateBindingWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -13016,7 +15208,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiFormTemplateBinding to update.
      */
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
   }
 
   /**
@@ -13030,7 +15222,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateBindings to update
      */
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     /**
      * Limit how many KpiFormTemplateBindings to update.
      */
@@ -13038,7 +15230,7 @@ export namespace Prisma {
   }
 
   /**
-   * KpiFormTemplateBinding upser
+   * KpiFormTemplateBinding upsert
    */
   export type KpiFormTemplateBindingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -13056,7 +15248,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiFormTemplateBinding to update in case it exists.
      */
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
     /**
      * In case the KpiFormTemplateBinding found by the `where` argument doesn't exist, create a new KpiFormTemplateBinding with this data.
      */
@@ -13086,7 +15278,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateBinding to delete.
      */
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
   }
 
   /**
@@ -13096,7 +15288,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormTemplateBindings to delete
      */
-    where?: KpiFormTemplateBindingWhereInpu
+    where?: KpiFormTemplateBindingWhereInput
     /**
      * Limit how many KpiFormTemplateBindings to delete.
      */
@@ -13123,7 +15315,7 @@ export namespace Prisma {
 
 
   /**
-   * Model KpiFormDocumen
+   * Model KpiFormDocument
    */
 
   export type AggregateKpiFormDocument = {
@@ -13263,7 +15455,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormDocument to aggregate.
      */
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -13275,7 +15467,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: KpiFormDocumentWhereUniqueInpu
+    cursor?: KpiFormDocumentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -13332,10 +15524,10 @@ export namespace Prisma {
 
 
   export type KpiFormDocumentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     orderBy?: KpiFormDocumentOrderByWithAggregationInput | KpiFormDocumentOrderByWithAggregationInput[]
     by: KpiFormDocumentScalarFieldEnum[] | KpiFormDocumentScalarFieldEnum
-    having?: KpiFormDocumentScalarWhereWithAggregatesInpu
+    having?: KpiFormDocumentScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: KpiFormDocumentCountAggregateInputType | true
@@ -13461,9 +15653,9 @@ export namespace Prisma {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KpiFormDocument'], meta: { name: 'KpiFormDocument' } }
     /**
      * Find zero or one KpiFormDocument that matches the filter.
-     * @param {KpiFormDocumentFindUniqueArgs} args - Arguments to find a KpiFormDocumen
+     * @param {KpiFormDocumentFindUniqueArgs} args - Arguments to find a KpiFormDocument
      * @example
-     * // Get one KpiFormDocumen
+     * // Get one KpiFormDocument
      * const kpiFormDocument = await prisma.kpiFormDocument.findUnique({
      *   where: {
      *     // ... provide filter here
@@ -13475,9 +15667,9 @@ export namespace Prisma {
     /**
      * Find one KpiFormDocument that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {KpiFormDocumentFindUniqueOrThrowArgs} args - Arguments to find a KpiFormDocumen
+     * @param {KpiFormDocumentFindUniqueOrThrowArgs} args - Arguments to find a KpiFormDocument
      * @example
-     * // Get one KpiFormDocumen
+     * // Get one KpiFormDocument
      * const kpiFormDocument = await prisma.kpiFormDocument.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -13490,9 +15682,9 @@ export namespace Prisma {
      * Find the first KpiFormDocument that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiFormDocumentFindFirstArgs} args - Arguments to find a KpiFormDocumen
+     * @param {KpiFormDocumentFindFirstArgs} args - Arguments to find a KpiFormDocument
      * @example
-     * // Get one KpiFormDocumen
+     * // Get one KpiFormDocument
      * const kpiFormDocument = await prisma.kpiFormDocument.findFirst({
      *   where: {
      *     // ... provide filter here
@@ -13506,9 +15698,9 @@ export namespace Prisma {
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {KpiFormDocumentFindFirstOrThrowArgs} args - Arguments to find a KpiFormDocumen
+     * @param {KpiFormDocumentFindFirstOrThrowArgs} args - Arguments to find a KpiFormDocument
      * @example
-     * // Get one KpiFormDocumen
+     * // Get one KpiFormDocument
      * const kpiFormDocument = await prisma.kpiFormDocument.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -13539,10 +15731,10 @@ export namespace Prisma {
      * Create a KpiFormDocument.
      * @param {KpiFormDocumentCreateArgs} args - Arguments to create a KpiFormDocument.
      * @example
-     * // Create one KpiFormDocumen
+     * // Create one KpiFormDocument
      * const KpiFormDocument = await prisma.kpiFormDocument.create({
      *   data: {
-     *     // ... data to create a KpiFormDocumen
+     *     // ... data to create a KpiFormDocument
      *   }
      * })
      *
@@ -13567,10 +15759,10 @@ export namespace Prisma {
      * Delete a KpiFormDocument.
      * @param {KpiFormDocumentDeleteArgs} args - Arguments to delete one KpiFormDocument.
      * @example
-     * // Delete one KpiFormDocumen
+     * // Delete one KpiFormDocument
      * const KpiFormDocument = await prisma.kpiFormDocument.delete({
      *   where: {
-     *     // ... filter to delete one KpiFormDocumen
+     *     // ... filter to delete one KpiFormDocument
      *   }
      * })
      *
@@ -13581,7 +15773,7 @@ export namespace Prisma {
      * Update one KpiFormDocument.
      * @param {KpiFormDocumentUpdateArgs} args - Arguments to update one KpiFormDocument.
      * @example
-     * // Update one KpiFormDocumen
+     * // Update one KpiFormDocument
      * const kpiFormDocument = await prisma.kpiFormDocument.update({
      *   where: {
      *     // ... provide filter here
@@ -13631,10 +15823,10 @@ export namespace Prisma {
      * Create or update one KpiFormDocument.
      * @param {KpiFormDocumentUpsertArgs} args - Arguments to update or create a KpiFormDocument.
      * @example
-     * // Update or create a KpiFormDocumen
+     * // Update or create a KpiFormDocument
      * const kpiFormDocument = await prisma.kpiFormDocument.upsert({
      *   create: {
-     *     // ... data to create a KpiFormDocumen
+     *     // ... data to create a KpiFormDocument
      *   },
      *   update: {
      *     // ... in case it already exists, update
@@ -13656,7 +15848,7 @@ export namespace Prisma {
      * // Count the number of KpiFormDocuments
      * const count = await prisma.kpiFormDocument.count({
      *   where: {
-     *     // ... the filter for the KpiFormDocuments we want to coun
+     *     // ... the filter for the KpiFormDocuments we want to count
      *   }
      * })
     **/
@@ -13702,7 +15894,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {KpiFormDocumentGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -13840,11 +16032,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -13854,7 +16046,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormDocument to fetch.
      */
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
   }
 
   /**
@@ -13862,11 +16054,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -13876,19 +16068,19 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormDocument to fetch.
      */
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
   }
 
   /**
-   * KpiFormDocument findFirs
+   * KpiFormDocument findFirst
    */
   export type KpiFormDocumentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -13898,7 +16090,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormDocument to fetch.
      */
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -13910,7 +16102,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormDocuments.
      */
-    cursor?: KpiFormDocumentWhereUniqueInpu
+    cursor?: KpiFormDocumentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -13936,11 +16128,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -13950,7 +16142,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormDocument to fetch.
      */
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -13962,7 +16154,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for KpiFormDocuments.
      */
-    cursor?: KpiFormDocumentWhereUniqueInpu
+    cursor?: KpiFormDocumentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -13988,11 +16180,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -14002,7 +16194,7 @@ export namespace Prisma {
     /**
      * Filter, which KpiFormDocuments to fetch.
      */
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -14014,7 +16206,7 @@ export namespace Prisma {
      *
      * Sets the position for listing KpiFormDocuments.
      */
-    cursor?: KpiFormDocumentWhereUniqueInpu
+    cursor?: KpiFormDocumentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -14040,11 +16232,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -14073,11 +16265,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -14091,7 +16283,7 @@ export namespace Prisma {
     /**
      * Choose, which KpiFormDocument to update.
      */
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
   }
 
   /**
@@ -14105,7 +16297,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormDocuments to update
      */
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     /**
      * Limit how many KpiFormDocuments to update.
      */
@@ -14113,15 +16305,15 @@ export namespace Prisma {
   }
 
   /**
-   * KpiFormDocument upser
+   * KpiFormDocument upsert
    */
   export type KpiFormDocumentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -14131,7 +16323,7 @@ export namespace Prisma {
     /**
      * The filter to search for the KpiFormDocument to update in case it exists.
      */
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     /**
      * In case the KpiFormDocument found by the `where` argument doesn't exist, create a new KpiFormDocument with this data.
      */
@@ -14147,11 +16339,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -14161,7 +16353,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormDocument to delete.
      */
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
   }
 
   /**
@@ -14171,7 +16363,7 @@ export namespace Prisma {
     /**
      * Filter which KpiFormDocuments to delete
      */
-    where?: KpiFormDocumentWhereInpu
+    where?: KpiFormDocumentWhereInput
     /**
      * Limit how many KpiFormDocuments to delete.
      */
@@ -14183,11 +16375,11 @@ export namespace Prisma {
    */
   export type KpiFormDocumentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the KpiFormDocumen
+     * Select specific fields to fetch from the KpiFormDocument
      */
     select?: KpiFormDocumentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the KpiFormDocumen
+     * Omit specific fields from the KpiFormDocument
      */
     omit?: KpiFormDocumentOmit<ExtArgs> | null
     /**
@@ -14338,7 +16530,7 @@ export namespace Prisma {
     /**
      * Filter which MasterPlan to aggregate.
      */
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -14350,7 +16542,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: MasterPlanWhereUniqueInpu
+    cursor?: MasterPlanWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -14407,10 +16599,10 @@ export namespace Prisma {
 
 
   export type MasterPlanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     orderBy?: MasterPlanOrderByWithAggregationInput | MasterPlanOrderByWithAggregationInput[]
     by: MasterPlanScalarFieldEnum[] | MasterPlanScalarFieldEnum
-    having?: MasterPlanScalarWhereWithAggregatesInpu
+    having?: MasterPlanScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: MasterPlanCountAggregateInputType | true
@@ -14730,7 +16922,7 @@ export namespace Prisma {
      * // Count the number of MasterPlans
      * const count = await prisma.masterPlan.count({
      *   where: {
-     *     // ... the filter for the MasterPlans we want to coun
+     *     // ... the filter for the MasterPlans we want to count
      *   }
      * })
     **/
@@ -14776,7 +16968,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {MasterPlanGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -14927,7 +17119,7 @@ export namespace Prisma {
     /**
      * Filter, which MasterPlan to fetch.
      */
-    where: MasterPlanWhereUniqueInpu
+    where: MasterPlanWhereUniqueInput
   }
 
   /**
@@ -14949,11 +17141,11 @@ export namespace Prisma {
     /**
      * Filter, which MasterPlan to fetch.
      */
-    where: MasterPlanWhereUniqueInpu
+    where: MasterPlanWhereUniqueInput
   }
 
   /**
-   * MasterPlan findFirs
+   * MasterPlan findFirst
    */
   export type MasterPlanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -14971,7 +17163,7 @@ export namespace Prisma {
     /**
      * Filter, which MasterPlan to fetch.
      */
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -14983,7 +17175,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for MasterPlans.
      */
-    cursor?: MasterPlanWhereUniqueInpu
+    cursor?: MasterPlanWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -15023,7 +17215,7 @@ export namespace Prisma {
     /**
      * Filter, which MasterPlan to fetch.
      */
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -15035,7 +17227,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for MasterPlans.
      */
-    cursor?: MasterPlanWhereUniqueInpu
+    cursor?: MasterPlanWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -15075,7 +17267,7 @@ export namespace Prisma {
     /**
      * Filter, which MasterPlans to fetch.
      */
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -15087,7 +17279,7 @@ export namespace Prisma {
      *
      * Sets the position for listing MasterPlans.
      */
-    cursor?: MasterPlanWhereUniqueInpu
+    cursor?: MasterPlanWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -15164,7 +17356,7 @@ export namespace Prisma {
     /**
      * Choose, which MasterPlan to update.
      */
-    where: MasterPlanWhereUniqueInpu
+    where: MasterPlanWhereUniqueInput
   }
 
   /**
@@ -15178,7 +17370,7 @@ export namespace Prisma {
     /**
      * Filter which MasterPlans to update
      */
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     /**
      * Limit how many MasterPlans to update.
      */
@@ -15186,7 +17378,7 @@ export namespace Prisma {
   }
 
   /**
-   * MasterPlan upser
+   * MasterPlan upsert
    */
   export type MasterPlanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -15204,7 +17396,7 @@ export namespace Prisma {
     /**
      * The filter to search for the MasterPlan to update in case it exists.
      */
-    where: MasterPlanWhereUniqueInpu
+    where: MasterPlanWhereUniqueInput
     /**
      * In case the MasterPlan found by the `where` argument doesn't exist, create a new MasterPlan with this data.
      */
@@ -15234,7 +17426,7 @@ export namespace Prisma {
     /**
      * Filter which MasterPlan to delete.
      */
-    where: MasterPlanWhereUniqueInpu
+    where: MasterPlanWhereUniqueInput
   }
 
   /**
@@ -15244,7 +17436,7 @@ export namespace Prisma {
     /**
      * Filter which MasterPlans to delete
      */
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     /**
      * Limit how many MasterPlans to delete.
      */
@@ -15267,9 +17459,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskInclude<ExtArgs> | null
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     orderBy?: TaskOrderByWithRelationInput | TaskOrderByWithRelationInput[]
-    cursor?: TaskWhereUniqueInpu
+    cursor?: TaskWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskScalarFieldEnum | TaskScalarFieldEnum[]
@@ -15513,7 +17705,7 @@ export namespace Prisma {
     /**
      * Filter which Task to aggregate.
      */
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -15525,7 +17717,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskWhereUniqueInpu
+    cursor?: TaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -15582,10 +17774,10 @@ export namespace Prisma {
 
 
   export type TaskGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     orderBy?: TaskOrderByWithAggregationInput | TaskOrderByWithAggregationInput[]
     by: TaskScalarFieldEnum[] | TaskScalarFieldEnum
-    having?: TaskScalarWhereWithAggregatesInpu
+    having?: TaskScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskCountAggregateInputType | true
@@ -15973,7 +18165,7 @@ export namespace Prisma {
      * // Count the number of Tasks
      * const count = await prisma.task.count({
      *   where: {
-     *     // ... the filter for the Tasks we want to coun
+     *     // ... the filter for the Tasks we want to count
      *   }
      * })
     **/
@@ -16019,7 +18211,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -16189,7 +18381,7 @@ export namespace Prisma {
     /**
      * Filter, which Task to fetch.
      */
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
   }
 
   /**
@@ -16211,11 +18403,11 @@ export namespace Prisma {
     /**
      * Filter, which Task to fetch.
      */
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
   }
 
   /**
-   * Task findFirs
+   * Task findFirst
    */
   export type TaskFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -16233,7 +18425,7 @@ export namespace Prisma {
     /**
      * Filter, which Task to fetch.
      */
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -16245,7 +18437,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for Tasks.
      */
-    cursor?: TaskWhereUniqueInpu
+    cursor?: TaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -16285,7 +18477,7 @@ export namespace Prisma {
     /**
      * Filter, which Task to fetch.
      */
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -16297,7 +18489,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for Tasks.
      */
-    cursor?: TaskWhereUniqueInpu
+    cursor?: TaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -16337,7 +18529,7 @@ export namespace Prisma {
     /**
      * Filter, which Tasks to fetch.
      */
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -16349,7 +18541,7 @@ export namespace Prisma {
      *
      * Sets the position for listing Tasks.
      */
-    cursor?: TaskWhereUniqueInpu
+    cursor?: TaskWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -16426,7 +18618,7 @@ export namespace Prisma {
     /**
      * Choose, which Task to update.
      */
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
   }
 
   /**
@@ -16440,7 +18632,7 @@ export namespace Prisma {
     /**
      * Filter which Tasks to update
      */
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     /**
      * Limit how many Tasks to update.
      */
@@ -16448,7 +18640,7 @@ export namespace Prisma {
   }
 
   /**
-   * Task upser
+   * Task upsert
    */
   export type TaskUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -16466,7 +18658,7 @@ export namespace Prisma {
     /**
      * The filter to search for the Task to update in case it exists.
      */
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     /**
      * In case the Task found by the `where` argument doesn't exist, create a new Task with this data.
      */
@@ -16496,7 +18688,7 @@ export namespace Prisma {
     /**
      * Filter which Task to delete.
      */
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
   }
 
   /**
@@ -16506,7 +18698,7 @@ export namespace Prisma {
     /**
      * Filter which Tasks to delete
      */
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     /**
      * Limit how many Tasks to delete.
      */
@@ -16529,7 +18721,7 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: MasterPlanInclude<ExtArgs> | null
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
   }
 
   /**
@@ -16548,9 +18740,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: KpiEvaluationTaskInclude<ExtArgs> | null
-    where?: KpiEvaluationTaskWhereInpu
+    where?: KpiEvaluationTaskWhereInput
     orderBy?: KpiEvaluationTaskOrderByWithRelationInput | KpiEvaluationTaskOrderByWithRelationInput[]
-    cursor?: KpiEvaluationTaskWhereUniqueInpu
+    cursor?: KpiEvaluationTaskWhereUniqueInput
     take?: number
     skip?: number
     distinct?: KpiEvaluationTaskScalarFieldEnum | KpiEvaluationTaskScalarFieldEnum[]
@@ -16561,20 +18753,20 @@ export namespace Prisma {
    */
   export type Task$participantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: TaskParticipantInclude<ExtArgs> | null
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     orderBy?: TaskParticipantOrderByWithRelationInput | TaskParticipantOrderByWithRelationInput[]
-    cursor?: TaskParticipantWhereUniqueInpu
+    cursor?: TaskParticipantWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskParticipantScalarFieldEnum | TaskParticipantScalarFieldEnum[]
@@ -16585,20 +18777,20 @@ export namespace Prisma {
    */
   export type Task$attachmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
     include?: TaskAttachmentInclude<ExtArgs> | null
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     orderBy?: TaskAttachmentOrderByWithRelationInput | TaskAttachmentOrderByWithRelationInput[]
-    cursor?: TaskAttachmentWhereUniqueInpu
+    cursor?: TaskAttachmentWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskAttachmentScalarFieldEnum | TaskAttachmentScalarFieldEnum[]
@@ -16620,9 +18812,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskHistoryInclude<ExtArgs> | null
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     orderBy?: TaskHistoryOrderByWithRelationInput | TaskHistoryOrderByWithRelationInput[]
-    cursor?: TaskHistoryWhereUniqueInpu
+    cursor?: TaskHistoryWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskHistoryScalarFieldEnum | TaskHistoryScalarFieldEnum[]
@@ -16644,9 +18836,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskStepInclude<ExtArgs> | null
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     orderBy?: TaskStepOrderByWithRelationInput | TaskStepOrderByWithRelationInput[]
-    cursor?: TaskStepWhereUniqueInpu
+    cursor?: TaskStepWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskStepScalarFieldEnum | TaskStepScalarFieldEnum[]
@@ -16668,9 +18860,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskClosureInclude<ExtArgs> | null
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     orderBy?: TaskClosureOrderByWithRelationInput | TaskClosureOrderByWithRelationInput[]
-    cursor?: TaskClosureWhereUniqueInpu
+    cursor?: TaskClosureWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskClosureScalarFieldEnum | TaskClosureScalarFieldEnum[]
@@ -16692,9 +18884,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskClosureInclude<ExtArgs> | null
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     orderBy?: TaskClosureOrderByWithRelationInput | TaskClosureOrderByWithRelationInput[]
-    cursor?: TaskClosureWhereUniqueInpu
+    cursor?: TaskClosureWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskClosureScalarFieldEnum | TaskClosureScalarFieldEnum[]
@@ -16716,9 +18908,9 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskNotificationLogInclude<ExtArgs> | null
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     orderBy?: TaskNotificationLogOrderByWithRelationInput | TaskNotificationLogOrderByWithRelationInput[]
-    cursor?: TaskNotificationLogWhereUniqueInpu
+    cursor?: TaskNotificationLogWhereUniqueInput
     take?: number
     skip?: number
     distinct?: TaskNotificationLogScalarFieldEnum | TaskNotificationLogScalarFieldEnum[]
@@ -16880,7 +19072,7 @@ export namespace Prisma {
     /**
      * Filter which TaskStep to aggregate.
      */
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -16892,7 +19084,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskStepWhereUniqueInpu
+    cursor?: TaskStepWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -16949,10 +19141,10 @@ export namespace Prisma {
 
 
   export type TaskStepGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     orderBy?: TaskStepOrderByWithAggregationInput | TaskStepOrderByWithAggregationInput[]
     by: TaskStepScalarFieldEnum[] | TaskStepScalarFieldEnum
-    having?: TaskStepScalarWhereWithAggregatesInpu
+    having?: TaskStepScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskStepCountAggregateInputType | true
@@ -17262,7 +19454,7 @@ export namespace Prisma {
      * // Count the number of TaskSteps
      * const count = await prisma.taskStep.count({
      *   where: {
-     *     // ... the filter for the TaskSteps we want to coun
+     *     // ... the filter for the TaskSteps we want to count
      *   }
      * })
     **/
@@ -17308,7 +19500,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskStepGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -17457,7 +19649,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskStep to fetch.
      */
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
   }
 
   /**
@@ -17479,11 +19671,11 @@ export namespace Prisma {
     /**
      * Filter, which TaskStep to fetch.
      */
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
   }
 
   /**
-   * TaskStep findFirs
+   * TaskStep findFirst
    */
   export type TaskStepFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -17501,7 +19693,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskStep to fetch.
      */
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -17513,7 +19705,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskSteps.
      */
-    cursor?: TaskStepWhereUniqueInpu
+    cursor?: TaskStepWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -17553,7 +19745,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskStep to fetch.
      */
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -17565,7 +19757,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskSteps.
      */
-    cursor?: TaskStepWhereUniqueInpu
+    cursor?: TaskStepWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -17605,7 +19797,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskSteps to fetch.
      */
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -17617,7 +19809,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskSteps.
      */
-    cursor?: TaskStepWhereUniqueInpu
+    cursor?: TaskStepWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -17694,7 +19886,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskStep to update.
      */
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
   }
 
   /**
@@ -17708,7 +19900,7 @@ export namespace Prisma {
     /**
      * Filter which TaskSteps to update
      */
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     /**
      * Limit how many TaskSteps to update.
      */
@@ -17716,7 +19908,7 @@ export namespace Prisma {
   }
 
   /**
-   * TaskStep upser
+   * TaskStep upsert
    */
   export type TaskStepUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -17734,7 +19926,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskStep to update in case it exists.
      */
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
     /**
      * In case the TaskStep found by the `where` argument doesn't exist, create a new TaskStep with this data.
      */
@@ -17764,7 +19956,7 @@ export namespace Prisma {
     /**
      * Filter which TaskStep to delete.
      */
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
   }
 
   /**
@@ -17774,7 +19966,7 @@ export namespace Prisma {
     /**
      * Filter which TaskSteps to delete
      */
-    where?: TaskStepWhereInpu
+    where?: TaskStepWhereInput
     /**
      * Limit how many TaskSteps to delete.
      */
@@ -17801,7 +19993,7 @@ export namespace Prisma {
 
 
   /**
-   * Model TaskAttachmen
+   * Model TaskAttachment
    */
 
   export type AggregateTaskAttachment = {
@@ -17899,7 +20091,7 @@ export namespace Prisma {
     /**
      * Filter which TaskAttachment to aggregate.
      */
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -17911,7 +20103,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskAttachmentWhereUniqueInpu
+    cursor?: TaskAttachmentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -17968,10 +20160,10 @@ export namespace Prisma {
 
 
   export type TaskAttachmentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     orderBy?: TaskAttachmentOrderByWithAggregationInput | TaskAttachmentOrderByWithAggregationInput[]
     by: TaskAttachmentScalarFieldEnum[] | TaskAttachmentScalarFieldEnum
-    having?: TaskAttachmentScalarWhereWithAggregatesInpu
+    having?: TaskAttachmentScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskAttachmentCountAggregateInputType | true
@@ -18066,9 +20258,9 @@ export namespace Prisma {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TaskAttachment'], meta: { name: 'TaskAttachment' } }
     /**
      * Find zero or one TaskAttachment that matches the filter.
-     * @param {TaskAttachmentFindUniqueArgs} args - Arguments to find a TaskAttachmen
+     * @param {TaskAttachmentFindUniqueArgs} args - Arguments to find a TaskAttachment
      * @example
-     * // Get one TaskAttachmen
+     * // Get one TaskAttachment
      * const taskAttachment = await prisma.taskAttachment.findUnique({
      *   where: {
      *     // ... provide filter here
@@ -18080,9 +20272,9 @@ export namespace Prisma {
     /**
      * Find one TaskAttachment that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {TaskAttachmentFindUniqueOrThrowArgs} args - Arguments to find a TaskAttachmen
+     * @param {TaskAttachmentFindUniqueOrThrowArgs} args - Arguments to find a TaskAttachment
      * @example
-     * // Get one TaskAttachmen
+     * // Get one TaskAttachment
      * const taskAttachment = await prisma.taskAttachment.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -18095,9 +20287,9 @@ export namespace Prisma {
      * Find the first TaskAttachment that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskAttachmentFindFirstArgs} args - Arguments to find a TaskAttachmen
+     * @param {TaskAttachmentFindFirstArgs} args - Arguments to find a TaskAttachment
      * @example
-     * // Get one TaskAttachmen
+     * // Get one TaskAttachment
      * const taskAttachment = await prisma.taskAttachment.findFirst({
      *   where: {
      *     // ... provide filter here
@@ -18111,9 +20303,9 @@ export namespace Prisma {
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskAttachmentFindFirstOrThrowArgs} args - Arguments to find a TaskAttachmen
+     * @param {TaskAttachmentFindFirstOrThrowArgs} args - Arguments to find a TaskAttachment
      * @example
-     * // Get one TaskAttachmen
+     * // Get one TaskAttachment
      * const taskAttachment = await prisma.taskAttachment.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -18144,10 +20336,10 @@ export namespace Prisma {
      * Create a TaskAttachment.
      * @param {TaskAttachmentCreateArgs} args - Arguments to create a TaskAttachment.
      * @example
-     * // Create one TaskAttachmen
+     * // Create one TaskAttachment
      * const TaskAttachment = await prisma.taskAttachment.create({
      *   data: {
-     *     // ... data to create a TaskAttachmen
+     *     // ... data to create a TaskAttachment
      *   }
      * })
      *
@@ -18172,10 +20364,10 @@ export namespace Prisma {
      * Delete a TaskAttachment.
      * @param {TaskAttachmentDeleteArgs} args - Arguments to delete one TaskAttachment.
      * @example
-     * // Delete one TaskAttachmen
+     * // Delete one TaskAttachment
      * const TaskAttachment = await prisma.taskAttachment.delete({
      *   where: {
-     *     // ... filter to delete one TaskAttachmen
+     *     // ... filter to delete one TaskAttachment
      *   }
      * })
      *
@@ -18186,7 +20378,7 @@ export namespace Prisma {
      * Update one TaskAttachment.
      * @param {TaskAttachmentUpdateArgs} args - Arguments to update one TaskAttachment.
      * @example
-     * // Update one TaskAttachmen
+     * // Update one TaskAttachment
      * const taskAttachment = await prisma.taskAttachment.update({
      *   where: {
      *     // ... provide filter here
@@ -18236,10 +20428,10 @@ export namespace Prisma {
      * Create or update one TaskAttachment.
      * @param {TaskAttachmentUpsertArgs} args - Arguments to update or create a TaskAttachment.
      * @example
-     * // Update or create a TaskAttachmen
+     * // Update or create a TaskAttachment
      * const taskAttachment = await prisma.taskAttachment.upsert({
      *   create: {
-     *     // ... data to create a TaskAttachmen
+     *     // ... data to create a TaskAttachment
      *   },
      *   update: {
      *     // ... in case it already exists, update
@@ -18261,7 +20453,7 @@ export namespace Prisma {
      * // Count the number of TaskAttachments
      * const count = await prisma.taskAttachment.count({
      *   where: {
-     *     // ... the filter for the TaskAttachments we want to coun
+     *     // ... the filter for the TaskAttachments we want to count
      *   }
      * })
     **/
@@ -18307,7 +20499,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskAttachmentGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -18437,11 +20629,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18451,7 +20643,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskAttachment to fetch.
      */
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
   }
 
   /**
@@ -18459,11 +20651,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18473,19 +20665,19 @@ export namespace Prisma {
     /**
      * Filter, which TaskAttachment to fetch.
      */
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
   }
 
   /**
-   * TaskAttachment findFirs
+   * TaskAttachment findFirst
    */
   export type TaskAttachmentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18495,7 +20687,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskAttachment to fetch.
      */
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -18507,7 +20699,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskAttachments.
      */
-    cursor?: TaskAttachmentWhereUniqueInpu
+    cursor?: TaskAttachmentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -18533,11 +20725,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18547,7 +20739,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskAttachment to fetch.
      */
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -18559,7 +20751,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskAttachments.
      */
-    cursor?: TaskAttachmentWhereUniqueInpu
+    cursor?: TaskAttachmentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -18585,11 +20777,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18599,7 +20791,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskAttachments to fetch.
      */
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -18611,7 +20803,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskAttachments.
      */
-    cursor?: TaskAttachmentWhereUniqueInpu
+    cursor?: TaskAttachmentWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -18637,11 +20829,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18670,11 +20862,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18688,7 +20880,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskAttachment to update.
      */
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
   }
 
   /**
@@ -18702,7 +20894,7 @@ export namespace Prisma {
     /**
      * Filter which TaskAttachments to update
      */
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     /**
      * Limit how many TaskAttachments to update.
      */
@@ -18710,15 +20902,15 @@ export namespace Prisma {
   }
 
   /**
-   * TaskAttachment upser
+   * TaskAttachment upsert
    */
   export type TaskAttachmentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18728,7 +20920,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskAttachment to update in case it exists.
      */
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
     /**
      * In case the TaskAttachment found by the `where` argument doesn't exist, create a new TaskAttachment with this data.
      */
@@ -18744,11 +20936,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18758,7 +20950,7 @@ export namespace Prisma {
     /**
      * Filter which TaskAttachment to delete.
      */
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
   }
 
   /**
@@ -18768,7 +20960,7 @@ export namespace Prisma {
     /**
      * Filter which TaskAttachments to delete
      */
-    where?: TaskAttachmentWhereInpu
+    where?: TaskAttachmentWhereInput
     /**
      * Limit how many TaskAttachments to delete.
      */
@@ -18780,11 +20972,11 @@ export namespace Prisma {
    */
   export type TaskAttachmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskAttachmen
+     * Select specific fields to fetch from the TaskAttachment
      */
     select?: TaskAttachmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskAttachmen
+     * Omit specific fields from the TaskAttachment
      */
     omit?: TaskAttachmentOmit<ExtArgs> | null
     /**
@@ -18795,7 +20987,7 @@ export namespace Prisma {
 
 
   /**
-   * Model TaskParticipan
+   * Model TaskParticipant
    */
 
   export type AggregateTaskParticipant = {
@@ -18905,7 +21097,7 @@ export namespace Prisma {
     /**
      * Filter which TaskParticipant to aggregate.
      */
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -18917,7 +21109,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskParticipantWhereUniqueInpu
+    cursor?: TaskParticipantWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -18974,10 +21166,10 @@ export namespace Prisma {
 
 
   export type TaskParticipantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     orderBy?: TaskParticipantOrderByWithAggregationInput | TaskParticipantOrderByWithAggregationInput[]
     by: TaskParticipantScalarFieldEnum[] | TaskParticipantScalarFieldEnum
-    having?: TaskParticipantScalarWhereWithAggregatesInpu
+    having?: TaskParticipantScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskParticipantCountAggregateInputType | true
@@ -19083,9 +21275,9 @@ export namespace Prisma {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TaskParticipant'], meta: { name: 'TaskParticipant' } }
     /**
      * Find zero or one TaskParticipant that matches the filter.
-     * @param {TaskParticipantFindUniqueArgs} args - Arguments to find a TaskParticipan
+     * @param {TaskParticipantFindUniqueArgs} args - Arguments to find a TaskParticipant
      * @example
-     * // Get one TaskParticipan
+     * // Get one TaskParticipant
      * const taskParticipant = await prisma.taskParticipant.findUnique({
      *   where: {
      *     // ... provide filter here
@@ -19097,9 +21289,9 @@ export namespace Prisma {
     /**
      * Find one TaskParticipant that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {TaskParticipantFindUniqueOrThrowArgs} args - Arguments to find a TaskParticipan
+     * @param {TaskParticipantFindUniqueOrThrowArgs} args - Arguments to find a TaskParticipant
      * @example
-     * // Get one TaskParticipan
+     * // Get one TaskParticipant
      * const taskParticipant = await prisma.taskParticipant.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -19112,9 +21304,9 @@ export namespace Prisma {
      * Find the first TaskParticipant that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskParticipantFindFirstArgs} args - Arguments to find a TaskParticipan
+     * @param {TaskParticipantFindFirstArgs} args - Arguments to find a TaskParticipant
      * @example
-     * // Get one TaskParticipan
+     * // Get one TaskParticipant
      * const taskParticipant = await prisma.taskParticipant.findFirst({
      *   where: {
      *     // ... provide filter here
@@ -19128,9 +21320,9 @@ export namespace Prisma {
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {TaskParticipantFindFirstOrThrowArgs} args - Arguments to find a TaskParticipan
+     * @param {TaskParticipantFindFirstOrThrowArgs} args - Arguments to find a TaskParticipant
      * @example
-     * // Get one TaskParticipan
+     * // Get one TaskParticipant
      * const taskParticipant = await prisma.taskParticipant.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -19161,10 +21353,10 @@ export namespace Prisma {
      * Create a TaskParticipant.
      * @param {TaskParticipantCreateArgs} args - Arguments to create a TaskParticipant.
      * @example
-     * // Create one TaskParticipan
+     * // Create one TaskParticipant
      * const TaskParticipant = await prisma.taskParticipant.create({
      *   data: {
-     *     // ... data to create a TaskParticipan
+     *     // ... data to create a TaskParticipant
      *   }
      * })
      *
@@ -19189,10 +21381,10 @@ export namespace Prisma {
      * Delete a TaskParticipant.
      * @param {TaskParticipantDeleteArgs} args - Arguments to delete one TaskParticipant.
      * @example
-     * // Delete one TaskParticipan
+     * // Delete one TaskParticipant
      * const TaskParticipant = await prisma.taskParticipant.delete({
      *   where: {
-     *     // ... filter to delete one TaskParticipan
+     *     // ... filter to delete one TaskParticipant
      *   }
      * })
      *
@@ -19203,7 +21395,7 @@ export namespace Prisma {
      * Update one TaskParticipant.
      * @param {TaskParticipantUpdateArgs} args - Arguments to update one TaskParticipant.
      * @example
-     * // Update one TaskParticipan
+     * // Update one TaskParticipant
      * const taskParticipant = await prisma.taskParticipant.update({
      *   where: {
      *     // ... provide filter here
@@ -19253,10 +21445,10 @@ export namespace Prisma {
      * Create or update one TaskParticipant.
      * @param {TaskParticipantUpsertArgs} args - Arguments to update or create a TaskParticipant.
      * @example
-     * // Update or create a TaskParticipan
+     * // Update or create a TaskParticipant
      * const taskParticipant = await prisma.taskParticipant.upsert({
      *   create: {
-     *     // ... data to create a TaskParticipan
+     *     // ... data to create a TaskParticipant
      *   },
      *   update: {
      *     // ... in case it already exists, update
@@ -19278,7 +21470,7 @@ export namespace Prisma {
      * // Count the number of TaskParticipants
      * const count = await prisma.taskParticipant.count({
      *   where: {
-     *     // ... the filter for the TaskParticipants we want to coun
+     *     // ... the filter for the TaskParticipants we want to count
      *   }
      * })
     **/
@@ -19324,7 +21516,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskParticipantGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -19457,11 +21649,11 @@ export namespace Prisma {
    */
   export type TaskParticipantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19471,7 +21663,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskParticipant to fetch.
      */
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
   }
 
   /**
@@ -19479,11 +21671,11 @@ export namespace Prisma {
    */
   export type TaskParticipantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19493,19 +21685,19 @@ export namespace Prisma {
     /**
      * Filter, which TaskParticipant to fetch.
      */
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
   }
 
   /**
-   * TaskParticipant findFirs
+   * TaskParticipant findFirst
    */
   export type TaskParticipantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19515,7 +21707,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskParticipant to fetch.
      */
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -19527,7 +21719,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskParticipants.
      */
-    cursor?: TaskParticipantWhereUniqueInpu
+    cursor?: TaskParticipantWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -19553,11 +21745,11 @@ export namespace Prisma {
    */
   export type TaskParticipantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19567,7 +21759,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskParticipant to fetch.
      */
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -19579,7 +21771,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskParticipants.
      */
-    cursor?: TaskParticipantWhereUniqueInpu
+    cursor?: TaskParticipantWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -19605,11 +21797,11 @@ export namespace Prisma {
    */
   export type TaskParticipantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19619,7 +21811,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskParticipants to fetch.
      */
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -19631,7 +21823,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskParticipants.
      */
-    cursor?: TaskParticipantWhereUniqueInpu
+    cursor?: TaskParticipantWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -19657,11 +21849,11 @@ export namespace Prisma {
    */
   export type TaskParticipantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19690,11 +21882,11 @@ export namespace Prisma {
    */
   export type TaskParticipantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19708,7 +21900,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskParticipant to update.
      */
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
   }
 
   /**
@@ -19722,7 +21914,7 @@ export namespace Prisma {
     /**
      * Filter which TaskParticipants to update
      */
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     /**
      * Limit how many TaskParticipants to update.
      */
@@ -19730,15 +21922,15 @@ export namespace Prisma {
   }
 
   /**
-   * TaskParticipant upser
+   * TaskParticipant upsert
    */
   export type TaskParticipantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19748,7 +21940,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskParticipant to update in case it exists.
      */
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     /**
      * In case the TaskParticipant found by the `where` argument doesn't exist, create a new TaskParticipant with this data.
      */
@@ -19764,11 +21956,11 @@ export namespace Prisma {
    */
   export type TaskParticipantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19778,7 +21970,7 @@ export namespace Prisma {
     /**
      * Filter which TaskParticipant to delete.
      */
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
   }
 
   /**
@@ -19788,7 +21980,7 @@ export namespace Prisma {
     /**
      * Filter which TaskParticipants to delete
      */
-    where?: TaskParticipantWhereInpu
+    where?: TaskParticipantWhereInput
     /**
      * Limit how many TaskParticipants to delete.
      */
@@ -19800,11 +21992,11 @@ export namespace Prisma {
    */
   export type TaskParticipantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the TaskParticipan
+     * Select specific fields to fetch from the TaskParticipant
      */
     select?: TaskParticipantSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the TaskParticipan
+     * Omit specific fields from the TaskParticipant
      */
     omit?: TaskParticipantOmit<ExtArgs> | null
     /**
@@ -19899,7 +22091,7 @@ export namespace Prisma {
     /**
      * Filter which TaskClosure to aggregate.
      */
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -19911,7 +22103,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskClosureWhereUniqueInpu
+    cursor?: TaskClosureWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -19968,10 +22160,10 @@ export namespace Prisma {
 
 
   export type TaskClosureGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     orderBy?: TaskClosureOrderByWithAggregationInput | TaskClosureOrderByWithAggregationInput[]
     by: TaskClosureScalarFieldEnum[] | TaskClosureScalarFieldEnum
-    having?: TaskClosureScalarWhereWithAggregatesInpu
+    having?: TaskClosureScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskClosureCountAggregateInputType | true
@@ -20252,7 +22444,7 @@ export namespace Prisma {
      * // Count the number of TaskClosures
      * const count = await prisma.taskClosure.count({
      *   where: {
-     *     // ... the filter for the TaskClosures we want to coun
+     *     // ... the filter for the TaskClosures we want to count
      *   }
      * })
     **/
@@ -20298,7 +22490,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskClosureGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -20440,7 +22632,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskClosure to fetch.
      */
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
   }
 
   /**
@@ -20462,11 +22654,11 @@ export namespace Prisma {
     /**
      * Filter, which TaskClosure to fetch.
      */
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
   }
 
   /**
-   * TaskClosure findFirs
+   * TaskClosure findFirst
    */
   export type TaskClosureFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -20484,7 +22676,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskClosure to fetch.
      */
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -20496,7 +22688,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskClosures.
      */
-    cursor?: TaskClosureWhereUniqueInpu
+    cursor?: TaskClosureWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -20536,7 +22728,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskClosure to fetch.
      */
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -20548,7 +22740,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskClosures.
      */
-    cursor?: TaskClosureWhereUniqueInpu
+    cursor?: TaskClosureWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -20588,7 +22780,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskClosures to fetch.
      */
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -20600,7 +22792,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskClosures.
      */
-    cursor?: TaskClosureWhereUniqueInpu
+    cursor?: TaskClosureWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -20677,7 +22869,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskClosure to update.
      */
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
   }
 
   /**
@@ -20691,7 +22883,7 @@ export namespace Prisma {
     /**
      * Filter which TaskClosures to update
      */
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     /**
      * Limit how many TaskClosures to update.
      */
@@ -20699,7 +22891,7 @@ export namespace Prisma {
   }
 
   /**
-   * TaskClosure upser
+   * TaskClosure upsert
    */
   export type TaskClosureUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -20717,7 +22909,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskClosure to update in case it exists.
      */
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     /**
      * In case the TaskClosure found by the `where` argument doesn't exist, create a new TaskClosure with this data.
      */
@@ -20747,7 +22939,7 @@ export namespace Prisma {
     /**
      * Filter which TaskClosure to delete.
      */
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
   }
 
   /**
@@ -20757,7 +22949,7 @@ export namespace Prisma {
     /**
      * Filter which TaskClosures to delete
      */
-    where?: TaskClosureWhereInpu
+    where?: TaskClosureWhereInput
     /**
      * Limit how many TaskClosures to delete.
      */
@@ -20880,7 +23072,7 @@ export namespace Prisma {
     /**
      * Filter which TaskHistory to aggregate.
      */
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -20892,7 +23084,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskHistoryWhereUniqueInpu
+    cursor?: TaskHistoryWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -20949,10 +23141,10 @@ export namespace Prisma {
 
 
   export type TaskHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     orderBy?: TaskHistoryOrderByWithAggregationInput | TaskHistoryOrderByWithAggregationInput[]
     by: TaskHistoryScalarFieldEnum[] | TaskHistoryScalarFieldEnum
-    having?: TaskHistoryScalarWhereWithAggregatesInpu
+    having?: TaskHistoryScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskHistoryCountAggregateInputType | true
@@ -21246,7 +23438,7 @@ export namespace Prisma {
      * // Count the number of TaskHistories
      * const count = await prisma.taskHistory.count({
      *   where: {
-     *     // ... the filter for the TaskHistories we want to coun
+     *     // ... the filter for the TaskHistories we want to count
      *   }
      * })
     **/
@@ -21292,7 +23484,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskHistoryGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -21437,7 +23629,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskHistory to fetch.
      */
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
   }
 
   /**
@@ -21459,11 +23651,11 @@ export namespace Prisma {
     /**
      * Filter, which TaskHistory to fetch.
      */
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
   }
 
   /**
-   * TaskHistory findFirs
+   * TaskHistory findFirst
    */
   export type TaskHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -21481,7 +23673,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskHistory to fetch.
      */
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -21493,7 +23685,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskHistories.
      */
-    cursor?: TaskHistoryWhereUniqueInpu
+    cursor?: TaskHistoryWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -21533,7 +23725,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskHistory to fetch.
      */
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -21545,7 +23737,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskHistories.
      */
-    cursor?: TaskHistoryWhereUniqueInpu
+    cursor?: TaskHistoryWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -21585,7 +23777,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskHistories to fetch.
      */
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -21597,7 +23789,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskHistories.
      */
-    cursor?: TaskHistoryWhereUniqueInpu
+    cursor?: TaskHistoryWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -21674,7 +23866,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskHistory to update.
      */
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
   }
 
   /**
@@ -21688,7 +23880,7 @@ export namespace Prisma {
     /**
      * Filter which TaskHistories to update
      */
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     /**
      * Limit how many TaskHistories to update.
      */
@@ -21696,7 +23888,7 @@ export namespace Prisma {
   }
 
   /**
-   * TaskHistory upser
+   * TaskHistory upsert
    */
   export type TaskHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -21714,7 +23906,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskHistory to update in case it exists.
      */
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
     /**
      * In case the TaskHistory found by the `where` argument doesn't exist, create a new TaskHistory with this data.
      */
@@ -21744,7 +23936,7 @@ export namespace Prisma {
     /**
      * Filter which TaskHistory to delete.
      */
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
   }
 
   /**
@@ -21754,7 +23946,7 @@ export namespace Prisma {
     /**
      * Filter which TaskHistories to delete
      */
-    where?: TaskHistoryWhereInpu
+    where?: TaskHistoryWhereInput
     /**
      * Limit how many TaskHistories to delete.
      */
@@ -21867,7 +24059,7 @@ export namespace Prisma {
     /**
      * Filter which TaskNotificationLog to aggregate.
      */
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -21879,7 +24071,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskNotificationLogWhereUniqueInpu
+    cursor?: TaskNotificationLogWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -21936,10 +24128,10 @@ export namespace Prisma {
 
 
   export type TaskNotificationLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     orderBy?: TaskNotificationLogOrderByWithAggregationInput | TaskNotificationLogOrderByWithAggregationInput[]
     by: TaskNotificationLogScalarFieldEnum[] | TaskNotificationLogScalarFieldEnum
-    having?: TaskNotificationLogScalarWhereWithAggregatesInpu
+    having?: TaskNotificationLogScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskNotificationLogCountAggregateInputType | true
@@ -22221,7 +24413,7 @@ export namespace Prisma {
      * // Count the number of TaskNotificationLogs
      * const count = await prisma.taskNotificationLog.count({
      *   where: {
-     *     // ... the filter for the TaskNotificationLogs we want to coun
+     *     // ... the filter for the TaskNotificationLogs we want to count
      *   }
      * })
     **/
@@ -22267,7 +24459,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskNotificationLogGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -22409,7 +24601,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskNotificationLog to fetch.
      */
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
   }
 
   /**
@@ -22431,11 +24623,11 @@ export namespace Prisma {
     /**
      * Filter, which TaskNotificationLog to fetch.
      */
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
   }
 
   /**
-   * TaskNotificationLog findFirs
+   * TaskNotificationLog findFirst
    */
   export type TaskNotificationLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -22453,7 +24645,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskNotificationLog to fetch.
      */
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -22465,7 +24657,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskNotificationLogs.
      */
-    cursor?: TaskNotificationLogWhereUniqueInpu
+    cursor?: TaskNotificationLogWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -22505,7 +24697,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskNotificationLog to fetch.
      */
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -22517,7 +24709,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskNotificationLogs.
      */
-    cursor?: TaskNotificationLogWhereUniqueInpu
+    cursor?: TaskNotificationLogWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -22557,7 +24749,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskNotificationLogs to fetch.
      */
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -22569,7 +24761,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskNotificationLogs.
      */
-    cursor?: TaskNotificationLogWhereUniqueInpu
+    cursor?: TaskNotificationLogWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -22646,7 +24838,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskNotificationLog to update.
      */
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
   }
 
   /**
@@ -22660,7 +24852,7 @@ export namespace Prisma {
     /**
      * Filter which TaskNotificationLogs to update
      */
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     /**
      * Limit how many TaskNotificationLogs to update.
      */
@@ -22668,7 +24860,7 @@ export namespace Prisma {
   }
 
   /**
-   * TaskNotificationLog upser
+   * TaskNotificationLog upsert
    */
   export type TaskNotificationLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -22686,7 +24878,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskNotificationLog to update in case it exists.
      */
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
     /**
      * In case the TaskNotificationLog found by the `where` argument doesn't exist, create a new TaskNotificationLog with this data.
      */
@@ -22716,7 +24908,7 @@ export namespace Prisma {
     /**
      * Filter which TaskNotificationLog to delete.
      */
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
   }
 
   /**
@@ -22726,7 +24918,7 @@ export namespace Prisma {
     /**
      * Filter which TaskNotificationLogs to delete
      */
-    where?: TaskNotificationLogWhereInpu
+    where?: TaskNotificationLogWhereInput
     /**
      * Limit how many TaskNotificationLogs to delete.
      */
@@ -22897,7 +25089,7 @@ export namespace Prisma {
     /**
      * Filter which TaskRankTemplate to aggregate.
      */
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -22909,7 +25101,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: TaskRankTemplateWhereUniqueInpu
+    cursor?: TaskRankTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -22966,10 +25158,10 @@ export namespace Prisma {
 
 
   export type TaskRankTemplateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     orderBy?: TaskRankTemplateOrderByWithAggregationInput | TaskRankTemplateOrderByWithAggregationInput[]
     by: TaskRankTemplateScalarFieldEnum[] | TaskRankTemplateScalarFieldEnum
-    having?: TaskRankTemplateScalarWhereWithAggregatesInpu
+    having?: TaskRankTemplateScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: TaskRankTemplateCountAggregateInputType | true
@@ -23281,7 +25473,7 @@ export namespace Prisma {
      * // Count the number of TaskRankTemplates
      * const count = await prisma.taskRankTemplate.count({
      *   where: {
-     *     // ... the filter for the TaskRankTemplates we want to coun
+     *     // ... the filter for the TaskRankTemplates we want to count
      *   }
      * })
     **/
@@ -23327,7 +25519,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {TaskRankTemplateGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -23473,7 +25665,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskRankTemplate to fetch.
      */
-    where: TaskRankTemplateWhereUniqueInpu
+    where: TaskRankTemplateWhereUniqueInput
   }
 
   /**
@@ -23491,11 +25683,11 @@ export namespace Prisma {
     /**
      * Filter, which TaskRankTemplate to fetch.
      */
-    where: TaskRankTemplateWhereUniqueInpu
+    where: TaskRankTemplateWhereUniqueInput
   }
 
   /**
-   * TaskRankTemplate findFirs
+   * TaskRankTemplate findFirst
    */
   export type TaskRankTemplateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -23509,7 +25701,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskRankTemplate to fetch.
      */
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -23521,7 +25713,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskRankTemplates.
      */
-    cursor?: TaskRankTemplateWhereUniqueInpu
+    cursor?: TaskRankTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -23557,7 +25749,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskRankTemplate to fetch.
      */
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -23569,7 +25761,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for TaskRankTemplates.
      */
-    cursor?: TaskRankTemplateWhereUniqueInpu
+    cursor?: TaskRankTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -23605,7 +25797,7 @@ export namespace Prisma {
     /**
      * Filter, which TaskRankTemplates to fetch.
      */
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -23617,7 +25809,7 @@ export namespace Prisma {
      *
      * Sets the position for listing TaskRankTemplates.
      */
-    cursor?: TaskRankTemplateWhereUniqueInpu
+    cursor?: TaskRankTemplateWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -23686,7 +25878,7 @@ export namespace Prisma {
     /**
      * Choose, which TaskRankTemplate to update.
      */
-    where: TaskRankTemplateWhereUniqueInpu
+    where: TaskRankTemplateWhereUniqueInput
   }
 
   /**
@@ -23700,7 +25892,7 @@ export namespace Prisma {
     /**
      * Filter which TaskRankTemplates to update
      */
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     /**
      * Limit how many TaskRankTemplates to update.
      */
@@ -23708,7 +25900,7 @@ export namespace Prisma {
   }
 
   /**
-   * TaskRankTemplate upser
+   * TaskRankTemplate upsert
    */
   export type TaskRankTemplateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -23722,7 +25914,7 @@ export namespace Prisma {
     /**
      * The filter to search for the TaskRankTemplate to update in case it exists.
      */
-    where: TaskRankTemplateWhereUniqueInpu
+    where: TaskRankTemplateWhereUniqueInput
     /**
      * In case the TaskRankTemplate found by the `where` argument doesn't exist, create a new TaskRankTemplate with this data.
      */
@@ -23748,7 +25940,7 @@ export namespace Prisma {
     /**
      * Filter which TaskRankTemplate to delete.
      */
-    where: TaskRankTemplateWhereUniqueInpu
+    where: TaskRankTemplateWhereUniqueInput
   }
 
   /**
@@ -23758,7 +25950,7 @@ export namespace Prisma {
     /**
      * Filter which TaskRankTemplates to delete
      */
-    where?: TaskRankTemplateWhereInpu
+    where?: TaskRankTemplateWhereInput
     /**
      * Limit how many TaskRankTemplates to delete.
      */
@@ -23901,7 +26093,7 @@ export namespace Prisma {
     /**
      * Filter which RankQuota to aggregate.
      */
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -23913,7 +26105,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: RankQuotaWhereUniqueInpu
+    cursor?: RankQuotaWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -23970,10 +26162,10 @@ export namespace Prisma {
 
 
   export type RankQuotaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     orderBy?: RankQuotaOrderByWithAggregationInput | RankQuotaOrderByWithAggregationInput[]
     by: RankQuotaScalarFieldEnum[] | RankQuotaScalarFieldEnum
-    having?: RankQuotaScalarWhereWithAggregatesInpu
+    having?: RankQuotaScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: RankQuotaCountAggregateInputType | true
@@ -24269,7 +26461,7 @@ export namespace Prisma {
      * // Count the number of RankQuotas
      * const count = await prisma.rankQuota.count({
      *   where: {
-     *     // ... the filter for the RankQuotas we want to coun
+     *     // ... the filter for the RankQuotas we want to count
      *   }
      * })
     **/
@@ -24315,7 +26507,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {RankQuotaGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -24457,7 +26649,7 @@ export namespace Prisma {
     /**
      * Filter, which RankQuota to fetch.
      */
-    where: RankQuotaWhereUniqueInpu
+    where: RankQuotaWhereUniqueInput
   }
 
   /**
@@ -24475,11 +26667,11 @@ export namespace Prisma {
     /**
      * Filter, which RankQuota to fetch.
      */
-    where: RankQuotaWhereUniqueInpu
+    where: RankQuotaWhereUniqueInput
   }
 
   /**
-   * RankQuota findFirs
+   * RankQuota findFirst
    */
   export type RankQuotaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -24493,7 +26685,7 @@ export namespace Prisma {
     /**
      * Filter, which RankQuota to fetch.
      */
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -24505,7 +26697,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for RankQuotas.
      */
-    cursor?: RankQuotaWhereUniqueInpu
+    cursor?: RankQuotaWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -24541,7 +26733,7 @@ export namespace Prisma {
     /**
      * Filter, which RankQuota to fetch.
      */
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -24553,7 +26745,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for RankQuotas.
      */
-    cursor?: RankQuotaWhereUniqueInpu
+    cursor?: RankQuotaWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -24589,7 +26781,7 @@ export namespace Prisma {
     /**
      * Filter, which RankQuotas to fetch.
      */
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -24601,7 +26793,7 @@ export namespace Prisma {
      *
      * Sets the position for listing RankQuotas.
      */
-    cursor?: RankQuotaWhereUniqueInpu
+    cursor?: RankQuotaWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -24670,7 +26862,7 @@ export namespace Prisma {
     /**
      * Choose, which RankQuota to update.
      */
-    where: RankQuotaWhereUniqueInpu
+    where: RankQuotaWhereUniqueInput
   }
 
   /**
@@ -24684,7 +26876,7 @@ export namespace Prisma {
     /**
      * Filter which RankQuotas to update
      */
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     /**
      * Limit how many RankQuotas to update.
      */
@@ -24692,7 +26884,7 @@ export namespace Prisma {
   }
 
   /**
-   * RankQuota upser
+   * RankQuota upsert
    */
   export type RankQuotaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -24706,7 +26898,7 @@ export namespace Prisma {
     /**
      * The filter to search for the RankQuota to update in case it exists.
      */
-    where: RankQuotaWhereUniqueInpu
+    where: RankQuotaWhereUniqueInput
     /**
      * In case the RankQuota found by the `where` argument doesn't exist, create a new RankQuota with this data.
      */
@@ -24732,7 +26924,7 @@ export namespace Prisma {
     /**
      * Filter which RankQuota to delete.
      */
-    where: RankQuotaWhereUniqueInpu
+    where: RankQuotaWhereUniqueInput
   }
 
   /**
@@ -24742,7 +26934,7 @@ export namespace Prisma {
     /**
      * Filter which RankQuotas to delete
      */
-    where?: RankQuotaWhereInpu
+    where?: RankQuotaWhereInput
     /**
      * Limit how many RankQuotas to delete.
      */
@@ -24765,7 +26957,7 @@ export namespace Prisma {
 
 
   /**
-   * Model OutboxEven
+   * Model OutboxEvent
    */
 
   export type AggregateOutboxEvent = {
@@ -24889,7 +27081,7 @@ export namespace Prisma {
     /**
      * Filter which OutboxEvent to aggregate.
      */
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -24901,7 +27093,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: OutboxEventWhereUniqueInpu
+    cursor?: OutboxEventWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -24958,10 +27150,10 @@ export namespace Prisma {
 
 
   export type OutboxEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     orderBy?: OutboxEventOrderByWithAggregationInput | OutboxEventOrderByWithAggregationInput[]
     by: OutboxEventScalarFieldEnum[] | OutboxEventScalarFieldEnum
-    having?: OutboxEventScalarWhereWithAggregatesInpu
+    having?: OutboxEventScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: OutboxEventCountAggregateInputType | true
@@ -25070,9 +27262,9 @@ export namespace Prisma {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OutboxEvent'], meta: { name: 'OutboxEvent' } }
     /**
      * Find zero or one OutboxEvent that matches the filter.
-     * @param {OutboxEventFindUniqueArgs} args - Arguments to find a OutboxEven
+     * @param {OutboxEventFindUniqueArgs} args - Arguments to find a OutboxEvent
      * @example
-     * // Get one OutboxEven
+     * // Get one OutboxEvent
      * const outboxEvent = await prisma.outboxEvent.findUnique({
      *   where: {
      *     // ... provide filter here
@@ -25084,9 +27276,9 @@ export namespace Prisma {
     /**
      * Find one OutboxEvent that matches the filter or throw an error with `error.code='P2025'`
      * if no matches were found.
-     * @param {OutboxEventFindUniqueOrThrowArgs} args - Arguments to find a OutboxEven
+     * @param {OutboxEventFindUniqueOrThrowArgs} args - Arguments to find a OutboxEvent
      * @example
-     * // Get one OutboxEven
+     * // Get one OutboxEvent
      * const outboxEvent = await prisma.outboxEvent.findUniqueOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -25099,9 +27291,9 @@ export namespace Prisma {
      * Find the first OutboxEvent that matches the filter.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {OutboxEventFindFirstArgs} args - Arguments to find a OutboxEven
+     * @param {OutboxEventFindFirstArgs} args - Arguments to find a OutboxEvent
      * @example
-     * // Get one OutboxEven
+     * // Get one OutboxEvent
      * const outboxEvent = await prisma.outboxEvent.findFirst({
      *   where: {
      *     // ... provide filter here
@@ -25115,9 +27307,9 @@ export namespace Prisma {
      * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * @param {OutboxEventFindFirstOrThrowArgs} args - Arguments to find a OutboxEven
+     * @param {OutboxEventFindFirstOrThrowArgs} args - Arguments to find a OutboxEvent
      * @example
-     * // Get one OutboxEven
+     * // Get one OutboxEvent
      * const outboxEvent = await prisma.outboxEvent.findFirstOrThrow({
      *   where: {
      *     // ... provide filter here
@@ -25148,10 +27340,10 @@ export namespace Prisma {
      * Create a OutboxEvent.
      * @param {OutboxEventCreateArgs} args - Arguments to create a OutboxEvent.
      * @example
-     * // Create one OutboxEven
+     * // Create one OutboxEvent
      * const OutboxEvent = await prisma.outboxEvent.create({
      *   data: {
-     *     // ... data to create a OutboxEven
+     *     // ... data to create a OutboxEvent
      *   }
      * })
      *
@@ -25176,10 +27368,10 @@ export namespace Prisma {
      * Delete a OutboxEvent.
      * @param {OutboxEventDeleteArgs} args - Arguments to delete one OutboxEvent.
      * @example
-     * // Delete one OutboxEven
+     * // Delete one OutboxEvent
      * const OutboxEvent = await prisma.outboxEvent.delete({
      *   where: {
-     *     // ... filter to delete one OutboxEven
+     *     // ... filter to delete one OutboxEvent
      *   }
      * })
      *
@@ -25190,7 +27382,7 @@ export namespace Prisma {
      * Update one OutboxEvent.
      * @param {OutboxEventUpdateArgs} args - Arguments to update one OutboxEvent.
      * @example
-     * // Update one OutboxEven
+     * // Update one OutboxEvent
      * const outboxEvent = await prisma.outboxEvent.update({
      *   where: {
      *     // ... provide filter here
@@ -25240,10 +27432,10 @@ export namespace Prisma {
      * Create or update one OutboxEvent.
      * @param {OutboxEventUpsertArgs} args - Arguments to update or create a OutboxEvent.
      * @example
-     * // Update or create a OutboxEven
+     * // Update or create a OutboxEvent
      * const outboxEvent = await prisma.outboxEvent.upsert({
      *   create: {
-     *     // ... data to create a OutboxEven
+     *     // ... data to create a OutboxEvent
      *   },
      *   update: {
      *     // ... in case it already exists, update
@@ -25265,7 +27457,7 @@ export namespace Prisma {
      * // Count the number of OutboxEvents
      * const count = await prisma.outboxEvent.count({
      *   where: {
-     *     // ... the filter for the OutboxEvents we want to coun
+     *     // ... the filter for the OutboxEvents we want to count
      *   }
      * })
     **/
@@ -25311,7 +27503,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {OutboxEventGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -25445,17 +27637,17 @@ export namespace Prisma {
    */
   export type OutboxEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * Filter, which OutboxEvent to fetch.
      */
-    where: OutboxEventWhereUniqueInpu
+    where: OutboxEventWhereUniqueInput
   }
 
   /**
@@ -25463,35 +27655,35 @@ export namespace Prisma {
    */
   export type OutboxEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * Filter, which OutboxEvent to fetch.
      */
-    where: OutboxEventWhereUniqueInpu
+    where: OutboxEventWhereUniqueInput
   }
 
   /**
-   * OutboxEvent findFirs
+   * OutboxEvent findFirst
    */
   export type OutboxEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * Filter, which OutboxEvent to fetch.
      */
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -25503,7 +27695,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for OutboxEvents.
      */
-    cursor?: OutboxEventWhereUniqueInpu
+    cursor?: OutboxEventWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -25529,17 +27721,17 @@ export namespace Prisma {
    */
   export type OutboxEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * Filter, which OutboxEvent to fetch.
      */
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -25551,7 +27743,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for OutboxEvents.
      */
-    cursor?: OutboxEventWhereUniqueInpu
+    cursor?: OutboxEventWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -25577,17 +27769,17 @@ export namespace Prisma {
    */
   export type OutboxEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * Filter, which OutboxEvents to fetch.
      */
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -25599,7 +27791,7 @@ export namespace Prisma {
      *
      * Sets the position for listing OutboxEvents.
      */
-    cursor?: OutboxEventWhereUniqueInpu
+    cursor?: OutboxEventWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -25625,11 +27817,11 @@ export namespace Prisma {
    */
   export type OutboxEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
@@ -25654,11 +27846,11 @@ export namespace Prisma {
    */
   export type OutboxEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
@@ -25668,7 +27860,7 @@ export namespace Prisma {
     /**
      * Choose, which OutboxEvent to update.
      */
-    where: OutboxEventWhereUniqueInpu
+    where: OutboxEventWhereUniqueInput
   }
 
   /**
@@ -25682,7 +27874,7 @@ export namespace Prisma {
     /**
      * Filter which OutboxEvents to update
      */
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     /**
      * Limit how many OutboxEvents to update.
      */
@@ -25690,21 +27882,21 @@ export namespace Prisma {
   }
 
   /**
-   * OutboxEvent upser
+   * OutboxEvent upsert
    */
   export type OutboxEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * The filter to search for the OutboxEvent to update in case it exists.
      */
-    where: OutboxEventWhereUniqueInpu
+    where: OutboxEventWhereUniqueInput
     /**
      * In case the OutboxEvent found by the `where` argument doesn't exist, create a new OutboxEvent with this data.
      */
@@ -25720,17 +27912,17 @@ export namespace Prisma {
    */
   export type OutboxEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
     /**
      * Filter which OutboxEvent to delete.
      */
-    where: OutboxEventWhereUniqueInpu
+    where: OutboxEventWhereUniqueInput
   }
 
   /**
@@ -25740,7 +27932,7 @@ export namespace Prisma {
     /**
      * Filter which OutboxEvents to delete
      */
-    where?: OutboxEventWhereInpu
+    where?: OutboxEventWhereInput
     /**
      * Limit how many OutboxEvents to delete.
      */
@@ -25752,11 +27944,11 @@ export namespace Prisma {
    */
   export type OutboxEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the OutboxEven
+     * Select specific fields to fetch from the OutboxEvent
      */
     select?: OutboxEventSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the OutboxEven
+     * Omit specific fields from the OutboxEvent
      */
     omit?: OutboxEventOmit<ExtArgs> | null
   }
@@ -25833,7 +28025,7 @@ export namespace Prisma {
     /**
      * Filter which ProcessedCommand to aggregate.
      */
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -25845,7 +28037,7 @@ export namespace Prisma {
      *
      * Sets the start position
      */
-    cursor?: ProcessedCommandWhereUniqueInpu
+    cursor?: ProcessedCommandWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -25890,10 +28082,10 @@ export namespace Prisma {
 
 
   export type ProcessedCommandGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     orderBy?: ProcessedCommandOrderByWithAggregationInput | ProcessedCommandOrderByWithAggregationInput[]
     by: ProcessedCommandScalarFieldEnum[] | ProcessedCommandScalarFieldEnum
-    having?: ProcessedCommandScalarWhereWithAggregatesInpu
+    having?: ProcessedCommandScalarWhereWithAggregatesInput
     take?: number
     skip?: number
     _count?: ProcessedCommandCountAggregateInputType | true
@@ -26169,7 +28361,7 @@ export namespace Prisma {
      * // Count the number of ProcessedCommands
      * const count = await prisma.processedCommand.count({
      *   where: {
-     *     // ... the filter for the ProcessedCommands we want to coun
+     *     // ... the filter for the ProcessedCommands we want to count
      *   }
      * })
     **/
@@ -26215,7 +28407,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * @param {ProcessedCommandGroupByArgs} args - Group by arguments.
      * @example
-     * // Group by city, order by createdAt, get coun
+     * // Group by city, order by createdAt, get count
      * const result = await prisma.user.groupBy({
      *   by: ['city', 'createdAt'],
      *   orderBy: {
@@ -26353,7 +28545,7 @@ export namespace Prisma {
     /**
      * Filter, which ProcessedCommand to fetch.
      */
-    where: ProcessedCommandWhereUniqueInpu
+    where: ProcessedCommandWhereUniqueInput
   }
 
   /**
@@ -26371,11 +28563,11 @@ export namespace Prisma {
     /**
      * Filter, which ProcessedCommand to fetch.
      */
-    where: ProcessedCommandWhereUniqueInpu
+    where: ProcessedCommandWhereUniqueInput
   }
 
   /**
-   * ProcessedCommand findFirs
+   * ProcessedCommand findFirst
    */
   export type ProcessedCommandFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -26389,7 +28581,7 @@ export namespace Prisma {
     /**
      * Filter, which ProcessedCommand to fetch.
      */
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -26401,7 +28593,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for ProcessedCommands.
      */
-    cursor?: ProcessedCommandWhereUniqueInpu
+    cursor?: ProcessedCommandWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -26437,7 +28629,7 @@ export namespace Prisma {
     /**
      * Filter, which ProcessedCommand to fetch.
      */
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -26449,7 +28641,7 @@ export namespace Prisma {
      *
      * Sets the position for searching for ProcessedCommands.
      */
-    cursor?: ProcessedCommandWhereUniqueInpu
+    cursor?: ProcessedCommandWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -26485,7 +28677,7 @@ export namespace Prisma {
     /**
      * Filter, which ProcessedCommands to fetch.
      */
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
      *
@@ -26497,7 +28689,7 @@ export namespace Prisma {
      *
      * Sets the position for listing ProcessedCommands.
      */
-    cursor?: ProcessedCommandWhereUniqueInpu
+    cursor?: ProcessedCommandWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
      *
@@ -26566,7 +28758,7 @@ export namespace Prisma {
     /**
      * Choose, which ProcessedCommand to update.
      */
-    where: ProcessedCommandWhereUniqueInpu
+    where: ProcessedCommandWhereUniqueInput
   }
 
   /**
@@ -26580,7 +28772,7 @@ export namespace Prisma {
     /**
      * Filter which ProcessedCommands to update
      */
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     /**
      * Limit how many ProcessedCommands to update.
      */
@@ -26588,7 +28780,7 @@ export namespace Prisma {
   }
 
   /**
-   * ProcessedCommand upser
+   * ProcessedCommand upsert
    */
   export type ProcessedCommandUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
@@ -26602,7 +28794,7 @@ export namespace Prisma {
     /**
      * The filter to search for the ProcessedCommand to update in case it exists.
      */
-    where: ProcessedCommandWhereUniqueInpu
+    where: ProcessedCommandWhereUniqueInput
     /**
      * In case the ProcessedCommand found by the `where` argument doesn't exist, create a new ProcessedCommand with this data.
      */
@@ -26628,7 +28820,7 @@ export namespace Prisma {
     /**
      * Filter which ProcessedCommand to delete.
      */
-    where: ProcessedCommandWhereUniqueInpu
+    where: ProcessedCommandWhereUniqueInput
   }
 
   /**
@@ -26638,7 +28830,7 @@ export namespace Prisma {
     /**
      * Filter which ProcessedCommands to delete
      */
-    where?: ProcessedCommandWhereInpu
+    where?: ProcessedCommandWhereInput
     /**
      * Limit how many ProcessedCommands to delete.
      */
@@ -26735,6 +28927,31 @@ export namespace Prisma {
   };
 
   export type KpiDomainWeightScalarFieldEnum = (typeof KpiDomainWeightScalarFieldEnum)[keyof typeof KpiDomainWeightScalarFieldEnum]
+
+
+  export const KpiFormulaConfigScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    version: 'version',
+    settings: 'settings',
+    updatedBy: 'updatedBy',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type KpiFormulaConfigScalarFieldEnum = (typeof KpiFormulaConfigScalarFieldEnum)[keyof typeof KpiFormulaConfigScalarFieldEnum]
+
+
+  export const KpiFormulaConfigVersionScalarFieldEnum: {
+    id: 'id',
+    organizationId: 'organizationId',
+    version: 'version',
+    settings: 'settings',
+    changedBy: 'changedBy',
+    createdAt: 'createdAt'
+  };
+
+  export type KpiFormulaConfigVersionScalarFieldEnum = (typeof KpiFormulaConfigVersionScalarFieldEnum)[keyof typeof KpiFormulaConfigVersionScalarFieldEnum]
 
 
   export const KpiPeriodScalarFieldEnum: {
@@ -27160,6 +29377,22 @@ export namespace Prisma {
   export type KpiDomainWeightOrderByRelevanceFieldEnum = (typeof KpiDomainWeightOrderByRelevanceFieldEnum)[keyof typeof KpiDomainWeightOrderByRelevanceFieldEnum]
 
 
+  export const KpiFormulaConfigOrderByRelevanceFieldEnum: {
+    organizationId: 'organizationId',
+    updatedBy: 'updatedBy'
+  };
+
+  export type KpiFormulaConfigOrderByRelevanceFieldEnum = (typeof KpiFormulaConfigOrderByRelevanceFieldEnum)[keyof typeof KpiFormulaConfigOrderByRelevanceFieldEnum]
+
+
+  export const KpiFormulaConfigVersionOrderByRelevanceFieldEnum: {
+    organizationId: 'organizationId',
+    changedBy: 'changedBy'
+  };
+
+  export type KpiFormulaConfigVersionOrderByRelevanceFieldEnum = (typeof KpiFormulaConfigVersionOrderByRelevanceFieldEnum)[keyof typeof KpiFormulaConfigVersionOrderByRelevanceFieldEnum]
+
+
   export const KpiPeriodOrderByRelevanceFieldEnum: {
     name: 'name',
     organizationId: 'organizationId'
@@ -27503,10 +29736,10 @@ export namespace Prisma {
     isDeleted?: SortOrder
     organizationId?: SortOrder
     departmentPath?: SortOrderInput | SortOrder
-    kpiEvaluations?: KpiEvaluationOrderByRelationAggregateInpu
-    kpiReviews?: KpiEvaluationOrderByRelationAggregateInpu
-    taskParticipants?: TaskParticipantOrderByRelationAggregateInpu
-    _relevance?: EmployeeOrderByRelevanceInpu
+    kpiEvaluations?: KpiEvaluationOrderByRelationAggregateInput
+    kpiReviews?: KpiEvaluationOrderByRelationAggregateInput
+    taskParticipants?: TaskParticipantOrderByRelationAggregateInput
+    _relevance?: EmployeeOrderByRelevanceInput
   }
 
   export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
@@ -27571,11 +29804,11 @@ export namespace Prisma {
     isDeleted?: SortOrder
     organizationId?: SortOrder
     departmentPath?: SortOrderInput | SortOrder
-    _count?: EmployeeCountOrderByAggregateInpu
-    _avg?: EmployeeAvgOrderByAggregateInpu
-    _max?: EmployeeMaxOrderByAggregateInpu
-    _min?: EmployeeMinOrderByAggregateInpu
-    _sum?: EmployeeSumOrderByAggregateInpu
+    _count?: EmployeeCountOrderByAggregateInput
+    _avg?: EmployeeAvgOrderByAggregateInput
+    _max?: EmployeeMaxOrderByAggregateInput
+    _min?: EmployeeMinOrderByAggregateInput
+    _sum?: EmployeeSumOrderByAggregateInput
   }
 
   export type EmployeeScalarWhereWithAggregatesInput = {
@@ -27641,14 +29874,14 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    domainWeights?: KpiDomainWeightOrderByRelationAggregateInpu
-    evaluations?: KpiEvaluationOrderByRelationAggregateInpu
-    _relevance?: KpiRuleSetOrderByRelevanceInpu
+    domainWeights?: KpiDomainWeightOrderByRelationAggregateInput
+    evaluations?: KpiEvaluationOrderByRelationAggregateInput
+    _relevance?: KpiRuleSetOrderByRelevanceInput
   }
 
   export type KpiRuleSetWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    unitId_version?: KpiRuleSetUnitIdVersionCompoundUniqueInpu
+    unitId_version?: KpiRuleSetUnitIdVersionCompoundUniqueInput
     AND?: KpiRuleSetWhereInput | KpiRuleSetWhereInput[]
     OR?: KpiRuleSetWhereInput[]
     NOT?: KpiRuleSetWhereInput | KpiRuleSetWhereInput[]
@@ -27678,11 +29911,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiRuleSetCountOrderByAggregateInpu
-    _avg?: KpiRuleSetAvgOrderByAggregateInpu
-    _max?: KpiRuleSetMaxOrderByAggregateInpu
-    _min?: KpiRuleSetMinOrderByAggregateInpu
-    _sum?: KpiRuleSetSumOrderByAggregateInpu
+    _count?: KpiRuleSetCountOrderByAggregateInput
+    _avg?: KpiRuleSetAvgOrderByAggregateInput
+    _max?: KpiRuleSetMaxOrderByAggregateInput
+    _min?: KpiRuleSetMinOrderByAggregateInput
+    _sum?: KpiRuleSetSumOrderByAggregateInput
   }
 
   export type KpiRuleSetScalarWhereWithAggregatesInput = {
@@ -27726,13 +29959,13 @@ export namespace Prisma {
     progressWeight?: SortOrder
     attitudeWeight?: SortOrder
     organizationId?: SortOrder
-    ruleSet?: KpiRuleSetOrderByWithRelationInpu
-    _relevance?: KpiDomainWeightOrderByRelevanceInpu
+    ruleSet?: KpiRuleSetOrderByWithRelationInput
+    _relevance?: KpiDomainWeightOrderByRelevanceInput
   }
 
   export type KpiDomainWeightWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    ruleSetId_domainCode?: KpiDomainWeightRuleSetIdDomainCodeCompoundUniqueInpu
+    ruleSetId_domainCode?: KpiDomainWeightRuleSetIdDomainCodeCompoundUniqueInput
     AND?: KpiDomainWeightWhereInput | KpiDomainWeightWhereInput[]
     OR?: KpiDomainWeightWhereInput[]
     NOT?: KpiDomainWeightWhereInput | KpiDomainWeightWhereInput[]
@@ -27755,11 +29988,11 @@ export namespace Prisma {
     progressWeight?: SortOrder
     attitudeWeight?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiDomainWeightCountOrderByAggregateInpu
-    _avg?: KpiDomainWeightAvgOrderByAggregateInpu
-    _max?: KpiDomainWeightMaxOrderByAggregateInpu
-    _min?: KpiDomainWeightMinOrderByAggregateInpu
-    _sum?: KpiDomainWeightSumOrderByAggregateInpu
+    _count?: KpiDomainWeightCountOrderByAggregateInput
+    _avg?: KpiDomainWeightAvgOrderByAggregateInput
+    _max?: KpiDomainWeightMaxOrderByAggregateInput
+    _min?: KpiDomainWeightMinOrderByAggregateInput
+    _sum?: KpiDomainWeightSumOrderByAggregateInput
   }
 
   export type KpiDomainWeightScalarWhereWithAggregatesInput = {
@@ -27774,6 +30007,138 @@ export namespace Prisma {
     progressWeight?: FloatWithAggregatesFilter<"KpiDomainWeight"> | number
     attitudeWeight?: FloatWithAggregatesFilter<"KpiDomainWeight"> | number
     organizationId?: StringWithAggregatesFilter<"KpiDomainWeight"> | string
+  }
+
+  export type KpiFormulaConfigWhereInput = {
+    AND?: KpiFormulaConfigWhereInput | KpiFormulaConfigWhereInput[]
+    OR?: KpiFormulaConfigWhereInput[]
+    NOT?: KpiFormulaConfigWhereInput | KpiFormulaConfigWhereInput[]
+    id?: IntFilter<"KpiFormulaConfig"> | number
+    organizationId?: StringFilter<"KpiFormulaConfig"> | string
+    version?: IntFilter<"KpiFormulaConfig"> | number
+    settings?: JsonFilter<"KpiFormulaConfig">
+    updatedBy?: StringNullableFilter<"KpiFormulaConfig"> | string | null
+    createdAt?: DateTimeFilter<"KpiFormulaConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"KpiFormulaConfig"> | Date | string
+    versions?: KpiFormulaConfigVersionListRelationFilter
+  }
+
+  export type KpiFormulaConfigOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    settings?: SortOrder
+    updatedBy?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    versions?: KpiFormulaConfigVersionOrderByRelationAggregateInput
+    _relevance?: KpiFormulaConfigOrderByRelevanceInput
+  }
+
+  export type KpiFormulaConfigWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    organizationId?: string
+    AND?: KpiFormulaConfigWhereInput | KpiFormulaConfigWhereInput[]
+    OR?: KpiFormulaConfigWhereInput[]
+    NOT?: KpiFormulaConfigWhereInput | KpiFormulaConfigWhereInput[]
+    version?: IntFilter<"KpiFormulaConfig"> | number
+    settings?: JsonFilter<"KpiFormulaConfig">
+    updatedBy?: StringNullableFilter<"KpiFormulaConfig"> | string | null
+    createdAt?: DateTimeFilter<"KpiFormulaConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"KpiFormulaConfig"> | Date | string
+    versions?: KpiFormulaConfigVersionListRelationFilter
+  }, "id" | "organizationId">
+
+  export type KpiFormulaConfigOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    settings?: SortOrder
+    updatedBy?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: KpiFormulaConfigCountOrderByAggregateInput
+    _avg?: KpiFormulaConfigAvgOrderByAggregateInput
+    _max?: KpiFormulaConfigMaxOrderByAggregateInput
+    _min?: KpiFormulaConfigMinOrderByAggregateInput
+    _sum?: KpiFormulaConfigSumOrderByAggregateInput
+  }
+
+  export type KpiFormulaConfigScalarWhereWithAggregatesInput = {
+    AND?: KpiFormulaConfigScalarWhereWithAggregatesInput | KpiFormulaConfigScalarWhereWithAggregatesInput[]
+    OR?: KpiFormulaConfigScalarWhereWithAggregatesInput[]
+    NOT?: KpiFormulaConfigScalarWhereWithAggregatesInput | KpiFormulaConfigScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"KpiFormulaConfig"> | number
+    organizationId?: StringWithAggregatesFilter<"KpiFormulaConfig"> | string
+    version?: IntWithAggregatesFilter<"KpiFormulaConfig"> | number
+    settings?: JsonWithAggregatesFilter<"KpiFormulaConfig">
+    updatedBy?: StringNullableWithAggregatesFilter<"KpiFormulaConfig"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"KpiFormulaConfig"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"KpiFormulaConfig"> | Date | string
+  }
+
+  export type KpiFormulaConfigVersionWhereInput = {
+    AND?: KpiFormulaConfigVersionWhereInput | KpiFormulaConfigVersionWhereInput[]
+    OR?: KpiFormulaConfigVersionWhereInput[]
+    NOT?: KpiFormulaConfigVersionWhereInput | KpiFormulaConfigVersionWhereInput[]
+    id?: IntFilter<"KpiFormulaConfigVersion"> | number
+    organizationId?: StringFilter<"KpiFormulaConfigVersion"> | string
+    version?: IntFilter<"KpiFormulaConfigVersion"> | number
+    settings?: JsonFilter<"KpiFormulaConfigVersion">
+    changedBy?: StringNullableFilter<"KpiFormulaConfigVersion"> | string | null
+    createdAt?: DateTimeFilter<"KpiFormulaConfigVersion"> | Date | string
+    config?: XOR<KpiFormulaConfigScalarRelationFilter, KpiFormulaConfigWhereInput>
+  }
+
+  export type KpiFormulaConfigVersionOrderByWithRelationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    settings?: SortOrder
+    changedBy?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    config?: KpiFormulaConfigOrderByWithRelationInput
+    _relevance?: KpiFormulaConfigVersionOrderByRelevanceInput
+  }
+
+  export type KpiFormulaConfigVersionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    organizationId_version?: KpiFormulaConfigVersionOrganizationIdVersionCompoundUniqueInput
+    AND?: KpiFormulaConfigVersionWhereInput | KpiFormulaConfigVersionWhereInput[]
+    OR?: KpiFormulaConfigVersionWhereInput[]
+    NOT?: KpiFormulaConfigVersionWhereInput | KpiFormulaConfigVersionWhereInput[]
+    organizationId?: StringFilter<"KpiFormulaConfigVersion"> | string
+    version?: IntFilter<"KpiFormulaConfigVersion"> | number
+    settings?: JsonFilter<"KpiFormulaConfigVersion">
+    changedBy?: StringNullableFilter<"KpiFormulaConfigVersion"> | string | null
+    createdAt?: DateTimeFilter<"KpiFormulaConfigVersion"> | Date | string
+    config?: XOR<KpiFormulaConfigScalarRelationFilter, KpiFormulaConfigWhereInput>
+  }, "id" | "organizationId_version">
+
+  export type KpiFormulaConfigVersionOrderByWithAggregationInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    settings?: SortOrder
+    changedBy?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: KpiFormulaConfigVersionCountOrderByAggregateInput
+    _avg?: KpiFormulaConfigVersionAvgOrderByAggregateInput
+    _max?: KpiFormulaConfigVersionMaxOrderByAggregateInput
+    _min?: KpiFormulaConfigVersionMinOrderByAggregateInput
+    _sum?: KpiFormulaConfigVersionSumOrderByAggregateInput
+  }
+
+  export type KpiFormulaConfigVersionScalarWhereWithAggregatesInput = {
+    AND?: KpiFormulaConfigVersionScalarWhereWithAggregatesInput | KpiFormulaConfigVersionScalarWhereWithAggregatesInput[]
+    OR?: KpiFormulaConfigVersionScalarWhereWithAggregatesInput[]
+    NOT?: KpiFormulaConfigVersionScalarWhereWithAggregatesInput | KpiFormulaConfigVersionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"KpiFormulaConfigVersion"> | number
+    organizationId?: StringWithAggregatesFilter<"KpiFormulaConfigVersion"> | string
+    version?: IntWithAggregatesFilter<"KpiFormulaConfigVersion"> | number
+    settings?: JsonWithAggregatesFilter<"KpiFormulaConfigVersion">
+    changedBy?: StringNullableWithAggregatesFilter<"KpiFormulaConfigVersion"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"KpiFormulaConfigVersion"> | Date | string
   }
 
   export type KpiPeriodWhereInput = {
@@ -27798,8 +30163,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    evaluations?: KpiEvaluationOrderByRelationAggregateInpu
-    _relevance?: KpiPeriodOrderByRelevanceInpu
+    evaluations?: KpiEvaluationOrderByRelationAggregateInput
+    _relevance?: KpiPeriodOrderByRelevanceInput
   }
 
   export type KpiPeriodWhereUniqueInput = Prisma.AtLeast<{
@@ -27824,11 +30189,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiPeriodCountOrderByAggregateInpu
-    _avg?: KpiPeriodAvgOrderByAggregateInpu
-    _max?: KpiPeriodMaxOrderByAggregateInpu
-    _min?: KpiPeriodMinOrderByAggregateInpu
-    _sum?: KpiPeriodSumOrderByAggregateInpu
+    _count?: KpiPeriodCountOrderByAggregateInput
+    _avg?: KpiPeriodAvgOrderByAggregateInput
+    _max?: KpiPeriodMaxOrderByAggregateInput
+    _min?: KpiPeriodMinOrderByAggregateInput
+    _sum?: KpiPeriodSumOrderByAggregateInput
   }
 
   export type KpiPeriodScalarWhereWithAggregatesInput = {
@@ -27889,13 +30254,13 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    employee?: EmployeeOrderByWithRelationInpu
-    reviewer?: EmployeeOrderByWithRelationInpu
-    period?: KpiPeriodOrderByWithRelationInpu
-    ruleSet?: KpiRuleSetOrderByWithRelationInpu
-    tasks?: KpiEvaluationTaskOrderByRelationAggregateInpu
-    documents?: KpiFormDocumentOrderByRelationAggregateInpu
-    _relevance?: KpiEvaluationOrderByRelevanceInpu
+    employee?: EmployeeOrderByWithRelationInput
+    reviewer?: EmployeeOrderByWithRelationInput
+    period?: KpiPeriodOrderByWithRelationInput
+    ruleSet?: KpiRuleSetOrderByWithRelationInput
+    tasks?: KpiEvaluationTaskOrderByRelationAggregateInput
+    documents?: KpiFormDocumentOrderByRelationAggregateInput
+    _relevance?: KpiEvaluationOrderByRelevanceInput
   }
 
   export type KpiEvaluationWhereUniqueInput = Prisma.AtLeast<{
@@ -27943,11 +30308,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiEvaluationCountOrderByAggregateInpu
-    _avg?: KpiEvaluationAvgOrderByAggregateInpu
-    _max?: KpiEvaluationMaxOrderByAggregateInpu
-    _min?: KpiEvaluationMinOrderByAggregateInpu
-    _sum?: KpiEvaluationSumOrderByAggregateInpu
+    _count?: KpiEvaluationCountOrderByAggregateInput
+    _avg?: KpiEvaluationAvgOrderByAggregateInput
+    _max?: KpiEvaluationMaxOrderByAggregateInput
+    _min?: KpiEvaluationMinOrderByAggregateInput
+    _sum?: KpiEvaluationSumOrderByAggregateInput
   }
 
   export type KpiEvaluationScalarWhereWithAggregatesInput = {
@@ -28027,9 +30392,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    task?: TaskOrderByWithRelationInpu
-    evaluation?: KpiEvaluationOrderByWithRelationInpu
-    _relevance?: KpiEvaluationTaskOrderByRelevanceInpu
+    task?: TaskOrderByWithRelationInput
+    evaluation?: KpiEvaluationOrderByWithRelationInput
+    _relevance?: KpiEvaluationTaskOrderByRelevanceInput
   }
 
   export type KpiEvaluationTaskWhereUniqueInput = Prisma.AtLeast<{
@@ -28087,11 +30452,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiEvaluationTaskCountOrderByAggregateInpu
-    _avg?: KpiEvaluationTaskAvgOrderByAggregateInpu
-    _max?: KpiEvaluationTaskMaxOrderByAggregateInpu
-    _min?: KpiEvaluationTaskMinOrderByAggregateInpu
-    _sum?: KpiEvaluationTaskSumOrderByAggregateInpu
+    _count?: KpiEvaluationTaskCountOrderByAggregateInput
+    _avg?: KpiEvaluationTaskAvgOrderByAggregateInput
+    _max?: KpiEvaluationTaskMaxOrderByAggregateInput
+    _min?: KpiEvaluationTaskMinOrderByAggregateInput
+    _sum?: KpiEvaluationTaskSumOrderByAggregateInput
   }
 
   export type KpiEvaluationTaskScalarWhereWithAggregatesInput = {
@@ -28159,10 +30524,10 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    documents?: KpiFormDocumentOrderByRelationAggregateInpu
-    bindings?: KpiFormTemplateBindingOrderByRelationAggregateInpu
-    versions?: KpiFormTemplateVersionOrderByRelationAggregateInpu
-    _relevance?: KpiFormTemplateOrderByRelevanceInpu
+    documents?: KpiFormDocumentOrderByRelationAggregateInput
+    bindings?: KpiFormTemplateBindingOrderByRelationAggregateInput
+    versions?: KpiFormTemplateVersionOrderByRelationAggregateInput
+    _relevance?: KpiFormTemplateOrderByRelevanceInput
   }
 
   export type KpiFormTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -28201,11 +30566,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiFormTemplateCountOrderByAggregateInpu
-    _avg?: KpiFormTemplateAvgOrderByAggregateInpu
-    _max?: KpiFormTemplateMaxOrderByAggregateInpu
-    _min?: KpiFormTemplateMinOrderByAggregateInpu
-    _sum?: KpiFormTemplateSumOrderByAggregateInpu
+    _count?: KpiFormTemplateCountOrderByAggregateInput
+    _avg?: KpiFormTemplateAvgOrderByAggregateInput
+    _max?: KpiFormTemplateMaxOrderByAggregateInput
+    _min?: KpiFormTemplateMinOrderByAggregateInput
+    _sum?: KpiFormTemplateSumOrderByAggregateInput
   }
 
   export type KpiFormTemplateScalarWhereWithAggregatesInput = {
@@ -28253,13 +30618,13 @@ export namespace Prisma {
     publishedBy?: SortOrderInput | SortOrder
     publishedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    template?: KpiFormTemplateOrderByWithRelationInpu
-    _relevance?: KpiFormTemplateVersionOrderByRelevanceInpu
+    template?: KpiFormTemplateOrderByWithRelationInput
+    _relevance?: KpiFormTemplateVersionOrderByRelevanceInput
   }
 
   export type KpiFormTemplateVersionWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    formCode_version?: KpiFormTemplateVersionFormCodeVersionCompoundUniqueInpu
+    formCode_version?: KpiFormTemplateVersionFormCodeVersionCompoundUniqueInput
     AND?: KpiFormTemplateVersionWhereInput | KpiFormTemplateVersionWhereInput[]
     OR?: KpiFormTemplateVersionWhereInput[]
     NOT?: KpiFormTemplateVersionWhereInput | KpiFormTemplateVersionWhereInput[]
@@ -28284,11 +30649,11 @@ export namespace Prisma {
     publishedBy?: SortOrderInput | SortOrder
     publishedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
-    _count?: KpiFormTemplateVersionCountOrderByAggregateInpu
-    _avg?: KpiFormTemplateVersionAvgOrderByAggregateInpu
-    _max?: KpiFormTemplateVersionMaxOrderByAggregateInpu
-    _min?: KpiFormTemplateVersionMinOrderByAggregateInpu
-    _sum?: KpiFormTemplateVersionSumOrderByAggregateInpu
+    _count?: KpiFormTemplateVersionCountOrderByAggregateInput
+    _avg?: KpiFormTemplateVersionAvgOrderByAggregateInput
+    _max?: KpiFormTemplateVersionMaxOrderByAggregateInput
+    _min?: KpiFormTemplateVersionMinOrderByAggregateInput
+    _sum?: KpiFormTemplateVersionSumOrderByAggregateInput
   }
 
   export type KpiFormTemplateVersionScalarWhereWithAggregatesInput = {
@@ -28344,8 +30709,8 @@ export namespace Prisma {
     createdBy?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    template?: KpiFormTemplateOrderByWithRelationInpu
-    _relevance?: KpiFormTemplateBindingOrderByRelevanceInpu
+    template?: KpiFormTemplateOrderByWithRelationInput
+    _relevance?: KpiFormTemplateBindingOrderByRelevanceInput
   }
 
   export type KpiFormTemplateBindingWhereUniqueInput = Prisma.AtLeast<{
@@ -28386,11 +30751,11 @@ export namespace Prisma {
     createdBy?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    _count?: KpiFormTemplateBindingCountOrderByAggregateInpu
-    _avg?: KpiFormTemplateBindingAvgOrderByAggregateInpu
-    _max?: KpiFormTemplateBindingMaxOrderByAggregateInpu
-    _min?: KpiFormTemplateBindingMinOrderByAggregateInpu
-    _sum?: KpiFormTemplateBindingSumOrderByAggregateInpu
+    _count?: KpiFormTemplateBindingCountOrderByAggregateInput
+    _avg?: KpiFormTemplateBindingAvgOrderByAggregateInput
+    _max?: KpiFormTemplateBindingMaxOrderByAggregateInput
+    _min?: KpiFormTemplateBindingMinOrderByAggregateInput
+    _sum?: KpiFormTemplateBindingSumOrderByAggregateInput
   }
 
   export type KpiFormTemplateBindingScalarWhereWithAggregatesInput = {
@@ -28451,9 +30816,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    template?: KpiFormTemplateOrderByWithRelationInpu
-    evaluation?: KpiEvaluationOrderByWithRelationInpu
-    _relevance?: KpiFormDocumentOrderByRelevanceInpu
+    template?: KpiFormTemplateOrderByWithRelationInput
+    evaluation?: KpiEvaluationOrderByWithRelationInput
+    _relevance?: KpiFormDocumentOrderByRelevanceInput
   }
 
   export type KpiFormDocumentWhereUniqueInput = Prisma.AtLeast<{
@@ -28493,11 +30858,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: KpiFormDocumentCountOrderByAggregateInpu
-    _avg?: KpiFormDocumentAvgOrderByAggregateInpu
-    _max?: KpiFormDocumentMaxOrderByAggregateInpu
-    _min?: KpiFormDocumentMinOrderByAggregateInpu
-    _sum?: KpiFormDocumentSumOrderByAggregateInpu
+    _count?: KpiFormDocumentCountOrderByAggregateInput
+    _avg?: KpiFormDocumentAvgOrderByAggregateInput
+    _max?: KpiFormDocumentMaxOrderByAggregateInput
+    _min?: KpiFormDocumentMinOrderByAggregateInput
+    _sum?: KpiFormDocumentSumOrderByAggregateInput
   }
 
   export type KpiFormDocumentScalarWhereWithAggregatesInput = {
@@ -28556,8 +30921,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    tasks?: TaskOrderByRelationAggregateInpu
-    _relevance?: MasterPlanOrderByRelevanceInpu
+    tasks?: TaskOrderByRelationAggregateInput
+    _relevance?: MasterPlanOrderByRelevanceInput
   }
 
   export type MasterPlanWhereUniqueInput = Prisma.AtLeast<{
@@ -28596,11 +30961,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: MasterPlanCountOrderByAggregateInpu
-    _avg?: MasterPlanAvgOrderByAggregateInpu
-    _max?: MasterPlanMaxOrderByAggregateInpu
-    _min?: MasterPlanMinOrderByAggregateInpu
-    _sum?: MasterPlanSumOrderByAggregateInpu
+    _count?: MasterPlanCountOrderByAggregateInput
+    _avg?: MasterPlanAvgOrderByAggregateInput
+    _max?: MasterPlanMaxOrderByAggregateInput
+    _min?: MasterPlanMinOrderByAggregateInput
+    _sum?: MasterPlanSumOrderByAggregateInput
   }
 
   export type MasterPlanScalarWhereWithAggregatesInput = {
@@ -28689,16 +31054,16 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
-    plan?: MasterPlanOrderByWithRelationInpu
-    kpiEvaluations?: KpiEvaluationTaskOrderByRelationAggregateInpu
-    participants?: TaskParticipantOrderByRelationAggregateInpu
-    attachments?: TaskAttachmentOrderByRelationAggregateInpu
-    histories?: TaskHistoryOrderByRelationAggregateInpu
-    steps?: TaskStepOrderByRelationAggregateInpu
-    ancestors?: TaskClosureOrderByRelationAggregateInpu
-    descendants?: TaskClosureOrderByRelationAggregateInpu
-    notificationLogs?: TaskNotificationLogOrderByRelationAggregateInpu
-    _relevance?: TaskOrderByRelevanceInpu
+    plan?: MasterPlanOrderByWithRelationInput
+    kpiEvaluations?: KpiEvaluationTaskOrderByRelationAggregateInput
+    participants?: TaskParticipantOrderByRelationAggregateInput
+    attachments?: TaskAttachmentOrderByRelationAggregateInput
+    histories?: TaskHistoryOrderByRelationAggregateInput
+    steps?: TaskStepOrderByRelationAggregateInput
+    ancestors?: TaskClosureOrderByRelationAggregateInput
+    descendants?: TaskClosureOrderByRelationAggregateInput
+    notificationLogs?: TaskNotificationLogOrderByRelationAggregateInput
+    _relevance?: TaskOrderByRelevanceInput
   }
 
   export type TaskWhereUniqueInput = Prisma.AtLeast<{
@@ -28767,11 +31132,11 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskCountOrderByAggregateInpu
-    _avg?: TaskAvgOrderByAggregateInpu
-    _max?: TaskMaxOrderByAggregateInpu
-    _min?: TaskMinOrderByAggregateInpu
-    _sum?: TaskSumOrderByAggregateInpu
+    _count?: TaskCountOrderByAggregateInput
+    _avg?: TaskAvgOrderByAggregateInput
+    _max?: TaskMaxOrderByAggregateInput
+    _min?: TaskMinOrderByAggregateInput
+    _sum?: TaskSumOrderByAggregateInput
   }
 
   export type TaskScalarWhereWithAggregatesInput = {
@@ -28837,8 +31202,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
-    task?: TaskOrderByWithRelationInpu
-    _relevance?: TaskStepOrderByRelevanceInpu
+    task?: TaskOrderByWithRelationInput
+    _relevance?: TaskStepOrderByRelevanceInput
   }
 
   export type TaskStepWhereUniqueInput = Prisma.AtLeast<{
@@ -28873,11 +31238,11 @@ export namespace Prisma {
     updatedAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskStepCountOrderByAggregateInpu
-    _avg?: TaskStepAvgOrderByAggregateInpu
-    _max?: TaskStepMaxOrderByAggregateInpu
-    _min?: TaskStepMinOrderByAggregateInpu
-    _sum?: TaskStepSumOrderByAggregateInpu
+    _count?: TaskStepCountOrderByAggregateInput
+    _avg?: TaskStepAvgOrderByAggregateInput
+    _max?: TaskStepMaxOrderByAggregateInput
+    _min?: TaskStepMinOrderByAggregateInput
+    _sum?: TaskStepSumOrderByAggregateInput
   }
 
   export type TaskStepScalarWhereWithAggregatesInput = {
@@ -28920,8 +31285,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
-    task?: TaskOrderByWithRelationInpu
-    _relevance?: TaskAttachmentOrderByRelevanceInpu
+    task?: TaskOrderByWithRelationInput
+    _relevance?: TaskAttachmentOrderByRelevanceInput
   }
 
   export type TaskAttachmentWhereUniqueInput = Prisma.AtLeast<{
@@ -28946,11 +31311,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     isDeleted?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskAttachmentCountOrderByAggregateInpu
-    _avg?: TaskAttachmentAvgOrderByAggregateInpu
-    _max?: TaskAttachmentMaxOrderByAggregateInpu
-    _min?: TaskAttachmentMinOrderByAggregateInpu
-    _sum?: TaskAttachmentSumOrderByAggregateInpu
+    _count?: TaskAttachmentCountOrderByAggregateInput
+    _avg?: TaskAttachmentAvgOrderByAggregateInput
+    _max?: TaskAttachmentMaxOrderByAggregateInput
+    _min?: TaskAttachmentMinOrderByAggregateInput
+    _sum?: TaskAttachmentSumOrderByAggregateInput
   }
 
   export type TaskAttachmentScalarWhereWithAggregatesInput = {
@@ -28993,13 +31358,13 @@ export namespace Prisma {
     reason?: SortOrderInput | SortOrder
     attendedAt?: SortOrderInput | SortOrder
     organizationId?: SortOrder
-    task?: TaskOrderByWithRelationInpu
-    employee?: EmployeeOrderByWithRelationInpu
-    _relevance?: TaskParticipantOrderByRelevanceInpu
+    task?: TaskOrderByWithRelationInput
+    employee?: EmployeeOrderByWithRelationInput
+    _relevance?: TaskParticipantOrderByRelevanceInput
   }
 
   export type TaskParticipantWhereUniqueInput = Prisma.AtLeast<{
-    taskId_employeeCode_participantRole?: TaskParticipantTaskIdEmployeeCodeParticipantRoleCompoundUniqueInpu
+    taskId_employeeCode_participantRole?: TaskParticipantTaskIdEmployeeCodeParticipantRoleCompoundUniqueInput
     AND?: TaskParticipantWhereInput | TaskParticipantWhereInput[]
     OR?: TaskParticipantWhereInput[]
     NOT?: TaskParticipantWhereInput | TaskParticipantWhereInput[]
@@ -29026,11 +31391,11 @@ export namespace Prisma {
     reason?: SortOrderInput | SortOrder
     attendedAt?: SortOrderInput | SortOrder
     organizationId?: SortOrder
-    _count?: TaskParticipantCountOrderByAggregateInpu
-    _avg?: TaskParticipantAvgOrderByAggregateInpu
-    _max?: TaskParticipantMaxOrderByAggregateInpu
-    _min?: TaskParticipantMinOrderByAggregateInpu
-    _sum?: TaskParticipantSumOrderByAggregateInpu
+    _count?: TaskParticipantCountOrderByAggregateInput
+    _avg?: TaskParticipantAvgOrderByAggregateInput
+    _max?: TaskParticipantMaxOrderByAggregateInput
+    _min?: TaskParticipantMinOrderByAggregateInput
+    _sum?: TaskParticipantSumOrderByAggregateInput
   }
 
   export type TaskParticipantScalarWhereWithAggregatesInput = {
@@ -29065,13 +31430,13 @@ export namespace Prisma {
     descendantId?: SortOrder
     depth?: SortOrder
     organizationId?: SortOrder
-    ancestor?: TaskOrderByWithRelationInpu
-    descendant?: TaskOrderByWithRelationInpu
-    _relevance?: TaskClosureOrderByRelevanceInpu
+    ancestor?: TaskOrderByWithRelationInput
+    descendant?: TaskOrderByWithRelationInput
+    _relevance?: TaskClosureOrderByRelevanceInput
   }
 
   export type TaskClosureWhereUniqueInput = Prisma.AtLeast<{
-    ancestorId_descendantId?: TaskClosureAncestorIdDescendantIdCompoundUniqueInpu
+    ancestorId_descendantId?: TaskClosureAncestorIdDescendantIdCompoundUniqueInput
     AND?: TaskClosureWhereInput | TaskClosureWhereInput[]
     OR?: TaskClosureWhereInput[]
     NOT?: TaskClosureWhereInput | TaskClosureWhereInput[]
@@ -29088,11 +31453,11 @@ export namespace Prisma {
     descendantId?: SortOrder
     depth?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskClosureCountOrderByAggregateInpu
-    _avg?: TaskClosureAvgOrderByAggregateInpu
-    _max?: TaskClosureMaxOrderByAggregateInpu
-    _min?: TaskClosureMinOrderByAggregateInpu
-    _sum?: TaskClosureSumOrderByAggregateInpu
+    _count?: TaskClosureCountOrderByAggregateInput
+    _avg?: TaskClosureAvgOrderByAggregateInput
+    _max?: TaskClosureMaxOrderByAggregateInput
+    _min?: TaskClosureMinOrderByAggregateInput
+    _sum?: TaskClosureSumOrderByAggregateInput
   }
 
   export type TaskClosureScalarWhereWithAggregatesInput = {
@@ -29129,8 +31494,8 @@ export namespace Prisma {
     newValue?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     organizationId?: SortOrder
-    task?: TaskOrderByWithRelationInpu
-    _relevance?: TaskHistoryOrderByRelevanceInpu
+    task?: TaskOrderByWithRelationInput
+    _relevance?: TaskHistoryOrderByRelevanceInput
   }
 
   export type TaskHistoryWhereUniqueInput = Prisma.AtLeast<{
@@ -29157,11 +31522,11 @@ export namespace Prisma {
     newValue?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskHistoryCountOrderByAggregateInpu
-    _avg?: TaskHistoryAvgOrderByAggregateInpu
-    _max?: TaskHistoryMaxOrderByAggregateInpu
-    _min?: TaskHistoryMinOrderByAggregateInpu
-    _sum?: TaskHistorySumOrderByAggregateInpu
+    _count?: TaskHistoryCountOrderByAggregateInput
+    _avg?: TaskHistoryAvgOrderByAggregateInput
+    _max?: TaskHistoryMaxOrderByAggregateInput
+    _min?: TaskHistoryMinOrderByAggregateInput
+    _sum?: TaskHistorySumOrderByAggregateInput
   }
 
   export type TaskHistoryScalarWhereWithAggregatesInput = {
@@ -29196,13 +31561,13 @@ export namespace Prisma {
     type?: SortOrder
     createdAt?: SortOrder
     organizationId?: SortOrder
-    task?: TaskOrderByWithRelationInpu
-    _relevance?: TaskNotificationLogOrderByRelevanceInpu
+    task?: TaskOrderByWithRelationInput
+    _relevance?: TaskNotificationLogOrderByRelevanceInput
   }
 
   export type TaskNotificationLogWhereUniqueInput = Prisma.AtLeast<{
     id?: number
-    taskId_type_organizationId?: TaskNotificationLogTaskIdTypeOrganizationIdCompoundUniqueInpu
+    taskId_type_organizationId?: TaskNotificationLogTaskIdTypeOrganizationIdCompoundUniqueInput
     AND?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
     OR?: TaskNotificationLogWhereInput[]
     NOT?: TaskNotificationLogWhereInput | TaskNotificationLogWhereInput[]
@@ -29219,11 +31584,11 @@ export namespace Prisma {
     type?: SortOrder
     createdAt?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskNotificationLogCountOrderByAggregateInpu
-    _avg?: TaskNotificationLogAvgOrderByAggregateInpu
-    _max?: TaskNotificationLogMaxOrderByAggregateInpu
-    _min?: TaskNotificationLogMinOrderByAggregateInpu
-    _sum?: TaskNotificationLogSumOrderByAggregateInpu
+    _count?: TaskNotificationLogCountOrderByAggregateInput
+    _avg?: TaskNotificationLogAvgOrderByAggregateInput
+    _max?: TaskNotificationLogMaxOrderByAggregateInput
+    _min?: TaskNotificationLogMinOrderByAggregateInput
+    _sum?: TaskNotificationLogSumOrderByAggregateInput
   }
 
   export type TaskNotificationLogScalarWhereWithAggregatesInput = {
@@ -29272,7 +31637,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _relevance?: TaskRankTemplateOrderByRelevanceInpu
+    _relevance?: TaskRankTemplateOrderByRelevanceInput
   }
 
   export type TaskRankTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -29310,11 +31675,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: TaskRankTemplateCountOrderByAggregateInpu
-    _avg?: TaskRankTemplateAvgOrderByAggregateInpu
-    _max?: TaskRankTemplateMaxOrderByAggregateInpu
-    _min?: TaskRankTemplateMinOrderByAggregateInpu
-    _sum?: TaskRankTemplateSumOrderByAggregateInpu
+    _count?: TaskRankTemplateCountOrderByAggregateInput
+    _avg?: TaskRankTemplateAvgOrderByAggregateInput
+    _max?: TaskRankTemplateMaxOrderByAggregateInput
+    _min?: TaskRankTemplateMinOrderByAggregateInput
+    _sum?: TaskRankTemplateSumOrderByAggregateInput
   }
 
   export type TaskRankTemplateScalarWhereWithAggregatesInput = {
@@ -29364,7 +31729,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _relevance?: RankQuotaOrderByRelevanceInpu
+    _relevance?: RankQuotaOrderByRelevanceInput
   }
 
   export type RankQuotaWhereUniqueInput = Prisma.AtLeast<{
@@ -29394,11 +31759,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
-    _count?: RankQuotaCountOrderByAggregateInpu
-    _avg?: RankQuotaAvgOrderByAggregateInpu
-    _max?: RankQuotaMaxOrderByAggregateInpu
-    _min?: RankQuotaMinOrderByAggregateInpu
-    _sum?: RankQuotaSumOrderByAggregateInpu
+    _count?: RankQuotaCountOrderByAggregateInput
+    _avg?: RankQuotaAvgOrderByAggregateInput
+    _max?: RankQuotaMaxOrderByAggregateInput
+    _min?: RankQuotaMinOrderByAggregateInput
+    _sum?: RankQuotaSumOrderByAggregateInput
   }
 
   export type RankQuotaScalarWhereWithAggregatesInput = {
@@ -29448,7 +31813,7 @@ export namespace Prisma {
     processedAt?: SortOrderInput | SortOrder
     errorReason?: SortOrderInput | SortOrder
     organizationId?: SortOrder
-    _relevance?: OutboxEventOrderByRelevanceInpu
+    _relevance?: OutboxEventOrderByRelevanceInput
   }
 
   export type OutboxEventWhereUniqueInput = Prisma.AtLeast<{
@@ -29482,11 +31847,11 @@ export namespace Prisma {
     processedAt?: SortOrderInput | SortOrder
     errorReason?: SortOrderInput | SortOrder
     organizationId?: SortOrder
-    _count?: OutboxEventCountOrderByAggregateInpu
-    _avg?: OutboxEventAvgOrderByAggregateInpu
-    _max?: OutboxEventMaxOrderByAggregateInpu
-    _min?: OutboxEventMinOrderByAggregateInpu
-    _sum?: OutboxEventSumOrderByAggregateInpu
+    _count?: OutboxEventCountOrderByAggregateInput
+    _avg?: OutboxEventAvgOrderByAggregateInput
+    _max?: OutboxEventMaxOrderByAggregateInput
+    _min?: OutboxEventMinOrderByAggregateInput
+    _sum?: OutboxEventSumOrderByAggregateInput
   }
 
   export type OutboxEventScalarWhereWithAggregatesInput = {
@@ -29526,7 +31891,7 @@ export namespace Prisma {
     action?: SortOrder
     status?: SortOrder
     organizationId?: SortOrder
-    _relevance?: ProcessedCommandOrderByRelevanceInpu
+    _relevance?: ProcessedCommandOrderByRelevanceInput
   }
 
   export type ProcessedCommandWhereUniqueInput = Prisma.AtLeast<{
@@ -29548,9 +31913,9 @@ export namespace Prisma {
     action?: SortOrder
     status?: SortOrder
     organizationId?: SortOrder
-    _count?: ProcessedCommandCountOrderByAggregateInpu
-    _max?: ProcessedCommandMaxOrderByAggregateInpu
-    _min?: ProcessedCommandMinOrderByAggregateInpu
+    _count?: ProcessedCommandCountOrderByAggregateInput
+    _max?: ProcessedCommandMaxOrderByAggregateInput
+    _min?: ProcessedCommandMinOrderByAggregateInput
   }
 
   export type ProcessedCommandScalarWhereWithAggregatesInput = {
@@ -29591,9 +31956,9 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInpu
-    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInpu
-    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInpu
+    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
+    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
+    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateInput = {
@@ -29623,9 +31988,9 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInpu
-    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInpu
-    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInpu
+    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
+    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
+    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUpdateInput = {
@@ -29654,9 +32019,9 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInpu
-    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInpu
-    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInpu
+    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
+    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
+    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateInput = {
@@ -29686,9 +32051,9 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInpu
-    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInpu
-    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInpu
+    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
+    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
+    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeCreateManyInput = {
@@ -29788,8 +32153,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    domainWeights?: KpiDomainWeightCreateNestedManyWithoutRuleSetInpu
-    evaluations?: KpiEvaluationCreateNestedManyWithoutRuleSetInpu
+    domainWeights?: KpiDomainWeightCreateNestedManyWithoutRuleSetInput
+    evaluations?: KpiEvaluationCreateNestedManyWithoutRuleSetInput
   }
 
   export type KpiRuleSetUncheckedCreateInput = {
@@ -29804,8 +32169,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    domainWeights?: KpiDomainWeightUncheckedCreateNestedManyWithoutRuleSetInpu
-    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutRuleSetInpu
+    domainWeights?: KpiDomainWeightUncheckedCreateNestedManyWithoutRuleSetInput
+    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutRuleSetInput
   }
 
   export type KpiRuleSetUpdateInput = {
@@ -29819,8 +32184,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    domainWeights?: KpiDomainWeightUpdateManyWithoutRuleSetNestedInpu
-    evaluations?: KpiEvaluationUpdateManyWithoutRuleSetNestedInpu
+    domainWeights?: KpiDomainWeightUpdateManyWithoutRuleSetNestedInput
+    evaluations?: KpiEvaluationUpdateManyWithoutRuleSetNestedInput
   }
 
   export type KpiRuleSetUncheckedUpdateInput = {
@@ -29835,8 +32200,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    domainWeights?: KpiDomainWeightUncheckedUpdateManyWithoutRuleSetNestedInpu
-    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutRuleSetNestedInpu
+    domainWeights?: KpiDomainWeightUncheckedUpdateManyWithoutRuleSetNestedInput
+    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutRuleSetNestedInput
   }
 
   export type KpiRuleSetCreateManyInput = {
@@ -29887,7 +32252,7 @@ export namespace Prisma {
     progressWeight: number
     attitudeWeight: number
     organizationId?: string
-    ruleSet: KpiRuleSetCreateNestedOneWithoutDomainWeightsInpu
+    ruleSet: KpiRuleSetCreateNestedOneWithoutDomainWeightsInput
   }
 
   export type KpiDomainWeightUncheckedCreateInput = {
@@ -29908,7 +32273,7 @@ export namespace Prisma {
     progressWeight?: FloatFieldUpdateOperationsInput | number
     attitudeWeight?: FloatFieldUpdateOperationsInput | number
     organizationId?: StringFieldUpdateOperationsInput | string
-    ruleSet?: KpiRuleSetUpdateOneRequiredWithoutDomainWeightsNestedInpu
+    ruleSet?: KpiRuleSetUpdateOneRequiredWithoutDomainWeightsNestedInput
   }
 
   export type KpiDomainWeightUncheckedUpdateInput = {
@@ -29953,6 +32318,136 @@ export namespace Prisma {
     organizationId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type KpiFormulaConfigCreateInput = {
+    organizationId?: string
+    version?: number
+    settings: JsonNullValueInput | InputJsonValue
+    updatedBy?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    versions?: KpiFormulaConfigVersionCreateNestedManyWithoutConfigInput
+  }
+
+  export type KpiFormulaConfigUncheckedCreateInput = {
+    id?: number
+    organizationId?: string
+    version?: number
+    settings: JsonNullValueInput | InputJsonValue
+    updatedBy?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    versions?: KpiFormulaConfigVersionUncheckedCreateNestedManyWithoutConfigInput
+  }
+
+  export type KpiFormulaConfigUpdateInput = {
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    updatedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    versions?: KpiFormulaConfigVersionUpdateManyWithoutConfigNestedInput
+  }
+
+  export type KpiFormulaConfigUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    updatedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    versions?: KpiFormulaConfigVersionUncheckedUpdateManyWithoutConfigNestedInput
+  }
+
+  export type KpiFormulaConfigCreateManyInput = {
+    id?: number
+    organizationId?: string
+    version?: number
+    settings: JsonNullValueInput | InputJsonValue
+    updatedBy?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KpiFormulaConfigUpdateManyMutationInput = {
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    updatedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    updatedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigVersionCreateInput = {
+    version: number
+    settings: JsonNullValueInput | InputJsonValue
+    changedBy?: string | null
+    createdAt?: Date | string
+    config: KpiFormulaConfigCreateNestedOneWithoutVersionsInput
+  }
+
+  export type KpiFormulaConfigVersionUncheckedCreateInput = {
+    id?: number
+    organizationId: string
+    version: number
+    settings: JsonNullValueInput | InputJsonValue
+    changedBy?: string | null
+    createdAt?: Date | string
+  }
+
+  export type KpiFormulaConfigVersionUpdateInput = {
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    config?: KpiFormulaConfigUpdateOneRequiredWithoutVersionsNestedInput
+  }
+
+  export type KpiFormulaConfigVersionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigVersionCreateManyInput = {
+    id?: number
+    organizationId: string
+    version: number
+    settings: JsonNullValueInput | InputJsonValue
+    changedBy?: string | null
+    createdAt?: Date | string
+  }
+
+  export type KpiFormulaConfigVersionUpdateManyMutationInput = {
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigVersionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type KpiPeriodCreateInput = {
     name: string
     startDate: Date | string
@@ -29960,7 +32455,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    evaluations?: KpiEvaluationCreateNestedManyWithoutPeriodInpu
+    evaluations?: KpiEvaluationCreateNestedManyWithoutPeriodInput
   }
 
   export type KpiPeriodUncheckedCreateInput = {
@@ -29971,7 +32466,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInpu
+    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutPeriodInput
   }
 
   export type KpiPeriodUpdateInput = {
@@ -29981,7 +32476,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    evaluations?: KpiEvaluationUpdateManyWithoutPeriodNestedInpu
+    evaluations?: KpiEvaluationUpdateManyWithoutPeriodNestedInput
   }
 
   export type KpiPeriodUncheckedUpdateInput = {
@@ -29992,7 +32487,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInpu
+    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutPeriodNestedInput
   }
 
   export type KpiPeriodCreateManyInput = {
@@ -30036,12 +32531,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInpu
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInpu
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInpu
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInpu
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInpu
+    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
+    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
+    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
+    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
+    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateInput = {
@@ -30061,8 +32556,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInpu
+    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUpdateInput = {
@@ -30077,12 +32572,12 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInpu
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInpu
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInpu
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInpu
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
+    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
+    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
+    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
+    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateInput = {
@@ -30102,8 +32597,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInpu
+    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationCreateManyInput = {
@@ -30179,8 +32674,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    task?: TaskCreateNestedOneWithoutKpiEvaluationsInpu
-    evaluation: KpiEvaluationCreateNestedOneWithoutTasksInpu
+    task?: TaskCreateNestedOneWithoutKpiEvaluationsInput
+    evaluation: KpiEvaluationCreateNestedOneWithoutTasksInput
   }
 
   export type KpiEvaluationTaskUncheckedCreateInput = {
@@ -30230,8 +32725,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneWithoutKpiEvaluationsNestedInpu
-    evaluation?: KpiEvaluationUpdateOneRequiredWithoutTasksNestedInpu
+    task?: TaskUpdateOneWithoutKpiEvaluationsNestedInput
+    evaluation?: KpiEvaluationUpdateOneRequiredWithoutTasksNestedInput
   }
 
   export type KpiEvaluationTaskUncheckedUpdateInput = {
@@ -30349,9 +32844,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInpu
-    bindings?: KpiFormTemplateBindingCreateNestedManyWithoutTemplateInpu
-    versions?: KpiFormTemplateVersionCreateNestedManyWithoutTemplateInpu
+    documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInput
+    bindings?: KpiFormTemplateBindingCreateNestedManyWithoutTemplateInput
+    versions?: KpiFormTemplateVersionCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateUncheckedCreateInput = {
@@ -30368,9 +32863,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInpu
-    bindings?: KpiFormTemplateBindingUncheckedCreateNestedManyWithoutTemplateInpu
-    versions?: KpiFormTemplateVersionUncheckedCreateNestedManyWithoutTemplateInpu
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInput
+    bindings?: KpiFormTemplateBindingUncheckedCreateNestedManyWithoutTemplateInput
+    versions?: KpiFormTemplateVersionUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateUpdateInput = {
@@ -30387,9 +32882,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInpu
-    bindings?: KpiFormTemplateBindingUpdateManyWithoutTemplateNestedInpu
-    versions?: KpiFormTemplateVersionUpdateManyWithoutTemplateNestedInpu
+    documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInput
+    bindings?: KpiFormTemplateBindingUpdateManyWithoutTemplateNestedInput
+    versions?: KpiFormTemplateVersionUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateUncheckedUpdateInput = {
@@ -30406,9 +32901,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInpu
-    bindings?: KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateNestedInpu
-    versions?: KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateNestedInpu
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInput
+    bindings?: KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateNestedInput
+    versions?: KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateCreateManyInput = {
@@ -30467,7 +32962,7 @@ export namespace Prisma {
     publishedBy?: string | null
     publishedAt?: Date | string | null
     createdAt?: Date | string
-    template: KpiFormTemplateCreateNestedOneWithoutVersionsInpu
+    template: KpiFormTemplateCreateNestedOneWithoutVersionsInput
   }
 
   export type KpiFormTemplateVersionUncheckedCreateInput = {
@@ -30490,7 +32985,7 @@ export namespace Prisma {
     publishedBy?: NullableStringFieldUpdateOperationsInput | string | null
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    template?: KpiFormTemplateUpdateOneRequiredWithoutVersionsNestedInpu
+    template?: KpiFormTemplateUpdateOneRequiredWithoutVersionsNestedInput
   }
 
   export type KpiFormTemplateVersionUncheckedUpdateInput = {
@@ -30553,7 +33048,7 @@ export namespace Prisma {
     createdBy?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    template: KpiFormTemplateCreateNestedOneWithoutBindingsInpu
+    template: KpiFormTemplateCreateNestedOneWithoutBindingsInput
   }
 
   export type KpiFormTemplateBindingUncheckedCreateInput = {
@@ -30588,7 +33083,7 @@ export namespace Prisma {
     createdBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    template?: KpiFormTemplateUpdateOneRequiredWithoutBindingsNestedInpu
+    template?: KpiFormTemplateUpdateOneRequiredWithoutBindingsNestedInput
   }
 
   export type KpiFormTemplateBindingUncheckedUpdateInput = {
@@ -30673,8 +33168,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    template: KpiFormTemplateCreateNestedOneWithoutDocumentsInpu
-    evaluation: KpiEvaluationCreateNestedOneWithoutDocumentsInpu
+    template: KpiFormTemplateCreateNestedOneWithoutDocumentsInput
+    evaluation: KpiEvaluationCreateNestedOneWithoutDocumentsInput
   }
 
   export type KpiFormDocumentUncheckedCreateInput = {
@@ -30706,8 +33201,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    template?: KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInpu
-    evaluation?: KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInpu
+    template?: KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInput
+    evaluation?: KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInput
   }
 
   export type KpiFormDocumentUncheckedUpdateInput = {
@@ -30789,7 +33284,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: TaskCreateNestedManyWithoutPlanInpu
+    tasks?: TaskCreateNestedManyWithoutPlanInput
   }
 
   export type MasterPlanUncheckedCreateInput = {
@@ -30807,7 +33302,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: TaskUncheckedCreateNestedManyWithoutPlanInpu
+    tasks?: TaskUncheckedCreateNestedManyWithoutPlanInput
   }
 
   export type MasterPlanUpdateInput = {
@@ -30824,7 +33319,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: TaskUpdateManyWithoutPlanNestedInpu
+    tasks?: TaskUpdateManyWithoutPlanNestedInput
   }
 
   export type MasterPlanUncheckedUpdateInput = {
@@ -30842,7 +33337,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: TaskUncheckedUpdateManyWithoutPlanNestedInpu
+    tasks?: TaskUncheckedUpdateManyWithoutPlanNestedInput
   }
 
   export type MasterPlanCreateManyInput = {
@@ -30919,15 +33414,15 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateInput = {
@@ -30956,14 +33451,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUpdateInput = {
@@ -30990,15 +33485,15 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateInput = {
@@ -31027,14 +33522,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateManyInput = {
@@ -31130,7 +33625,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    task: TaskCreateNestedOneWithoutStepsInpu
+    task: TaskCreateNestedOneWithoutStepsInput
   }
 
   export type TaskStepUncheckedCreateInput = {
@@ -31159,7 +33654,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutStepsNestedInpu
+    task?: TaskUpdateOneRequiredWithoutStepsNestedInput
   }
 
   export type TaskStepUncheckedUpdateInput = {
@@ -31226,7 +33721,7 @@ export namespace Prisma {
     createdAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    task: TaskCreateNestedOneWithoutAttachmentsInpu
+    task: TaskCreateNestedOneWithoutAttachmentsInput
   }
 
   export type TaskAttachmentUncheckedCreateInput = {
@@ -31245,7 +33740,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutAttachmentsNestedInpu
+    task?: TaskUpdateOneRequiredWithoutAttachmentsNestedInput
   }
 
   export type TaskAttachmentUncheckedUpdateInput = {
@@ -31294,8 +33789,8 @@ export namespace Prisma {
     reason?: string | null
     attendedAt?: Date | string | null
     organizationId?: string
-    task: TaskCreateNestedOneWithoutParticipantsInpu
-    employee: EmployeeCreateNestedOneWithoutTaskParticipantsInpu
+    task: TaskCreateNestedOneWithoutParticipantsInput
+    employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
 
   export type TaskParticipantUncheckedCreateInput = {
@@ -31318,8 +33813,8 @@ export namespace Prisma {
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutParticipantsNestedInpu
-    employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInpu
+    task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
+    employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
 
   export type TaskParticipantUncheckedUpdateInput = {
@@ -31371,8 +33866,8 @@ export namespace Prisma {
   export type TaskClosureCreateInput = {
     depth: number
     organizationId?: string
-    ancestor: TaskCreateNestedOneWithoutDescendantsInpu
-    descendant: TaskCreateNestedOneWithoutAncestorsInpu
+    ancestor: TaskCreateNestedOneWithoutDescendantsInput
+    descendant: TaskCreateNestedOneWithoutAncestorsInput
   }
 
   export type TaskClosureUncheckedCreateInput = {
@@ -31385,8 +33880,8 @@ export namespace Prisma {
   export type TaskClosureUpdateInput = {
     depth?: IntFieldUpdateOperationsInput | number
     organizationId?: StringFieldUpdateOperationsInput | string
-    ancestor?: TaskUpdateOneRequiredWithoutDescendantsNestedInpu
-    descendant?: TaskUpdateOneRequiredWithoutAncestorsNestedInpu
+    ancestor?: TaskUpdateOneRequiredWithoutDescendantsNestedInput
+    descendant?: TaskUpdateOneRequiredWithoutAncestorsNestedInput
   }
 
   export type TaskClosureUncheckedUpdateInput = {
@@ -31422,7 +33917,7 @@ export namespace Prisma {
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     organizationId?: string
-    task: TaskCreateNestedOneWithoutHistoriesInpu
+    task: TaskCreateNestedOneWithoutHistoriesInput
   }
 
   export type TaskHistoryUncheckedCreateInput = {
@@ -31443,7 +33938,7 @@ export namespace Prisma {
     newValue?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutHistoriesNestedInpu
+    task?: TaskUpdateOneRequiredWithoutHistoriesNestedInput
   }
 
   export type TaskHistoryUncheckedUpdateInput = {
@@ -31492,7 +33987,7 @@ export namespace Prisma {
     type: string
     createdAt?: Date | string
     organizationId?: string
-    task: TaskCreateNestedOneWithoutNotificationLogsInpu
+    task: TaskCreateNestedOneWithoutNotificationLogsInput
   }
 
   export type TaskNotificationLogUncheckedCreateInput = {
@@ -31507,7 +34002,7 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutNotificationLogsNestedInpu
+    task?: TaskUpdateOneRequiredWithoutNotificationLogsNestedInput
   }
 
   export type TaskNotificationLogUncheckedUpdateInput = {
@@ -32015,15 +34510,15 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationListRelationFilter = {
-    every?: KpiEvaluationWhereInpu
-    some?: KpiEvaluationWhereInpu
-    none?: KpiEvaluationWhereInpu
+    every?: KpiEvaluationWhereInput
+    some?: KpiEvaluationWhereInput
+    none?: KpiEvaluationWhereInput
   }
 
   export type TaskParticipantListRelationFilter = {
-    every?: TaskParticipantWhereInpu
-    some?: TaskParticipantWhereInpu
-    none?: TaskParticipantWhereInpu
+    every?: TaskParticipantWhereInput
+    some?: TaskParticipantWhereInput
+    none?: TaskParticipantWhereInput
   }
 
   export type SortOrderInput = {
@@ -32288,9 +34783,9 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightListRelationFilter = {
-    every?: KpiDomainWeightWhereInpu
-    some?: KpiDomainWeightWhereInpu
-    none?: KpiDomainWeightWhereInpu
+    every?: KpiDomainWeightWhereInput
+    some?: KpiDomainWeightWhereInput
+    none?: KpiDomainWeightWhereInput
   }
 
   export type KpiDomainWeightOrderByRelationAggregateInput = {
@@ -32383,8 +34878,8 @@ export namespace Prisma {
   }
 
   export type KpiRuleSetScalarRelationFilter = {
-    is?: KpiRuleSetWhereInpu
-    isNot?: KpiRuleSetWhereInpu
+    is?: KpiRuleSetWhereInput
+    isNot?: KpiRuleSetWhereInput
   }
 
   export type KpiDomainWeightOrderByRelevanceInput = {
@@ -32448,6 +34943,160 @@ export namespace Prisma {
     progressWeight?: SortOrder
     attitudeWeight?: SortOrder
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type KpiFormulaConfigVersionListRelationFilter = {
+    every?: KpiFormulaConfigVersionWhereInput
+    some?: KpiFormulaConfigVersionWhereInput
+    none?: KpiFormulaConfigVersionWhereInput
+  }
+
+  export type KpiFormulaConfigVersionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type KpiFormulaConfigOrderByRelevanceInput = {
+    fields: KpiFormulaConfigOrderByRelevanceFieldEnum | KpiFormulaConfigOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type KpiFormulaConfigCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    settings?: SortOrder
+    updatedBy?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KpiFormulaConfigAvgOrderByAggregateInput = {
+    id?: SortOrder
+    version?: SortOrder
+  }
+
+  export type KpiFormulaConfigMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    updatedBy?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KpiFormulaConfigMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    updatedBy?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KpiFormulaConfigSumOrderByAggregateInput = {
+    id?: SortOrder
+    version?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type KpiFormulaConfigScalarRelationFilter = {
+    is?: KpiFormulaConfigWhereInput
+    isNot?: KpiFormulaConfigWhereInput
+  }
+
+  export type KpiFormulaConfigVersionOrderByRelevanceInput = {
+    fields: KpiFormulaConfigVersionOrderByRelevanceFieldEnum | KpiFormulaConfigVersionOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type KpiFormulaConfigVersionOrganizationIdVersionCompoundUniqueInput = {
+    organizationId: string
+    version: number
+  }
+
+  export type KpiFormulaConfigVersionCountOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    settings?: SortOrder
+    changedBy?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type KpiFormulaConfigVersionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    version?: SortOrder
+  }
+
+  export type KpiFormulaConfigVersionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    changedBy?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type KpiFormulaConfigVersionMinOrderByAggregateInput = {
+    id?: SortOrder
+    organizationId?: SortOrder
+    version?: SortOrder
+    changedBy?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type KpiFormulaConfigVersionSumOrderByAggregateInput = {
+    id?: SortOrder
+    version?: SortOrder
+  }
 
   export type KpiPeriodOrderByRelevanceInput = {
     fields: KpiPeriodOrderByRelevanceFieldEnum | KpiPeriodOrderByRelevanceFieldEnum[]
@@ -32505,8 +35154,8 @@ export namespace Prisma {
   }
 
   export type EmployeeScalarRelationFilter = {
-    is?: EmployeeWhereInpu
-    isNot?: EmployeeWhereInpu
+    is?: EmployeeWhereInput
+    isNot?: EmployeeWhereInput
   }
 
   export type EmployeeNullableScalarRelationFilter = {
@@ -32515,8 +35164,8 @@ export namespace Prisma {
   }
 
   export type KpiPeriodScalarRelationFilter = {
-    is?: KpiPeriodWhereInpu
-    isNot?: KpiPeriodWhereInpu
+    is?: KpiPeriodWhereInput
+    isNot?: KpiPeriodWhereInput
   }
 
   export type KpiRuleSetNullableScalarRelationFilter = {
@@ -32525,15 +35174,15 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskListRelationFilter = {
-    every?: KpiEvaluationTaskWhereInpu
-    some?: KpiEvaluationTaskWhereInpu
-    none?: KpiEvaluationTaskWhereInpu
+    every?: KpiEvaluationTaskWhereInput
+    some?: KpiEvaluationTaskWhereInput
+    none?: KpiEvaluationTaskWhereInput
   }
 
   export type KpiFormDocumentListRelationFilter = {
-    every?: KpiFormDocumentWhereInpu
-    some?: KpiFormDocumentWhereInpu
-    none?: KpiFormDocumentWhereInpu
+    every?: KpiFormDocumentWhereInput
+    some?: KpiFormDocumentWhereInput
+    none?: KpiFormDocumentWhereInput
   }
 
   export type KpiEvaluationTaskOrderByRelationAggregateInput = {
@@ -32653,8 +35302,8 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationScalarRelationFilter = {
-    is?: KpiEvaluationWhereInpu
-    isNot?: KpiEvaluationWhereInpu
+    is?: KpiEvaluationWhereInput
+    isNot?: KpiEvaluationWhereInput
   }
 
   export type KpiEvaluationTaskOrderByRelevanceInput = {
@@ -32776,15 +35425,15 @@ export namespace Prisma {
   }
 
   export type KpiFormTemplateBindingListRelationFilter = {
-    every?: KpiFormTemplateBindingWhereInpu
-    some?: KpiFormTemplateBindingWhereInpu
-    none?: KpiFormTemplateBindingWhereInpu
+    every?: KpiFormTemplateBindingWhereInput
+    some?: KpiFormTemplateBindingWhereInput
+    none?: KpiFormTemplateBindingWhereInput
   }
 
   export type KpiFormTemplateVersionListRelationFilter = {
-    every?: KpiFormTemplateVersionWhereInpu
-    some?: KpiFormTemplateVersionWhereInpu
-    none?: KpiFormTemplateVersionWhereInpu
+    every?: KpiFormTemplateVersionWhereInput
+    some?: KpiFormTemplateVersionWhereInput
+    none?: KpiFormTemplateVersionWhereInput
   }
 
   export type KpiFormTemplateBindingOrderByRelationAggregateInput = {
@@ -32858,8 +35507,8 @@ export namespace Prisma {
   }
 
   export type KpiFormTemplateScalarRelationFilter = {
-    is?: KpiFormTemplateWhereInpu
-    isNot?: KpiFormTemplateWhereInpu
+    is?: KpiFormTemplateWhereInput
+    isNot?: KpiFormTemplateWhereInput
   }
 
   export type KpiFormTemplateVersionOrderByRelevanceInput = {
@@ -33057,9 +35706,9 @@ export namespace Prisma {
   }
 
   export type TaskListRelationFilter = {
-    every?: TaskWhereInpu
-    some?: TaskWhereInpu
-    none?: TaskWhereInpu
+    every?: TaskWhereInput
+    some?: TaskWhereInput
+    none?: TaskWhereInput
   }
 
   export type TaskOrderByRelationAggregateInput = {
@@ -33139,33 +35788,33 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentListRelationFilter = {
-    every?: TaskAttachmentWhereInpu
-    some?: TaskAttachmentWhereInpu
-    none?: TaskAttachmentWhereInpu
+    every?: TaskAttachmentWhereInput
+    some?: TaskAttachmentWhereInput
+    none?: TaskAttachmentWhereInput
   }
 
   export type TaskHistoryListRelationFilter = {
-    every?: TaskHistoryWhereInpu
-    some?: TaskHistoryWhereInpu
-    none?: TaskHistoryWhereInpu
+    every?: TaskHistoryWhereInput
+    some?: TaskHistoryWhereInput
+    none?: TaskHistoryWhereInput
   }
 
   export type TaskStepListRelationFilter = {
-    every?: TaskStepWhereInpu
-    some?: TaskStepWhereInpu
-    none?: TaskStepWhereInpu
+    every?: TaskStepWhereInput
+    some?: TaskStepWhereInput
+    none?: TaskStepWhereInput
   }
 
   export type TaskClosureListRelationFilter = {
-    every?: TaskClosureWhereInpu
-    some?: TaskClosureWhereInpu
-    none?: TaskClosureWhereInpu
+    every?: TaskClosureWhereInput
+    some?: TaskClosureWhereInput
+    none?: TaskClosureWhereInput
   }
 
   export type TaskNotificationLogListRelationFilter = {
-    every?: TaskNotificationLogWhereInpu
-    some?: TaskNotificationLogWhereInpu
-    none?: TaskNotificationLogWhereInpu
+    every?: TaskNotificationLogWhereInput
+    some?: TaskNotificationLogWhereInput
+    none?: TaskNotificationLogWhereInput
   }
 
   export type TaskAttachmentOrderByRelationAggregateInput = {
@@ -33295,8 +35944,8 @@ export namespace Prisma {
   }
 
   export type TaskScalarRelationFilter = {
-    is?: TaskWhereInpu
-    isNot?: TaskWhereInpu
+    is?: TaskWhereInput
+    isNot?: TaskWhereInput
   }
 
   export type TaskStepOrderByRelevanceInput = {
@@ -33745,29 +36394,6 @@ export namespace Prisma {
     targetValue?: SortOrder
     weight?: SortOrder
   }
-  export type JsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type OutboxEventOrderByRelevanceInput = {
     fields: OutboxEventOrderByRelevanceFieldEnum | OutboxEventOrderByRelevanceFieldEnum[]
@@ -33826,32 +36452,6 @@ export namespace Prisma {
   export type OutboxEventSumOrderByAggregateInput = {
     processVersion?: SortOrder
     retryCount?: SortOrder
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type ProcessedCommandOrderByRelevanceInput = {
@@ -34143,16 +36743,72 @@ export namespace Prisma {
 
   export type KpiRuleSetCreateNestedOneWithoutDomainWeightsInput = {
     create?: XOR<KpiRuleSetCreateWithoutDomainWeightsInput, KpiRuleSetUncheckedCreateWithoutDomainWeightsInput>
-    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutDomainWeightsInpu
-    connect?: KpiRuleSetWhereUniqueInpu
+    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutDomainWeightsInput
+    connect?: KpiRuleSetWhereUniqueInput
   }
 
   export type KpiRuleSetUpdateOneRequiredWithoutDomainWeightsNestedInput = {
     create?: XOR<KpiRuleSetCreateWithoutDomainWeightsInput, KpiRuleSetUncheckedCreateWithoutDomainWeightsInput>
-    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutDomainWeightsInpu
-    upsert?: KpiRuleSetUpsertWithoutDomainWeightsInpu
-    connect?: KpiRuleSetWhereUniqueInpu
+    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutDomainWeightsInput
+    upsert?: KpiRuleSetUpsertWithoutDomainWeightsInput
+    connect?: KpiRuleSetWhereUniqueInput
     update?: XOR<XOR<KpiRuleSetUpdateToOneWithWhereWithoutDomainWeightsInput, KpiRuleSetUpdateWithoutDomainWeightsInput>, KpiRuleSetUncheckedUpdateWithoutDomainWeightsInput>
+  }
+
+  export type KpiFormulaConfigVersionCreateNestedManyWithoutConfigInput = {
+    create?: XOR<KpiFormulaConfigVersionCreateWithoutConfigInput, KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput> | KpiFormulaConfigVersionCreateWithoutConfigInput[] | KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput[]
+    connectOrCreate?: KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput | KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput[]
+    createMany?: KpiFormulaConfigVersionCreateManyConfigInputEnvelope
+    connect?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+  }
+
+  export type KpiFormulaConfigVersionUncheckedCreateNestedManyWithoutConfigInput = {
+    create?: XOR<KpiFormulaConfigVersionCreateWithoutConfigInput, KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput> | KpiFormulaConfigVersionCreateWithoutConfigInput[] | KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput[]
+    connectOrCreate?: KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput | KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput[]
+    createMany?: KpiFormulaConfigVersionCreateManyConfigInputEnvelope
+    connect?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+  }
+
+  export type KpiFormulaConfigVersionUpdateManyWithoutConfigNestedInput = {
+    create?: XOR<KpiFormulaConfigVersionCreateWithoutConfigInput, KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput> | KpiFormulaConfigVersionCreateWithoutConfigInput[] | KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput[]
+    connectOrCreate?: KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput | KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput[]
+    upsert?: KpiFormulaConfigVersionUpsertWithWhereUniqueWithoutConfigInput | KpiFormulaConfigVersionUpsertWithWhereUniqueWithoutConfigInput[]
+    createMany?: KpiFormulaConfigVersionCreateManyConfigInputEnvelope
+    set?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    disconnect?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    delete?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    connect?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    update?: KpiFormulaConfigVersionUpdateWithWhereUniqueWithoutConfigInput | KpiFormulaConfigVersionUpdateWithWhereUniqueWithoutConfigInput[]
+    updateMany?: KpiFormulaConfigVersionUpdateManyWithWhereWithoutConfigInput | KpiFormulaConfigVersionUpdateManyWithWhereWithoutConfigInput[]
+    deleteMany?: KpiFormulaConfigVersionScalarWhereInput | KpiFormulaConfigVersionScalarWhereInput[]
+  }
+
+  export type KpiFormulaConfigVersionUncheckedUpdateManyWithoutConfigNestedInput = {
+    create?: XOR<KpiFormulaConfigVersionCreateWithoutConfigInput, KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput> | KpiFormulaConfigVersionCreateWithoutConfigInput[] | KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput[]
+    connectOrCreate?: KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput | KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput[]
+    upsert?: KpiFormulaConfigVersionUpsertWithWhereUniqueWithoutConfigInput | KpiFormulaConfigVersionUpsertWithWhereUniqueWithoutConfigInput[]
+    createMany?: KpiFormulaConfigVersionCreateManyConfigInputEnvelope
+    set?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    disconnect?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    delete?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    connect?: KpiFormulaConfigVersionWhereUniqueInput | KpiFormulaConfigVersionWhereUniqueInput[]
+    update?: KpiFormulaConfigVersionUpdateWithWhereUniqueWithoutConfigInput | KpiFormulaConfigVersionUpdateWithWhereUniqueWithoutConfigInput[]
+    updateMany?: KpiFormulaConfigVersionUpdateManyWithWhereWithoutConfigInput | KpiFormulaConfigVersionUpdateManyWithWhereWithoutConfigInput[]
+    deleteMany?: KpiFormulaConfigVersionScalarWhereInput | KpiFormulaConfigVersionScalarWhereInput[]
+  }
+
+  export type KpiFormulaConfigCreateNestedOneWithoutVersionsInput = {
+    create?: XOR<KpiFormulaConfigCreateWithoutVersionsInput, KpiFormulaConfigUncheckedCreateWithoutVersionsInput>
+    connectOrCreate?: KpiFormulaConfigCreateOrConnectWithoutVersionsInput
+    connect?: KpiFormulaConfigWhereUniqueInput
+  }
+
+  export type KpiFormulaConfigUpdateOneRequiredWithoutVersionsNestedInput = {
+    create?: XOR<KpiFormulaConfigCreateWithoutVersionsInput, KpiFormulaConfigUncheckedCreateWithoutVersionsInput>
+    connectOrCreate?: KpiFormulaConfigCreateOrConnectWithoutVersionsInput
+    upsert?: KpiFormulaConfigUpsertWithoutVersionsInput
+    connect?: KpiFormulaConfigWhereUniqueInput
+    update?: XOR<XOR<KpiFormulaConfigUpdateToOneWithWhereWithoutVersionsInput, KpiFormulaConfigUpdateWithoutVersionsInput>, KpiFormulaConfigUncheckedUpdateWithoutVersionsInput>
   }
 
   export type KpiEvaluationCreateNestedManyWithoutPeriodInput = {
@@ -34199,26 +36855,26 @@ export namespace Prisma {
 
   export type EmployeeCreateNestedOneWithoutKpiEvaluationsInput = {
     create?: XOR<EmployeeCreateWithoutKpiEvaluationsInput, EmployeeUncheckedCreateWithoutKpiEvaluationsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiEvaluationsInpu
-    connect?: EmployeeWhereUniqueInpu
+    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiEvaluationsInput
+    connect?: EmployeeWhereUniqueInput
   }
 
   export type EmployeeCreateNestedOneWithoutKpiReviewsInput = {
     create?: XOR<EmployeeCreateWithoutKpiReviewsInput, EmployeeUncheckedCreateWithoutKpiReviewsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiReviewsInpu
-    connect?: EmployeeWhereUniqueInpu
+    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiReviewsInput
+    connect?: EmployeeWhereUniqueInput
   }
 
   export type KpiPeriodCreateNestedOneWithoutEvaluationsInput = {
     create?: XOR<KpiPeriodCreateWithoutEvaluationsInput, KpiPeriodUncheckedCreateWithoutEvaluationsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutEvaluationsInpu
-    connect?: KpiPeriodWhereUniqueInpu
+    connectOrCreate?: KpiPeriodCreateOrConnectWithoutEvaluationsInput
+    connect?: KpiPeriodWhereUniqueInput
   }
 
   export type KpiRuleSetCreateNestedOneWithoutEvaluationsInput = {
     create?: XOR<KpiRuleSetCreateWithoutEvaluationsInput, KpiRuleSetUncheckedCreateWithoutEvaluationsInput>
-    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutEvaluationsInpu
-    connect?: KpiRuleSetWhereUniqueInpu
+    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutEvaluationsInput
+    connect?: KpiRuleSetWhereUniqueInput
   }
 
   export type KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput = {
@@ -34259,37 +36915,37 @@ export namespace Prisma {
 
   export type EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput = {
     create?: XOR<EmployeeCreateWithoutKpiEvaluationsInput, EmployeeUncheckedCreateWithoutKpiEvaluationsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiEvaluationsInpu
-    upsert?: EmployeeUpsertWithoutKpiEvaluationsInpu
-    connect?: EmployeeWhereUniqueInpu
+    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiEvaluationsInput
+    upsert?: EmployeeUpsertWithoutKpiEvaluationsInput
+    connect?: EmployeeWhereUniqueInput
     update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutKpiEvaluationsInput, EmployeeUpdateWithoutKpiEvaluationsInput>, EmployeeUncheckedUpdateWithoutKpiEvaluationsInput>
   }
 
   export type EmployeeUpdateOneWithoutKpiReviewsNestedInput = {
     create?: XOR<EmployeeCreateWithoutKpiReviewsInput, EmployeeUncheckedCreateWithoutKpiReviewsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiReviewsInpu
-    upsert?: EmployeeUpsertWithoutKpiReviewsInpu
+    connectOrCreate?: EmployeeCreateOrConnectWithoutKpiReviewsInput
+    upsert?: EmployeeUpsertWithoutKpiReviewsInput
     disconnect?: EmployeeWhereInput | boolean
     delete?: EmployeeWhereInput | boolean
-    connect?: EmployeeWhereUniqueInpu
+    connect?: EmployeeWhereUniqueInput
     update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutKpiReviewsInput, EmployeeUpdateWithoutKpiReviewsInput>, EmployeeUncheckedUpdateWithoutKpiReviewsInput>
   }
 
   export type KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput = {
     create?: XOR<KpiPeriodCreateWithoutEvaluationsInput, KpiPeriodUncheckedCreateWithoutEvaluationsInput>
-    connectOrCreate?: KpiPeriodCreateOrConnectWithoutEvaluationsInpu
-    upsert?: KpiPeriodUpsertWithoutEvaluationsInpu
-    connect?: KpiPeriodWhereUniqueInpu
+    connectOrCreate?: KpiPeriodCreateOrConnectWithoutEvaluationsInput
+    upsert?: KpiPeriodUpsertWithoutEvaluationsInput
+    connect?: KpiPeriodWhereUniqueInput
     update?: XOR<XOR<KpiPeriodUpdateToOneWithWhereWithoutEvaluationsInput, KpiPeriodUpdateWithoutEvaluationsInput>, KpiPeriodUncheckedUpdateWithoutEvaluationsInput>
   }
 
   export type KpiRuleSetUpdateOneWithoutEvaluationsNestedInput = {
     create?: XOR<KpiRuleSetCreateWithoutEvaluationsInput, KpiRuleSetUncheckedCreateWithoutEvaluationsInput>
-    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutEvaluationsInpu
-    upsert?: KpiRuleSetUpsertWithoutEvaluationsInpu
+    connectOrCreate?: KpiRuleSetCreateOrConnectWithoutEvaluationsInput
+    upsert?: KpiRuleSetUpsertWithoutEvaluationsInput
     disconnect?: KpiRuleSetWhereInput | boolean
     delete?: KpiRuleSetWhereInput | boolean
-    connect?: KpiRuleSetWhereUniqueInpu
+    connect?: KpiRuleSetWhereUniqueInput
     update?: XOR<XOR<KpiRuleSetUpdateToOneWithWhereWithoutEvaluationsInput, KpiRuleSetUpdateWithoutEvaluationsInput>, KpiRuleSetUncheckedUpdateWithoutEvaluationsInput>
   }
 
@@ -34351,31 +37007,31 @@ export namespace Prisma {
 
   export type TaskCreateNestedOneWithoutKpiEvaluationsInput = {
     create?: XOR<TaskCreateWithoutKpiEvaluationsInput, TaskUncheckedCreateWithoutKpiEvaluationsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutKpiEvaluationsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutKpiEvaluationsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type KpiEvaluationCreateNestedOneWithoutTasksInput = {
     create?: XOR<KpiEvaluationCreateWithoutTasksInput, KpiEvaluationUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutTasksInpu
-    connect?: KpiEvaluationWhereUniqueInpu
+    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutTasksInput
+    connect?: KpiEvaluationWhereUniqueInput
   }
 
   export type TaskUpdateOneWithoutKpiEvaluationsNestedInput = {
     create?: XOR<TaskCreateWithoutKpiEvaluationsInput, TaskUncheckedCreateWithoutKpiEvaluationsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutKpiEvaluationsInpu
-    upsert?: TaskUpsertWithoutKpiEvaluationsInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutKpiEvaluationsInput
+    upsert?: TaskUpsertWithoutKpiEvaluationsInput
     disconnect?: TaskWhereInput | boolean
     delete?: TaskWhereInput | boolean
-    connect?: TaskWhereUniqueInpu
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutKpiEvaluationsInput, TaskUpdateWithoutKpiEvaluationsInput>, TaskUncheckedUpdateWithoutKpiEvaluationsInput>
   }
 
   export type KpiEvaluationUpdateOneRequiredWithoutTasksNestedInput = {
     create?: XOR<KpiEvaluationCreateWithoutTasksInput, KpiEvaluationUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutTasksInpu
-    upsert?: KpiEvaluationUpsertWithoutTasksInpu
-    connect?: KpiEvaluationWhereUniqueInpu
+    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutTasksInput
+    upsert?: KpiEvaluationUpsertWithoutTasksInput
+    connect?: KpiEvaluationWhereUniqueInput
     update?: XOR<XOR<KpiEvaluationUpdateToOneWithWhereWithoutTasksInput, KpiEvaluationUpdateWithoutTasksInput>, KpiEvaluationUncheckedUpdateWithoutTasksInput>
   }
 
@@ -34507,57 +37163,57 @@ export namespace Prisma {
 
   export type KpiFormTemplateCreateNestedOneWithoutVersionsInput = {
     create?: XOR<KpiFormTemplateCreateWithoutVersionsInput, KpiFormTemplateUncheckedCreateWithoutVersionsInput>
-    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutVersionsInpu
-    connect?: KpiFormTemplateWhereUniqueInpu
+    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutVersionsInput
+    connect?: KpiFormTemplateWhereUniqueInput
   }
 
   export type KpiFormTemplateUpdateOneRequiredWithoutVersionsNestedInput = {
     create?: XOR<KpiFormTemplateCreateWithoutVersionsInput, KpiFormTemplateUncheckedCreateWithoutVersionsInput>
-    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutVersionsInpu
-    upsert?: KpiFormTemplateUpsertWithoutVersionsInpu
-    connect?: KpiFormTemplateWhereUniqueInpu
+    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutVersionsInput
+    upsert?: KpiFormTemplateUpsertWithoutVersionsInput
+    connect?: KpiFormTemplateWhereUniqueInput
     update?: XOR<XOR<KpiFormTemplateUpdateToOneWithWhereWithoutVersionsInput, KpiFormTemplateUpdateWithoutVersionsInput>, KpiFormTemplateUncheckedUpdateWithoutVersionsInput>
   }
 
   export type KpiFormTemplateCreateNestedOneWithoutBindingsInput = {
     create?: XOR<KpiFormTemplateCreateWithoutBindingsInput, KpiFormTemplateUncheckedCreateWithoutBindingsInput>
-    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutBindingsInpu
-    connect?: KpiFormTemplateWhereUniqueInpu
+    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutBindingsInput
+    connect?: KpiFormTemplateWhereUniqueInput
   }
 
   export type KpiFormTemplateUpdateOneRequiredWithoutBindingsNestedInput = {
     create?: XOR<KpiFormTemplateCreateWithoutBindingsInput, KpiFormTemplateUncheckedCreateWithoutBindingsInput>
-    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutBindingsInpu
-    upsert?: KpiFormTemplateUpsertWithoutBindingsInpu
-    connect?: KpiFormTemplateWhereUniqueInpu
+    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutBindingsInput
+    upsert?: KpiFormTemplateUpsertWithoutBindingsInput
+    connect?: KpiFormTemplateWhereUniqueInput
     update?: XOR<XOR<KpiFormTemplateUpdateToOneWithWhereWithoutBindingsInput, KpiFormTemplateUpdateWithoutBindingsInput>, KpiFormTemplateUncheckedUpdateWithoutBindingsInput>
   }
 
   export type KpiFormTemplateCreateNestedOneWithoutDocumentsInput = {
     create?: XOR<KpiFormTemplateCreateWithoutDocumentsInput, KpiFormTemplateUncheckedCreateWithoutDocumentsInput>
-    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutDocumentsInpu
-    connect?: KpiFormTemplateWhereUniqueInpu
+    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutDocumentsInput
+    connect?: KpiFormTemplateWhereUniqueInput
   }
 
   export type KpiEvaluationCreateNestedOneWithoutDocumentsInput = {
     create?: XOR<KpiEvaluationCreateWithoutDocumentsInput, KpiEvaluationUncheckedCreateWithoutDocumentsInput>
-    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutDocumentsInpu
-    connect?: KpiEvaluationWhereUniqueInpu
+    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutDocumentsInput
+    connect?: KpiEvaluationWhereUniqueInput
   }
 
   export type KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInput = {
     create?: XOR<KpiFormTemplateCreateWithoutDocumentsInput, KpiFormTemplateUncheckedCreateWithoutDocumentsInput>
-    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutDocumentsInpu
-    upsert?: KpiFormTemplateUpsertWithoutDocumentsInpu
-    connect?: KpiFormTemplateWhereUniqueInpu
+    connectOrCreate?: KpiFormTemplateCreateOrConnectWithoutDocumentsInput
+    upsert?: KpiFormTemplateUpsertWithoutDocumentsInput
+    connect?: KpiFormTemplateWhereUniqueInput
     update?: XOR<XOR<KpiFormTemplateUpdateToOneWithWhereWithoutDocumentsInput, KpiFormTemplateUpdateWithoutDocumentsInput>, KpiFormTemplateUncheckedUpdateWithoutDocumentsInput>
   }
 
   export type KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInput = {
     create?: XOR<KpiEvaluationCreateWithoutDocumentsInput, KpiEvaluationUncheckedCreateWithoutDocumentsInput>
-    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutDocumentsInpu
-    upsert?: KpiEvaluationUpsertWithoutDocumentsInpu
-    connect?: KpiEvaluationWhereUniqueInpu
+    connectOrCreate?: KpiEvaluationCreateOrConnectWithoutDocumentsInput
+    upsert?: KpiEvaluationUpsertWithoutDocumentsInput
+    connect?: KpiEvaluationWhereUniqueInput
     update?: XOR<XOR<KpiEvaluationUpdateToOneWithWhereWithoutDocumentsInput, KpiEvaluationUpdateWithoutDocumentsInput>, KpiEvaluationUncheckedUpdateWithoutDocumentsInput>
   }
 
@@ -34605,8 +37261,8 @@ export namespace Prisma {
 
   export type MasterPlanCreateNestedOneWithoutTasksInput = {
     create?: XOR<MasterPlanCreateWithoutTasksInput, MasterPlanUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: MasterPlanCreateOrConnectWithoutTasksInpu
-    connect?: MasterPlanWhereUniqueInpu
+    connectOrCreate?: MasterPlanCreateOrConnectWithoutTasksInput
+    connect?: MasterPlanWhereUniqueInput
   }
 
   export type KpiEvaluationTaskCreateNestedManyWithoutTaskInput = {
@@ -34723,11 +37379,11 @@ export namespace Prisma {
 
   export type MasterPlanUpdateOneWithoutTasksNestedInput = {
     create?: XOR<MasterPlanCreateWithoutTasksInput, MasterPlanUncheckedCreateWithoutTasksInput>
-    connectOrCreate?: MasterPlanCreateOrConnectWithoutTasksInpu
-    upsert?: MasterPlanUpsertWithoutTasksInpu
+    connectOrCreate?: MasterPlanCreateOrConnectWithoutTasksInput
+    upsert?: MasterPlanUpsertWithoutTasksInput
     disconnect?: MasterPlanWhereInput | boolean
     delete?: MasterPlanWhereInput | boolean
-    connect?: MasterPlanWhereUniqueInpu
+    connect?: MasterPlanWhereUniqueInput
     update?: XOR<XOR<MasterPlanUpdateToOneWithWhereWithoutTasksInput, MasterPlanUpdateWithoutTasksInput>, MasterPlanUncheckedUpdateWithoutTasksInput>
   }
 
@@ -34957,42 +37613,42 @@ export namespace Prisma {
 
   export type TaskCreateNestedOneWithoutStepsInput = {
     create?: XOR<TaskCreateWithoutStepsInput, TaskUncheckedCreateWithoutStepsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutStepsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutStepsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type TaskUpdateOneRequiredWithoutStepsNestedInput = {
     create?: XOR<TaskCreateWithoutStepsInput, TaskUncheckedCreateWithoutStepsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutStepsInpu
-    upsert?: TaskUpsertWithoutStepsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutStepsInput
+    upsert?: TaskUpsertWithoutStepsInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutStepsInput, TaskUpdateWithoutStepsInput>, TaskUncheckedUpdateWithoutStepsInput>
   }
 
   export type TaskCreateNestedOneWithoutAttachmentsInput = {
     create?: XOR<TaskCreateWithoutAttachmentsInput, TaskUncheckedCreateWithoutAttachmentsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutAttachmentsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutAttachmentsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type TaskUpdateOneRequiredWithoutAttachmentsNestedInput = {
     create?: XOR<TaskCreateWithoutAttachmentsInput, TaskUncheckedCreateWithoutAttachmentsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutAttachmentsInpu
-    upsert?: TaskUpsertWithoutAttachmentsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutAttachmentsInput
+    upsert?: TaskUpsertWithoutAttachmentsInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutAttachmentsInput, TaskUpdateWithoutAttachmentsInput>, TaskUncheckedUpdateWithoutAttachmentsInput>
   }
 
   export type TaskCreateNestedOneWithoutParticipantsInput = {
     create?: XOR<TaskCreateWithoutParticipantsInput, TaskUncheckedCreateWithoutParticipantsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutParticipantsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutParticipantsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type EmployeeCreateNestedOneWithoutTaskParticipantsInput = {
     create?: XOR<EmployeeCreateWithoutTaskParticipantsInput, EmployeeUncheckedCreateWithoutTaskParticipantsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutTaskParticipantsInpu
-    connect?: EmployeeWhereUniqueInpu
+    connectOrCreate?: EmployeeCreateOrConnectWithoutTaskParticipantsInput
+    connect?: EmployeeWhereUniqueInput
   }
 
   export type EnumTaskRoleFieldUpdateOperationsInput = {
@@ -35001,73 +37657,73 @@ export namespace Prisma {
 
   export type TaskUpdateOneRequiredWithoutParticipantsNestedInput = {
     create?: XOR<TaskCreateWithoutParticipantsInput, TaskUncheckedCreateWithoutParticipantsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutParticipantsInpu
-    upsert?: TaskUpsertWithoutParticipantsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutParticipantsInput
+    upsert?: TaskUpsertWithoutParticipantsInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutParticipantsInput, TaskUpdateWithoutParticipantsInput>, TaskUncheckedUpdateWithoutParticipantsInput>
   }
 
   export type EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput = {
     create?: XOR<EmployeeCreateWithoutTaskParticipantsInput, EmployeeUncheckedCreateWithoutTaskParticipantsInput>
-    connectOrCreate?: EmployeeCreateOrConnectWithoutTaskParticipantsInpu
-    upsert?: EmployeeUpsertWithoutTaskParticipantsInpu
-    connect?: EmployeeWhereUniqueInpu
+    connectOrCreate?: EmployeeCreateOrConnectWithoutTaskParticipantsInput
+    upsert?: EmployeeUpsertWithoutTaskParticipantsInput
+    connect?: EmployeeWhereUniqueInput
     update?: XOR<XOR<EmployeeUpdateToOneWithWhereWithoutTaskParticipantsInput, EmployeeUpdateWithoutTaskParticipantsInput>, EmployeeUncheckedUpdateWithoutTaskParticipantsInput>
   }
 
   export type TaskCreateNestedOneWithoutDescendantsInput = {
     create?: XOR<TaskCreateWithoutDescendantsInput, TaskUncheckedCreateWithoutDescendantsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutDescendantsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutDescendantsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type TaskCreateNestedOneWithoutAncestorsInput = {
     create?: XOR<TaskCreateWithoutAncestorsInput, TaskUncheckedCreateWithoutAncestorsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutAncestorsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutAncestorsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type TaskUpdateOneRequiredWithoutDescendantsNestedInput = {
     create?: XOR<TaskCreateWithoutDescendantsInput, TaskUncheckedCreateWithoutDescendantsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutDescendantsInpu
-    upsert?: TaskUpsertWithoutDescendantsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutDescendantsInput
+    upsert?: TaskUpsertWithoutDescendantsInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutDescendantsInput, TaskUpdateWithoutDescendantsInput>, TaskUncheckedUpdateWithoutDescendantsInput>
   }
 
   export type TaskUpdateOneRequiredWithoutAncestorsNestedInput = {
     create?: XOR<TaskCreateWithoutAncestorsInput, TaskUncheckedCreateWithoutAncestorsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutAncestorsInpu
-    upsert?: TaskUpsertWithoutAncestorsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutAncestorsInput
+    upsert?: TaskUpsertWithoutAncestorsInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutAncestorsInput, TaskUpdateWithoutAncestorsInput>, TaskUncheckedUpdateWithoutAncestorsInput>
   }
 
   export type TaskCreateNestedOneWithoutHistoriesInput = {
     create?: XOR<TaskCreateWithoutHistoriesInput, TaskUncheckedCreateWithoutHistoriesInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutHistoriesInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutHistoriesInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type TaskUpdateOneRequiredWithoutHistoriesNestedInput = {
     create?: XOR<TaskCreateWithoutHistoriesInput, TaskUncheckedCreateWithoutHistoriesInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutHistoriesInpu
-    upsert?: TaskUpsertWithoutHistoriesInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutHistoriesInput
+    upsert?: TaskUpsertWithoutHistoriesInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutHistoriesInput, TaskUpdateWithoutHistoriesInput>, TaskUncheckedUpdateWithoutHistoriesInput>
   }
 
   export type TaskCreateNestedOneWithoutNotificationLogsInput = {
     create?: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutNotificationLogsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutNotificationLogsInput
+    connect?: TaskWhereUniqueInput
   }
 
   export type TaskUpdateOneRequiredWithoutNotificationLogsNestedInput = {
     create?: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
-    connectOrCreate?: TaskCreateOrConnectWithoutNotificationLogsInpu
-    upsert?: TaskUpsertWithoutNotificationLogsInpu
-    connect?: TaskWhereUniqueInpu
+    connectOrCreate?: TaskCreateOrConnectWithoutNotificationLogsInput
+    upsert?: TaskUpsertWithoutNotificationLogsInput
+    connect?: TaskWhereUniqueInput
     update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutNotificationLogsInput, TaskUpdateWithoutNotificationLogsInput>, TaskUncheckedUpdateWithoutNotificationLogsInput>
   }
 
@@ -35314,6 +37970,29 @@ export namespace Prisma {
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
   }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue
+    lte?: InputJsonValue
+    gt?: InputJsonValue
+    gte?: InputJsonValue
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
@@ -35347,29 +38026,6 @@ export namespace Prisma {
     _min?: NestedEnumTaskRoleFilter<$PrismaModel>
     _max?: NestedEnumTaskRoleFilter<$PrismaModel>
   }
-  export type NestedJsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue
-    lte?: InputJsonValue
-    gt?: InputJsonValue
-    gte?: InputJsonValue
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type KpiEvaluationCreateWithoutEmployeeInput = {
     staffingSlotId?: number | null
@@ -35383,11 +38039,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInpu
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInpu
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInpu
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInpu
+    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
+    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
+    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
+    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateWithoutEmployeeInput = {
@@ -35406,12 +38062,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInpu
+    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationCreateOrConnectWithoutEmployeeInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     create: XOR<KpiEvaluationCreateWithoutEmployeeInput, KpiEvaluationUncheckedCreateWithoutEmployeeInput>
   }
 
@@ -35432,11 +38088,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInpu
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInpu
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInpu
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInpu
+    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
+    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
+    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
+    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateWithoutReviewerInput = {
@@ -35455,12 +38111,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInpu
+    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationCreateOrConnectWithoutReviewerInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     create: XOR<KpiEvaluationCreateWithoutReviewerInput, KpiEvaluationUncheckedCreateWithoutReviewerInput>
   }
 
@@ -35477,7 +38133,7 @@ export namespace Prisma {
     reason?: string | null
     attendedAt?: Date | string | null
     organizationId?: string
-    task: TaskCreateNestedOneWithoutParticipantsInpu
+    task: TaskCreateNestedOneWithoutParticipantsInput
   }
 
   export type TaskParticipantUncheckedCreateWithoutEmployeeInput = {
@@ -35492,7 +38148,7 @@ export namespace Prisma {
   }
 
   export type TaskParticipantCreateOrConnectWithoutEmployeeInput = {
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     create: XOR<TaskParticipantCreateWithoutEmployeeInput, TaskParticipantUncheckedCreateWithoutEmployeeInput>
   }
 
@@ -35502,18 +38158,18 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpsertWithWhereUniqueWithoutEmployeeInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     update: XOR<KpiEvaluationUpdateWithoutEmployeeInput, KpiEvaluationUncheckedUpdateWithoutEmployeeInput>
     create: XOR<KpiEvaluationCreateWithoutEmployeeInput, KpiEvaluationUncheckedCreateWithoutEmployeeInput>
   }
 
   export type KpiEvaluationUpdateWithWhereUniqueWithoutEmployeeInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     data: XOR<KpiEvaluationUpdateWithoutEmployeeInput, KpiEvaluationUncheckedUpdateWithoutEmployeeInput>
   }
 
   export type KpiEvaluationUpdateManyWithWhereWithoutEmployeeInput = {
-    where: KpiEvaluationScalarWhereInpu
+    where: KpiEvaluationScalarWhereInput
     data: XOR<KpiEvaluationUpdateManyMutationInput, KpiEvaluationUncheckedUpdateManyWithoutEmployeeInput>
   }
 
@@ -35540,34 +38196,34 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpsertWithWhereUniqueWithoutReviewerInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     update: XOR<KpiEvaluationUpdateWithoutReviewerInput, KpiEvaluationUncheckedUpdateWithoutReviewerInput>
     create: XOR<KpiEvaluationCreateWithoutReviewerInput, KpiEvaluationUncheckedCreateWithoutReviewerInput>
   }
 
   export type KpiEvaluationUpdateWithWhereUniqueWithoutReviewerInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     data: XOR<KpiEvaluationUpdateWithoutReviewerInput, KpiEvaluationUncheckedUpdateWithoutReviewerInput>
   }
 
   export type KpiEvaluationUpdateManyWithWhereWithoutReviewerInput = {
-    where: KpiEvaluationScalarWhereInpu
+    where: KpiEvaluationScalarWhereInput
     data: XOR<KpiEvaluationUpdateManyMutationInput, KpiEvaluationUncheckedUpdateManyWithoutReviewerInput>
   }
 
   export type TaskParticipantUpsertWithWhereUniqueWithoutEmployeeInput = {
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     update: XOR<TaskParticipantUpdateWithoutEmployeeInput, TaskParticipantUncheckedUpdateWithoutEmployeeInput>
     create: XOR<TaskParticipantCreateWithoutEmployeeInput, TaskParticipantUncheckedCreateWithoutEmployeeInput>
   }
 
   export type TaskParticipantUpdateWithWhereUniqueWithoutEmployeeInput = {
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     data: XOR<TaskParticipantUpdateWithoutEmployeeInput, TaskParticipantUncheckedUpdateWithoutEmployeeInput>
   }
 
   export type TaskParticipantUpdateManyWithWhereWithoutEmployeeInput = {
-    where: TaskParticipantScalarWhereInpu
+    where: TaskParticipantScalarWhereInput
     data: XOR<TaskParticipantUpdateManyMutationInput, TaskParticipantUncheckedUpdateManyWithoutEmployeeInput>
   }
 
@@ -35606,7 +38262,7 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightCreateOrConnectWithoutRuleSetInput = {
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
     create: XOR<KpiDomainWeightCreateWithoutRuleSetInput, KpiDomainWeightUncheckedCreateWithoutRuleSetInput>
   }
 
@@ -35627,11 +38283,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInpu
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInpu
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInpu
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInpu
+    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
+    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
+    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
+    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateWithoutRuleSetInput = {
@@ -35650,12 +38306,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInpu
+    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationCreateOrConnectWithoutRuleSetInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     create: XOR<KpiEvaluationCreateWithoutRuleSetInput, KpiEvaluationUncheckedCreateWithoutRuleSetInput>
   }
 
@@ -35665,18 +38321,18 @@ export namespace Prisma {
   }
 
   export type KpiDomainWeightUpsertWithWhereUniqueWithoutRuleSetInput = {
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
     update: XOR<KpiDomainWeightUpdateWithoutRuleSetInput, KpiDomainWeightUncheckedUpdateWithoutRuleSetInput>
     create: XOR<KpiDomainWeightCreateWithoutRuleSetInput, KpiDomainWeightUncheckedCreateWithoutRuleSetInput>
   }
 
   export type KpiDomainWeightUpdateWithWhereUniqueWithoutRuleSetInput = {
-    where: KpiDomainWeightWhereUniqueInpu
+    where: KpiDomainWeightWhereUniqueInput
     data: XOR<KpiDomainWeightUpdateWithoutRuleSetInput, KpiDomainWeightUncheckedUpdateWithoutRuleSetInput>
   }
 
   export type KpiDomainWeightUpdateManyWithWhereWithoutRuleSetInput = {
-    where: KpiDomainWeightScalarWhereInpu
+    where: KpiDomainWeightScalarWhereInput
     data: XOR<KpiDomainWeightUpdateManyMutationInput, KpiDomainWeightUncheckedUpdateManyWithoutRuleSetInput>
   }
 
@@ -35695,18 +38351,18 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpsertWithWhereUniqueWithoutRuleSetInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     update: XOR<KpiEvaluationUpdateWithoutRuleSetInput, KpiEvaluationUncheckedUpdateWithoutRuleSetInput>
     create: XOR<KpiEvaluationCreateWithoutRuleSetInput, KpiEvaluationUncheckedCreateWithoutRuleSetInput>
   }
 
   export type KpiEvaluationUpdateWithWhereUniqueWithoutRuleSetInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     data: XOR<KpiEvaluationUpdateWithoutRuleSetInput, KpiEvaluationUncheckedUpdateWithoutRuleSetInput>
   }
 
   export type KpiEvaluationUpdateManyWithWhereWithoutRuleSetInput = {
-    where: KpiEvaluationScalarWhereInpu
+    where: KpiEvaluationScalarWhereInput
     data: XOR<KpiEvaluationUpdateManyMutationInput, KpiEvaluationUncheckedUpdateManyWithoutRuleSetInput>
   }
 
@@ -35721,7 +38377,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    evaluations?: KpiEvaluationCreateNestedManyWithoutRuleSetInpu
+    evaluations?: KpiEvaluationCreateNestedManyWithoutRuleSetInput
   }
 
   export type KpiRuleSetUncheckedCreateWithoutDomainWeightsInput = {
@@ -35736,22 +38392,22 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutRuleSetInpu
+    evaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutRuleSetInput
   }
 
   export type KpiRuleSetCreateOrConnectWithoutDomainWeightsInput = {
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
     create: XOR<KpiRuleSetCreateWithoutDomainWeightsInput, KpiRuleSetUncheckedCreateWithoutDomainWeightsInput>
   }
 
   export type KpiRuleSetUpsertWithoutDomainWeightsInput = {
     update: XOR<KpiRuleSetUpdateWithoutDomainWeightsInput, KpiRuleSetUncheckedUpdateWithoutDomainWeightsInput>
     create: XOR<KpiRuleSetCreateWithoutDomainWeightsInput, KpiRuleSetUncheckedCreateWithoutDomainWeightsInput>
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
   }
 
   export type KpiRuleSetUpdateToOneWithWhereWithoutDomainWeightsInput = {
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     data: XOR<KpiRuleSetUpdateWithoutDomainWeightsInput, KpiRuleSetUncheckedUpdateWithoutDomainWeightsInput>
   }
 
@@ -35766,7 +38422,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    evaluations?: KpiEvaluationUpdateManyWithoutRuleSetNestedInpu
+    evaluations?: KpiEvaluationUpdateManyWithoutRuleSetNestedInput
   }
 
   export type KpiRuleSetUncheckedUpdateWithoutDomainWeightsInput = {
@@ -35781,7 +38437,114 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutRuleSetNestedInpu
+    evaluations?: KpiEvaluationUncheckedUpdateManyWithoutRuleSetNestedInput
+  }
+
+  export type KpiFormulaConfigVersionCreateWithoutConfigInput = {
+    version: number
+    settings: JsonNullValueInput | InputJsonValue
+    changedBy?: string | null
+    createdAt?: Date | string
+  }
+
+  export type KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput = {
+    id?: number
+    version: number
+    settings: JsonNullValueInput | InputJsonValue
+    changedBy?: string | null
+    createdAt?: Date | string
+  }
+
+  export type KpiFormulaConfigVersionCreateOrConnectWithoutConfigInput = {
+    where: KpiFormulaConfigVersionWhereUniqueInput
+    create: XOR<KpiFormulaConfigVersionCreateWithoutConfigInput, KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput>
+  }
+
+  export type KpiFormulaConfigVersionCreateManyConfigInputEnvelope = {
+    data: KpiFormulaConfigVersionCreateManyConfigInput | KpiFormulaConfigVersionCreateManyConfigInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type KpiFormulaConfigVersionUpsertWithWhereUniqueWithoutConfigInput = {
+    where: KpiFormulaConfigVersionWhereUniqueInput
+    update: XOR<KpiFormulaConfigVersionUpdateWithoutConfigInput, KpiFormulaConfigVersionUncheckedUpdateWithoutConfigInput>
+    create: XOR<KpiFormulaConfigVersionCreateWithoutConfigInput, KpiFormulaConfigVersionUncheckedCreateWithoutConfigInput>
+  }
+
+  export type KpiFormulaConfigVersionUpdateWithWhereUniqueWithoutConfigInput = {
+    where: KpiFormulaConfigVersionWhereUniqueInput
+    data: XOR<KpiFormulaConfigVersionUpdateWithoutConfigInput, KpiFormulaConfigVersionUncheckedUpdateWithoutConfigInput>
+  }
+
+  export type KpiFormulaConfigVersionUpdateManyWithWhereWithoutConfigInput = {
+    where: KpiFormulaConfigVersionScalarWhereInput
+    data: XOR<KpiFormulaConfigVersionUpdateManyMutationInput, KpiFormulaConfigVersionUncheckedUpdateManyWithoutConfigInput>
+  }
+
+  export type KpiFormulaConfigVersionScalarWhereInput = {
+    AND?: KpiFormulaConfigVersionScalarWhereInput | KpiFormulaConfigVersionScalarWhereInput[]
+    OR?: KpiFormulaConfigVersionScalarWhereInput[]
+    NOT?: KpiFormulaConfigVersionScalarWhereInput | KpiFormulaConfigVersionScalarWhereInput[]
+    id?: IntFilter<"KpiFormulaConfigVersion"> | number
+    organizationId?: StringFilter<"KpiFormulaConfigVersion"> | string
+    version?: IntFilter<"KpiFormulaConfigVersion"> | number
+    settings?: JsonFilter<"KpiFormulaConfigVersion">
+    changedBy?: StringNullableFilter<"KpiFormulaConfigVersion"> | string | null
+    createdAt?: DateTimeFilter<"KpiFormulaConfigVersion"> | Date | string
+  }
+
+  export type KpiFormulaConfigCreateWithoutVersionsInput = {
+    organizationId?: string
+    version?: number
+    settings: JsonNullValueInput | InputJsonValue
+    updatedBy?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KpiFormulaConfigUncheckedCreateWithoutVersionsInput = {
+    id?: number
+    organizationId?: string
+    version?: number
+    settings: JsonNullValueInput | InputJsonValue
+    updatedBy?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KpiFormulaConfigCreateOrConnectWithoutVersionsInput = {
+    where: KpiFormulaConfigWhereUniqueInput
+    create: XOR<KpiFormulaConfigCreateWithoutVersionsInput, KpiFormulaConfigUncheckedCreateWithoutVersionsInput>
+  }
+
+  export type KpiFormulaConfigUpsertWithoutVersionsInput = {
+    update: XOR<KpiFormulaConfigUpdateWithoutVersionsInput, KpiFormulaConfigUncheckedUpdateWithoutVersionsInput>
+    create: XOR<KpiFormulaConfigCreateWithoutVersionsInput, KpiFormulaConfigUncheckedCreateWithoutVersionsInput>
+    where?: KpiFormulaConfigWhereInput
+  }
+
+  export type KpiFormulaConfigUpdateToOneWithWhereWithoutVersionsInput = {
+    where?: KpiFormulaConfigWhereInput
+    data: XOR<KpiFormulaConfigUpdateWithoutVersionsInput, KpiFormulaConfigUncheckedUpdateWithoutVersionsInput>
+  }
+
+  export type KpiFormulaConfigUpdateWithoutVersionsInput = {
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    updatedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigUncheckedUpdateWithoutVersionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    organizationId?: StringFieldUpdateOperationsInput | string
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    updatedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KpiEvaluationCreateWithoutPeriodInput = {
@@ -35796,11 +38559,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInpu
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInpu
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInpu
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInpu
+    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
+    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
+    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
+    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateWithoutPeriodInput = {
@@ -35819,12 +38582,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInpu
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInpu
+    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationCreateOrConnectWithoutPeriodInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     create: XOR<KpiEvaluationCreateWithoutPeriodInput, KpiEvaluationUncheckedCreateWithoutPeriodInput>
   }
 
@@ -35834,18 +38597,18 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationUpsertWithWhereUniqueWithoutPeriodInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     update: XOR<KpiEvaluationUpdateWithoutPeriodInput, KpiEvaluationUncheckedUpdateWithoutPeriodInput>
     create: XOR<KpiEvaluationCreateWithoutPeriodInput, KpiEvaluationUncheckedCreateWithoutPeriodInput>
   }
 
   export type KpiEvaluationUpdateWithWhereUniqueWithoutPeriodInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     data: XOR<KpiEvaluationUpdateWithoutPeriodInput, KpiEvaluationUncheckedUpdateWithoutPeriodInput>
   }
 
   export type KpiEvaluationUpdateManyWithWhereWithoutPeriodInput = {
-    where: KpiEvaluationScalarWhereInpu
+    where: KpiEvaluationScalarWhereInput
     data: XOR<KpiEvaluationUpdateManyMutationInput, KpiEvaluationUncheckedUpdateManyWithoutPeriodInput>
   }
 
@@ -35875,8 +38638,8 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInpu
-    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInpu
+    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
+    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateWithoutKpiEvaluationsInput = {
@@ -35906,12 +38669,12 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInpu
-    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInpu
+    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
+    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeCreateOrConnectWithoutKpiEvaluationsInput = {
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
     create: XOR<EmployeeCreateWithoutKpiEvaluationsInput, EmployeeUncheckedCreateWithoutKpiEvaluationsInput>
   }
 
@@ -35941,8 +38704,8 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInpu
-    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInpu
+    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
+    taskParticipants?: TaskParticipantCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeUncheckedCreateWithoutKpiReviewsInput = {
@@ -35972,12 +38735,12 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInpu
-    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInpu
+    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
+    taskParticipants?: TaskParticipantUncheckedCreateNestedManyWithoutEmployeeInput
   }
 
   export type EmployeeCreateOrConnectWithoutKpiReviewsInput = {
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
     create: XOR<EmployeeCreateWithoutKpiReviewsInput, EmployeeUncheckedCreateWithoutKpiReviewsInput>
   }
 
@@ -36001,7 +38764,7 @@ export namespace Prisma {
   }
 
   export type KpiPeriodCreateOrConnectWithoutEvaluationsInput = {
-    where: KpiPeriodWhereUniqueInpu
+    where: KpiPeriodWhereUniqueInput
     create: XOR<KpiPeriodCreateWithoutEvaluationsInput, KpiPeriodUncheckedCreateWithoutEvaluationsInput>
   }
 
@@ -36016,7 +38779,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    domainWeights?: KpiDomainWeightCreateNestedManyWithoutRuleSetInpu
+    domainWeights?: KpiDomainWeightCreateNestedManyWithoutRuleSetInput
   }
 
   export type KpiRuleSetUncheckedCreateWithoutEvaluationsInput = {
@@ -36031,11 +38794,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    domainWeights?: KpiDomainWeightUncheckedCreateNestedManyWithoutRuleSetInpu
+    domainWeights?: KpiDomainWeightUncheckedCreateNestedManyWithoutRuleSetInput
   }
 
   export type KpiRuleSetCreateOrConnectWithoutEvaluationsInput = {
-    where: KpiRuleSetWhereUniqueInpu
+    where: KpiRuleSetWhereUniqueInput
     create: XOR<KpiRuleSetCreateWithoutEvaluationsInput, KpiRuleSetUncheckedCreateWithoutEvaluationsInput>
   }
 
@@ -36060,7 +38823,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    task?: TaskCreateNestedOneWithoutKpiEvaluationsInpu
+    task?: TaskCreateNestedOneWithoutKpiEvaluationsInput
   }
 
   export type KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput = {
@@ -36089,7 +38852,7 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskCreateOrConnectWithoutEvaluationInput = {
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     create: XOR<KpiEvaluationTaskCreateWithoutEvaluationInput, KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput>
   }
 
@@ -36110,7 +38873,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    template: KpiFormTemplateCreateNestedOneWithoutDocumentsInpu
+    template: KpiFormTemplateCreateNestedOneWithoutDocumentsInput
   }
 
   export type KpiFormDocumentUncheckedCreateWithoutEvaluationInput = {
@@ -36130,7 +38893,7 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentCreateOrConnectWithoutEvaluationInput = {
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     create: XOR<KpiFormDocumentCreateWithoutEvaluationInput, KpiFormDocumentUncheckedCreateWithoutEvaluationInput>
   }
 
@@ -36142,11 +38905,11 @@ export namespace Prisma {
   export type EmployeeUpsertWithoutKpiEvaluationsInput = {
     update: XOR<EmployeeUpdateWithoutKpiEvaluationsInput, EmployeeUncheckedUpdateWithoutKpiEvaluationsInput>
     create: XOR<EmployeeCreateWithoutKpiEvaluationsInput, EmployeeUncheckedCreateWithoutKpiEvaluationsInput>
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
   }
 
   export type EmployeeUpdateToOneWithWhereWithoutKpiEvaluationsInput = {
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     data: XOR<EmployeeUpdateWithoutKpiEvaluationsInput, EmployeeUncheckedUpdateWithoutKpiEvaluationsInput>
   }
 
@@ -36176,8 +38939,8 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInpu
-    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInpu
+    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
+    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutKpiEvaluationsInput = {
@@ -36207,18 +38970,18 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInpu
-    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInpu
+    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
+    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUpsertWithoutKpiReviewsInput = {
     update: XOR<EmployeeUpdateWithoutKpiReviewsInput, EmployeeUncheckedUpdateWithoutKpiReviewsInput>
     create: XOR<EmployeeCreateWithoutKpiReviewsInput, EmployeeUncheckedCreateWithoutKpiReviewsInput>
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
   }
 
   export type EmployeeUpdateToOneWithWhereWithoutKpiReviewsInput = {
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     data: XOR<EmployeeUpdateWithoutKpiReviewsInput, EmployeeUncheckedUpdateWithoutKpiReviewsInput>
   }
 
@@ -36248,8 +39011,8 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInpu
-    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInpu
+    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
+    taskParticipants?: TaskParticipantUpdateManyWithoutEmployeeNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutKpiReviewsInput = {
@@ -36279,18 +39042,18 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInpu
-    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInpu
+    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
+    taskParticipants?: TaskParticipantUncheckedUpdateManyWithoutEmployeeNestedInput
   }
 
   export type KpiPeriodUpsertWithoutEvaluationsInput = {
     update: XOR<KpiPeriodUpdateWithoutEvaluationsInput, KpiPeriodUncheckedUpdateWithoutEvaluationsInput>
     create: XOR<KpiPeriodCreateWithoutEvaluationsInput, KpiPeriodUncheckedCreateWithoutEvaluationsInput>
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
   }
 
   export type KpiPeriodUpdateToOneWithWhereWithoutEvaluationsInput = {
-    where?: KpiPeriodWhereInpu
+    where?: KpiPeriodWhereInput
     data: XOR<KpiPeriodUpdateWithoutEvaluationsInput, KpiPeriodUncheckedUpdateWithoutEvaluationsInput>
   }
 
@@ -36316,11 +39079,11 @@ export namespace Prisma {
   export type KpiRuleSetUpsertWithoutEvaluationsInput = {
     update: XOR<KpiRuleSetUpdateWithoutEvaluationsInput, KpiRuleSetUncheckedUpdateWithoutEvaluationsInput>
     create: XOR<KpiRuleSetCreateWithoutEvaluationsInput, KpiRuleSetUncheckedCreateWithoutEvaluationsInput>
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
   }
 
   export type KpiRuleSetUpdateToOneWithWhereWithoutEvaluationsInput = {
-    where?: KpiRuleSetWhereInpu
+    where?: KpiRuleSetWhereInput
     data: XOR<KpiRuleSetUpdateWithoutEvaluationsInput, KpiRuleSetUncheckedUpdateWithoutEvaluationsInput>
   }
 
@@ -36335,7 +39098,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    domainWeights?: KpiDomainWeightUpdateManyWithoutRuleSetNestedInpu
+    domainWeights?: KpiDomainWeightUpdateManyWithoutRuleSetNestedInput
   }
 
   export type KpiRuleSetUncheckedUpdateWithoutEvaluationsInput = {
@@ -36350,22 +39113,22 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    domainWeights?: KpiDomainWeightUncheckedUpdateManyWithoutRuleSetNestedInpu
+    domainWeights?: KpiDomainWeightUncheckedUpdateManyWithoutRuleSetNestedInput
   }
 
   export type KpiEvaluationTaskUpsertWithWhereUniqueWithoutEvaluationInput = {
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     update: XOR<KpiEvaluationTaskUpdateWithoutEvaluationInput, KpiEvaluationTaskUncheckedUpdateWithoutEvaluationInput>
     create: XOR<KpiEvaluationTaskCreateWithoutEvaluationInput, KpiEvaluationTaskUncheckedCreateWithoutEvaluationInput>
   }
 
   export type KpiEvaluationTaskUpdateWithWhereUniqueWithoutEvaluationInput = {
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     data: XOR<KpiEvaluationTaskUpdateWithoutEvaluationInput, KpiEvaluationTaskUncheckedUpdateWithoutEvaluationInput>
   }
 
   export type KpiEvaluationTaskUpdateManyWithWhereWithoutEvaluationInput = {
-    where: KpiEvaluationTaskScalarWhereInpu
+    where: KpiEvaluationTaskScalarWhereInput
     data: XOR<KpiEvaluationTaskUpdateManyMutationInput, KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationInput>
   }
 
@@ -36399,18 +39162,18 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpsertWithWhereUniqueWithoutEvaluationInput = {
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     update: XOR<KpiFormDocumentUpdateWithoutEvaluationInput, KpiFormDocumentUncheckedUpdateWithoutEvaluationInput>
     create: XOR<KpiFormDocumentCreateWithoutEvaluationInput, KpiFormDocumentUncheckedCreateWithoutEvaluationInput>
   }
 
   export type KpiFormDocumentUpdateWithWhereUniqueWithoutEvaluationInput = {
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     data: XOR<KpiFormDocumentUpdateWithoutEvaluationInput, KpiFormDocumentUncheckedUpdateWithoutEvaluationInput>
   }
 
   export type KpiFormDocumentUpdateManyWithWhereWithoutEvaluationInput = {
-    where: KpiFormDocumentScalarWhereInpu
+    where: KpiFormDocumentScalarWhereInput
     data: XOR<KpiFormDocumentUpdateManyMutationInput, KpiFormDocumentUncheckedUpdateManyWithoutEvaluationInput>
   }
 
@@ -36458,14 +39221,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutKpiEvaluationsInput = {
@@ -36494,17 +39257,17 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutKpiEvaluationsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutKpiEvaluationsInput, TaskUncheckedCreateWithoutKpiEvaluationsInput>
   }
 
@@ -36520,11 +39283,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInpu
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInpu
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInpu
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInpu
-    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInpu
+    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
+    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
+    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
+    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
+    documents?: KpiFormDocumentCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateWithoutTasksInput = {
@@ -36544,22 +39307,22 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInpu
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationCreateOrConnectWithoutTasksInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     create: XOR<KpiEvaluationCreateWithoutTasksInput, KpiEvaluationUncheckedCreateWithoutTasksInput>
   }
 
   export type TaskUpsertWithoutKpiEvaluationsInput = {
     update: XOR<TaskUpdateWithoutKpiEvaluationsInput, TaskUncheckedUpdateWithoutKpiEvaluationsInput>
     create: XOR<TaskCreateWithoutKpiEvaluationsInput, TaskUncheckedCreateWithoutKpiEvaluationsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutKpiEvaluationsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutKpiEvaluationsInput, TaskUncheckedUpdateWithoutKpiEvaluationsInput>
   }
 
@@ -36587,14 +39350,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutKpiEvaluationsInput = {
@@ -36623,23 +39386,23 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type KpiEvaluationUpsertWithoutTasksInput = {
     update: XOR<KpiEvaluationUpdateWithoutTasksInput, KpiEvaluationUncheckedUpdateWithoutTasksInput>
     create: XOR<KpiEvaluationCreateWithoutTasksInput, KpiEvaluationUncheckedCreateWithoutTasksInput>
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
   }
 
   export type KpiEvaluationUpdateToOneWithWhereWithoutTasksInput = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     data: XOR<KpiEvaluationUpdateWithoutTasksInput, KpiEvaluationUncheckedUpdateWithoutTasksInput>
   }
 
@@ -36655,11 +39418,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInpu
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInpu
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInpu
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInpu
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
+    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
+    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
+    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
+    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateWithoutTasksInput = {
@@ -36679,7 +39442,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInpu
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiFormDocumentCreateWithoutTemplateInput = {
@@ -36694,7 +39457,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    evaluation: KpiEvaluationCreateNestedOneWithoutDocumentsInpu
+    evaluation: KpiEvaluationCreateNestedOneWithoutDocumentsInput
   }
 
   export type KpiFormDocumentUncheckedCreateWithoutTemplateInput = {
@@ -36714,7 +39477,7 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentCreateOrConnectWithoutTemplateInput = {
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     create: XOR<KpiFormDocumentCreateWithoutTemplateInput, KpiFormDocumentUncheckedCreateWithoutTemplateInput>
   }
 
@@ -36757,7 +39520,7 @@ export namespace Prisma {
   }
 
   export type KpiFormTemplateBindingCreateOrConnectWithoutTemplateInput = {
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
     create: XOR<KpiFormTemplateBindingCreateWithoutTemplateInput, KpiFormTemplateBindingUncheckedCreateWithoutTemplateInput>
   }
 
@@ -36788,7 +39551,7 @@ export namespace Prisma {
   }
 
   export type KpiFormTemplateVersionCreateOrConnectWithoutTemplateInput = {
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
     create: XOR<KpiFormTemplateVersionCreateWithoutTemplateInput, KpiFormTemplateVersionUncheckedCreateWithoutTemplateInput>
   }
 
@@ -36798,34 +39561,34 @@ export namespace Prisma {
   }
 
   export type KpiFormDocumentUpsertWithWhereUniqueWithoutTemplateInput = {
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     update: XOR<KpiFormDocumentUpdateWithoutTemplateInput, KpiFormDocumentUncheckedUpdateWithoutTemplateInput>
     create: XOR<KpiFormDocumentCreateWithoutTemplateInput, KpiFormDocumentUncheckedCreateWithoutTemplateInput>
   }
 
   export type KpiFormDocumentUpdateWithWhereUniqueWithoutTemplateInput = {
-    where: KpiFormDocumentWhereUniqueInpu
+    where: KpiFormDocumentWhereUniqueInput
     data: XOR<KpiFormDocumentUpdateWithoutTemplateInput, KpiFormDocumentUncheckedUpdateWithoutTemplateInput>
   }
 
   export type KpiFormDocumentUpdateManyWithWhereWithoutTemplateInput = {
-    where: KpiFormDocumentScalarWhereInpu
+    where: KpiFormDocumentScalarWhereInput
     data: XOR<KpiFormDocumentUpdateManyMutationInput, KpiFormDocumentUncheckedUpdateManyWithoutTemplateInput>
   }
 
   export type KpiFormTemplateBindingUpsertWithWhereUniqueWithoutTemplateInput = {
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
     update: XOR<KpiFormTemplateBindingUpdateWithoutTemplateInput, KpiFormTemplateBindingUncheckedUpdateWithoutTemplateInput>
     create: XOR<KpiFormTemplateBindingCreateWithoutTemplateInput, KpiFormTemplateBindingUncheckedCreateWithoutTemplateInput>
   }
 
   export type KpiFormTemplateBindingUpdateWithWhereUniqueWithoutTemplateInput = {
-    where: KpiFormTemplateBindingWhereUniqueInpu
+    where: KpiFormTemplateBindingWhereUniqueInput
     data: XOR<KpiFormTemplateBindingUpdateWithoutTemplateInput, KpiFormTemplateBindingUncheckedUpdateWithoutTemplateInput>
   }
 
   export type KpiFormTemplateBindingUpdateManyWithWhereWithoutTemplateInput = {
-    where: KpiFormTemplateBindingScalarWhereInpu
+    where: KpiFormTemplateBindingScalarWhereInput
     data: XOR<KpiFormTemplateBindingUpdateManyMutationInput, KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateInput>
   }
 
@@ -36851,18 +39614,18 @@ export namespace Prisma {
   }
 
   export type KpiFormTemplateVersionUpsertWithWhereUniqueWithoutTemplateInput = {
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
     update: XOR<KpiFormTemplateVersionUpdateWithoutTemplateInput, KpiFormTemplateVersionUncheckedUpdateWithoutTemplateInput>
     create: XOR<KpiFormTemplateVersionCreateWithoutTemplateInput, KpiFormTemplateVersionUncheckedCreateWithoutTemplateInput>
   }
 
   export type KpiFormTemplateVersionUpdateWithWhereUniqueWithoutTemplateInput = {
-    where: KpiFormTemplateVersionWhereUniqueInpu
+    where: KpiFormTemplateVersionWhereUniqueInput
     data: XOR<KpiFormTemplateVersionUpdateWithoutTemplateInput, KpiFormTemplateVersionUncheckedUpdateWithoutTemplateInput>
   }
 
   export type KpiFormTemplateVersionUpdateManyWithWhereWithoutTemplateInput = {
-    where: KpiFormTemplateVersionScalarWhereInpu
+    where: KpiFormTemplateVersionScalarWhereInput
     data: XOR<KpiFormTemplateVersionUpdateManyMutationInput, KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateInput>
   }
 
@@ -36895,8 +39658,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInpu
-    bindings?: KpiFormTemplateBindingCreateNestedManyWithoutTemplateInpu
+    documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInput
+    bindings?: KpiFormTemplateBindingCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateUncheckedCreateWithoutVersionsInput = {
@@ -36913,23 +39676,23 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInpu
-    bindings?: KpiFormTemplateBindingUncheckedCreateNestedManyWithoutTemplateInpu
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInput
+    bindings?: KpiFormTemplateBindingUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateCreateOrConnectWithoutVersionsInput = {
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
     create: XOR<KpiFormTemplateCreateWithoutVersionsInput, KpiFormTemplateUncheckedCreateWithoutVersionsInput>
   }
 
   export type KpiFormTemplateUpsertWithoutVersionsInput = {
     update: XOR<KpiFormTemplateUpdateWithoutVersionsInput, KpiFormTemplateUncheckedUpdateWithoutVersionsInput>
     create: XOR<KpiFormTemplateCreateWithoutVersionsInput, KpiFormTemplateUncheckedCreateWithoutVersionsInput>
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
   }
 
   export type KpiFormTemplateUpdateToOneWithWhereWithoutVersionsInput = {
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     data: XOR<KpiFormTemplateUpdateWithoutVersionsInput, KpiFormTemplateUncheckedUpdateWithoutVersionsInput>
   }
 
@@ -36947,8 +39710,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInpu
-    bindings?: KpiFormTemplateBindingUpdateManyWithoutTemplateNestedInpu
+    documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInput
+    bindings?: KpiFormTemplateBindingUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateUncheckedUpdateWithoutVersionsInput = {
@@ -36965,8 +39728,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInpu
-    bindings?: KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateNestedInpu
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInput
+    bindings?: KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateCreateWithoutBindingsInput = {
@@ -36983,8 +39746,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInpu
-    versions?: KpiFormTemplateVersionCreateNestedManyWithoutTemplateInpu
+    documents?: KpiFormDocumentCreateNestedManyWithoutTemplateInput
+    versions?: KpiFormTemplateVersionCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateUncheckedCreateWithoutBindingsInput = {
@@ -37001,23 +39764,23 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInpu
-    versions?: KpiFormTemplateVersionUncheckedCreateNestedManyWithoutTemplateInpu
+    documents?: KpiFormDocumentUncheckedCreateNestedManyWithoutTemplateInput
+    versions?: KpiFormTemplateVersionUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateCreateOrConnectWithoutBindingsInput = {
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
     create: XOR<KpiFormTemplateCreateWithoutBindingsInput, KpiFormTemplateUncheckedCreateWithoutBindingsInput>
   }
 
   export type KpiFormTemplateUpsertWithoutBindingsInput = {
     update: XOR<KpiFormTemplateUpdateWithoutBindingsInput, KpiFormTemplateUncheckedUpdateWithoutBindingsInput>
     create: XOR<KpiFormTemplateCreateWithoutBindingsInput, KpiFormTemplateUncheckedCreateWithoutBindingsInput>
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
   }
 
   export type KpiFormTemplateUpdateToOneWithWhereWithoutBindingsInput = {
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     data: XOR<KpiFormTemplateUpdateWithoutBindingsInput, KpiFormTemplateUncheckedUpdateWithoutBindingsInput>
   }
 
@@ -37035,8 +39798,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInpu
-    versions?: KpiFormTemplateVersionUpdateManyWithoutTemplateNestedInpu
+    documents?: KpiFormDocumentUpdateManyWithoutTemplateNestedInput
+    versions?: KpiFormTemplateVersionUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateUncheckedUpdateWithoutBindingsInput = {
@@ -37053,8 +39816,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInpu
-    versions?: KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateNestedInpu
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutTemplateNestedInput
+    versions?: KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateCreateWithoutDocumentsInput = {
@@ -37071,8 +39834,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    bindings?: KpiFormTemplateBindingCreateNestedManyWithoutTemplateInpu
-    versions?: KpiFormTemplateVersionCreateNestedManyWithoutTemplateInpu
+    bindings?: KpiFormTemplateBindingCreateNestedManyWithoutTemplateInput
+    versions?: KpiFormTemplateVersionCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateUncheckedCreateWithoutDocumentsInput = {
@@ -37089,12 +39852,12 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    bindings?: KpiFormTemplateBindingUncheckedCreateNestedManyWithoutTemplateInpu
-    versions?: KpiFormTemplateVersionUncheckedCreateNestedManyWithoutTemplateInpu
+    bindings?: KpiFormTemplateBindingUncheckedCreateNestedManyWithoutTemplateInput
+    versions?: KpiFormTemplateVersionUncheckedCreateNestedManyWithoutTemplateInput
   }
 
   export type KpiFormTemplateCreateOrConnectWithoutDocumentsInput = {
-    where: KpiFormTemplateWhereUniqueInpu
+    where: KpiFormTemplateWhereUniqueInput
     create: XOR<KpiFormTemplateCreateWithoutDocumentsInput, KpiFormTemplateUncheckedCreateWithoutDocumentsInput>
   }
 
@@ -37110,11 +39873,11 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInpu
-    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInpu
-    period: KpiPeriodCreateNestedOneWithoutEvaluationsInpu
-    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInpu
-    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInpu
+    employee: EmployeeCreateNestedOneWithoutKpiEvaluationsInput
+    reviewer?: EmployeeCreateNestedOneWithoutKpiReviewsInput
+    period: KpiPeriodCreateNestedOneWithoutEvaluationsInput
+    ruleSet?: KpiRuleSetCreateNestedOneWithoutEvaluationsInput
+    tasks?: KpiEvaluationTaskCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationUncheckedCreateWithoutDocumentsInput = {
@@ -37134,22 +39897,22 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInpu
+    tasks?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutEvaluationInput
   }
 
   export type KpiEvaluationCreateOrConnectWithoutDocumentsInput = {
-    where: KpiEvaluationWhereUniqueInpu
+    where: KpiEvaluationWhereUniqueInput
     create: XOR<KpiEvaluationCreateWithoutDocumentsInput, KpiEvaluationUncheckedCreateWithoutDocumentsInput>
   }
 
   export type KpiFormTemplateUpsertWithoutDocumentsInput = {
     update: XOR<KpiFormTemplateUpdateWithoutDocumentsInput, KpiFormTemplateUncheckedUpdateWithoutDocumentsInput>
     create: XOR<KpiFormTemplateCreateWithoutDocumentsInput, KpiFormTemplateUncheckedCreateWithoutDocumentsInput>
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
   }
 
   export type KpiFormTemplateUpdateToOneWithWhereWithoutDocumentsInput = {
-    where?: KpiFormTemplateWhereInpu
+    where?: KpiFormTemplateWhereInput
     data: XOR<KpiFormTemplateUpdateWithoutDocumentsInput, KpiFormTemplateUncheckedUpdateWithoutDocumentsInput>
   }
 
@@ -37167,8 +39930,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    bindings?: KpiFormTemplateBindingUpdateManyWithoutTemplateNestedInpu
-    versions?: KpiFormTemplateVersionUpdateManyWithoutTemplateNestedInpu
+    bindings?: KpiFormTemplateBindingUpdateManyWithoutTemplateNestedInput
+    versions?: KpiFormTemplateVersionUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiFormTemplateUncheckedUpdateWithoutDocumentsInput = {
@@ -37185,18 +39948,18 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    bindings?: KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateNestedInpu
-    versions?: KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateNestedInpu
+    bindings?: KpiFormTemplateBindingUncheckedUpdateManyWithoutTemplateNestedInput
+    versions?: KpiFormTemplateVersionUncheckedUpdateManyWithoutTemplateNestedInput
   }
 
   export type KpiEvaluationUpsertWithoutDocumentsInput = {
     update: XOR<KpiEvaluationUpdateWithoutDocumentsInput, KpiEvaluationUncheckedUpdateWithoutDocumentsInput>
     create: XOR<KpiEvaluationCreateWithoutDocumentsInput, KpiEvaluationUncheckedCreateWithoutDocumentsInput>
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
   }
 
   export type KpiEvaluationUpdateToOneWithWhereWithoutDocumentsInput = {
-    where?: KpiEvaluationWhereInpu
+    where?: KpiEvaluationWhereInput
     data: XOR<KpiEvaluationUpdateWithoutDocumentsInput, KpiEvaluationUncheckedUpdateWithoutDocumentsInput>
   }
 
@@ -37212,11 +39975,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInpu
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInpu
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInpu
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInpu
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
+    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
+    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
+    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
+    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateWithoutDocumentsInput = {
@@ -37236,7 +39999,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInpu
+    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type TaskCreateWithoutPlanInput = {
@@ -37263,14 +40026,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutPlanInput = {
@@ -37298,18 +40061,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutPlanInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutPlanInput, TaskUncheckedCreateWithoutPlanInput>
   }
 
@@ -37319,18 +40082,18 @@ export namespace Prisma {
   }
 
   export type TaskUpsertWithWhereUniqueWithoutPlanInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     update: XOR<TaskUpdateWithoutPlanInput, TaskUncheckedUpdateWithoutPlanInput>
     create: XOR<TaskCreateWithoutPlanInput, TaskUncheckedCreateWithoutPlanInput>
   }
 
   export type TaskUpdateWithWhereUniqueWithoutPlanInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     data: XOR<TaskUpdateWithoutPlanInput, TaskUncheckedUpdateWithoutPlanInput>
   }
 
   export type TaskUpdateManyWithWhereWithoutPlanInput = {
-    where: TaskScalarWhereInpu
+    where: TaskScalarWhereInput
     data: XOR<TaskUpdateManyMutationInput, TaskUncheckedUpdateManyWithoutPlanInput>
   }
 
@@ -37399,7 +40162,7 @@ export namespace Prisma {
   }
 
   export type MasterPlanCreateOrConnectWithoutTasksInput = {
-    where: MasterPlanWhereUniqueInpu
+    where: MasterPlanWhereUniqueInput
     create: XOR<MasterPlanCreateWithoutTasksInput, MasterPlanUncheckedCreateWithoutTasksInput>
   }
 
@@ -37424,7 +40187,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId?: string
-    evaluation: KpiEvaluationCreateNestedOneWithoutTasksInpu
+    evaluation: KpiEvaluationCreateNestedOneWithoutTasksInput
   }
 
   export type KpiEvaluationTaskUncheckedCreateWithoutTaskInput = {
@@ -37453,7 +40216,7 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskCreateOrConnectWithoutTaskInput = {
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     create: XOR<KpiEvaluationTaskCreateWithoutTaskInput, KpiEvaluationTaskUncheckedCreateWithoutTaskInput>
   }
 
@@ -37470,7 +40233,7 @@ export namespace Prisma {
     reason?: string | null
     attendedAt?: Date | string | null
     organizationId?: string
-    employee: EmployeeCreateNestedOneWithoutTaskParticipantsInpu
+    employee: EmployeeCreateNestedOneWithoutTaskParticipantsInput
   }
 
   export type TaskParticipantUncheckedCreateWithoutTaskInput = {
@@ -37485,7 +40248,7 @@ export namespace Prisma {
   }
 
   export type TaskParticipantCreateOrConnectWithoutTaskInput = {
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     create: XOR<TaskParticipantCreateWithoutTaskInput, TaskParticipantUncheckedCreateWithoutTaskInput>
   }
 
@@ -37512,7 +40275,7 @@ export namespace Prisma {
   }
 
   export type TaskAttachmentCreateOrConnectWithoutTaskInput = {
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
     create: XOR<TaskAttachmentCreateWithoutTaskInput, TaskAttachmentUncheckedCreateWithoutTaskInput>
   }
 
@@ -37541,7 +40304,7 @@ export namespace Prisma {
   }
 
   export type TaskHistoryCreateOrConnectWithoutTaskInput = {
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
     create: XOR<TaskHistoryCreateWithoutTaskInput, TaskHistoryUncheckedCreateWithoutTaskInput>
   }
 
@@ -37578,7 +40341,7 @@ export namespace Prisma {
   }
 
   export type TaskStepCreateOrConnectWithoutTaskInput = {
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
     create: XOR<TaskStepCreateWithoutTaskInput, TaskStepUncheckedCreateWithoutTaskInput>
   }
 
@@ -37590,7 +40353,7 @@ export namespace Prisma {
   export type TaskClosureCreateWithoutDescendantInput = {
     depth: number
     organizationId?: string
-    ancestor: TaskCreateNestedOneWithoutDescendantsInpu
+    ancestor: TaskCreateNestedOneWithoutDescendantsInput
   }
 
   export type TaskClosureUncheckedCreateWithoutDescendantInput = {
@@ -37600,7 +40363,7 @@ export namespace Prisma {
   }
 
   export type TaskClosureCreateOrConnectWithoutDescendantInput = {
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     create: XOR<TaskClosureCreateWithoutDescendantInput, TaskClosureUncheckedCreateWithoutDescendantInput>
   }
 
@@ -37612,7 +40375,7 @@ export namespace Prisma {
   export type TaskClosureCreateWithoutAncestorInput = {
     depth: number
     organizationId?: string
-    descendant: TaskCreateNestedOneWithoutAncestorsInpu
+    descendant: TaskCreateNestedOneWithoutAncestorsInput
   }
 
   export type TaskClosureUncheckedCreateWithoutAncestorInput = {
@@ -37622,7 +40385,7 @@ export namespace Prisma {
   }
 
   export type TaskClosureCreateOrConnectWithoutAncestorInput = {
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     create: XOR<TaskClosureCreateWithoutAncestorInput, TaskClosureUncheckedCreateWithoutAncestorInput>
   }
 
@@ -37645,7 +40408,7 @@ export namespace Prisma {
   }
 
   export type TaskNotificationLogCreateOrConnectWithoutTaskInput = {
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
     create: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput>
   }
 
@@ -37657,11 +40420,11 @@ export namespace Prisma {
   export type MasterPlanUpsertWithoutTasksInput = {
     update: XOR<MasterPlanUpdateWithoutTasksInput, MasterPlanUncheckedUpdateWithoutTasksInput>
     create: XOR<MasterPlanCreateWithoutTasksInput, MasterPlanUncheckedCreateWithoutTasksInput>
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
   }
 
   export type MasterPlanUpdateToOneWithWhereWithoutTasksInput = {
-    where?: MasterPlanWhereInpu
+    where?: MasterPlanWhereInput
     data: XOR<MasterPlanUpdateWithoutTasksInput, MasterPlanUncheckedUpdateWithoutTasksInput>
   }
 
@@ -37699,50 +40462,50 @@ export namespace Prisma {
   }
 
   export type KpiEvaluationTaskUpsertWithWhereUniqueWithoutTaskInput = {
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     update: XOR<KpiEvaluationTaskUpdateWithoutTaskInput, KpiEvaluationTaskUncheckedUpdateWithoutTaskInput>
     create: XOR<KpiEvaluationTaskCreateWithoutTaskInput, KpiEvaluationTaskUncheckedCreateWithoutTaskInput>
   }
 
   export type KpiEvaluationTaskUpdateWithWhereUniqueWithoutTaskInput = {
-    where: KpiEvaluationTaskWhereUniqueInpu
+    where: KpiEvaluationTaskWhereUniqueInput
     data: XOR<KpiEvaluationTaskUpdateWithoutTaskInput, KpiEvaluationTaskUncheckedUpdateWithoutTaskInput>
   }
 
   export type KpiEvaluationTaskUpdateManyWithWhereWithoutTaskInput = {
-    where: KpiEvaluationTaskScalarWhereInpu
+    where: KpiEvaluationTaskScalarWhereInput
     data: XOR<KpiEvaluationTaskUpdateManyMutationInput, KpiEvaluationTaskUncheckedUpdateManyWithoutTaskInput>
   }
 
   export type TaskParticipantUpsertWithWhereUniqueWithoutTaskInput = {
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     update: XOR<TaskParticipantUpdateWithoutTaskInput, TaskParticipantUncheckedUpdateWithoutTaskInput>
     create: XOR<TaskParticipantCreateWithoutTaskInput, TaskParticipantUncheckedCreateWithoutTaskInput>
   }
 
   export type TaskParticipantUpdateWithWhereUniqueWithoutTaskInput = {
-    where: TaskParticipantWhereUniqueInpu
+    where: TaskParticipantWhereUniqueInput
     data: XOR<TaskParticipantUpdateWithoutTaskInput, TaskParticipantUncheckedUpdateWithoutTaskInput>
   }
 
   export type TaskParticipantUpdateManyWithWhereWithoutTaskInput = {
-    where: TaskParticipantScalarWhereInpu
+    where: TaskParticipantScalarWhereInput
     data: XOR<TaskParticipantUpdateManyMutationInput, TaskParticipantUncheckedUpdateManyWithoutTaskInput>
   }
 
   export type TaskAttachmentUpsertWithWhereUniqueWithoutTaskInput = {
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
     update: XOR<TaskAttachmentUpdateWithoutTaskInput, TaskAttachmentUncheckedUpdateWithoutTaskInput>
     create: XOR<TaskAttachmentCreateWithoutTaskInput, TaskAttachmentUncheckedCreateWithoutTaskInput>
   }
 
   export type TaskAttachmentUpdateWithWhereUniqueWithoutTaskInput = {
-    where: TaskAttachmentWhereUniqueInpu
+    where: TaskAttachmentWhereUniqueInput
     data: XOR<TaskAttachmentUpdateWithoutTaskInput, TaskAttachmentUncheckedUpdateWithoutTaskInput>
   }
 
   export type TaskAttachmentUpdateManyWithWhereWithoutTaskInput = {
-    where: TaskAttachmentScalarWhereInpu
+    where: TaskAttachmentScalarWhereInput
     data: XOR<TaskAttachmentUpdateManyMutationInput, TaskAttachmentUncheckedUpdateManyWithoutTaskInput>
   }
 
@@ -37760,18 +40523,18 @@ export namespace Prisma {
   }
 
   export type TaskHistoryUpsertWithWhereUniqueWithoutTaskInput = {
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
     update: XOR<TaskHistoryUpdateWithoutTaskInput, TaskHistoryUncheckedUpdateWithoutTaskInput>
     create: XOR<TaskHistoryCreateWithoutTaskInput, TaskHistoryUncheckedCreateWithoutTaskInput>
   }
 
   export type TaskHistoryUpdateWithWhereUniqueWithoutTaskInput = {
-    where: TaskHistoryWhereUniqueInpu
+    where: TaskHistoryWhereUniqueInput
     data: XOR<TaskHistoryUpdateWithoutTaskInput, TaskHistoryUncheckedUpdateWithoutTaskInput>
   }
 
   export type TaskHistoryUpdateManyWithWhereWithoutTaskInput = {
-    where: TaskHistoryScalarWhereInpu
+    where: TaskHistoryScalarWhereInput
     data: XOR<TaskHistoryUpdateManyMutationInput, TaskHistoryUncheckedUpdateManyWithoutTaskInput>
   }
 
@@ -37790,18 +40553,18 @@ export namespace Prisma {
   }
 
   export type TaskStepUpsertWithWhereUniqueWithoutTaskInput = {
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
     update: XOR<TaskStepUpdateWithoutTaskInput, TaskStepUncheckedUpdateWithoutTaskInput>
     create: XOR<TaskStepCreateWithoutTaskInput, TaskStepUncheckedCreateWithoutTaskInput>
   }
 
   export type TaskStepUpdateWithWhereUniqueWithoutTaskInput = {
-    where: TaskStepWhereUniqueInpu
+    where: TaskStepWhereUniqueInput
     data: XOR<TaskStepUpdateWithoutTaskInput, TaskStepUncheckedUpdateWithoutTaskInput>
   }
 
   export type TaskStepUpdateManyWithWhereWithoutTaskInput = {
-    where: TaskStepScalarWhereInpu
+    where: TaskStepScalarWhereInput
     data: XOR<TaskStepUpdateManyMutationInput, TaskStepUncheckedUpdateManyWithoutTaskInput>
   }
 
@@ -37824,18 +40587,18 @@ export namespace Prisma {
   }
 
   export type TaskClosureUpsertWithWhereUniqueWithoutDescendantInput = {
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     update: XOR<TaskClosureUpdateWithoutDescendantInput, TaskClosureUncheckedUpdateWithoutDescendantInput>
     create: XOR<TaskClosureCreateWithoutDescendantInput, TaskClosureUncheckedCreateWithoutDescendantInput>
   }
 
   export type TaskClosureUpdateWithWhereUniqueWithoutDescendantInput = {
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     data: XOR<TaskClosureUpdateWithoutDescendantInput, TaskClosureUncheckedUpdateWithoutDescendantInput>
   }
 
   export type TaskClosureUpdateManyWithWhereWithoutDescendantInput = {
-    where: TaskClosureScalarWhereInpu
+    where: TaskClosureScalarWhereInput
     data: XOR<TaskClosureUpdateManyMutationInput, TaskClosureUncheckedUpdateManyWithoutDescendantInput>
   }
 
@@ -37850,34 +40613,34 @@ export namespace Prisma {
   }
 
   export type TaskClosureUpsertWithWhereUniqueWithoutAncestorInput = {
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     update: XOR<TaskClosureUpdateWithoutAncestorInput, TaskClosureUncheckedUpdateWithoutAncestorInput>
     create: XOR<TaskClosureCreateWithoutAncestorInput, TaskClosureUncheckedCreateWithoutAncestorInput>
   }
 
   export type TaskClosureUpdateWithWhereUniqueWithoutAncestorInput = {
-    where: TaskClosureWhereUniqueInpu
+    where: TaskClosureWhereUniqueInput
     data: XOR<TaskClosureUpdateWithoutAncestorInput, TaskClosureUncheckedUpdateWithoutAncestorInput>
   }
 
   export type TaskClosureUpdateManyWithWhereWithoutAncestorInput = {
-    where: TaskClosureScalarWhereInpu
+    where: TaskClosureScalarWhereInput
     data: XOR<TaskClosureUpdateManyMutationInput, TaskClosureUncheckedUpdateManyWithoutAncestorInput>
   }
 
   export type TaskNotificationLogUpsertWithWhereUniqueWithoutTaskInput = {
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
     update: XOR<TaskNotificationLogUpdateWithoutTaskInput, TaskNotificationLogUncheckedUpdateWithoutTaskInput>
     create: XOR<TaskNotificationLogCreateWithoutTaskInput, TaskNotificationLogUncheckedCreateWithoutTaskInput>
   }
 
   export type TaskNotificationLogUpdateWithWhereUniqueWithoutTaskInput = {
-    where: TaskNotificationLogWhereUniqueInpu
+    where: TaskNotificationLogWhereUniqueInput
     data: XOR<TaskNotificationLogUpdateWithoutTaskInput, TaskNotificationLogUncheckedUpdateWithoutTaskInput>
   }
 
   export type TaskNotificationLogUpdateManyWithWhereWithoutTaskInput = {
-    where: TaskNotificationLogScalarWhereInpu
+    where: TaskNotificationLogScalarWhereInput
     data: XOR<TaskNotificationLogUpdateManyMutationInput, TaskNotificationLogUncheckedUpdateManyWithoutTaskInput>
   }
 
@@ -37916,14 +40679,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutStepsInput = {
@@ -37952,28 +40715,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutStepsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutStepsInput, TaskUncheckedCreateWithoutStepsInput>
   }
 
   export type TaskUpsertWithoutStepsInput = {
     update: XOR<TaskUpdateWithoutStepsInput, TaskUncheckedUpdateWithoutStepsInput>
     create: XOR<TaskCreateWithoutStepsInput, TaskUncheckedCreateWithoutStepsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutStepsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutStepsInput, TaskUncheckedUpdateWithoutStepsInput>
   }
 
@@ -38001,14 +40764,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutStepsInput = {
@@ -38037,13 +40800,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutAttachmentsInput = {
@@ -38070,14 +40833,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutAttachmentsInput = {
@@ -38106,28 +40869,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutAttachmentsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutAttachmentsInput, TaskUncheckedCreateWithoutAttachmentsInput>
   }
 
   export type TaskUpsertWithoutAttachmentsInput = {
     update: XOR<TaskUpdateWithoutAttachmentsInput, TaskUncheckedUpdateWithoutAttachmentsInput>
     create: XOR<TaskCreateWithoutAttachmentsInput, TaskUncheckedCreateWithoutAttachmentsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutAttachmentsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutAttachmentsInput, TaskUncheckedUpdateWithoutAttachmentsInput>
   }
 
@@ -38155,14 +40918,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutAttachmentsInput = {
@@ -38191,13 +40954,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutParticipantsInput = {
@@ -38224,14 +40987,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutParticipantsInput = {
@@ -38260,17 +41023,17 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutParticipantsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutParticipantsInput, TaskUncheckedCreateWithoutParticipantsInput>
   }
 
@@ -38300,8 +41063,8 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInpu
-    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInpu
+    kpiEvaluations?: KpiEvaluationCreateNestedManyWithoutEmployeeInput
+    kpiReviews?: KpiEvaluationCreateNestedManyWithoutReviewerInput
   }
 
   export type EmployeeUncheckedCreateWithoutTaskParticipantsInput = {
@@ -38331,23 +41094,23 @@ export namespace Prisma {
     isDeleted?: boolean
     organizationId?: string
     departmentPath?: string | null
-    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInpu
-    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInpu
+    kpiEvaluations?: KpiEvaluationUncheckedCreateNestedManyWithoutEmployeeInput
+    kpiReviews?: KpiEvaluationUncheckedCreateNestedManyWithoutReviewerInput
   }
 
   export type EmployeeCreateOrConnectWithoutTaskParticipantsInput = {
-    where: EmployeeWhereUniqueInpu
+    where: EmployeeWhereUniqueInput
     create: XOR<EmployeeCreateWithoutTaskParticipantsInput, EmployeeUncheckedCreateWithoutTaskParticipantsInput>
   }
 
   export type TaskUpsertWithoutParticipantsInput = {
     update: XOR<TaskUpdateWithoutParticipantsInput, TaskUncheckedUpdateWithoutParticipantsInput>
     create: XOR<TaskCreateWithoutParticipantsInput, TaskUncheckedCreateWithoutParticipantsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutParticipantsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutParticipantsInput, TaskUncheckedUpdateWithoutParticipantsInput>
   }
 
@@ -38375,14 +41138,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutParticipantsInput = {
@@ -38411,23 +41174,23 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type EmployeeUpsertWithoutTaskParticipantsInput = {
     update: XOR<EmployeeUpdateWithoutTaskParticipantsInput, EmployeeUncheckedUpdateWithoutTaskParticipantsInput>
     create: XOR<EmployeeCreateWithoutTaskParticipantsInput, EmployeeUncheckedCreateWithoutTaskParticipantsInput>
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
   }
 
   export type EmployeeUpdateToOneWithWhereWithoutTaskParticipantsInput = {
-    where?: EmployeeWhereInpu
+    where?: EmployeeWhereInput
     data: XOR<EmployeeUpdateWithoutTaskParticipantsInput, EmployeeUncheckedUpdateWithoutTaskParticipantsInput>
   }
 
@@ -38457,8 +41220,8 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInpu
-    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInpu
+    kpiEvaluations?: KpiEvaluationUpdateManyWithoutEmployeeNestedInput
+    kpiReviews?: KpiEvaluationUpdateManyWithoutReviewerNestedInput
   }
 
   export type EmployeeUncheckedUpdateWithoutTaskParticipantsInput = {
@@ -38488,8 +41251,8 @@ export namespace Prisma {
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
     departmentPath?: NullableStringFieldUpdateOperationsInput | string | null
-    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInpu
-    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInpu
+    kpiEvaluations?: KpiEvaluationUncheckedUpdateManyWithoutEmployeeNestedInput
+    kpiReviews?: KpiEvaluationUncheckedUpdateManyWithoutReviewerNestedInput
   }
 
   export type TaskCreateWithoutDescendantsInput = {
@@ -38516,14 +41279,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutDescendantsInput = {
@@ -38552,17 +41315,17 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutDescendantsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutDescendantsInput, TaskUncheckedCreateWithoutDescendantsInput>
   }
 
@@ -38590,14 +41353,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutAncestorsInput = {
@@ -38626,28 +41389,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutAncestorsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutAncestorsInput, TaskUncheckedCreateWithoutAncestorsInput>
   }
 
   export type TaskUpsertWithoutDescendantsInput = {
     update: XOR<TaskUpdateWithoutDescendantsInput, TaskUncheckedUpdateWithoutDescendantsInput>
     create: XOR<TaskCreateWithoutDescendantsInput, TaskUncheckedCreateWithoutDescendantsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutDescendantsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutDescendantsInput, TaskUncheckedUpdateWithoutDescendantsInput>
   }
 
@@ -38675,14 +41438,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutDescendantsInput = {
@@ -38711,23 +41474,23 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUpsertWithoutAncestorsInput = {
     update: XOR<TaskUpdateWithoutAncestorsInput, TaskUncheckedUpdateWithoutAncestorsInput>
     create: XOR<TaskCreateWithoutAncestorsInput, TaskUncheckedCreateWithoutAncestorsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutAncestorsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutAncestorsInput, TaskUncheckedUpdateWithoutAncestorsInput>
   }
 
@@ -38755,14 +41518,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutAncestorsInput = {
@@ -38791,13 +41554,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutHistoriesInput = {
@@ -38824,14 +41587,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutHistoriesInput = {
@@ -38860,28 +41623,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
-    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
+    notificationLogs?: TaskNotificationLogUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutHistoriesInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutHistoriesInput, TaskUncheckedCreateWithoutHistoriesInput>
   }
 
   export type TaskUpsertWithoutHistoriesInput = {
     update: XOR<TaskUpdateWithoutHistoriesInput, TaskUncheckedUpdateWithoutHistoriesInput>
     create: XOR<TaskCreateWithoutHistoriesInput, TaskUncheckedCreateWithoutHistoriesInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutHistoriesInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutHistoriesInput, TaskUncheckedUpdateWithoutHistoriesInput>
   }
 
@@ -38909,14 +41672,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutHistoriesInput = {
@@ -38945,13 +41708,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutNotificationLogsInput = {
@@ -38978,14 +41741,14 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    plan?: MasterPlanCreateNestedOneWithoutTasksInpu
-    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureCreateNestedManyWithoutAncestorInpu
+    plan?: MasterPlanCreateNestedOneWithoutTasksInput
+    kpiEvaluations?: KpiEvaluationTaskCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryCreateNestedManyWithoutTaskInput
+    steps?: TaskStepCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureCreateNestedManyWithoutAncestorInput
   }
 
   export type TaskUncheckedCreateWithoutNotificationLogsInput = {
@@ -39014,28 +41777,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     isDeleted?: boolean
     organizationId?: string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInpu
-    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInpu
-    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInpu
-    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInpu
-    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInpu
-    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInpu
-    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedCreateNestedManyWithoutTaskInput
+    participants?: TaskParticipantUncheckedCreateNestedManyWithoutTaskInput
+    attachments?: TaskAttachmentUncheckedCreateNestedManyWithoutTaskInput
+    histories?: TaskHistoryUncheckedCreateNestedManyWithoutTaskInput
+    steps?: TaskStepUncheckedCreateNestedManyWithoutTaskInput
+    ancestors?: TaskClosureUncheckedCreateNestedManyWithoutDescendantInput
+    descendants?: TaskClosureUncheckedCreateNestedManyWithoutAncestorInput
   }
 
   export type TaskCreateOrConnectWithoutNotificationLogsInput = {
-    where: TaskWhereUniqueInpu
+    where: TaskWhereUniqueInput
     create: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
   }
 
   export type TaskUpsertWithoutNotificationLogsInput = {
     update: XOR<TaskUpdateWithoutNotificationLogsInput, TaskUncheckedUpdateWithoutNotificationLogsInput>
     create: XOR<TaskCreateWithoutNotificationLogsInput, TaskUncheckedCreateWithoutNotificationLogsInput>
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
   }
 
   export type TaskUpdateToOneWithWhereWithoutNotificationLogsInput = {
-    where?: TaskWhereInpu
+    where?: TaskWhereInput
     data: XOR<TaskUpdateWithoutNotificationLogsInput, TaskUncheckedUpdateWithoutNotificationLogsInput>
   }
 
@@ -39063,14 +41826,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    plan?: MasterPlanUpdateOneWithoutTasksNestedInpu
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
+    plan?: MasterPlanUpdateOneWithoutTasksNestedInput
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutNotificationLogsInput = {
@@ -39099,13 +41862,13 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
   }
 
   export type KpiEvaluationCreateManyEmployeeInput = {
@@ -39167,11 +41930,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInpu
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInpu
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInpu
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInpu
+    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
+    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
+    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
+    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateWithoutEmployeeInput = {
@@ -39190,8 +41953,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInpu
+    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateManyWithoutEmployeeInput = {
@@ -39224,11 +41987,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInpu
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInpu
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInpu
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
+    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
+    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
+    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateWithoutReviewerInput = {
@@ -39247,8 +42010,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInpu
+    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateManyWithoutReviewerInput = {
@@ -39277,7 +42040,7 @@ export namespace Prisma {
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneRequiredWithoutParticipantsNestedInpu
+    task?: TaskUpdateOneRequiredWithoutParticipantsNestedInput
   }
 
   export type TaskParticipantUncheckedUpdateWithoutEmployeeInput = {
@@ -39371,11 +42134,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInpu
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInpu
-    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInpu
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
+    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
+    period?: KpiPeriodUpdateOneRequiredWithoutEvaluationsNestedInput
+    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateWithoutRuleSetInput = {
@@ -39394,8 +42157,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInpu
+    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateManyWithoutRuleSetInput = {
@@ -39414,6 +42177,37 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type KpiFormulaConfigVersionCreateManyConfigInput = {
+    id?: number
+    version: number
+    settings: JsonNullValueInput | InputJsonValue
+    changedBy?: string | null
+    createdAt?: Date | string
+  }
+
+  export type KpiFormulaConfigVersionUpdateWithoutConfigInput = {
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigVersionUncheckedUpdateWithoutConfigInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KpiFormulaConfigVersionUncheckedUpdateManyWithoutConfigInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    version?: IntFieldUpdateOperationsInput | number
+    settings?: JsonNullValueInput | InputJsonValue
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type KpiEvaluationCreateManyPeriodInput = {
@@ -39446,11 +42240,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInpu
-    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInpu
-    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInpu
-    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutKpiEvaluationsNestedInput
+    reviewer?: EmployeeUpdateOneWithoutKpiReviewsNestedInput
+    ruleSet?: KpiRuleSetUpdateOneWithoutEvaluationsNestedInput
+    tasks?: KpiEvaluationTaskUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateWithoutPeriodInput = {
@@ -39469,8 +42263,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInpu
-    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInpu
+    tasks?: KpiEvaluationTaskUncheckedUpdateManyWithoutEvaluationNestedInput
+    documents?: KpiFormDocumentUncheckedUpdateManyWithoutEvaluationNestedInput
   }
 
   export type KpiEvaluationUncheckedUpdateManyWithoutPeriodInput = {
@@ -39553,7 +42347,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    task?: TaskUpdateOneWithoutKpiEvaluationsNestedInpu
+    task?: TaskUpdateOneWithoutKpiEvaluationsNestedInput
   }
 
   export type KpiEvaluationTaskUncheckedUpdateWithoutEvaluationInput = {
@@ -39618,7 +42412,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    template?: KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInpu
+    template?: KpiFormTemplateUpdateOneRequiredWithoutDocumentsNestedInput
   }
 
   export type KpiFormDocumentUncheckedUpdateWithoutEvaluationInput = {
@@ -39709,7 +42503,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    evaluation?: KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInpu
+    evaluation?: KpiEvaluationUpdateOneRequiredWithoutDocumentsNestedInput
   }
 
   export type KpiFormDocumentUncheckedUpdateWithoutTemplateInput = {
@@ -39877,14 +42671,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutPlanInput = {
@@ -39912,14 +42706,14 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInpu
-    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInpu
-    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInpu
-    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInpu
-    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInpu
-    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInpu
-    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInpu
-    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInpu
+    kpiEvaluations?: KpiEvaluationTaskUncheckedUpdateManyWithoutTaskNestedInput
+    participants?: TaskParticipantUncheckedUpdateManyWithoutTaskNestedInput
+    attachments?: TaskAttachmentUncheckedUpdateManyWithoutTaskNestedInput
+    histories?: TaskHistoryUncheckedUpdateManyWithoutTaskNestedInput
+    steps?: TaskStepUncheckedUpdateManyWithoutTaskNestedInput
+    ancestors?: TaskClosureUncheckedUpdateManyWithoutDescendantNestedInput
+    descendants?: TaskClosureUncheckedUpdateManyWithoutAncestorNestedInput
+    notificationLogs?: TaskNotificationLogUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutPlanInput = {
@@ -40058,7 +42852,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
-    evaluation?: KpiEvaluationUpdateOneRequiredWithoutTasksNestedInpu
+    evaluation?: KpiEvaluationUpdateOneRequiredWithoutTasksNestedInput
   }
 
   export type KpiEvaluationTaskUncheckedUpdateWithoutTaskInput = {
@@ -40119,7 +42913,7 @@ export namespace Prisma {
     reason?: NullableStringFieldUpdateOperationsInput | string | null
     attendedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     organizationId?: StringFieldUpdateOperationsInput | string
-    employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInpu
+    employee?: EmployeeUpdateOneRequiredWithoutTaskParticipantsNestedInput
   }
 
   export type TaskParticipantUncheckedUpdateWithoutTaskInput = {
@@ -40243,7 +43037,7 @@ export namespace Prisma {
   export type TaskClosureUpdateWithoutDescendantInput = {
     depth?: IntFieldUpdateOperationsInput | number
     organizationId?: StringFieldUpdateOperationsInput | string
-    ancestor?: TaskUpdateOneRequiredWithoutDescendantsNestedInpu
+    ancestor?: TaskUpdateOneRequiredWithoutDescendantsNestedInput
   }
 
   export type TaskClosureUncheckedUpdateWithoutDescendantInput = {
@@ -40261,7 +43055,7 @@ export namespace Prisma {
   export type TaskClosureUpdateWithoutAncestorInput = {
     depth?: IntFieldUpdateOperationsInput | number
     organizationId?: StringFieldUpdateOperationsInput | string
-    descendant?: TaskUpdateOneRequiredWithoutAncestorsNestedInpu
+    descendant?: TaskUpdateOneRequiredWithoutAncestorsNestedInput
   }
 
   export type TaskClosureUncheckedUpdateWithoutAncestorInput = {

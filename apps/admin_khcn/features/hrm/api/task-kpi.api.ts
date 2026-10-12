@@ -19,6 +19,22 @@ export interface GlobalKpiSettings {
     enablePenalty: boolean;
     penaltyPerDay: number;
     customRules: CustomRule[];
+    version?: number;
+}
+
+export interface KpiPreviewVariables {
+    Q: number;
+    C: number;
+    W: number;
+    D: number;
+    S: number;
+}
+
+export interface KpiFormulaVersion {
+    version: number;
+    settingsJson: string;
+    changedBy: string;
+    createdAt: string;
 }
 
 export const taskKpiApi = {
@@ -32,5 +48,13 @@ export const taskKpiApi = {
 
     saveGlobalSettings: (data: GlobalKpiSettings) => {
         return apiClient.put('/hrm/tasks/kpi/global-settings', data);
+    },
+
+    previewGlobalSettings: (data: { settings: GlobalKpiSettings; variables: KpiPreviewVariables; domainCode?: string }) => {
+        return apiClient.post('/hrm/tasks/kpi/preview', data);
+    },
+
+    getGlobalSettingVersions: () => {
+        return apiClient.get('/hrm/tasks/kpi/global-settings/versions');
     }
 };

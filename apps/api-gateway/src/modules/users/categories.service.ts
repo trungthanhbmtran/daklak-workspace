@@ -123,6 +123,9 @@ export class CategoriesService implements OnModuleInit {
         take: limitNum,
         skip: skipNum,
         selectedIds: selectedIdsArr,
+        selected_ids: selectedIdsArr,
+        parentUnitId: parentId,
+        parent_unit_id: parentId,
       }),
     ).catch((e) => this.handleRpcError(e));
 

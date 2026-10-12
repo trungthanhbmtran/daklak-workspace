@@ -185,8 +185,10 @@ export class DefinitionValidatorService {
     }));
 
     const edges: any[] = (graph?.edges ?? []).map((e: any) => {
-      // Map action từ label hoặc data.action (chuẩn React Flow)
-      const action = e.label ?? e.action ?? (e.data?.action) ?? null;
+      // Giữ nguyên mã action cho workflow engine máy trạng thái
+      const action = e.action ?? (e.data?.action) ?? null;
+      // Nhãn mô tả tiếng Việt chuẩn hóa
+      const label = e.label ?? (e.data?.label) ?? null;
       
       // Map condition từ properties gốc hoặc từ data (nếu UI truyền lên)
       let condition = e.condition ?? null;
@@ -202,6 +204,7 @@ export class DefinitionValidatorService {
         id: e.id,
         source: e.source ?? e.sourceNodeId,
         target: e.target ?? e.targetNodeId,
+        label,
         action,
         condition,
         priority: e.priority ?? (e.data?.priority) ?? 0,

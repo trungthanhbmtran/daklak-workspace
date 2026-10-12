@@ -18,6 +18,8 @@ service TaskService {
   rpc GetKpiSystemVariables (common.Empty) returns (KpiSystemVariablesResponse) {}
   rpc GetGlobalKpiSettings (common.Empty) returns (GlobalKpiSettingsResponse) {}
   rpc SaveGlobalKpiSettings (SaveGlobalKpiSettingsRequest) returns (GlobalKpiSettingsResponse) {}
+  rpc PreviewGlobalKpiSettings (PreviewGlobalKpiSettingsRequest) returns (PreviewGlobalKpiSettingsResponse) {}
+  rpc ListGlobalKpiSettingVersions (common.Empty) returns (GlobalKpiSettingVersionsResponse) {}
   rpc UpsertTaskKpiSetting (UpsertTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
   rpc GetTaskKpiSetting (GetTaskKpiSettingRequest) returns (TaskKpiSettingResponse) {}
   rpc GetTaskHistory (GetTaskHistoryRequest) returns (TaskHistoryResponse) {}
@@ -723,6 +725,7 @@ message GlobalKpiSettingsData {
   bool enablePenalty = 4;
   float penaltyPerDay = 5;
   repeated CustomRule customRules = 6;
+  int32 version = 7;
 }
 
 message GlobalKpiSettingsResponse {
@@ -738,4 +741,35 @@ message SaveGlobalKpiSettingsRequest {
   bool enablePenalty = 4;
   float penaltyPerDay = 5;
   repeated CustomRule customRules = 6;
+  string changedBy = 7;
+}
+
+message PreviewGlobalKpiSettingsRequest {
+  string settingsJson = 1;
+  double quota = 2;
+  double completed = 3;
+  double weight = 4;
+  double delayDays = 5;
+  double qualityScore = 6;
+  string domainCode = 7;
+}
+
+message PreviewGlobalKpiSettingsResponse {
+  bool success = 1;
+  bool valid = 2;
+  double score = 3;
+  string error = 4;
+  string message = 5;
+}
+
+message GlobalKpiSettingVersion {
+  int32 version = 1;
+  string settingsJson = 2;
+  string changedBy = 3;
+  string createdAt = 4;
+}
+
+message GlobalKpiSettingVersionsResponse {
+  bool success = 1;
+  repeated GlobalKpiSettingVersion data = 2;
 }
