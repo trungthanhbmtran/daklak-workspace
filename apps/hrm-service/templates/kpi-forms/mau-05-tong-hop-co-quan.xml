@@ -8,8 +8,8 @@
 -->
 <KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_05" schemaVersion="1.0">
   <Header>
-    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
-    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <AgencyName>{{agencyName}}</AgencyName>
+    <OrganizationName>{{organizationName}}</OrganizationName>
     <DecisionNumber>{{decisionNumber}}</DecisionNumber>
     <DecisionDate>{{decisionDate}}</DecisionDate>
     <DocumentTitle>QUYẾT ĐỊNH VỀ VIỆC PHÊ DUYỆT KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG CÁN BỘ, CÔNG CHỨC</DocumentTitle>
@@ -27,48 +27,39 @@
   </LegalBasis>
 
   <AgencyStatisticsSummary>
-    <TotalOfficers count="24"/>
-    <TotalEvaluated count="24"/>
+    <TotalOfficers count="{{officers.length}}"/>
+    <TotalEvaluated count="{{officers.length}}"/>
     <ExcellentQuotaControl>
       <GoodOrBetterTotal>{{goodOrBetterCount}}</GoodOrBetterTotal>
       <MaxExcellentAllowed20Pct>{{maxExcellentAllowed}}</MaxExcellentAllowed20Pct>
       <ActualExcellentApproved>{{actualExcellentApproved}}</ActualExcellentApproved>
-      <QuotaComplianceStatus>COMPLIANT</QuotaComplianceStatus>
+      <QuotaComplianceStatus>{{quotaComplianceStatus}}</QuotaComplianceStatus>
     </ExcellentQuotaControl>
   </AgencyStatisticsSummary>
 
   <CollectiveRankings>
-    <CollectiveItem code="TT-01" name="Lãnh đạo Ban" rank="{{rank_TT01}}"/>
-    <CollectiveItem code="TT-02" name="Phòng Tổ chức đảng, đảng viên" rank="{{rank_TT02}}"/>
-    <CollectiveItem code="TT-03" name="Phòng Tổ chức cán bộ" rank="{{rank_TT03}}"/>
-    <CollectiveItem code="TT-04" name="Phòng Bảo vệ chính trị nội bộ" rank="{{rank_TT04}}"/>
-    <CollectiveItem code="TT-05" name="Văn phòng Ban" rank="{{rank_TT05}}"/>
+    {{#each collectives}}
+    <CollectiveItem code="{{this.code}}" name="{{this.name}}" rank="{{this.rank}}"/>
+    {{/each}}
   </CollectiveRankings>
 
-  <IndividualFinalRankings count="24">
+  <IndividualFinalRankings count="{{officers.length}}">
     <!-- Danh sách xếp loại chính thức toàn cơ quan -->
-    <OfficerRankingItem id="1">
-      <EmployeeCode>{{empCode_1}}</EmployeeCode>
-      <FullName>{{empName_1}}</FullName>
-      <DepartmentName>{{deptName_1}}</DepartmentName>
-      <JobTitle>{{jobTitle_1}}</JobTitle>
-      <TotalScore>{{totalScore_1}}</TotalScore>
-      <OfficialRank>{{officialRank_1}}</OfficialRank>
-      <UnitLeaderCapApplied>{{unitLeaderCapApplied_1}}</UnitLeaderCapApplied>
+    {{#each officers}}
+    <OfficerRankingItem id="{{@number}}" orderNumber="{{@number}}">
+      <EmployeeCode>{{this.employeeCode}}</EmployeeCode>
+      <FullName>{{this.fullName}}</FullName>
+      <DepartmentName>{{this.departmentName}}</DepartmentName>
+      <JobTitle>{{this.jobTitle}}</JobTitle>
+      <TotalScore>{{this.totalScore}}</TotalScore>
+      <OfficialRank>{{this.officialRank}}</OfficialRank>
+      <UnitLeaderCapApplied>{{this.unitLeaderCapApplied}}</UnitLeaderCapApplied>
     </OfficerRankingItem>
-    <OfficerRankingItem id="2">
-      <EmployeeCode>{{empCode_2}}</EmployeeCode>
-      <FullName>{{empName_2}}</FullName>
-      <DepartmentName>{{deptName_2}}</DepartmentName>
-      <JobTitle>{{jobTitle_2}}</JobTitle>
-      <TotalScore>{{totalScore_2}}</TotalScore>
-      <OfficialRank>{{officialRank_2}}</OfficialRank>
-      <UnitLeaderCapApplied>{{unitLeaderCapApplied_2}}</UnitLeaderCapApplied>
-    </OfficerRankingItem>
+    {{/each}}
   </IndividualFinalRankings>
 
   <DecisionTerms>
-    <Article1>Phê duyệt kết quả đánh giá, xếp loại chất lượng đối với 05 tập thể phòng và 24 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy theo danh sách trên.</Article1>
+    <Article1>{{decisionArticle1}}</Article1>
     <Article2>Kết quả đánh giá, xếp loại là căn cứ để thực hiện công tác thi đua, khen thưởng, quy hoạch, đào tạo, bổ nhiệm và thực hiện chế độ chính sách đối với cán bộ, công chức.</Article2>
     <Article3>Chánh Văn phòng, Trưởng các phòng chuyên môn và các cá nhân có tên tại Điều 1 chịu trách nhiệm thi hành Quyết định này.</Article3>
   </DecisionTerms>

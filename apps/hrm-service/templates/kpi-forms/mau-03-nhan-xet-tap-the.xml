@@ -6,9 +6,9 @@
 -->
 <KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_03" schemaVersion="1.0">
   <Header>
-    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
-    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
-    <DocumentTitle>BẢN NHẬN XÉT, ĐÁNH GIÁ CỦA CẤP ỦY VÀ TẬP THỂ LÃNH ĐẠO PHÒNG</DocumentTitle>
+    <AgencyName>{{agencyName}}</AgencyName>
+    <OrganizationName>{{organizationName}}</OrganizationName>
+    <DocumentTitle>{{documentTitle}}</DocumentTitle>
     <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
     <PeriodYear>{{periodYear}}</PeriodYear>
     <PeriodQuarter>{{periodQuarter}}</PeriodQuarter>
@@ -39,6 +39,16 @@
       <IdentifiedShortcomings>{{identifiedShortcomings}}</IdentifiedShortcomings>
       <ImprovementDirections>{{improvementDirections}}</ImprovementDirections>
     </DepartmentLeadershipComments>
+    <ReviewerComments>
+      {{#each reviewerComments}}
+      <Comment orderNumber="{{@number}}">
+        <ReviewerName>{{this.reviewerName}}</ReviewerName>
+        <ReviewerTitle>{{this.reviewerTitle}}</ReviewerTitle>
+        <Content>{{this.content}}</Content>
+        <CreatedAt>{{this.createdAt}}</CreatedAt>
+      </Comment>
+      {{/each}}
+    </ReviewerComments>
   </CollectiveFeedback>
 
   <DepartmentRatingConclusion>

@@ -107,11 +107,16 @@ export function saveTemplateXmlContent(formCode: string, xmlContent: string): bo
  * Trích xuất danh sách các biến {{placeholder}} trong XML
  */
 export function extractPlaceholders(xmlContent: string): string[] {
-  const regex = /\{\{([a-zA-Z0-9_-]+)\}\}/g;
   const matches = new Set<string>();
+  const eachRegex = /\{\{#each\s+([a-zA-Z0-9_./-]+)\s*\}\}/g;
+  const placeholderRegex = /\{\{\s*([a-zA-Z0-9_@./-]+)\s*\}\}/g;
   let match;
-  while ((match = regex.exec(xmlContent)) !== null) {
-    matches.add(match[1]);
+  while ((match = eachRegex.exec(xmlContent)) !== null) matches.add(match[1]);
+  while ((match = placeholderRegex.exec(xmlContent)) !== null) {
+    const expression = match[1];
+    if (expression !== '@index' && expression !== '@number') {
+      matches.add(expression);
+    }
   }
   return Array.from(matches);
 }
@@ -169,11 +174,95 @@ export function validateXmlSyntax(xmlString: string): { isValid: boolean; error?
 /**
  * Render template XML với data đối tượng
  */
-export function renderTemplateXml(xmlTemplate: string, data: Record<string, any>): string {
-  let rendered = xmlTemplate;
-  for (const [key, value] of Object.entries(data)) {
-    const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-    rendered = rendered.replace(placeholder, value !== undefined && value !== null ? String(value) : '');
+type TemplateScope = { value: unknown; index: number };
+
+function escapeXmlValue(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function getPathValue(value: unknown, pathParts: string[]): unknown {
+  return pathParts.reduce<unknown>((current, part) => {
+    if (current === null || typeof current !== 'object') return undefined;
+    return (current as Record<string, unknown>)[part];
+  }, value);
+}
+
+function resolveTemplateValue(expression: string, root: Record<string, unknown>, scopes: TemplateScope[]): unknown {
+  if (expression === '@index') return scopes[scopes.length - 1]?.index;
+  if (expression === '@number') {
+    const index = scopes[scopes.length - 1]?.index;
+    return index === undefined ? undefined : index + 1;
   }
-  return rendered;
+
+  let scopeOffset = 0;
+  let target = expression;
+  if (target.startsWith('this.')) {
+    target = target.slice(5);
+  } else if (target === 'this') {
+    return scopes[scopes.length - 1]?.value;
+  } else {
+    while (target.startsWith('../')) {
+      scopeOffset += 1;
+      target = target.slice(3);
+    }
+    if (scopeOffset > 0) {
+      const scope = scopes[scopes.length - 1 - scopeOffset];
+      return scope ? getPathValue(scope.value, target.split('.')) : undefined;
+    }
+    return getPathValue(root, target.split('.'));
+  }
+
+  const current = scopes[scopes.length - 1];
+  return current ? getPathValue(current.value, target.split('.')) : undefined;
+}
+
+function renderTemplateFragment(template: string, root: Record<string, unknown>, scopes: TemplateScope[]): string {
+  const eachStart = /\{\{#each\s+([a-zA-Z0-9_./-]+)\s*\}\}/g;
+  let output = '';
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = eachStart.exec(template)) !== null) {
+    output += template.slice(cursor, match.index);
+    const collection = resolveTemplateValue(match[1], root, scopes);
+    let depth = 1;
+    let tokenCursor = eachStart.lastIndex;
+    const tokenRegex = /\{\{#each\s+[a-zA-Z0-9_./-]+\s*\}\}|\{\{\/each\s*\}\}/g;
+    tokenRegex.lastIndex = tokenCursor;
+    let token: RegExpExecArray | null;
+    while ((token = tokenRegex.exec(template)) !== null) {
+      if (token[0].startsWith('{{#each')) depth += 1;
+      else depth -= 1;
+      if (depth === 0) break;
+    }
+
+    if (!token) {
+      output += template.slice(match.index);
+      cursor = template.length;
+      break;
+    }
+
+    const body = template.slice(tokenCursor, token.index);
+    if (Array.isArray(collection)) {
+      output += collection.map((item, index) => renderTemplateFragment(body, root, [...scopes, { value: item, index }])).join('');
+    }
+    cursor = tokenRegex.lastIndex;
+    eachStart.lastIndex = cursor;
+  }
+
+  if (cursor < template.length) output += template.slice(cursor);
+  return output.replace(/\{\{\s*([a-zA-Z0-9_@./-]+)\s*\}\}/g, (_placeholder, expression: string) => {
+    return escapeXmlValue(resolveTemplateValue(expression, root, scopes));
+  });
+}
+
+/** Render placeholders and {{#each collection}} sections with XML-escaped values. */
+export function renderTemplateXml(xmlTemplate: string, data: Record<string, any>): string {
+  return renderTemplateFragment(xmlTemplate, data, []);
 }

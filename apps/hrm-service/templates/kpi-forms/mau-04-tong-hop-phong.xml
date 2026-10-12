@@ -6,8 +6,8 @@
 -->
 <KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_04" schemaVersion="1.0">
   <Header>
-    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
-    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <AgencyName>{{agencyName}}</AgencyName>
+    <OrganizationName>{{organizationName}}</OrganizationName>
     <DepartmentName>{{departmentName}}</DepartmentName>
     <DepartmentCode>{{departmentCode}}</DepartmentCode>
     <DocumentTitle>BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG CỦA ĐƠN VỊ</DocumentTitle>
@@ -18,7 +18,7 @@
 
   <DepartmentStatistics totalStaff="{{totalStaffCount}}" evaluatedStaff="{{evaluatedStaffCount}}">
     <StaffRankDistribution>
-      <ExcellentCount proposed="{{excellentProposedCount}}" maxAllowed20Pct="{{maxExcellentAllowed}}"/>
+      <ExcellentCount proposed="{{excellentProposedCount}}" maxAllowed="{{maxExcellentAllowed}}" quotaPercent="{{excellentQuotaPercent}}"/>
       <GoodCount>{{goodCount}}</GoodCount>
       <FairCount>{{fairCount}}</FairCount>
       <PoorCount>{{poorCount}}</PoorCount>
@@ -26,40 +26,32 @@
   </DepartmentStatistics>
 
   <StaffSummaryTable>
-    <StaffRow orderNumber="1">
-      <EmployeeCode>{{empCode_1}}</EmployeeCode>
-      <FullName>{{empName_1}}</FullName>
-      <JobTitle>{{empJobTitle_1}}</JobTitle>
-      <GeneralScore>{{empGenScore_1}}</GeneralScore>
-      <TaskScore>{{empTaskScore_1}}</TaskScore>
-      <QualityPenaltyTier>{{empPenaltyTier_1}}</QualityPenaltyTier>
-      <TotalScore>{{empTotalScore_1}}</TotalScore>
-      <ProposedRank>{{empProposedRank_1}}</ProposedRank>
-      <IsOutstandingBonus>{{empIsBonus_1}}</IsOutstandingBonus>
-      <OutstandingTaskNotes>{{empBonusNotes_1}}</OutstandingTaskNotes>
+    {{#each staff}}
+    <StaffRow orderNumber="{{@number}}">
+      <EmployeeCode>{{this.employeeCode}}</EmployeeCode>
+      <FullName>{{this.fullName}}</FullName>
+      <JobTitle>{{this.jobTitle}}</JobTitle>
+      <GeneralScore>{{this.generalScore}}</GeneralScore>
+      <TaskScore>{{this.taskScore}}</TaskScore>
+      <QualityPenaltyTier>{{this.qualityPenaltyTier}}</QualityPenaltyTier>
+      <TotalScore>{{this.totalScore}}</TotalScore>
+      <ProposedRank>{{this.proposedRank}}</ProposedRank>
+      <IsOutstandingBonus>{{this.isOutstandingBonus}}</IsOutstandingBonus>
+      <OutstandingTaskNotes>{{this.outstandingTaskNotes}}</OutstandingTaskNotes>
     </StaffRow>
-    <StaffRow orderNumber="2">
-      <EmployeeCode>{{empCode_2}}</EmployeeCode>
-      <FullName>{{empName_2}}</FullName>
-      <JobTitle>{{empJobTitle_2}}</JobTitle>
-      <GeneralScore>{{empGenScore_2}}</GeneralScore>
-      <TaskScore>{{empTaskScore_2}}</TaskScore>
-      <QualityPenaltyTier>{{empPenaltyTier_2}}</QualityPenaltyTier>
-      <TotalScore>{{empTotalScore_2}}</TotalScore>
-      <ProposedRank>{{empProposedRank_2}}</ProposedRank>
-      <IsOutstandingBonus>{{empIsBonus_2}}</IsOutstandingBonus>
-      <OutstandingTaskNotes>{{empBonusNotes_2}}</OutstandingTaskNotes>
-    </StaffRow>
+    {{/each}}
   </StaffSummaryTable>
 
   <OutstandingTasksRegistry>
-    <RegistryItem>
-      <EmployeeName>{{bonusEmployeeName}}</EmployeeName>
-      <TaskTitle>{{bonusTaskTitle}}</TaskTitle>
-      <DomainCode>{{bonusDomainCode}}</DomainCode>
-      <AchievementsSummary>{{bonusAchievements}}</AchievementsSummary>
-      <BonusScoreAdded>+10%</BonusScoreAdded>
+    {{#each outstandingTasks}}
+    <RegistryItem orderNumber="{{@number}}">
+      <EmployeeName>{{this.employeeName}}</EmployeeName>
+      <TaskTitle>{{this.taskTitle}}</TaskTitle>
+      <DomainCode>{{this.domainCode}}</DomainCode>
+      <AchievementsSummary>{{this.achievements}}</AchievementsSummary>
+      <BonusScoreAdded>{{this.bonusScoreAdded}}</BonusScoreAdded>
     </RegistryItem>
+    {{/each}}
   </OutstandingTasksRegistry>
 
   <DepartmentSignatures>

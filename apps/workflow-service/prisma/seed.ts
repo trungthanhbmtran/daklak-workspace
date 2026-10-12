@@ -12,7 +12,8 @@ import { PrismaMariaDb } from '@prisma/adapter-mariadb';
  * - DATABASE_URL phải được set trước khi chạy seed.
  */
 import 'dotenv/config';
-import { PrismaClient } from '../src/generated/prisma/client'
+import { PrismaClient } from '../src/generated/prisma/client';
+import { seedBtctuWorkflow } from './seed-btctu';
 
 
 function createPrismaClient(): PrismaClient {
@@ -411,6 +412,7 @@ async function main() {
 
     console.log('\n🎉 Hoàn thành seed database!');
     await seedCustomInstance(prisma);
+    await seedBtctuWorkflow(prisma);
   } finally {
     await prisma.$disconnect();
   }

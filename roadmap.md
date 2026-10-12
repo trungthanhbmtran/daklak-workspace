@@ -4,6 +4,20 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Workflow Engine & Data] Nạp Dữ Liệu Quy Trình Nghiệp Vụ Ban Tổ Chức Tỉnh Ủy Vào Workflow Service (12/10/2026)**
+  - **Yêu cầu**: Dựa vào các sơ đồ luồng quản lý công việc và KPI Ban Tổ chức Tỉnh ủy trong `docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md`, nạp dữ liệu quy trình hoàn chỉnh vào `workflow-service` và gán đơn vị là Ban Tổ chức Tỉnh ủy (`BTCTU_DAKLAK`).
+  - **Chi tiết**:
+    1. Chuẩn hóa 2 định nghĩa quy trình (`ProcessDefinition`): `WF_BTCTU_QUAN_LY_CONG_VIEC` (chu trình 4 làn nghiệp vụ, phân luồng 4 phòng ban, 22 VTVL, kiểm soát 3 mức lỗi, ký số CA Chuyên dùng, tự động tính KPI 4 thành tố) và `WF_BTCTU_DANH_GIA_KPI` (4 giai đoạn tích hợp 5 Mẫu biểu hành chính, đối soát 8 nguồn CSDL, kiểm tra kỷ luật, áp trần khống chế 20% Xuất sắc per Quy định 348-QĐ/BTCTW và áp trần Người đứng đầu).
+    2. Cập nhật danh mục nghiệp vụ (`ProcessType`): `BTCTU_TASK_MANAGEMENT` và `BTCTU_KPI_EVALUATION` thuộc `hrm-service`.
+    3. Cấu hình ràng buộc quy trình (`ProcessBinding`): Gắn chặt với `organizationId = 'BTCTU_DAKLAK'`.
+    4. Xây dựng và thực thi seed script `apps/workflow-service/prisma/seed-btctu.ts` và tích hợp vào `seed.ts`. Khởi tạo `ProcessInstance` và `WorkflowTask` mẫu minh họa.
+  - **Kiểm chứng**: Kiểm tra CSDL `admin_workflow`, chạy `tsc --noEmit`, kiểm tra UTF-8 không BOM, đối soát 7 bộ ràng buộc kỹ thuật.
+
+- [x] **[KPI Templates] Chuyển các biểu mẫu KPI sang XML động (12/10/2026)**
+  - **Yêu cầu**: Bỏ danh sách và số lượng cố định trong các mẫu KPI 01, 03, 04, 05 để biểu mẫu có thể render theo dữ liệu thực tế.
+  - **Thực hiện**: Thêm section lặp `{{#each}}` cho renderer XML, hỗ trợ dữ liệu lồng nhau và escape ký tự XML; chuyển danh sách nhiệm vụ, nhận xét, nhân sự, tập thể và xếp loại cơ quan thành danh sách động.
+  - **Kiểm chứng**: `npx tsc --noEmit -p tsconfig.json` tại `apps/hrm-service` thành công; bốn mẫu XML và vòng lặp lồng nhau render thành XML hợp lệ với dữ liệu nhiều phần tử; `git diff --check` sạch.
+
 - [x] **[Feature & Templates] Tạo Các File XML Biểu Mẫu, Chức Năng Quản Lý File Mẫu & Nơi Chứa Mẫu Đánh Giá (12/10/2026)**
   - **Yêu cầu**: Tạo các file XML các mẫu (Mẫu 01 đến Mẫu 05 chuẩn Ban Tổ chức Tỉnh ủy theo Hướng dẫn 05-HD/TU & Quy định 01-QĐ/BTCTU), xây dựng chức năng quản lý file mẫu (xem, tải về, tải lên, validate cú pháp, render dữ liệu XML), và xây dựng nơi chứa mẫu đánh giá (Evaluation Forms Center) trong CSDL và UI quản trị công việc.
   - **Chi tiết**:
