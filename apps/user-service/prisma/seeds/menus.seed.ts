@@ -23,7 +23,6 @@ const menuData: MenuSeed[] = [
   { code: 'SYS_MENU', name: 'Quản lý Menu', route: '/services/admin/menus', icon: 'Menu', order: 5, parentCode: 'SYS_GROUP', linkedResourceCode: 'MENU', type: 'MENU' },
   { code: 'SYS_CAT', name: 'Danh mục', route: '/services/admin/categories', icon: 'ListTree', order: 6, parentCode: 'SYS_GROUP', linkedResourceCode: 'CATEGORY', type: 'MENU' },
   { code: 'SYS_SETTING', name: 'Cấu hình chung', route: '/services/admin/settings', icon: 'Settings', order: 8, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
-  { code: 'SYS_ENDPOINT', name: 'Quản lý Endpoints', route: '/system-admin/endpoints', icon: 'PlugZ', order: 9, parentCode: 'SYS_GROUP', linkedResourceCode: 'SYSTEM', type: 'MENU' },
 
   { code: 'HUB_NOTIF_GROUP', name: 'Trung tâm Thông báo', route: '/hub/notifications', icon: 'Bell', order: 10, linkedResourceCode: null, type: 'SERVICE_ITEM' },
   { code: 'SYS_NOTIF', name: 'Cấu hình Thông báo', route: '/hub/notifications/config', icon: 'Mail', order: 1, parentCode: 'HUB_NOTIF_GROUP', linkedResourceCode: 'NOTIFICATION', type: 'MENU' },
@@ -73,6 +72,7 @@ export async function seedMenus(prisma: PrismaClient) {
 
   await prisma.menu.deleteMany({ where: { code: 'HRM_DASHBOARD_MENU' } });
   await prisma.menu.deleteMany({ where: { code: 'API_GATEWAY_GROUP' } });
+  await prisma.menu.deleteMany({ where: { code: 'SYS_ENDPOINT' } });
 
   for (const menu of menuData) {
     const parent = menu.parentCode
