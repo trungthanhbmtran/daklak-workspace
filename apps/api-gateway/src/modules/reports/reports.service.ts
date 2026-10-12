@@ -156,9 +156,9 @@ export class ReportsService implements OnModuleInit {
     );
   }
 
-  async getReportDefinitionById(id: string, user: any, authHeader: string) {
+  async getReportDefinitionById(id: number | string, user: any, authHeader: string) {
     return this.parseResponse(
-      await this.callGrpc('GetReportDefinitionById', { id }, user, authHeader),
+      await this.callGrpc('GetReportDefinitionById', { id: Number(id) }, user, authHeader),
     );
   }
 
@@ -168,14 +168,14 @@ export class ReportsService implements OnModuleInit {
     );
   }
 
-  async getReportRunStatus(id: string, user: any, authHeader: string) {
+  async getReportRunStatus(id: number | string, user: any, authHeader: string) {
     return this.parseResponse(
-      await this.callGrpc('GetReportRunStatus', { id }, user, authHeader),
+      await this.callGrpc('GetReportRunStatus', { id: Number(id) }, user, authHeader),
     );
   }
 
   async getDatasetSnapshot(
-    runId: string,
+    runId: number | string,
     query: any,
     user: any,
     authHeader: string,
@@ -183,7 +183,7 @@ export class ReportsService implements OnModuleInit {
     return this.parseResponse(
       await this.callGrpc(
         'GetDatasetSnapshot',
-        { runId, ...query },
+        { runId: Number(runId), ...query },
         user,
         authHeader,
       ),

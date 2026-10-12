@@ -97,33 +97,29 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   onBack,
 }) => {
   const router = useRouter();
-  const [runId, setRunId] = useState<string | null>(null);
+  const [runId, setRunId] = useState<number | null>(null);
   const [tableSearch, setTableSearch] = useState('');
   const [page, setPage] = useState(1);
   const [chartModes, setChartModes] = useState<Record<number, 'bar' | 'line' | 'pie'>>({});
   const pageSize = 20;
 
-  const validIdStr = definitionId && !isNaN(definitionId) ? definitionId.toString() : '';
-  const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(validIdStr);
+  const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(definitionId);
   const actualConfig = config || reportDef?.configuration;
   const reportName = reportDef?.name || 'Báo cáo Chi tiết';
 
   // Khởi tạo runId từ lượt chạy gần nhất trong database nếu có
   useEffect(() => {
     if (!runId && (reportDef as any)?.runs?.[0]?.id) {
-      setRunId(String((reportDef as any).runs[0].id));
+      setRunId((reportDef as any).runs[0].id);
     }
   }, [reportDef, runId]);
 
   const runMutation = useRunReport();
-  const { data: runStatus, isLoading: isStatusLoading } = useGetReportRunStatus(
-    runId!,
-    !!runId,
-  );
+  const { data: runStatus, isLoading: isStatusLoading } = useGetReportRunStatus(runId);
 
   const isCompleted = runStatus?.status === 'SUCCEEDED';
   const { data: snapshot, isLoading: isSnapshotLoading } = useGetDatasetSnapshot(
-    isCompleted ? runId! : '',
+    isCompleted ? runId : null,
   );
 
   // Tự động kích hoạt lượt chạy đầu tiên nếu báo cáo chưa có bất kỳ lượt chạy nào trong DB
@@ -136,7 +132,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           config: actualConfig,
         });
         if (isMounted && result?.runId) {
-          setRunId(result.runId.toString());
+          setRunId(result.runId);
         }
       } catch (err) {
         // Fallback: cho phép người dùng click "Chạy lại" thủ công
@@ -145,8 +141,6 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
     if (
       !runId &&
-      definitionId &&
-      !isNaN(definitionId) &&
       !isDefLoading &&
       reportDef &&
       (!(reportDef as any)?.runs || (reportDef as any).runs.length === 0)
@@ -166,7 +160,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         config: actualConfig,
       });
       if (result?.runId) {
-        setRunId(result.runId.toString());
+        setRunId(result.runId);
       }
     } catch {
       alert('Có lỗi xảy ra khi thực thi báo cáo.');

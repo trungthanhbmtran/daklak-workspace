@@ -8,6 +8,7 @@ import {
   Delete,
   Req,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -69,18 +70,18 @@ export class ReportsController {
   }
 
   @Get('templates/:id')
-  async getTemplateById(@Param('id') id: string, @Req() req: any) {
-    return this.reportsService.getTemplateById(id, req.query);
+  async getTemplateById(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.reportsService.getTemplateById(String(id), req.query);
   }
 
   @Put('templates/:id')
-  async updateTemplate(@Param('id') id: string, @Body() body: any) {
-    return this.reportsService.updateTemplate(id, body);
+  async updateTemplate(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
+    return this.reportsService.updateTemplate(String(id), body);
   }
 
   @Delete('templates/:id')
-  async deleteTemplate(@Param('id') id: string) {
-    return this.reportsService.deleteTemplate(id);
+  async deleteTemplate(@Param('id', ParseIntPipe) id: number) {
+    return this.reportsService.deleteTemplate(String(id));
   }
 
   @Get('tasks')
@@ -165,7 +166,10 @@ export class ReportsController {
 
   @Get('definitions/:id')
   @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
-  async getReportDefinitionById(@Param('id') id: string, @Req() req: any) {
+  async getReportDefinitionById(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any,
+  ) {
     return this.reportsService.getReportDefinitionById(
       id,
       req.user,
@@ -185,7 +189,10 @@ export class ReportsController {
 
   @Get('runs/:id/status')
   @RequirePermissions('REPORT:READ')
-  async getReportRunStatus(@Param('id') id: string, @Req() req: any) {
+  async getReportRunStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any,
+  ) {
     return this.reportsService.getReportRunStatus(
       id,
       req.user,
@@ -195,7 +202,10 @@ export class ReportsController {
 
   @Get('runs/:runId/snapshot')
   @RequirePermissions('REPORT:READ')
-  async getDatasetSnapshot(@Param('runId') runId: string, @Req() req: any) {
+  async getDatasetSnapshot(
+    @Param('runId', ParseIntPipe) runId: number,
+    @Req() req: any,
+  ) {
     return this.reportsService.getDatasetSnapshot(
       runId,
       req.query,

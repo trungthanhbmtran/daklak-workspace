@@ -15,11 +15,12 @@ export const reportKeys = {
   list: (filters: string) => [...reportKeys.lists(), { filters }] as const,
   catalog: () => [...reportKeys.all, "catalog"] as const,
   details: () => [...reportKeys.all, "detail"] as const,
-  detail: (id: string) => [...reportKeys.details(), id] as const,
-  runs: (id: string) => [...reportKeys.detail(id), "runs"] as const,
-  runStatus: (runId: string) =>
-    [...reportKeys.all, "runStatus", runId] as const,
-  snapshot: (runId: string) => [...reportKeys.all, "snapshot", runId] as const,
+  detail: (id: number | string) => [...reportKeys.details(), Number(id)] as const,
+  runs: (id: number | string) => [...reportKeys.detail(id), "runs"] as const,
+  runStatus: (runId: number | string) =>
+    [...reportKeys.all, "runStatus", Number(runId)] as const,
+  snapshot: (runId: number | string) =>
+    [...reportKeys.all, "snapshot", Number(runId)] as const,
   dashboardStats: () => [...reportKeys.all, "dashboardStats"] as const,
 };
 
@@ -64,15 +65,17 @@ export const useGetReportDefinitions = () => {
   });
 };
 
-export const useGetReportDefinition = (id: string) => {
-  const isValidId = !!id && id !== "NaN" && !isNaN(Number(id));
+export const useGetReportDefinition = (id?: number | string | null) => {
+  const numericId = Number(id);
+  const isValid = Number.isInteger(numericId) && numericId > 0;
+
   return useQuery({
-    queryKey: reportKeys.detail(id),
+    queryKey: reportKeys.detail(isValid ? numericId : 0),
     queryFn: async () => {
-      const res: any = await axiosInstance.get(`/reports/definitions/${id}`);
+      const res: any = await axiosInstance.get(`/reports/definitions/${numericId}`);
       return unwrapData<ReportDefinition>(res, null as any);
     },
-    enabled: isValidId,
+    enabled: isValid,
   });
 };
 
@@ -113,22 +116,24 @@ export const useRunReport = () => {
   });
 };
 
-export const useGetReportRunStatus = (runId: string, enabled = true) => {
+export const useGetReportRunStatus = (runId?: number | string | null, enabled = true) => {
+  const numericId = Number(runId);
+  const isValid = Number.isInteger(numericId) && numericId > 0;
   const [retryCount, setRetryCount] = useState(0);
 
   return useQuery({
-    queryKey: reportKeys.runStatus(runId),
+    queryKey: reportKeys.runStatus(isValid ? numericId : 0),
     queryFn: async () => {
-      const res: any = await axiosInstance.get(`/reports/runs/${runId}/status`);
+      const res: any = await axiosInstance.get(`/reports/runs/${numericId}/status`);
       setRetryCount((prev) => prev + 1);
       return unwrapData<ReportRun>(res, {
-        id: Number(runId),
+        id: numericId,
         reportDefinitionId: 0,
         definitionVersion: 1,
         status: "RUNNING",
       });
     },
-    enabled: !!runId && enabled,
+    enabled: isValid && enabled,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "QUEUED" || status === "RUNNING") {
@@ -139,12 +144,15 @@ export const useGetReportRunStatus = (runId: string, enabled = true) => {
   });
 };
 
-export const useGetDatasetSnapshot = (runId: string) => {
+export const useGetDatasetSnapshot = (runId?: number | string | null) => {
+  const numericId = Number(runId);
+  const isValid = Number.isInteger(numericId) && numericId > 0;
+
   return useQuery({
-    queryKey: reportKeys.snapshot(runId),
+    queryKey: reportKeys.snapshot(isValid ? numericId : 0),
     queryFn: async () => {
       const res: any = await axiosInstance.get(
-        `/reports/runs/${runId}/snapshot`,
+        `/reports/runs/${numericId}/snapshot`,
       );
       const snapshot = unwrapData<DatasetSnapshot>(res, {
         schema: [],
@@ -155,7 +163,7 @@ export const useGetDatasetSnapshot = (runId: string) => {
         data: Array.isArray(snapshot?.data) ? snapshot.data : [],
       };
     },
-    enabled: !!runId,
+    enabled: isValid,
   });
 };
 
