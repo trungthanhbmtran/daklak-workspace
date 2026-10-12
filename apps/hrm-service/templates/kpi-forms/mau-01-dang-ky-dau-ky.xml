@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 01: Bản đăng ký khung danh mục sản phẩm / công việc chuẩn đầu kỳ
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 01-QĐ/BTCTU
+-->
+<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_01" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>BẢN ĐĂNG KÝ KHUNG DANH MỤC SẢN PHẨM / CÔNG VIỆC CHUẨN ĐẦU KỲ</DocumentTitle>
+    <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
+    <PeriodYear>{{periodYear}}</PeriodYear>
+    <PeriodQuarter>{{periodQuarter}}</PeriodQuarter>
+  </Header>
+
+  <OfficerProfile>
+    <EmployeeCode>{{employeeCode}}</EmployeeCode>
+    <FullName>{{fullName}}</FullName>
+    <DepartmentName>{{departmentName}}</DepartmentName>
+    <DepartmentCode>{{departmentCode}}</DepartmentCode>
+    <JobTitle>{{jobTitle}}</JobTitle>
+    <JobPositionCode>{{jobPositionCode}}</JobPositionCode>
+    <StaffingSlotId>{{staffingSlotId}}</StaffingSlotId>
+    <IsUnitLeader>{{isUnitLeader}}</IsUnitLeader>
+  </OfficerProfile>
+
+  <LegalBasis>
+    <Regulation>Quy định số 01-QĐ/BTCTU ngày 15/01/2026 của Ban Tổ chức Tỉnh ủy Đắk Lắk</Regulation>
+    <Guideline>Hướng dẫn số 05-HD/TU của Ban Thường vụ Tỉnh ủy Đắk Lắk</Guideline>
+    <StandardCriteria>Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương</StandardCriteria>
+  </LegalBasis>
+
+  <RegisteredTasks totalPlannedTasks="{{totalPlannedTasks}}">
+    <!-- Danh sách nhiệm vụ chuyên môn đăng ký đầu kỳ -->
+    <TaskItem orderNumber="1">
+      <TaskId>{{taskId_1}}</TaskId>
+      <TaskName>{{taskName_1}}</TaskName>
+      <DomainCode>{{domainCode_1}}</DomainCode>
+      <DomainName>{{domainName_1}}</DomainName>
+      <PlannedQuantity>{{plannedQty_1}}</PlannedQuantity>
+      <DifficultyFactor>{{difficultyK_1}}</DifficultyFactor>
+      <TaskWeight>{{weight_1}}</TaskWeight>
+      <TargetDeadline>{{targetDeadline_1}}</TargetDeadline>
+      <ExpectedDeliverable>{{expectedDeliverable_1}}</ExpectedDeliverable>
+      <SecurityTier>{{securityTier_1}}</SecurityTier>
+    </TaskItem>
+    <TaskItem orderNumber="2">
+      <TaskId>{{taskId_2}}</TaskId>
+      <TaskName>{{taskName_2}}</TaskName>
+      <DomainCode>{{domainCode_2}}</DomainCode>
+      <DomainName>{{domainName_2}}</DomainName>
+      <PlannedQuantity>{{plannedQty_2}}</PlannedQuantity>
+      <DifficultyFactor>{{difficultyK_2}}</DifficultyFactor>
+      <TaskWeight>{{weight_2}}</TaskWeight>
+      <TargetDeadline>{{targetDeadline_2}}</TargetDeadline>
+      <ExpectedDeliverable>{{expectedDeliverable_2}}</ExpectedDeliverable>
+      <SecurityTier>{{securityTier_2}}</SecurityTier>
+    </TaskItem>
+  </RegisteredTasks>
+
+  <GeneralCommitments>
+    <IdeologyAndPolitics>Chấp hành nghiêm chủ trương, đường lối của Đảng, chính sách pháp luật của Nhà nước.</IdeologyAndPolitics>
+    <EthicsAndLifestyle>Giữ gìn phẩm chất đạo đức, lối sống trong sạch, không vi phạm quy định những điều đảng viên không được làm.</EthicsAndLifestyle>
+    <WorkingDiscipline>Tuân thủ nội quy cơ quan, thời giờ làm việc, văn hóa công sở, kỷ luật phát ngôn và bảo mật thông tin tài liệu Đảng.</WorkingDiscipline>
+    <InformationSecurityCompliance>Tuyệt đối chấp hành quy chế an toàn thông tin Cấp độ 3 per Nghị định 85/2016/NĐ-CP và bảo vệ tài liệu mật.</InformationSecurityCompliance>
+  </GeneralCommitments>
+
+  <WorkflowSignatures>
+    <OfficerConfirmation>
+      <SignerName>{{fullName}}</SignerName>
+      <SigningDate>{{registeredDate}}</SigningDate>
+      <SignatureStatus>SIGNED</SignatureStatus>
+      <DigitalSignature>{{officerDigitalSignature}}</DigitalSignature>
+    </OfficerConfirmation>
+    <DepartmentLeaderApproval>
+      <ApproverName>{{departmentLeaderName}}</ApproverName>
+      <ApproverTitle>{{departmentLeaderTitle}}</ApproverTitle>
+      <ApprovalDate>{{departmentApprovalDate}}</ApprovalDate>
+      <ApprovalStatus>{{departmentApprovalStatus}}</ApprovalStatus>
+      <DigitalSignature>{{departmentLeaderDigitalSignature}}</DigitalSignature>
+    </DepartmentLeaderApproval>
+  </WorkflowSignatures>
+</KpiFormDocument>

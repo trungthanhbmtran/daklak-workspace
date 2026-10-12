@@ -134,8 +134,8 @@ export function getSecurityLevelLabel(sec: string | null | undefined): string {
 /**
  * Chuẩn hóa một bản ghi nhiệm vụ (Task)
  */
-export function normalizeTask<T extends Record<string, any>>(task: T): T {
-  if (!task || typeof task !== 'object') return task;
+export function normalizeTask<T extends Record<string, any>>(task: T): T & { statusLabel: string; priorityLabel: string } {
+  if (!task || typeof task !== 'object') return task as any;
   const target = task as Record<string, any>;
   const statusLabel = getTaskStatusLabel(target.statusLabel || target.status);
   const priorityLabel = getPriorityLabel(target.priorityLabel || target.priority);
@@ -147,14 +147,14 @@ export function normalizeTask<T extends Record<string, any>>(task: T): T {
   if (Array.isArray(target.subTasks)) {
     target.subTasks = target.subTasks.map(normalizeTask);
   }
-  return target as T;
+  return target as T & { statusLabel: string; priorityLabel: string };
 }
 
 /**
  * Chuẩn hóa một bản ghi văn bản (Document)
  */
-export function normalizeDocument<T extends Record<string, any>>(doc: T): T {
-  if (!doc || typeof doc !== 'object') return doc;
+export function normalizeDocument<T extends Record<string, any>>(doc: T): T & { statusLabel: string; urgencyLabel: string; securityLevelLabel: string } {
+  if (!doc || typeof doc !== 'object') return doc as any;
   return {
     ...doc,
     statusLabel: getDocumentStatusLabel(doc.status),
@@ -166,8 +166,8 @@ export function normalizeDocument<T extends Record<string, any>>(doc: T): T {
 /**
  * Chuẩn hóa một bản ghi bài viết (Post)
  */
-export function normalizePost<T extends Record<string, any>>(post: T): T {
-  if (!post || typeof post !== 'object') return post;
+export function normalizePost<T extends Record<string, any>>(post: T): T & { statusLabel: string } {
+  if (!post || typeof post !== 'object') return post as any;
   return {
     ...post,
     statusLabel: getPostStatusLabel(post.status),
@@ -177,8 +177,8 @@ export function normalizePost<T extends Record<string, any>>(post: T): T {
 /**
  * Chuẩn hóa một bản ghi quy trình (Workflow)
  */
-export function normalizeWorkflow<T extends Record<string, any>>(wf: T): T {
-  if (!wf || typeof wf !== 'object') return wf;
+export function normalizeWorkflow<T extends Record<string, any>>(wf: T): T & { statusLabel: string } {
+  if (!wf || typeof wf !== 'object') return wf as any;
   return {
     ...wf,
     statusLabel: getWorkflowStatusLabel(wf.status),

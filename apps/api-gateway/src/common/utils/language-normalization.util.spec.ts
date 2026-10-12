@@ -73,8 +73,8 @@ describe('Language Normalization Utility (API Gateway)', () => {
       const normalized = normalizeTask(task);
       expect(normalized.statusLabel).toBe('Đang thực hiện');
       expect(normalized.priorityLabel).toBe('Ưu tiên cao');
-      expect(normalized.children[0].statusLabel).toBe('Chờ thực hiện');
-      expect(normalized.children[0].priorityLabel).toBe('Bình thường');
+      expect((normalized.children[0] as any).statusLabel).toBe('Chờ thực hiện');
+      expect((normalized.children[0] as any).priorityLabel).toBe('Bình thường');
     });
 
     it('should normalize document payloads', () => {

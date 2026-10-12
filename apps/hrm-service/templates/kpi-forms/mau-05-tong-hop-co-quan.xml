@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 05: Dự thảo quyết định & Bảng tổng hợp xếp loại chất lượng toàn cơ quan
+  Căn cứ: Quy định số 348-QĐ/BTCTW, Hướng dẫn số 05-HD/TU, Quy định số 01-QĐ/BTCTU
+  Nguyên tắc khống chế: Trần Xuất sắc <= 20% tổng số Hoàn thành tốt trở lên; 
+                        Xếp loại Người đứng đầu <= Xếp loại tập thể phòng.
+-->
+<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_05" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DecisionNumber>{{decisionNumber}}</DecisionNumber>
+    <DecisionDate>{{decisionDate}}</DecisionDate>
+    <DocumentTitle>QUYẾT ĐỊNH VỀ VIỆC PHÊ DUYỆT KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG CÁN BỘ, CÔNG CHỨC</DocumentTitle>
+    <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
+    <PeriodYear>{{periodYear}}</PeriodYear>
+    <PeriodQuarter>{{periodQuarter}}</PeriodQuarter>
+  </Header>
+
+  <LegalBasis>
+    <Item>Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về tiêu chuẩn, tiêu chí đánh giá cán bộ;</Item>
+    <Item>Căn cứ Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy về phân cấp quản lý cán bộ;</Item>
+    <Item>Căn cứ Hướng dẫn số 05-HD/TU của Ban Thường vụ Tỉnh ủy Đắk Lắk;</Item>
+    <Item>Căn cứ Quy định số 01-QĐ/BTCTU của Ban Tổ chức Tỉnh ủy Đắk Lắk;</Item>
+    <Item>Xét đề nghị của Hội đồng Thi đua - Khen thưởng và Đánh giá cơ quan Ban Tổ chức Tỉnh ủy.</Item>
+  </LegalBasis>
+
+  <AgencyStatisticsSummary>
+    <TotalOfficers count="24"/>
+    <TotalEvaluated count="24"/>
+    <ExcellentQuotaControl>
+      <GoodOrBetterTotal>{{goodOrBetterCount}}</GoodOrBetterTotal>
+      <MaxExcellentAllowed20Pct>{{maxExcellentAllowed}}</MaxExcellentAllowed20Pct>
+      <ActualExcellentApproved>{{actualExcellentApproved}}</ActualExcellentApproved>
+      <QuotaComplianceStatus>COMPLIANT</QuotaComplianceStatus>
+    </ExcellentQuotaControl>
+  </AgencyStatisticsSummary>
+
+  <CollectiveRankings>
+    <CollectiveItem code="TT-01" name="Lãnh đạo Ban" rank="{{rank_TT01}}"/>
+    <CollectiveItem code="TT-02" name="Phòng Tổ chức đảng, đảng viên" rank="{{rank_TT02}}"/>
+    <CollectiveItem code="TT-03" name="Phòng Tổ chức cán bộ" rank="{{rank_TT03}}"/>
+    <CollectiveItem code="TT-04" name="Phòng Bảo vệ chính trị nội bộ" rank="{{rank_TT04}}"/>
+    <CollectiveItem code="TT-05" name="Văn phòng Ban" rank="{{rank_TT05}}"/>
+  </CollectiveRankings>
+
+  <IndividualFinalRankings count="24">
+    <!-- Danh sách xếp loại chính thức toàn cơ quan -->
+    <OfficerRankingItem id="1">
+      <EmployeeCode>{{empCode_1}}</EmployeeCode>
+      <FullName>{{empName_1}}</FullName>
+      <DepartmentName>{{deptName_1}}</DepartmentName>
+      <JobTitle>{{jobTitle_1}}</JobTitle>
+      <TotalScore>{{totalScore_1}}</TotalScore>
+      <OfficialRank>{{officialRank_1}}</OfficialRank>
+      <UnitLeaderCapApplied>{{unitLeaderCapApplied_1}}</UnitLeaderCapApplied>
+    </OfficerRankingItem>
+    <OfficerRankingItem id="2">
+      <EmployeeCode>{{empCode_2}}</EmployeeCode>
+      <FullName>{{empName_2}}</FullName>
+      <DepartmentName>{{deptName_2}}</DepartmentName>
+      <JobTitle>{{jobTitle_2}}</JobTitle>
+      <TotalScore>{{totalScore_2}}</TotalScore>
+      <OfficialRank>{{officialRank_2}}</OfficialRank>
+      <UnitLeaderCapApplied>{{unitLeaderCapApplied_2}}</UnitLeaderCapApplied>
+    </OfficerRankingItem>
+  </IndividualFinalRankings>
+
+  <DecisionTerms>
+    <Article1>Phê duyệt kết quả đánh giá, xếp loại chất lượng đối với 05 tập thể phòng và 24 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy theo danh sách trên.</Article1>
+    <Article2>Kết quả đánh giá, xếp loại là căn cứ để thực hiện công tác thi đua, khen thưởng, quy hoạch, đào tạo, bổ nhiệm và thực hiện chế độ chính sách đối với cán bộ, công chức.</Article2>
+    <Article3>Chánh Văn phòng, Trưởng các phòng chuyên môn và các cá nhân có tên tại Điều 1 chịu trách nhiệm thi hành Quyết định này.</Article3>
+  </DecisionTerms>
+
+  <PromulgationSignature>
+    <SignerPlace>Thành phố Buôn Ma Thuột</SignerPlace>
+    <SignerTitle>TRƯỞNG BAN TỔ CHỨC TỈNH ỦY</SignerTitle>
+    <SignerName>{{headOfAgencyName}}</SignerName>
+    <PromulgatedDate>{{promulgatedDate}}</PromulgatedDate>
+    <DigitalSignatureVerification>
+      <Status>VERIFIED</Status>
+      <CertificateOrg>Ban Cơ yếu Chính phủ - CA Chuyên dùng</CertificateOrg>
+      <DigitalSignature>{{agencyHeadDigitalSignature}}</DigitalSignature>
+    </DigitalSignatureVerification>
+  </PromulgationSignature>
+</KpiFormDocument>

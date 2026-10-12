@@ -18,6 +18,12 @@ service KpiService {
   rpc SubmitEvaluation (SubmitEvaluationRequest) returns (EvaluationResponse) {}
   rpc ApproveEvaluation (ApproveEvaluationRequest) returns (EvaluationResponse) {}
   rpc GetEvaluationStats (GetEvaluationStatsRequest) returns (GetEvaluationStatsResponse) {}
+  rpc FindFormTemplates (FindFormTemplatesRequest) returns (FormTemplatesResponse) {}
+  rpc GetFormTemplateDetail (GetFormTemplateDetailRequest) returns (FormTemplateDetailResponse) {}
+  rpc UpdateFormTemplate (UpdateFormTemplateRequest) returns (FormTemplateDetailResponse) {}
+  rpc GetFormTemplateXml (GetFormTemplateXmlRequest) returns (FormTemplateXmlResponse) {}
+  rpc SaveFormTemplateXml (SaveFormTemplateXmlRequest) returns (FormTemplateXmlResponse) {}
+  rpc ValidateFormTemplateXml (ValidateFormTemplateXmlRequest) returns (ValidateFormTemplateXmlResponse) {}
 }
 
 message FindPeriodsRequest {}
@@ -215,3 +221,77 @@ message GetEvaluationStatsResponse {
   }
   StatsData data = 3;
 }
+
+message FindFormTemplatesRequest {
+  optional string organizationId = 1;
+}
+
+message FormTemplateItem {
+  string formCode = 1;
+  string name = 2;
+  string description = 3;
+  string templateFileId = 4;
+  string createdAt = 5;
+  string updatedAt = 6;
+  string category = 7;
+  string targetRole = 8;
+  string schemaVersion = 9;
+  int32 documentCount = 10;
+  bool hasXmlFile = 11;
+  int32 xmlSize = 12;
+}
+
+message FormTemplatesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated FormTemplateItem data = 3;
+}
+
+message GetFormTemplateDetailRequest {
+  string formCode = 1;
+}
+
+message FormTemplateDetailResponse {
+  bool success = 1;
+  string message = 2;
+  FormTemplateItem data = 3;
+  string xmlContent = 4;
+  repeated string placeholders = 5;
+}
+
+message UpdateFormTemplateRequest {
+  string formCode = 1;
+  string name = 2;
+  string description = 3;
+  optional string templateFileId = 4;
+}
+
+message GetFormTemplateXmlRequest {
+  string formCode = 1;
+}
+
+message FormTemplateXmlResponse {
+  bool success = 1;
+  string message = 2;
+  string formCode = 3;
+  string xmlContent = 4;
+  repeated string placeholders = 5;
+  int32 xmlSize = 6;
+}
+
+message SaveFormTemplateXmlRequest {
+  string formCode = 1;
+  string xmlContent = 2;
+}
+
+message ValidateFormTemplateXmlRequest {
+  string xmlContent = 1;
+}
+
+message ValidateFormTemplateXmlResponse {
+  bool isValid = 1;
+  string message = 2;
+  optional string error = 3;
+  repeated string placeholders = 4;
+}
+

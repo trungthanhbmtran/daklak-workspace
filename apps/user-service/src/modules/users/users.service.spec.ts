@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RpcException } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-import { IntegrationAuthService } from '../integration-config/integration-auth.service';
 import { AuthDeviceStore } from './auth-device.store';
 import { AuthSessionStore } from './auth-session.store';
 import { UsersService } from './users.service';
 import { PrismaService } from '@/database/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
 describe('UsersService', () => {
   let service: UsersService;
   let prisma: {
@@ -30,7 +30,13 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: prisma },
         { provide: 'NOTIFICATION_SERVICE', useValue: { emit: jest.fn() } },
-        { provide: 'WORKFLOW_SERVICE', useValue: { send: jest.fn() } },
+        {
+          provide: 'WORKFLOW_SERVICE',
+          useValue: {
+            send: jest.fn(),
+            getService: jest.fn(() => ({ TriggerWorkflow: jest.fn() })),
+          },
+        },
         {
           provide: CACHE_MANAGER,
           useValue: { get: jest.fn(), set: jest.fn() },
@@ -42,10 +48,6 @@ describe('UsersService', () => {
               k === 'JWT_EXPIRES_IN' ? '1h' : 'secret',
             ),
           },
-        },
-        {
-          provide: IntegrationAuthService,
-          useValue: { signAccessToken: jest.fn(() => 'mock-jwt') },
         },
         { provide: AuthDeviceStore, useValue: {} },
         {

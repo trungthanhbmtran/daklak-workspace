@@ -3,6 +3,13 @@ import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
 import { lastValueFrom } from 'rxjs';
+import {
+  DEFAULT_KPI_FORM_TEMPLATES,
+  getTemplateXmlContent,
+  saveTemplateXmlContent,
+  extractPlaceholders,
+  validateXmlSyntax,
+} from './kpi-template-xml.util';
 
 @Injectable()
 export class KpiEvaluationsService implements OnModuleInit {
@@ -300,5 +307,200 @@ export class KpiEvaluationsService implements OnModuleInit {
       data: { status: 'APPROVED', reviewerCode: reviewerCode }
     });
     return { success: true, message: 'Đã chốt phiếu đánh giá', data: JSON.stringify({ status: 'APPROVED' }) };
+  }
+
+  // 4. Quản lý Biểu mẫu Đánh giá (KpiFormTemplate & File XML Mẫu)
+  async findFormTemplates(query?: any) {
+    let dbTemplates = await this.prisma.kpiFormTemplate.findMany({
+      include: {
+        _count: {
+          select: { documents: true },
+        },
+      },
+      orderBy: { formCode: 'asc' },
+    });
+
+    if (dbTemplates.length < DEFAULT_KPI_FORM_TEMPLATES.length) {
+      for (const def of DEFAULT_KPI_FORM_TEMPLATES) {
+        const found = dbTemplates.find((t) => t.formCode === def.formCode);
+        if (!found) {
+          await this.prisma.kpiFormTemplate.upsert({
+            where: { formCode: def.formCode },
+            update: {
+              name: def.name,
+              description: def.description,
+              templateFileId: def.fileName,
+            },
+            create: {
+              formCode: def.formCode,
+              name: def.name,
+              description: def.description,
+              templateFileId: def.fileName,
+            },
+          });
+        }
+      }
+
+      dbTemplates = await this.prisma.kpiFormTemplate.findMany({
+        include: {
+          _count: {
+            select: { documents: true },
+          },
+        },
+        orderBy: { formCode: 'asc' },
+      });
+    }
+
+    const data = dbTemplates.map((item) => {
+      const def = DEFAULT_KPI_FORM_TEMPLATES.find((t) => t.formCode === item.formCode);
+      const xml = getTemplateXmlContent(item.formCode);
+      const xmlSize = Buffer.byteLength(xml, 'utf8');
+
+      return {
+        formCode: item.formCode,
+        name: item.name,
+        description: item.description || '',
+        templateFileId: item.templateFileId || def?.fileName || '',
+        createdAt: item.createdAt ? item.createdAt.toISOString() : '',
+        updatedAt: item.updatedAt ? item.updatedAt.toISOString() : '',
+        category: def?.category || 'Biểu mẫu đánh giá',
+        targetRole: def?.targetRole || 'Toàn thể cán bộ',
+        schemaVersion: def?.schemaVersion || '1.0',
+        documentCount: (item as any)._count?.documents || 0,
+        hasXmlFile: true,
+        xmlSize,
+      };
+    });
+
+    return {
+      success: true,
+      message: 'Lấy danh sách biểu mẫu thành công',
+      data,
+    };
+  }
+
+  async getFormTemplateDetail(formCode: string) {
+    let item = await this.prisma.kpiFormTemplate.findUnique({
+      where: { formCode },
+      include: {
+        _count: {
+          select: { documents: true },
+        },
+      },
+    });
+
+    const def = DEFAULT_KPI_FORM_TEMPLATES.find((t) => t.formCode === formCode);
+    if (!item && def) {
+      item = await this.prisma.kpiFormTemplate.create({
+        data: {
+          formCode: def.formCode,
+          name: def.name,
+          description: def.description,
+          templateFileId: def.fileName,
+        },
+        include: {
+          _count: {
+            select: { documents: true },
+          },
+        },
+      });
+    }
+
+    if (!item) {
+      throw new RpcException({ message: `Không tìm thấy biểu mẫu ${formCode}`, code: 5 });
+    }
+
+    const xmlContent = getTemplateXmlContent(formCode);
+    const placeholders = extractPlaceholders(xmlContent);
+    const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
+
+    return {
+      success: true,
+      message: 'Lấy chi tiết biểu mẫu thành công',
+      data: {
+        formCode: item.formCode,
+        name: item.name,
+        description: item.description || '',
+        templateFileId: item.templateFileId || def?.fileName || '',
+        createdAt: item.createdAt ? item.createdAt.toISOString() : '',
+        updatedAt: item.updatedAt ? item.updatedAt.toISOString() : '',
+        category: def?.category || 'Biểu mẫu đánh giá',
+        targetRole: def?.targetRole || 'Toàn thể cán bộ',
+        schemaVersion: def?.schemaVersion || '1.0',
+        documentCount: (item as any)._count?.documents || 0,
+        hasXmlFile: true,
+        xmlSize,
+      },
+      xmlContent,
+      placeholders,
+    };
+  }
+
+  async updateFormTemplate(formCode: string, payload: any) {
+    await this.prisma.kpiFormTemplate.update({
+      where: { formCode },
+      data: {
+        name: payload.name,
+        description: payload.description,
+        templateFileId: payload.templateFileId,
+      },
+    });
+
+    return this.getFormTemplateDetail(formCode);
+  }
+
+  async getFormTemplateXml(formCode: string) {
+    const xmlContent = getTemplateXmlContent(formCode);
+    const placeholders = extractPlaceholders(xmlContent);
+    const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
+
+    return {
+      success: true,
+      message: 'Lấy file XML mẫu thành công',
+      formCode,
+      xmlContent,
+      placeholders,
+      xmlSize,
+    };
+  }
+
+  async saveFormTemplateXml(formCode: string, xmlContent: string) {
+    const validation = validateXmlSyntax(xmlContent);
+    if (!validation.isValid) {
+      throw new RpcException({
+        code: 3,
+        message: `XML không hợp lệ: ${validation.error}`,
+      });
+    }
+
+    saveTemplateXmlContent(formCode, xmlContent);
+    const placeholders = extractPlaceholders(xmlContent);
+    const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
+
+    await this.prisma.kpiFormTemplate.updateMany({
+      where: { formCode },
+      data: { updatedAt: new Date() },
+    });
+
+    return {
+      success: true,
+      message: `Đã lưu file XML mẫu ${formCode} thành công`,
+      formCode,
+      xmlContent,
+      placeholders,
+      xmlSize,
+    };
+  }
+
+  async validateFormTemplateXml(xmlContent: string) {
+    const validation = validateXmlSyntax(xmlContent);
+    const placeholders = validation.isValid ? extractPlaceholders(xmlContent) : [];
+
+    return {
+      isValid: validation.isValid,
+      message: validation.isValid ? 'Cú pháp XML hợp lệ' : (validation.error || 'Cú pháp XML không hợp lệ'),
+      error: validation.error,
+      placeholders,
+    };
   }
 }

@@ -69,4 +69,34 @@ export class KpiEvaluationsController {
     const payload = JSON.parse(data.data);
     return this.kpiEvaluationsService.approveReviewerScore(data.id, payload, data.reviewerCode);
   }
+
+  @GrpcMethod('KpiService', 'FindFormTemplates')
+  findFormTemplates(data: any) {
+    return this.kpiEvaluationsService.findFormTemplates(data);
+  }
+
+  @GrpcMethod('KpiService', 'GetFormTemplateDetail')
+  getFormTemplateDetail(data: { formCode: string }) {
+    return this.kpiEvaluationsService.getFormTemplateDetail(data.formCode);
+  }
+
+  @GrpcMethod('KpiService', 'UpdateFormTemplate')
+  updateFormTemplate(data: any) {
+    return this.kpiEvaluationsService.updateFormTemplate(data.formCode, data);
+  }
+
+  @GrpcMethod('KpiService', 'GetFormTemplateXml')
+  getFormTemplateXml(data: { formCode: string }) {
+    return this.kpiEvaluationsService.getFormTemplateXml(data.formCode);
+  }
+
+  @GrpcMethod('KpiService', 'SaveFormTemplateXml')
+  saveFormTemplateXml(data: { formCode: string; xmlContent: string }) {
+    return this.kpiEvaluationsService.saveFormTemplateXml(data.formCode, data.xmlContent);
+  }
+
+  @GrpcMethod('KpiService', 'ValidateFormTemplateXml')
+  validateFormTemplateXml(data: { xmlContent: string }) {
+    return this.kpiEvaluationsService.validateFormTemplateXml(data.xmlContent);
+  }
 }

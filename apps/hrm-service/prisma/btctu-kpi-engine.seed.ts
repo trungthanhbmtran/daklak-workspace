@@ -86,11 +86,36 @@ export async function seedBtctuKpiEngine(prisma: PrismaClient) {
 
   // 3. Nạp danh mục biểu mẫu hành chính (Forms 01 - 05)
   const forms = [
-    { formCode: 'MAU_01', name: 'Bản đăng ký khung danh mục sản phẩm / công việc chuẩn đầu kỳ', description: 'Đăng ký công việc đầu kỳ' },
-    { formCode: 'MAU_02', name: 'Bản tự đánh giá, chấm điểm KPI/OKR cá nhân hằng quý', description: 'Cá nhân tự đánh giá' },
-    { formCode: 'MAU_03', name: 'Bảng tổng hợp kết quả đánh giá tập thể phòng', description: 'Tổng hợp đánh giá cấp phòng' },
-    { formCode: 'MAU_04', name: 'Bảng kê khai sản phẩm / nhiệm vụ nổi trội, vượt mức', description: 'Khai báo thành tích nổi trội' },
-    { formCode: 'MAU_05', name: 'Dự thảo quyết định phê duyệt xếp loại chất lượng hằng quý', description: 'Quyết định chốt xếp loại của Lãnh đạo Ban' },
+    {
+      formCode: 'MAU_01',
+      name: 'Bản đăng ký khung danh mục sản phẩm, công việc chuẩn đầu kỳ',
+      description: 'Áp dụng cho chuyên viên và cán bộ đăng ký khung khối lượng, độ khó và hạn định công việc đầu kỳ đánh giá.',
+      templateFileId: 'mau-01-dang-ky-dau-ky.xml',
+    },
+    {
+      formCode: 'MAU_02',
+      name: 'Bản tự đánh giá, chấm điểm KPI/OKR cá nhân định kỳ',
+      description: 'Phiếu tự chấm điểm 30đ tiêu chí chung và 70đ kết quả công việc 4 thành tố (Khối lượng, Chất lượng, Tiến độ, Thái độ).',
+      templateFileId: 'mau-02-tu-danh-gia-ca-nhan.xml',
+    },
+    {
+      formCode: 'MAU_03',
+      name: 'Bản nhận xét, đánh giá của cấp ủy và tập thể lãnh đạo phòng',
+      description: 'Phiếu nhận xét ưu/khuyết điểm, xếp loại của Chi bộ và đánh giá của Lãnh đạo phòng trực tiếp.',
+      templateFileId: 'mau-03-nhan-xet-tap-the.xml',
+    },
+    {
+      formCode: 'MAU_04',
+      name: 'Bảng tổng hợp kết quả đánh giá tập thể phòng & nhiệm vụ nổi trội',
+      description: 'Tổng hợp phân bổ xếp loại của phòng, trừ điểm chất lượng (-5%, -15%, -35%) và cộng thưởng việc nổi trội (+10%).',
+      templateFileId: 'mau-04-tong-hop-phong.xml',
+    },
+    {
+      formCode: 'MAU_05',
+      name: 'Dự thảo quyết định & Bảng tổng hợp xếp loại toàn cơ quan',
+      description: 'Quyết định chốt xếp loại của Trưởng ban, áp dụng trần 20% Hoàn thành xuất sắc và trần Người đứng đầu.',
+      templateFileId: 'mau-05-tong-hop-co-quan.xml',
+    },
   ];
 
   for (const f of forms) {

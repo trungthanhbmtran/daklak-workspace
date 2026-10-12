@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 04: Bảng tổng hợp kết quả đánh giá tập thể phòng & kê khai nhiệm vụ nổi trội, vượt mức
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 01-QĐ/BTCTU
+-->
+<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_04" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DepartmentName>{{departmentName}}</DepartmentName>
+    <DepartmentCode>{{departmentCode}}</DepartmentCode>
+    <DocumentTitle>BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG CỦA ĐƠN VỊ</DocumentTitle>
+    <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
+    <PeriodYear>{{periodYear}}</PeriodYear>
+    <PeriodQuarter>{{periodQuarter}}</PeriodQuarter>
+  </Header>
+
+  <DepartmentStatistics totalStaff="{{totalStaffCount}}" evaluatedStaff="{{evaluatedStaffCount}}">
+    <StaffRankDistribution>
+      <ExcellentCount proposed="{{excellentProposedCount}}" maxAllowed20Pct="{{maxExcellentAllowed}}"/>
+      <GoodCount>{{goodCount}}</GoodCount>
+      <FairCount>{{fairCount}}</FairCount>
+      <PoorCount>{{poorCount}}</PoorCount>
+    </StaffRankDistribution>
+  </DepartmentStatistics>
+
+  <StaffSummaryTable>
+    <StaffRow orderNumber="1">
+      <EmployeeCode>{{empCode_1}}</EmployeeCode>
+      <FullName>{{empName_1}}</FullName>
+      <JobTitle>{{empJobTitle_1}}</JobTitle>
+      <GeneralScore>{{empGenScore_1}}</GeneralScore>
+      <TaskScore>{{empTaskScore_1}}</TaskScore>
+      <QualityPenaltyTier>{{empPenaltyTier_1}}</QualityPenaltyTier>
+      <TotalScore>{{empTotalScore_1}}</TotalScore>
+      <ProposedRank>{{empProposedRank_1}}</ProposedRank>
+      <IsOutstandingBonus>{{empIsBonus_1}}</IsOutstandingBonus>
+      <OutstandingTaskNotes>{{empBonusNotes_1}}</OutstandingTaskNotes>
+    </StaffRow>
+    <StaffRow orderNumber="2">
+      <EmployeeCode>{{empCode_2}}</EmployeeCode>
+      <FullName>{{empName_2}}</FullName>
+      <JobTitle>{{empJobTitle_2}}</JobTitle>
+      <GeneralScore>{{empGenScore_2}}</GeneralScore>
+      <TaskScore>{{empTaskScore_2}}</TaskScore>
+      <QualityPenaltyTier>{{empPenaltyTier_2}}</QualityPenaltyTier>
+      <TotalScore>{{empTotalScore_2}}</TotalScore>
+      <ProposedRank>{{empProposedRank_2}}</ProposedRank>
+      <IsOutstandingBonus>{{empIsBonus_2}}</IsOutstandingBonus>
+      <OutstandingTaskNotes>{{empBonusNotes_2}}</OutstandingTaskNotes>
+    </StaffRow>
+  </StaffSummaryTable>
+
+  <OutstandingTasksRegistry>
+    <RegistryItem>
+      <EmployeeName>{{bonusEmployeeName}}</EmployeeName>
+      <TaskTitle>{{bonusTaskTitle}}</TaskTitle>
+      <DomainCode>{{bonusDomainCode}}</DomainCode>
+      <AchievementsSummary>{{bonusAchievements}}</AchievementsSummary>
+      <BonusScoreAdded>+10%</BonusScoreAdded>
+    </RegistryItem>
+  </OutstandingTasksRegistry>
+
+  <DepartmentSignatures>
+    <Compiler>
+      <Name>{{compilerName}}</Name>
+      <Title>Người tổng hợp</Title>
+      <Date>{{compileDate}}</Date>
+      <DigitalSignature>{{compilerDigitalSignature}}</DigitalSignature>
+    </Compiler>
+    <DepartmentHead>
+      <Name>{{departmentHeadName}}</Name>
+      <Title>{{departmentHeadTitle}}</Title>
+      <Date>{{departmentHeadDate}}</Date>
+      <DigitalSignature>{{departmentHeadDigitalSignature}}</DigitalSignature>
+    </DepartmentHead>
+  </DepartmentSignatures>
+</KpiFormDocument>

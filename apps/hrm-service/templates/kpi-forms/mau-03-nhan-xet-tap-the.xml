@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 03: Bản nhận xét, đánh giá của cấp ủy, tập thể lãnh đạo phòng nơi công tác
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 01-QĐ/BTCTU
+-->
+<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_03" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>BẢN NHẬN XÉT, ĐÁNH GIÁ CỦA CẤP ỦY VÀ TẬP THỂ LÃNH ĐẠO PHÒNG</DocumentTitle>
+    <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
+    <PeriodYear>{{periodYear}}</PeriodYear>
+    <PeriodQuarter>{{periodQuarter}}</PeriodQuarter>
+  </Header>
+
+  <EvaluatedOfficer>
+    <EmployeeCode>{{employeeCode}}</EmployeeCode>
+    <FullName>{{fullName}}</FullName>
+    <DepartmentName>{{departmentName}}</DepartmentName>
+    <JobTitle>{{jobTitle}}</JobTitle>
+    <SelfRating>{{selfClassification}}</SelfRating>
+    <SelfScore>{{totalScoreSelf}}</SelfScore>
+  </EvaluatedOfficer>
+
+  <CollectiveFeedback>
+    <PartyBranchComments>
+      <BranchName>{{partyBranchName}}</BranchName>
+      <PoliticalStance>{{politicalStanceComment}}</PoliticalStance>
+      <EthicalQualities>{{ethicalQualitiesComment}}</EthicalQualities>
+      <CommunityRelations>{{communityRelationsComment}}</CommunityRelations>
+      <PartyBranchRating>{{partyBranchRating}}</PartyBranchRating>
+    </PartyBranchComments>
+
+    <DepartmentLeadershipComments>
+      <WorkAttitudeComment>{{workAttitudeComment}}</WorkAttitudeComment>
+      <TaskExecutionComment>{{taskExecutionComment}}</TaskExecutionComment>
+      <TeamCoordinationComment>{{teamCoordinationComment}}</TeamCoordinationComment>
+      <IdentifiedShortcomings>{{identifiedShortcomings}}</IdentifiedShortcomings>
+      <ImprovementDirections>{{improvementDirections}}</ImprovementDirections>
+    </DepartmentLeadershipComments>
+  </CollectiveFeedback>
+
+  <DepartmentRatingConclusion>
+    <GeneralScoreApproved>{{generalScoreApproved}}</GeneralScoreApproved>
+    <TaskScoreApproved>{{taskScoreApproved}}</TaskScoreApproved>
+    <TotalScoreApproved>{{totalScoreApproved}}</TotalScoreApproved>
+    <DepartmentRankProposed>{{departmentRankProposed}}</DepartmentRankProposed>
+    <IsEligibleForBonus>{{isEligibleForBonus}}</IsEligibleForBonus>
+  </DepartmentRatingConclusion>
+
+  <Signatures>
+    <PartyBranchRepresentative>
+      <RepresentativeName>{{partyBranchSecretaryName}}</RepresentativeName>
+      <Title>Bí thư Chi bộ</Title>
+      <Date>{{partyBranchDate}}</Date>
+      <DigitalSignature>{{partyBranchDigitalSignature}}</DigitalSignature>
+    </PartyBranchRepresentative>
+    <DepartmentHead>
+      <HeadName>{{departmentHeadName}}</HeadName>
+      <Title>{{departmentHeadTitle}}</Title>
+      <Date>{{departmentHeadDate}}</Date>
+      <DigitalSignature>{{departmentHeadDigitalSignature}}</DigitalSignature>
+    </DepartmentHead>
+  </Signatures>
+</KpiFormDocument>

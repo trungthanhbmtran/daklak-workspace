@@ -6,7 +6,8 @@ import {
   ListTodo,
   Library,
   Settings,
-  Calculator
+  Calculator,
+  FileText
 } from "lucide-react";
 
 export default function WorkPlansLayout({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,11 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
       name: "Công thức tính KPI",
       href: "/services/hrm/work-plans/kpi-formulas",
       icon: Calculator,
+    },
+    {
+      name: "Mẫu đánh giá",
+      href: "/services/hrm/work-plans/evaluation-forms",
+      icon: FileText,
     }
   ];
 

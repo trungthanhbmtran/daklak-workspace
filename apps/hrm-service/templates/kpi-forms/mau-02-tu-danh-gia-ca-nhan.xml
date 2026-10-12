@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 02: Bản tự đánh giá, chấm điểm KPI/OKR cá nhân định kỳ (Quý/Năm)
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 01-QĐ/BTCTU
+  Công thức: Điểm tổng (100đ) = Điểm tiêu chí chung (30đ) + Điểm kết quả công việc (70đ)
+-->
+<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="MAU_02" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>BẢN TỰ ĐÁNH GIÁ, CHẤM ĐIỂM KPI/OKR CÁ NHÂN ĐỊNH KỲ</DocumentTitle>
+    <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
+    <PeriodYear>{{periodYear}}</PeriodYear>
+    <PeriodQuarter>{{periodQuarter}}</PeriodQuarter>
+  </Header>
+
+  <OfficerProfile>
+    <EmployeeCode>{{employeeCode}}</EmployeeCode>
+    <FullName>{{fullName}}</FullName>
+    <DepartmentName>{{departmentName}}</DepartmentName>
+    <DepartmentCode>{{departmentCode}}</DepartmentCode>
+    <JobTitle>{{jobTitle}}</JobTitle>
+    <JobPositionCode>{{jobPositionCode}}</JobPositionCode>
+    <StaffingSlotId>{{staffingSlotId}}</StaffingSlotId>
+    <RankCode>{{rankCode}}</RankCode>
+  </OfficerProfile>
+
+  <SectionA_GeneralCriteria maxScore="30.0" selfScore="{{generalScoreSelf}}" finalScore="{{generalScoreFinal}}">
+    <!-- Nhóm 1: Tiêu chí chung (Tối đa 30 điểm) -->
+    <Criterion code="C_01" maxScore="10.0">
+      <Name>Tư tưởng chính trị, đạo đức, lối sống</Name>
+      <Description>Tuyệt đối trung thành với Đảng, Nhà nước; giữ gìn đoàn kết nội bộ, phẩm chất đạo đức lối sống lành mạnh.</Description>
+      <SelfScore>{{score_C01_self}}</SelfScore>
+      <ReviewerScore>{{score_C01_final}}</ReviewerScore>
+    </Criterion>
+    <Criterion code="C_02" maxScore="10.0">
+      <Name>Tác phong, lề lối làm việc và ý thức kỷ luật</Name>
+      <Description>Chấp hành nghiêm thời giờ làm việc, văn hóa công sở, quy chế văn thư lưu trữ và kỷ luật phát ngôn.</Description>
+      <SelfScore>{{score_C02_self}}</SelfScore>
+      <ReviewerScore>{{score_C02_final}}</ReviewerScore>
+    </Criterion>
+    <Criterion code="C_03" maxScore="10.0">
+      <Name>Ý thức trách nhiệm và tuân thủ quy định ATTT</Name>
+      <Description>Tuân thủ an toàn thông tin Cấp độ 3, bảo vệ bí mật Nhà nước và hồ sơ dữ liệu cán bộ 2C.</Description>
+      <SelfScore>{{score_C03_self}}</SelfScore>
+      <ReviewerScore>{{score_C03_final}}</ReviewerScore>
+    </Criterion>
+  </SectionA_GeneralCriteria>
+
+  <SectionB_TaskPerformance maxScore="70.0" selfScore="{{taskScoreSelf}}" finalScore="{{taskScoreFinal}}">
+    <!-- Nhóm 2: Kết quả thực hiện nhiệm vụ chuyên môn theo 4 thành tố (Tối đa 70 điểm) -->
+    <FormulaDescription>KPI_Task = (A% * w_A) + (B% * w_B) + (C% * w_C) + (D% * w_D)</FormulaDescription>
+    
+    <EvaluatedTasks count="{{evaluatedTaskCount}}">
+      <TaskDetail id="{{taskId_1}}">
+        <TaskName>{{taskName_1}}</TaskName>
+        <DomainCode>{{domainCode_1}}</DomainCode>
+        <VolumeFactorA plannedQty="{{plannedQty_1}}" actualQty="{{actualQty_1}}" completionPct="{{volPct_1}}" weight="{{w_A_1}}"/>
+        <QualityFactorB errorSeverity="{{errorSeverity_1}}" qualityPct="{{qualPct_1}}" weight="{{w_B_1}}"/>
+        <ProgressFactorC deadlineDays="{{deadlineDays_1}}" actualDays="{{actualDays_1}}" progressPct="{{progPct_1}}" weight="{{w_C_1}}"/>
+        <AttitudeFactorD score="{{attitudeScore_1}}" attitudePct="{{attPct_1}}" weight="{{w_D_1}}"/>
+        <TaskKpiScore>{{taskKpiScore_1}}</TaskKpiScore>
+        <IsOutstanding>{{isOutstanding_1}}</IsOutstanding>
+      </TaskDetail>
+    </EvaluatedTasks>
+
+    <DeductionsAndPenalties>
+      <LgspSyncErrors count="{{failedLgspCount}}" penaltyPoints="{{lgspPenaltyPoints}}"/>
+      <QualityPenaltyTier appliedTier="{{qualityPenaltyTier}}" penaltyPct="{{qualityPenaltyPct}}"/>
+      <LateDeadlineDays count="{{lateDaysCount}}" penaltyPoints="{{latePenaltyPoints}}"/>
+    </DeductionsAndPenalties>
+  </SectionB_TaskPerformance>
+
+  <SummaryResults>
+    <GeneralScoreTotal>{{generalScoreSelf}}</GeneralScoreTotal>
+    <TaskScoreTotal>{{taskScoreSelf}}</TaskScoreTotal>
+    <TotalScoreSelf>{{totalScoreSelf}}</TotalScoreSelf>
+    <TotalScoreFinal>{{totalScoreFinal}}</TotalScoreFinal>
+    <SelfClassification>{{selfClassification}}</SelfClassification>
+    <ProposedClassification>{{proposedClassification}}</ProposedClassification>
+  </SummaryResults>
+
+  <WorkflowSignatures>
+    <OfficerSignature>
+      <SignerName>{{fullName}}</SignerName>
+      <SignedAt>{{signedAt}}</SignedAt>
+      <DigitalSignature>{{officerDigitalSignature}}</DigitalSignature>
+    </OfficerSignature>
+    <DepartmentReviewerSignature>
+      <ReviewerName>{{reviewerName}}</ReviewerName>
+      <ReviewerTitle>{{reviewerTitle}}</ReviewerTitle>
+      <ReviewedAt>{{reviewedAt}}</ReviewedAt>
+      <Comments>{{reviewerComments}}</Comments>
+      <DigitalSignature>{{reviewerDigitalSignature}}</DigitalSignature>
+    </DepartmentReviewerSignature>
+  </WorkflowSignatures>
+</KpiFormDocument>

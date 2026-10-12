@@ -8,6 +8,7 @@ import { MasterPlansController } from './master-plans.controller';
 import { MasterPlansService } from './master-plans.service';
 import { TaskTemplatesController } from './task-templates.controller';
 import { RankQuotasController } from './rank-quotas.controller';
+import { KpiFormsController } from './kpi-forms.controller';
 import { TasksService } from './tasks.service';
 import { EmployeeService } from './employee.service';
 
@@ -17,6 +18,7 @@ import { EmployeeService } from './employee.service';
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.TASK),
+    registerGrpcService(MICROSERVICES.KPI),
     registerGrpcService(MICROSERVICES.MASTER_PLAN),
     registerGrpcService(MICROSERVICES.RANK_QUOTA),
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
@@ -28,6 +30,7 @@ import { EmployeeService } from './employee.service';
     MasterPlansController,
     TaskTemplatesController,
     RankQuotasController,
+    KpiFormsController,
   ],
   providers: [TasksService, MasterPlansService, EmployeeService],
 })

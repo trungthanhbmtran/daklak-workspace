@@ -4,7 +4,33 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
-- [x] **[Backend & Architecture] Mở Rộng Chuẩn Hóa Ngôn Ngữ & Tìm Kiếm Đồng Nhất Trên Toàn Bộ Microservices (HRM, Document, Posts, Workflow, API Gateway) (12/10/2026)**
+- [x] **[Feature & Templates] Tạo Các File XML Biểu Mẫu, Chức Năng Quản Lý File Mẫu & Nơi Chứa Mẫu Đánh Giá (12/10/2026)**
+  - **Yêu cầu**: Tạo các file XML các mẫu (Mẫu 01 đến Mẫu 05 chuẩn Ban Tổ chức Tỉnh ủy theo Hướng dẫn 05-HD/TU & Quy định 01-QĐ/BTCTU), xây dựng chức năng quản lý file mẫu (xem, tải về, tải lên, validate cú pháp, render dữ liệu XML), và xây dựng nơi chứa mẫu đánh giá (Evaluation Forms Center) trong CSDL và UI quản trị công việc.
+  - **Chi tiết**:
+    1. Khởi tạo 05 file XML mẫu chuẩn định dạng hành chính Đảng (`mau-01-dang-ky-dau-ky.xml`, `mau-02-tu-danh-gia-ca-nhan.xml`, `mau-03-nhan-xet-tap-the.xml`, `mau-04-tong-hop-phong.xml`, `mau-05-tong-hop-co-quan.xml`).
+    2. Xây dựng chức năng quản lý file mẫu (XML Template Engine, gRPC service, API Gateway `/api/v1/admin/hrm/kpi-forms`, validator XML và preview/download/edit).
+    3. Xây dựng nơi chứa mẫu đánh giá: Tab "Mẫu đánh giá" tại `/services/hrm/work-plans/evaluation-forms` (giao diện hiện đại, tra cứu, xem trước XML trong Sheet, quản lý metadata, tải file XML).
+    4. Nạp dữ liệu 05 mẫu đánh giá chuẩn vào CSDL `kpi_form_templates` và liên kết với file XML tương ứng.
+  - **Kiểm chứng**: Kiểm tra typecheck TypeScript (`tsc --noEmit`), build Next.js, xác thực encoding UTF-8 không BOM, kiểm tra render XML và đối soát 7 bộ ràng buộc.
+
+- [x] **[Documentation & Workflow Architecture] Thiết Kế Sơ Đồ Luồng Quản Lý Công Việc Ban Tổ Chức Tỉnh Ủy & Tích Hợp Vào Hệ Thống Diagrams (12/10/2026)**
+  - **Yêu cầu**: Thiết kế sơ đồ luồng đi (workflow diagram / sequence diagram / state machine) quản lý công việc của Ban Tổ chức Tỉnh ủy (BTCTU) Đắk Lắk và bổ sung vào hệ thống diagram của dự án.
+  - **Nghiệp vụ chi tiết**:
+    1. Vòng đời toàn diện của nhiệm vụ công việc tại Ban Tổ chức Tỉnh ủy: Tiếp nhận chỉ đạo BTV Tỉnh ủy / Đăng ký Mẫu 01 -> Lãnh đạo Ban giao việc & phân công Trưởng phòng -> Trưởng phòng phân rã công việc & giao Chuyên viên -> Thực thi theo 4 mảng việc nghiệp vụ đặc thù (Thẩm định/BVCTNB, CSDL Đảng viên/LGSP, Tổ chức cán bộ Mẫu 2C, Văn thư/ATTT Cấp 3) -> Trình duyệt & Kiểm soát chất lượng 3 mức lỗi -> Phê duyệt Lãnh đạo Ban & Ký số phát hành -> Tự chấm điểm (Mẫu 02), Bảng nổi trội (Mẫu 04), Tổng hợp tập thể (Mẫu 03) -> Hội đồng Ban đánh giá & Áp trần khống chế 20% Xuất sắc -> Quyết định phê duyệt (Mẫu 05).
+    2. Tương tác kỹ thuật hệ thống giữa các phân hệ: Frontend Next.js, API Gateway, HRM Service (Task), Workflow Service (State Machine Engine), Notification Service (RabbitMQ) và PBAC Security.
+    3. Tạo tài liệu `docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md` với đầy đủ sơ đồ Mermaid (Swimlane Flowchart, Sequence Diagram, State Machine, Architecture Diagram) và bổ sung vào thư mục `docs/diagrams/`.
+  - **Kiểm chứng**: Kiểm tra cú pháp Mermaid đảm bảo render hoàn hảo không lỗi, UTF-8 không BOM.
+
+- [x] **[Database & PBAC] Cập nhật Toàn diện Dữ liệu Vị trí Việc làm (22 VTVL) và Phân quyền PBAC Ban Tổ chức Tỉnh ủy Đắk Lắk (12/10/2026)**
+  - **Vấn đề**: Dữ liệu Vị trí việc làm (VTVL) và phân quyền của Ban Tổ chức Tỉnh ủy (BTCTU) cần được cập nhật chuẩn hóa toàn diện theo Đề án VTVL và tài liệu nghiệp vụ (05 tập thể phòng, 22 VTVL cá nhân, mã CDE, định biên biên chế, sản phẩm đầu ra, thẩm quyền phân cấp). Các tài khoản cán bộ công chức thuộc BTCTU chưa được gán đầy đủ nhóm quyền (UserGroup) và chính sách truy cập (PBAC Policy) theo đúng chức năng nhiệm vụ hệ thống (Lãnh đạo Ban, Lãnh đạo Phòng, Chuyên viên nghiệp vụ từng phòng, Văn thư, Quản trị CNTT/ATTT).
+  - **Khắc phục**:
+    1. Cập nhật danh mục 05 Tập thể phòng (`collective_groups`) và 22 Vị trí việc làm cá nhân (`JobTitle`) với đầy đủ mã CDE, chức năng nhiệm vụ, sản phẩm chuẩn, cấp bậc (`rank`), thẩm quyền (`authorityLevel`), và tuyến báo cáo (`reportsToJobTitleId`).
+    2. Thiết lập định biên biên chế (`OrganizationStaffing`) và chi tiết phân bổ slot (`StaffingSlot`), gán lĩnh vực phụ trách (`StaffingSlotDomain`) và đơn vị theo dõi (`StaffingSlotMonitoredUnit`).
+    3. Cập nhật 22 cán bộ công chức và vị trí công tác (`JobPosition`), thiết lập chuẩn xác `isUnitLeader` và `isDeputyLeader`.
+    4. Thiết lập hệ thống nhóm người dùng (`UserGroup`) và phân quyền chính sách PBAC (`Policy`) bao phủ toàn diện các phân hệ: Công việc/Nhiệm vụ (`TASK`, `WORKFLOW`, `PLAN`, `PROJECT`), Văn bản điều hành (`DOCUMENT`, `DOC_INCOMING`, `DOC_OUTGOING`, `DOC_DRAFT`, `DOC_PUBLISH`), Nhân sự (`HRM_EMPLOYEE`), Đánh giá/KPI (`KPI`, `OBJECTIVE`, `REPORT`), và Quản trị hệ thống/ATTT Cấp 3 (`SYSTEM`, `USER`, `ROLE`, `API_GATEWAY`, `INTEGRATION`).
+    5. Nâng cấp và chạy script seed `apps/user-service/prisma/seed-daklak.ts` nạp trực tiếp vào CSDL hệ thống.
+  - **Kiểm chứng**: Chạy nạp dữ liệu thực tế, kiểm tra tính toàn vẹn CSDL (22 VTVL, 23 slots biên chế, 22 JobPositions, đầy đủ PBAC policies), typecheck `tsc --noEmit` pass.
+
   - **Vấn đề**: Người dùng yêu cầu mở rộng kiến trúc xử lý ngôn ngữ tập trung: tất cả các service còn lại (`hrm-service`, `document-service`, `posts-service`, `workflow-service`, và `api-gateway`) đều phải xử lý ngôn ngữ/mã trạng thái/độ ưu tiên trước ở backend, tự động đính kèm `statusLabel`, `priorityLabel`, `urgencyLabel`, v.v. Frontend chỉ nhận và render kết quả hiển thị, không làm lại logic mapping này.
   - **Khắc phục**:
     1. Xây dựng bộ chuẩn hóa ngôn ngữ trung tâm tại `apps/api-gateway/src/common/utils/language-normalization.util.ts` và tích hợp vào các gateway services (`tasks`, `documents`, `posts`, `workflow`, `user`).
