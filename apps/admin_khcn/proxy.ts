@@ -45,8 +45,6 @@ export async function proxy(request: NextRequest) {
   // ✅ Có token → forward pathname để Server Components dùng, JWT verify ở server
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
-  console.log(`[proxy.ts] Allowing path: ${pathname}. Token present.`);
-
 
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
