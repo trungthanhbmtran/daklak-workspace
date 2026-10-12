@@ -23,6 +23,10 @@ async function bootstrap() {
       package: ['reports'],
       protoPath,
       url: process.env.GRPC_URL ?? '0.0.0.0:50062',
+      channelOptions: {
+        'grpc.max_receive_message_length': 64 * 1024 * 1024,
+        'grpc.max_send_message_length': 64 * 1024 * 1024,
+      },
       loader: {
         keepCase: false,
         longs: String,
@@ -50,11 +54,5 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.listen(process.env.PORT ?? 3011);
-  console.log(
-    'Report Service (REST, gRPC, RMQ) listening on port',
-    process.env.PORT ?? 3011,
-    'and GRPC on',
-    process.env.GRPC_URL ?? '0.0.0.0:50062',
-  );
 }
 void bootstrap();

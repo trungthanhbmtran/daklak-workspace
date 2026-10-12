@@ -69,6 +69,15 @@ export class StatisticsService implements OnModuleInit {
   // CQRS / EVENT-SOURCING SNAPSHOT HANDLERS (WRITE-MODEL -> READ-MODEL)
   // =========================================================================
 
+  private getSafeListReq(filter: any) {
+    const safeLimit = Math.min(Math.max(Number(filter?.limit) || 1000, 1), 2000);
+    const safePage = Math.max(Number(filter?.page) || 1, 1);
+    const req = { ...filter, page: safePage, limit: safeLimit };
+    delete req.config;
+    delete req.format;
+    return req;
+  }
+
   private async saveSnapshot(dataSourceCode: string, data: any) {
     try {
       await this.prisma.statisticsSnapshot.create({
@@ -80,7 +89,7 @@ export class StatisticsService implements OnModuleInit {
       const oldSnapshots = await this.prisma.statisticsSnapshot.findMany({
         where: { dataSourceCode },
         orderBy: { recordedAt: 'desc' },
-        skip: 10,
+        skip: 5,
         select: { id: true },
       });
       if (oldSnapshots.length > 0) {
@@ -216,9 +225,7 @@ export class StatisticsService implements OnModuleInit {
 
       // 2. Fetch via gRPC if no cached flat dataset
       if (!rows) {
-        const listReq = { ...filter, page: 1, limit: 10000 };
-        delete listReq.config;
-        delete listReq.format;
+        const listReq = this.getSafeListReq(filter);
 
         const res: any = await firstValueFrom(
           this.taskService.ListTasks(listReq, metadata),
@@ -316,9 +323,7 @@ export class StatisticsService implements OnModuleInit {
       }
 
       if (!rows) {
-        const listReq = { ...filter, page: 1, limit: 10000 };
-        delete listReq.config;
-        delete listReq.format;
+        const listReq = this.getSafeListReq(filter);
 
         const res: any = await firstValueFrom(
           this.postService.ListPosts(listReq, metadata),
@@ -386,9 +391,7 @@ export class StatisticsService implements OnModuleInit {
       }
 
       if (!rows) {
-        const listReq = { ...filter, page: 1, limit: 10000 };
-        delete listReq.config;
-        delete listReq.format;
+        const listReq = this.getSafeListReq(filter);
 
         const res: any = await firstValueFrom(
           this.kpiService.FindEvaluations(listReq, metadata),
@@ -462,9 +465,7 @@ export class StatisticsService implements OnModuleInit {
       }
 
       if (!rows) {
-        const listReq = { ...filter, page: 1, limit: 10000 };
-        delete listReq.config;
-        delete listReq.format;
+        const listReq = this.getSafeListReq(filter);
 
         const res: any = await firstValueFrom(
           this.documentService.ListDocuments(listReq, metadata),

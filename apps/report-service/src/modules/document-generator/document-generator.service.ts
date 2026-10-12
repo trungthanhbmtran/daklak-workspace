@@ -8,6 +8,7 @@ import { RpcException } from '@nestjs/microservices';
 @Injectable()
 export class DocumentGeneratorService {
   private readonly logger = new Logger(DocumentGeneratorService.name);
+  private readonly templateCache = new Map<string, string>();
 
   /**
    * Tạo file Word (.docx) từ template dựa trên dữ liệu đầu vào.
@@ -20,12 +21,19 @@ export class DocumentGeneratorService {
       // Xác định đường dẫn file template. Mặc định để trong thư mục assets/templates.
       const templatePath = path.resolve(process.cwd(), 'assets', 'templates', templateName);
       
-      if (!fs.existsSync(templatePath)) {
-        this.logger.error(`Template not found: ${templatePath}`);
-        throw new RpcException(`Không tìm thấy mẫu báo cáo: ${templateName}`);
+      let content = this.templateCache.get(templatePath);
+      if (!content) {
+        try {
+          await fs.promises.access(templatePath, fs.constants.R_OK);
+        } catch {
+          this.logger.error(`Template not found: ${templatePath}`);
+          throw new RpcException(`Không tìm thấy mẫu báo cáo: ${templateName}`);
+        }
+
+        content = await fs.promises.readFile(templatePath, 'binary');
+        this.templateCache.set(templatePath, content);
       }
 
-      const content = fs.readFileSync(templatePath, 'binary');
       const zip = new PizZip(content);
       const doc = new Docxtemplater(zip, {
         paragraphLoop: true,

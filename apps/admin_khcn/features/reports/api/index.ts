@@ -142,15 +142,21 @@ export const useGetReportRunStatus = (runId?: number | string | null, enabled = 
   });
 };
 
-export const useGetDatasetSnapshot = (runId?: number | string | null) => {
+export const useGetDatasetSnapshot = (
+  runId?: number | string | null,
+  options?: { limit?: number; page?: number },
+) => {
   const numericId = Number(runId);
   const isValid = Number.isInteger(numericId) && numericId > 0;
+  const limit = options?.limit ?? 1000;
+  const page = options?.page ?? 1;
 
   return useQuery({
-    queryKey: reportKeys.snapshot(isValid ? numericId : 0),
+    queryKey: [...reportKeys.snapshot(isValid ? numericId : 0), { limit, page }],
     queryFn: async () => {
       const res: any = await axiosInstance.get(
         `/reports/runs/${numericId}/snapshot`,
+        { params: { limit, page } },
       );
       const snapshot = unwrapData<DatasetSnapshot>(res, {
         schema: [],

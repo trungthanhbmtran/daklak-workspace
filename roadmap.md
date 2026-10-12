@@ -4,6 +4,16 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Performance & Optimization] Tối ưu hóa Toàn diện Module Report: Nâng trần gRPC 64MB, Async I/O, Phân trang An toàn & Quản lý Bộ nhớ (12/10/2026)**
+  - **Vấn đề**: Module Report đối mặt với nguy cơ lỗi gRPC payload 4MB `RESOURCE_EXHAUSTED`, blocking main thread do `fs.readFileSync`, quá tải microservice do query trần `limit: 10000`, và rủi ro OOM khi lưu trữ mảng JSON đơn khối lớn trong CSDL.
+  - **Khắc phục**:
+    1. Nâng trần gRPC message size lên 64MB (`max_receive_message_length` & `max_send_message_length`) cho cả Report Service và API Gateway.
+    2. Chuyển đổi Document Generator sang `fs.promises.readFile` bất đồng bộ để giải phóng Event Loop.
+    3. Giảm trần query microservices xuống mức 1.000 bản ghi an toàn, tối ưu lưu trữ snapshot và dọn dẹp bản ghi cũ.
+    4. Cắt lát dữ liệu Snapshot theo Chunks (500 dòng/chunk) chống nghẽn bộ nhớ MySQL và phân trang mượt mà.
+    5. Xóa sạch 100% debug logs thừa trong mã nguồn.
+  - **Kiểm chứng**: Typecheck `npx tsc --noEmit` toàn bộ các service liên quan (`report-service`, `api-gateway`, `admin_khcn`), đảm bảo không có bất kỳ lỗi biên dịch nào.
+
 - [x] **[UI/UX & Data Engine] Sửa lỗi Ghép nối Nguồn Dữ liệu (JOIN) và Cấu hình Cột Kết quả trong Trình Thiết kế Báo cáo (12/10/2026)**
   - **Vấn đề**: Khi tạo/thiết kế báo cáo (`/admin/services/reports/[id]/design` và `/new`), phần "Nguồn Dữ Liệu Đã Chọn" không thể ghép nối do khối JOIN nhanh thiếu logic state và event handlers. Phần "Cột Kết Quả & Biến Đổi Dữ Liệu" hiển thị 0 cột, trắng data do chưa tự động đồng bộ trường từ nguồn và thiếu giao diện Thêm/Sửa nhãn tiếng Việt/Định dạng tính toán.
   - **Khắc phục**:

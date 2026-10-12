@@ -20,23 +20,29 @@ Antigravity trực tiếp làm chủ quy trình khép kín, xử lý nhanh chón
 - **Đồng bộ Roadmap**: Kiểm tra và cập nhật `roadmap.md`. Nếu tác vụ chưa có, thêm vào mục `Unplanned Tasks / Hotfixes`.
 - **Ghi nhận Kế hoạch**: Lập plan step-by-step chi tiết và lưu vào `.agents/current_plan.md`. Liên tục check-off `[x]` khi hoàn thành từng bước.
 
-### Bước 2: Tự phản biện & Đối chiếu Ràng buộc (Critique)
+### Bước 2: Tự phản biện Kế hoạch (Plan Critique)
 - Tự đóng vai trò Red Team để đối chiếu kế hoạch với **7 Bộ ràng buộc kỹ thuật bắt buộc** (PBAC, tenant boundary, Additive migration, CSS min-w-0, gRPC delegation token).
 - Nếu phát hiện rủi ro sập CSDL hoặc vỡ layout, điều chỉnh phương án ngay trước khi viết code.
 
 ### Bước 3: Thực thi Chuẩn xác (Execution)
 - Trực tiếp viết mã nguồn bám sát kế hoạch, tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật ở Mục 3.
 
-### Bước 4: Kiểm chứng Thực tế & Tự sửa lỗi (Verification & Anti-Thrashing)
-- Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test tương ứng).
-- **Chống thử mù quáng (Anti-thrashing)**: Nếu gặp lỗi, đọc kỹ log để phân tích nguyên nhân gốc rễ (root cause). Tuyệt đối không thử sai mù quáng quá 2-3 lần mà không có cơ sở lý do.
-- **Kiểm tra hồi quy (Regression Check)**: Không làm hỏng các tính năng đã chạy trước đó.
+### Bước 4: Kiểm chứng Thực tế & Phản biện Kết quả (Verification & Result Critique)
+- **Kiểm chứng máy (Automated Verification):** Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test tương ứng).
+- **Phản biện Kết quả Thực thi (Post-Execution Diff Critique Gate):**
+  * Không bao giờ thỏa mãn chỉ vì `tsc` báo pass. BẮT BUỘC soi từng dòng `git diff` vừa sinh ra đối chiếu trực tiếp với 7 Bộ ràng buộc kỹ thuật:
+    - *UI/UX*: Có thẻ con flex nào thiếu `min-w-0`? Chuỗi dài thiếu `break-words`? Form dài có bị nhét nhầm vào `<Dialog>` thay vì `<Sheet>`?
+    - *Routing*: Có lọt tiền tố thừa `/admin` vào `apiClient` không?
+    - *Backend & DB*: Cột mới có đảm bảo `nullable` hoặc `@default` không? Query CSDL có bị lọt ngoài `organizationId` scope không? Lời gọi gRPC có thiếu metadata token không?
+    - *Logic & Edge Cases*: Có nuốt lỗi âm thầm (`catch {}` rỗng) không? Tham số `null`/`undefined`/mảng rỗng có bị vỡ app không?
+  * **Chống thử mù quáng (Anti-thrashing):** Nếu gặp lỗi hoặc phát hiện vi phạm khi phản biện diff, phân tích tận gốc và tự sửa ngay trước khi bàn giao.
+  * **Phản biện độc lập chuyên sâu (Khi cần):** Với các tác vụ nhạy cảm liên quan tới CSDL lớn hoặc PBAC đa service, có thể kích hoạt skill `critical-review` hoặc `code_auditor_agent` để có góc nhìn thẩm định độc lập.
 
 ### Bước 5: Kiểm duyệt, Dọn rác & Nghiệm thu (Quality Gate & Cleanup)
 - Dọn sạch toàn bộ `console.log`, import thừa, file tạm.
 - Check-off đầy đủ các mục trong `.agents/current_plan.md` và `roadmap.md`.
 - Ghi nhận nguyên nhân lỗi và giải pháp vào `.agents/execution_log.md`.
-- Xuất Báo cáo Thực thi Antigravity 5 bước.
+- Xuất Báo cáo Thực thi Antigravity đầy đủ.
 
 ---
 
@@ -90,8 +96,9 @@ Kết thúc bất kỳ tác vụ nào, Antigravity bắt buộc xuất báo cáo
 ```markdown
 ## Báo cáo Thực thi Antigravity
 - **Bước 1 - Lên Kế Hoạch (Planning):** [Xác nhận đã lập kế hoạch & đối chiếu roadmap.md, current_plan.md]
-- **Bước 2 - Phản biện & Kiểm chứng (Critique):** [Các rủi ro kiến trúc & 7 Bộ ràng buộc đã đối chiếu và bảo đảm]
-- **Bước 3 & 4 - Thực Thi & Kiểm thử (Execution & Test):** [Lệnh kiểm chứng máy thực tế đã chạy (rtk tsc/build) và kết quả xác thực]
+- **Bước 2 - Phản biện Kế hoạch (Plan Critique):** [Các rủi ro kiến trúc & 7 Bộ ràng buộc đã đối chiếu và chặn trước khi viết code]
+- **Bước 3 - Thực thi Chuẩn xác (Execution):** [Mã nguồn đã triển khai theo kế hoạch]
+- **Bước 4 - Kiểm chứng Máy & Phản biện Kết quả (Verification & Result Critique):** [Lệnh kiểm chứng máy thực tế đã chạy (rtk tsc/build) VÀ Kết quả phản biện diff đối chiếu 7 Bộ ràng buộc/edge-cases]
 - **Bước 5 - Dọn rác, Roadmap & Tài liệu:** [Xác nhận đã dọn rác 100%, cập nhật roadmap.md, current_plan.md, execution_log.md]
 ```
 

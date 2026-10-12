@@ -297,14 +297,31 @@ export class ReportsService implements OnModuleInit {
         }));
       }
 
-      await this.prisma.datasetSnapshot.create({
-        data: {
-          runId: run.id,
-          chunkIndex: 0,
-          schema,
-          data: sourceRows,
-        },
-      });
+      // Lưu snapshot theo từng chunk (500 dòng/chunk) để chống nghẽn bộ nhớ MySQL
+      const CHUNK_SIZE = 500;
+      if (sourceRows.length > CHUNK_SIZE) {
+        const totalChunks = Math.ceil(sourceRows.length / CHUNK_SIZE);
+        for (let i = 0; i < totalChunks; i++) {
+          const chunkData = sourceRows.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+          await this.prisma.datasetSnapshot.create({
+            data: {
+              runId: run.id,
+              chunkIndex: i,
+              schema: i === 0 ? schema : undefined,
+              data: chunkData,
+            },
+          });
+        }
+      } else {
+        await this.prisma.datasetSnapshot.create({
+          data: {
+            runId: run.id,
+            chunkIndex: 0,
+            schema,
+            data: sourceRows,
+          },
+        });
+      }
 
       await this.prisma.reportRun.update({
         where: { id: run.id },
@@ -359,33 +376,32 @@ export class ReportsService implements OnModuleInit {
 
   async getDatasetSnapshot(payloadStr: string, _userDataStr: string) {
     try {
-      // Tối ưu: Lấy có giới hạn để tránh gRPC Payload Too Large và OOM
+      // Tối ưu: Lấy có giới hạn an toàn để tránh gRPC Payload Too Large và OOM
       const payload = JSON.parse(payloadStr);
       const runId = Number(payload.runId || payload.id);
-      const page = payload.page || 1;
-      const limit = payload.limit || 500;
+      const limit = Math.min(Math.max(Number(payload.limit) || 1000, 1), 2000);
 
       const snapshots = await this.prisma.datasetSnapshot.findMany({
         where: { runId: Number(runId) },
         orderBy: { chunkIndex: 'asc' },
-        take: 2, // Chỉ lấy 2 chunks đầu tiên để preview, tránh sập hệ thống
+        take: 4, // Lấy tối đa 4 chunks (~2.000 dòng an toàn)
       });
 
       if (snapshots.length === 0) {
-        return { success: false, data: JSON.stringify({ schema: [], data: [] }), message: 'Không có dữ liệu snapshot' };
+        return { success: false, data: JSON.stringify({ schema: [], data: [], total: 0 }), message: 'Không có dữ liệu snapshot' };
       }
 
-      const schema = snapshots[0].schema;
+      const schema = snapshots[0].schema || [];
       const combinedData = snapshots.flatMap((s: any) => (s.data as any[]) || []).slice(0, limit);
 
       return {
         success: true,
-        data: JSON.stringify({ schema, data: combinedData }),
-        message: 'Lấy dữ liệu kết quả thành công (Preview)',
+        data: JSON.stringify({ schema, data: combinedData, total: combinedData.length }),
+        message: 'Lấy dữ liệu kết quả thành công',
       };
     } catch (error: any) {
       this.logger.error('Error fetching dataset snapshot', error?.stack);
-      return { success: false, data: JSON.stringify({ schema: [], data: [] }), message: 'Lỗi lấy kết quả báo cáo' };
+      return { success: false, data: JSON.stringify({ schema: [], data: [], total: 0 }), message: 'Lỗi lấy kết quả báo cáo' };
     }
   }
 

@@ -7,6 +7,11 @@ import { StatisticsService } from './statistics.service';
 const PROTO_ROOT =
   process.env.PROTO_PATH || join(__dirname, '../../../../../../shared/protos');
 
+const DEFAULT_CHANNEL_OPTIONS = {
+  'grpc.max_receive_message_length': 64 * 1024 * 1024,
+  'grpc.max_send_message_length': 64 * 1024 * 1024,
+};
+
 @Module({
   imports: [
     ClientsModule.register([
@@ -17,6 +22,7 @@ const PROTO_ROOT =
           package: 'task',
           protoPath: join(PROTO_ROOT, 'hrm/task.proto'),
           url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
+          channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
             longs: String,
@@ -38,6 +44,7 @@ const PROTO_ROOT =
             process.env.POSTS_GRPC_URL ||
             process.env.POST_GRPC_URL ||
             '0.0.0.0:50054',
+          channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
             longs: String,
@@ -56,6 +63,7 @@ const PROTO_ROOT =
           package: 'document',
           protoPath: join(PROTO_ROOT, 'document/document.proto'),
           url: process.env.DOCUMENT_GRPC_URL || '0.0.0.0:50052',
+          channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
             longs: String,
@@ -74,6 +82,7 @@ const PROTO_ROOT =
           package: 'kpi',
           protoPath: join(PROTO_ROOT, 'hrm/kpi.proto'),
           url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
+          channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
             longs: String,
@@ -95,6 +104,7 @@ const PROTO_ROOT =
             process.env.USERS_GRPC_URL ||
             process.env.USER_GRPC_URL ||
             '0.0.0.0:50051',
+          channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
             longs: String,
