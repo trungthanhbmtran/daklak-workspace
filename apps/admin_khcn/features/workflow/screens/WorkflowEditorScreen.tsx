@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Background, BackgroundVariant, Controls, Handle, MarkerType, MiniMap, Panel, Position, ReactFlow, ReactFlowProvider, addEdge, useReactFlow, useViewport, type Connection, type Edge, type Node, type NodeProps, useEdgesState, useNodesState } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ArrowLeft, Check, CircleHelp, GitBranch, Layers, Loader2, Save, Send, Settings2, Trash2, UserRound, Workflow as WorkflowIcon } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowLeft, Check, CircleHelp, GitBranch, Layers, Loader2, Save, Send, Settings2, Trash2, UserRound, Workflow as WorkflowIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -175,8 +175,8 @@ function CanvasNodeCard({ id, data, type, selected }: NodeProps<CanvasNode>) {
           {inputHandles.length > 0 ? (
             inputHandles.map((handleId, index) => (
               <Handle
-                key={handleId ?? "default-target"}
-                id={handleId ?? undefined}
+                key={handleId}
+                id={handleId}
                 type="target"
                 position={Position.Left}
                 style={{ top: `${((index + 1) / (inputHandles.length + 1)) * 100}%` }}
@@ -186,6 +186,7 @@ function CanvasNodeCard({ id, data, type, selected }: NodeProps<CanvasNode>) {
           ) : (
             <Handle
               type="target"
+              id="target-left"
               position={Position.Left}
               className="!size-3 !border-2 !border-background !bg-primary"
             />
@@ -237,8 +238,8 @@ function CanvasNodeCard({ id, data, type, selected }: NodeProps<CanvasNode>) {
           {outputHandles.length > 0 ? (
             outputHandles.map((handleId, index) => (
               <Handle
-                key={handleId ?? "default-source"}
-                id={handleId ?? undefined}
+                key={handleId}
+                id={handleId}
                 type="source"
                 position={Position.Right}
                 style={{ top: `${((index + 1) / (outputHandles.length + 1)) * 100}%` }}
@@ -248,6 +249,7 @@ function CanvasNodeCard({ id, data, type, selected }: NodeProps<CanvasNode>) {
           ) : (
             <Handle
               type="source"
+              id="source-right"
               position={Position.Right}
               className="!size-3 !border-2 !border-background !bg-primary"
             />
@@ -357,7 +359,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* GIAI ĐOẠN 1: TỰ ĐÁNH GIÁ */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-emerald-400/50 bg-emerald-500/[0.04] dark:border-emerald-600/40 dark:bg-emerald-950/[0.12]"
-            style={{ left: 20, top: 60, width: 880, height: 500 }}
+            style={{ left: 20, top: 60, width: 880, height: 580 }}
           >
             <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-emerald-800 dark:text-emerald-300">
               <div className="flex items-center gap-2">
@@ -373,7 +375,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* GIAI ĐOẠN 2: TẬP THỂ PHÒNG THẨM ĐỊNH */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-blue-400/50 bg-blue-500/[0.04] dark:border-blue-600/40 dark:bg-blue-950/[0.12]"
-            style={{ left: 915, top: 60, width: 330, height: 500 }}
+            style={{ left: 915, top: 60, width: 330, height: 580 }}
           >
             <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-blue-800 dark:text-blue-300">
               <div className="flex items-center gap-2">
@@ -389,7 +391,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* GIAI ĐOẠN 3: HỘI ĐỒNG BAN THẨM ĐỊNH & SIẾT TRẦN */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-500/[0.04] dark:border-amber-600/40 dark:bg-amber-950/[0.12]"
-            style={{ left: 1260, top: 60, width: 1420, height: 500 }}
+            style={{ left: 1260, top: 60, width: 1540, height: 580 }}
           >
             <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-amber-800 dark:text-amber-300">
               <div className="flex items-center gap-2">
@@ -405,7 +407,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* GIAI ĐOẠN 4: BAN HÀNH QUYẾT ĐỊNH */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-purple-400/50 bg-purple-500/[0.04] dark:border-purple-600/40 dark:bg-purple-950/[0.12]"
-            style={{ left: 2695, top: 60, width: 620, height: 500 }}
+            style={{ left: 2820, top: 60, width: 720, height: 580 }}
           >
             <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-purple-800 dark:text-purple-300">
               <div className="flex items-center gap-2">
@@ -448,10 +450,9 @@ function asGraph(workflow?: Workflow): WorkflowGraph | undefined {
 function edgeEndpoint(primary?: string, legacy?: string) {
   return primary?.trim() || legacy?.trim() || "";
 }
-function edgeHandleIds(workflow: Workflow | undefined, nodeId: string, side: "source" | "target"): Array<string | null> {
+function edgeHandleIds(workflow: Workflow | undefined, nodeId: string, side: "source" | "target"): string[] {
   const graph = asGraph(workflow);
   const handleIds = new Set<string>();
-  let hasDefaultHandle = false;
   for (const edge of graph?.edges ?? []) {
     const endpoint = side === "source"
       ? edgeEndpoint(edge.source, edge.sourceNodeId)
@@ -459,13 +460,13 @@ function edgeHandleIds(workflow: Workflow | undefined, nodeId: string, side: "so
     const handleId = side === "source" ? edge.sourceHandle : edge.targetHandle;
     if (endpoint !== nodeId) continue;
     if (handleId?.trim()) handleIds.add(handleId.trim());
-    else hasDefaultHandle = true;
   }
+  const fixedHandleIds = new Set([`${side}-top`, `${side}-bottom`, side === "source" ? "source-right" : "target-left"]);
   const sortedHandles = [...handleIds].sort((left, right) => {
     const order = (value: string) => value === "true" ? 0 : value === "false" ? 1 : 2;
     return order(left) - order(right) || left.localeCompare(right);
   });
-  return hasDefaultHandle ? [null, ...sortedHandles] : sortedHandles;
+  return sortedHandles.filter((id) => !fixedHandleIds.has(id));
 }
 function readPosition(value: unknown): { x: number; y: number } | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
@@ -674,6 +675,9 @@ function graphNodes(workflow?: Workflow): CanvasNode[] {
     }
     positions = combined.size === graph.nodes.length ? combined : autoLayoutPositions(graph.nodes, graph.edges ?? []);
   }
+  if (!positionsMatchFlow(graph.nodes, graph.edges ?? [], positions)) {
+    positions = autoLayoutPositions(graph.nodes, graph.edges ?? []);
+  }
   return graph.nodes.map((node, index) => {
     const assignment = node.assignments?.[0];
     const nodeType = node.type || "user_task";
@@ -700,8 +704,8 @@ function graphEdges(workflow?: Workflow): Edge[] {
   return (graph?.edges ?? []).map((edge, index) => {
     const source = edgeEndpoint(edge.source, edge.sourceNodeId);
     const target = edgeEndpoint(edge.target, edge.targetNodeId);
-    const sourceHandle = edge.sourceHandle?.trim() || null;
-    const targetHandle = edge.targetHandle?.trim() || null;
+    const sourceHandle = edge.sourceHandle?.trim() || "source-right";
+    const targetHandle = edge.targetHandle?.trim() || "target-left";
     const action = edge.action || (typeof edge.data?.action === "string" ? edge.data.action : "");
     const actionLabel = action ? (EDGE_ACTION_LABELS[action] || action) : "";
     const branchLabel = sourceHandle === "true" ? "Đúng" : sourceHandle === "false" ? "Sai" : "";
@@ -757,7 +761,7 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(graphEdges(workflow));
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView: fitWorkflowView } = useReactFlow();
   const readOnly = forceReadOnly;
   const currentNode = useMemo(() => nodes.find((node) => node.id === selectedNode), [nodes, selectedNode]);
   const currentEdge = useMemo(() => edges.find((edge) => edge.id === selectedEdge), [edges, selectedEdge]);
@@ -766,6 +770,12 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
   function addNode(type: string, label: string) {
     const node: CanvasNode = { id: nextNodeId(type, nodes), type, position: { x: 100 + (nodes.length % 3) * 240, y: 130 + Math.floor(nodes.length / 3) * 150 }, data: { label } };
     setNodes((items) => [...items, node]); setSelectedNode(node.id); setSelectedEdge(null);
+  }
+  function arrangeWorkflow() {
+    const positions = autoLayoutPositions(nodes as unknown as WorkflowGraph["nodes"], edges as unknown as WorkflowGraph["edges"]);
+    setNodes((items) => items.map((node) => ({ ...node, position: positions.get(node.id) ?? node.position })));
+    requestAnimationFrame(() => void fitWorkflowView({ padding: 0.18, duration: 350, minZoom: 0.3, maxZoom: 1.1 }));
+    toast.success("Đã sắp xếp các bước theo luồng xử lý");
   }
   function graphForSave(): WorkflowGraph {
     return {
@@ -813,14 +823,21 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
     <header className="flex flex-wrap items-center justify-between gap-3 border-b p-3"><div className="flex items-center gap-2"><Button variant="ghost" size="icon" onClick={() => router.push(WORKFLOW_ROUTES.list)} aria-label="Quay lại"><ArrowLeft /></Button><div><div className="flex items-center gap-2"><Input className="h-8 w-64 font-semibold" value={name} onChange={(event) => setName(event.target.value)} placeholder="Tên quy trình" disabled={readOnly} aria-label="Tên quy trình" />{workflow && <Badge variant={workflow.status === "PUBLISHED" ? "default" : "secondary"}>{workflow.status === "PUBLISHED" ? "Đã phát hành · lưu sẽ tạo nháp" : "Bản nháp"} · v{workflow.version ?? 1}</Badge>}</div><p className="ml-1 mt-1 text-xs text-muted-foreground">{code || "Mã sẽ được tạo từ tên quy trình"}</p></div></div><div className="flex items-center gap-2"><Button variant="outline" onClick={() => void saveDraft()} disabled={readOnly || save.isPending}><Save />{save.isPending ? "Đang lưu…" : "Lưu nháp"}</Button><Button onClick={() => void publishWorkflow()} disabled={readOnly || publish.isPending || !workflowId || !ownerUnitCode}><Send />{publish.isPending ? "Đang phát hành…" : "Phát hành"}</Button></div></header>
     <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
       <aside className="border-b p-4 xl:border-b-0 xl:border-r"><h2 className="mb-3 text-sm font-semibold">Thành phần</h2><div className="grid grid-cols-2 gap-2 xl:grid-cols-1">{NODE_OPTIONS.map(({ type, label, icon: Icon }) => <Button key={type} variant="outline" size="sm" className="justify-start cursor-grab active:cursor-grabbing" draggable={!readOnly} onDragStart={(event) => { event.dataTransfer.setData('application/reactflow', type); event.dataTransfer.setData('application/reactflow-label', label); event.dataTransfer.effectAllowed = 'move'; }} disabled={readOnly} onClick={() => addNode(type, label)}><Icon />{label}</Button>)}</div><p className="mt-5 text-xs leading-relaxed text-muted-foreground">Kéo thả (hoặc click) thành phần vào sơ đồ. Kéo từ chấm bên phải của bước sang chấm bên trái bước kế tiếp để nối luồng.</p><div className="mt-5 space-y-2"><Label>Đơn vị sở hữu quy trình</Label><OrganizationUnitSelector value={ownerUnitCode} onChange={(value) => setOwnerUnitCode(value)} unitTree={unitTree} disabled={readOnly} isLoading={organizationTree.isPending} error={organizationTree.isError} /><p className="text-[11px] leading-relaxed text-muted-foreground">Đơn vị sở hữu dùng để giới hạn quy trình và mẫu biểu đánh giá được gán.</p></div><div className="mt-5 space-y-2"><Label htmlFor="workflow-description">Mô tả</Label><Textarea id="workflow-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Mục đích và phạm vi áp dụng" disabled={readOnly} /></div></aside>
-      <div className="h-[60vh] min-h-[440px] xl:h-auto" onDrop={readOnly ? undefined : (event) => { event.preventDefault(); const type = event.dataTransfer.getData('application/reactflow'); const label = event.dataTransfer.getData('application/reactflow-label'); if (!type) return; const position = screenToFlowPosition({ x: event.clientX, y: event.clientY }); const newNode: CanvasNode = { id: nextNodeId(type, nodes), type, position, data: { label } }; setNodes((nds) => nds.concat(newNode)); setSelectedNode(newNode.id); setSelectedEdge(null); }} onDragOver={readOnly ? undefined : (event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}>
+      <div className="relative h-[60vh] min-h-[440px] xl:h-auto" onDrop={readOnly ? undefined : (event) => { event.preventDefault(); const type = event.dataTransfer.getData('application/reactflow'); const label = event.dataTransfer.getData('application/reactflow-label'); if (!type) return; const position = screenToFlowPosition({ x: event.clientX, y: event.clientY }); const newNode: CanvasNode = { id: nextNodeId(type, nodes), type, position, data: { label } }; setNodes((nds) => nds.concat(newNode)); setSelectedNode(newNode.id); setSelectedEdge(null); }} onDragOver={readOnly ? undefined : (event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}>
+        <div className="absolute right-3 top-3 z-10 flex items-center gap-2 rounded-lg border bg-background/95 p-1.5 shadow-sm backdrop-blur">
+          <span className="hidden px-2 text-xs text-muted-foreground md:inline">Bố cục sơ đồ</span>
+          <Button type="button" size="sm" variant="outline" onClick={arrangeWorkflow} disabled={nodes.length < 2}>
+            <ArrowDownWideNarrow className="size-4" />
+            Sắp xếp theo luồng
+          </Button>
+        </div>
         <ReactFlow
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
           onNodesChange={readOnly ? undefined : onNodesChange}
           onEdgesChange={readOnly ? undefined : onEdgesChange}
-          onConnect={readOnly ? undefined : (connection: Connection) => setEdges((items) => addEdge({ ...connection, id: `edge-${Math.random().toString(36).substring(2, 10)}`, type: "smoothstep", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2.25 }, markerEnd: { type: MarkerType.ArrowClosed, color: "var(--primary)" } }, items))}
+          onConnect={readOnly ? undefined : (connection: Connection) => setEdges((items) => addEdge({ ...connection, sourceHandle: connection.sourceHandle || "source-right", targetHandle: connection.targetHandle || "target-left", id: `edge-${Math.random().toString(36).substring(2, 10)}`, type: "smoothstep", animated: true, style: { stroke: "var(--primary)", strokeWidth: 2.25 }, markerEnd: { type: MarkerType.ArrowClosed, color: "var(--primary)" } }, items))}
           onNodeClick={(_event, node) => { setSelectedNode(node.id); setSelectedEdge(null); }}
           onEdgeClick={(_event, edge) => { setSelectedEdge(edge.id); setSelectedNode(null); }}
           onPaneClick={() => { setSelectedNode(null); setSelectedEdge(null); }}

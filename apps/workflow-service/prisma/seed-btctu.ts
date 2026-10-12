@@ -215,7 +215,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'end_rejected',
       type: 'end',
-      position: { x: 1900, y: 440 },
+      position: { x: 1900, y: 70 },
       data: {
         label: 'Đình chỉ / Hủy nhiệm vụ theo chỉ đạo BTVTU',
         description: 'Nhiệm vụ dừng thực hiện, chuyển trạng thái CANCELLED',
@@ -325,7 +325,8 @@ export const btctuTaskManagementGraph = {
       source: 'gateway_ldb_check',
       target: 'end_rejected',
       type: 'custom',
-      sourceHandle: 'cancel',
+      sourceHandle: 'source-top',
+      targetHandle: 'target-bottom',
       label: 'Đình chỉ / Hủy nhiệm vụ',
       action: 'BAN_CANCEL',
       condition: 'variables.banDecision === "DINH_CHI"',
@@ -425,7 +426,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau03_phong_hop',
       type: 'userTask',
-      position: { x: 940, y: 350 },
+      position: { x: 960, y: 350 },
       data: {
         label: 'Họp phòng & Thẩm định tập thể (MẪU 03)',
         description: 'Tập thể phòng & Chi bộ họp nhận xét; Trưởng phòng thẩm định điểm từng cá nhân và lập Bảng tổng hợp tập thể phòng theo Mẫu 03',
@@ -446,7 +447,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_service_audit_sources',
       type: 'serviceTask',
-      position: { x: 1280, y: 240 },
+      position: { x: 1290, y: 240 },
       data: {
         label: 'Đối soát 08 nguồn CSDL & Rà soát kỷ luật',
         description: 'Tự động đối soát dữ liệu với CSDL Đảng viên, LGSP, Cán bộ 2C, BVCTNB Mức 3, Sổ văn bản mật, An toàn thông tin Cấp 3 để phát hiện vi phạm bắt buộc hạ bậc',
@@ -458,7 +459,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'gateway_discipline_check',
       type: 'exclusiveGateway',
-      position: { x: 1580, y: 240 },
+      position: { x: 1650, y: 240 },
       data: {
         label: 'Có vi phạm kỷ luật / Lọt lộ bí mật?',
         description: 'Vi phạm kỷ luật hoặc chỉ tiêu < 70% -> Hạ bậc bắt buộc; Không vi phạm -> Áp trần chất lượng',
@@ -467,7 +468,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_demote_unqualified',
       type: 'userTask',
-      position: { x: 1580, y: 480 },
+      position: { x: 1650, y: 450 },
       data: {
         label: 'Hạ bậc bắt buộc: Không hoàn thành nhiệm vụ',
         description: 'Ấn định mức xếp loại Không hoàn thành nhiệm vụ theo quy định đối với cá nhân có sai phạm',
@@ -487,7 +488,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_service_apply_caps',
       type: 'serviceTask',
-      position: { x: 1880, y: 240 },
+      position: { x: 1980, y: 240 },
       data: {
         label: 'Thuật toán Áp trần 20% & Áp trần Người đứng đầu',
         description: 'Áp trần 20% Xuất sắc per Quy định 348-QĐ/BTCTW: Số Xuất sắc <= INT(20% * Tổng số Tốt trở lên). Áp trần Người đứng đầu: Rank Trưởng phòng <= Rank Tập thể phòng',
@@ -499,7 +500,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_hoidong_thamdinh',
       type: 'userTask',
-      position: { x: 2180, y: 240 },
+      position: { x: 2340, y: 240 },
       data: {
         label: 'Hội đồng Thẩm định Ban xét duyệt kết quả',
         description: 'Hội đồng Thẩm định Ban Tổ chức Tỉnh ủy họp từ ngày 21 đến 25 để xem xét toàn diện kết quả chấm điểm và áp trần khống chế',
@@ -519,7 +520,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'gateway_council_check',
       type: 'exclusiveGateway',
-      position: { x: 2480, y: 240 },
+      position: { x: 2700, y: 240 },
       data: {
         label: 'Hội đồng Thông qua?',
         description: 'Đồng ý -> Dự thảo Quyết định; Yêu cầu điều chỉnh -> Họp phòng rà soát lại',
@@ -528,7 +529,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'task_mau05_quyetdinh',
       type: 'userTask',
-      position: { x: 2740, y: 240 },
+      position: { x: 2880, y: 240 },
       data: {
         label: 'Trưởng ban ký Quyết định phê duyệt (MẪU 05)',
         description: 'Dự thảo và ban hành Quyết định phê duyệt kết quả xếp loại chất lượng toàn cơ quan Ban Tổ chức Tỉnh ủy (Mẫu 05) trước ngày 28',
@@ -550,7 +551,7 @@ export const btctuKpiEvaluationGraph = {
     {
       id: 'end_kpi_published',
       type: 'end',
-      position: { x: 3040, y: 240 },
+      position: { x: 3240, y: 240 },
       data: {
         label: 'Công khai kết quả & Lưu trữ hồ sơ xếp loại',
         description: 'Công bố công khai kết quả xếp loại toàn cơ quan và báo cáo Ban Thường vụ Tỉnh ủy',
@@ -612,7 +613,8 @@ export const btctuKpiEvaluationGraph = {
       source: 'gateway_discipline_check',
       target: 'task_demote_unqualified',
       type: 'custom',
-      sourceHandle: 'violation',
+      sourceHandle: 'source-bottom',
+      targetHandle: 'target-top',
       label: 'Có vi phạm (Kỷ luật / Lọt lộ bí mật)',
       action: 'HAS_VIOLATION',
       condition: 'variables.hasDisciplineViolation === true',

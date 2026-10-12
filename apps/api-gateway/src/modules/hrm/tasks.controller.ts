@@ -28,28 +28,28 @@ export class TasksController {
   }
 
   @Get('kpi/variables')
-  async getKpiSystemVariables() {
-    return this.tasksService.getKpiSystemVariables();
+  async getKpiSystemVariables(@Req() req: any) {
+    return this.tasksService.getKpiSystemVariables(req);
   }
 
   @Get('kpi/global-settings')
-  async getGlobalKpiSettings() {
-    return this.tasksService.getGlobalKpiSettings();
+  async getGlobalKpiSettings(@Req() req: any) {
+    return this.tasksService.getGlobalKpiSettings(req);
   }
 
   @Get('kpi/global-settings/versions')
-  async getGlobalKpiSettingVersions() {
-    return this.tasksService.getGlobalKpiSettingVersions();
+  async getGlobalKpiSettingVersions(@Req() req: any) {
+    return this.tasksService.getGlobalKpiSettingVersions(req);
   }
 
   @Put('kpi/global-settings')
   async saveGlobalKpiSettings(@Req() req: any, @Body() body: any) {
-    return this.tasksService.saveGlobalKpiSettings({ ...body, changedBy: String(req?.user?.id || '') });
+    return this.tasksService.saveGlobalKpiSettings(req, { ...body, changedBy: String(req?.user?.id || '') });
   }
 
   @Post('kpi/preview')
-  async previewGlobalKpiSettings(@Body() body: any) {
-    return this.tasksService.previewGlobalKpiSettings(body);
+  async previewGlobalKpiSettings(@Req() req: any, @Body() body: any) {
+    return this.tasksService.previewGlobalKpiSettings(req, body);
   }
 
   @Get()
