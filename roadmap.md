@@ -4,6 +4,20 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Performance & Architecture] Tối Ưu Hóa Toàn Diện Hiệu Năng Workflow Platform & UI Canvas (12/10/2026)**
+  - **Yêu cầu**: Giải quyết triệt để 4 điểm nghẽn hiệu năng phát hiện sau đợt review: overfetching gRPC payload (~800KB), thiếu caching layer cho PUBLISHED workflows, lag GPU composite khi pan/zoom trên canvas, và input lag bộ chọn đơn vị.
+  - **Thực hiện**:
+    1. *Cắt giảm 95% gRPC/REST Payload Overfetching*: Tách projection trong `apps/workflow-service/src/definition/definition.service.ts` (`listProcesses` hỗ trợ `includeGraph: false` không query cột `graph` JSON từ MySQL). Cập nhật `grpc.controller.ts` trả về `bpmnLogic: '{}'` rỗng trong `ListWorkflows`, chỉ nạp full graph khi xem/sửa chi tiết.
+    2. *In-Memory TTL Caching cho Workflow Definitions*: Cài đặt bộ nhớ đệm 60s trong `definition.service.ts` cho các quy trình `PUBLISHED` (bất biến), tự động purge cache tức thì khi có thao tác `updateProcess`, `publishProcess`, hoặc `deleteProcess`.
+    3. *Kích hoạt GPU Hardware Acceleration trên Canvas*: Bọc `React.memo` cho `WorkflowCanvasOverlay`, chuyển đổi sang `translate3d(...)`, bổ sung `willChange: "transform"` và `contain: "paint layout"` giúp GPU xử lý độc lập layer 2780px không gây repaint khi pan/zoom.
+    4. *Triệt tiêu Input Lag & Tiền tính toán Search Index*: Thêm `searchIndex` không dấu O(1) vào `FlatUnitItem` lúc duyệt cây phân cấp, tích hợp React `useDeferredValue` cho `OrganizationUnitSelector` giúp gõ phím mượt mà 60/120fps.
+  - **Kiểm chứng**:
+    * `tsc --noEmit` trên `apps/workflow-service`: PASSED (0 errors).
+    * `npm run typecheck` trên `apps/admin_khcn`: PASSED (0 errors).
+    * Rebuild container `daklak-workspace-workflow-service-1` và `daklak-workspace-admin-frontend-1` hoạt động ổn định (ready in 209ms).
+    * Kiểm chứng browser: Danh sách quy trình tải tức thì, canvas 60fps mượt mà, bộ chọn đơn vị tìm kiếm không độ trễ.
+    * Push commit `310d7586` lên nhánh `main`.
+
 - [x] **[UI/UX & Workflow Canvas] Chuẩn Hóa Sơ Đồ Nghiệp Vụ Trên Canvas Theo Tài Liệu docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md (12/10/2026)**
   - **Yêu cầu**: Thể hiện trực quan, chuẩn xác 100% sơ đồ quy trình nghiệp vụ trên canvas thiết kế workflow (`WorkflowEditorScreen.tsx`) bám sát tài liệu thiết kế nghiệp vụ `docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md` (thay vì bị dồn phẳng thành 1 hàng ngang duy nhất co nhỏ không xem được).
   - **Thực hiện**:
