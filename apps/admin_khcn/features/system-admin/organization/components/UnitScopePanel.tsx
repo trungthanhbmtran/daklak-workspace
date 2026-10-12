@@ -67,10 +67,11 @@ export function UnitScopePanel() {
     (code || "").startsWith("BTCTU_") ||
     (code || "").startsWith("TU_");
 
-  // Truyền selectedIds lên server để server sort + đánh dấu
-  // Backend sẽ tự động lọc danh sách lĩnh vực theo parentId nếu có
+  // Truyền savedDomainIds lên server để server sort các mục đã lưu lên đầu danh sách
+  // Giữ queryKey ổn định theo savedDomainIds để việc tick chọn/bỏ chọn local không làm reset trang đã tải thêm
+  const savedDomainIds = scopeData?.domainIds ?? [];
   const effectiveParentId = parentId ?? (isPartyUnit ? selectedId : undefined);
-  const domains = useDomainSearch(domainIds, effectiveParentId ?? undefined);
+  const domains = useDomainSearch(savedDomainIds, effectiveParentId ?? undefined);
 
   // TanStack Query v5: isPending=true khi enabled=false (code rỗng) hoặc chưa fetch xong
   // isDetailPlaceholder=true khi keepPreviousData đang giữ data cũ trong lúc chuyển đơn vị
@@ -78,7 +79,9 @@ export function UnitScopePanel() {
   const isDetailLoading = (isDetailPending || isDetailFetching || isDetailPlaceholder) && !detailResponse;
   const isLoading = isDetailLoading || (!isDetailError && isScopeLoading && !scopeData && !!selectedId);
 
-  const displayedDomainItems = isPartyUnit
+  // Ánh xạ trạng thái selected theo domainIds hiện tại của người dùng
+  // Đồng thời khử trùng lặp phòng thủ theo id để đảm bảo 100% không trùng key/data
+  const rawDomainList = isPartyUnit
     ? domains.items.filter((item) => {
         const c = item.code || "";
         return (
@@ -98,6 +101,18 @@ export function UnitScopePanel() {
         );
       })
     : domains.items;
+
+  const seenDomainIds = new Set<number>();
+  const displayedDomainItems: CatalogServerItem[] = [];
+  for (const item of rawDomainList) {
+    if (item && !seenDomainIds.has(item.id)) {
+      seenDomainIds.add(item.id);
+      displayedDomainItems.push({
+        ...item,
+        selected: domainIds.includes(item.id),
+      });
+    }
+  }
 
   const toggle = (ids: number[], id: number) =>
     ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id];

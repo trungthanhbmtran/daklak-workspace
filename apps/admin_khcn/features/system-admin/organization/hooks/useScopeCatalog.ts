@@ -8,6 +8,7 @@
  * 2. Search debounce 300ms — giới hạn 50 items/lần
  * 3. Server trả về field `selected: boolean` — client chỉ hiển thị
  * 4. GeoAreas lazy khi user click tab
+ * 5. Khử trùng lặp (deduplication) triệt để bằng Set<number> theo item.id giữa các trang
  */
 
 import { useState, useEffect } from "react";
@@ -34,7 +35,7 @@ function useDebounce(value: string, delay = DEBOUNCE_MS) {
   return debounced;
 }
 
-/** Hook lĩnh vực — server-side search + selected-first sort */
+/** Hook lĩnh vực — server-side search + selected-first sort + deduplicate an toàn */
 export function useDomainSearch(selectedIds: number[], parentUnitId?: number) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
@@ -43,8 +44,8 @@ export function useDomainSearch(selectedIds: number[], parentUnitId?: number) {
     queryKey: ["categories", "DOMAIN", debouncedQ, selectedIds.join(","), parentUnitId],
     queryFn: ({ pageParam = 0 }) => organizationApi.getDomains(debouncedQ, selectedIds, pageParam as number, parentUnitId),
     getNextPageParam: (lastPage, allPages) => {
-      // 15 items per page
-      return lastPage.length === 15 ? allPages.length * 15 : undefined;
+      if (!lastPage || lastPage.length < 15) return undefined;
+      return allPages.reduce((acc, p) => acc + (p?.length || 0), 0);
     },
     initialPageParam: 0,
     staleTime: CAT_STALE,
@@ -52,7 +53,16 @@ export function useDomainSearch(selectedIds: number[], parentUnitId?: number) {
     placeholderData: keepPreviousData,
   });
 
-  const items = query.data?.pages.flat() || [];
+  // Khử trùng lặp giữa các trang bằng Set<number>
+  const rawItems = query.data?.pages.flat() || [];
+  const seen = new Set<number>();
+  const items: CatalogServerItem[] = [];
+  for (const item of rawItems) {
+    if (item && typeof item.id === "number" && !seen.has(item.id)) {
+      seen.add(item.id);
+      items.push(item);
+    }
+  }
 
   return { 
     items, 
@@ -73,7 +83,8 @@ export function useGeoAreaSearch(selectedIds: number[], enabled = true) {
     queryKey: ["categories", "GEO_AREA", debouncedQ, selectedIds.join(",")],
     queryFn: ({ pageParam = 0 }) => organizationApi.getGeographicAreas(debouncedQ, selectedIds, pageParam as number),
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.length === 15 ? allPages.length * 15 : undefined;
+      if (!lastPage || lastPage.length < 15) return undefined;
+      return allPages.reduce((acc, p) => acc + (p?.length || 0), 0);
     },
     initialPageParam: 0,
     enabled,
@@ -82,7 +93,16 @@ export function useGeoAreaSearch(selectedIds: number[], enabled = true) {
     placeholderData: keepPreviousData,
   });
 
-  const items = query.data?.pages.flat() || [];
+  // Khử trùng lặp giữa các trang bằng Set<number>
+  const rawItems = query.data?.pages.flat() || [];
+  const seen = new Set<number>();
+  const items: CatalogServerItem[] = [];
+  for (const item of rawItems) {
+    if (item && typeof item.id === "number" && !seen.has(item.id)) {
+      seen.add(item.id);
+      items.push(item);
+    }
+  }
 
   return { 
     items, 

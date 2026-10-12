@@ -279,7 +279,12 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
     searchKey.includes("TASK_MANAGEMENT") ||
     searchKey.includes("QUẢN LÝ CÔNG VIỆC");
 
-  if (!isBtctuTaskManagement && phases.length === 0) {
+  const isBtctuKpi =
+    searchKey.includes("DANH_GIA_KPI") ||
+    searchKey.includes("KPI_EVALUATION") ||
+    searchKey.includes("ĐÁNH GIÁ KPI");
+
+  if (!isBtctuTaskManagement && !isBtctuKpi && phases.length === 0) {
     return null;
   }
 
@@ -298,7 +303,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 1: BAN THƯỜNG VỤ TỈNH ỦY */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-purple-400/50 bg-purple-500/[0.04] dark:border-purple-600/40 dark:bg-purple-950/[0.12]"
-            style={{ left: 20, top: 20, width: 2850, height: 190 }}
+            style={{ left: 20, top: 20, width: 2900, height: 190 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-purple-800 dark:text-purple-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-purple-500/20 text-[11px]">🏛️</span>
@@ -312,7 +317,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 2: LÃNH ĐẠO BAN TỔ CHỨC TỈNH ỦY */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-rose-400/50 bg-rose-500/[0.04] dark:border-rose-600/40 dark:bg-rose-950/[0.12]"
-            style={{ left: 20, top: 230, width: 2850, height: 230 }}
+            style={{ left: 20, top: 230, width: 2900, height: 230 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-rose-800 dark:text-rose-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-rose-500/20 text-[11px]">🔴</span>
@@ -326,7 +331,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 3: LÃNH ĐẠO PHÒNG CHUYÊN MÔN */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-blue-400/50 bg-blue-500/[0.04] dark:border-blue-600/40 dark:bg-blue-950/[0.12]"
-            style={{ left: 20, top: 480, width: 2850, height: 210 }}
+            style={{ left: 20, top: 480, width: 2900, height: 210 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-blue-800 dark:text-blue-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[11px]">🔵</span>
@@ -340,13 +345,73 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 4: CHUYÊN VIÊN NGHIỆP VỤ 22 VTVL */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-emerald-400/50 bg-emerald-500/[0.04] dark:border-emerald-600/40 dark:bg-emerald-950/[0.12]"
-            style={{ left: 20, top: 710, width: 2850, height: 200 }}
+            style={{ left: 20, top: 710, width: 2900, height: 200 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-emerald-800 dark:text-emerald-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500/20 text-[11px]">🟢</span>
               <span>LÀN 4: CHUYÊN VIÊN NGHIỆP VỤ (22 Vị trí việc làm & Người phối hợp)</span>
               <span className="text-[10px] font-normal text-muted-foreground">
                 — Thực thi chuyên môn (TCCB Mẫu 2C, TCĐ-ĐV LGSP, BVCTNB Mức 3, Văn phòng ATTT Cấp 3), nộp minh chứng
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {isBtctuKpi && (
+        <>
+          {/* GIAI ĐOẠN 1: TỰ ĐÁNH GIÁ CÁ NHÂN (MẪU 01, 02, 04) */}
+          <div
+            className="absolute rounded-2xl border-2 border-dashed border-emerald-400/50 bg-emerald-500/[0.04] dark:border-emerald-600/40 dark:bg-emerald-950/[0.12]"
+            style={{ left: 20, top: 20, width: 880, height: 600 }}
+          >
+            <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-emerald-800 dark:text-emerald-300">
+              <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500/20 text-[11px]">🟢</span>
+              <span>GIAI ĐOẠN 1: TỰ ĐÁNH GIÁ CÁ NHÂN (MẪU 01, 02, 04)</span>
+              <span className="text-[10px] font-normal text-muted-foreground">
+                — Đăng ký đầu kỳ, tự chấm điểm cá nhân & kê khai thành tích nổi trội
+              </span>
+            </div>
+          </div>
+
+          {/* GIAI ĐOẠN 2: TẬP THỂ PHÒNG THẨM ĐỊNH (MẪU 03) */}
+          <div
+            className="absolute rounded-2xl border-2 border-dashed border-blue-400/50 bg-blue-500/[0.04] dark:border-blue-600/40 dark:bg-blue-950/[0.12]"
+            style={{ left: 920, top: 20, width: 320, height: 600 }}
+          >
+            <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-blue-800 dark:text-blue-300">
+              <span className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[11px]">🔵</span>
+              <span>GIAI ĐOẠN 2: TẬP THỂ PHÒNG THẨM ĐỊNH</span>
+              <span className="text-[10px] font-normal text-muted-foreground">
+                — Họp phòng, nhận xét & biểu quyết Mẫu 03
+              </span>
+            </div>
+          </div>
+
+          {/* GIAI ĐOẠN 3: HỘI ĐỒNG BAN & ÁP TRẦN 20% */}
+          <div
+            className="absolute rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-500/[0.04] dark:border-amber-600/40 dark:bg-amber-950/[0.12]"
+            style={{ left: 1260, top: 20, width: 1560, height: 600 }}
+          >
+            <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-amber-800 dark:text-amber-300">
+              <span className="flex size-5 items-center justify-center rounded-full bg-amber-500/20 text-[11px]">⚖️</span>
+              <span>GIAI ĐOẠN 3: HỘI ĐỒNG BAN THẨM ĐỊNH & ÁP TRẦN 20%</span>
+              <span className="text-[10px] font-normal text-muted-foreground">
+                — Rà soát 08 nguồn CSDL, kiểm tra kỷ luật, áp trần 20% Xuất sắc & Hội đồng họp xét
+              </span>
+            </div>
+          </div>
+
+          {/* GIAI ĐOẠN 4: BAN HÀNH QĐ (MẪU 05) & CÔNG KHAI */}
+          <div
+            className="absolute rounded-2xl border-2 border-dashed border-purple-400/50 bg-purple-500/[0.04] dark:border-purple-600/40 dark:bg-purple-950/[0.12]"
+            style={{ left: 2840, top: 20, width: 720, height: 600 }}
+          >
+            <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-purple-800 dark:text-purple-300">
+              <span className="flex size-5 items-center justify-center rounded-full bg-purple-500/20 text-[11px]">🟣</span>
+              <span>GIAI ĐOẠN 4: BAN HÀNH QĐ & CÔNG KHAI KẾT QUẢ</span>
+              <span className="text-[10px] font-normal text-muted-foreground">
+                — Trưởng ban ký Quyết định (Mẫu 05), công khai toàn cơ quan & lưu trữ an toàn
               </span>
             </div>
           </div>
@@ -798,6 +863,35 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
         >
           <WorkflowCanvasOverlay workflowCode={workflow?.code || code} workflowName={name || workflow?.name} phases={phases} nodes={nodes} />
           {(() => {
+            const workflowCode = workflow?.code || code || "";
+            const workflowName = name || workflow?.name || "";
+            const searchKey = `${workflowCode} ${workflowName}`.toUpperCase();
+            const isKpi =
+              searchKey.includes("DANH_GIA_KPI") ||
+              searchKey.includes("KPI_EVALUATION") ||
+              searchKey.includes("ĐÁNH GIÁ KPI");
+
+            if (isKpi) {
+              return (
+                <Panel position="top-left" className="m-2 flex flex-wrap items-center gap-1.5 rounded-lg border bg-card/90 p-2 shadow-sm backdrop-blur-xs text-[11px]">
+                  <span className="font-semibold text-foreground flex items-center gap-1 mr-1">
+                    <Layers className="size-3.5 text-primary" /> 4 Giai đoạn Đánh giá KPI & Áp trần:
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-xs border border-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 font-medium text-emerald-700 dark:text-emerald-300">
+                    🟢 GĐ 1: Tự đánh giá (Mẫu 01, 02, 04)
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-xs border border-blue-300 bg-blue-500/10 px-1.5 py-0.5 font-medium text-blue-700 dark:text-blue-300">
+                    🔵 GĐ 2: Tập thể phòng (Mẫu 03)
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-xs border border-amber-300 bg-amber-500/10 px-1.5 py-0.5 font-medium text-amber-700 dark:text-amber-300">
+                    ⚖️ GĐ 3: Hội đồng Ban & Trần 20%
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-xs border border-purple-300 bg-purple-500/10 px-1.5 py-0.5 font-medium text-purple-700 dark:text-purple-300">
+                    🟣 GĐ 4: Ban hành QĐ (Mẫu 05)
+                  </span>
+                </Panel>
+              );
+            }
             if (phases.length > 0) {
               return (
                 <Panel position="top-left" className="m-2 flex max-w-[min(920px,calc(100vw-32px))] flex-wrap items-center gap-1.5 rounded-lg border bg-card/95 p-2 shadow-sm backdrop-blur-xs text-[11px]">

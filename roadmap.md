@@ -4,6 +4,44 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Auth & Microservices] Sửa Lỗi UnauthorizedException: Invalid Delegation Token Tại /admin/services/hrm/work-plans/kpi-formulas (12/10/2026)**
+  - **Vấn đề**: Khi mở trang Quản lý Công việc & KPI -> Công thức tính KPI (`/admin/services/hrm/work-plans/kpi-formulas`), hệ thống bị lỗi `[AllExceptionsFilter] [UnauthorizedException] Invalid delegation token` tại `TasksService.handleRpcError` dòng 618:104, khiến phiên làm việc bị ngắt kết nối và văng ra màn hình đăng nhập (Infinite Logout Loop).
+  - **Nguyên nhân cốt lõi**:
+    1. Trong `apps/api-gateway/src/modules/hrm/tasks.controller.ts` và `tasks.service.ts`, các phương thức gRPC liên quan đến KPI (`getKpiSystemVariables`, `getGlobalKpiSettings`, `saveGlobalKpiSettings`, `previewGlobalKpiSettings`, `getGlobalKpiSettingVersions`) gọi microservice `hrm-service` mà không truyền metadata `this.getGrpcMetadata(req)`.
+    2. Phương thức `ListGlobalKpiSettingVersions` đã khai báo trong file `.proto` nhưng container chạy thực tế của `hrm-service` chưa được rebuild bản mã nguồn có GrpcMethod này.
+  - **Thực hiện**:
+    1. Bổ sung `@Req() req` và truyền `this.getGrpcMetadata(req)` vào toàn bộ các lời gọi gRPC KPI trong `apps/api-gateway/src/modules/hrm/tasks.service.ts` và `tasks.controller.ts`.
+    2. Rebuild image Docker `thanhtran1993/daklak-hrm-service:latest` và recreate container `hrm-service` trên Docker Compose Production.
+  - **Kiểm chứng**:
+    - Truy cập trang `http://113.184.220.82/admin/services/hrm/work-plans/kpi-formulas` bằng trình duyệt thực tế, trang tải tức thì dữ liệu "Công thức tính điểm v1" và từ điển biến số mà không phát sinh lỗi 401/UnauthorizedException (ảnh `kpi_formulas_verified_1791816330551.png`).
+
+- [x] **[UI/UX Canvas & Layout] Khắc Phục Lỗi Lệch Vị Trí Node & Khung Giai Đoạn Trên Canvas Sơ Đồ Quy Trình (12/10/2026)**
+  - **Vấn đề**: Các bước (nodes) trên canvas quy trình nghiệp vụ Ban Tổ chức Tỉnh ủy bị lệch vị trí, tràn ra ngoài khung Giai đoạn và không bao trọn các bước (cả Quy trình Quản lý Công việc `WF_BTCTU_QUAN_LY_CONG_VIEC` và Quy trình Đánh giá KPI `WF_BTCTU_DANH_GIA_KPI`).
+  - **Nguyên nhân cốt lõi**:
+    1. Trong `WorkflowEditorScreen.tsx`, hàm `positionsMatchFlow` tự động phán đoán sai và kích hoạt `autoLayoutPositions` ghi đè toàn bộ tọa độ thiết kế của đồ thị 2D swimlanes.
+    2. Component `WorkflowCanvasOverlay` thiếu logic kích hoạt hiển thị 4 khung Giai đoạn Đánh giá KPI & Áp trần (`isBtctuKpi`) khi trường `phases` trong CSDL rỗng.
+    3. Độ rộng của các làn Swimlanes (2780px) chưa bao trọn node kết thúc `end_completed` (tọa độ X=2520..2770).
+  - **Thực hiện**:
+    1. Loại bỏ hoàn toàn cơ chế tự ý can thiệp ghi đè tọa độ của `positionsMatchFlow` trong `WorkflowEditorScreen.tsx`.
+    2. Bổ sung nhận diện `isBtctuKpi` và vẽ 4 khung Giai đoạn nét đứt bao trọn 100% 13 node của quy trình KPI (`GĐ 1: Tự đánh giá`, `GĐ 2: Tập thể phòng`, `GĐ 3: Hội đồng Ban & Trần 20%`, `GĐ 4: Ban hành QĐ & Công khai`).
+    3. Tăng độ rộng các dải Swimlane lên 2900px, bao bọc toàn bộ từ node Khởi tạo (X=60) đến Lưu trữ ATTT Cấp 3 (X=2520..2770).
+    4. Thêm Legend panel 4 Giai đoạn thích ứng trên Canvas và rebuild, restart container `admin-frontend`.
+  - **Kiểm chứng**:
+    - `npm run typecheck` trên `apps/admin_khcn`: PASSED (0 errors).
+    - Rebuild Docker image `thanhtran1993/daklak-admin-khcn:latest` và recreate container `admin-frontend` thành công.
+    - Kiểm chứng bằng browser: Cả 2 sơ đồ hiển thị hoàn hảo, các node nằm trọn vẹn trong các khung và làn thẩm quyền tương ứng (ảnh `kpi_4_stages_final_png_1791816994367.png`).
+
+- [/] **[Bugfix & Pagination] Sửa Lỗi Trùng Dữ Liệu Khi Tải Thêm Lĩnh Vực Trong Phạm Vi Phụ Trách Tổ Chức (12/10/2026)**
+  - **Yêu cầu**: Khắc phục lỗi tại `http://113.184.220.82/admin/services/admin/organization/P_TCCB` tab "Phạm vi phụ trách", khi bấm "Tải thêm lĩnh vực" dữ liệu bị lặp lại các mục đã có.
+  - **Nguyên nhân**:
+    1. *Backend (`user-service/categories.service.ts`)*: Khi `skip > 0` (tải thêm trang sau), backend vẫn tiếp tục đính kèm `selectedItems` ở đầu `data`, đồng thời tính sai offset `skip` cho các mục unselected dẫn đến lặp lại các mục đã chọn và lệch dữ liệu.
+    2. *Frontend (`useScopeCatalog.ts` & `UnitScopePanel.tsx`)*: `useInfiniteQuery` làm phẳng các trang mà không deduplicate theo ID; `useDomainSearch` nhận `domainIds` động làm `queryKey` bị reset trang khi click checkbox; `displayedDomainItems` thiếu bước deduplication phòng vệ.
+  - **Khắc phục**:
+    1. Backend: Chỉ đính kèm `selectedItems` ở trang đầu (`skip === 0`). Ở các trang sau (`skip > 0`), không gửi lại `selectedItems`, tính offset chính xác `unselectedSkip = Math.max(skip - selectedItems.length, 0)` và `take = limit`.
+    2. Frontend Hook: Thêm deduplication 100% bằng `Set<number>` theo `id` cho `useDomainSearch` và `useGeoAreaSearch`, chuẩn hóa `getNextPageParam`.
+    3. Frontend Panel: Giữ `savedDomainIds` ổn định cho `queryKey`, ánh xạ trạng thái `selected` theo `domainIds.includes(item.id)`, deduplicate `displayedDomainItems`.
+  - **Kiểm chứng**: Kiểm tra typecheck TypeScript (`tsc --noEmit`), kiểm tra API và build production.
+
 - [x] **[Performance & Architecture] Tối Ưu Hóa Toàn Diện Hiệu Năng Workflow Platform & UI Canvas (12/10/2026)**
   - **Yêu cầu**: Giải quyết triệt để 4 điểm nghẽn hiệu năng phát hiện sau đợt review: overfetching gRPC payload (~800KB), thiếu caching layer cho PUBLISHED workflows, lag GPU composite khi pan/zoom trên canvas, và input lag bộ chọn đơn vị.
   - **Thực hiện**:
