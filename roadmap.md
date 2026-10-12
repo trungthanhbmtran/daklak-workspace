@@ -4,6 +4,14 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Hotfix] Khôi phục cấu hình URL gRPC trong API Gateway - Sửa lỗi ECONNREFUSED ::1:5000 (12/10/2026)**
+  - **Vấn đề**: API Gateway báo lỗi `InternalServerErrorException: No connection established. Last error: Error: connect ECONNREFUSED ::1:5000` tại `MenusService.getHubApps` và các lời gọi gRPC đến `user-service`.
+  - **Nguyên nhân**: Khi thêm cấu hình trần payload 64MB (`channelOptions`) trong commit trước, dòng `url: serviceConfig.URL` trong `apps/api-gateway/src/core/factories/grpc.factory.ts` vô tình bị ghi đè/xóa mất. Khi thiếu thuộc tính `url`, NestJS gRPC client tự động fallback về `localhost:5000` (phân giải thành IPv6 `::1:5000` trong container Linux), dẫn đến từ chối kết nối.
+  - **Khắc phục**:
+    1. Bổ sung lại `url: serviceConfig.URL` vào `options` của `registerGrpcService` trong `apps/api-gateway/src/core/factories/grpc.factory.ts`.
+    2. Chạy `npm run build` cho `api-gateway`, đồng bộ gói `dist` vào container đang chạy `daklak-workspace-api-gateway-1` và khởi động lại container.
+  - **Kiểm chứng**: Kiểm tra log container sạch lỗi; kiểm tra thực tế các API `/api/v1/admin/menus/hub` (trả về 8 Hub Apps) và `/api/v1/admin/menus` (trả về 51 menu items) hoạt động ổn định 100%.
+
 - [x] **[Feature] Quản lý mẫu XML động theo đơn vị và quy trình (12/10/2026)**
   - **Yêu cầu**: Cho phép tạo nhiều mẫu theo tên, lưu phiên bản XML, gán mẫu cho đơn vị và quy trình cụ thể; mỗi quy trình phải khai báo phòng ban sở hữu.
   - **Thực hiện**: Bổ sung ownerUnitCode cho quy trình và chặn phát hành quy trình chưa có đơn vị sở hữu; xây dựng CRUD tạo/phát hành mẫu, lưu phiên bản, gán/gỡ gán theo đơn vị + quy trình + bước/phase + thời hạn; thêm API tra cứu mẫu áp dụng và giao diện cấu hình tại Trung tâm Mẫu đánh giá.

@@ -13,6 +13,7 @@ export function registerGrpcService(serviceConfig: any) {
       options: {
         package: serviceConfig.PACKAGE,
         protoPath: join(PROTO_ROOT, serviceConfig.PROTO),
+        url: serviceConfig.URL,
         channelOptions: {
           'grpc.max_receive_message_length': 64 * 1024 * 1024,
           'grpc.max_send_message_length': 64 * 1024 * 1024,
