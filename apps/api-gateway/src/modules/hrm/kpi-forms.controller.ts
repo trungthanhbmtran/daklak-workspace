@@ -87,12 +87,28 @@ export class KpiFormsController implements OnModuleInit {
   @Get(':formCode')
   @ApiOperation({ summary: 'Lấy chi tiết biểu mẫu và nội dung XML' })
   async findOne(@Req() req: any, @Param('formCode') formCode: string) {
-    return firstValueFrom(
+    const res: any = await firstValueFrom(
       this.kpiService.GetFormTemplateDetail(
         { formCode, organizationId: this.getOrganizationId(req) },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
+
+    const item = res?.data || {};
+    const xmlContent = res?.xmlContent || item.xmlContent || '';
+    const placeholders = res?.placeholders || item.placeholders || [];
+
+    return {
+      success: res?.success ?? true,
+      message: res?.message || 'Lấy chi tiết biểu mẫu thành công',
+      data: {
+        ...item,
+        xmlContent,
+        placeholders,
+      },
+      xmlContent,
+      placeholders,
+    };
   }
 
   @Put(':formCode')
