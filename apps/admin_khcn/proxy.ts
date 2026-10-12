@@ -35,7 +35,6 @@ export async function proxy(request: NextRequest) {
 
   // ❌ Không có token → redirect login ngay tại Edge (nhanh, không cần verify)
   if (!token) {
-    console.log(`[proxy.ts] Redirecting to login for path: ${pathname}. Token missing.`);
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = refreshToken ? "/session/refresh" : "/login";
     loginUrl.searchParams.set("callbackUrl", pathname);

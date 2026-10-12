@@ -26,7 +26,7 @@ import {
 interface ReportViewerProps {
   definitionId: number;
   config?: any;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 interface AggregatedItem {
@@ -220,7 +220,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={onBack}
+              onClick={onBack ? onBack : () => router.push('/services/reports')}
               className="text-slate-600 border-slate-200 hover:bg-slate-100 shrink-0"
             >
               <ArrowLeft className="w-4 h-4 mr-1.5" />

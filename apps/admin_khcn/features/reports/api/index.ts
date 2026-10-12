@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../../lib/axiosInstance";
 import type { ApiResponse } from "../../../lib/api.types";
@@ -119,13 +118,11 @@ export const useRunReport = () => {
 export const useGetReportRunStatus = (runId?: number | string | null, enabled = true) => {
   const numericId = Number(runId);
   const isValid = Number.isInteger(numericId) && numericId > 0;
-  const [retryCount, setRetryCount] = useState(0);
 
   return useQuery({
     queryKey: reportKeys.runStatus(isValid ? numericId : 0),
     queryFn: async () => {
       const res: any = await axiosInstance.get(`/reports/runs/${numericId}/status`);
-      setRetryCount((prev) => prev + 1);
       return unwrapData<ReportRun>(res, {
         id: numericId,
         reportDefinitionId: 0,
@@ -137,7 +134,8 @@ export const useGetReportRunStatus = (runId?: number | string | null, enabled = 
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "QUEUED" || status === "RUNNING") {
-        return Math.min(1500 * Math.pow(1.3, retryCount), 6000);
+        const count = query.state.dataUpdateCount || 0;
+        return Math.min(1500 * Math.pow(1.3, count), 6000);
       }
       return false;
     },
