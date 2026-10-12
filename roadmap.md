@@ -31,16 +31,20 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
     - Rebuild Docker image `thanhtran1993/daklak-admin-khcn:latest` và recreate container `admin-frontend` thành công.
     - Kiểm chứng bằng browser: Cả 2 sơ đồ hiển thị hoàn hảo, các node nằm trọn vẹn trong các khung và làn thẩm quyền tương ứng (ảnh `kpi_4_stages_final_png_1791816994367.png`).
 
-- [/] **[Bugfix & Pagination] Sửa Lỗi Trùng Dữ Liệu Khi Tải Thêm Lĩnh Vực Trong Phạm Vi Phụ Trách Tổ Chức (12/10/2026)**
+- [x] **[Bugfix & Pagination] Sửa Lỗi Trùng Dữ Liệu Khi Tải Thêm Lĩnh Vực Trong Phạm Vi Phụ Trách Tổ Chức (12/10/2026)**
   - **Yêu cầu**: Khắc phục lỗi tại `http://113.184.220.82/admin/services/admin/organization/P_TCCB` tab "Phạm vi phụ trách", khi bấm "Tải thêm lĩnh vực" dữ liệu bị lặp lại các mục đã có.
-  - **Nguyên nhân**:
+  - **Nguyên nhân cốt lõi**:
     1. *Backend (`user-service/categories.service.ts`)*: Khi `skip > 0` (tải thêm trang sau), backend vẫn tiếp tục đính kèm `selectedItems` ở đầu `data`, đồng thời tính sai offset `skip` cho các mục unselected dẫn đến lặp lại các mục đã chọn và lệch dữ liệu.
-    2. *Frontend (`useScopeCatalog.ts` & `UnitScopePanel.tsx`)*: `useInfiniteQuery` làm phẳng các trang mà không deduplicate theo ID; `useDomainSearch` nhận `domainIds` động làm `queryKey` bị reset trang khi click checkbox; `displayedDomainItems` thiếu bước deduplication phòng vệ.
+    2. *Database Order Determinism*: Khi các bản ghi danh mục có cùng `order = 0`, câu lệnh SQL `ORDER BY order ASC` không có tie-breaker `id ASC` dẫn đến MySQL optimizer tráo đổi vị trí các dòng giữa các trang `OFFSET 0` và `OFFSET 15`.
+    3. *Frontend (`useScopeCatalog.ts` & `UnitScopePanel.tsx`)*: `useInfiniteQuery` làm phẳng các trang mà không deduplicate theo ID; `useDomainSearch` nhận `domainIds` động làm `queryKey` bị reset trang khi click checkbox; `displayedDomainItems` thiếu bước deduplication phòng vệ.
   - **Khắc phục**:
-    1. Backend: Chỉ đính kèm `selectedItems` ở trang đầu (`skip === 0`). Ở các trang sau (`skip > 0`), không gửi lại `selectedItems`, tính offset chính xác `unselectedSkip = Math.max(skip - selectedItems.length, 0)` và `take = limit`.
-    2. Frontend Hook: Thêm deduplication 100% bằng `Set<number>` theo `id` cho `useDomainSearch` và `useGeoAreaSearch`, chuẩn hóa `getNextPageParam`.
+    1. Backend: Chỉ đính kèm `selectedItems` ở trang đầu (`skip === 0`). Ở các trang sau (`skip > 0`), không gửi lại `selectedItems`, tính offset chính xác `unselectedSkip = Math.max(skip - selectedItems.length, 0)` và `take = limit`. Bổ sung sắp xếp tất định `orderBy: [{ order: 'asc' }, { id: 'asc' }]`.
+    2. Frontend Hook: Thêm deduplication 100% bằng `Set<number>` theo `id` cho `useDomainSearch` và `useGeoAreaSearch`, chuẩn hóa `getNextPageParam` tính `totalFetched`.
     3. Frontend Panel: Giữ `savedDomainIds` ổn định cho `queryKey`, ánh xạ trạng thái `selected` theo `domainIds.includes(item.id)`, deduplicate `displayedDomainItems`.
-  - **Kiểm chứng**: Kiểm tra typecheck TypeScript (`tsc --noEmit`), kiểm tra API và build production.
+    4. Triển khai: Biên dịch và cập nhật `categories.service.js` vào container `user-service`, flush cache Redis, rebuild Docker image `daklak-admin-khcn:latest` và recreate container `admin-frontend`.
+  - **Kiểm chứng**:
+    - TypeScript compilation `tsc --noEmit` cả `user-service` và `admin_khcn`: PASSED (0 errors).
+    - Kiểm chứng API trực tiếp qua Gateway: Trang 0 (15 items), Trang 1 (15 items), Trang 2 (15 items) liên tục, độc lập, tỷ lệ trùng lặp: 0%. Container Next.js hoạt động trơn tru (Ready in 177ms).
 
 - [x] **[Performance & Architecture] Tối Ưu Hóa Toàn Diện Hiệu Năng Workflow Platform & UI Canvas (12/10/2026)**
   - **Yêu cầu**: Giải quyết triệt để 4 điểm nghẽn hiệu năng phát hiện sau đợt review: overfetching gRPC payload (~800KB), thiếu caching layer cho PUBLISHED workflows, lag GPU composite khi pan/zoom trên canvas, và input lag bộ chọn đơn vị.
