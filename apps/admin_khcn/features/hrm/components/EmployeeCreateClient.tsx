@@ -8,10 +8,12 @@ import Image from "next/image";
 import {
   ArrowLeft, Save, User, Camera,
   Loader2, Mail, Phone, CreditCard, Calendar,
-  Building2, Check, Hash, AlertCircle, ShieldAlert
+  Building2, Check, Hash, AlertCircle, ShieldAlert,
+  UserCheck
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
@@ -51,6 +53,7 @@ const formSchema = z.object({
   departmentId: z.number({ message: "Vui lòng chọn đơn vị" }),
   jobTitleId: z.number().optional(),
   partyTitleId: z.number().optional(),
+  slotOrder: z.number().optional(),
   startDate: z.string().optional(),
   birthday: z.string().optional(),
   avatar: z.string().optional(),
@@ -60,7 +63,14 @@ function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): a
   for (const node of nodes || []) {
     const currentPath = parentPath ? `${parentPath} / ${node.name}` : node.name;
     if (node.id != null) {
-      acc.push({ id: node.id, name: node.name, fullPath: currentPath, code: node.code });
+      acc.push({
+        id: node.id,
+        name: node.name,
+        fullPath: currentPath,
+        code: node.code,
+        categoryCode: node.categoryCode,
+        typeCode: node.typeCode,
+      });
     }
     flattenUnits(node.children ?? [], acc, currentPath);
   }
@@ -121,6 +131,21 @@ export function EmployeeCreateClient() {
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
   const partyTitles = useMemo(() => jobTitles.filter(j => j.type === "PARTY"), [jobTitles]);
 
+  const isPartyUnit = useMemo(() => {
+    if (!selectedUnit) return false;
+    return (
+      selectedUnit.categoryCode === "DANG" ||
+      selectedUnit.typeCode === "BAN_DANG" ||
+      selectedUnit.typeCode === "CQ_DANG" ||
+      (selectedUnit.typeCode && selectedUnit.typeCode.includes("DANG")) ||
+      (selectedUnit.code && selectedUnit.code.startsWith("TU_")) ||
+      (selectedUnit.code && selectedUnit.code.startsWith("BTCTU")) ||
+      (selectedUnit.name && selectedUnit.name.toLowerCase().includes("tỉnh ủy")) ||
+      (selectedUnit.name && selectedUnit.name.toLowerCase().includes("đảng")) ||
+      (partyTitles.length > 0 && govtTitles.length === 0)
+    );
+  }, [selectedUnit, partyTitles.length, govtTitles.length]);
+
   // Lấy báo cáo định biên khi user chọn đơn vị
   const { data: staffingReport } = useQuery({
     queryKey: ["staffing-report", departmentId],
@@ -129,16 +154,22 @@ export function EmployeeCreateClient() {
     staleTime: 60 * 1000,
   });
 
-  const staffingMap = useMemo(() => {
-    const map = new Map<number, { quantity: number; currentCount: number }>();
-    (staffingReport?.data ?? []).forEach((s: any) => {
-      map.set(s.jobTitleId, { quantity: s.quantity, currentCount: s.currentCount ?? 0 });
-    });
-    return map;
-  }, [staffingReport]);
-
   const selectedJobTitleId = form.watch("jobTitleId");
-  const quotaInfo = selectedJobTitleId ? staffingMap.get(selectedJobTitleId) : undefined;
+  const selectedPartyTitleId = form.watch("partyTitleId");
+  const selectedSlotOrder = form.watch("slotOrder");
+
+  const effectiveJobTitleId = isPartyUnit
+    ? (selectedPartyTitleId || selectedJobTitleId)
+    : (selectedJobTitleId || selectedPartyTitleId);
+
+  const activeStaffingRow = useMemo(() => {
+    if (!effectiveJobTitleId || !staffingReport?.data) return undefined;
+    return (staffingReport.data as any[]).find((s: any) => s.jobTitleId === effectiveJobTitleId);
+  }, [effectiveJobTitleId, staffingReport]);
+
+  const quotaInfo = activeStaffingRow
+    ? { quantity: activeStaffingRow.quantity, currentCount: activeStaffingRow.currentCount ?? 0 }
+    : undefined;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setSubmitting(true);
@@ -148,8 +179,12 @@ export function EmployeeCreateClient() {
         departmentId: values.departmentId,
         jobTitleId: values.jobTitleId,
         partyTitleId: values.partyTitleId || 0,
+        slotOrder: values.slotOrder || undefined,
       });
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
+      if (values.departmentId) {
+        queryClient.invalidateQueries({ queryKey: ["staffing-report", values.departmentId] });
+      }
       toast.success("Thêm nhân sự thành công");
       router.push("/services/hrm/employees");
     } catch {
@@ -209,6 +244,8 @@ export function EmployeeCreateClient() {
                                 onClick={() => {
                                   form.setValue("departmentId", u.id, { shouldValidate: true });
                                   form.setValue("jobTitleId", undefined as any);
+                                  form.setValue("partyTitleId", undefined as any);
+                                  form.setValue("slotOrder", undefined);
                                 }}
                                 className={cn(
                                   "w-full text-left p-3 rounded-lg mb-1 transition-all border border-transparent",
@@ -235,9 +272,11 @@ export function EmployeeCreateClient() {
                     <div className="bg-slate-900 rounded-xl p-4 text-white shadow-lg border-l-4 border-blue-500">
                       <div className="flex items-start gap-3">
                         <div className="bg-blue-600 p-1.5 rounded-lg shrink-0"><Check size={16} /></div>
-                        <div className="space-y-1">
-                          <Text variant="small" className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Đơn vị đã chọn:</Text>
-                          <Text weight="bold" className="leading-snug">{selectedUnit.fullPath}</Text>
+                        <div className="space-y-1 min-w-0">
+                          <Text variant="small" className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                            {isPartyUnit ? "Cơ quan Đảng đã chọn:" : "Đơn vị đã chọn:"}
+                          </Text>
+                          <Text weight="bold" className="leading-snug break-words">{selectedUnit.fullPath}</Text>
                           <Text variant="code" className="text-[10px] text-slate-400 italic font-normal bg-transparent p-0">Mã: {selectedUnit.code || 'None'}</Text>
                         </div>
                       </div>
@@ -246,97 +285,299 @@ export function EmployeeCreateClient() {
 
                   {/* Chức danh */}
                   <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="jobTitleId"
-                      render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">2. Chức vụ chính quyền (Không bắt buộc)</FormLabel>
-                          <Select
-                            disabled={!departmentId}
-                            onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
-                            value={field.value ? String(field.value) : undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
-                                <SelectValue placeholder="-- Chọn chức vụ chính quyền --" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {govtTitles.map((j: any) => {
-                                const q = staffingMap.get(j.id);
-                                const remaining = q ? q.quantity - q.currentCount : null;
-                                return (
-                                  <SelectItem key={j.id} value={String(j.id)}>
-                                    <div className="flex items-center justify-between gap-2 w-full">
-                                      <span>{j.name}</span>
-                                      {q !== undefined && (
-                                        <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                                          remaining !== null && remaining <= 0 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                                        }`}>
-                                          {remaining !== null && remaining <= 0 ? 'Hết biên chế' : `Còn ${remaining} biên chế`}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
-
-                          {/* Cảnh báo biên chế ngay dưới Select */}
-                          {quotaInfo !== undefined && (
-                            <div className={`flex items-center gap-2 text-xs font-semibold mt-1.5 px-3 py-2 rounded-lg ${
-                              quotaInfo.currentCount >= quotaInfo.quantity
-                                ? 'bg-red-50 text-red-700 border border-red-200'
-                                : 'bg-green-50 text-green-700 border border-green-200'
-                            }`}>
-                              {quotaInfo.currentCount >= quotaInfo.quantity
-                                ? <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
-                                : <Check className="h-3.5 w-3.5 shrink-0" />
-                              }
-                              <span>
-                                Định biên: {quotaInfo.currentCount}/{quotaInfo.quantity} &mdash;
-                                {quotaInfo.currentCount >= quotaInfo.quantity
-                                  ? ' Đã hết chỉ tiêu! Hệ thống sẽ tự từ chối khi lưu.'
-                                  : ` Còn ${quotaInfo.quantity - quotaInfo.currentCount} vị trí trống.`
-                                }
-                              </span>
-                            </div>
+                    {/* Nếu là Cơ quan Đảng: Ưu tiên chọn Chức vụ / VTVL Đảng trước */}
+                    {isPartyUnit ? (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="partyTitleId"
+                          render={({ field }) => (
+                            <FormItem className="space-y-2">
+                              <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">
+                                2. Chức danh / Vị trí việc làm Đảng *
+                              </FormLabel>
+                              <Select
+                                disabled={!departmentId}
+                                onValueChange={(val) => {
+                                  field.onChange(val ? Number(val) : undefined);
+                                  form.setValue("slotOrder", undefined);
+                                }}
+                                value={field.value ? String(field.value) : undefined}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                    <SelectValue placeholder="-- Chọn chức danh khối Đảng --" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {partyTitles.map((j: any) => {
+                                    const rep = (staffingReport?.data as any[] || []).find((s: any) => s.jobTitleId === j.id);
+                                    const qty = rep ? rep.quantity : null;
+                                    const cnt = rep ? rep.currentCount ?? 0 : 0;
+                                    const rem = qty !== null ? qty - cnt : null;
+                                    return (
+                                      <SelectItem key={j.id} value={String(j.id)}>
+                                        <div className="flex items-center justify-between gap-2 w-full">
+                                          <span>{j.name}</span>
+                                          {qty !== null && (
+                                            <span className={cn(
+                                              "ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+                                              rem !== null && rem <= 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+                                            )}>
+                                              Định biên: {cnt}/{qty}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
                           )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        />
 
+                        {govtTitles.length > 0 && (
+                          <FormField
+                            control={form.control}
+                            name="jobTitleId"
+                            render={({ field }) => (
+                              <FormItem className="space-y-2">
+                                <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">
+                                  Chức vụ chính quyền kiêm nhiệm (Không bắt buộc)
+                                </FormLabel>
+                                <Select
+                                  disabled={!departmentId}
+                                  onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
+                                  value={field.value ? String(field.value) : undefined}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                      <SelectValue placeholder="-- Chọn chức vụ chính quyền --" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {govtTitles.map((j: any) => (
+                                      <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="jobTitleId"
+                          render={({ field }) => (
+                            <FormItem className="space-y-2">
+                              <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">
+                                2. Chức vụ chính quyền
+                              </FormLabel>
+                              <Select
+                                disabled={!departmentId}
+                                onValueChange={(val) => {
+                                  field.onChange(val ? Number(val) : undefined);
+                                  form.setValue("slotOrder", undefined);
+                                }}
+                                value={field.value ? String(field.value) : undefined}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                    <SelectValue placeholder="-- Chọn chức vụ chính quyền --" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {govtTitles.map((j: any) => {
+                                    const rep = (staffingReport?.data as any[] || []).find((s: any) => s.jobTitleId === j.id);
+                                    const qty = rep ? rep.quantity : null;
+                                    const cnt = rep ? rep.currentCount ?? 0 : 0;
+                                    const rem = qty !== null ? qty - cnt : null;
+                                    return (
+                                      <SelectItem key={j.id} value={String(j.id)}>
+                                        <div className="flex items-center justify-between gap-2 w-full">
+                                          <span>{j.name}</span>
+                                          {qty !== null && (
+                                            <span className={cn(
+                                              "ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+                                              rem !== null && rem <= 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+                                            )}>
+                                              Định biên: {cnt}/{qty}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
+                        <FormField
+                          control={form.control}
+                          name="partyTitleId"
+                          render={({ field }) => (
+                            <FormItem className="space-y-2">
+                              <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">
+                                Chức vụ Đảng (Không bắt buộc)
+                              </FormLabel>
+                              <Select
+                                disabled={!departmentId}
+                                onValueChange={(val) => {
+                                  field.onChange(val ? Number(val) : undefined);
+                                  if (!form.getValues("jobTitleId")) form.setValue("slotOrder", undefined);
+                                }}
+                                value={field.value ? String(field.value) : undefined}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
+                                    <SelectValue placeholder="-- Chọn chức vụ Đảng --" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {partyTitles.map((j: any) => (
+                                    <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
 
-                    <FormField
-                      control={form.control}
-                      name="partyTitleId"
-                      render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="font-black text-slate-700 text-xs uppercase tracking-wider">4. Chức vụ Đảng (Không bắt buộc)</FormLabel>
-                          <Select
-                            disabled={!departmentId}
-                            onValueChange={(val) => field.onChange(val ? Number(val) : undefined)}
-                            value={field.value ? String(field.value) : undefined}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 disabled:bg-slate-100">
-                                <SelectValue placeholder="-- Chọn chức vụ Đảng --" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {partyTitles.map((j: any) => (
-                                <SelectItem key={j.id} value={String(j.id)}>{j.name}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Cảnh báo biên chế tổng */}
+                    {quotaInfo !== undefined && (
+                      <div className={cn(
+                        "flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg",
+                        quotaInfo.currentCount >= quotaInfo.quantity
+                          ? "bg-red-50 text-red-700 border border-red-200"
+                          : "bg-green-50 text-green-700 border border-green-200"
+                      )}>
+                        {quotaInfo.currentCount >= quotaInfo.quantity
+                          ? <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+                          : <Check className="h-3.5 w-3.5 shrink-0" />
+                        }
+                        <span>
+                          Định biên chức danh: {quotaInfo.currentCount}/{quotaInfo.quantity} &mdash;
+                          {quotaInfo.currentCount >= quotaInfo.quantity
+                            ? " Đã đủ chỉ tiêu! Vẫn có thể phân công slot để chuyển giao vị trí."
+                            : ` Còn ${quotaInfo.quantity - quotaInfo.currentCount} vị trí trống.`
+                          }
+                        </span>
+                      </div>
+                    )}
+
+                    {/* 3. VỊ TRÍ CHỨC DANH (SLOTS) ĐỊNH BIÊN */}
+                    {activeStaffingRow && activeStaffingRow.quantity > 0 && (
+                      <div className="space-y-3 pt-3 border-t border-slate-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <FormLabel className="font-black text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                              <UserCheck className="h-3.5 w-3.5 text-blue-700" />
+                              3. Chọn Vị trí chức danh (Định biên: {activeStaffingRow.quantity} vị trí)
+                            </FormLabel>
+                            <Text variant="small" className="text-[11px] text-slate-500 italic">
+                              Chọn vị trí cụ thể được phân công trong định biên cơ quan
+                            </Text>
+                          </div>
+                          {selectedSlotOrder && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => form.setValue("slotOrder", undefined)}
+                              className="text-xs h-7 text-slate-500 hover:text-red-600 px-2"
+                            >
+                              Bỏ chọn
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-2.5 max-h-[380px] overflow-y-auto pr-1">
+                          {Array.from({ length: activeStaffingRow.quantity }, (_, i) => i + 1).map((slotNum) => {
+                            const slotData = (activeStaffingRow.slots || []).find((s: any) => s.slotOrder === slotNum);
+                            const isAssigned = !!(slotData?.assignedEmployeeCode || slotData?.assignedEmployeeName);
+                            const isSelected = selectedSlotOrder === slotNum;
+
+                            return (
+                              <div
+                                key={slotNum}
+                                onClick={() => {
+                                  form.setValue("slotOrder", isSelected ? undefined : slotNum, { shouldValidate: true });
+                                }}
+                                className={cn(
+                                  "p-3 rounded-xl border text-left cursor-pointer transition-all flex flex-col gap-1.5 select-none relative",
+                                  isSelected
+                                    ? "bg-blue-50/90 border-blue-600 shadow-sm ring-2 ring-blue-600/30 text-blue-950"
+                                    : "bg-white hover:bg-slate-50 border-slate-200 text-slate-800"
+                                )}
+                              >
+                                <div className="flex items-center justify-between gap-2 min-w-0">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className={cn(
+                                      "flex items-center justify-center w-5 h-5 rounded-full text-xs font-black shrink-0",
+                                      isSelected ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-700"
+                                    )}>
+                                      {slotNum}
+                                    </span>
+                                    <span className="font-bold text-xs truncate min-w-0">
+                                      {slotData?.description
+                                        ? slotData.description.split(" (")[0]
+                                        : `Vị trí ${slotNum}`}
+                                    </span>
+                                  </div>
+
+                                  {isAssigned ? (
+                                    <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-[10px] font-semibold shrink-0">
+                                      <UserCheck className="h-3 w-3 mr-1" />
+                                      Đã phân công
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-300 text-[10px] font-semibold shrink-0">
+                                      <Check className="h-3 w-3 mr-1" />
+                                      Còn trống
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                {slotData?.description && (
+                                  <div className="text-[11px] text-slate-600 leading-snug break-words">
+                                    {slotData.description}
+                                  </div>
+                                )}
+
+                                {isAssigned && (
+                                  <div className="text-[10px] text-amber-700 font-medium truncate">
+                                    Nhân sự: <strong>{slotData.assignedEmployeeName || slotData.assignedEmployeeCode}</strong>
+                                    {slotData.assignedEmployeeCode && ` (${slotData.assignedEmployeeCode})`}
+                                  </div>
+                                )}
+
+                                {slotData?.domains && slotData.domains.length > 0 && (
+                                  <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                                    {slotData.domains.map((d: any) => (
+                                      <Badge key={d.id} variant="secondary" className="text-[9px] px-1.5 py-0 bg-slate-100 text-slate-600 font-normal">
+                                        {d.name}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
                     {isLoadingJobs && (
                       <div className="flex items-center gap-2 text-xs text-blue-600 font-semibold mt-1">

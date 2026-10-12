@@ -492,6 +492,8 @@ export class KpiEvaluationsService implements OnModuleInit {
         version: item.version || 1,
         hasXmlFile: true,
         xmlSize,
+        xmlContent,
+        placeholders,
       },
       xmlContent,
       placeholders,

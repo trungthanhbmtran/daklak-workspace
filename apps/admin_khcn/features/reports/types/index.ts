@@ -11,6 +11,7 @@ export interface ReportSourceDef {
   fields: string[];
   upstream?: string;
   path?: string;
+  method?: string;
 }
 
 export interface JoinDef {

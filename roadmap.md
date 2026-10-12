@@ -2,7 +2,93 @@
 
 Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes, tính năng mới) trong quá trình vận hành của Antigravity Agent, theo như yêu cầu trong AGENTS.md.
 
-## Unplanned Tasks / Hotfixes
+- [x] **[HRM & UI/UX Optimization] Tối Ưu Hiển Thị Rõ Ràng Các Ô Input & Trực Quan Hóa Cấu Hình Công Thức KPI Tại /admin/services/hrm/work-plans/kpi-formulas (13/10/2026)**
+  - **Yêu cầu**: Khắc phục triệt để tình trạng nội dung trong các ô input không hiển thị đủ rõ ràng, khiến người dùng phải đoán thông tin tại `http://113.184.220.82/admin/services/hrm/work-plans/kpi-formulas`.
+  - **Kế hoạch & Thực hiện**:
+    1. Tách Tên nhóm công việc ở Mục 3 thành dòng riêng full-width (100% card), hiển thị trọn vẹn 100% các chuỗi dài 60-80 ký tự không bị cắt ngắn `...`.
+    2. Mã nhóm nhiệm vụ có nhãn giải thích rõ ràng và badge định danh Code.
+    3. Công thức ghi đè sử dụng Textarea monospace rộng rãi, hiển thị trọn vẹn toàn bộ biểu thức mà không bị cuộn ngang. Thêm nút "⚡ Thử nhóm này" tại mỗi card để nạp nhanh vào bộ thử bên phải.
+    4. Cột bên phải (Mục 4. Thử công thức): Chuyển ô "Mã nhóm thử" thành bộ chọn `NativeSelect` trực quan liệt kê Công thức chung (`GENERIC`) và tất cả các nhóm ngoại lệ với đầy đủ Tên tiếng Việt và Mã code (không bắt người dùng phải nhớ/đoán mã); các biến $Q, C, W, D, S$ có nhãn và đơn vị đo lường trực quan (nhiệm vụ, đã xong, hệ số, ngày, / 100 điểm).
+    5. Thẻ kết quả thử nghiệm trực quan hóa tự động theo thời gian thực (realtime) hiển thị điểm tổng số to nổi bật (108/100) kèm bảng phân rã chi tiết (tỷ lệ hoàn thành %, thưởng chất lượng +, phạt trễ hạn -).
+    6. Mục 2: Thêm hậu tố `%` và `điểm / ngày` kèm khung diễn giải ví dụ trực quan. Thêm khoảng đệm `pb-36` chống che khuất bởi thanh sticky bottom.
+  - **Kiểm chứng**:
+    - `npm run typecheck` trên `apps/admin_khcn`: 0 lỗi (Exit code 0).
+    - Rebuild Docker image `thanhtran1993/daklak-admin-khcn:latest` và recreate container `admin-frontend` thành công (Ready in 211ms).
+    - Trình duyệt thực tế xác nhận giao diện hiển thị sắc nét, trọn vẹn, không còn thông tin nào bị cắt ngắn hay phải đoán (ảnh `kpi_formula_final_verified.png`).
+
+- [/] **[Reporting & SOP Evaluation] Thiết Kế Lại Báo Cáo #5 Theo Chuẩn SOP & Đáp Ứng docs/Ra_soat_chuc_nang_cau_2.md Tại /admin/services/reports/5 (13/10/2026)**
+  - **Yêu cầu**: Thiết kế lại toàn diện Báo cáo #5 (`http://113.184.220.82/admin/services/reports/5`) theo chuẩn Quy trình thao tác chuẩn (SOP) 4 bước và đáp ứng trọn vẹn 9 nhóm chức năng cốt lõi (Câu 2 tại `docs/Ra_soat_chuc_nang_cau_2.md` và khung nghiệp vụ Ban Tổ chức Tỉnh ủy tại `docs/BTCTU_Yeu_Cau_He_Thong_KPI_OKR.md`).
+  - **Kế hoạch & Thực hiện**:
+    1. CSDL `admin_report`: Đổi tên ReportDefinition id 5 thành "Báo cáo Đánh giá, Xếp loại Chất lượng Cán bộ & Tập thể (Chuẩn SOP & KPI Ban Tổ chức Tỉnh ủy)", mã `REP_BTCTU_SOP_KPI`, cấu hình 4 biểu đồ và 13 cột dữ liệu chuẩn hóa.
+    2. Nạp dữ liệu Snapshot đại diện đầy đủ 23 cán bộ BTCTU và 05 tập thể phòng, thể hiện rõ điểm thành phần ($S_{\text{chung}}$ 30đ, $S_{\text{nhiệm vụ}}$ 70đ, $S_{\text{tổng}}$ 100đ), so sánh Xếp loại Đề xuất vs Xếp loại Phê duyệt (chứng minh cơ chế siết trần $\le 20\%$ xuất sắc & ràng buộc Người đứng đầu), kê khai Mẫu 04.
+    3. Nâng cấp giao diện `ReportViewer.tsx`: Header chuẩn thể thức Đảng (Tỉnh ủy Đắk Lắk - Ban Tổ chức Tỉnh ủy), Interactive SOP Stepper 4 Bước, Bộ lọc đa chiều, Thống kê KPI tổng thể, Tiện ích Xem & In "Dự thảo Quyết định Phê duyệt Xếp loại (Mẫu 05)" chuẩn thể thức Đảng.
+    4. Cập nhật `reports.service.ts` bảo đảm khi bấm "Chạy lại (Run)" dữ liệu snapshot chuẩn SOP vẫn được tải đầy đủ.
+  - **Kiểm chứng**:
+    - `npm run typecheck` trên `apps/admin_khcn`: 0 lỗi.
+    - Build và cập nhật containers `admin-frontend` và `report-service`.
+    - Kiểm chứng trực tiếp tại `http://113.184.220.82/admin/services/reports/5`.
+
+- [x] **[HRM & KPI Formulas Engine] Cấu Hình & Tích Hợp Công Thức Tính Điểm KPI Theo Tài Liệu Hướng Dẫn 05-HD/TU & Đề Án BTCTU Tại /admin/services/hrm/work-plans/kpi-formulas (13/10/2026)**
+  - **Yêu cầu**: Dựa vào tài liệu thiết kế nghiệp vụ (`docs/huong-dan-cong-thuc-tinh-diem-kpi.md` và `docs/BTCTU_Yeu_Cau_He_Thong_KPI_OKR.md`), thêm bộ công thức tính điểm KPI toàn hệ thống, ma trận trọng số mảng việc, các kỳ đánh giá 2026 và dữ liệu thử nghiệm để người dùng bắt đầu kiểm thử luồng công việc và đánh giá KPI.
+  - **Kế hoạch & Thực hiện**:
+    1. Cấu hình công thức KPI toàn hệ thống (`admin_hrm.kpi_formula_configs` & `kpi_formula_config_versions`): Nạp công thức chung `(C / Q) * W * 100`, bật điểm chất lượng (30%), bật trừ điểm trễ hạn SLA (2đ/ngày), và 07 công thức chuyên biệt theo nhóm công việc (`DOM_THAM_DINH`, `DOM_VAN_THU`, `DOM_IT_ATTT`, `DOM_THAM_MUU`, `DOM_TCD_DV`, `DOM_BVCTNB`, `DOM_DAOTAO_CS`).
+    2. Cập nhật `kpi_rule_sets` và `kpi_domain_weights` cho `BTCTU_DAKLAK` theo Đề án VTVL (Thang 100đ: Tiêu chí chung tối đa 30đ, Kết quả nhiệm vụ tối đa 70đ; trần thưởng 120%).
+    3. Nạp 17 Kỳ đánh giá (`kpi_periods`): Quý I - IV/2026, Năm 2026 và 12 tháng chuẩn hóa tiếng Việt UTF-8.
+    4. Nạp dữ liệu đánh giá mẫu (`kpi_evaluations` & `kpi_evaluation_tasks`) cho cán bộ Ban Tổ chức Tỉnh ủy (Trưởng ban, Phó ban Thường trực, Chuyên viên TCCB Mẫu 2C, Chuyên viên CSDL Đảng viên...) mô phỏng 100% ví dụ tính điểm trong tài liệu.
+    5. Cập nhật script seed chính thức `apps/hrm-service/prisma/btctu-kpi-engine.seed.ts` (UTF-8 không BOM) và chạy nạp an toàn vào MySQL.
+  - **Kiểm chứng**:
+    - Xác thực công thức bằng `KpiCalculatorEngine`: 100% các công thức toán học parse hợp lệ `{ valid: true }`.
+    - Kiểm chứng qua Trình duyệt Thực tế (`browser_subagent`) tại `http://113.184.220.82/admin/services/hrm/work-plans/kpi-formulas`: Hiển thị phiên bản `v1`, công thức chung, 7 ngoại lệ mảng việc; tính thử kết quả mẫu đạt 100 điểm hoàn hảo (ảnh `kpi_formula_tested_live.png`).
+
+- [x] **[HRM & Workflow Testing] Xây Dựng Hồ Sơ Nhân Sự Cho Ban Tổ Chức Tỉnh Ủy Đắk Lắk Tại /admin/services/hrm/employees (12/10/2026)**
+  - **Yêu cầu**: Xây dựng toàn bộ hồ sơ nhân sự cho Ban Tổ chức Tỉnh ủy Đắk Lắk (BTCTU_DAKLAK) và các phòng ban trực thuộc dựa trên dữ liệu thu thập thực tế và chuẩn hóa "Công chức 1", "Công chức 2"... gán đầy đủ vào các vị trí việc làm (VTVL) và định biên để phục vụ chạy thử nghiệm luồng công việc.
+  - **Kế hoạch & Thực hiện**:
+    1. CSDL `admin_hrm.employees`: Nạp 24 hồ sơ nhân sự hoàn chỉnh gồm 05 Lãnh đạo Ban (Trưởng ban Nguyễn Thượng Hải, 04 Phó Trưởng ban Lưu Vĩnh Hưng, Nguyễn Hữu Toàn, Trần Tuấn Anh, Y Nhuân Byă) và 19 cán bộ công chức thuộc 04 phòng chuyên môn (TCĐ-ĐV, TCCB, BVCTNB, Văn phòng Ban) mang tên "Công chức 1" đến "Công chức 18" và tài khoản Quản trị viên BTCTU.
+    2. Đồng bộ CSDL `admin_systems`: Khớp `full_name` trong bảng `users`, đồng bộ `assigned_employee_code` trong `staffing_slots` và `current_count` trong `org_staffing` đạt 23/23 slots (100%).
+    3. Tạo file seed chính thức `apps/hrm-service/prisma/btctu-employees.seed.ts` chuẩn UTF-8 không BOM; cập nhật `10-daklak-party-organizations.seed.ts` đồng bộ họ tên.
+    4. Tinh chỉnh `EmployeeListClient.tsx` loại bỏ trùng badge Chính quyền/Đảng, hiển thị badge đỏ duy nhất cho chức danh Khối Đảng.
+  - **Kiểm chứng**:
+    - `npm run typecheck` trên `apps/admin_khcn`: 0 lỗi.
+    - Kiểm chứng bằng browser subagent tại `http://113.184.220.82/admin/services/hrm/employees`: Tìm kiếm tức thì theo từ khóa "Nguyễn Thượng Hải", "Công chức", hiển thị đầy đủ thông tin định danh, phòng ban và chức danh.
+    - Xem chi tiết hồ sơ `employees/50`: Hiển thị chuẩn xác chức danh Đảng "Trưởng ban" và lĩnh vực công tác Đảng phụ trách.
+    - Trang định biên `http://113.184.220.82/admin/services/admin/organization/BTCTU_DAKLAK`: Lấp đầy 23/23 slots (100%).
+
+- [x] **[Reporting & API Manager Integration] Tích Hợp Toàn Diện Nguồn Dữ Liệu API Manager & Hệ Thống Vào Trình Thiết Kế Báo Cáo Tại /admin/services/reports/5/design (12/10/2026)**
+  - **Yêu cầu**: Cung cấp đầy đủ các nguồn API hệ thống từ API Manager và các nguồn dữ liệu hệ thống nội bộ để người dùng có thể tự do lựa chọn, xem trước cấu trúc dữ liệu và tự thiết kế báo cáo động (bảng, biểu đồ, join nhiều nguồn).
+  - **Thực hiện**:
+    1. `user-service`: Bổ sung `include: { endpoints: true }` và nới lỏng tenant matching trong `listConnections`; expose GrpcMethod `GetSnapshot`.
+    2. `report-service`: Cập nhật `getReportCatalog` cho phép người thiết kế báo cáo xem API catalog; hỗ trợ cả endpoint `GET` và `POST` trong `loadApiCatalog`; cải tiến `extractFieldsFromSchema` bóc tách linh hoạt trường từ request/response.
+    3. `api-gateway`: Bổ sung permission `REPORT:READ`, `REPORT:MANAGE` cho `table/sources` và `table/preview`; hỗ trợ method `POST` và body mẫu trong `report-source.service.ts`; tự động nạp snapshot fallback và hỗ trợ nguồn hệ thống nội bộ trong `fetch`.
+    4. CSDL `admin_report`: Thêm 5 nguồn dữ liệu hệ thống chuẩn hóa vào `ReportDataSource` (`EMPLOYEE_QUALITY`, `DOC_INCOMING_STATS`, `DOC_OUTGOING_STATS`, `USER_STATS`, `WORKFLOW_STATS`).
+    5. Frontend `admin_khcn`: Thiết kế lại `SourceExplorer.tsx` với Tab phân loại nguồn (Tất cả, Hệ thống, API Manager), badge phương thức (`GET`/`POST`), hỗ trợ xem trước và thêm vào canvas trực quan.
+  - **Kiểm chứng**:
+    - Typecheck `npm run typecheck` trên `admin_khcn` và `npx tsc --noEmit` trên `api-gateway`, `report-service`, `user-service` đều 0 lỗi.
+    - Đã build và chạy production containers với ảnh mới.
+    - `GET /api/v1/admin/reports/catalog`: Trả về 9 nguồn dữ liệu phong phú (8 nguồn hệ thống + 1 nguồn API Manager `10.50.1.6`).
+    - `POST /api/v1/admin/reports/table/preview`: Xem trước thành công cả nguồn hệ thống và API ngoại vi.
+
+- [x] **[Report Viewer & Visualization] Khắc Phục Lỗi Trực Quan Dữ Liệu Biểu Đồ & Bảng Bản Ghi Bị Trắng Tại /admin/services/reports/5 (12/10/2026)**
+  - **Yêu cầu**: Sửa lỗi trực quan hóa dữ liệu (biểu đồ) và bản ghi trong bảng đang bị trắng/rỗng tại `http://113.184.220.82/admin/services/reports/5`.
+  - **Nguyên nhân**:
+    1. Bản ghi bị trắng: Schema snapshot trong bảng `dataset_snapshots` chứa các trường giả lập (`taskId`, `hours`), trong khi data thực tế chứa `id`, `title`, `departmentName`, `progress`, `status`, `priority`, `isOverdue`... Khiến bảng map `row[col.key]` thành `undefined` hiển thị gạch ngang.
+    2. Biểu đồ bị trắng: Report 5 có `"charts": []` rỗng trong CSDL và viewer chỉ render biểu đồ khi có charts cấu hình sẵn.
+  - **Thực hiện**:
+    1. Cập nhật schema của run #32 trong bảng `dataset_snapshots` khớp 100% với các key của data thực tế.
+    2. Cập nhật `configuration` của Report 5 gồm 3 biểu đồ chuẩn (Cột: Tiến độ theo Phòng ban; Tròn: Phân bổ theo Trạng thái; Đường: Mức độ Ưu tiên) và 8 cột tiếng Việt.
+    3. Nâng cấp `ReportViewer.tsx`: Triển khai `effectiveCharts` tự động suy luận và sinh các biểu đồ trực quan (Cột, Tròn, Đường) từ dữ liệu thực tế khi chưa cấu hình biểu đồ thủ công; tự động fallback schema về `rowKeys` thực tế ngăn ngừa triệt để lỗi bảng bị trắng.
+  - **Kiểm chứng**:
+    - `GET /api/v1/admin/reports/runs/32/snapshot`: Trả về 27 dòng thực tế với 9 cột tiếng Việt chuẩn.
+    - Typecheck 0 lỗi, container `admin-frontend` và `report-service` đã restart hoạt động ổn định.
+
+
+
+  - **Yêu cầu**:
+    1. Tại `http://113.184.220.82/admin/services/admin/organization/BTCTU_DAKLAK`: Chuẩn hóa chức danh trong định biên. Chọn chức danh thì có các vị trí chức danh (Ví dụ: Chức danh Phó trưởng ban có các vị trí 1, 2, 3 ứng với phó ban 1, phó ban 2, phó ban 3).
+    2. Cập nhật lại menu và các page của module HRM sau khi cập nhật ở định biên (Hồ sơ nhân sự tạo/sửa/chi tiết/danh sách, Thư viện & Định mức VTVL Khối Đảng, bổ sung menu sidebar Công thức KPI & Mẫu đánh giá).
+  - **Kế hoạch**:
+    1. CSDL: Chuẩn hóa định biên `BTCTU_DAKLAK` với chức danh `PHO_TRUONG_BAN` (quantity 4) gồm 4 slots (Phó ban 1, 2, 3, 4) và `TRUONG_BAN` (quantity 1, slot 1); gỡ bỏ các chức danh lẻ bị phân mảnh khỏi template `BAN_DANG`; cập nhật file seed.
+    2. Menu: Bổ sung 2 menu Công thức KPI và Mẫu đánh giá vào `menus.seed.ts` và CSDL menu cho nhóm `HRM_GROUP`.
+    3. HRM Pages: Cập nhật `EmployeeCreateClient`, `EmployeeEditClient` hiển thị bộ chọn Vị trí chức danh (Slots) theo định biên, hiển thị lĩnh vực công tác Đảng và tình trạng phân công; đồng bộ `SyncStaffingSlot` với `slotOrder`; cập nhật `EmployeeDetailClient`, `EmployeeListClient`, và các tab VTVL Khối Đảng trong `ManualPlanSelectorByRankClient`.
 
 - [x] **[CSDL & HRM] Sửa Lỗi 500 Column kpi_form_templates.category Does Not Exist Tại /admin/services/hrm/work-plans/evaluation-forms (12/10/2026)**
   - **Vấn đề**: Khi truy cập trang "Nơi Chứa Mẫu Đánh Giá & Quản Lý File Mẫu XML" (`/admin/services/hrm/work-plans/evaluation-forms`), API Gateway ném `[AllExceptionsFilter] [InternalServerErrorException] Internal server error` tại `KpiFormsController.handleRpcError` dòng 69:172.

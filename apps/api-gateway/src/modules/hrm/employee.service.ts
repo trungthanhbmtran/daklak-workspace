@@ -247,13 +247,22 @@ export class EmployeeService implements OnModuleInit {
       firstValueFrom(this.employeeService.CreateEmployee(body)),
     );
     if (res?.data?.employeeCode) {
+      const effectiveJobTitleId =
+        body.partyTitleId ||
+        res.data.partyTitleId ||
+        res.data.jobTitle?.id ||
+        res.data.jobTitleId ||
+        0;
       await firstValueFrom(
         this.orgService.SyncStaffingSlot({
           employeeCode: res.data.employeeCode,
           unitId: res.data.department?.id || res.data.departmentId || 0,
-          jobTitleId: res.data.jobTitle?.id || res.data.jobTitleId || 0,
-          isActive: res.data.employmentStatus !== 'retired' && res.data.employmentStatus !== 'resigned',
-        })
+          jobTitleId: effectiveJobTitleId,
+          isActive:
+            res.data.employmentStatus !== 'retired' &&
+            res.data.employmentStatus !== 'resigned',
+          slotOrder: body.slotOrder ? parseInt(body.slotOrder, 10) : 0,
+        }),
       ).catch(() => {});
     }
     return res;
@@ -277,13 +286,22 @@ export class EmployeeService implements OnModuleInit {
       firstValueFrom(this.employeeService.UpdateEmployee(payload)),
     );
     if (res?.data?.employeeCode) {
+      const effectiveJobTitleId =
+        payload.partyTitleId ||
+        res.data.partyTitleId ||
+        res.data.jobTitle?.id ||
+        res.data.jobTitleId ||
+        0;
       await firstValueFrom(
         this.orgService.SyncStaffingSlot({
           employeeCode: res.data.employeeCode,
           unitId: res.data.department?.id || res.data.departmentId || 0,
-          jobTitleId: res.data.jobTitle?.id || res.data.jobTitleId || 0,
-          isActive: res.data.employmentStatus !== 'retired' && res.data.employmentStatus !== 'resigned',
-        })
+          jobTitleId: effectiveJobTitleId,
+          isActive:
+            res.data.employmentStatus !== 'retired' &&
+            res.data.employmentStatus !== 'resigned',
+          slotOrder: payload.slotOrder ? parseInt(payload.slotOrder, 10) : 0,
+        }),
       ).catch(() => {});
     }
     return res;

@@ -701,6 +701,7 @@ export class OrganizationsService {
     unitId: number;
     jobTitleId: number;
     isActive: boolean;
+    slotOrder?: number;
   }) {
     if (!data.employeeCode) return;
 
@@ -732,7 +733,7 @@ export class OrganizationsService {
         }
       }
 
-      // 2. Nếu employee active, tìm slot trống và gán
+      // 2. Nếu employee active, tìm slot trống hoặc slotOrder chỉ định và gán
       if (data.isActive && data.unitId && data.jobTitleId) {
         const staffing = await tx.organizationStaffing.findUnique({
           where: {
@@ -744,20 +745,34 @@ export class OrganizationsService {
         });
 
         if (staffing) {
-          const availableSlot = await tx.staffingSlot.findFirst({
-            where: {
-              staffingId: staffing.id,
-              OR: [
-                { assignedEmployeeCode: null },
-                { assignedEmployeeCode: '' },
-              ],
-            },
-            orderBy: { slotOrder: 'asc' },
-          });
+          let targetSlot: any = null;
+          if (data.slotOrder && data.slotOrder > 0) {
+            targetSlot = await tx.staffingSlot.findUnique({
+              where: {
+                staffingId_slotOrder: {
+                  staffingId: staffing.id,
+                  slotOrder: data.slotOrder,
+                },
+              },
+            });
+          }
 
-          if (availableSlot) {
+          if (!targetSlot) {
+            targetSlot = await tx.staffingSlot.findFirst({
+              where: {
+                staffingId: staffing.id,
+                OR: [
+                  { assignedEmployeeCode: null },
+                  { assignedEmployeeCode: '' },
+                ],
+              },
+              orderBy: { slotOrder: 'asc' },
+            });
+          }
+
+          if (targetSlot) {
             await tx.staffingSlot.update({
-              where: { id: availableSlot.id },
+              where: { id: targetSlot.id },
               data: { assignedEmployeeCode: data.employeeCode },
             });
 

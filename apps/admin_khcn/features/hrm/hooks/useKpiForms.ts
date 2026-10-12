@@ -32,8 +32,14 @@ export function useGetKpiFormDetail(formCode: string | null) {
     queryKey: KPI_FORMS_QUERY_KEYS.detail(formCode || ''),
     queryFn: async () => {
       if (!formCode) return null;
-      const res = await kpiFormsApi.getDetail(formCode);
-      return unwrapData<KpiFormDetailResponse>(res, null as any);
+      const res: any = await kpiFormsApi.getDetail(formCode);
+      if (!res) return null;
+      const inner = res.data && typeof res.data === 'object' ? res.data : res;
+      return {
+        ...inner,
+        xmlContent: inner.xmlContent || res.xmlContent || '',
+        placeholders: inner.placeholders || res.placeholders || [],
+      };
     },
     enabled: Boolean(formCode),
     staleTime: 60 * 1000,

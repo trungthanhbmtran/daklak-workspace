@@ -1,6 +1,6 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này là Hiến chương điều phối tối cao cho Antigravity (AGY) Lead Full-Stack Engineer. Mọi tác vụ lập trình và kỹ thuật BẮT BUỘC phải tuân thủ nghiêm ngặt quy trình 5 bước và 7 Bộ ràng buộc bất biến dưới đây.
+File này là Hiến chương kỹ thuật dùng chung cho Codex và Antigravity trong dự án. Điều phối viên phải tuân thủ quy trình lập kế hoạch, phản biện plan, thực thi song song theo ranh giới file, tích hợp và kiểm chứng cùng 7 bộ ràng buộc dưới đây.
 
 ---
 
@@ -12,22 +12,32 @@ File này là Hiến chương điều phối tối cao cho Antigravity (AGY) Lea
 
 ---
 
-## 2. Quy trình làm việc 5 bước khép kín (Lead Full-Stack Execution)
-Antigravity trực tiếp làm chủ quy trình khép kín, xử lý nhanh chóng trong 1 lượt (15 – 30s) mà không phân mảnh đùn đẩy trách nhiệm:
+## 2. Quy trình điều phối bắt buộc
 
-### Bước 1: Khảo sát & Kế hoạch (Planning)
-- **Khảo sát bối cảnh sâu**: Đọc kỹ yêu cầu và mã nguồn hiện tại. BẮT BUỘC tìm và đọc các file liên quan (schema, interface, dependencies) để nắm rõ cấu trúc, tránh võ đoán.
-- **Đồng bộ Roadmap**: Kiểm tra và cập nhật `roadmap.md`. Nếu tác vụ chưa có, thêm vào mục `Unplanned Tasks / Hotfixes`.
-- **Ghi nhận Kế hoạch**: Lập plan step-by-step chi tiết và lưu vào `.agents/current_plan.md`. Liên tục check-off `[x]` khi hoàn thành từng bước.
+Codex là điều phối viên mặc định cho quy trình hỗn hợp tài khoản. Codex lập plan và tự phản biện trước; chỉ sau khi plan đạt mới giao hai phần code độc lập cho hai phiên Antigravity. Hai agent coder không tự mở rộng phạm vi hoặc sửa phần của nhau.
 
-### Bước 2: Tự phản biện Kế hoạch (Plan Critique)
-- Tự đóng vai trò Red Team để đối chiếu kế hoạch với **7 Bộ ràng buộc kỹ thuật bắt buộc** (PBAC, tenant boundary, Additive migration, CSS min-w-0, gRPC delegation token).
-- Nếu phát hiện rủi ro sập CSDL hoặc vỡ layout, điều chỉnh phương án ngay trước khi viết code.
+### Bước 1: Khảo sát & Lập kế hoạch (Codex, chỉ đọc mã sản phẩm)
+- Khảo sát yêu cầu và các file liên quan (schema, interface, dependencies).
+- Trước khi plan, kiểm tra git status/diff; tra blacklist, các bản đồ kiến trúc/source-of-truth liên quan, mục execution_log theo từ khóa và Git history của file bị ảnh hưởng. Đối chiếu quyết định cũ với code/schema/proto hiện tại; không áp lại bản sửa lịch sử một cách máy móc.
+- Ghi context digest có đường dẫn nguồn, lỗi lịch sử liên quan và sự kiện hiện tại đã xác minh vào plan để hai coder cùng dùng.
+- Không sửa roadmap trong pha plan. Ghi đề xuất roadmap vào plan; điều phối viên chỉ cập nhật roadmap sau khi implementation được tích hợp nếu task cần.
+- Lưu plan step-by-step vào .agents/current_plan.md, gồm yêu cầu, contract, tiêu chí nghiệm thu, danh sách file, chủ sở hữu từng file, phụ thuộc và lệnh kiểm chứng dự kiến.
 
-### Bước 3: Thực thi Chuẩn xác (Execution)
-- Trực tiếp viết mã nguồn bám sát kế hoạch, tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật ở Mục 3.
+### Bước 2: Phản biện Plan (Codex, chưa cho phép viết mã sản phẩm)
+- Đối chiếu plan với rule/checklist phù hợp: PBAC, tenant boundary, additive migration, service sovereignty, CSS min-w-0, API contract và gRPC delegation.
+- Kiểm tra phạm vi file giữa Backend và Frontend không giao nhau; file dùng chung phải có đúng một chủ sở hữu trong plan.
+- Ghi PLAN_APPROVED hoặc PLAN_REVISE trong .agents/current_plan.md. Nếu PLAN_REVISE, sửa plan và phản biện lại. Chỉ bắt đầu code sau PLAN_APPROVED.
 
-### Bước 4: Kiểm chứng Thực tế & Phản biện Kết quả (Verification & Result Critique)
+### Bước 3: Thực thi song song (hai tài khoản Antigravity)
+- Chuẩn bị hai handoff riêng cho backend-coder và frontend-coder khi plan xác định hai phần độc lập và đã chốt contract. Khi các tool MCP cục bộ daklak-agent-orchestrator sẵn sàng, dùng chúng để tạo worktree riêng và dispatch hai lane. Nếu tool hoặc runner tài khoản chưa sẵn sàng, xuất hai prompt sẵn dùng và nêu rõ blocker; không được tuyên bố agent đã chạy.
+- Mỗi agent làm trong Git worktree riêng. Chỉ sửa file được giao; không sửa .agents/current_plan.md, .agents/execution_log.md, roadmap.md hoặc file của agent còn lại.
+- Nếu cần sửa file shared (libs/**, root configs, hoặc contract), plan phải chỉ định duy nhất một agent sở hữu file đó; agent còn lại chỉ đọc.
+- Mỗi agent đọc cùng context digest, báo cáo file đã sửa, kiểm chứng đã chạy, vấn đề còn mở, decision record và không tự merge worktree.
+
+### Bước 4: Kiểm chứng, Tích hợp & Phản biện Kết quả (Codex điều phối)
+- Nghiệm thu từng worktree riêng ngay khi agent hoàn tất, đối chiếu đúng phần file được giao, tiêu chí trong plan và các ràng buộc kỹ thuật.
+- Ghi AGENT_ACCEPTED hoặc AGENT_REVISION_REQUIRED cho từng lane. Nếu cần sửa, gửi finding cho đúng coder; không tích hợp phần chưa được chấp nhận.
+- Sau khi cả hai lane được chấp nhận, tích hợp và rà soát chéo contract, file overlap, tương thích Backend/Frontend rồi chạy kiểm chứng toàn cục.
 - **Kiểm chứng máy (Automated Verification):** Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test tương ứng).
 - **Phản biện Kết quả Thực thi (Post-Execution Diff Critique Gate):**
   * Không bao giờ thỏa mãn chỉ vì `tsc` báo pass. BẮT BUỘC soi từng dòng `git diff` vừa sinh ra đối chiếu trực tiếp với 7 Bộ ràng buộc kỹ thuật:
@@ -38,11 +48,10 @@ Antigravity trực tiếp làm chủ quy trình khép kín, xử lý nhanh chón
   * **Chống thử mù quáng (Anti-thrashing):** Nếu gặp lỗi hoặc phát hiện vi phạm khi phản biện diff, phân tích tận gốc và tự sửa ngay trước khi bàn giao.
   * **Phản biện độc lập chuyên sâu (Khi cần):** Với các tác vụ nhạy cảm liên quan tới CSDL lớn hoặc PBAC đa service, có thể kích hoạt skill `critical-review` hoặc `code_auditor_agent` để có góc nhìn thẩm định độc lập.
 
-### Bước 5: Kiểm duyệt, Dọn rác & Nghiệm thu (Quality Gate & Cleanup)
-- Dọn sạch toàn bộ `console.log`, import thừa, file tạm.
-- Check-off đầy đủ các mục trong `.agents/current_plan.md` và `roadmap.md`.
-- Ghi nhận nguyên nhân lỗi và giải pháp vào `.agents/execution_log.md`.
-- Xuất Báo cáo Thực thi Antigravity đầy đủ.
+### Bước 5: Cập nhật tài liệu & Nghiệm thu
+- Dọn sạch toàn bộ console.log, import thừa, file tạm.
+- Điều phối viên check-off .agents/current_plan.md, cập nhật roadmap.md nếu phù hợp và ghi quyết định/lỗi đáng lưu ý vào .agents/execution_log.md.
+- Xuất Báo cáo Thực thi đầy đủ.
 
 ---
 

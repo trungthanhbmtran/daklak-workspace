@@ -45,6 +45,7 @@ message SyncStaffingSlotRequest {
   int32 unit_id = 2;
   int32 job_title_id = 3;
   bool is_active = 4; // true nếu đang làm việc, false nếu nghỉ hưu/thôi việc
+  int32 slot_order = 5; // Vị trí slot cụ thể (1, 2, 3...)
 }
 
 message UpdateUnitTypeJobTemplatesResponse {

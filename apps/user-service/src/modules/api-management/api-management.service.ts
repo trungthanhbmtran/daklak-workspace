@@ -84,15 +84,23 @@ export class ApiManagementService {
   }
 
   async listConnections(organizationId: string, limit = 50, offset = 0) {
+    const whereClause: any = {};
+    if (organizationId && organizationId !== 'ALL') {
+      whereClause.OR = [
+        { organizationId },
+        { organizationId: 'DEFAULT' },
+        { organizationId: '' },
+      ];
+    }
     const data = await this.prisma.apiConnection.findMany({
-      where: { organizationId },
+      where: whereClause,
       take: limit,
       skip: offset,
       orderBy: { createdAt: 'desc' },
-      // OPTIMIZED: Removed include: { endpoints: true } to prevent N+1 and OOM issues
+      include: { endpoints: true },
     });
     const total = await this.prisma.apiConnection.count({
-      where: { organizationId },
+      where: whereClause,
     });
     return { data, total };
   }

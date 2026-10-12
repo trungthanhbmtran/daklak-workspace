@@ -35,6 +35,8 @@ charts/*/values.schema.json
 # Local logs
 *.log
 logs/
+.agent-worktrees/
+.agent-orchestrator.local.json
 
 # Prisma
 /apps/*/prisma/*.db
@@ -50,6 +52,32 @@ logs/
 !.agents/agents/chatgpt-planner.md
 !.agents/agents/chatgpt-planner.toml
 !.agents/agents/gemini-executor.md
+!.agents/agents/backend-coder.md
+!.agents/agents/frontend-coder.md
+!.agents/agents/backend-coder/
+!.agents/agents/backend-coder/agent.md
+!.agents/agents/frontend-coder/
+!.agents/agents/frontend-coder/agent.md
+!.agents/subagents/
+.agents/subagents/*
+!.agents/subagents/README.md
+!.agents/commands/
+.agents/commands/*
+!.agents/commands/implement.md
+!.agents/commands/analyze.md
+!.agents/commands/plan.md
+!.agents/commands/review.md
+!.agents/checklists/
+.agents/checklists/*
+!.agents/checklists/agent-acceptance.md
+!.agents/roles/
+.agents/roles/*
+!.agents/roles/agent-operations.md
+!.agents/roles/codex-orchestrator.md
+!.agents/reports/
+!.agents/templates/
+.agents/templates/*
+!.agents/templates/decision-record.md
 !.agents/skills/
 .agents/skills/*
 !.agents/skills/plan-critique/

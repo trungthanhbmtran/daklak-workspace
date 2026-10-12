@@ -46,6 +46,31 @@ export class ApiManagementController {
     );
   }
 
+  @GrpcMethod('ApiManagementService', 'GetSnapshot')
+  async getSnapshot(data: { currentEtag?: string }) {
+    try {
+      const res = await this.service.getSnapshot(data?.currentEtag || '');
+      const conns = Array.isArray(res.connections) ? (res.connections as any[]) : [];
+      return {
+        version: res.version,
+        etag: res.etag,
+        connections: conns.map((conn: any) => ({
+          ...conn,
+          auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
+          endpoints: Array.isArray(conn.endpoints)
+            ? conn.endpoints.map((ep: any) => ({
+                id: ep.id,
+                method: ep.method,
+                pathTemplate: ep.pathTemplate,
+              }))
+            : [],
+        })),
+      };
+    } catch (e: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
   @GrpcMethod('ApiManagementService', 'ListConnections')
   @Permissions('INTEGRATION:VIEW')
   async listConnections(data: any) {

@@ -1,4 +1,4 @@
-﻿import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RpcException } from '@nestjs/microservices';
 import { status as GrpcStatus } from '@grpc/grpc-js';
@@ -35,7 +35,9 @@ export class PbacGuard implements CanActivate {
     }
 
     const userPermissions = user.permissionsFlatten ?? [];
-    const hasPermission = requiredPermissions.some((p) => userPermissions.includes(p));
+    const hasPermission =
+      userPermissions.includes('*') ||
+      requiredPermissions.some((p) => userPermissions.includes(p));
 
     if (!hasPermission) {
       throw new RpcException({

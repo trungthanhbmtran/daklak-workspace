@@ -132,19 +132,21 @@ export function EmployeeListClient() {
                     <div className="flex flex-col space-y-2">
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {govt ? (
+                          {govt && govt !== party && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                               {govt}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground border border-border">
-                              Chưa bổ nhiệm (CQ)
                             </span>
                           )}
 
                           {party && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
                               {party}
+                            </span>
+                          )}
+
+                          {!govt && !party && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground border border-border">
+                              {rank || "Chưa bổ nhiệm"}
                             </span>
                           )}
                         </div>

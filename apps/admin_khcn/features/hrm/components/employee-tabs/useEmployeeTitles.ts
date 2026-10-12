@@ -22,6 +22,13 @@ export function useEmployeeTitles(employee: any) {
     queryFn: () => organizationApi.getJobTitles(),
   });
 
+  const { data: staffingReport } = useQuery({
+    queryKey: ["staffing-report", employee?.departmentId],
+    queryFn: () => organizationApi.getStaffingReport(employee.departmentId),
+    enabled: !!employee?.departmentId,
+    staleTime: 60 * 1000,
+  });
+
   const unitName = useMemo(() => {
     if (!employee?.departmentId) return employee?.department?.name ?? "—";
     if (!Array.isArray(treeNodes)) return employee?.department?.name ?? "—";
@@ -57,11 +64,34 @@ export function useEmployeeTitles(employee: any) {
     return found?.name ?? "—";
   }, [employee, jobTitlesRes]);
 
+  const assignedSlot = useMemo(() => {
+    if (!employee?.employeeCode || !staffingReport?.data) return null;
+    for (const reportItem of (staffingReport.data as any[])) {
+      const match = reportItem.slots?.find(
+        (s: any) => s.assignedEmployeeCode === employee.employeeCode
+      );
+      if (match) {
+        return {
+          ...match,
+          jobTitleName: reportItem.jobTitleName,
+        };
+      }
+    }
+    return null;
+  }, [employee?.employeeCode, staffingReport]);
+
   const mainTitleName = useMemo(() => {
+    if (assignedSlot?.description) {
+      return assignedSlot.description;
+    }
+    if (assignedSlot?.slotOrder && assignedSlot?.jobTitleName) {
+      return `${assignedSlot.jobTitleName} (Vị trí ${assignedSlot.slotOrder})`;
+    }
+    if (partyTitleName !== "—") return partyTitleName;
     if (govtTitleName !== "—") return govtTitleName;
     if (rankTitleName !== "—") return rankTitleName;
     return "Nhân sự";
-  }, [govtTitleName, rankTitleName]);
+  }, [assignedSlot, partyTitleName, govtTitleName, rankTitleName]);
 
   return {
     unitName,
@@ -69,5 +99,6 @@ export function useEmployeeTitles(employee: any) {
     rankTitleName,
     partyTitleName,
     mainTitleName,
+    assignedSlot,
   };
 }

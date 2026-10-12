@@ -76,12 +76,14 @@ export function StaffingTable({ report, domainsForUnit, unitDomainIds, subordina
                                   return (
                                     <Button key={slotOrder} type="button" onClick={() => setActiveSlotMap(p => ({ ...p, [row.id]: slotOrder }))}
                                       className={cn("flex flex-col text-left px-3 py-2 text-xs rounded-lg transition-all min-w-[100px] md:w-full border select-none shrink-0 relative", isSel ? "bg-primary text-primary-foreground border-primary shadow-sm" : "bg-background text-foreground hover:bg-muted/80 border-border")}>
-                                      <div className="flex items-center justify-between w-full">
-                                        <span className="font-semibold">Vị trí {slotOrder}</span>
+                                      <div className="flex items-center justify-between w-full gap-1">
+                                        <span className="font-semibold truncate" title={existing?.description || `Vị trí ${slotOrder}`}>
+                                          {existing?.description ? existing.description.split(' (')[0] : `Vị trí ${slotOrder}`}
+                                        </span>
                                         {existing && <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", isSel ? "bg-primary-foreground" : "bg-emerald-500")} />}
                                       </div>
                                       <div className={cn("mt-0.5 truncate max-w-full text-[11px]", isSel ? "text-primary-foreground/90" : "text-muted-foreground", existing?.assignedEmployeeName ? "" : "italic opacity-70")}>
-                                        {existing?.assignedEmployeeName || "Chưa có nhân sự"}
+                                        {existing?.assignedEmployeeName ? `Đã gán: ${existing.assignedEmployeeName}` : "Chưa có nhân sự"}
                                       </div>
                                     </Button>
                                   );

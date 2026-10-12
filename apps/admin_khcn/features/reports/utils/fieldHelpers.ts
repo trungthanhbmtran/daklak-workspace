@@ -35,6 +35,16 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
   taskId: 'Mã nhiệm vụ',
   postId: 'Mã bài viết',
   targetCode: 'Mã đối tượng',
+  cadreCode: 'Mã cán bộ',
+  jobTitle: 'Vị trí việc làm (VTVL)',
+  sChung: 'Điểm chung (30đ)',
+  sNhiemVu: 'Điểm nhiệm vụ (70đ)',
+  sTong: 'Tổng điểm (100đ)',
+  proposedRank: 'Xếp loại đề xuất (Mẫu 02/03)',
+  approvedRank: 'Xếp loại phê duyệt (Mẫu 05)',
+  hasMau04: 'Mẫu 04 (Nổi trội)',
+  sopStep: 'Tiến trình SOP',
+  quarterYear: 'Kỳ đánh giá',
 };
 
 export const STATUS_LABEL_MAP: Record<string, string> = {

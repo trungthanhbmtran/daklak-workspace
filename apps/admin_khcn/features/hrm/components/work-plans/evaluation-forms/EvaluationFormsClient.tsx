@@ -19,9 +19,12 @@ import {
   Layers,
   Sparkles,
   Save,
-  Tag
+  Tag,
+  FileText,
+  Printer
 } from 'lucide-react';
 import { GitBranch, Plus } from 'lucide-react';
+import { exportKpiXmlFile, exportKpiDocxFile, printKpiXmlDocument } from '@/features/hrm/utils/kpiXmlToDocx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,6 +94,124 @@ export function EvaluationFormsClient() {
   const [assignTo, setAssignTo] = useState('');
   const [isSavingNewTemplate, setIsSavingNewTemplate] = useState(false);
   const [isSavingBinding, setIsSavingBinding] = useState(false);
+  const [exportingDocxCode, setExportingDocxCode] = useState<string | null>(null);
+  const [exportingXmlCode, setExportingXmlCode] = useState<string | null>(null);
+
+  // Tải file XML trực tiếp dưới dạng UTF-8 Blob
+  const handleDownloadXml = async (item: KpiFormTemplateItem) => {
+    setExportingXmlCode(item.formCode);
+    try {
+      const res = await kpiFormsApi.getXml(item.formCode);
+      const xml = res.data?.xmlContent || '';
+      if (!xml) {
+        toast.error('Nội dung file XML đang trống');
+        return;
+      }
+      const safeName = item.name.replace(/[/\\?%*:|"<>]/g, '_').trim();
+      exportKpiXmlFile(xml, `${item.formCode}_${safeName}.xml`);
+      toast.success(`Đã xuất file XML: ${item.formCode}.xml`);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Không thể tải file XML');
+    } finally {
+      setExportingXmlCode(null);
+    }
+  };
+
+  // Xuất file DOCX chuẩn văn bản hành chính từ mẫu XML
+  const handleExportDocx = async (item: KpiFormTemplateItem) => {
+    setExportingDocxCode(item.formCode);
+    try {
+      const res = await kpiFormsApi.getXml(item.formCode);
+      const xml = res.data?.xmlContent || '';
+      if (!xml) {
+        toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
+        return;
+      }
+      const safeName = item.name.replace(/[/\\?%*:|"<>]/g, '_').trim();
+      await exportKpiDocxFile(xml, `${item.formCode}_${safeName}.docx`, item.name);
+      toast.success(`Đã xuất văn bản DOCX (Word) chuẩn hành chính: ${item.formCode}.docx!`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Lỗi khi tạo file DOCX từ mẫu XML');
+    } finally {
+      setExportingDocxCode(null);
+    }
+  };
+
+  // Xuất DOCX từ Sheet Xem trước
+  const handleExportDocxFromPreview = async () => {
+    if (!previewDetail?.xmlContent) return;
+    try {
+      const safeName = previewDetail.name.replace(/[/\\?%*:|"<>]/g, '_').trim();
+      await exportKpiDocxFile(
+        previewDetail.xmlContent,
+        `${previewDetail.formCode}_${safeName}.docx`,
+        previewDetail.name
+      );
+      toast.success(`Đã xuất văn bản Word (.docx) chuẩn Nghị định 30: ${previewDetail.formCode}.docx!`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Lỗi khi xuất file DOCX');
+    }
+  };
+
+  // Xuất XML từ Sheet Xem trước
+  const handleExportXmlFromPreview = () => {
+    if (!previewDetail?.xmlContent) return;
+    const safeName = previewDetail.name.replace(/[/\\?%*:|"<>]/g, '_').trim();
+    exportKpiXmlFile(
+      previewDetail.xmlContent,
+      `${previewDetail.formCode}_${safeName}.xml`
+    );
+    toast.success(`Đã tải file XML: ${previewDetail.formCode}.xml!`);
+  };
+
+  // Xuất DOCX trực tiếp từ XML đang chỉnh sửa trong Sheet Sửa XML
+  const handleExportDocxFromEditor = async () => {
+    if (!editingXmlText.trim()) {
+      toast.error('Nội dung XML đang trống');
+      return;
+    }
+    try {
+      const code = editXmlFormCode || 'CUSTOM';
+      await exportKpiDocxFile(
+        editingXmlText,
+        `${code}_ban_chinh_sua.docx`,
+        'VĂN BẢN ĐÁNH GIÁ CHUẨN HÀNH CHÍNH'
+      );
+      toast.success('Đã xuất file Word DOCX trực tiếp từ nội dung XML đang chỉnh sửa!');
+    } catch (err: any) {
+      toast.error(err?.message || 'Lỗi khi tạo file Word từ XML');
+    }
+  };
+
+  // In / Xuất PDF trực tiếp theo chuẩn văn bản hành chính
+  const handlePrintPdf = async (item: KpiFormTemplateItem) => {
+    try {
+      const res = await kpiFormsApi.getXml(item.formCode);
+      const xml = res.data?.xmlContent || '';
+      if (!xml) {
+        toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
+        return;
+      }
+      printKpiXmlDocument(xml, item.name);
+    } catch (err: any) {
+      toast.error(err?.message || 'Không thể mở bản in PDF');
+    }
+  };
+
+  // In / Xuất PDF từ Sheet Xem trước
+  const handlePrintPdfFromPreview = () => {
+    if (!previewDetail?.xmlContent) return;
+    printKpiXmlDocument(previewDetail.xmlContent, previewDetail.name);
+  };
+
+  // In / Xuất PDF từ Sheet Sửa XML
+  const handlePrintPdfFromEditor = () => {
+    if (!editingXmlText.trim()) {
+      toast.error('Nội dung XML đang trống');
+      return;
+    }
+    printKpiXmlDocument(editingXmlText, 'VĂN BẢN ĐÁNH GIÁ CHUẨN HÀNH CHÍNH');
+  };
 
   const unitsQuery = useQuery({
     queryKey: ['organizations', 'tree'],
@@ -552,12 +673,44 @@ export function EvaluationFormsClient() {
                     <Button
                       variant="outline"
                       size="sm"
-                      asChild
-                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-emerald-600 hover:border-emerald-300"
+                      onClick={() => void handleDownloadXml(item)}
+                      disabled={exportingXmlCode === item.formCode}
+                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-emerald-600 hover:border-emerald-300 min-w-0"
+                      title="Xuất file XML chuẩn UTF-8"
                     >
-                      <a href={kpiFormsApi.getDownloadUrl(item.formCode)} download>
-                        <Download className="w-3.5 h-3.5" /> Tải XML
-                      </a>
+                      {exportingXmlCode === item.formCode ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Download className="w-3.5 h-3.5" />
+                      )}
+                      <span>Xuất XML</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void handleExportDocx(item)}
+                      disabled={exportingDocxCode === item.formCode}
+                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-blue-600 hover:border-blue-300 min-w-0"
+                      title="Xuất văn bản DOCX (Word) theo chuẩn hành chính"
+                    >
+                      {exportingDocxCode === item.formCode ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <FileText className="w-3.5 h-3.5" />
+                      )}
+                      <span>Xuất DOCX</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void handlePrintPdf(item)}
+                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-amber-600 hover:border-amber-300 min-w-0"
+                      title="In hoặc lưu file PDF theo thể thức văn bản hành chính chuẩn A4"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>In / PDF</span>
                     </Button>
 
                     <Button
@@ -740,16 +893,35 @@ export function EvaluationFormsClient() {
                 <Code2 className="w-3.5 h-3.5" /> Chỉnh sửa XML
               </Button>
 
-              {previewFormCode && (
-                <Button
-                  size="sm"
-                  asChild
-                  className="text-xs gap-1.5 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  <a href={kpiFormsApi.getDownloadUrl(previewFormCode)} download>
-                    <Download className="w-3.5 h-3.5" /> Tải về máy (.xml)
-                  </a>
-                </Button>
+              {previewDetail?.xmlContent && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportXmlFromPreview}
+                    className="text-xs gap-1.5 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Xuất file XML
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    onClick={() => void handleExportDocxFromPreview()}
+                    className="text-xs gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  >
+                    <FileText className="w-3.5 h-3.5" /> Xuất văn bản DOCX (Word)
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrintPdfFromPreview}
+                    className="text-xs gap-1.5 border-amber-300 text-amber-700 hover:bg-amber-50"
+                    title="In hoặc lưu file PDF chuẩn thể thức văn bản hành chính A4"
+                  >
+                    <Printer className="w-3.5 h-3.5" /> In / PDF
+                  </Button>
+                </>
               )}
             </div>
           </SheetFooter>
@@ -783,20 +955,42 @@ export function EvaluationFormsClient() {
               <Label className="text-xs font-semibold text-muted-foreground">
                 Nội dung XML (XML 1.0, UTF-8):
               </Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleValidateXml}
-                disabled={validateXmlMutation.isPending}
-                className="h-8 text-xs gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
-              >
-                {validateXmlMutation.isPending ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                )}
-                Kiểm tra cú pháp (Validate)
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void handleExportDocxFromEditor()}
+                  className="h-8 text-xs gap-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                  title="Xuất văn bản Word DOCX theo chuẩn Nghị định 30 từ nội dung XML đang chỉnh sửa"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Xuất thử DOCX
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrintPdfFromEditor}
+                  className="h-8 text-xs gap-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200"
+                  title="In hoặc xem trước PDF chuẩn hành chính từ nội dung XML đang chỉnh sửa"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  In / PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleValidateXml}
+                  disabled={validateXmlMutation.isPending}
+                  className="h-8 text-xs gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+                >
+                  {validateXmlMutation.isPending ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  )}
+                  Kiểm tra cú pháp (Validate)
+                </Button>
+              </div>
             </div>
 
             <Textarea

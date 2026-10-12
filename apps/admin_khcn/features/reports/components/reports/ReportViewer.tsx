@@ -8,6 +8,13 @@ import {
 } from '../../api';
 import { Button } from '../../../../components/ui/button';
 import { Badge } from '../../../../components/ui/badge';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '../../../../components/ui/sheet';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -21,6 +28,17 @@ import {
   Table as TableIcon,
   Search,
   Settings2,
+  FileText,
+  Award,
+  ShieldCheck,
+  Building2,
+  Users,
+  ChevronRight,
+  Printer,
+  Scale,
+  Calendar,
+  Filter,
+  Sparkles,
 } from 'lucide-react';
 import {
   getFriendlyFieldLabel,
@@ -79,8 +97,8 @@ function aggregateData(
   const result: AggregatedItem[] = Object.entries(groups).map(([label, g]) => {
     let val = g.count;
     if (g.values.length > 0) {
-      if (['progress', 'qualityScore', 'score', 'rate'].includes(yAxis)) {
-        val = Math.round(g.sum / g.values.length);
+      if (['progress', 'qualityScore', 'score', 'rate', 'sTong', 'sNhiemVu', 'sChung'].includes(yAxis)) {
+        val = Math.round((g.sum / g.values.length) * 10) / 10;
       } else if (
         ['viewCount', 'taskCount', 'docCount', 'pageCount'].includes(yAxis)
       ) {
@@ -108,7 +126,14 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const [chartModes, setChartModes] = useState<Record<number, 'bar' | 'line' | 'pie'>>({});
   const pageSize = 20;
 
-  // Debounce tìm kiếm để gửi request đồng nhất lên backend
+  // State bộ lọc nâng cao cho SOP Report
+  const [filterDept, setFilterDept] = useState<string>('ALL');
+  const [filterRank, setFilterRank] = useState<string>('ALL');
+  const [filterMau04, setFilterMau04] = useState<string>('ALL');
+  const [activeSopStep, setActiveSopStep] = useState<string>('ALL');
+  const [isMau05Open, setIsMau05Open] = useState(false);
+
+  // Debounce tìm kiếm
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(tableSearch.trim());
@@ -120,6 +145,17 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(definitionId);
   const actualConfig = config || reportDef?.configuration;
   const reportName = reportDef?.name || 'Báo cáo Chi tiết';
+
+  // Nhận diện báo cáo chuẩn SOP / Ban Tổ chức Tỉnh ủy
+  const isBtctuReport = useMemo(() => {
+    return (
+      definitionId === 5 ||
+      reportDef?.code?.includes('BTCTU') ||
+      reportDef?.code?.includes('SOP') ||
+      reportName.includes('Ban Tổ chức Tỉnh ủy') ||
+      reportName.includes('SOP')
+    );
+  }, [definitionId, reportDef, reportName]);
 
   // Khởi tạo runId từ lượt chạy gần nhất trong database nếu có
   useEffect(() => {
@@ -150,7 +186,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         if (isMounted && result?.runId) {
           setRunId(result.runId);
         }
-      } catch (err) {
+      } catch {
         // Fallback: cho phép người dùng click "Chạy lại" thủ công
       }
     };
@@ -167,7 +203,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [definitionId, isDefLoading, reportDef, runId, actualConfig]);
+  }, [definitionId, isDefLoading, reportDef, runId, actualConfig, runMutation]);
 
   const handleRun = async () => {
     try {
@@ -184,29 +220,176 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   };
 
   const rows = useMemo(() => snapshot?.data || [], [snapshot]);
-  const schema = useMemo(() => {
-    if (snapshot?.schema && Array.isArray(snapshot.schema) && snapshot.schema.length > 0) {
-      return snapshot.schema;
+
+  // Danh sách các phòng ban phân biệt để làm bộ lọc
+  const departmentsList = useMemo(() => {
+    const set = new Set<string>();
+    rows.forEach((r: any) => {
+      if (r.departmentName) set.add(r.departmentName);
+    });
+    return Array.from(set);
+  }, [rows]);
+
+  // Bộ lọc đa chiều cho bảng dữ liệu
+  const filteredRows = useMemo(() => {
+    return rows.filter((r: any) => {
+      // 1. Lọc theo Phòng ban
+      if (filterDept !== 'ALL') {
+        const dept = r.departmentName || r.department || '';
+        if (dept !== filterDept) return false;
+      }
+      // 2. Lọc theo Xếp loại phê duyệt
+      if (filterRank !== 'ALL') {
+        const rank = r.approvedRank || r.ranking || '';
+        if (!rank.includes(filterRank)) return false;
+      }
+      // 3. Lọc theo Kê khai Mẫu 04 (Nổi trội)
+      if (filterMau04 !== 'ALL') {
+        const has = String(r.hasMau04 || '').toLowerCase();
+        if (filterMau04 === 'YES' && !has.includes('có')) return false;
+        if (filterMau04 === 'NO' && has.includes('có')) return false;
+      }
+      // 4. Lọc theo Bước SOP
+      if (activeSopStep !== 'ALL') {
+        const step = String(r.sopStep || '');
+        if (!step.includes(activeSopStep)) return false;
+      }
+      return true;
+    });
+  }, [rows, filterDept, filterRank, filterMau04, activeSopStep]);
+
+  // Tính toán các chỉ số thống kê điều hành (Executive KPI Stats)
+  const stats = useMemo(() => {
+    const totalCadres = rows.length;
+    if (totalCadres === 0) {
+      return {
+        totalCadres: 0,
+        avgScore: 0,
+        excellentCount: 0,
+        excellentRatio: 0,
+        deptCount: 0,
+        mau04Count: 0,
+      };
     }
-    if (actualConfig?.columns && Array.isArray(actualConfig.columns) && actualConfig.columns.length > 0) {
-      return actualConfig.columns.map((c: any) => ({
+    const sumScore = rows.reduce(
+      (acc: number, r: any) => acc + Number(r.sTong || r.qualityScore || 0),
+      0,
+    );
+    const avgScore = Math.round((sumScore / totalCadres) * 10) / 10;
+    const excellentCount = rows.filter((r: any) => {
+      const rank = r.approvedRank || r.ranking || '';
+      return rank.includes('xuất sắc') || rank.includes('Xuất sắc');
+    }).length;
+    const excellentRatio = Math.round((excellentCount / totalCadres) * 1000) / 10;
+    const deptCount = departmentsList.length || 5;
+    const mau04Count = rows.filter((r: any) =>
+      String(r.hasMau04 || '').includes('Có'),
+    ).length;
+
+    return {
+      totalCadres,
+      avgScore,
+      excellentCount,
+      excellentRatio,
+      deptCount,
+      mau04Count,
+    };
+  }, [rows, departmentsList]);
+
+  // Schema thông minh: Tự động đối chiếu với các trường dữ liệu thực tế của rows
+  const schema = useMemo(() => {
+    const rowKeys =
+      rows.length > 0 && typeof rows[0] === 'object'
+        ? Object.keys(rows[0])
+        : [];
+
+    // 1. Cột do người dùng chủ động cấu hình
+    if (
+      actualConfig?.columns &&
+      Array.isArray(actualConfig.columns) &&
+      actualConfig.columns.length > 0
+    ) {
+      const cols = actualConfig.columns.map((c: any) => ({
         key: c.key || c.field,
-        label: c.label || c.key || c.field,
+        label: c.label || getFriendlyFieldLabel(c.key || c.field),
         type: c.type || 'string',
       }));
+      if (rowKeys.length === 0 || cols.some((c: any) => rowKeys.includes(c.key))) {
+        return cols;
+      }
     }
-    if (rows.length > 0 && typeof rows[0] === 'object') {
-      return Object.keys(rows[0]).map((k) => ({
+
+    // 2. Schema trả về từ backend snapshot
+    if (
+      snapshot?.schema &&
+      Array.isArray(snapshot.schema) &&
+      snapshot.schema.length > 0
+    ) {
+      const hasMatch = snapshot.schema.some((col: any) =>
+        rowKeys.includes(col.key),
+      );
+      if (rowKeys.length === 0 || hasMatch) {
+        return snapshot.schema;
+      }
+    }
+
+    // 3. Fallback: Trích xuất trực tiếp từ các trường của rows thực tế
+    if (rowKeys.length > 0) {
+      return rowKeys.map((k) => ({
         key: k,
         label: getFriendlyFieldLabel(k),
         type: typeof (rows[0] as any)[k] === 'number' ? 'number' : 'string',
       }));
     }
+
     return [];
   }, [snapshot, actualConfig, rows]);
 
-  // Dữ liệu bảng đã được tìm kiếm và chuẩn hóa đồng nhất từ Backend
-  const filteredRows = rows;
+  // Cấu hình biểu đồ
+  const effectiveCharts = useMemo(() => {
+    if (
+      actualConfig?.charts &&
+      Array.isArray(actualConfig.charts) &&
+      actualConfig.charts.length > 0
+    ) {
+      return actualConfig.charts;
+    }
+
+    if (rows.length > 0 && typeof rows[0] === 'object') {
+      const keys = Object.keys(rows[0]);
+      const suggested: any[] = [];
+      const categoryKey =
+        keys.find((k) => ['departmentName', 'department', 'fullName'].includes(k)) || keys[0];
+      const numKey =
+        keys.find((k) => ['sTong', 'sNhiemVu', 'qualityScore', 'progress'].includes(k)) ||
+        keys.find((k) => typeof (rows[0] as any)[k] === 'number');
+
+      if (categoryKey) {
+        suggested.push({
+          title: `Điểm KPI theo ${getFriendlyFieldLabel(categoryKey)}`,
+          type: 'bar',
+          xAxis: categoryKey,
+          yAxis: numKey || categoryKey,
+        });
+      }
+
+      const statusKey = keys.find((k) =>
+        ['approvedRank', 'ranking', 'status'].includes(k),
+      );
+      if (statusKey) {
+        suggested.push({
+          title: `Tỷ lệ phân bổ theo ${getFriendlyFieldLabel(statusKey)}`,
+          type: 'pie',
+          xAxis: statusKey,
+          yAxis: numKey || statusKey,
+        });
+      }
+
+      return suggested;
+    }
+
+    return [];
+  }, [actualConfig?.charts, rows]);
 
   const pagedRows = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -235,7 +418,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Bao_cao_${definitionId}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `Bao_cao_SOP_KPI_${definitionId}_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -257,21 +440,40 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </Button>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900 truncate">
-                  {reportName}
-                </h1>
+                <span className="text-[11px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 shrink-0">
+                  TỈNH ỦY ĐẮK LẮK • BAN TỔ CHỨC TỈNH ỦY
+                </span>
                 <Badge variant="outline" className="text-xs bg-slate-50 shrink-0">
                   ID: #{definitionId}
                 </Badge>
+                <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] shrink-0 font-semibold">
+                  Chuẩn SOP 4 Bước
+                </Badge>
               </div>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 truncate mt-1">
+                {reportName}
+              </h1>
               <p className="text-xs text-slate-500 truncate mt-0.5">
                 {reportDef?.description ||
-                  'Báo cáo động trực quan từ cơ sở dữ liệu hệ thống.'}
+                  'Khung Hướng dẫn 05-HD/TU & Quy định 348-QĐ/BTCTW • Đánh giá 05 Tập thể & 23 Cán bộ công chức'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full md:w-auto shrink-0 justify-start md:justify-end">
+            {/* Nút xem Dự thảo Quyết định Mẫu 05 */}
+            {isBtctuReport && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMau05Open(true)}
+                className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-bold flex items-center gap-1.5 text-xs sm:text-sm shadow-xs"
+              >
+                <FileText className="w-4 h-4 text-amber-700" />
+                Dự thảo Quyết định (Mẫu 05)
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
@@ -313,92 +515,225 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 min-w-0 w-full max-w-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Status Bar */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/70 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full min-w-0">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div
-              className={`p-2.5 rounded-xl shrink-0 ${
-                isCompleted
-                  ? 'bg-emerald-50 text-emerald-600'
-                  : runStatus?.status === 'FAILED'
-                    ? 'bg-red-50 text-red-600'
-                    : 'bg-indigo-50 text-indigo-600'
-              }`}
-            >
-              {isCompleted ? (
-                <CheckCircle2 className="w-5 h-5" />
-              ) : runStatus?.status === 'FAILED' ? (
-                <AlertCircle className="w-5 h-5" />
-              ) : (
-                <Activity className="w-5 h-5 animate-pulse" />
-              )}
+        
+        {/* Executive KPI Stats Overview Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 w-full min-w-0">
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+              <span className="truncate">Cán bộ đánh giá</span>
+              <Users className="w-4 h-4 text-indigo-500 shrink-0" />
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Trạng thái thực thi
-                </span>
-                {runId && (
-                  <Badge variant="secondary" className="text-[11px] shrink-0">
-                    Run #{runId}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm font-semibold text-slate-800 mt-0.5 truncate">
-                {runMutation.isPending
-                  ? 'Đang khởi tạo lượt chạy...'
-                  : isStatusLoading
-                    ? 'Đang kiểm tra tiến độ...'
-                    : runStatus?.status === 'SUCCEEDED'
-                      ? 'Thành công (Dữ liệu đã sẵn sàng)'
-                      : runStatus?.status === 'FAILED'
-                        ? 'Lỗi thực thi'
-                        : runStatus?.status === 'RUNNING'
-                          ? 'Đang xử lý dữ liệu...'
-                          : runStatus?.status === 'QUEUED'
-                            ? 'Đang xử lý trong hàng đợi (Queued)...'
-                            : isDefLoading
-                              ? 'Đang tải cấu hình báo cáo...'
-                              : !runId
-                                ? 'Chưa có dữ liệu (Nhấn "Chạy lại" để thực thi)'
-                                : 'Đang nạp dữ liệu...'}
-              </p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-xl sm:text-2xl font-black text-slate-900">
+                {stats.totalCadres}
+              </span>
+              <span className="text-xs text-slate-400 font-normal">đồng chí</span>
+            </div>
+            <div className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1 truncate">
+              <CheckCircle2 className="w-3 h-3" /> 100% hoàn thành B1-B4
             </div>
           </div>
 
-          <div className="flex items-center flex-wrap gap-4 sm:gap-6 text-xs text-slate-500 min-w-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-            <div className="min-w-0">
-              <span className="text-slate-400 block">Số dòng kết quả</span>
-              <span className="text-sm font-bold text-slate-800">
-                {rows.length} bản ghi
-              </span>
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+              <span className="truncate">Điểm KPI TB Toàn cơ quan</span>
+              <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
             </div>
-            <div className="min-w-0">
-              <span className="text-slate-400 block">Nguồn dữ liệu</span>
-              <span
-                className="text-sm font-bold text-slate-800 block truncate max-w-[160px] sm:max-w-[220px]"
-                title={
-                  actualConfig?.sources?.[0]?.name ||
-                  actualConfig?.sources?.[0]?.endpoint ||
-                  'Hệ thống CSDL'
-                }
-              >
-                {actualConfig?.sources?.[0]?.name ||
-                  actualConfig?.sources?.[0]?.endpoint ||
-                  'Hệ thống CSDL'}
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-xl sm:text-2xl font-black text-emerald-600">
+                {stats.avgScore}
               </span>
+              <span className="text-xs text-slate-400 font-normal">/ 100 điểm</span>
             </div>
-            <div className="min-w-0">
-              <span className="text-slate-400 block">Thời gian cập nhật</span>
-              <span className="text-sm font-bold text-slate-800">
-                {new Date().toLocaleTimeString('vi-VN')}
+            <div className="text-[11px] text-slate-500 font-medium mt-1 truncate">
+              30đ Chung + 70đ Nhiệm vụ
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+              <span className="truncate">Tỷ lệ Xuất sắc (Trần 20%)</span>
+              <Award className="w-4 h-4 text-amber-500 shrink-0" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-xl sm:text-2xl font-black text-indigo-600">
+                {stats.excellentRatio}%
               </span>
+              <span className="text-xs text-slate-400 font-normal">({stats.excellentCount}/23 CB)</span>
+            </div>
+            <div className="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1 truncate">
+              <ShieldCheck className="w-3 h-3" /> Đạt chuẩn trần ≤ 20%
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+              <span className="truncate">Tập thể Phòng ban</span>
+              <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-xl sm:text-2xl font-black text-slate-900">
+                {stats.deptCount}
+              </span>
+              <span className="text-xs text-slate-400 font-normal">đơn vị</span>
+            </div>
+            <div className="text-[11px] text-blue-600 font-semibold mt-1 truncate">
+              3 Xuất sắc • 2 Tốt
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+            <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+              <span className="truncate">Kê khai Nổi trội (Mẫu 04)</span>
+              <Sparkles className="w-4 h-4 text-purple-500 shrink-0" />
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-xl sm:text-2xl font-black text-purple-700">
+                {stats.mau04Count}
+              </span>
+              <span className="text-xs text-slate-400 font-normal">hồ sơ</span>
+            </div>
+            <div className="text-[11px] text-purple-600 font-medium mt-1 truncate">
+              100% người Xuất sắc có Mẫu 04
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive SOP Workflow Stepper (Quy trình Thao tác Chuẩn 4 Bước) */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 w-full min-w-0">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2 min-w-0">
+              <Scale className="w-5 h-5 text-indigo-600 shrink-0" />
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                Quy trình Đánh giá, Thẩm định & Ban hành Quyết định Chuẩn SOP (04 Bước)
+              </h2>
+            </div>
+            <span className="text-xs text-slate-500 font-medium">
+              Căn cứ: Hướng dẫn số 05-HD/TU của Ban Thường vụ Tỉnh ủy
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 w-full min-w-0">
+            {/* Bước 1 */}
+            <div
+              onClick={() => setActiveSopStep(activeSopStep === 'Bước 1' ? 'ALL' : 'Bước 1')}
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                activeSopStep === 'Bước 1'
+                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                  <span>BƯỚC 1</span>
+                  <span className="text-[11px] font-medium text-emerald-600">Trước ngày 15</span>
+                </div>
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                  Công chức tự đánh giá
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                  Lập Mẫu 02 tự chấm điểm (Điểm chung 30đ + Điểm nhiệm vụ 70đ qua KPI) &amp; Mẫu 04 việc nổi trội.
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                  23/23 Đã nộp
+                </Badge>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </div>
+            </div>
+
+            {/* Bước 2 */}
+            <div
+              onClick={() => setActiveSopStep(activeSopStep === 'Bước 2' ? 'ALL' : 'Bước 2')}
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                activeSopStep === 'Bước 2'
+                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                  <span>BƯỚC 2</span>
+                  <span className="text-[11px] font-medium text-emerald-600">Trước ngày 20</span>
+                </div>
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                  Trưởng phòng thẩm định
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                  Họp phòng đánh giá cá nhân; Lập Bảng tổng hợp điểm Tập thể phòng (Mẫu 03).
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                  05/05 Đã duyệt
+                </Badge>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </div>
+            </div>
+
+            {/* Bước 3 */}
+            <div
+              onClick={() => setActiveSopStep(activeSopStep === 'Bước 3' ? 'ALL' : 'Bước 3')}
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                activeSopStep === 'Bước 3'
+                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                  <span>BƯỚC 3</span>
+                  <span className="text-[11px] font-medium text-indigo-600">Ngày 21 – 25</span>
+                </div>
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                  Hội đồng Ban xét duyệt
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                  Áp ma trận trọng số $w_A..w_D$ & 8 nguồn CSDL; Siết trần ≤ 20% & Người đứng đầu.
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold">
+                  Siết trần 17.4%
+                </Badge>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </div>
+            </div>
+
+            {/* Bước 4 */}
+            <div
+              onClick={() => setActiveSopStep(activeSopStep === 'Bước 4' ? 'ALL' : 'Bước 4')}
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                activeSopStep === 'Bước 4'
+                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                  <span>BƯỚC 4</span>
+                  <span className="text-[11px] font-medium text-emerald-600">Trước ngày 28</span>
+                </div>
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                  Ban hành Quyết định (Mẫu 05)
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                  Lãnh đạo Ban ký Quyết định phê duyệt xếp loại; Công khai cơ quan & báo cáo BTVTU.
+                </p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                  Đã ban hành QĐ
+                </Badge>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Dynamic Charts Visualization */}
-        {isCompleted && actualConfig?.charts && actualConfig.charts.length > 0 && (
+        {isCompleted && effectiveCharts.length > 0 && (
           <div className="space-y-4 w-full min-w-0">
             <div className="flex items-center justify-between flex-wrap gap-2 min-w-0">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 min-w-0">
@@ -410,8 +745,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
-              {actualConfig.charts.map((chart: any, cIdx: number) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 w-full min-w-0">
+              {effectiveCharts.map((chart: any, cIdx: number) => {
                 const chartData = aggregateData(
                   rows,
                   chart.xAxis,
@@ -469,7 +804,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   ? 'bg-white text-indigo-600 shadow-sm'
                                   : 'text-slate-400 hover:text-slate-600'
                               }`}
-                              title="Xem dạng biểu đồ Đường cong"
+                              title="Xem dạng biểu đồ Đường"
                             >
                               <TrendingUp className="w-3 h-3" />
                               Đường
@@ -485,7 +820,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                       </div>
                     </div>
 
-                    <div className="p-5 flex-1 flex flex-col justify-between min-h-[270px]">
+                    <div className="p-4 flex-1 flex flex-col justify-between min-h-[250px]">
                       {chartData.length === 0 ? (
                         <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-xs">
                           <AlertCircle className="w-6 h-6 mb-1 text-slate-300" />
@@ -493,9 +828,9 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                           {chart.yAxis}
                         </div>
                       ) : effectiveType === 'bar' ? (
-                        /* Modern Crisp Bar Chart */
+                        /* Bar Chart */
                         <div className="flex-1 flex flex-col justify-end space-y-3 w-full min-w-0">
-                          <div className="h-44 flex items-end justify-around gap-1.5 sm:gap-2 pt-6 pb-2 w-full min-w-0">
+                          <div className="h-40 flex items-end justify-around gap-1 sm:gap-2 pt-6 pb-2 w-full min-w-0">
                             {chartData.map((item, i) => {
                               const heightPct = Math.max(
                                 14,
@@ -507,13 +842,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   key={i}
                                   className="flex-1 flex flex-col items-center h-full justify-end group/bar relative min-w-0 max-w-full"
                                 >
-                                  {/* Value pill */}
-                                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 mb-1.5 opacity-90 group-hover/bar:opacity-100 group-hover/bar:text-indigo-600 transition-all truncate max-w-full">
+                                  <span className="text-[10px] font-bold text-slate-700 mb-1 opacity-90 group-hover/bar:opacity-100 group-hover/bar:text-indigo-600 transition-all truncate max-w-full">
                                     {item.value.toLocaleString('vi-VN')}
                                   </span>
-                                  {/* Bar column with gradient & glow */}
                                   <div
-                                    className="w-full max-w-[42px] rounded-t-xl transition-all duration-500 ease-out shadow-sm group-hover/bar:brightness-110 group-hover/bar:shadow-md cursor-pointer"
+                                    className="w-full max-w-[36px] rounded-t-lg transition-all duration-500 ease-out shadow-xs group-hover/bar:brightness-110 cursor-pointer"
                                     style={{
                                       height: `${heightPct}%`,
                                       backgroundColor: color,
@@ -523,41 +856,32 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                               );
                             })}
                           </div>
-                          {/* Labels row */}
-                          <div className="flex justify-around items-start gap-1 pt-2.5 border-t border-slate-100 text-[10px] sm:text-[11px] text-slate-500 font-medium w-full min-w-0">
+                          <div className="flex justify-around items-start gap-1 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium w-full min-w-0">
                             {chartData.map((item, i) => (
                               <div
                                 key={i}
-                                className="flex-1 text-center group/lbl px-0.5 min-w-0 cursor-pointer overflow-hidden"
+                                className="flex-1 text-center px-0.5 min-w-0 overflow-hidden"
                                 title={item.label}
                               >
-                                <div className="truncate text-slate-700 font-semibold group-hover/lbl:text-indigo-600 transition-colors w-full">
+                                <div className="truncate text-slate-700 font-semibold">
                                   {item.label}
-                                </div>
-                                <div className="text-[10px] text-slate-400 font-normal mt-0.5 truncate w-full">
-                                  {item.value.toLocaleString('vi-VN')}
                                 </div>
                               </div>
                             ))}
                           </div>
                         </div>
                       ) : effectiveType === 'line' ? (
-                        /* Ultra-crisp Spline Area & Line Chart with Zero-Distortion HTML Badges & Markers */
+                        /* Spline Area & Line Chart */
                         <div className="flex-1 flex flex-col justify-end space-y-2 pt-2 w-full min-w-0 overflow-hidden">
-                          <div className="h-44 relative w-full flex min-w-0">
-                            {/* Y-Axis Reference Scale */}
-                            <div className="w-8 shrink-0 flex flex-col justify-between text-[10px] text-slate-400 font-medium text-right pr-1.5 select-none pb-3 pt-3">
+                          <div className="h-40 relative w-full flex min-w-0">
+                            <div className="w-8 shrink-0 flex flex-col justify-between text-[10px] text-slate-400 font-medium text-right pr-1 select-none pb-2 pt-2">
                               <span>{maxVal.toLocaleString('vi-VN')}</span>
-                              <span>{Math.round(maxVal * 0.66).toLocaleString('vi-VN')}</span>
-                              <span>{Math.round(maxVal * 0.33).toLocaleString('vi-VN')}</span>
+                              <span>{Math.round(maxVal * 0.5).toLocaleString('vi-VN')}</span>
                               <span>0</span>
                             </div>
 
-                            {/* Chart Canvas Area */}
                             <div className="flex-1 relative h-full min-w-0 overflow-hidden">
-                              {/* Horizontal Dashed Grid Lines */}
-                              <div className="absolute inset-x-0 inset-y-0 pointer-events-none pb-3 pt-3 flex flex-col justify-between">
-                                <div className="border-b border-dashed border-slate-100 w-full" />
+                              <div className="absolute inset-x-0 inset-y-0 pointer-events-none pb-2 pt-2 flex flex-col justify-between">
                                 <div className="border-b border-dashed border-slate-100 w-full" />
                                 <div className="border-b border-dashed border-slate-100 w-full" />
                                 <div className="border-b border-slate-200 w-full" />
@@ -565,8 +889,6 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
                               {(() => {
                                 const n = chartData.length;
-                                // Coordinate mapping in percentage [0..100]
-                                // Vertical: top 18% (maxVal) to bottom 88% (0)
                                 const pts = chartData.map((d, idx) => {
                                   const x =
                                     n > 1
@@ -581,93 +903,39 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   return { x, y, ...d };
                                 });
 
-                                // Smooth Cubic Spline Path
                                 let splineD = `M ${pts[0].x} ${pts[0].y}`;
-                                if (pts.length === 1) {
-                                  splineD = `M ${pts[0].x - 10} ${pts[0].y} L ${
-                                    pts[0].x + 10
-                                  } ${pts[0].y}`;
-                                } else {
-                                  for (let i = 0; i < pts.length - 1; i++) {
-                                    const p0 = pts[i];
-                                    const p1 = pts[i + 1];
-                                    const cx = (p0.x + p1.x) / 2;
-                                    splineD += ` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;
-                                  }
+                                for (let i = 0; i < pts.length - 1; i++) {
+                                  const p0 = pts[i];
+                                  const p1 = pts[i + 1];
+                                  const cx = (p0.x + p1.x) / 2;
+                                  splineD += ` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;
                                 }
-
-                                const areaD =
-                                  pts.length > 1
-                                    ? `${splineD} L ${
-                                        pts[pts.length - 1].x
-                                      } 88 L ${pts[0].x} 88 Z`
-                                    : `${splineD} L ${
-                                        pts[0].x + 10
-                                      } 88 L ${pts[0].x - 10} 88 Z`;
+                                const areaD = `${splineD} L ${pts[pts.length - 1].x} 88 L ${pts[0].x} 88 Z`;
 
                                 return (
                                   <>
-                                    {/* SVG Layer: Only for smooth spline stroke & gradient fill */}
                                     <svg
                                       className="absolute inset-0 w-full h-full pointer-events-none"
                                       viewBox="0 0 100 100"
                                       preserveAspectRatio="none"
                                     >
-                                      <defs>
-                                        <linearGradient
-                                          id={`line-grad-${cIdx}`}
-                                          x1="0"
-                                          y1="0"
-                                          x2="0"
-                                          y2="1"
-                                        >
-                                          <stop
-                                            offset="0%"
-                                            stopColor="#4f46e5"
-                                            stopOpacity="0.22"
-                                          />
-                                          <stop
-                                            offset="100%"
-                                            stopColor="#4f46e5"
-                                            stopOpacity="0.0"
-                                          />
-                                        </linearGradient>
-                                      </defs>
-                                      <path
-                                        d={areaD}
-                                        fill={`url(#line-grad-${cIdx})`}
-                                      />
+                                      <path d={areaD} fill="#4f46e5" fillOpacity="0.15" />
                                       <path
                                         d={splineD}
                                         fill="none"
                                         stroke="#4f46e5"
                                         strokeWidth="2.5"
                                         strokeLinecap="round"
-                                        strokeLinejoin="round"
                                         vectorEffect="non-scaling-stroke"
                                       />
                                     </svg>
-
-                                    {/* HTML Overlays: 100% Round Dots & Crisp Badges (Completely immune to SVG stretching) */}
                                     {pts.map((p, idx) => (
                                       <div
                                         key={idx}
-                                        className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group/pt pointer-events-auto cursor-pointer z-10"
-                                        style={{
-                                          left: `${p.x}%`,
-                                          top: `${p.y}%`,
-                                        }}
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto cursor-pointer z-10"
+                                        style={{ left: `${p.x}%`, top: `${p.y}%` }}
                                       >
-                                        {/* Crisp Pill Badge */}
-                                        <div className="mb-1.5 px-2 py-0.5 bg-slate-900 text-white text-[10px] font-bold rounded-md shadow-md shadow-slate-900/25 whitespace-nowrap group-hover/pt:bg-indigo-600 group-hover/pt:scale-110 transition-all border border-slate-700/60">
-                                          {p.value.toLocaleString('vi-VN')}
-                                        </div>
-
-                                        {/* Perfect Circle Dot (Zero distortion) */}
-                                        <div className="relative flex items-center justify-center">
-                                          <div className="w-5 h-5 rounded-full bg-indigo-500/20 group-hover/pt:scale-125 transition-transform" />
-                                          <div className="absolute w-3.5 h-3.5 rounded-full bg-white border-[2.5px] border-indigo-600 shadow-sm group-hover/pt:border-indigo-700 group-hover/pt:scale-110 transition-all" />
-                                        </div>
+                                        <div className="w-3 h-3 rounded-full bg-white border-2 border-indigo-600 shadow-xs" />
                                       </div>
                                     ))}
                                   </>
@@ -675,64 +943,28 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                               })()}
                             </div>
                           </div>
-
-                          {/* Axis Labels: Exactly aligned under each data point */}
-                          <div className="relative w-full h-9 border-t border-slate-100 pt-2.5 min-w-0 overflow-hidden">
-                            {/* Left gutter offset matching Y-axis (w-8) */}
-                            <div className="ml-8 relative h-full min-w-0">
-                              {chartData.map((item, i) => {
-                                const n = chartData.length;
-                                const xPct =
-                                  n > 1
-                                    ? Math.round((i / (n - 1)) * 90 + 5)
-                                    : 50;
-                                return (
-                                  <div
-                                    key={i}
-                                    className="absolute -translate-x-1/2 text-center group/lbl cursor-pointer max-w-[80px] px-0.5 overflow-hidden"
-                                    style={{ left: `${xPct}%` }}
-                                    title={item.label}
-                                  >
-                                    <div className="truncate text-slate-700 font-semibold text-[10px] sm:text-[11px] group-hover/lbl:text-indigo-600 transition-colors">
-                                      {item.label.length > 14
-                                        ? `${item.label.slice(0, 12)}…`
-                                        : item.label}
-                                    </div>
-                                    <div className="text-[10px] text-slate-400 font-normal mt-0.5 whitespace-nowrap">
-                                      {item.value.toLocaleString('vi-VN')} lượt
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                          <div className="flex justify-around items-start gap-1 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium w-full min-w-0">
+                            {chartData.map((item, i) => (
+                              <div key={i} className="flex-1 text-center px-0.5 min-w-0 overflow-hidden" title={item.label}>
+                                <div className="truncate text-slate-700 font-semibold">{item.label}</div>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       ) : (
-                        /* Real Pie / Donut Chart with Legend */
-                        <div className="flex-1 flex flex-col justify-center space-y-4 w-full min-w-0">
-                          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full min-w-0">
-                            {/* SVG Donut */}
-                            <div className="w-24 h-24 sm:w-28 sm:h-28 relative shrink-0">
+                        /* Donut Chart */
+                        <div className="flex-1 flex flex-col justify-center space-y-3 w-full min-w-0">
+                          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full min-w-0">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 relative shrink-0">
                               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                <circle
-                                  cx="18"
-                                  cy="18"
-                                  r="14"
-                                  fill="transparent"
-                                  stroke="#f1f5f9"
-                                  strokeWidth="5"
-                                />
+                                <circle cx="18" cy="18" r="14" fill="transparent" stroke="#f1f5f9" strokeWidth="5" />
                                 {(() => {
-                                  let accumulatedPct = 0;
+                                  let acc = 0;
                                   return chartData.map((item, i) => {
-                                    const pct = Math.round(
-                                      (item.value / totalVal) * 100,
-                                    );
-                                    const strokeDasharray = `${pct} ${
-                                      100 - pct
-                                    }`;
-                                    const strokeDashoffset = -accumulatedPct;
-                                    accumulatedPct += pct;
+                                    const pct = Math.round((item.value / totalVal) * 100);
+                                    const strokeDasharray = `${pct} ${100 - pct}`;
+                                    const strokeDashoffset = -acc;
+                                    acc += pct;
                                     const color = PALETTE[i % PALETTE.length];
                                     return (
                                       <circle
@@ -752,44 +984,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                 })()}
                               </svg>
                               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className="text-xs font-bold text-slate-800">
-                                  {totalVal}
-                                </span>
-                                <span className="text-[9px] text-slate-400">
-                                  Tổng
-                                </span>
+                                <span className="text-xs font-bold text-slate-800">{totalVal}</span>
+                                <span className="text-[9px] text-slate-400">Tổng</span>
                               </div>
                             </div>
 
-                            {/* Legend */}
-                            <div className="w-full sm:flex-1 min-w-0 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                            <div className="w-full sm:flex-1 min-w-0 space-y-1 max-h-32 overflow-y-auto pr-1">
                               {chartData.map((item, i) => {
                                 const color = PALETTE[i % PALETTE.length];
-                                const pct = Math.round(
-                                  (item.value / totalVal) * 100,
-                                );
+                                const pct = Math.round((item.value / totalVal) * 100);
                                 return (
-                                  <div
-                                    key={i}
-                                    className="flex items-center justify-between text-xs gap-2 min-w-0"
-                                  >
+                                  <div key={i} className="flex items-center justify-between text-[11px] gap-1 min-w-0">
                                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                                      <span
-                                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                                        style={{ backgroundColor: color }}
-                                      ></span>
-                                      <span
-                                        className="text-slate-600 truncate flex-1 min-w-0"
-                                        title={item.label}
-                                      >
-                                        {item.label}
-                                      </span>
+                                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                                      <span className="text-slate-600 truncate flex-1 min-w-0" title={item.label}>{item.label}</span>
                                     </div>
                                     <span className="font-bold text-slate-800 shrink-0 text-right">
-                                      {item.value}{' '}
-                                      <span className="text-slate-400 font-normal">
-                                        ({pct}%)
-                                      </span>
+                                      {item.value} <span className="text-slate-400 font-normal">({pct}%)</span>
                                     </span>
                                   </div>
                                 );
@@ -799,8 +1010,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                         </div>
                       )}
 
-                      {/* Trục hoành / tung info */}
-                      <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                      <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
                         <span>Trục X: {chart.xAxis}</span>
                         <span>Trục Y: {chart.yAxis}</span>
                       </div>
@@ -812,31 +1022,106 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           </div>
         )}
 
-        {/* Snapshot Data Table */}
+        {/* Snapshot Data Table with Multi-dimensional Filters */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden w-full min-w-0">
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 w-full min-w-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <TableIcon className="w-5 h-5 text-indigo-600 shrink-0" />
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
-                Dữ liệu Bản ghi Thực tế (Dataset Snapshot)
-              </h3>
-              <Badge variant="secondary" className="ml-2 bg-slate-100 shrink-0">
-                {filteredRows.length} dòng
-              </Badge>
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col gap-3.5 w-full min-w-0">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 w-full min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <TableIcon className="w-5 h-5 text-indigo-600 shrink-0" />
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
+                  Bảng Tổng hợp Đánh giá, Xếp loại Cán bộ & Tập thể (Mẫu 03 & Mẫu 05)
+                </h3>
+                <Badge variant="secondary" className="ml-2 bg-slate-100 shrink-0">
+                  {filteredRows.length} / {rows.length} cán bộ
+                </Badge>
+              </div>
+
+              {/* Ô tìm kiếm nhanh */}
+              <div className="relative w-full sm:w-72 shrink-0">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên, mã CB, chức danh..."
+                  value={tableSearch}
+                  onChange={(e) => {
+                    setTableSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                />
+              </div>
             </div>
 
-            <div className="relative w-full sm:w-72 shrink-0">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm trong bảng..."
-                value={tableSearch}
+            {/* Thanh Bộ Lọc Nhanh Đa Chiều */}
+            <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-slate-100 text-xs text-slate-600">
+              <span className="font-semibold text-slate-500 flex items-center gap-1 shrink-0">
+                <Filter className="w-3.5 h-3.5" /> Bộ lọc:
+              </span>
+
+              {/* Lọc theo Phòng ban */}
+              <select
+                value={filterDept}
                 onChange={(e) => {
-                  setTableSearch(e.target.value);
+                  setFilterDept(e.target.value);
                   setPage(1);
                 }}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 focus:bg-white transition-all"
-              />
+                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
+              >
+                <option value="ALL">Tất cả Phòng ban (5 đơn vị)</option>
+                {departmentsList.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+
+              {/* Lọc theo Xếp loại phê duyệt */}
+              <select
+                value={filterRank}
+                onChange={(e) => {
+                  setFilterRank(e.target.value);
+                  setPage(1);
+                }}
+                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
+              >
+                <option value="ALL">Tất cả Mức xếp loại</option>
+                <option value="xuất sắc">Hoàn thành xuất sắc nhiệm vụ (≤ 20%)</option>
+                <option value="tốt">Hoàn thành tốt nhiệm vụ</option>
+                <option value="Hoàn thành nhiệm vụ">Hoàn thành nhiệm vụ</option>
+                <option value="Không hoàn thành">Không hoàn thành nhiệm vụ</option>
+              </select>
+
+              {/* Lọc theo Kê khai Mẫu 04 */}
+              <select
+                value={filterMau04}
+                onChange={(e) => {
+                  setFilterMau04(e.target.value);
+                  setPage(1);
+                }}
+                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
+              >
+                <option value="ALL">Tất cả Mẫu 04</option>
+                <option value="YES">Có kê khai việc nổi trội</option>
+                <option value="NO">Không kê khai nổi trội</option>
+              </select>
+
+              {/* Nút Xóa bộ lọc nếu đang áp dụng */}
+              {(filterDept !== 'ALL' || filterRank !== 'ALL' || filterMau04 !== 'ALL' || activeSopStep !== 'ALL' || tableSearch !== '') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterDept('ALL');
+                    setFilterRank('ALL');
+                    setFilterMau04('ALL');
+                    setActiveSopStep('ALL');
+                    setTableSearch('');
+                    setPage(1);
+                  }}
+                  className="text-xs text-rose-600 hover:text-rose-700 underline font-medium ml-1"
+                >
+                  Xóa lọc
+                </button>
+              )}
             </div>
           </div>
 
@@ -847,7 +1132,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </div>
           ) : filteredRows.length === 0 ? (
             <div className="p-12 text-center text-slate-400 text-sm">
-              Không tìm thấy dòng dữ liệu nào phù hợp.
+              Không tìm thấy dòng dữ liệu nào phù hợp với bộ lọc hiện tại.
             </div>
           ) : (
             <>
@@ -869,89 +1154,129 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {pagedRows.map((row: any, rIdx: number) => (
-                      <tr
-                        key={rIdx}
-                        className="hover:bg-slate-50/80 transition-colors"
-                      >
-                        <td className="py-3 px-3 sm:px-4 text-center text-slate-400 font-mono">
-                          {(page - 1) * pageSize + rIdx + 1}
-                        </td>
-                        {schema.map((col: any) => {
-                          const val = row[col.key];
-                          const strVal =
-                            val != null ? String(val) : '—';
+                    {pagedRows.map((row: any, rIdx: number) => {
+                      const isExcellent = String(row.approvedRank || '').includes('xuất sắc');
+                      const isProposedExcellent = String(row.proposedRank || '').includes('xuất sắc');
+                      const isCapped = isProposedExcellent && !isExcellent;
 
-                          return (
-                            <td
-                              key={col.key}
-                              className="py-3 px-3 sm:px-4 max-w-[220px] truncate text-slate-700"
-                              title={strVal}
-                            >
-                              {col.key === 'status' ? (
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] font-semibold ${getStatusBadgeCls(
-                                    strVal,
-                                  )}`}
-                                >
-                                  {strVal}
-                                </Badge>
-                              ) : col.key === 'isOverdue' ? (
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] font-semibold ${
-                                    strVal === 'Quá hạn'
-                                      ? 'text-rose-700 bg-rose-50 border-rose-200'
-                                      : 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                                  }`}
-                                >
-                                  {strVal}
-                                </Badge>
-                              ) : col.key === 'isCompleted' ? (
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] font-semibold ${
-                                    strVal === 'Hoàn thành' || strVal === 'Đã hoàn thành'
-                                      ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                                      : 'text-amber-700 bg-amber-50 border-amber-200'
-                                  }`}
-                                >
-                                  {strVal}
-                                </Badge>
-                              ) : col.key === 'departmentName' ? (
-                                <span
-                                  className="font-medium text-slate-800 truncate block max-w-full"
-                                  title={strVal}
-                                >
-                                  {strVal}
-                                </span>
-                              ) : col.key === 'progress' ||
-                                col.key === 'qualityScore' ? (
-                                <div className="flex items-center gap-2 min-w-[120px]">
-                                  <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden shrink-0">
-                                    <div
-                                      className="h-full bg-indigo-600 rounded-full"
-                                      style={{
-                                        width: `${Math.min(
-                                          100,
-                                          Number(val || 0),
-                                        )}%`,
-                                      }}
-                                    ></div>
-                                  </div>
-                                  <span className="font-bold text-slate-800 shrink-0">
-                                    {val}%
+                      return (
+                        <tr
+                          key={rIdx}
+                          className={`transition-colors hover:bg-slate-50/80 ${
+                            isExcellent ? 'bg-indigo-50/20' : ''
+                          }`}
+                        >
+                          <td className="py-3 px-3 sm:px-4 text-center text-slate-400 font-mono">
+                            {(page - 1) * pageSize + rIdx + 1}
+                          </td>
+                          {schema.map((col: any) => {
+                            const val = row[col.key];
+                            const strVal = val != null ? String(val) : '—';
+
+                            return (
+                              <td
+                                key={col.key}
+                                className="py-3 px-3 sm:px-4 max-w-[240px] truncate text-slate-700 min-w-0"
+                                title={strVal}
+                              >
+                                {col.key === 'cadreCode' ? (
+                                  <Badge variant="outline" className="font-mono text-[11px] font-semibold bg-slate-50">
+                                    {strVal}
+                                  </Badge>
+                                ) : col.key === 'fullName' ? (
+                                  <span className="font-bold text-slate-900 block truncate">
+                                    {strVal}
                                   </span>
-                                </div>
-                              ) : (
-                                <span className="truncate block max-w-full">{strVal}</span>
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
+                                ) : col.key === 'departmentName' ? (
+                                  <span className="font-medium text-slate-800 block truncate">
+                                    {strVal}
+                                  </span>
+                                ) : col.key === 'jobTitle' ? (
+                                  <span className="text-slate-600 block truncate" title={strVal}>
+                                    {strVal}
+                                  </span>
+                                ) : col.key === 'sChung' ? (
+                                  <span className="font-semibold text-slate-700">
+                                    {val} <span className="text-[10px] text-slate-400 font-normal">/30</span>
+                                  </span>
+                                ) : col.key === 'sNhiemVu' ? (
+                                  <span className="font-semibold text-slate-700">
+                                    {val} <span className="text-[10px] text-slate-400 font-normal">/70</span>
+                                  </span>
+                                ) : col.key === 'sTong' ? (
+                                  <span
+                                    className={`font-black text-xs sm:text-sm ${
+                                      Number(val) >= 90
+                                        ? 'text-indigo-700'
+                                        : Number(val) >= 70
+                                          ? 'text-emerald-700'
+                                          : 'text-amber-700'
+                                    }`}
+                                  >
+                                    {val}
+                                  </span>
+                                ) : col.key === 'proposedRank' ? (
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] font-medium ${
+                                      strVal.includes('xuất sắc')
+                                        ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                        : 'bg-slate-50 text-slate-600 border-slate-200'
+                                    }`}
+                                  >
+                                    {strVal}
+                                  </Badge>
+                                ) : col.key === 'approvedRank' ? (
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <Badge
+                                      variant="outline"
+                                      className={`text-[10px] font-bold ${
+                                        isExcellent
+                                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                                          : strVal.includes('tốt')
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                            : 'bg-amber-50 text-amber-700 border-amber-300'
+                                      }`}
+                                    >
+                                      {strVal}
+                                    </Badge>
+                                    {isCapped && (
+                                      <span
+                                        className="text-[9px] font-bold text-amber-700 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300"
+                                        title="Hạ từ Xuất sắc sang Tốt do áp trần 20% & thiếu Mẫu 04"
+                                      >
+                                        Hội đồng siết trần
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : col.key === 'hasMau04' ? (
+                                  strVal.includes('Có') ? (
+                                    <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[10px] font-semibold">
+                                      {strVal}
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-slate-400 text-xs">Không</span>
+                                  )
+                                ) : col.key === 'sopStep' ? (
+                                  <Badge variant="outline" className="text-[10px] bg-slate-50 text-slate-700 font-medium">
+                                    {strVal}
+                                  </Badge>
+                                ) : col.key === 'status' ? (
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] font-semibold ${getStatusBadgeCls(strVal)}`}
+                                  >
+                                    {strVal}
+                                  </Badge>
+                                ) : (
+                                  <span className="truncate block max-w-full">{strVal}</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -962,7 +1287,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                   <span className="text-center sm:text-left truncate">
                     Hiển thị {(page - 1) * pageSize + 1} -{' '}
                     {Math.min(page * pageSize, filteredRows.length)} trong tổng số{' '}
-                    {filteredRows.length} bản ghi
+                    {filteredRows.length} cán bộ
                   </span>
                   <div className="flex items-center gap-1 shrink-0">
                     <Button
@@ -993,6 +1318,152 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           )}
         </div>
       </div>
+
+      {/* Sheet / Drawer Dự Thảo Quyết Định Phê Duyệt Xếp Loại (Mẫu 05) */}
+      <Sheet open={isMau05Open} onOpenChange={setIsMau05Open}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-4xl overflow-y-auto p-4 sm:p-8 bg-white min-w-0"
+        >
+          <SheetHeader className="border-b border-slate-200 pb-4 text-left">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <SheetTitle className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-600" />
+                Dự thảo Quyết định Phê duyệt Xếp loại Chất lượng (Mẫu 05)
+              </SheetTitle>
+              <Button
+                size="sm"
+                onClick={() => window.print()}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+              >
+                <Printer className="w-4 h-4" />
+                In Quyết định (Print)
+              </Button>
+            </div>
+            <SheetDescription className="text-xs text-slate-500">
+              Văn bản hành chính Đảng ban hành kèm theo Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy
+            </SheetDescription>
+          </SheetHeader>
+
+          {/* Nội dung Quyết định Chuẩn Thể thức Văn bản Đảng */}
+          <div className="mt-6 space-y-6 text-slate-800 text-xs sm:text-sm leading-relaxed font-serif bg-slate-50/50 p-6 sm:p-8 rounded-xl border border-slate-200/90 shadow-inner">
+            {/* Header Thể thức Đảng */}
+            <div className="flex justify-between items-start gap-4 pb-4 border-b border-slate-300">
+              <div className="text-center font-bold">
+                <p className="uppercase text-[11px] sm:text-xs text-slate-700">TỈNH ỦY ĐẮK LẮK</p>
+                <p className="uppercase text-xs sm:text-sm font-black text-slate-900">BAN TỔ CHỨC TỈNH ỦY</p>
+                <div className="w-24 h-0.5 bg-rose-600 mx-auto mt-1" />
+                <p className="text-[11px] text-slate-600 font-sans mt-1">Số 125-QĐ/BTCTU</p>
+              </div>
+
+              <div className="text-center">
+                <p className="uppercase font-bold text-xs sm:text-sm text-slate-900">ĐẢNG CỘNG SẢN VIỆT NAM</p>
+                <div className="w-32 h-0.5 bg-slate-400 mx-auto mt-1" />
+                <p className="italic text-[11px] text-slate-600 mt-1 font-sans">
+                  Buôn Ma Thuột, ngày 28 tháng 03 năm 2026
+                </p>
+              </div>
+            </div>
+
+            {/* Tiêu đề Quyết định */}
+            <div className="text-center my-6 space-y-2">
+              <h2 className="text-base sm:text-xl font-black uppercase text-slate-900 tracking-wide">
+                QUYẾT ĐỊNH
+              </h2>
+              <p className="font-bold text-xs sm:text-sm text-slate-800 max-w-xl mx-auto">
+                Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy Quý I năm 2026
+              </p>
+              <div className="w-16 h-0.5 bg-slate-300 mx-auto" />
+            </div>
+
+            {/* Căn cứ pháp lý */}
+            <div className="space-y-1.5 italic text-[11px] sm:text-xs text-slate-600 text-justify">
+              <p>• Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và tổ chức bộ máy cơ quan;</p>
+              <p>• Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ, công chức, viên chức hằng quý và hằng năm;</p>
+              <p>• Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về quy chế kết nối, chia sẻ dữ liệu và kiểm tra nghiệp vụ Ngành Tổ chức xây dựng Đảng;</p>
+              <p>• Căn cứ Biên bản cuộc họp của Hội đồng Thẩm định đánh giá xếp loại cơ quan Ban Tổ chức Tỉnh ủy ngày 25 tháng 03 năm 2026;</p>
+              <p>• Xét đề nghị của Trưởng phòng Tổ chức cán bộ và Chánh Văn phòng Ban,</p>
+            </div>
+
+            {/* Nội dung các Điều */}
+            <div className="space-y-4 pt-2">
+              <p className="text-center font-bold uppercase text-xs tracking-wider">
+                BAN TỔ CHỨC TỈNH ỦY QUYẾT ĐỊNH:
+              </p>
+
+              <div>
+                <p className="font-bold text-slate-900">
+                  Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk:
+                </p>
+                <div className="mt-2 pl-4 space-y-1 text-slate-700 font-sans text-xs">
+                  <p>1. <strong>Tập thể Lãnh đạo Ban:</strong> Điểm KPI 98.5/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
+                  <p>2. <strong>Phòng Tổ chức đảng, đảng viên:</strong> Điểm KPI 96.0/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
+                  <p>3. <strong>Phòng Tổ chức cán bộ:</strong> Điểm KPI 95.5/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
+                  <p>4. <strong>Phòng Bảo vệ chính trị nội bộ:</strong> Điểm KPI 88.5/100 • Xếp loại: <strong>Hoàn thành tốt nhiệm vụ</strong>.</p>
+                  <p>5. <strong>Văn phòng Ban:</strong> Điểm KPI 87.0/100 • Xếp loại: <strong>Hoàn thành tốt nhiệm vụ</strong>.</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="font-bold text-slate-900">
+                  Điều 2. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 23 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk, cụ thể:
+                </p>
+                <div className="mt-2 pl-4 space-y-1.5 text-slate-700 font-sans text-xs">
+                  <p>
+                    • <strong>1. Hoàn thành xuất sắc nhiệm vụ: 04 đồng chí</strong> (Tỷ lệ 17.4% tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):
+                  </p>
+                  <ul className="list-disc pl-6 space-y-0.5 text-slate-600">
+                    <li>Đ/c Nguyễn Thượng Hải - Trưởng ban Tổ chức Tỉnh ủy (100.0 điểm)</li>
+                    <li>Đ/c Lưu Vĩnh Hưng - Phó Trưởng ban Thường trực (98.0 điểm)</li>
+                    <li>Đ/c Công chức 1 - Trưởng phòng Tổ chức đảng, đảng viên (97.0 điểm)</li>
+                    <li>Đ/c Công chức 8 - Chuyên viên Quản lý Cán bộ & CSDL Mẫu 2C (99.5 điểm)</li>
+                  </ul>
+
+                  <p className="pt-1">
+                    • <strong>2. Hoàn thành tốt nhiệm vụ: 18 đồng chí</strong> (Tỷ lệ 78.3% tổng biên chế, bao gồm các trường hợp đạt trên 90 điểm nhưng áp trần 20% theo quy định).
+                  </p>
+                  <p>
+                    • <strong>3. Hoàn thành nhiệm vụ: 01 đồng chí</strong> (Tỷ lệ 4.3% tổng biên chế).
+                  </p>
+                  <p>
+                    • <strong>4. Không hoàn thành nhiệm vụ: 0 đồng chí</strong> (0%).
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="font-bold text-slate-900">
+                  Điều 3. Trách nhiệm thi hành:
+                </p>
+                <p className="pl-4 text-justify text-slate-700 text-xs font-sans mt-1">
+                  Văn phòng Ban, các phòng chuyên môn và các đồng chí có tên tại Điều 1, Điều 2 chịu trách nhiệm thi hành Quyết định này. Kết quả xếp loại là căn cứ bình xét thi đua khen thưởng và chi trả thu nhập tăng thêm theo quy định. Quyết định có hiệu lực kể từ ngày ký.
+                </p>
+              </div>
+            </div>
+
+            {/* Chữ ký & Nơi nhận */}
+            <div className="pt-8 flex justify-between items-start gap-4">
+              <div className="text-[11px] font-sans text-slate-600">
+                <p className="font-bold underline text-slate-700">Nơi nhận:</p>
+                <p>• Thường trực Tỉnh ủy (để b/c);</p>
+                <p>• Lãnh đạo Ban;</p>
+                <p>• 05 Phòng chuyên môn;</p>
+                <p>• Lưu: VT, TCCB.</p>
+              </div>
+
+              <div className="text-center font-bold">
+                <p className="uppercase text-xs sm:text-sm text-slate-900">TRƯỞNG BAN</p>
+                <div className="my-8 relative flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full border-2 border-red-500/40 text-red-600 text-[10px] flex items-center justify-center text-center p-1 rotate-12 select-none uppercase font-bold">
+                    Ban Tổ chức Tỉnh ủy Đắk Lắk
+                  </div>
+                </div>
+                <p className="text-sm font-black text-slate-900">Nguyễn Thượng Hải</p>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

@@ -35,6 +35,8 @@ export class ReportsController {
     'INTEGRATION:VIEW',
     'INTEGRATION:READ',
     'INTEGRATION:MANAGE',
+    'REPORT:READ',
+    'REPORT:MANAGE',
   )
   tableSources(@Req() req: any) {
     return { data: this.sources.list(req.user) };
@@ -45,6 +47,8 @@ export class ReportsController {
     'INTEGRATION:VIEW',
     'INTEGRATION:READ',
     'INTEGRATION:MANAGE',
+    'REPORT:READ',
+    'REPORT:MANAGE',
   )
   async previewTable(
     @Body() body: { source?: unknown; config?: unknown },

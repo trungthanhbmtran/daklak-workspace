@@ -2,6 +2,7 @@ import { Injectable, Logger, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class GatewayRegistryService implements OnModuleInit {
@@ -19,10 +20,40 @@ export class GatewayRegistryService implements OnModuleInit {
     private readonly client: ClientGrpc,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     this.grpcService = this.client.getService('ApiManagementService');
-    // Optionally trigger an initial sync here if needed.
-    this.logger.log('Gateway Registry Initialized. Awaiting sync events...');
+    this.logger.log('Gateway Registry Initialized. Syncing initial connections...');
+    try {
+      await this.initialSync();
+    } catch (e: any) {
+      this.logger.warn(`Initial registry sync delayed: ${e?.message}`);
+    }
+  }
+
+  async initialSync() {
+    try {
+      const meta = new Metadata();
+      meta.add(
+        'x-internal-token',
+        process.env.INTERNAL_TOKEN || 'internal-secret-daklak',
+      );
+      const res = (await firstValueFrom(
+        this.grpcService.ListConnections({ limit: 100, offset: 0 }, meta),
+      )) as any;
+      if (Array.isArray(res?.data)) {
+        for (const conn of res.data) {
+          this.activeConnections.set(conn.id, conn);
+          this.connectionsByCode.set(conn.code, conn);
+        }
+        this.logger.log(
+          `[Registry] Loaded ${this.activeConnections.size} connections via initial gRPC sync.`,
+        );
+      }
+    } catch (err: any) {
+      this.logger.warn(
+        `Could not load initial connections from user-service: ${err?.message}`,
+      );
+    }
   }
 
   // Called when API_CONNECTION_DENY is received

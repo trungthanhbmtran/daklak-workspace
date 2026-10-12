@@ -15,11 +15,12 @@ type Props = {
   domainsForUnit: { id: number; name: string }[];
   unitDomainIds: number[];
   subordinateUnits: { id: number; name: string }[];
-  onSave: (p: { staffingId: number; slotOrder: number; domainIds?: number[]; geographicAreaIds?: number[]; monitoredUnitIds?: number[] }) => void;
+  onSave: (p: { staffingId: number; slotOrder: number; description?: string; domainIds?: number[]; geographicAreaIds?: number[]; monitoredUnitIds?: number[] }) => void;
   isSaving: boolean;
 };
 
 export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, unitDomainIds, subordinateUnits, onSave, isSaving }: Props) {
+  const [description, setDescription] = useState<string>(existingSlot?.description ?? "");
   const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
   const [geoAreaIds, setGeoAreaIds] = useState<number[]>(existingSlot?.geographicAreaIds ?? []);
   const [unitIds, setUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
@@ -27,6 +28,7 @@ export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, 
   const { items: geoAreas, isFetching: loadingGeo, q: geoQ, setQ: setGeoQ, hasNextPage, fetchNextPage, isFetchingNextPage } = useGeoAreaSearch(geoAreaIds);
 
   useEffect(() => {
+    setDescription(existingSlot?.description ?? "");
     setDomainIds(existingSlot?.domainIds ?? []);
     setGeoAreaIds(existingSlot?.geographicAreaIds ?? []);
     setUnitIds(existingSlot?.monitoredUnitIds ?? []);
@@ -37,10 +39,10 @@ export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, 
       <CardHeader className="py-3 px-4 bg-muted/40 border-b flex flex-row items-center justify-between space-y-0 gap-2 shrink-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">{slotOrder}</div>
-          <span>Vị trí nhân sự</span>
+          <span>Vị trí nhân sự {slotOrder}</span>
         </CardTitle>
         <Button type="button" size="sm" className="h-8 text-xs font-medium"
-          onClick={() => onSave({ staffingId, slotOrder, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geoAreaIds.length ? geoAreaIds : undefined, monitoredUnitIds: unitIds.length ? unitIds : undefined })}
+          onClick={() => onSave({ staffingId, slotOrder, description: description.trim() || undefined, domainIds: domainIds.length ? domainIds : undefined, geographicAreaIds: geoAreaIds.length ? geoAreaIds : undefined, monitoredUnitIds: unitIds.length ? unitIds : undefined })}
           disabled={isSaving}>
           {isSaving ? (
             <>
@@ -56,6 +58,28 @@ export function SlotCard({ staffingId, slotOrder, existingSlot, domainsForUnit, 
         </Button>
       </CardHeader>
       <CardContent className="p-4 flex-1 flex flex-col gap-4 text-sm">
+        {existingSlot?.assignedEmployeeName ? (
+          <div className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-lg flex items-center justify-between">
+            <span className="font-semibold">Nhân sự đảm nhiệm: {existingSlot.assignedEmployeeName}</span>
+            {existingSlot.assignedEmployeeCode && <span className="font-mono text-[11px] opacity-80">Mã: {existingSlot.assignedEmployeeCode}</span>}
+          </div>
+        ) : (
+          <div className="text-xs bg-muted/50 text-muted-foreground border border-dashed px-3 py-2 rounded-lg italic">
+            Chưa có nhân sự đảm nhiệm vị trí này (Còn trống biên chế).
+          </div>
+        )}
+
+        <div className="flex flex-col space-y-1.5">
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tên vị trí / Phân công phụ trách</label>
+          <input
+            type="text"
+            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            placeholder="Ví dụ: Vị trí 1 — Phó ban 1 (Phụ trách Tổ chức cán bộ, VTVL)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
           <div className="flex flex-col space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"><Network className="h-3.5 w-3.5" /> Lĩnh vực</label>

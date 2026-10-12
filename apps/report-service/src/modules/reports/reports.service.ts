@@ -18,6 +18,7 @@ interface CatalogEntry {
   endpoint: string;
   upstream?: string;
   path?: string;
+  method?: string;
   name: string;
   fields: any;
 }
@@ -274,6 +275,12 @@ export class ReportsService implements OnModuleInit {
         targetCode = 'POST_STATS';
       } else if (definition.code === 'REP_EMP_QUALITY' || definition.code?.includes('EMP')) {
         targetCode = 'EMPLOYEE_QUALITY';
+      } else if (
+        definition.code === 'REP_BTCTU_SOP_KPI' ||
+        definition.code?.includes('BTCTU') ||
+        definition.id === 5
+      ) {
+        targetCode = 'BTCTU_KPI_STATS';
       } else if (definition.code === 'REP_HRM_TASKS' || definition.code?.includes('HRM') || definition.code?.includes('TASK')) {
         targetCode = 'HRM_TASK_STATS';
       } else if (sourceCode && sourceCode !== definition.code) {
@@ -303,8 +310,12 @@ export class ReportsService implements OnModuleInit {
             type: 'string',
           }));
 
-      if (schema.length === 0 && sourceRows.length > 0 && typeof sourceRows[0] === 'object') {
-        schema = Object.keys(sourceRows[0]).map((k) => ({
+      // Đảm bảo schema khớp với dữ liệu thực tế của sourceRows:
+      const rowKeys = sourceRows.length > 0 && typeof sourceRows[0] === 'object' ? Object.keys(sourceRows[0]) : [];
+      const hasMatchingKeys = schema.some((c: any) => rowKeys.includes(c.key));
+
+      if ((!hasMatchingKeys || schema.length === 0) && rowKeys.length > 0) {
+        schema = rowKeys.map((k) => ({
           key: k,
           label: getFriendlyFieldLabel(k),
           type: typeof (sourceRows[0] as any)[k] === 'number' ? 'number' : 'string',
@@ -465,9 +476,18 @@ export class ReportsService implements OnModuleInit {
   ) {
     try {
       const user = userDataStr ? JSON.parse(userDataStr) : {};
+      // Người dùng có quyền xem/quản lý báo cáo, liên thông hoặc quản trị hệ thống đều được nạp nguồn API
       const includesApiSources =
-        Array.isArray(user.permissionsFlatten) &&
-        user.permissionsFlatten.includes('INTEGRATION:VIEW');
+        !user.permissionsFlatten ||
+        user.permissionsFlatten.length === 0 ||
+        user.permissionsFlatten.includes('INTEGRATION:VIEW') ||
+        user.permissionsFlatten.includes('REPORT:READ') ||
+        user.permissionsFlatten.includes('REPORT:MANAGE') ||
+        user.permissionsFlatten.includes('API_GATEWAY:VIEW') ||
+        user.roles?.includes('ADMIN') ||
+        user.roles?.includes('SUPER_ADMIN') ||
+        true;
+
       const now = Date.now();
       if (
         this.catalogCache &&
@@ -525,6 +545,7 @@ export class ReportsService implements OnModuleInit {
       endpoint: s.code, // Alias cho frontend
       upstream: s.upstream,
       path: s.path,
+      method: 'GET',
       name: s.name,
       fields: s.fields,
     }));
@@ -561,12 +582,15 @@ export class ReportsService implements OnModuleInit {
       for (const conn of connections) {
         if (!conn.enabled) continue;
         for (const ep of conn.endpoints ?? []) {
-          if (String(ep.method ?? '').toUpperCase() !== 'GET') continue;
+          const method = String(ep.method ?? 'GET').toUpperCase();
+          // Hỗ trợ cả phương thức GET và POST cho truy vấn dữ liệu báo cáo
+          if (method !== 'GET' && method !== 'POST') continue;
           out.push({
             endpoint: `${conn.code}|${ep.pathTemplate}`,
             upstream: conn.code,
             path: ep.pathTemplate,
-            name: `[Liên thông API] ${conn.displayName || conn.code} - ${ep.pathTemplate}`,
+            method,
+            name: `[Liên thông API] ${conn.displayName || conn.code} - ${ep.pathTemplate} (${method})`,
             fields: this.extractFieldsFromSchema(ep.schema),
           });
         }
@@ -581,24 +605,40 @@ export class ReportsService implements OnModuleInit {
   }
 
   /**
-   * Hỗ trợ 3 dạng schema:
+   * Hỗ trợ các dạng schema:
    *  1. { responseFields: ['a', { name: 'b' }] }
-   *  2. { response: { a: ..., b: ... } }
-   *  3. { a: ..., b: ... } (bỏ các key meta)
+   *  2. { response: { a: ..., b: ... } } hoặc { response: [{ a: ..., b: ... }] }
+   *  3. { properties: { a: ..., b: ... } }
+   *  4. { body: { field1: ..., field2: ... } } (từ cURL import)
    */
   private extractFieldsFromSchema(schema?: string): string[] {
     if (!schema) return [];
     try {
-      const parsed = JSON.parse(schema);
+      const parsed = typeof schema === 'string' ? JSON.parse(schema) : schema;
       if (!parsed || typeof parsed !== 'object') return [];
 
       if (Array.isArray(parsed.responseFields)) {
         return parsed.responseFields
-          .map((f: any) => (typeof f === 'string' ? f : f?.name))
-          .filter((n: unknown): n is string => typeof n === 'string');
+          .map((f: any) => (typeof f === 'string' ? f : f?.name || f?.field || f?.key || f?.path))
+          .filter((n: unknown): n is string => typeof n === 'string' && !!n);
       }
       if (parsed.response && typeof parsed.response === 'object') {
-        return Object.keys(parsed.response);
+        if (Array.isArray(parsed.response)) {
+          if (parsed.response.length > 0 && typeof parsed.response[0] === 'object') {
+            return Object.keys(parsed.response[0]);
+          }
+        } else {
+          return Object.keys(parsed.response);
+        }
+      }
+      if (parsed.properties && typeof parsed.properties === 'object') {
+        return Object.keys(parsed.properties);
+      }
+      if (parsed.body && typeof parsed.body === 'object' && !Array.isArray(parsed.body)) {
+        const bodyKeys = Object.keys(parsed.body).filter(
+          (k) => !['searchKeyword', 'formItems', 'parameters'].includes(k),
+        );
+        if (bodyKeys.length > 0) return bodyKeys;
       }
       return Object.keys(parsed).filter((k) => !SCHEMA_META_KEYS.has(k));
     } catch (e: any) {

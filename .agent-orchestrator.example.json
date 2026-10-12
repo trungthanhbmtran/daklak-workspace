@@ -1,0 +1,17 @@
+{
+  "timeoutMs": 3600000,
+  "accountMode": "shared",
+  "sharedAccountConfirmed": false,
+  "workers": {
+    "backend": {
+      "accountLabel": "antigravity-current-account",
+      "command": "C:/Users/<username>/AppData/Local/agy/bin/agy.exe",
+      "args": []
+    },
+    "frontend": {
+      "accountLabel": "antigravity-current-account",
+      "command": "C:/Users/<username>/AppData/Local/agy/bin/agy.exe",
+      "args": []
+    }
+  }
+}

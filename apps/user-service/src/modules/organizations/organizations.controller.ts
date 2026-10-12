@@ -395,13 +395,19 @@ export class OrganizationsController {
   }
 
   @GrpcMethod('OrganizationService', 'SyncStaffingSlot')
-  async syncStaffingSlot(data: {
-    employeeCode: string;
-    unitId: number;
-    jobTitleId: number;
-    isActive: boolean;
-  }) {
-    await this.orgService.syncStaffingSlot(data);
+  async syncStaffingSlot(data: any) {
+    await this.orgService.syncStaffingSlot({
+      employeeCode: data.employeeCode || data.employee_code || '',
+      unitId: data.unitId || data.unit_id || 0,
+      jobTitleId: data.jobTitleId || data.job_title_id || 0,
+      isActive:
+        data.isActive !== undefined
+          ? data.isActive
+          : data.is_active !== undefined
+            ? data.is_active
+            : true,
+      slotOrder: data.slotOrder || data.slot_order || 0,
+    });
     return {};
   }
 

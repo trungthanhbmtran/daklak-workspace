@@ -48,6 +48,10 @@ export function ManualPlanSelectorByRankClient() {
         { code: 'IT', name: 'Công nghệ thông tin' },
         { code: 'HEALTHCARE', name: 'Y tế' },
         { code: 'EDUCATION', name: 'Giáo dục' },
+        { code: 'CONG_TAC_TO_CHUC', name: 'Công tác Tổ chức, Cán bộ, Đảng viên' },
+        { code: 'CONG_TAC_KIEM_TRA', name: 'Công tác Kiểm tra, Giám sát' },
+        { code: 'CONG_TAC_NOI_CHINH', name: 'Công tác Nội chính, BVCTNB' },
+        { code: 'CONG_TAC_VAN_PHONG', name: 'Công tác Văn phòng cấp ủy' },
     ];
 
     const { data: jobTitlesRes = { allTitles: [], govTitles: [], partyTitles: [] } } = useQuery({
@@ -56,9 +60,10 @@ export function ManualPlanSelectorByRankClient() {
         staleTime: 5 * 60 * 1000,
     });
 
-    // Phân loại chức danh: Công chức (GOVERNMENT) vs Viên chức (VIEN_CHUC)
+    // Phân loại chức danh: Công chức vs Viên chức vs Cơ quan Đảng
     const congChucRanks = jobTitlesRes.govTitles;
     const vienChucRanks = jobTitlesRes.allTitles.filter((j: any) => j.category && j.category.includes('Viên chức'));
+    const partyRanks = jobTitlesRes.partyTitles || [];
 
     const { data: templatesData } = useTaskTemplatesList();
     const serverTemplates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
@@ -73,7 +78,7 @@ export function ManualPlanSelectorByRankClient() {
         defaultWeight: t.defaultWeight || 1
     }));
 
-    const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC'>('CONG_CHUC');
+    const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC' | 'DANG'>('CONG_CHUC');
     const [activeRankFilter, setActiveRankFilter] = useState<string>('');
     const [activeDomainFilter, setActiveDomainFilter] = useState<string>('GENERIC');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
@@ -86,7 +91,11 @@ export function ManualPlanSelectorByRankClient() {
 
     const { isPending } = useCreateMasterPlan();
 
-    const activeRanksList = classification === 'CONG_CHUC' ? congChucRanks : vienChucRanks;
+    const activeRanksList = classification === 'CONG_CHUC'
+        ? congChucRanks
+        : classification === 'VIEN_CHUC'
+        ? vienChucRanks
+        : partyRanks;
 
     const currentGroups = React.useMemo(() => {
         const catSet = new Map<string, string>();
@@ -380,9 +389,10 @@ export function ManualPlanSelectorByRankClient() {
                     <div className="space-y-3 shrink-0">
                         <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại VTVL</Label>
                         <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted rounded-xl">
-                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Khối Công chức</TabsTrigger>
-                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">Khối Viên chức</TabsTrigger>
+                            <TabsList className="w-full grid grid-cols-3 p-1 bg-muted rounded-xl">
+                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs">Công chức</TabsTrigger>
+                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs">Viên chức</TabsTrigger>
+                                <TabsTrigger value="DANG" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs">Khối Đảng</TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
