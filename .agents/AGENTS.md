@@ -28,8 +28,8 @@ Codex là điều phối viên mặc định cho quy trình hỗn hợp tài kho
 - Kiểm tra phạm vi file giữa Backend và Frontend không giao nhau; file dùng chung phải có đúng một chủ sở hữu trong plan.
 - Ghi PLAN_APPROVED hoặc PLAN_REVISE trong .agents/current_plan.md. Nếu PLAN_REVISE, sửa plan và phản biện lại. Chỉ bắt đầu code sau PLAN_APPROVED.
 
-### Bước 3: Thực thi song song (hai tài khoản Antigravity)
-- Chuẩn bị hai handoff riêng cho backend-coder và frontend-coder khi plan xác định hai phần độc lập và đã chốt contract. Khi các tool MCP cục bộ daklak-agent-orchestrator sẵn sàng, dùng chúng để tạo worktree riêng và dispatch hai lane. Nếu tool hoặc runner tài khoản chưa sẵn sàng, xuất hai prompt sẵn dùng và nêu rõ blocker; không được tuyên bố agent đã chạy.
+### Bước 3: Thực thi song song (hai worker Antigravity)
+- Chuẩn bị hai handoff riêng cho backend-coder và frontend-coder khi plan xác định hai phần độc lập và đã chốt contract. Khi các tool MCP cục bộ daklak-agent-orchestrator sẵn sàng, dùng chúng để tạo worktree riêng và dispatch hai lane. Cấu hình có thể dùng chung phiên Antigravity hiện tại (`accountMode: shared`) hoặc hai phiên được cô lập riêng (`accountMode: isolated`); phải báo đúng chế độ và quota tương ứng. Nếu tool hoặc runner chưa sẵn sàng, xuất hai prompt sẵn dùng và nêu rõ blocker; không được tuyên bố agent đã chạy.
 - Mỗi agent làm trong Git worktree riêng. Chỉ sửa file được giao; không sửa .agents/current_plan.md, .agents/execution_log.md, roadmap.md hoặc file của agent còn lại.
 - Nếu cần sửa file shared (libs/**, root configs, hoặc contract), plan phải chỉ định duy nhất một agent sở hữu file đó; agent còn lại chỉ đọc.
 - Mỗi agent đọc cùng context digest, báo cáo file đã sửa, kiểm chứng đã chạy, vấn đề còn mở, decision record và không tự merge worktree.

@@ -2,7 +2,7 @@
 
 Daklak Government Workflow Platform
 
-Quy trình hỗn hợp tài khoản: Codex khảo sát blacklist, kiến trúc, lịch sử lỗi và Git history; sau đó lập plan và tự phản biện plan trước; sau khi plan đạt, Codex chuẩn bị hai lane Backend và Frontend. Khi daklak-agent-orchestrator MCP cùng hai runner tài khoản đã sẵn sàng, Codex dispatch tự động; nếu chưa, Codex xuất hai prompt sẵn dùng và nêu blocker. Các file trong subagents/ là tài liệu vai trò cũ/tham khảo. Antigravity tự phát hiện custom agents từ .agents/agents/.
+Quy trình nhiều agent: Codex khảo sát blacklist, kiến trúc, lịch sử lỗi và Git history; sau đó lập plan và tự phản biện plan trước; sau khi plan đạt, Codex chuẩn bị hai lane Backend và Frontend. Khi daklak-agent-orchestrator MCP cùng hai runner đã sẵn sàng, Codex dispatch tự động; nếu chưa, Codex xuất hai prompt sẵn dùng và nêu blocker. Các file trong subagents/ là tài liệu vai trò cũ/tham khảo. Antigravity tự phát hiện custom agents từ .agents/agents/.
 
 ## Vai trò và giai đoạn
 
@@ -16,7 +16,7 @@ Quy trình hỗn hợp tài khoản: Codex khảo sát blacklist, kiến trúc, 
 
 1. Codex khảo sát yêu cầu và repo, rồi ghi plan, contract, tiêu chí nghiệm thu, phụ thuộc và chủ sở hữu từng file vào .agents/current_plan.md.
 2. Codex tự phản biện plan bằng checklist phù hợp. Nếu có lỗi, sửa plan và phản biện lại. Chỉ ghi PLAN_APPROVED khi rủi ro đã được xử lý.
-3. Sau PLAN_APPROVED, Codex chuẩn bị hai task riêng nhưng cùng contract. Nếu MCP và runner tài khoản đã sẵn sàng, gọi prepare_agent_worktrees rồi dispatch hai lane song song; nếu chưa, xuất hai prompt độc lập và nêu blocker. Chỉ chạy song song khi file ownership không chồng lấn; task chỉ thuộc một lane thì chỉ chạy một coder.
+3. Sau PLAN_APPROVED, Codex chuẩn bị hai task riêng nhưng cùng contract. Nếu MCP và runner đã sẵn sàng, gọi prepare_agent_worktrees rồi dispatch hai lane song song; quota dùng chung nếu cấu hình shared; nếu chưa, xuất hai prompt độc lập và nêu blocker. Chỉ chạy song song khi file ownership không chồng lấn; task chỉ thuộc một lane thì chỉ chạy một coder.
 4. Mỗi coder dùng worktree riêng, không sửa file điều phối hoặc file của nhau, không tự merge. Khi từng agent xong, Codex nghiệm thu riêng diff của agent đó theo file ownership, plan và checklist; ghi AGENT_ACCEPTED hoặc AGENT_REVISION_REQUIRED. Finding chỉ trả về đúng coder đó.
 5. Chỉ tích hợp sau khi cả hai lane đều AGENT_ACCEPTED. Codex rà soát chéo contract và overlap trên diff hợp nhất, chạy verification tích hợp, rồi cập nhật plan/log/roadmap nếu cần.
 

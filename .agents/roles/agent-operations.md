@@ -33,7 +33,7 @@ Current code, schema, proto contracts, tests, and the shared engineering charter
 6. Result gates: review each coder's diff independently; record AGENT_ACCEPTED or AGENT_REVISION_REQUIRED and give findings only to that coder. After both pass, run combined integration review and verification.
 7. Update shared plan, acceptance statuses, and execution log after integration.
 
-### Backend Coder — Antigravity account 1
+### Backend Coder — Antigravity worker (shared account by default)
 
 1. Read the approved plan and context digest. Independently search the blacklist and relevant history for the assigned services and failure keywords.
 2. Confirm service source-of-truth, current DTO/proto/schema behavior, neighboring tests, and current diff before editing.
@@ -41,7 +41,7 @@ Current code, schema, proto contracts, tests, and the shared engineering charter
 4. Run only plan-approved backend checks and preserve command evidence.
 5. Write a backend decision record in the task report folder. Do not assign your own acceptance status or merge your worktree.
 
-### Frontend Coder — Antigravity account 2
+### Frontend Coder — Antigravity worker (shared account by default)
 
 1. Read the approved plan and context digest. Independently search the blacklist and relevant history for the assigned feature, route, component, and failure keywords.
 2. Confirm current route/baseURL, API response shape, source types, shared UI patterns, and current diff before editing.
