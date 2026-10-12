@@ -22,7 +22,11 @@ import {
   Search,
   Settings2,
 } from 'lucide-react';
-import { getFriendlyFieldLabel } from '@/features/reports/utils/fieldHelpers';
+import {
+  getFriendlyFieldLabel,
+  translateStatus,
+  getStatusBadgeCls,
+} from '@/features/reports/utils/fieldHelpers';
 
 interface ReportViewerProps {
   definitionId: number;
@@ -54,13 +58,17 @@ function aggregateData(
 ): AggregatedItem[] {
   if (!rows || rows.length === 0 || !xAxis) return [];
 
+  const isStatusField = xAxis.toLowerCase().includes('status');
   const groups: Record<string, { count: number; sum: number; values: number[] }> =
     {};
 
   for (const row of rows) {
     const rawX = row[xAxis];
-    const key =
+    let key =
       rawX != null && rawX !== '' ? String(rawX).trim() : 'Chưa phân loại';
+    if (isStatusField) {
+      key = translateStatus(key);
+    }
     if (!groups[key]) {
       groups[key] = { count: 0, sum: 0, values: [] };
     }
@@ -191,12 +199,20 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     return [];
   }, [snapshot, actualConfig, rows]);
 
-  // Bộ lọc dữ liệu bảng
+  // Bộ lọc dữ liệu bảng (hỗ trợ tìm kiếm thông minh cả mã và tiếng Việt)
   const filteredRows = useMemo(() => {
     if (!tableSearch.trim()) return rows;
     const q = tableSearch.toLowerCase();
     return rows.filter((r: any) =>
-      Object.values(r).some((val) => String(val ?? '').toLowerCase().includes(q)),
+      Object.entries(r).some(([k, val]) => {
+        const str = String(val ?? '').toLowerCase();
+        if (str.includes(q)) return true;
+        if (k.toLowerCase().includes('status')) {
+          const vi = translateStatus(String(val ?? '')).toLowerCase();
+          if (vi.includes(q)) return true;
+        }
+        return false;
+      }),
     );
   }, [rows, tableSearch]);
 
@@ -883,19 +899,41 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                               {col.key === 'status' ? (
                                 <Badge
                                   variant="outline"
+                                  className={`text-[10px] font-semibold ${getStatusBadgeCls(
+                                    strVal,
+                                  )}`}
+                                >
+                                  {translateStatus(strVal)}
+                                </Badge>
+                              ) : col.key === 'isOverdue' ? (
+                                <Badge
+                                  variant="outline"
                                   className={`text-[10px] font-semibold ${
-                                    strVal === 'COMPLETED' ||
-                                    strVal === 'DONE' ||
-                                    strVal === 'PUBLISHED'
-                                      ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
-                                      : strVal === 'TODO' ||
-                                          strVal === 'PROCESSING'
-                                        ? 'text-amber-700 bg-amber-50 border-amber-200'
-                                        : 'text-slate-600 bg-slate-50 border-slate-200'
+                                    strVal === 'Quá hạn'
+                                      ? 'text-rose-700 bg-rose-50 border-rose-200'
+                                      : 'text-emerald-700 bg-emerald-50 border-emerald-200'
                                   }`}
                                 >
                                   {strVal}
                                 </Badge>
+                              ) : col.key === 'isCompleted' ? (
+                                <Badge
+                                  variant="outline"
+                                  className={`text-[10px] font-semibold ${
+                                    strVal === 'Hoàn thành' || strVal === 'Đã hoàn thành'
+                                      ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                                      : 'text-amber-700 bg-amber-50 border-amber-200'
+                                  }`}
+                                >
+                                  {strVal}
+                                </Badge>
+                              ) : col.key === 'departmentName' ? (
+                                <span
+                                  className="font-medium text-slate-800 truncate block max-w-full"
+                                  title={strVal}
+                                >
+                                  {strVal}
+                                </span>
                               ) : col.key === 'progress' ||
                                 col.key === 'qualityScore' ? (
                                 <div className="flex items-center gap-2 min-w-[120px]">

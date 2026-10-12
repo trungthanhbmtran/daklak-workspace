@@ -244,16 +244,17 @@ export class StatisticsService implements OnModuleInit {
           const isDone = t.status === 'COMPLETED' || t.status === 'DONE';
           const taskDueTime = t.dueDate ? new Date(t.dueDate).getTime() : null;
           const isOverdue = !isDone && taskDueTime && nowTime > taskDueTime;
-          const deptId = t.departmentId || t.plan?.departmentId || 0;
-          const deptName =
-            (unitMap[deptId] ? unitMap[deptId].name : null) || 'Chưa phân công';
           const mainAssignee = t.participants?.find(
             (p: any) => p.role === 'ASSIGNEE',
           );
           const assigneeCode =
             mainAssignee?.employeeCode || t.assigneeCode || 'Chưa giao';
           const assigneeName =
-            mainAssignee?.fullName || t.assigneeName || assigneeCode;
+            mainAssignee?.fullName || t.assigneeName || (assigneeCode !== 'Chưa giao' ? assigneeCode : 'Chưa giao');
+          const deptId = t.departmentId || mainAssignee?.departmentId || t.plan?.departmentId || 0;
+          const deptName =
+            (unitMap[deptId] ? unitMap[deptId].name : null) ||
+            (deptId === 0 || deptId === 2 ? 'Sở Khoa học và Công nghệ' : 'Chưa phân công');
 
           return {
             id: t.id,

@@ -37,6 +37,66 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
   targetCode: 'Mã đối tượng',
 };
 
+export const STATUS_LABEL_MAP: Record<string, string> = {
+  TODO: 'Chờ thực hiện',
+  IN_PROGRESS: 'Đang thực hiện',
+  PENDING_ACCEPTANCE: 'Chờ tiếp nhận',
+  PENDING_APPROVAL: 'Chờ phê duyệt',
+  COMPLETED: 'Đã hoàn thành',
+  DONE: 'Đã hoàn thành',
+  CANCELLED: 'Đã hủy',
+  REJECTED: 'Đã từ chối',
+  DRAFT: 'Bản nháp',
+  ASSIGNED: 'Đã phân công',
+  PUBLISHED: 'Đã xuất bản',
+  PROCESSING: 'Đang xử lý',
+  NORMAL: 'Bình thường',
+  HIGH: 'Ưu tiên cao',
+  URGENT: 'Khẩn cấp',
+  LOW: 'Ưu tiên thấp',
+};
+
+export function translateStatus(status: string | null | undefined): string {
+  if (!status) return '—';
+  const raw = String(status).trim();
+  const upper = raw.toUpperCase();
+  return STATUS_LABEL_MAP[upper] || raw;
+}
+
+export function getStatusBadgeCls(status: string | null | undefined): string {
+  if (!status) return 'text-slate-600 bg-slate-50 border-slate-200';
+  const upper = String(status).trim().toUpperCase();
+  switch (upper) {
+    case 'COMPLETED':
+    case 'DONE':
+    case 'PUBLISHED':
+    case 'ĐÃ HOÀN THÀNH':
+    case 'HOÀN THÀNH':
+      return 'text-emerald-700 bg-emerald-50 border-emerald-200';
+    case 'IN_PROGRESS':
+    case 'PROCESSING':
+    case 'ĐANG THỰC HIỆN':
+    case 'ĐANG XỬ LÝ':
+      return 'text-blue-700 bg-blue-50 border-blue-200';
+    case 'PENDING_ACCEPTANCE':
+    case 'CHỜ TIẾP NHẬN':
+      return 'text-amber-700 bg-amber-50 border-amber-200';
+    case 'PENDING_APPROVAL':
+    case 'CHỜ PHÊ DUYỆT':
+      return 'text-purple-700 bg-purple-50 border-purple-200';
+    case 'TODO':
+    case 'CHỜ THỰC HIỆN':
+      return 'text-slate-700 bg-slate-100 border-slate-300';
+    case 'CANCELLED':
+    case 'REJECTED':
+    case 'ĐÃ HỦY':
+    case 'TỪ CHỐI':
+      return 'text-rose-700 bg-rose-50 border-rose-200';
+    default:
+      return 'text-slate-600 bg-slate-50 border-slate-200';
+  }
+}
+
 export function getFriendlyFieldLabel(field: string): string {
   if (!field) return '';
   if (FIELD_LABEL_MAP[field]) return FIELD_LABEL_MAP[field];

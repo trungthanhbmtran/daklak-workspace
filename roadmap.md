@@ -4,6 +4,24 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [ ] **[Backend & Architecture] Chuẩn hóa Chuyển đổi Mã/Tên sang Tiếng Việt & Tìm kiếm Đa ngôn ngữ Đồng nhất trên Backend (12/10/2026)**
+  - **Vấn đề**: Logic convert các mã cũ (`TODO`, `PENDING_ACCEPTANCE`, `IN_PROGRESS`, `COMPLETED`, field labels) sang tiếng Việt đang bị viết rải rác dưới client (`ReportViewer.tsx`, `fieldHelpers.ts`). Tương tự, bộ lọc tìm kiếm cũng bị xử lý thủ công dưới client với các hàm dịch cục bộ, không đồng nhất khi tìm kiếm bằng tiếng Việt có dấu/không dấu hoặc các mã/ngôn ngữ khác.
+  - **Khắc phục**:
+    1. Chuyển toàn bộ logic convert code/name cũ sang tiếng Việt lên Backend (`report-service`): chuẩn hóa toàn bộ dữ liệu status, priority, field labels trong `schema` và `data` của `DatasetSnapshot`/`StatisticsSnapshot`.
+    2. Xây dựng bộ máy tìm kiếm thông minh đồng nhất trên Backend: hỗ trợ tìm kiếm không phân biệt hoa thường, không phân biệt dấu tiếng Việt (accent-insensitive), nhận diện cả mã gốc tiếng Anh lẫn nhãn tiếng Việt tương ứng.
+    3. Hỗ trợ phân trang và tìm kiếm trực tiếp trong API `getDatasetSnapshot` trên backend.
+    4. Dọn sạch toàn bộ logic `translateStatus` và code mapping dưới client (`ReportViewer.tsx`, `fieldHelpers.ts`), client chỉ nhận và hiển thị dữ liệu đã chuẩn hóa từ Backend.
+  - **Kiểm chứng**: Typecheck `tsc --noEmit` cả `report-service` và `admin_khcn`, kiểm tra tìm kiếm đa ngôn ngữ/tiếng Việt thực tế và đối soát diff theo 7 bộ ràng buộc.
+
+- [x] **[UI/UX & Data Engine] Chuẩn hóa Trạng thái Tiếng Việt & Ánh xạ Phòng ban Báo cáo Quản lý Nhiệm vụ (Báo cáo #1) (12/10/2026)**
+  - **Vấn đề**: Tại Báo cáo #1 (`/admin/services/reports/1`), trạng thái nhiệm vụ đang hiển thị mã tiếng Anh (`TODO`, `PENDING_ACCEPTANCE`, `IN_PROGRESS`) trên biểu đồ và bảng dữ liệu; toàn bộ 27 nhiệm vụ bị hiển thị sai phòng ban (gán nhầm "Phòng Quản lý Khoa học" thay vì Trung tâm IOC, Phòng Hành chính - Tổng hợp, Phòng Khai thác & Quản lý dữ liệu, Phòng Hạ tầng - Đô thị thông minh).
+  - **Khắc phục**:
+    1. Chuẩn hóa dịch trạng thái nhiệm vụ tiếng Việt trong `ReportViewer.tsx` (cả trong gom nhóm `aggregateData` cho biểu đồ và render Badge bảng dữ liệu).
+    2. Cập nhật `enrichTasks` trong `hrm-service` để tự động gắn `departmentId` theo nhân sự thực hiện (`ASSIGNEE`) hoặc người tạo (`OWNER`).
+    3. Cập nhật `statistics.service.ts` trong `report-service` để phân giải `deptName` chính xác qua `unitMap`.
+    4. Cập nhật CSDL `StatisticsSnapshot` và `DatasetSnapshot` cho Báo cáo #1 với đầy đủ phòng ban và trạng thái chuẩn tiếng Việt.
+  - **Kiểm chứng**: Kiểm tra typecheck TypeScript, build Next.js, đối soát CSDL và kiểm tra hiển thị thực tế trên Báo cáo #1.
+
 - [x] **[Performance & Optimization] Tối ưu hóa Toàn diện Module Report: Nâng trần gRPC 64MB, Async I/O, Phân trang An toàn & Quản lý Bộ nhớ (12/10/2026)**
   - **Vấn đề**: Module Report đối mặt với nguy cơ lỗi gRPC payload 4MB `RESOURCE_EXHAUSTED`, blocking main thread do `fs.readFileSync`, quá tải microservice do query trần `limit: 10000`, và rủi ro OOM khi lưu trữ mảng JSON đơn khối lớn trong CSDL.
   - **Khắc phục**:

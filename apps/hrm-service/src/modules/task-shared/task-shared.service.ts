@@ -239,14 +239,18 @@ export class TaskSharedService {
 
     const empCodesArray = Array.from(empCodes).filter(Boolean);
     const employeeMap = new Map<string, string>(); // employeeCode -> fullName
+    const empDeptMap = new Map<string, number>(); // employeeCode -> departmentId
 
     if (empCodesArray.length > 0) {
       const employees = await this.prisma.employee.findMany({
         where: { employeeCode: { in: empCodesArray } },
-        select: { employeeCode: true, fullName: true }
+        select: { employeeCode: true, fullName: true, departmentId: true }
       });
       employees.forEach(emp => {
         employeeMap.set(emp.employeeCode, emp.fullName);
+        if (emp.departmentId) {
+          empDeptMap.set(emp.employeeCode, emp.departmentId);
+        }
       });
     }
 
@@ -271,8 +275,17 @@ export class TaskSharedService {
         t.supervisorName = approver ? (employeeMap.get(approver) || approver) : '';
         t.coassigneeCodes = coordinators;
         t.coassigneeNames = (coordinators || []).map((code: string) => employeeMap.get(code) || code);
+
+        // Ánh xạ departmentId chuẩn từ nhân sự thực hiện (assignee) -> người giao (owner) -> người tạo (creator)
+        const effectiveEmpCode = (assignee && assignee !== 'UNASSIGNED') ? assignee : (owner || t.creatorEmployeeCode);
+        if (effectiveEmpCode && empDeptMap.has(effectiveEmpCode)) {
+          t.departmentId = empDeptMap.get(effectiveEmpCode);
+        }
       } else {
         t.assignerName = t.creatorName || '';
+        if (t.creatorEmployeeCode && empDeptMap.has(t.creatorEmployeeCode)) {
+          t.departmentId = empDeptMap.get(t.creatorEmployeeCode);
+        }
       }
       if (t.children) t.children.forEach(mapNames);
     };
