@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Background, BackgroundVariant, Controls, Handle, MarkerType, MiniMap, Panel, Position, ReactFlow, ReactFlowProvider, addEdge, useReactFlow, useViewport, type Connection, type Edge, type Node, type NodeProps, useEdgesState, useNodesState } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { ArrowDownWideNarrow, ArrowLeft, Check, CircleHelp, GitBranch, Layers, Loader2, Save, Send, Settings2, Trash2, UserRound, Workflow as WorkflowIcon } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowLeft, Check, CircleHelp, GitBranch, Layers, Loader2, Plus, Save, Send, Settings2, Trash2, UserRound, Workflow as WorkflowIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { usePublishWorkflow, useSaveWorkflow, useWorkflowDefinition, useWorkflowRoles } from "@/features/workflow/hooks";
-import type { Workflow, WorkflowGraph, WorkflowNodeData } from "@/features/workflow/api";
+import type { Workflow, WorkflowGraph, WorkflowNodeData, WorkflowPhase } from "@/features/workflow/api";
 import { WORKFLOW_ROUTES } from "@/features/workflow/routes";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import type { OrganizationUnitNode } from "@/features/system-admin/organization/types";
@@ -263,9 +263,13 @@ function CanvasNodeCard({ id, data, type, selected }: NodeProps<CanvasNode>) {
 const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
   workflowCode,
   workflowName,
+  phases,
+  nodes,
 }: {
   workflowCode?: string;
   workflowName?: string;
+  phases: WorkflowPhase[];
+  nodes: CanvasNode[];
 }) {
   const { x, y, zoom } = useViewport();
   const searchKey = `${workflowCode || ""} ${workflowName || ""}`.toUpperCase();
@@ -275,12 +279,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
     searchKey.includes("TASK_MANAGEMENT") ||
     searchKey.includes("QUẢN LÝ CÔNG VIỆC");
 
-  const isBtctuKpiEvaluation =
-    searchKey.includes("DANH_GIA_KPI") ||
-    searchKey.includes("KPI_EVALUATION") ||
-    searchKey.includes("ĐÁNH GIÁ KPI");
-
-  if (!isBtctuTaskManagement && !isBtctuKpiEvaluation) {
+  if (!isBtctuTaskManagement && phases.length === 0) {
     return null;
   }
 
@@ -299,7 +298,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 1: BAN THƯỜNG VỤ TỈNH ỦY */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-purple-400/50 bg-purple-500/[0.04] dark:border-purple-600/40 dark:bg-purple-950/[0.12]"
-            style={{ left: 20, top: 20, width: 2780, height: 190 }}
+            style={{ left: 20, top: 20, width: 2850, height: 190 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-purple-800 dark:text-purple-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-purple-500/20 text-[11px]">🏛️</span>
@@ -313,7 +312,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 2: LÃNH ĐẠO BAN TỔ CHỨC TỈNH ỦY */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-rose-400/50 bg-rose-500/[0.04] dark:border-rose-600/40 dark:bg-rose-950/[0.12]"
-            style={{ left: 20, top: 230, width: 2780, height: 230 }}
+            style={{ left: 20, top: 230, width: 2850, height: 230 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-rose-800 dark:text-rose-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-rose-500/20 text-[11px]">🔴</span>
@@ -327,7 +326,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 3: LÃNH ĐẠO PHÒNG CHUYÊN MÔN */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-blue-400/50 bg-blue-500/[0.04] dark:border-blue-600/40 dark:bg-blue-950/[0.12]"
-            style={{ left: 20, top: 480, width: 2780, height: 210 }}
+            style={{ left: 20, top: 480, width: 2850, height: 210 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-blue-800 dark:text-blue-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[11px]">🔵</span>
@@ -341,7 +340,7 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
           {/* LÀN 4: CHUYÊN VIÊN NGHIỆP VỤ 22 VTVL */}
           <div
             className="absolute rounded-2xl border-2 border-dashed border-emerald-400/50 bg-emerald-500/[0.04] dark:border-emerald-600/40 dark:bg-emerald-950/[0.12]"
-            style={{ left: 20, top: 710, width: 2780, height: 200 }}
+            style={{ left: 20, top: 710, width: 2850, height: 200 }}
           >
             <div className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold tracking-wide text-emerald-800 dark:text-emerald-300">
               <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500/20 text-[11px]">🟢</span>
@@ -354,73 +353,26 @@ const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
         </>
       )}
 
-      {isBtctuKpiEvaluation && (
-        <>
-          {/* GIAI ĐOẠN 1: TỰ ĐÁNH GIÁ */}
+      {phases.map((phase, index) => {
+        const phaseNodes = nodes.filter((node) => node.data.phaseId === phase.id);
+        if (!phaseNodes.length) return null;
+        const left = Math.min(...phaseNodes.map((node) => node.position.x)) - 36;
+        const top = Math.min(...phaseNodes.map((node) => node.position.y)) - 54;
+        const right = Math.max(...phaseNodes.map((node) => node.position.x)) + 260;
+        const bottom = Math.max(...phaseNodes.map((node) => node.position.y)) + 150;
+        return (
           <div
-            className="absolute rounded-2xl border-2 border-dashed border-emerald-400/50 bg-emerald-500/[0.04] dark:border-emerald-600/40 dark:bg-emerald-950/[0.12]"
-            style={{ left: 20, top: 60, width: 880, height: 580 }}
+            key={phase.id}
+            className="absolute rounded-2xl border-2 border-dashed border-primary/35 bg-primary/[0.025]"
+            style={{ left, top, width: Math.max(320, right - left + 36), height: Math.max(190, bottom - top + 36) }}
           >
-            <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-emerald-800 dark:text-emerald-300">
-              <div className="flex items-center gap-2">
-                <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500/20 text-[11px]">📋</span>
-                <span>GIAI ĐOẠN 1: TỰ ĐÁNH GIÁ (Trước ngày 15 tháng cuối quý)</span>
-              </div>
-              <span className="text-[10px] font-normal text-muted-foreground ml-7">
-                Đăng ký Mẫu 01 đầu kỳ, tự chấm Mẫu 02 (S_chung tối đa 30đ + S_nhiệm vụ thang 70đ), kê khai Nổi trội Mẫu 04
-              </span>
+            <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-semibold text-primary">
+              <span>ĐỢT {index + 1}: {phase.name} <span className="font-normal text-muted-foreground">· {phaseNodes.length} bước</span></span>
+              {phase.description && <span className="text-[10px] font-normal text-muted-foreground">{phase.description}</span>}
             </div>
           </div>
-
-          {/* GIAI ĐOẠN 2: TẬP THỂ PHÒNG THẨM ĐỊNH */}
-          <div
-            className="absolute rounded-2xl border-2 border-dashed border-blue-400/50 bg-blue-500/[0.04] dark:border-blue-600/40 dark:bg-blue-950/[0.12]"
-            style={{ left: 915, top: 60, width: 330, height: 580 }}
-          >
-            <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-blue-800 dark:text-blue-300">
-              <div className="flex items-center gap-2">
-                <span className="flex size-5 items-center justify-center rounded-full bg-blue-500/20 text-[11px]">👥</span>
-                <span>GIAI ĐOẠN 2: TẬP THỂ PHÒNG (Ngày 15-20)</span>
-              </div>
-              <span className="text-[10px] font-normal text-muted-foreground ml-7">
-                Họp Chi bộ & Phòng chuyên môn, thẩm định từng cá nhân, tổng hợp Mẫu 03
-              </span>
-            </div>
-          </div>
-
-          {/* GIAI ĐOẠN 3: HỘI ĐỒNG BAN THẨM ĐỊNH & SIẾT TRẦN */}
-          <div
-            className="absolute rounded-2xl border-2 border-dashed border-amber-400/50 bg-amber-500/[0.04] dark:border-amber-600/40 dark:bg-amber-950/[0.12]"
-            style={{ left: 1260, top: 60, width: 1540, height: 580 }}
-          >
-            <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-amber-800 dark:text-amber-300">
-              <div className="flex items-center gap-2">
-                <span className="flex size-5 items-center justify-center rounded-full bg-amber-500/20 text-[11px]">⚖️</span>
-                <span>GIAI ĐOẠN 3: HỘI ĐỒNG BAN THẨM ĐỊNH & SIẾT TRẦN (Ngày 21-25)</span>
-              </div>
-              <span className="text-[10px] font-normal text-muted-foreground ml-7">
-                Đối soát 08 nguồn CSDL, kiểm tra kỷ luật hạ bậc, áp trần 20% Xuất sắc (Quy định 348-QĐ/BTCTW) & áp trần Người đứng đầu
-              </span>
-            </div>
-          </div>
-
-          {/* GIAI ĐOẠN 4: BAN HÀNH QUYẾT ĐỊNH */}
-          <div
-            className="absolute rounded-2xl border-2 border-dashed border-purple-400/50 bg-purple-500/[0.04] dark:border-purple-600/40 dark:bg-purple-950/[0.12]"
-            style={{ left: 2820, top: 60, width: 720, height: 580 }}
-          >
-            <div className="flex flex-col gap-0.5 px-4 py-2.5 text-xs font-bold tracking-wide text-purple-800 dark:text-purple-300">
-              <div className="flex items-center gap-2">
-                <span className="flex size-5 items-center justify-center rounded-full bg-purple-500/20 text-[11px]">📜</span>
-                <span>GIAI ĐOẠN 4: BAN HÀNH QUYẾT ĐỊNH (Trước ngày 28)</span>
-              </div>
-              <span className="text-[10px] font-normal text-muted-foreground ml-7">
-                Trưởng ban ký Quyết định phê duyệt (Mẫu 05), công khai cơ quan & báo cáo Ban Thường vụ Tỉnh ủy
-              </span>
-            </div>
-          </div>
-        </>
-      )}
+        );
+      })}
     </div>
   );
 });
@@ -493,11 +445,7 @@ function metadataPositions(metadata: unknown): Map<string, { x: number; y: numbe
     return id && position ? [[id, position] as const] : [];
   }));
 }
-function hasUsablePositionSet(positions: Map<string, { x: number; y: number }>, nodeCount: number) {
-  if (positions.size !== nodeCount) return false;
-  if (nodeCount <= 1) return true;
-  return new Set([...positions.values()].map(({ x, y }) => `${x}:${y}`)).size === nodeCount;
-}
+
 function layeredPositions(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edges"]): Map<string, { x: number; y: number }> {
   const outgoing = new Map(nodes.map((node) => [node.id, [] as Array<{ id: string; priority: number; index: number }>]));
   const incomingCount = new Map(nodes.map((node) => [node.id, 0]));
@@ -604,47 +552,7 @@ function autoLayoutPositions(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph
   for (const root of roots) placeSubtree(root.id, 0);
   return positions;
 }
-function positionsMatchFlow(nodes: WorkflowGraph["nodes"], edges: WorkflowGraph["edges"], positions: Map<string, { x: number; y: number }>) {
-  if (!hasUsablePositionSet(positions, nodes.length)) return false;
-  for (let left = 0; left < nodes.length; left += 1) {
-    const first = positions.get(nodes[left].id)!;
-    for (let right = left + 1; right < nodes.length; right += 1) {
-      const second = positions.get(nodes[right].id)!;
-      if (Math.abs(first.x - second.x) < 170 && Math.abs(first.y - second.y) < 90) return false;
-    }
-  }
 
-  const outgoing = new Map<string, Array<{ target: string; handle: string }>>();
-  let forwardEdges = 0;
-  let validEdges = 0;
-  for (const edge of edges) {
-    const source = edgeEndpoint(edge.source, edge.sourceNodeId);
-    const target = edgeEndpoint(edge.target, edge.targetNodeId);
-    const from = positions.get(source);
-    const to = positions.get(target);
-    if (!from || !to) continue;
-    validEdges += 1;
-    const handle = (edge.sourceHandle || "").toLowerCase();
-    if (to.x - from.x >= 120 || ((handle === "true" || handle === "false" || handle === "yes" || handle === "no") && Math.abs(to.y - from.y) >= 120)) forwardEdges += 1;
-    outgoing.set(source, [...(outgoing.get(source) ?? []), { target, handle }]);
-  }
-  if (validEdges > 0 && forwardEdges / validEdges < 0.65) return false;
-  for (const branches of outgoing.values()) {
-    if (branches.length < 2) continue;
-    const branchPositions = branches.flatMap((branch) => {
-      const position = positions.get(branch.target);
-      return position ? [{ ...position, handle: branch.handle }] : [];
-    });
-    if (branchPositions.length > 1) {
-      const yValues = branchPositions.map((position) => position.y);
-      if (Math.max(...yValues) - Math.min(...yValues) < 110) return false;
-      const trueBranch = branchPositions.find((position) => position.handle === "true" || position.handle === "yes");
-      const falseBranch = branchPositions.find((position) => position.handle === "false" || position.handle === "no");
-      if (trueBranch && falseBranch && trueBranch.y >= falseBranch.y) return false;
-    }
-  }
-  return true;
-}
 function nextNodeId(type: string, nodes: CanvasNode[]) {
   let sequence = nodes.length + 1;
   let id = `${type}-${sequence}`;
@@ -674,9 +582,6 @@ function graphNodes(workflow?: Workflow): CanvasNode[] {
       }
     }
     positions = combined.size === graph.nodes.length ? combined : autoLayoutPositions(graph.nodes, graph.edges ?? []);
-  }
-  if (!positionsMatchFlow(graph.nodes, graph.edges ?? [], positions)) {
-    positions = autoLayoutPositions(graph.nodes, graph.edges ?? []);
   }
   return graph.nodes.map((node, index) => {
     const assignment = node.assignments?.[0];
@@ -750,6 +655,8 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
   const [code, setCode] = useState(workflow?.code || "");
   const [description, setDescription] = useState(workflow?.description || "");
   const [ownerUnitCode, setOwnerUnitCode] = useState(workflow?.ownerUnitCode || "");
+  const [phases, setPhases] = useState<WorkflowPhase[]>(() => asGraph(workflow)?.phases ?? []);
+  const [newPhaseName, setNewPhaseName] = useState("");
   const organizationTree = useQuery({ queryKey: ["organizations", "tree"], queryFn: () => organizationApi.getTree() });
   const unitTreeData = organizationTree.data as unknown;
   const unitTree = Array.isArray(unitTreeData)
@@ -763,6 +670,7 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
   const [selectedEdge, setSelectedEdge] = useState<string | null>(null);
   const { screenToFlowPosition, fitView: fitWorkflowView } = useReactFlow();
   const readOnly = forceReadOnly;
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
   const currentNode = useMemo(() => nodes.find((node) => node.id === selectedNode), [nodes, selectedNode]);
   const currentEdge = useMemo(() => edges.find((edge) => edge.id === selectedEdge), [edges, selectedEdge]);
   const updateNode = (patch: Partial<WorkflowNodeData>) => setNodes((items) => items.map((node) => node.id === selectedNode ? { ...node, data: { ...node.data, ...patch } } : node));
@@ -776,6 +684,34 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
     setNodes((items) => items.map((node) => ({ ...node, position: positions.get(node.id) ?? node.position })));
     requestAnimationFrame(() => void fitWorkflowView({ padding: 0.18, duration: 350, minZoom: 0.3, maxZoom: 1.1 }));
     toast.success("Đã sắp xếp các bước theo luồng xử lý");
+  }
+  function addWorkflowPhase() {
+    const phaseName = newPhaseName.trim();
+    if (!phaseName) return;
+    const id = `phase-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    setPhases((items) => [...items, { id, name: phaseName, order: items.length + 1 }]);
+    setNewPhaseName("");
+    setSelectedPhaseId(id);
+  }
+  function updateWorkflowPhase(phaseId: string, patch: Partial<WorkflowPhase>) {
+    setPhases((items) => items.map((phase) => phase.id === phaseId ? { ...phase, ...patch } : phase));
+  }
+  function removeWorkflowPhase(phaseId: string) {
+    setPhases((items) => items.filter((phase) => phase.id !== phaseId).map((phase, index) => ({ ...phase, order: index + 1 })));
+    setNodes((items) => items.map((node) => node.data.phaseId === phaseId
+      ? { ...node, data: { ...node.data, phaseId: undefined } }
+      : node));
+    if (selectedPhaseId === phaseId) setSelectedPhaseId(null);
+  }
+  function focusWorkflowPhase(phaseId: string) {
+    const phaseNodes = nodes.filter((node) => node.data.phaseId === phaseId);
+    if (!phaseNodes.length) {
+      setSelectedPhaseId(phaseId);
+      toast.info("Chưa gán bước nào vào đợt này. Chọn đợt ở thuộc tính của từng bước.");
+      return;
+    }
+    setSelectedPhaseId(phaseId);
+    void fitWorkflowView({ nodes: phaseNodes, padding: 0.28, duration: 450, minZoom: 0.35, maxZoom: 1.1 });
   }
   function graphForSave(): WorkflowGraph {
     return {
@@ -801,6 +737,7 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
           ...(data.condition === undefined ? {} : { condition: data.condition }),
         };
       }),
+      phases: phases.map((phase, index) => ({ ...phase, order: index + 1 })),
     };
   }
   async function saveDraft() {
@@ -822,7 +759,20 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
   return <div className="flex min-h-[calc(100vh-9rem)] flex-col overflow-hidden rounded-xl border bg-background">
     <header className="flex flex-wrap items-center justify-between gap-3 border-b p-3"><div className="flex items-center gap-2"><Button variant="ghost" size="icon" onClick={() => router.push(WORKFLOW_ROUTES.list)} aria-label="Quay lại"><ArrowLeft /></Button><div><div className="flex items-center gap-2"><Input className="h-8 w-64 font-semibold" value={name} onChange={(event) => setName(event.target.value)} placeholder="Tên quy trình" disabled={readOnly} aria-label="Tên quy trình" />{workflow && <Badge variant={workflow.status === "PUBLISHED" ? "default" : "secondary"}>{workflow.status === "PUBLISHED" ? "Đã phát hành · lưu sẽ tạo nháp" : "Bản nháp"} · v{workflow.version ?? 1}</Badge>}</div><p className="ml-1 mt-1 text-xs text-muted-foreground">{code || "Mã sẽ được tạo từ tên quy trình"}</p></div></div><div className="flex items-center gap-2"><Button variant="outline" onClick={() => void saveDraft()} disabled={readOnly || save.isPending}><Save />{save.isPending ? "Đang lưu…" : "Lưu nháp"}</Button><Button onClick={() => void publishWorkflow()} disabled={readOnly || publish.isPending || !workflowId || !ownerUnitCode}><Send />{publish.isPending ? "Đang phát hành…" : "Phát hành"}</Button></div></header>
     <div className="grid min-h-0 flex-1 grid-cols-1 xl:grid-cols-[220px_minmax(0,1fr)_300px]">
-      <aside className="border-b p-4 xl:border-b-0 xl:border-r"><h2 className="mb-3 text-sm font-semibold">Thành phần</h2><div className="grid grid-cols-2 gap-2 xl:grid-cols-1">{NODE_OPTIONS.map(({ type, label, icon: Icon }) => <Button key={type} variant="outline" size="sm" className="justify-start cursor-grab active:cursor-grabbing" draggable={!readOnly} onDragStart={(event) => { event.dataTransfer.setData('application/reactflow', type); event.dataTransfer.setData('application/reactflow-label', label); event.dataTransfer.effectAllowed = 'move'; }} disabled={readOnly} onClick={() => addNode(type, label)}><Icon />{label}</Button>)}</div><p className="mt-5 text-xs leading-relaxed text-muted-foreground">Kéo thả (hoặc click) thành phần vào sơ đồ. Kéo từ chấm bên phải của bước sang chấm bên trái bước kế tiếp để nối luồng.</p><div className="mt-5 space-y-2"><Label>Đơn vị sở hữu quy trình</Label><OrganizationUnitSelector value={ownerUnitCode} onChange={(value) => setOwnerUnitCode(value)} unitTree={unitTree} disabled={readOnly} isLoading={organizationTree.isPending} error={organizationTree.isError} /><p className="text-[11px] leading-relaxed text-muted-foreground">Đơn vị sở hữu dùng để giới hạn quy trình và mẫu biểu đánh giá được gán.</p></div><div className="mt-5 space-y-2"><Label htmlFor="workflow-description">Mô tả</Label><Textarea id="workflow-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Mục đích và phạm vi áp dụng" disabled={readOnly} /></div></aside>
+      <aside className="space-y-5 overflow-y-auto border-b p-4 xl:border-b-0 xl:border-r">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold">Thành phần</h2>
+          <div className="grid grid-cols-2 gap-2 xl:grid-cols-1">{NODE_OPTIONS.map(({ type, label, icon: Icon }) => <Button key={type} variant="outline" size="sm" className="justify-start cursor-grab active:cursor-grabbing" draggable={!readOnly} onDragStart={(event) => { event.dataTransfer.setData('application/reactflow', type); event.dataTransfer.setData('application/reactflow-label', label); event.dataTransfer.effectAllowed = 'move'; }} disabled={readOnly} onClick={() => addNode(type, label)}><Icon />{label}</Button>)}</div>
+          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Kéo thả hoặc bấm để thêm bước. Nối từ handle nguồn sang bước kế tiếp.</p>
+        </section>
+        <section className="space-y-2 rounded-lg border p-3">
+          <div><h2 className="text-sm font-semibold">Các đợt xử lý</h2><p className="text-xs text-muted-foreground">Tạo đợt theo quy trình và gán từng bước ở phần thuộc tính node.</p></div>
+          {!readOnly && <div className="flex gap-2"><Input value={newPhaseName} onChange={(event) => setNewPhaseName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addWorkflowPhase(); } }} placeholder="Tên đợt mới" aria-label="Tên đợt mới" /><Button type="button" size="icon" onClick={addWorkflowPhase} disabled={!newPhaseName.trim()} aria-label="Thêm đợt"><Plus className="size-4" /></Button></div>}
+          {phases.length === 0 ? <p className="rounded-md bg-muted/60 p-2 text-xs text-muted-foreground">Chưa có đợt nào. Thêm đợt để nhóm các bước trên canvas.</p> : <div className="space-y-2">{phases.map((phase, index) => <div key={phase.id} className="space-y-1.5 rounded-md bg-muted/40 p-2"><div className="flex items-center gap-1.5"><Badge variant="outline">{index + 1}</Badge><Input value={phase.name} onChange={(event) => updateWorkflowPhase(phase.id, { name: event.target.value })} disabled={readOnly} aria-label={`Tên đợt ${index + 1}`} />{!readOnly && <Button type="button" variant="ghost" size="icon" onClick={() => removeWorkflowPhase(phase.id)} aria-label={`Xóa đợt ${phase.name}`}><Trash2 className="size-4 text-destructive" /></Button>}</div><Input value={phase.description || ""} onChange={(event) => updateWorkflowPhase(phase.id, { description: event.target.value })} disabled={readOnly} placeholder="Mô tả (không bắt buộc)" aria-label={`Mô tả đợt ${index + 1}`} /><p className="text-[11px] text-muted-foreground">{nodes.filter((node) => node.data.phaseId === phase.id).length} bước được gán</p></div>)}</div>}
+        </section>
+        <section className="space-y-2"><Label>Đơn vị sở hữu quy trình</Label><OrganizationUnitSelector value={ownerUnitCode} onChange={(value) => setOwnerUnitCode(value)} unitTree={unitTree} disabled={readOnly} isLoading={organizationTree.isPending} error={organizationTree.isError} /><p className="text-[11px] leading-relaxed text-muted-foreground">Đơn vị sở hữu dùng để giới hạn quy trình và mẫu biểu đánh giá được gán.</p></section>
+        <section className="space-y-2"><Label htmlFor="workflow-description">Mô tả quy trình</Label><Textarea id="workflow-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Mục đích và phạm vi áp dụng" disabled={readOnly} /></section>
+      </aside>
       <div className="relative h-[60vh] min-h-[440px] xl:h-auto" onDrop={readOnly ? undefined : (event) => { event.preventDefault(); const type = event.dataTransfer.getData('application/reactflow'); const label = event.dataTransfer.getData('application/reactflow-label'); if (!type) return; const position = screenToFlowPosition({ x: event.clientX, y: event.clientY }); const newNode: CanvasNode = { id: nextNodeId(type, nodes), type, position, data: { label } }; setNodes((nds) => nds.concat(newNode)); setSelectedNode(newNode.id); setSelectedEdge(null); }} onDragOver={readOnly ? undefined : (event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; }}>
         <div className="absolute right-3 top-3 z-10 flex items-center gap-2 rounded-lg border bg-background/95 p-1.5 shadow-sm backdrop-blur">
           <span className="hidden px-2 text-xs text-muted-foreground md:inline">Bố cục sơ đồ</span>
@@ -846,28 +796,32 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
           fitView
           fitViewOptions={{ padding: 0.15, minZoom: 0.45, maxZoom: 1.15 }}
         >
-          <WorkflowCanvasOverlay workflowCode={workflow?.code || code} workflowName={name || workflow?.name} />
+          <WorkflowCanvasOverlay workflowCode={workflow?.code || code} workflowName={name || workflow?.name} phases={phases} nodes={nodes} />
           {(() => {
-            const searchKey = `${workflow?.code || code || ""} ${name || workflow?.name || ""}`.toUpperCase();
-            const isKpi = searchKey.includes("DANH_GIA_KPI") || searchKey.includes("KPI_EVALUATION") || searchKey.includes("ĐÁNH GIÁ KPI");
-            if (isKpi) {
+            if (phases.length > 0) {
               return (
-                <Panel position="top-left" className="m-2 flex flex-wrap items-center gap-1.5 rounded-lg border bg-card/90 p-2 shadow-sm backdrop-blur-xs text-[11px]">
-                  <span className="font-semibold text-foreground flex items-center gap-1 mr-1">
-                    <Layers className="size-3.5 text-primary" /> 4 Giai đoạn Đánh giá KPI & Áp trần:
+                <Panel position="top-left" className="m-2 flex max-w-[min(920px,calc(100vw-32px))] flex-wrap items-center gap-1.5 rounded-lg border bg-card/95 p-2 shadow-sm backdrop-blur-xs text-[11px]">
+                  <span className="flex items-center gap-1 font-semibold text-foreground">
+                    <Layers className="size-3.5 text-primary" /> Các đợt · bấm để xem trên canvas:
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-xs border border-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 font-medium text-emerald-700 dark:text-emerald-300">
-                    🟢 GĐ 1: Tự đánh giá (Mẫu 01, 02, 04)
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-xs border border-blue-300 bg-blue-500/10 px-1.5 py-0.5 font-medium text-blue-700 dark:text-blue-300">
-                    🔵 GĐ 2: Tập thể phòng (Mẫu 03)
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-xs border border-amber-300 bg-amber-500/10 px-1.5 py-0.5 font-medium text-amber-700 dark:text-amber-300">
-                    ⚖️ GĐ 3: Hội đồng Ban & Trần 20%
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-xs border border-purple-300 bg-purple-500/10 px-1.5 py-0.5 font-medium text-purple-700 dark:text-purple-300">
-                    🟣 GĐ 4: Ban hành QĐ (Mẫu 05)
-                  </span>
+                  {phases.map((phase, index) => {
+                    const count = nodes.filter((node) => node.data.phaseId === phase.id).length;
+                    const active = selectedPhaseId === phase.id;
+                    return (
+                      <Button
+                        key={phase.id}
+                        type="button"
+                        size="sm"
+                        variant={active ? "default" : "outline"}
+                        className="h-auto min-h-8 gap-2 px-2 py-1 text-left"
+                        title={phase.description || phase.name}
+                        onClick={() => focusWorkflowPhase(phase.id)}
+                      >
+                        <span>{index + 1}. {phase.name}</span>
+                        <Badge variant={active ? "secondary" : "outline"} className="px-1.5 py-0 text-[10px]">{count} bước</Badge>
+                      </Button>
+                    );
+                  })}
                 </Panel>
               );
             }
@@ -903,7 +857,7 @@ function WorkflowEditor({ id, workflow, forceReadOnly = false }: { id?: string; 
         </ReactFlow>
       </div>
       <aside className="border-t p-4 xl:border-l xl:border-t-0"><h2 className="mb-1 text-sm font-semibold">Thuộc tính</h2><p className="mb-4 text-xs text-muted-foreground">{currentNode ? "Cấu hình bước đang chọn" : currentEdge ? "Cấu hình nhánh đang chọn" : "Chọn một bước hoặc nhánh trên sơ đồ"}</p>
-        {currentNode && <div className="space-y-4"><div className="space-y-2"><Label>Tên bước</Label><Input value={String(currentNode.data.label || "")} onChange={(event) => updateNode({ label: event.target.value })} disabled={readOnly} /></div>{currentNode.type === "user_task" && <><div className="space-y-2"><Label>Chiến lược phân công</Label><Select value={String(currentNode.data.assignmentStrategy || "BY_ROLE")} onValueChange={(value) => updateNode({ assignmentStrategy: value })} disabled={readOnly}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="BY_ROLE">Theo chức danh</SelectItem><SelectItem value="CREATOR">Người tạo hồ sơ</SelectItem><SelectItem value="PREVIOUS_ACTOR">Người xử lý bước trước</SelectItem></SelectContent></Select></div>{(currentNode.data.assignmentStrategy === "BY_ROLE" || !currentNode.data.assignmentStrategy) && <div className="space-y-2"><Label>Chức danh xử lý</Label><Select value={String(currentNode.data.targetRole || "")} onValueChange={(value) => updateNode({ targetRole: value })} disabled={readOnly || roles.isPending}><SelectTrigger className="w-full"><SelectValue placeholder="Chọn chức danh từ API" /></SelectTrigger><SelectContent>{(roles.data ?? []).map((role) => <SelectItem key={role.code} value={role.code}>{role.name}</SelectItem>)}</SelectContent></Select>{roles.isError && <p className="text-xs text-destructive">Không tải được danh sách chức danh từ backend.</p>}</div>}</>}{currentNode.type === "service_task" && <div className="space-y-2"><Label>Mã Action tự động</Label><Input value={String(currentNode.data.actionCode || "")} onChange={(event) => updateNode({ actionCode: event.target.value })} disabled={readOnly} placeholder="Ví dụ: SEND_EMAIL" /><p className="text-[10px] text-muted-foreground">Mã hành động mà hệ thống (hoặc Worker) sẽ thực thi.</p></div>}{!readOnly && <Button variant="destructive" className="w-full" onClick={() => { setNodes((nds) => nds.filter((n) => n.id !== currentNode.id)); setEdges((eds) => eds.filter((e) => e.source !== currentNode.id && e.target !== currentNode.id)); setSelectedNode(null); }}><Trash2 className="mr-2 size-4" /> Xóa bước này</Button>}</div>}
+        {currentNode && <div className="space-y-4"><div className="space-y-2"><Label>Tên bước</Label><Input value={String(currentNode.data.label || "")} onChange={(event) => updateNode({ label: event.target.value })} disabled={readOnly} /></div><div className="space-y-2"><Label>Đợt xử lý</Label><Select value={String(currentNode.data.phaseId || "__unassigned__")} onValueChange={(value) => updateNode({ phaseId: value === "__unassigned__" ? undefined : value })} disabled={readOnly}><SelectTrigger className="w-full"><SelectValue placeholder="Chọn đợt" /></SelectTrigger><SelectContent><SelectItem value="__unassigned__">Chưa gán đợt</SelectItem>{phases.map((phase) => <SelectItem key={phase.id} value={phase.id}>{phase.name}</SelectItem>)}</SelectContent></Select>{phases.length === 0 && <p className="text-xs text-muted-foreground">Tạo đợt ở cột bên trái để nhóm bước.</p>}</div>{currentNode.type === "user_task" && <><div className="space-y-2"><Label>Chiến lược phân công</Label><Select value={String(currentNode.data.assignmentStrategy || "BY_ROLE")} onValueChange={(value) => updateNode({ assignmentStrategy: value })} disabled={readOnly}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="BY_ROLE">Theo chức danh</SelectItem><SelectItem value="CREATOR">Người tạo hồ sơ</SelectItem><SelectItem value="PREVIOUS_ACTOR">Người xử lý bước trước</SelectItem></SelectContent></Select></div>{(currentNode.data.assignmentStrategy === "BY_ROLE" || !currentNode.data.assignmentStrategy) && <div className="space-y-2"><Label>Chức danh xử lý</Label><Select value={String(currentNode.data.targetRole || "")} onValueChange={(value) => updateNode({ targetRole: value })} disabled={readOnly || roles.isPending}><SelectTrigger className="w-full"><SelectValue placeholder="Chọn chức danh từ API" /></SelectTrigger><SelectContent>{(roles.data ?? []).map((role) => <SelectItem key={role.code} value={role.code}>{role.name}</SelectItem>)}</SelectContent></Select>{roles.isError && <p className="text-xs text-destructive">Không tải được danh sách chức danh từ backend.</p>}</div>}</>}{currentNode.type === "service_task" && <div className="space-y-2"><Label>Mã Action tự động</Label><Input value={String(currentNode.data.actionCode || "")} onChange={(event) => updateNode({ actionCode: event.target.value })} disabled={readOnly} placeholder="Ví dụ: SEND_EMAIL" /><p className="text-[10px] text-muted-foreground">Mã hành động mà hệ thống (hoặc Worker) sẽ thực thi.</p></div>}{!readOnly && <Button variant="destructive" className="w-full" onClick={() => { setNodes((nds) => nds.filter((n) => n.id !== currentNode.id)); setEdges((eds) => eds.filter((e) => e.source !== currentNode.id && e.target !== currentNode.id)); setSelectedNode(null); }}><Trash2 className="mr-2 size-4" /> Xóa bước này</Button>}</div>}
         {currentEdge && <div className="space-y-3"><div className="space-y-2"><Label>Nhãn nhánh</Label><Input value={currentEdge.data?.workflowGeneratedLabel === currentEdge.label ? "" : typeof currentEdge.label === "string" ? currentEdge.label : ""} onChange={(event) => updateEdge({ label: event.target.value })} disabled={readOnly} placeholder="Ví dụ: Hồ sơ hợp lệ" /></div><div className="space-y-2"><Label>Biểu thức điều kiện (Condition)</Label><Input value={String(currentEdge.data?.condition || "")} onChange={(event) => updateEdge({ data: { ...(currentEdge.data || {}), condition: event.target.value } })} disabled={readOnly} placeholder="Ví dụ: status == 'APPROVED'" /></div><p className="flex gap-2 rounded-md bg-muted p-3 text-xs leading-relaxed text-muted-foreground"><CircleHelp className="size-4 shrink-0" />Điều kiện nghiệp vụ và biến số thực tế cần tuân theo data schema của loại quy trình (Process Type).</p>{!readOnly && <Button variant="destructive" className="w-full" onClick={() => { setEdges((eds) => eds.filter((e) => e.id !== currentEdge.id)); setSelectedEdge(null); }}><Trash2 className="mr-2 size-4" /> Xóa nhánh này</Button>}</div>}
         {!currentEdge && !currentNode && <div className="rounded-lg border border-dashed p-4 text-xs text-muted-foreground"><WorkflowIcon className="mb-2 size-5" />Chọn node để chỉnh tên và giao việc. Backend kiểm tra tính hợp lệ khi phát hành.</div>}
       </aside>

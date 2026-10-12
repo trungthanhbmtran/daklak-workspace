@@ -347,6 +347,14 @@ export const btctuTaskManagementGraph = {
 // ============================================================================
 
 export const btctuKpiEvaluationGraph = {
+  // Default workflow configuration. The editor reads these values and lets
+  // administrators add, rename, remove, and assign phases without code changes.
+  phases: [
+    { id: 'evaluation-self', name: 'Tự đánh giá cá nhân', description: 'Đăng ký đầu kỳ, tự chấm điểm và kê khai nhiệm vụ nổi trội', order: 1 },
+    { id: 'evaluation-unit', name: 'Nhận xét tập thể phòng', description: 'Họp phòng, nhận xét và tổng hợp kết quả theo đơn vị', order: 2 },
+    { id: 'evaluation-council', name: 'Thẩm định và xếp loại', description: 'Đối soát, kiểm tra điều kiện, áp trần và hội đồng xét duyệt', order: 3 },
+    { id: 'evaluation-publish', name: 'Ban hành kết quả', description: 'Ký quyết định, công khai và lưu trữ hồ sơ', order: 4 },
+  ],
   viewport: { x: 0, y: 0, zoom: 0.8 },
   nodes: [
     {
@@ -356,6 +364,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Mở kỳ đánh giá KPI quý',
         description: 'Kích hoạt kỳ đánh giá định kỳ hằng quý tại Ban Tổ chức Tỉnh ủy',
+        phaseId: 'evaluation-self',
       },
     },
     {
@@ -365,6 +374,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Đăng ký danh mục đầu kỳ (MẪU 01)',
         description: 'Công chức đăng ký khung danh mục sản phẩm, nhiệm vụ trọng tâm đầu kỳ theo Mẫu 01',
+        phaseId: 'evaluation-self',
         assignments: [
           {
             unitScope: 'SELF',
@@ -386,6 +396,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Cá nhân tự chấm điểm KPI (MẪU 02)',
         description: 'Tự chấm điểm tiêu chí chung S_chung (tối đa 30đ) + Điểm nhiệm vụ S_nhiemvu (quy đổi từ KPI_i sang thang 70đ) theo Mẫu 02',
+        phaseId: 'evaluation-self',
         assignments: [
           {
             unitScope: 'SELF',
@@ -408,6 +419,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Kê khai nhiệm vụ nổi trội (MẪU 04)',
         description: 'Lập Bảng kê khai nhiệm vụ nổi trội, vượt mức (Mẫu 04) - Điều kiện bắt buộc để xét danh hiệu Hoàn thành Xuất sắc',
+        phaseId: 'evaluation-self',
         assignments: [
           {
             unitScope: 'SELF',
@@ -430,6 +442,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Họp phòng & Thẩm định tập thể (MẪU 03)',
         description: 'Tập thể phòng & Chi bộ họp nhận xét; Trưởng phòng thẩm định điểm từng cá nhân và lập Bảng tổng hợp tập thể phòng theo Mẫu 03',
+        phaseId: 'evaluation-unit',
         assignments: [
           {
             unitScope: 'SAME_UNIT',
@@ -451,6 +464,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Đối soát 08 nguồn CSDL & Rà soát kỷ luật',
         description: 'Tự động đối soát dữ liệu với CSDL Đảng viên, LGSP, Cán bộ 2C, BVCTNB Mức 3, Sổ văn bản mật, An toàn thông tin Cấp 3 để phát hiện vi phạm bắt buộc hạ bậc',
+        phaseId: 'evaluation-council',
         integrationCode: 'LGSP_TINH',
         endpoint: '/btctu/audit/discipline-check',
         method: 'POST',
@@ -463,6 +477,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Có vi phạm kỷ luật / Lọt lộ bí mật?',
         description: 'Vi phạm kỷ luật hoặc chỉ tiêu < 70% -> Hạ bậc bắt buộc; Không vi phạm -> Áp trần chất lượng',
+        phaseId: 'evaluation-council',
       },
     },
     {
@@ -472,6 +487,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Hạ bậc bắt buộc: Không hoàn thành nhiệm vụ',
         description: 'Ấn định mức xếp loại Không hoàn thành nhiệm vụ theo quy định đối với cá nhân có sai phạm',
+        phaseId: 'evaluation-council',
         assignments: [
           {
             unitScope: 'PARENT_UNIT',
@@ -492,6 +508,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Thuật toán Áp trần 20% & Áp trần Người đứng đầu',
         description: 'Áp trần 20% Xuất sắc per Quy định 348-QĐ/BTCTW: Số Xuất sắc <= INT(20% * Tổng số Tốt trở lên). Áp trần Người đứng đầu: Rank Trưởng phòng <= Rank Tập thể phòng',
+        phaseId: 'evaluation-council',
         integrationCode: 'HRM_SERVICE',
         endpoint: '/api/v1/hrm/kpi/apply-quotas-and-caps',
         method: 'POST',
@@ -504,6 +521,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Hội đồng Thẩm định Ban xét duyệt kết quả',
         description: 'Hội đồng Thẩm định Ban Tổ chức Tỉnh ủy họp từ ngày 21 đến 25 để xem xét toàn diện kết quả chấm điểm và áp trần khống chế',
+        phaseId: 'evaluation-council',
         assignments: [
           {
             unitScope: 'PARENT_UNIT',
@@ -524,6 +542,7 @@ export const btctuKpiEvaluationGraph = {
       data: {
         label: 'Hội đồng Thông qua?',
         description: 'Đồng ý -> Dự thảo Quyết định; Yêu cầu điều chỉnh -> Họp phòng rà soát lại',
+        phaseId: 'evaluation-council',
       },
     },
     {
@@ -532,6 +551,7 @@ export const btctuKpiEvaluationGraph = {
       position: { x: 2880, y: 240 },
       data: {
         label: 'Trưởng ban ký Quyết định phê duyệt (MẪU 05)',
+        phaseId: 'evaluation-publish',
         description: 'Dự thảo và ban hành Quyết định phê duyệt kết quả xếp loại chất lượng toàn cơ quan Ban Tổ chức Tỉnh ủy (Mẫu 05) trước ngày 28',
         assignments: [
           {
@@ -554,6 +574,7 @@ export const btctuKpiEvaluationGraph = {
       position: { x: 3240, y: 240 },
       data: {
         label: 'Công khai kết quả & Lưu trữ hồ sơ xếp loại',
+        phaseId: 'evaluation-publish',
         description: 'Công bố công khai kết quả xếp loại toàn cơ quan và báo cáo Ban Thường vụ Tỉnh ủy',
         targetStatus: 'PUBLISHED',
       },

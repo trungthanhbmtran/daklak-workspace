@@ -4,6 +4,7 @@ import apiClient from "@/lib/axiosInstance";
 export interface WorkflowPosition { x: number; y: number }
 export interface WorkflowNodeData {
   label?: string;
+  phaseId?: string;
   assignmentStrategy?: string;
   targetRole?: string;
   employeeCode?: string;
@@ -35,9 +36,16 @@ export interface WorkflowEdge {
   data?: Record<string, unknown>;
   [key: string]: unknown;
 }
+export interface WorkflowPhase {
+  id: string;
+  name: string;
+  description?: string;
+  order: number;
+}
 export interface WorkflowGraph {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
+  phases?: WorkflowPhase[];
   _uiMetadata?: Record<string, unknown>;
   viewport?: { x: number; y: number; zoom: number };
 }

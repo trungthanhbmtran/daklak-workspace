@@ -815,41 +815,44 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async getKpiSystemVariables() {
+  async getKpiSystemVariables(req: any) {
     return firstValueFrom(
-      this.taskService.GetKpiSystemVariables({})
+      this.taskService.GetKpiSystemVariables({}, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async getGlobalKpiSettings() {
+  async getGlobalKpiSettings(req: any) {
     return firstValueFrom(
-      this.taskService.GetGlobalKpiSettings({})
+      this.taskService.GetGlobalKpiSettings({}, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async saveGlobalKpiSettings(body: any) {
+  async saveGlobalKpiSettings(req: any, body: any) {
     return firstValueFrom(
-      this.taskService.SaveGlobalKpiSettings(body)
+      this.taskService.SaveGlobalKpiSettings(body, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async previewGlobalKpiSettings(body: any) {
+  async previewGlobalKpiSettings(req: any, body: any) {
     return firstValueFrom(
-      this.taskService.PreviewGlobalKpiSettings({
-        settingsJson: JSON.stringify(body.settings || {}),
-        quota: Number(body.variables?.Q ?? 10),
-        completed: Number(body.variables?.C ?? 8),
-        weight: Number(body.variables?.W ?? 1),
-        delayDays: Number(body.variables?.D ?? 2),
-        qualityScore: Number(body.variables?.S ?? 80),
-        domainCode: String(body.domainCode || 'GENERIC'),
-      }),
+      this.taskService.PreviewGlobalKpiSettings(
+        {
+          settingsJson: JSON.stringify(body.settings || {}),
+          quota: Number(body.variables?.Q ?? 10),
+          completed: Number(body.variables?.C ?? 8),
+          weight: Number(body.variables?.W ?? 1),
+          delayDays: Number(body.variables?.D ?? 2),
+          qualityScore: Number(body.variables?.S ?? 80),
+          domainCode: String(body.domainCode || 'GENERIC'),
+        },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async getGlobalKpiSettingVersions() {
+  async getGlobalKpiSettingVersions(req: any) {
     return firstValueFrom(
-      this.taskService.ListGlobalKpiSettingVersions({}),
+      this.taskService.ListGlobalKpiSettingVersions({}, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
   }
 }
