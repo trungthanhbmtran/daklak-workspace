@@ -60,13 +60,16 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
   async listWorkflows(@Payload() data: any) {
-    const { items, total } = await this.definitionService.listProcesses(data || {});
+    const { items, total } = await this.definitionService.listProcesses({
+      ...(data || {}),
+      includeGraph: false,
+    });
     const take = Math.min(100, Math.max(1, Number(data?.take) || 20));
     const skip = Math.max(0, Number(data?.skip) || 0);
     const totalPages = Math.max(1, Math.ceil(total / take));
     const page = Math.floor(skip / take) + 1;
     return {
-      data: items.map((p) => this.mapToWorkflowResponse(p, p.versions[0])),
+      data: items.map((p) => this.mapToWorkflowResponse(p, p.versions[0], false)),
       meta: {
         total, page, pageSize: take, totalPages,
         hasNext: page < totalPages,
@@ -334,16 +337,19 @@ export class GrpcWorkflowController {
     return data.definition || {};
   }
 
-  private mapToWorkflowResponse(def: any, version: any) {
+  private mapToWorkflowResponse(def: any, version: any, includeGraph = true) {
     if (!def) return {};
     
-    // Prisma mariadb adapter might return Json fields as strings instead of objects.
-    let graphObj = version?.graph;
-    if (typeof graphObj === 'string') {
-      try {
-        graphObj = JSON.parse(graphObj);
-      } catch (e) {
-        graphObj = {};
+    let graphObj: any = null;
+    if (includeGraph) {
+      // Prisma mariadb adapter might return Json fields as strings instead of objects.
+      graphObj = version?.graph;
+      if (typeof graphObj === 'string') {
+        try {
+          graphObj = JSON.parse(graphObj);
+        } catch (e) {
+          graphObj = {};
+        }
       }
     }
 
@@ -354,9 +360,9 @@ export class GrpcWorkflowController {
       description: def.description,
       version: version?.version || 1,
       status: version?.status || 'DRAFT',
-      bpmnLogic: graphObj ? JSON.stringify({ nodes: graphObj.nodes || [], edges: graphObj.edges || [] }) : '{}',
-      uiMetadata: graphObj?._uiMetadata ? JSON.stringify(graphObj._uiMetadata) : '{}',
-      definitionJson: graphObj ? JSON.stringify(graphObj) : '{}',
+      bpmnLogic: includeGraph && graphObj ? JSON.stringify({ nodes: graphObj.nodes || [], edges: graphObj.edges || [] }) : '{}',
+      uiMetadata: includeGraph && graphObj?._uiMetadata ? JSON.stringify(graphObj._uiMetadata) : '{}',
+      definitionJson: includeGraph && graphObj ? JSON.stringify(graphObj) : '{}',
       trigger: def.code,
       createdAt: def.createdAt?.toISOString(),
       updatedAt: def.updatedAt?.toISOString(),

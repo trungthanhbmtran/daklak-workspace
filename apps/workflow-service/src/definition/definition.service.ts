@@ -22,10 +22,30 @@ export interface UpdateDefinitionDto {
 
 @Injectable()
 export class DefinitionService {
+  private readonly definitionCache = new Map<string, { data: any; expiry: number }>();
+
   constructor(
     private prisma: PrismaService,
     private readonly validator: DefinitionValidatorService,
   ) {}
+
+  private getCacheKey(identifier: string, organizationId?: string): string {
+    return `${identifier}:${organizationId || "ALL"}`;
+  }
+
+  private purgeCache(id?: string, code?: string): void {
+    if (id) {
+      for (const key of this.definitionCache.keys()) {
+        if (key.startsWith(`${id}:`)) this.definitionCache.delete(key);
+      }
+    }
+    if (code) {
+      for (const key of this.definitionCache.keys()) {
+        if (key.startsWith(`${code}:`)) this.definitionCache.delete(key);
+      }
+    }
+  }
+
 
   async createProcess(dto: CreateDefinitionDto) {
     return this.prisma.$transaction(async (tx) => {
@@ -114,6 +134,7 @@ export class DefinitionService {
         data: { graph: dto.graph },
       });
 
+      this.purgeCache(id, updatedDef.code);
       return { def: updatedDef, version: updatedVersion };
     });
   }
@@ -188,6 +209,7 @@ export class DefinitionService {
         },
       });
 
+      this.purgeCache(def.id, def.code);
       return { def, version: updated };
     });
   }
@@ -234,11 +256,18 @@ export class DefinitionService {
     });
   }
 
-  async listProcesses(params: { skip?: number; take?: number; search?: string; organizationId?: string }) {
+  async listProcesses(params: {
+    skip?: number;
+    take?: number;
+    search?: string;
+    organizationId?: string;
+    includeGraph?: boolean;
+  }) {
     const skip = Math.max(0, Number(params.skip) || 0);
     const take = Math.min(100, Math.max(1, Number(params.take) || 20));
     const search = params.search?.trim().slice(0, 100);
-    
+    const includeGraph = params.includeGraph ?? false;
+
     const conditions: any[] = [];
     if (search) {
       conditions.push({
@@ -262,14 +291,22 @@ export class DefinitionService {
           versions: {
             orderBy: { version: "desc" },
             take: 1,
-            select: {
-              version: true,
-              status: true,
-              createdAt: true,
-              publishedAt: true,
-              graph: true,
-              publishedBy: true,
-            },
+            select: includeGraph
+              ? {
+                  version: true,
+                  status: true,
+                  createdAt: true,
+                  publishedAt: true,
+                  graph: true,
+                  publishedBy: true,
+                }
+              : {
+                  version: true,
+                  status: true,
+                  createdAt: true,
+                  publishedAt: true,
+                  publishedBy: true,
+                },
           },
         },
       }),
@@ -280,6 +317,12 @@ export class DefinitionService {
   }
 
   async getDefinition(code: string, organizationId?: string) {
+    const cacheKey = this.getCacheKey(code, organizationId);
+    const cached = this.definitionCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiry) {
+      return cached.data;
+    }
+
     const whereClause: any = { code };
     if (organizationId && organizationId !== "DEFAULT") {
       whereClause.OR = [{ organizationId }, { organizationId: null }];
@@ -296,10 +339,25 @@ export class DefinitionService {
     });
 
     if (!def) throw new NotFoundException(`Process definition ${code} not found`);
+
+    // Chỉ cache nếu version mới nhất là PUBLISHED (bất biến)
+    if (def.versions[0]?.status === "PUBLISHED") {
+      this.definitionCache.set(cacheKey, {
+        data: def,
+        expiry: Date.now() + 60_000, // 60 giây TTL
+      });
+    }
+
     return def;
   }
 
   async getDefinitionById(id: string, organizationId?: string) {
+    const cacheKey = this.getCacheKey(id, organizationId);
+    const cached = this.definitionCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiry) {
+      return cached.data;
+    }
+
     const whereClause: any = { id };
     if (organizationId && organizationId !== "DEFAULT") {
       whereClause.OR = [{ organizationId }, { organizationId: null }];
@@ -316,6 +374,15 @@ export class DefinitionService {
     });
 
     if (!def) throw new NotFoundException(`Process definition id ${id} not found`);
+
+    // Chỉ cache nếu version mới nhất là PUBLISHED (bất biến)
+    if (def.versions[0]?.status === "PUBLISHED") {
+      this.definitionCache.set(cacheKey, {
+        data: def,
+        expiry: Date.now() + 60_000, // 60 giây TTL
+      });
+    }
+
     return def;
   }
 
@@ -334,6 +401,7 @@ export class DefinitionService {
       throw new BadRequestException("Không thể xóa quy trình đang có gắn kết nghiệp vụ (Binding) hoạt động");
     }
 
+    this.purgeCache(id, def.code);
     return this.prisma.processDefinition.delete({ where: { id } });
   }
 

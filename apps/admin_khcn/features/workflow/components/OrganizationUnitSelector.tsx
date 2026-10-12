@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import {
   Building2,
   Check,
@@ -37,6 +37,7 @@ export interface FlatUnitItem {
   level: number;
   path: string[];
   pathString: string;
+  searchIndex: string;
   rawNode: OrganizationUnitNode;
 }
 
@@ -58,6 +59,8 @@ export function flattenUnitHierarchy(
   for (const node of nodes) {
     const currentPath = [...parentPath, node.name];
     if (node.code) {
+      const pathStr = parentPath.join(" › ");
+      const searchIndex = `${removeVietnameseTones(node.name)} ${node.code.toLowerCase()} ${removeVietnameseTones(node.shortName || "")} ${removeVietnameseTones(pathStr)}`;
       result.push({
         id: node.id,
         code: node.code,
@@ -66,7 +69,8 @@ export function flattenUnitHierarchy(
         categoryCode: node.categoryCode,
         level,
         path: parentPath,
-        pathString: parentPath.join(" › "),
+        pathString: pathStr,
+        searchIndex,
         rawNode: node,
       });
     }
@@ -115,6 +119,7 @@ export function OrganizationUnitSelector({
 }: OrganizationUnitSelectorProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"search" | "tree">("search");
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
@@ -131,9 +136,9 @@ export function OrganizationUnitSelector({
 
   const selectedUnit = value ? unitMap.get(value) : undefined;
 
-  // Lọc danh sách theo tìm kiếm và danh mục
+  // Lọc danh sách theo tìm kiếm và danh mục với index đã tính sẵn O(1) và deferred input
   const filteredUnits = useMemo(() => {
-    const rawQ = searchQuery.trim();
+    const rawQ = deferredSearchQuery.trim();
     const cleanQ = removeVietnameseTones(rawQ);
 
     return flatUnits.filter((unit) => {
@@ -142,22 +147,11 @@ export function OrganizationUnitSelector({
       if (selectedCategory === "CHINH_QUYEN" && unit.categoryCode !== "CHINH_QUYEN") return false;
       if (selectedCategory === "SU_NGHIEP" && !["SU_NGHIEP", "PHONG_THUOC_SN"].includes(unit.categoryCode || "")) return false;
 
-      // Tìm kiếm từ khóa
+      // Tìm kiếm từ khóa siêu tốc qua searchIndex
       if (!cleanQ) return true;
-
-      const cleanName = removeVietnameseTones(unit.name);
-      const cleanCode = unit.code.toLowerCase();
-      const cleanShortName = removeVietnameseTones(unit.shortName || "");
-      const cleanPath = removeVietnameseTones(unit.pathString);
-
-      return (
-        cleanName.includes(cleanQ) ||
-        cleanCode.includes(cleanQ) ||
-        cleanShortName.includes(cleanQ) ||
-        cleanPath.includes(cleanQ)
-      );
+      return unit.searchIndex.includes(cleanQ);
     });
-  }, [flatUnits, searchQuery, selectedCategory]);
+  }, [flatUnits, deferredSearchQuery, selectedCategory]);
 
   const toggleNode = (code: string) => {
     setExpandedNodes((prev) => ({ ...prev, [code]: !prev[code] }));

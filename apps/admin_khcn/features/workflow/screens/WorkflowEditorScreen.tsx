@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Background, BackgroundVariant, Controls, Handle, MarkerType, MiniMap, Panel, Position, ReactFlow, ReactFlowProvider, addEdge, useReactFlow, useViewport, type Connection, type Edge, type Node, type NodeProps, useEdgesState, useNodesState } from "@xyflow/react";
@@ -258,7 +258,13 @@ function CanvasNodeCard({ id, data, type, selected }: NodeProps<CanvasNode>) {
   );
 }
 
-function WorkflowCanvasOverlay({ workflowCode, workflowName }: { workflowCode?: string; workflowName?: string }) {
+const WorkflowCanvasOverlay = memo(function WorkflowCanvasOverlay({
+  workflowCode,
+  workflowName,
+}: {
+  workflowCode?: string;
+  workflowName?: string;
+}) {
   const { x, y, zoom } = useViewport();
   const searchKey = `${workflowCode || ""} ${workflowName || ""}`.toUpperCase();
 
@@ -280,8 +286,10 @@ function WorkflowCanvasOverlay({ workflowCode, workflowName }: { workflowCode?: 
     <div
       className="pointer-events-none absolute inset-0 overflow-visible select-none z-0"
       style={{
-        transform: `translate(${x}px, ${y}px) scale(${zoom})`,
+        transform: `translate3d(${x}px, ${y}px, 0) scale(${zoom})`,
         transformOrigin: "0 0",
+        willChange: "transform",
+        contain: "paint layout",
       }}
     >
       {isBtctuTaskManagement && (
@@ -413,7 +421,7 @@ function WorkflowCanvasOverlay({ workflowCode, workflowName }: { workflowCode?: 
       )}
     </div>
   );
-}
+});
 
 
 const nodeTypes = {
