@@ -75,26 +75,26 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   const sourceCount = config.sources?.length || 0;
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 min-h-screen">
+    <div className="flex flex-col h-full w-full bg-slate-50 overflow-hidden min-w-0">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200/80 px-6 py-3.5 flex flex-wrap justify-between items-center gap-4 shadow-sm z-10">
-        <div className="flex items-center gap-6 min-w-0">
+      <div className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-3 sm:gap-4 shadow-sm z-10 shrink-0 w-full min-w-0">
+        <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-wrap">
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-800 tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">
                 Trình Thiết Kế Báo Cáo
               </h2>
               {reportId ? (
                 <Badge
                   variant="outline"
-                  className="bg-indigo-50 text-indigo-700 border-indigo-200 text-xs font-semibold"
+                  className="bg-indigo-50 text-indigo-700 border-indigo-200 text-xs font-semibold shrink-0"
                 >
                   ID #{reportId}
                 </Badge>
               ) : (
                 <Badge
                   variant="secondary"
-                  className="bg-amber-50 text-amber-700 border-amber-200 text-xs font-semibold"
+                  className="bg-amber-50 text-amber-700 border-amber-200 text-xs font-semibold shrink-0"
                 >
                   Tạo mới
                 </Badge>
@@ -105,14 +105,14 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
               value={reportTitle}
               onChange={(e) => setReportTitle(e.target.value)}
               placeholder="Nhập tên tiêu đề báo cáo..."
-              className="text-xs text-slate-600 font-medium bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none py-0.5 mt-0.5 min-w-[260px] transition-colors"
+              className="text-xs text-slate-600 font-medium bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none py-0.5 mt-0.5 min-w-[200px] sm:min-w-[260px] transition-colors"
             />
           </div>
 
-          <div className="flex bg-slate-100/90 p-1 rounded-xl border border-slate-200/60 shadow-inner">
+          <div className="flex bg-slate-100/90 p-1 rounded-xl border border-slate-200/60 shadow-inner shrink-0">
             <button
               onClick={() => setActiveTab('model')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 sm:gap-2 ${
                 activeTab === 'model'
                   ? 'bg-white shadow-sm text-indigo-700'
                   : 'text-slate-500 hover:text-slate-800'
@@ -126,7 +126,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('chart')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 sm:gap-2 ${
                 activeTab === 'chart'
                   ? 'bg-white shadow-sm text-indigo-700'
                   : 'text-slate-500 hover:text-slate-800'
@@ -147,7 +147,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -169,10 +169,10 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       </div>
 
       {/* Main Designer Area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden w-full">
         {/* Left Panel: Source Explorer (Only show in Model tab) */}
         {activeTab === 'model' && (
-          <div className="w-1/4 min-w-[280px] max-w-[360px] border-r border-slate-200/80 bg-white overflow-y-auto shadow-sm z-0">
+          <div className="w-1/4 min-w-[260px] max-w-[340px] border-r border-slate-200/80 bg-white overflow-y-auto shadow-sm z-0 shrink-0">
             <SourceExplorer
               onAddSource={(source) =>
                 setConfig({ ...config, sources: [...config.sources, source] })
@@ -183,7 +183,7 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
 
         {/* Middle Panel */}
         <div
-          className={`flex-1 bg-slate-50 overflow-auto relative p-6 ${
+          className={`flex-1 min-h-0 min-w-0 bg-slate-50 overflow-auto relative p-4 sm:p-6 ${
             activeTab === 'chart' ? 'w-full' : ''
           }`}
         >

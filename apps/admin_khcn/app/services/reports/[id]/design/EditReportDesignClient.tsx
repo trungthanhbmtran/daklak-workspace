@@ -52,28 +52,28 @@ export function EditReportDesignClient({ id }: EditReportDesignClientProps) {
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-slate-50">
+    <div className="w-full h-full flex flex-col bg-slate-50 overflow-hidden min-w-0">
       {/* Breadcrumb Header */}
-      <div className="bg-white border-b border-slate-200/80 px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 shadow-xs">
+      <div className="bg-white border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex items-center gap-2 text-xs text-slate-500 shadow-xs shrink-0 w-full min-w-0 overflow-x-auto">
         <Link
           href="/services/reports"
-          className="hover:text-indigo-600 transition-colors flex items-center gap-1.5 font-medium text-slate-600"
+          className="hover:text-indigo-600 transition-colors flex items-center gap-1.5 font-medium text-slate-600 shrink-0"
         >
           <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
           Trung tâm Báo cáo
         </Link>
-        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
         <Link
           href={`/services/reports/${id}`}
-          className="hover:text-indigo-600 transition-colors font-medium text-slate-600 truncate max-w-xs"
+          className="hover:text-indigo-600 transition-colors font-medium text-slate-600 truncate max-w-xs shrink-0"
         >
           {reportDef?.name || `Báo cáo #${id}`}
         </Link>
-        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-        <span className="font-semibold text-slate-800">Thiết kế lại</span>
+        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+        <span className="font-semibold text-slate-800 shrink-0">Thiết kế lại</span>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
         <ReportDesigner
           reportId={id}
           reportName={reportDef?.name}

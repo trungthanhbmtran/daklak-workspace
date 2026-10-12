@@ -212,11 +212,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 min-h-screen">
+    <div className="flex flex-col h-full w-full bg-slate-50 overflow-hidden min-w-0">
       {/* Top Header Bar */}
-      <div className="sticky top-0 z-20 bg-white border-b border-slate-200/80 px-6 py-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4 min-w-0">
+      <div className="shrink-0 z-20 bg-white border-b border-slate-200/80 px-4 sm:px-6 py-3 sm:py-4 shadow-sm w-full min-w-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 w-full min-w-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 max-w-full">
             <Button
               variant="outline"
               size="sm"
@@ -226,12 +226,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <ArrowLeft className="w-4 h-4 mr-1.5" />
               Quay lại
             </Button>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900 truncate">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900 truncate">
                   {reportName}
                 </h1>
-                <Badge variant="outline" className="text-xs bg-slate-50">
+                <Badge variant="outline" className="text-xs bg-slate-50 shrink-0">
                   ID: #{definitionId}
                 </Badge>
               </div>
@@ -242,12 +242,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full md:w-auto shrink-0 justify-start md:justify-end">
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push(`/services/reports/${definitionId}/design`)}
-              className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5"
+              className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 text-xs sm:text-sm"
             >
               <Settings2 className="w-4 h-4 text-slate-500" />
               Thiết kế lại
@@ -257,7 +257,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleExportCSV}
-                className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5"
+                className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 text-xs sm:text-sm"
               >
                 <Download className="w-4 h-4 text-slate-500" />
                 Xuất CSV / Excel
@@ -267,7 +267,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               size="sm"
               onClick={handleRun}
               disabled={runMutation.isPending || runStatus?.status === 'RUNNING'}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex items-center gap-1.5"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex items-center gap-1.5 text-xs sm:text-sm"
             >
               <RefreshCw
                 className={`w-4 h-4 ${
@@ -283,12 +283,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6">
+      <div className="flex-1 min-h-0 min-w-0 w-full max-w-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Status Bar */}
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/70 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/70 flex flex-col md:flex-row md:items-center justify-between gap-4 w-full min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className={`p-2.5 rounded-xl ${
+              className={`p-2.5 rounded-xl shrink-0 ${
                 isCompleted
                   ? 'bg-emerald-50 text-emerald-600'
                   : runStatus?.status === 'FAILED'
@@ -304,18 +304,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 <Activity className="w-5 h-5 animate-pulse" />
               )}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Trạng thái thực thi
                 </span>
                 {runId && (
-                  <Badge variant="secondary" className="text-[11px]">
+                  <Badge variant="secondary" className="text-[11px] shrink-0">
                     Run #{runId}
                   </Badge>
                 )}
               </div>
-              <p className="text-sm font-semibold text-slate-800 mt-0.5">
+              <p className="text-sm font-semibold text-slate-800 mt-0.5 truncate">
                 {runMutation.isPending
                   ? 'Đang khởi tạo lượt chạy...'
                   : isStatusLoading
@@ -337,22 +337,29 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-xs text-slate-500">
-            <div>
+          <div className="flex items-center flex-wrap gap-4 sm:gap-6 text-xs text-slate-500 min-w-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+            <div className="min-w-0">
               <span className="text-slate-400 block">Số dòng kết quả</span>
               <span className="text-sm font-bold text-slate-800">
                 {rows.length} bản ghi
               </span>
             </div>
-            <div>
+            <div className="min-w-0">
               <span className="text-slate-400 block">Nguồn dữ liệu</span>
-              <span className="text-sm font-bold text-slate-800">
+              <span
+                className="text-sm font-bold text-slate-800 block truncate max-w-[160px] sm:max-w-[220px]"
+                title={
+                  actualConfig?.sources?.[0]?.name ||
+                  actualConfig?.sources?.[0]?.endpoint ||
+                  'Hệ thống CSDL'
+                }
+              >
                 {actualConfig?.sources?.[0]?.name ||
                   actualConfig?.sources?.[0]?.endpoint ||
                   'Hệ thống CSDL'}
               </span>
             </div>
-            <div>
+            <div className="min-w-0">
               <span className="text-slate-400 block">Thời gian cập nhật</span>
               <span className="text-sm font-bold text-slate-800">
                 {new Date().toLocaleTimeString('vi-VN')}
@@ -363,18 +370,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
         {/* Dynamic Charts Visualization */}
         {isCompleted && actualConfig?.charts && actualConfig.charts.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-indigo-600" />
-                Trực quan hóa Dữ liệu Thực tế
+          <div className="space-y-4 w-full min-w-0">
+            <div className="flex items-center justify-between flex-wrap gap-2 min-w-0">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 min-w-0">
+                <BarChart3 className="w-5 h-5 text-indigo-600 shrink-0" />
+                <span className="truncate">Trực quan hóa Dữ liệu Thực tế</span>
               </h2>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-400 shrink-0">
                 Tự động tổng hợp từ {rows.length} bản ghi
               </span>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
               {actualConfig.charts.map((chart: any, cIdx: number) => {
                 const chartData = aggregateData(
                   rows,
@@ -393,10 +400,10 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 return (
                   <div
                     key={cIdx}
-                    className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden"
+                    className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden w-full min-w-0"
                   >
-                    <div className="px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                      <h3 className="font-bold text-sm text-slate-800 truncate pr-2">
+                    <div className="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 gap-2 min-w-0">
+                      <h3 className="font-bold text-xs sm:text-sm text-slate-800 truncate pr-2 min-w-0 flex-1">
                         {chart.title || `Biểu đồ ${cIdx + 1}`}
                       </h3>
                       <div className="flex items-center gap-2 shrink-0">
@@ -458,8 +465,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                         </div>
                       ) : effectiveType === 'bar' ? (
                         /* Modern Crisp Bar Chart */
-                        <div className="flex-1 flex flex-col justify-end space-y-3">
-                          <div className="h-44 flex items-end justify-around gap-2 pt-6 pb-2">
+                        <div className="flex-1 flex flex-col justify-end space-y-3 w-full min-w-0">
+                          <div className="h-44 flex items-end justify-around gap-1.5 sm:gap-2 pt-6 pb-2 w-full min-w-0">
                             {chartData.map((item, i) => {
                               const heightPct = Math.max(
                                 14,
@@ -469,15 +476,15 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                               return (
                                 <div
                                   key={i}
-                                  className="flex-1 flex flex-col items-center h-full justify-end group/bar relative min-w-0"
+                                  className="flex-1 flex flex-col items-center h-full justify-end group/bar relative min-w-0 max-w-full"
                                 >
                                   {/* Value pill */}
-                                  <span className="text-[11px] font-bold text-slate-700 mb-1.5 opacity-90 group-hover/bar:opacity-100 group-hover/bar:text-indigo-600 transition-all">
+                                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 mb-1.5 opacity-90 group-hover/bar:opacity-100 group-hover/bar:text-indigo-600 transition-all truncate max-w-full">
                                     {item.value.toLocaleString('vi-VN')}
                                   </span>
                                   {/* Bar column with gradient & glow */}
                                   <div
-                                    className="w-full max-w-[46px] rounded-t-xl transition-all duration-500 ease-out shadow-sm group-hover/bar:brightness-110 group-hover/bar:shadow-md cursor-pointer"
+                                    className="w-full max-w-[42px] rounded-t-xl transition-all duration-500 ease-out shadow-sm group-hover/bar:brightness-110 group-hover/bar:shadow-md cursor-pointer"
                                     style={{
                                       height: `${heightPct}%`,
                                       backgroundColor: color,
@@ -488,19 +495,17 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                             })}
                           </div>
                           {/* Labels row */}
-                          <div className="flex justify-around items-start gap-1.5 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 font-medium">
+                          <div className="flex justify-around items-start gap-1 pt-2.5 border-t border-slate-100 text-[10px] sm:text-[11px] text-slate-500 font-medium w-full min-w-0">
                             {chartData.map((item, i) => (
                               <div
                                 key={i}
-                                className="flex-1 text-center group/lbl px-0.5 min-w-0 cursor-pointer"
+                                className="flex-1 text-center group/lbl px-0.5 min-w-0 cursor-pointer overflow-hidden"
                                 title={item.label}
                               >
-                                <div className="truncate text-slate-700 font-semibold group-hover/lbl:text-indigo-600 transition-colors">
-                                  {item.label.length > 18
-                                    ? `${item.label.slice(0, 16)}…`
-                                    : item.label}
+                                <div className="truncate text-slate-700 font-semibold group-hover/lbl:text-indigo-600 transition-colors w-full">
+                                  {item.label}
                                 </div>
-                                <div className="text-[10px] text-slate-400 font-normal mt-0.5">
+                                <div className="text-[10px] text-slate-400 font-normal mt-0.5 truncate w-full">
                                   {item.value.toLocaleString('vi-VN')}
                                 </div>
                               </div>
@@ -509,8 +514,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                         </div>
                       ) : effectiveType === 'line' ? (
                         /* Ultra-crisp Spline Area & Line Chart with Zero-Distortion HTML Badges & Markers */
-                        <div className="flex-1 flex flex-col justify-end space-y-2 pt-2">
-                          <div className="h-44 relative w-full flex">
+                        <div className="flex-1 flex flex-col justify-end space-y-2 pt-2 w-full min-w-0 overflow-hidden">
+                          <div className="h-44 relative w-full flex min-w-0">
                             {/* Y-Axis Reference Scale */}
                             <div className="w-8 shrink-0 flex flex-col justify-between text-[10px] text-slate-400 font-medium text-right pr-1.5 select-none pb-3 pt-3">
                               <span>{maxVal.toLocaleString('vi-VN')}</span>
@@ -520,7 +525,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                             </div>
 
                             {/* Chart Canvas Area */}
-                            <div className="flex-1 relative h-full">
+                            <div className="flex-1 relative h-full min-w-0 overflow-hidden">
                               {/* Horizontal Dashed Grid Lines */}
                               <div className="absolute inset-x-0 inset-y-0 pointer-events-none pb-3 pt-3 flex flex-col justify-between">
                                 <div className="border-b border-dashed border-slate-100 w-full" />
@@ -643,9 +648,9 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                           </div>
 
                           {/* Axis Labels: Exactly aligned under each data point */}
-                          <div className="relative w-full h-9 border-t border-slate-100 pt-2.5">
+                          <div className="relative w-full h-9 border-t border-slate-100 pt-2.5 min-w-0 overflow-hidden">
                             {/* Left gutter offset matching Y-axis (w-8) */}
-                            <div className="ml-8 relative h-full">
+                            <div className="ml-8 relative h-full min-w-0">
                               {chartData.map((item, i) => {
                                 const n = chartData.length;
                                 const xPct =
@@ -655,11 +660,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                 return (
                                   <div
                                     key={i}
-                                    className="absolute -translate-x-1/2 text-center group/lbl cursor-pointer max-w-[85px] px-0.5"
+                                    className="absolute -translate-x-1/2 text-center group/lbl cursor-pointer max-w-[80px] px-0.5 overflow-hidden"
                                     style={{ left: `${xPct}%` }}
                                     title={item.label}
                                   >
-                                    <div className="truncate text-slate-700 font-semibold text-[11px] group-hover/lbl:text-indigo-600 transition-colors">
+                                    <div className="truncate text-slate-700 font-semibold text-[10px] sm:text-[11px] group-hover/lbl:text-indigo-600 transition-colors">
                                       {item.label.length > 14
                                         ? `${item.label.slice(0, 12)}…`
                                         : item.label}
@@ -675,10 +680,10 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                         </div>
                       ) : (
                         /* Real Pie / Donut Chart with Legend */
-                        <div className="flex-1 flex flex-col justify-center space-y-4">
-                          <div className="flex items-center justify-center gap-6">
+                        <div className="flex-1 flex flex-col justify-center space-y-4 w-full min-w-0">
+                          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full min-w-0">
                             {/* SVG Donut */}
-                            <div className="w-28 h-28 relative shrink-0">
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 relative shrink-0">
                               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <circle
                                   cx="18"
@@ -717,7 +722,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   });
                                 })()}
                               </svg>
-                              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                 <span className="text-xs font-bold text-slate-800">
                                   {totalVal}
                                 </span>
@@ -728,7 +733,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                             </div>
 
                             {/* Legend */}
-                            <div className="flex-1 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                            <div className="w-full sm:flex-1 min-w-0 space-y-1.5 max-h-36 overflow-y-auto pr-1">
                               {chartData.map((item, i) => {
                                 const color = PALETTE[i % PALETTE.length];
                                 const pct = Math.round(
@@ -737,21 +742,21 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                 return (
                                   <div
                                     key={i}
-                                    className="flex items-center justify-between text-xs"
+                                    className="flex items-center justify-between text-xs gap-2 min-w-0"
                                   >
-                                    <div className="flex items-center gap-1.5 min-w-0 pr-2">
+                                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                       <span
                                         className="w-2.5 h-2.5 rounded-full shrink-0"
                                         style={{ backgroundColor: color }}
                                       ></span>
                                       <span
-                                        className="text-slate-600 truncate"
+                                        className="text-slate-600 truncate flex-1 min-w-0"
                                         title={item.label}
                                       >
                                         {item.label}
                                       </span>
                                     </div>
-                                    <span className="font-bold text-slate-800 shrink-0">
+                                    <span className="font-bold text-slate-800 shrink-0 text-right">
                                       {item.value}{' '}
                                       <span className="text-slate-400 font-normal">
                                         ({pct}%)
@@ -779,19 +784,19 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         )}
 
         {/* Snapshot Data Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-          <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-2">
-              <TableIcon className="w-5 h-5 text-indigo-600" />
-              <h3 className="font-bold text-slate-900 text-base">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden w-full min-w-0">
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 w-full min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <TableIcon className="w-5 h-5 text-indigo-600 shrink-0" />
+              <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
                 Dữ liệu Bản ghi Thực tế (Dataset Snapshot)
               </h3>
-              <Badge variant="secondary" className="ml-2 bg-slate-100">
+              <Badge variant="secondary" className="ml-2 bg-slate-100 shrink-0">
                 {filteredRows.length} dòng
               </Badge>
             </div>
 
-            <div className="relative w-full sm:w-72">
+            <div className="relative w-full sm:w-72 shrink-0">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -817,17 +822,17 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+              <div className="w-full min-w-0 overflow-x-auto">
+                <table className="w-full min-w-full text-left text-xs border-collapse">
                   <thead className="bg-slate-50/80 border-b border-slate-100 text-slate-600 font-semibold uppercase tracking-wider">
                     <tr>
-                      <th className="py-3 px-4 w-12 text-center text-slate-400">
+                      <th className="py-3 px-3 sm:px-4 w-12 text-center text-slate-400 shrink-0">
                         #
                       </th>
                       {schema.map((col: any) => (
                         <th
                           key={col.key}
-                          className="py-3 px-4 whitespace-nowrap"
+                          className="py-3 px-3 sm:px-4 whitespace-nowrap"
                         >
                           {col.label || col.key}
                         </th>
@@ -840,21 +845,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                         key={rIdx}
                         className="hover:bg-slate-50/80 transition-colors"
                       >
-                        <td className="py-3 px-4 text-center text-slate-400 font-mono">
+                        <td className="py-3 px-3 sm:px-4 text-center text-slate-400 font-mono">
                           {(page - 1) * pageSize + rIdx + 1}
                         </td>
                         {schema.map((col: any) => {
                           const val = row[col.key];
                           const strVal =
                             val != null ? String(val) : '—';
-                          const isNumber =
-                            typeof val === 'number' ||
-                            !isNaN(Number(val)) && val !== '';
 
                           return (
                             <td
                               key={col.key}
-                              className="py-3 px-4 max-w-xs truncate text-slate-700"
+                              className="py-3 px-3 sm:px-4 max-w-[220px] truncate text-slate-700"
                               title={strVal}
                             >
                               {col.key === 'status' ? (
@@ -875,8 +877,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                 </Badge>
                               ) : col.key === 'progress' ||
                                 col.key === 'qualityScore' ? (
-                                <div className="flex items-center gap-2">
-                                  <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="flex items-center gap-2 min-w-[120px]">
+                                  <div className="w-16 h-2 bg-slate-100 rounded-full overflow-hidden shrink-0">
                                     <div
                                       className="h-full bg-indigo-600 rounded-full"
                                       style={{
@@ -887,12 +889,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                       }}
                                     ></div>
                                   </div>
-                                  <span className="font-bold text-slate-800">
+                                  <span className="font-bold text-slate-800 shrink-0">
                                     {val}%
                                   </span>
                                 </div>
                               ) : (
-                                <span>{strVal}</span>
+                                <span className="truncate block max-w-full">{strVal}</span>
                               )}
                             </td>
                           );
@@ -905,13 +907,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
               {/* Table Pagination Bar */}
               {totalPages > 1 && (
-                <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50">
-                  <span>
+                <div className="px-4 sm:px-5 py-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 bg-slate-50/50 w-full min-w-0">
+                  <span className="text-center sm:text-left truncate">
                     Hiển thị {(page - 1) * pageSize + 1} -{' '}
                     {Math.min(page * pageSize, filteredRows.length)} trong tổng số{' '}
                     {filteredRows.length} bản ghi
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <Button
                       variant="outline"
                       size="sm"

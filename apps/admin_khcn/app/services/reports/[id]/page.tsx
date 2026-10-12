@@ -18,7 +18,7 @@ export default async function ReportDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-white overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-slate-50 overflow-hidden min-w-0">
       <ReportViewer definitionId={numId} />
     </div>
   );
