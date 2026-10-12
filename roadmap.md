@@ -4,7 +4,7 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
-- [ ] **[Backend & Architecture] Chuẩn hóa Chuyển đổi Mã/Tên sang Tiếng Việt & Tìm kiếm Đa ngôn ngữ Đồng nhất trên Backend (12/10/2026)**
+- [x] **[Backend & Architecture] Chuẩn hóa Chuyển đổi Mã/Tên sang Tiếng Việt & Tìm kiếm Đa ngôn ngữ Đồng nhất trên Backend (12/10/2026)**
   - **Vấn đề**: Logic convert các mã cũ (`TODO`, `PENDING_ACCEPTANCE`, `IN_PROGRESS`, `COMPLETED`, field labels) sang tiếng Việt đang bị viết rải rác dưới client (`ReportViewer.tsx`, `fieldHelpers.ts`). Tương tự, bộ lọc tìm kiếm cũng bị xử lý thủ công dưới client với các hàm dịch cục bộ, không đồng nhất khi tìm kiếm bằng tiếng Việt có dấu/không dấu hoặc các mã/ngôn ngữ khác.
   - **Khắc phục**:
     1. Chuyển toàn bộ logic convert code/name cũ sang tiếng Việt lên Backend (`report-service`): chuẩn hóa toàn bộ dữ liệu status, priority, field labels trong `schema` và `data` của `DatasetSnapshot`/`StatisticsSnapshot`.

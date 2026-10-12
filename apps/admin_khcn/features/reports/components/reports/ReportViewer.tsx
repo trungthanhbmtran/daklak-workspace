@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 import {
   getFriendlyFieldLabel,
-  translateStatus,
   getStatusBadgeCls,
 } from '@/features/reports/utils/fieldHelpers';
 
@@ -58,17 +57,13 @@ function aggregateData(
 ): AggregatedItem[] {
   if (!rows || rows.length === 0 || !xAxis) return [];
 
-  const isStatusField = xAxis.toLowerCase().includes('status');
   const groups: Record<string, { count: number; sum: number; values: number[] }> =
     {};
 
   for (const row of rows) {
     const rawX = row[xAxis];
-    let key =
+    const key =
       rawX != null && rawX !== '' ? String(rawX).trim() : 'Chưa phân loại';
-    if (isStatusField) {
-      key = translateStatus(key);
-    }
     if (!groups[key]) {
       groups[key] = { count: 0, sum: 0, values: [] };
     }
@@ -108,9 +103,19 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const router = useRouter();
   const [runId, setRunId] = useState<number | null>(null);
   const [tableSearch, setTableSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [chartModes, setChartModes] = useState<Record<number, 'bar' | 'line' | 'pie'>>({});
   const pageSize = 20;
+
+  // Debounce tìm kiếm để gửi request đồng nhất lên backend
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(tableSearch.trim());
+      setPage(1);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [tableSearch]);
 
   const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(definitionId);
   const actualConfig = config || reportDef?.configuration;
@@ -130,6 +135,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const isCompleted = latestStatus === 'SUCCEEDED';
   const { data: snapshot, isLoading: isSnapshotLoading } = useGetDatasetSnapshot(
     isCompleted ? runId : null,
+    { search: debouncedSearch, page: 1, limit: 1000 },
   );
 
   // Tự động kích hoạt lượt chạy đầu tiên nếu báo cáo chưa có bất kỳ lượt chạy nào trong DB
@@ -199,22 +205,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     return [];
   }, [snapshot, actualConfig, rows]);
 
-  // Bộ lọc dữ liệu bảng (hỗ trợ tìm kiếm thông minh cả mã và tiếng Việt)
-  const filteredRows = useMemo(() => {
-    if (!tableSearch.trim()) return rows;
-    const q = tableSearch.toLowerCase();
-    return rows.filter((r: any) =>
-      Object.entries(r).some(([k, val]) => {
-        const str = String(val ?? '').toLowerCase();
-        if (str.includes(q)) return true;
-        if (k.toLowerCase().includes('status')) {
-          const vi = translateStatus(String(val ?? '')).toLowerCase();
-          if (vi.includes(q)) return true;
-        }
-        return false;
-      }),
-    );
-  }, [rows, tableSearch]);
+  // Dữ liệu bảng đã được tìm kiếm và chuẩn hóa đồng nhất từ Backend
+  const filteredRows = rows;
 
   const pagedRows = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -903,7 +895,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                     strVal,
                                   )}`}
                                 >
-                                  {translateStatus(strVal)}
+                                  {strVal}
                                 </Badge>
                               ) : col.key === 'isOverdue' ? (
                                 <Badge

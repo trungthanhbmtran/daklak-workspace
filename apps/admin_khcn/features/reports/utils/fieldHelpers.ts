@@ -57,10 +57,7 @@ export const STATUS_LABEL_MAP: Record<string, string> = {
 };
 
 export function translateStatus(status: string | null | undefined): string {
-  if (!status) return '—';
-  const raw = String(status).trim();
-  const upper = raw.toUpperCase();
-  return STATUS_LABEL_MAP[upper] || raw;
+  return status != null && status !== '' ? String(status) : '—';
 }
 
 export function getStatusBadgeCls(status: string | null | undefined): string {

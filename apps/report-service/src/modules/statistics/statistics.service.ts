@@ -10,6 +10,12 @@ import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { executeTable } from '../reports/table-engine';
+import {
+  translateStatus,
+  translatePriority,
+  URGENCY_VIETNAMESE_MAP,
+  SECURITY_VIETNAMESE_MAP,
+} from '../reports/utils/normalization';
 
 @Injectable()
 export class StatisticsService implements OnModuleInit {
@@ -118,8 +124,8 @@ export class StatisticsService implements OnModuleInit {
       rows.unshift({
         id: data.taskId,
         title: data.title || `Nhiệm vụ #${data.taskId}`,
-        status: data.status || 'PENDING_ACCEPTANCE',
-        priority: data.priority || 'MEDIUM',
+        status: translateStatus(data.status || 'PENDING_ACCEPTANCE'),
+        priority: translatePriority(data.priority || 'MEDIUM'),
         progress: 0,
         departmentId: data.departmentId || 0,
         departmentName: 'Đang cập nhật',
@@ -146,7 +152,7 @@ export class StatisticsService implements OnModuleInit {
           const isDone = data.status === 'COMPLETED' || data.status === 'DONE';
           return {
             ...r,
-            status: data.status || r.status,
+            status: translateStatus(data.status || r.status),
             progress: isDone ? 100 : (data.progress ?? r.progress),
             isCompleted: isDone ? 'Hoàn thành' : 'Chưa hoàn thành',
           };
@@ -166,7 +172,7 @@ export class StatisticsService implements OnModuleInit {
     if (latest && Array.isArray(latest.data)) {
       const rows = (latest.data as any[]).map((r) => {
         if (r.id === data.id) {
-          return { ...r, status: 'PUBLISHED' };
+          return { ...r, status: translateStatus('PUBLISHED') };
         }
         return r;
       });
@@ -182,14 +188,16 @@ export class StatisticsService implements OnModuleInit {
     });
     if (latest && Array.isArray(latest.data)) {
       const rows = [...(latest.data as any[])];
+      const urg = String(data.urgency || 'NORMAL').toUpperCase();
+      const sec = String(data.securityLevel || 'NORMAL').toUpperCase();
       rows.unshift({
         id: data.id,
         documentNumber: data.documentNumber || `VB-${data.id}`,
         abstract: data.abstract || '',
-        status: data.status || 'PROCESSING',
+        status: translateStatus(data.status || 'PROCESSING'),
         isIncoming: data.isIncoming ? 'Văn bản đến' : 'Văn bản đi',
-        urgency: data.urgency || 'NORMAL',
-        securityLevel: data.securityLevel || 'NORMAL',
+        urgency: URGENCY_VIETNAMESE_MAP[urg] || 'Bình thường',
+        securityLevel: SECURITY_VIETNAMESE_MAP[sec] || 'Thường',
         pageCount: Number(data.pageCount || 1),
         isLate: 'Đúng hạn',
         issueDate: new Date().toISOString().split('T')[0],
@@ -259,8 +267,8 @@ export class StatisticsService implements OnModuleInit {
           return {
             id: t.id,
             title: t.title || `Nhiệm vụ #${t.id}`,
-            status: t.status,
-            priority: t.priority || 'MEDIUM',
+            status: translateStatus(t.status),
+            priority: translatePriority(t.priority || 'MEDIUM'),
             progress: Number(t.progress || (isDone ? 100 : 0)),
             departmentId: deptId,
             departmentName: deptName,
@@ -334,7 +342,7 @@ export class StatisticsService implements OnModuleInit {
         rows = allPosts.map((p: any) => ({
           id: p.id,
           title: p.title || '',
-          status: p.status,
+          status: translateStatus(p.status),
           categoryName: p.category || p.categoryName || 'Tin tức chung',
           authorName: p.authorName || p.authorId || 'Ban biên tập',
           viewCount: Number(p.viewCount || 0),
@@ -417,7 +425,7 @@ export class StatisticsService implements OnModuleInit {
             departmentName: deptName,
             periodId: String(ev.periodId || ''),
             totalScore: Number(ev.totalScore || 0),
-            status: ev.status || 'SUBMITTED',
+            status: translateStatus(ev.status || 'SUBMITTED'),
           };
         });
 
@@ -481,15 +489,17 @@ export class StatisticsService implements OnModuleInit {
             : null;
           const isLate =
             doc.status === 'PROCESSING' && deadline && deadline < now;
+          const urg = String(doc.urgency || 'NORMAL').toUpperCase();
+          const sec = String(doc.securityLevel || 'NORMAL').toUpperCase();
 
           return {
             id: doc.id,
             documentNumber: doc.documentNumber || `VB-${doc.id}`,
             abstract: doc.abstract || '',
-            status: doc.status,
+            status: translateStatus(doc.status),
             isIncoming,
-            urgency: doc.urgency || 'NORMAL',
-            securityLevel: doc.securityLevel || 'NORMAL',
+            urgency: URGENCY_VIETNAMESE_MAP[urg] || 'Bình thường',
+            securityLevel: SECURITY_VIETNAMESE_MAP[sec] || 'Thường',
             pageCount: Number(doc.pageCount || 1),
             isLate: isLate ? 'Trễ hạn' : 'Đúng hạn',
             issueDate: doc.issueDate

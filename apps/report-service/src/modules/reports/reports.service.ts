@@ -5,6 +5,12 @@ import { executeTable } from './table-engine';
 import { Metadata } from '@grpc/grpc-js';
 
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  normalizeRow,
+  normalizeSchema,
+  matchSearchQuery,
+  getFriendlyFieldLabel,
+} from './utils/normalization';
 
 // ───────────────────────── Types ─────────────────────────
 
@@ -280,22 +286,32 @@ export class ReportsService implements OnModuleInit {
       });
 
       if (latestSnapshot && Array.isArray(latestSnapshot.data)) {
-        sourceRows = latestSnapshot.data as any[];
+        sourceRows = (latestSnapshot.data as any[]).map(normalizeRow);
       }
 
-      // Tạo schema từ columns hoặc fields
+      // Tạo schema từ columns hoặc fields và chuẩn hóa nhãn tiếng Việt
       const columns = config?.columns || [];
       let schema = columns.length > 0
-        ? columns.map((c: any) => ({ key: c.key, label: c.label || c.key, type: c.type || 'string' }))
-        : (primarySource?.fields || []).map((f: string) => ({ key: f, label: f, type: 'string' }));
+        ? columns.map((c: any) => ({
+            key: c.key || c.field,
+            label: c.label && c.label !== (c.key || c.field) ? c.label : getFriendlyFieldLabel(c.key || c.field),
+            type: c.type || 'string',
+          }))
+        : (primarySource?.fields || []).map((f: string) => ({
+            key: f,
+            label: getFriendlyFieldLabel(f),
+            type: 'string',
+          }));
 
       if (schema.length === 0 && sourceRows.length > 0 && typeof sourceRows[0] === 'object') {
         schema = Object.keys(sourceRows[0]).map((k) => ({
           key: k,
-          label: k,
+          label: getFriendlyFieldLabel(k),
           type: typeof (sourceRows[0] as any)[k] === 'number' ? 'number' : 'string',
         }));
       }
+
+      schema = normalizeSchema(schema);
 
       // Lưu snapshot theo từng chunk (500 dòng/chunk) để chống nghẽn bộ nhớ MySQL
       const CHUNK_SIZE = 500;
@@ -376,32 +392,67 @@ export class ReportsService implements OnModuleInit {
 
   async getDatasetSnapshot(payloadStr: string, _userDataStr: string) {
     try {
-      // Tối ưu: Lấy có giới hạn an toàn để tránh gRPC Payload Too Large và OOM
+      // Tối ưu: Lấy an toàn các chunks và xử lý lọc/phân trang trực tiếp trên backend
       const payload = JSON.parse(payloadStr);
       const runId = Number(payload.runId || payload.id);
       const limit = Math.min(Math.max(Number(payload.limit) || 1000, 1), 2000);
+      const page = Math.max(Number(payload.page) || 1, 1);
+      const search = payload.search || payload.q ? String(payload.search || payload.q).trim() : '';
 
       const snapshots = await this.prisma.datasetSnapshot.findMany({
         where: { runId: Number(runId) },
         orderBy: { chunkIndex: 'asc' },
-        take: 4, // Lấy tối đa 4 chunks (~2.000 dòng an toàn)
+        take: 10,
       });
 
       if (snapshots.length === 0) {
-        return { success: false, data: JSON.stringify({ schema: [], data: [], total: 0 }), message: 'Không có dữ liệu snapshot' };
+        return {
+          success: false,
+          data: JSON.stringify({ schema: [], data: [], total: 0, filteredTotal: 0 }),
+          message: 'Không có dữ liệu snapshot',
+        };
       }
 
-      const schema = snapshots[0].schema || [];
-      const combinedData = snapshots.flatMap((s: any) => (s.data as any[]) || []).slice(0, limit);
+      const rawSchema = snapshots[0].schema || [];
+      const normalizedSchema = normalizeSchema(rawSchema as any);
+
+      // Gộp các chunks và chuẩn hóa 100% dữ liệu sang tiếng Việt chuẩn
+      const allRows = snapshots
+        .flatMap((s: any) => (s.data as any[]) || [])
+        .map(normalizeRow);
+
+      // Tìm kiếm đồng nhất trên backend (hỗ trợ có dấu, không dấu, và mã code tương ứng)
+      let filteredRows = allRows;
+      if (search) {
+        filteredRows = allRows.filter((row) => matchSearchQuery(row, search));
+      }
+
+      const total = allRows.length;
+      const filteredTotal = filteredRows.length;
+
+      // Phân trang dữ liệu
+      const startIndex = (page - 1) * limit;
+      const pagedData = filteredRows.slice(startIndex, startIndex + limit);
 
       return {
         success: true,
-        data: JSON.stringify({ schema, data: combinedData, total: combinedData.length }),
+        data: JSON.stringify({
+          schema: normalizedSchema,
+          data: pagedData,
+          total,
+          filteredTotal,
+          page,
+          limit,
+        }),
         message: 'Lấy dữ liệu kết quả thành công',
       };
     } catch (error: any) {
       this.logger.error('Error fetching dataset snapshot', error?.stack);
-      return { success: false, data: JSON.stringify({ schema: [], data: [], total: 0 }), message: 'Lỗi lấy kết quả báo cáo' };
+      return {
+        success: false,
+        data: JSON.stringify({ schema: [], data: [], total: 0, filteredTotal: 0 }),
+        message: 'Lỗi lấy kết quả báo cáo',
+      };
     }
   }
 

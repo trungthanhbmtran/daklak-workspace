@@ -144,27 +144,30 @@ export const useGetReportRunStatus = (runId?: number | string | null, enabled = 
 
 export const useGetDatasetSnapshot = (
   runId?: number | string | null,
-  options?: { limit?: number; page?: number },
+  options?: { limit?: number; page?: number; search?: string },
 ) => {
   const numericId = Number(runId);
   const isValid = Number.isInteger(numericId) && numericId > 0;
   const limit = options?.limit ?? 1000;
   const page = options?.page ?? 1;
+  const search = options?.search ?? '';
 
   return useQuery({
-    queryKey: [...reportKeys.snapshot(isValid ? numericId : 0), { limit, page }],
+    queryKey: [...reportKeys.snapshot(isValid ? numericId : 0), { limit, page, search }],
     queryFn: async () => {
       const res: any = await axiosInstance.get(
         `/reports/runs/${numericId}/snapshot`,
-        { params: { limit, page } },
+        { params: { limit, page, search: search.trim() || undefined } },
       );
-      const snapshot = unwrapData<DatasetSnapshot>(res, {
+      const snapshot = unwrapData<DatasetSnapshot & { total?: number; filteredTotal?: number }>(res, {
         schema: [],
         data: [],
       });
       return {
         schema: Array.isArray(snapshot?.schema) ? snapshot.schema : [],
         data: Array.isArray(snapshot?.data) ? snapshot.data : [],
+        total: Number(snapshot?.total ?? (snapshot?.data?.length || 0)),
+        filteredTotal: Number(snapshot?.filteredTotal ?? (snapshot?.data?.length || 0)),
       };
     },
     enabled: isValid,
