@@ -3,11 +3,19 @@ model KpiFormTemplate {
   formCode    String  @id @map("form_code") // Ví dụ: MAU_01, MAU_02
   name        String  @map("name")
   description String? @db.Text
+  category    String? @map("category")
+  targetRole  String? @map("target_role")
+  schemaVersion String @default("1.0") @map("schema_version")
+  status      String  @default("PUBLISHED") @map("status")
+  version     Int     @default(1) @map("version")
+  xmlContent  String? @map("xml_content") @db.LongText
 
   // File mẫu XML gốc lưu tại media-service
   templateFileId String? @map("template_file_id")
 
   documents KpiFormDocument[]
+  bindings  KpiFormTemplateBinding[]
+  versions  KpiFormTemplateVersion[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -17,9 +25,53 @@ model KpiFormTemplate {
   @@map("kpi_form_templates")
 }
 
+model KpiFormTemplateVersion {
+  id          Int       @id @default(autoincrement())
+  formCode    String    @map("form_code")
+  version     Int
+  xmlContent  String    @map("xml_content") @db.LongText
+  status      String    @default("DRAFT")
+  createdBy   String?   @map("created_by")
+  publishedBy String?   @map("published_by")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  template KpiFormTemplate @relation(fields: [formCode], references: [formCode], onDelete: Cascade)
+
+  @@unique([formCode, version])
+  @@index([formCode, status])
+  @@map("kpi_form_template_versions")
+}
+
+model KpiFormTemplateBinding {
+  id                  Int       @id @default(autoincrement())
+  formCode            String    @map("form_code")
+  organizationId      String    @default("DEFAULT") @map("organization_id")
+  unitCode            String    @map("unit_code")
+  processDefinitionId String    @map("process_definition_id")
+  processCode         String    @map("process_code")
+  templateVersion     Int       @default(1) @map("template_version")
+  nodeCode            String?   @map("node_code")
+  phase               String?   @map("phase")
+  effectiveFrom       DateTime? @map("effective_from")
+  effectiveTo         DateTime? @map("effective_to")
+  isActive            Boolean   @default(true) @map("is_active")
+  createdBy           String?   @map("created_by")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  template KpiFormTemplate @relation(fields: [formCode], references: [formCode], onDelete: Cascade)
+
+  @@index([organizationId, unitCode, processDefinitionId, isActive])
+  @@index([formCode])
+  @@index([effectiveFrom, effectiveTo])
+  @@map("kpi_form_template_bindings")
+}
+
 model KpiFormDocument {
   id           Int    @id @default(autoincrement())
   formCode     String @map("form_code")
+  templateVersion Int? @map("template_version")
   evaluationId Int    @map("evaluation_id")
 
   // ID của file biểu mẫu (XML/PDF) sau khi điền dữ liệu, lưu tại media-service

@@ -35,7 +35,9 @@ export class TaskHistoryService {
       where: { employeeCode: { in: Array.from(employeeCodes) } },
       select: { employeeCode: true, fullName: true, avatar: true }
     });
-    const empMap = new Map(employees.map(e => [e.employeeCode, e]));
+    const empMap = new Map<string, { fullName: string; avatar: string | null }>(
+      employees.map((e: any) => [e.employeeCode, e] as const),
+    );
 
     const mappedHistory = history.map(h => {
       const val = h.newValue as any;

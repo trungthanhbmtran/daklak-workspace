@@ -29,6 +29,7 @@ export class GrpcWorkflowController {
       description: data.description,
       graph: this.parseGraphPayload(data),
       organizationId: data.organizationId,
+      ownerUnitCode: data.ownerUnitCode || undefined,
       createdBy: data.createdBy,
     });
     return this.mapToWorkflowResponse(result.def, result.version);
@@ -361,6 +362,8 @@ export class GrpcWorkflowController {
       updatedAt: def.updatedAt?.toISOString(),
       publishedBy: version?.publishedBy,
       publishedAt: version?.publishedAt?.toISOString(),
+      organizationId: def.organizationId || '',
+      ownerUnitCode: def.ownerUnitCode || '',
     };
     return result;
   }

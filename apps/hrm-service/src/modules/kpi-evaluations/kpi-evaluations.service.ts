@@ -3,10 +3,10 @@ import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
 import { lastValueFrom } from 'rxjs';
+import { randomUUID } from 'crypto';
 import {
   DEFAULT_KPI_FORM_TEMPLATES,
   getTemplateXmlContent,
-  saveTemplateXmlContent,
   extractPlaceholders,
   validateXmlSyntax,
 } from './kpi-template-xml.util';
@@ -311,11 +311,14 @@ export class KpiEvaluationsService implements OnModuleInit {
 
   // 4. Quản lý Biểu mẫu Đánh giá (KpiFormTemplate & File XML Mẫu)
   async findFormTemplates(query?: any) {
+    const organizationId = query?.organizationId || 'DEFAULT';
     let dbTemplates = await this.prisma.kpiFormTemplate.findMany({
+      where: { OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
       include: {
         _count: {
           select: { documents: true },
         },
+        bindings: { where: { organizationId, isActive: true } },
       },
       orderBy: { formCode: 'asc' },
     });
@@ -330,22 +333,26 @@ export class KpiEvaluationsService implements OnModuleInit {
               name: def.name,
               description: def.description,
               templateFileId: def.fileName,
+              organizationId: 'DEFAULT',
             },
             create: {
               formCode: def.formCode,
               name: def.name,
               description: def.description,
               templateFileId: def.fileName,
+              organizationId: 'DEFAULT',
             },
           });
         }
       }
 
       dbTemplates = await this.prisma.kpiFormTemplate.findMany({
+        where: { OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
         include: {
           _count: {
             select: { documents: true },
           },
+          bindings: { where: { organizationId, isActive: true } },
         },
         orderBy: { formCode: 'asc' },
       });
@@ -353,7 +360,7 @@ export class KpiEvaluationsService implements OnModuleInit {
 
     const data = dbTemplates.map((item) => {
       const def = DEFAULT_KPI_FORM_TEMPLATES.find((t) => t.formCode === item.formCode);
-      const xml = getTemplateXmlContent(item.formCode);
+      const xml = item.xmlContent || getTemplateXmlContent(item.formCode);
       const xmlSize = Buffer.byteLength(xml, 'utf8');
 
       return {
@@ -363,10 +370,15 @@ export class KpiEvaluationsService implements OnModuleInit {
         templateFileId: item.templateFileId || def?.fileName || '',
         createdAt: item.createdAt ? item.createdAt.toISOString() : '',
         updatedAt: item.updatedAt ? item.updatedAt.toISOString() : '',
-        category: def?.category || 'Biểu mẫu đánh giá',
-        targetRole: def?.targetRole || 'Toàn thể cán bộ',
-        schemaVersion: def?.schemaVersion || '1.0',
+        category: item.category || def?.category || 'Biểu mẫu đánh giá',
+        targetRole: item.targetRole || def?.targetRole || 'Toàn thể cán bộ',
+        schemaVersion: item.schemaVersion || def?.schemaVersion || '1.0',
         documentCount: (item as any)._count?.documents || 0,
+        organizationId: item.organizationId,
+        status: item.status || 'PUBLISHED',
+        version: item.version || 1,
+        unitCodes: (item as any).bindings?.map((binding: any) => binding.unitCode) || [],
+        processCodes: (item as any).bindings?.map((binding: any) => binding.processCode) || [],
         hasXmlFile: true,
         xmlSize,
       };
@@ -379,9 +391,9 @@ export class KpiEvaluationsService implements OnModuleInit {
     };
   }
 
-  async getFormTemplateDetail(formCode: string) {
-    let item = await this.prisma.kpiFormTemplate.findUnique({
-      where: { formCode },
+  async getFormTemplateDetail(formCode: string, organizationId = 'DEFAULT') {
+    let item = await this.prisma.kpiFormTemplate.findFirst({
+      where: { formCode, OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
       include: {
         _count: {
           select: { documents: true },
@@ -410,7 +422,7 @@ export class KpiEvaluationsService implements OnModuleInit {
       throw new RpcException({ message: `Không tìm thấy biểu mẫu ${formCode}`, code: 5 });
     }
 
-    const xmlContent = getTemplateXmlContent(formCode);
+    const xmlContent = item.xmlContent || getTemplateXmlContent(formCode);
     const placeholders = extractPlaceholders(xmlContent);
     const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
 
@@ -424,10 +436,13 @@ export class KpiEvaluationsService implements OnModuleInit {
         templateFileId: item.templateFileId || def?.fileName || '',
         createdAt: item.createdAt ? item.createdAt.toISOString() : '',
         updatedAt: item.updatedAt ? item.updatedAt.toISOString() : '',
-        category: def?.category || 'Biểu mẫu đánh giá',
-        targetRole: def?.targetRole || 'Toàn thể cán bộ',
-        schemaVersion: def?.schemaVersion || '1.0',
+        category: item.category || def?.category || 'Biểu mẫu đánh giá',
+        targetRole: item.targetRole || def?.targetRole || 'Toàn thể cán bộ',
+        schemaVersion: item.schemaVersion || def?.schemaVersion || '1.0',
         documentCount: (item as any)._count?.documents || 0,
+        organizationId: item.organizationId,
+        status: item.status || 'PUBLISHED',
+        version: item.version || 1,
         hasXmlFile: true,
         xmlSize,
       },
@@ -437,20 +452,59 @@ export class KpiEvaluationsService implements OnModuleInit {
   }
 
   async updateFormTemplate(formCode: string, payload: any) {
-    await this.prisma.kpiFormTemplate.update({
-      where: { formCode },
+    const update = await this.prisma.kpiFormTemplate.updateMany({
+      where: { formCode, organizationId: payload.organizationId || 'DEFAULT' },
       data: {
         name: payload.name,
         description: payload.description,
         templateFileId: payload.templateFileId,
+        category: payload.category,
+        targetRole: payload.targetRole,
       },
     });
+    if (update.count === 0) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu có thể sửa ${formCode}` });
 
-    return this.getFormTemplateDetail(formCode);
+    return this.getFormTemplateDetail(formCode, payload.organizationId || 'DEFAULT');
   }
 
-  async getFormTemplateXml(formCode: string) {
-    const xmlContent = getTemplateXmlContent(formCode);
+  async createFormTemplate(payload: any) {
+    const validation = validateXmlSyntax(payload.xmlContent);
+    if (!validation.isValid) {
+      throw new RpcException({ code: 3, message: `XML không hợp lệ: ${validation.error}` });
+    }
+    const formCode = `CUSTOM_${randomUUID().replace(/-/g, '').slice(0, 16).toUpperCase()}`;
+    const storedXml = String(payload.xmlContent).replace(/(<KpiFormDocument\b[^>]*\bformCode=")[^"]*(")/, `$1${formCode}$2`);
+    await this.prisma.kpiFormTemplate.create({
+      data: {
+        formCode,
+        name: payload.name.trim(),
+        description: payload.description || null,
+        category: payload.category || null,
+        targetRole: payload.targetRole || null,
+        schemaVersion: '1.0',
+        status: 'DRAFT',
+        xmlContent: storedXml,
+        organizationId: payload.organizationId || 'DEFAULT',
+        versions: {
+          create: {
+            version: 1,
+            xmlContent: storedXml,
+            status: 'DRAFT',
+            createdBy: payload.createdBy || null,
+          },
+        },
+      },
+    });
+    return this.getFormTemplateDetail(formCode, payload.organizationId || 'DEFAULT');
+  }
+
+  async getFormTemplateXml(formCode: string, organizationId = 'DEFAULT') {
+    const item = await this.prisma.kpiFormTemplate.findFirst({
+      where: { formCode, OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
+      select: { xmlContent: true },
+    });
+    if (!item) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu ${formCode}` });
+    const xmlContent = item.xmlContent || getTemplateXmlContent(formCode);
     const placeholders = extractPlaceholders(xmlContent);
     const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
 
@@ -464,7 +518,7 @@ export class KpiEvaluationsService implements OnModuleInit {
     };
   }
 
-  async saveFormTemplateXml(formCode: string, xmlContent: string) {
+  async saveFormTemplateXml(formCode: string, xmlContent: string, organizationId = 'DEFAULT') {
     const validation = validateXmlSyntax(xmlContent);
     if (!validation.isValid) {
       throw new RpcException({
@@ -472,14 +526,36 @@ export class KpiEvaluationsService implements OnModuleInit {
         message: `XML không hợp lệ: ${validation.error}`,
       });
     }
+    const documentCode = xmlContent.match(/<KpiFormDocument\b[^>]*\bformCode="([^"]+)"/)?.[1];
+    if (documentCode && documentCode !== formCode) {
+      throw new RpcException({ code: 3, message: `formCode trong XML phải khớp mã mẫu ${formCode}` });
+    }
 
-    saveTemplateXmlContent(formCode, xmlContent);
     const placeholders = extractPlaceholders(xmlContent);
     const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
 
-    await this.prisma.kpiFormTemplate.updateMany({
-      where: { formCode },
-      data: { updatedAt: new Date() },
+    const template = await this.prisma.kpiFormTemplate.findFirst({
+      where: { formCode, organizationId },
+      select: { version: true, status: true },
+    });
+    if (!template) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu ${formCode}` });
+    const nextVersion = template.status === 'PUBLISHED' ? template.version + 1 : template.version;
+    await this.prisma.$transaction(async (tx) => {
+      const existingRevision = await tx.kpiFormTemplateVersion.findFirst({ where: { formCode, version: nextVersion } });
+      if (existingRevision) {
+        await tx.kpiFormTemplateVersion.update({
+          where: { id: existingRevision.id },
+          data: { xmlContent, status: 'DRAFT', publishedBy: null, publishedAt: null },
+        });
+      } else {
+        await tx.kpiFormTemplateVersion.create({
+          data: { formCode, version: nextVersion, xmlContent, status: 'DRAFT', createdBy: organizationId },
+        });
+      }
+      await tx.kpiFormTemplate.update({
+        where: { formCode },
+        data: { xmlContent, version: nextVersion, status: 'DRAFT', updatedAt: new Date() },
+      });
     });
 
     return {
@@ -489,6 +565,192 @@ export class KpiEvaluationsService implements OnModuleInit {
       xmlContent,
       placeholders,
       xmlSize,
+    };
+  }
+
+  async listFormTemplateBindings(formCode: string, organizationId = 'DEFAULT') {
+    const data = await this.prisma.kpiFormTemplateBinding.findMany({
+      where: { formCode, organizationId },
+      orderBy: [{ unitCode: 'asc' }, { processCode: 'asc' }, { nodeCode: 'asc' }],
+    });
+    return {
+      success: true,
+      message: 'Lấy danh sách gán mẫu thành công',
+      data: data.map((binding) => this.mapFormTemplateBinding(binding)),
+    };
+  }
+
+  async createFormTemplateBinding(payload: any) {
+    const organizationId = payload.organizationId || 'DEFAULT';
+    const unitCode = String(payload.unitCode || '').trim();
+    const processDefinitionId = String(payload.processDefinitionId || '').trim();
+    const processCode = String(payload.processCode || '').trim();
+    if (!unitCode || !processDefinitionId || !processCode) {
+      throw new RpcException({ code: 3, message: 'Cần chọn đơn vị và quy trình trước khi gán mẫu' });
+    }
+
+    const template = await this.prisma.kpiFormTemplate.findFirst({
+      where: { formCode: payload.formCode, OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
+      select: { formCode: true, status: true, version: true },
+    });
+    if (!template) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu ${payload.formCode}` });
+    if (template.status !== 'PUBLISHED') throw new RpcException({ code: 3, message: 'Chỉ mẫu đã phát hành mới được gán vào quy trình' });
+
+    const effectiveFrom = payload.effectiveFrom ? new Date(payload.effectiveFrom) : null;
+    const effectiveTo = payload.effectiveTo ? new Date(payload.effectiveTo) : null;
+    if ((effectiveFrom && Number.isNaN(effectiveFrom.getTime())) || (effectiveTo && Number.isNaN(effectiveTo.getTime()))) {
+      throw new RpcException({ code: 3, message: 'Ngày hiệu lực không hợp lệ' });
+    }
+    if (effectiveFrom && effectiveTo && effectiveTo < effectiveFrom) {
+      throw new RpcException({ code: 3, message: 'Ngày kết thúc phải sau ngày bắt đầu' });
+    }
+
+    const candidates = await this.prisma.kpiFormTemplateBinding.findMany({
+      where: {
+        organizationId,
+        unitCode,
+        processDefinitionId,
+        nodeCode: payload.nodeCode || null,
+        phase: payload.phase || null,
+        isActive: true,
+      },
+    });
+    const overlaps = candidates.some((candidate) => {
+      const candidateStart = candidate.effectiveFrom?.getTime() ?? Number.NEGATIVE_INFINITY;
+      const candidateEnd = candidate.effectiveTo?.getTime() ?? Number.POSITIVE_INFINITY;
+      const newStart = effectiveFrom?.getTime() ?? Number.NEGATIVE_INFINITY;
+      const newEnd = effectiveTo?.getTime() ?? Number.POSITIVE_INFINITY;
+      return candidateStart <= newEnd && newStart <= candidateEnd;
+    });
+    if (overlaps) {
+      throw new RpcException({ code: 6, message: 'Đã có mẫu đang hoạt động cho đơn vị, quy trình, bước và thời gian này' });
+    }
+
+    const binding = await this.prisma.kpiFormTemplateBinding.create({
+      data: {
+        formCode: payload.formCode,
+        organizationId,
+        unitCode,
+        processDefinitionId,
+        processCode,
+        templateVersion: template.version,
+        nodeCode: payload.nodeCode || null,
+        phase: payload.phase || null,
+        effectiveFrom,
+        effectiveTo,
+        createdBy: payload.createdBy || null,
+      },
+    });
+    return {
+      success: true,
+      message: 'Đã gán biểu mẫu cho đơn vị và quy trình',
+      data: this.mapFormTemplateBinding(binding),
+    };
+  }
+
+  async deleteFormTemplateBinding(id: number, organizationId = 'DEFAULT') {
+    const result = await this.prisma.kpiFormTemplateBinding.updateMany({
+      where: { id, organizationId, isActive: true },
+      data: { isActive: false, updatedAt: new Date() },
+    });
+    if (result.count === 0) throw new RpcException({ code: 5, message: 'Không tìm thấy cấu hình gán mẫu đang hoạt động' });
+    const data = await this.prisma.kpiFormTemplateBinding.findFirst({ where: { id, organizationId } });
+    return {
+      success: true,
+      message: 'Đã gỡ gán biểu mẫu',
+      data: data ? this.mapFormTemplateBinding(data) : undefined,
+    };
+  }
+
+  async publishFormTemplate(formCode: string, organizationId = 'DEFAULT', publishedBy?: string) {
+    const template = await this.prisma.kpiFormTemplate.findFirst({
+      where: { formCode, organizationId },
+      select: { xmlContent: true, version: true },
+    });
+    if (!template) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu ${formCode}` });
+    const xmlContent = template.xmlContent || getTemplateXmlContent(formCode);
+    const validation = validateXmlSyntax(xmlContent);
+    if (!validation.isValid) throw new RpcException({ code: 3, message: `XML không hợp lệ: ${validation.error}` });
+    const revision = await this.prisma.kpiFormTemplateVersion.findFirst({ where: { formCode, version: template.version } });
+    await this.prisma.$transaction(async (tx) => {
+      if (revision) {
+        await tx.kpiFormTemplateVersion.update({
+          where: { id: revision.id },
+          data: { status: 'PUBLISHED', publishedBy: publishedBy || null, publishedAt: new Date() },
+        });
+      } else {
+        await tx.kpiFormTemplateVersion.create({
+          data: {
+            formCode,
+            version: template.version,
+            xmlContent,
+            status: 'PUBLISHED',
+            createdBy: organizationId,
+            publishedBy: publishedBy || null,
+            publishedAt: new Date(),
+          },
+        });
+      }
+      await tx.kpiFormTemplate.updateMany({ where: { formCode, organizationId }, data: { status: 'PUBLISHED' } });
+    });
+    return this.getFormTemplateDetail(formCode, organizationId);
+  }
+
+  async resolveFormTemplateBinding(query: any) {
+    const now = new Date();
+    const bindings = await this.prisma.kpiFormTemplateBinding.findMany({
+      where: {
+        organizationId: query.organizationId,
+        unitCode: query.unitCode,
+        processDefinitionId: query.processDefinitionId,
+        isActive: true,
+        OR: [{ nodeCode: query.nodeCode }, { nodeCode: null }],
+        AND: [
+          { OR: [{ phase: query.phase }, { phase: null }] },
+          { OR: [{ effectiveFrom: null }, { effectiveFrom: { lte: now } }] },
+          { OR: [{ effectiveTo: null }, { effectiveTo: { gte: now } }] },
+        ],
+      },
+      include: { template: { include: { versions: true } } },
+    });
+    const published = bindings.filter((binding) => binding.template.status === 'PUBLISHED');
+    published.sort((left, right) => Number(Boolean(right.nodeCode)) - Number(Boolean(left.nodeCode)) || Number(Boolean(right.phase)) - Number(Boolean(left.phase)));
+    const selected = published[0];
+    if (!selected) throw new RpcException({ code: 5, message: 'Không có biểu mẫu đã phát hành phù hợp với đơn vị và bước quy trình' });
+    if (published[1] && Boolean(published[1].nodeCode) === Boolean(selected.nodeCode) && Boolean(published[1].phase) === Boolean(selected.phase)) {
+      throw new RpcException({ code: 6, message: 'Có nhiều biểu mẫu cùng độ ưu tiên phù hợp với bước quy trình' });
+    }
+    return {
+      success: true,
+      message: 'Đã tìm thấy biểu mẫu áp dụng',
+      data: {
+        bindingId: selected.id,
+        formCode: selected.formCode,
+        name: selected.template.name,
+        unitCode: selected.unitCode,
+        processCode: selected.processCode,
+        nodeCode: selected.nodeCode || '',
+        phase: selected.phase || '',
+        templateVersion: selected.templateVersion,
+        xmlContent: selected.template.versions.find((version) => version.version === selected.templateVersion)?.xmlContent || selected.template.xmlContent || getTemplateXmlContent(selected.formCode),
+      },
+    };
+  }
+
+  private mapFormTemplateBinding(binding: any) {
+    return {
+      id: binding.id,
+      formCode: binding.formCode,
+      organizationId: binding.organizationId,
+      unitCode: binding.unitCode,
+      processDefinitionId: binding.processDefinitionId,
+      processCode: binding.processCode,
+      templateVersion: binding.templateVersion || 1,
+      nodeCode: binding.nodeCode || '',
+      phase: binding.phase || '',
+      effectiveFrom: binding.effectiveFrom?.toISOString?.() || '',
+      effectiveTo: binding.effectiveTo?.toISOString?.() || '',
+      isActive: binding.isActive,
     };
   }
 

@@ -16,6 +16,7 @@ import {
   ForbiddenException,
   Req,
   Res,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -34,14 +35,21 @@ import { Metadata } from '@grpc/grpc-js';
 @ApiBearerAuth('JWT-auth')
 export class KpiFormsController implements OnModuleInit {
   private kpiService: any;
+  private workflowService: any;
 
   constructor(
     @Inject(MICROSERVICES.KPI.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly workflowClient: any,
     private readonly issuer: TokenIssuerService,
   ) {}
 
   onModuleInit() {
     this.kpiService = this.client.getService(MICROSERVICES.KPI.SERVICE);
+    this.workflowService = this.workflowClient.getService(MICROSERVICES.WORKFLOW.SERVICE);
+  }
+
+  private getOrganizationId(req: any): string {
+    return String(req?.user?.organizationId || req?.user?.orgId || req?.user?.organizationCode || req?.user?.unitCode || 'DEFAULT');
   }
 
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
@@ -72,7 +80,7 @@ export class KpiFormsController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách các biểu mẫu đánh giá và file XML mẫu' })
   async findAll(@Req() req: any) {
     return firstValueFrom(
-      this.kpiService.FindFormTemplates({}, this.getGrpcMetadata(req)),
+      this.kpiService.FindFormTemplates({ organizationId: this.getOrganizationId(req) }, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
   }
 
@@ -81,7 +89,7 @@ export class KpiFormsController implements OnModuleInit {
   async findOne(@Req() req: any, @Param('formCode') formCode: string) {
     return firstValueFrom(
       this.kpiService.GetFormTemplateDetail(
-        { formCode },
+        { formCode, organizationId: this.getOrganizationId(req) },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
@@ -96,7 +104,7 @@ export class KpiFormsController implements OnModuleInit {
   ) {
     return firstValueFrom(
       this.kpiService.UpdateFormTemplate(
-        { formCode, ...body },
+        { formCode, ...body, organizationId: this.getOrganizationId(req) },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
@@ -107,7 +115,7 @@ export class KpiFormsController implements OnModuleInit {
   async getXml(@Req() req: any, @Param('formCode') formCode: string) {
     return firstValueFrom(
       this.kpiService.GetFormTemplateXml(
-        { formCode },
+        { formCode, organizationId: this.getOrganizationId(req) },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
@@ -125,7 +133,7 @@ export class KpiFormsController implements OnModuleInit {
     }
     return firstValueFrom(
       this.kpiService.SaveFormTemplateXml(
-        { formCode, xmlContent: body.xmlContent },
+        { formCode, xmlContent: body.xmlContent, organizationId: this.getOrganizationId(req) },
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
@@ -152,7 +160,7 @@ export class KpiFormsController implements OnModuleInit {
     try {
       const response = await firstValueFrom(
         this.kpiService.GetFormTemplateXml(
-          { formCode },
+          { formCode, organizationId: this.getOrganizationId(req) },
           this.getGrpcMetadata(req),
         ),
       );
@@ -169,5 +177,99 @@ export class KpiFormsController implements OnModuleInit {
     } catch (e) {
       this.handleRpcError(e);
     }
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Tạo biểu mẫu XML mới trong phạm vi tổ chức' })
+  async create(@Req() req: any, @Body() body: { name: string; description?: string; category?: string; targetRole?: string; xmlContent: string }) {
+    if (!body?.name?.trim() || !body?.xmlContent?.trim()) {
+      throw new BadRequestException('Tên mẫu và nội dung XML là bắt buộc');
+    }
+    return firstValueFrom(this.kpiService.CreateFormTemplate({
+      ...body,
+      organizationId: this.getOrganizationId(req),
+      createdBy: String(req?.user?.id || ''),
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e));
+  }
+
+  @Post(':formCode/publish')
+  @ApiOperation({ summary: 'Phát hành mẫu XML đã kiểm tra' })
+  async publish(@Req() req: any, @Param('formCode') formCode: string) {
+    return firstValueFrom(this.kpiService.PublishFormTemplate({
+      formCode,
+      organizationId: this.getOrganizationId(req),
+      publishedBy: String(req?.user?.id || ''),
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e));
+  }
+
+  @Get(':formCode/bindings')
+  @ApiOperation({ summary: 'Danh sách đơn vị và quy trình đang được gán mẫu' })
+  async listBindings(@Req() req: any, @Param('formCode') formCode: string) {
+    return firstValueFrom(this.kpiService.ListFormTemplateBindings({
+      formCode,
+      organizationId: this.getOrganizationId(req),
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e));
+  }
+
+  @Post(':formCode/bindings')
+  @ApiOperation({ summary: 'Gán mẫu cho đơn vị và bước trong quy trình' })
+  async createBinding(@Req() req: any, @Param('formCode') formCode: string, @Body() body: { unitCode: string; processDefinitionId: string; processCode: string; nodeCode?: string; phase?: string; effectiveFrom?: string; effectiveTo?: string }) {
+    const organizationId = this.getOrganizationId(req);
+    const workflow = await firstValueFrom(this.workflowService.FindOneWorkflow({
+      id: body.processDefinitionId,
+      organizationId,
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e)) as any;
+    if (workflow?.organizationId && workflow.organizationId !== organizationId) {
+      throw new ForbiddenException('Quy trình không thuộc tổ chức hiện tại');
+    }
+    if (!workflow?.ownerUnitCode || workflow.ownerUnitCode !== body.unitCode) {
+      throw new BadRequestException('Đơn vị gán mẫu phải trùng với đơn vị sở hữu quy trình');
+    }
+    if (workflow.code !== body.processCode) {
+      throw new BadRequestException('Mã quy trình không khớp với quy trình đã chọn');
+    }
+    if (body.nodeCode) {
+      let graph: any = {};
+      try { graph = JSON.parse(workflow.definitionJson || '{}'); }
+      catch { throw new BadRequestException('Không đọc được cấu trúc các bước trong quy trình'); }
+      const nodes = Array.isArray(graph?.nodes) ? graph.nodes : [];
+      if (!nodes.some((node: any) => node?.id === body.nodeCode || node?.nodeKey === body.nodeCode)) {
+        throw new BadRequestException('Mã bước không tồn tại trong quy trình đã chọn');
+      }
+    }
+    return firstValueFrom(this.kpiService.CreateFormTemplateBinding({
+      formCode,
+      ...body,
+      organizationId,
+      createdBy: String(req?.user?.id || ''),
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e));
+  }
+
+  @Get('resolve/binding')
+  @ApiOperation({ summary: 'Tra cứu mẫu đã phát hành cho đơn vị và bước quy trình' })
+  async resolveBinding(@Req() req: any, @Query() query: { unitCode: string; processDefinitionId: string; nodeCode?: string; phase?: string }) {
+    if (!query.unitCode || !query.processDefinitionId) throw new BadRequestException('Cần truyền đơn vị và quy trình');
+    const organizationId = this.getOrganizationId(req);
+    const workflow = await firstValueFrom(this.workflowService.FindOneWorkflow({
+      id: query.processDefinitionId,
+      organizationId,
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e)) as any;
+    if (workflow?.ownerUnitCode !== query.unitCode) throw new ForbiddenException('Đơn vị không sở hữu quy trình này');
+    return firstValueFrom(this.kpiService.ResolveFormTemplateBinding({
+      organizationId,
+      unitCode: query.unitCode,
+      processDefinitionId: query.processDefinitionId,
+      nodeCode: query.nodeCode || '',
+      phase: query.phase || '',
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e));
+  }
+
+  @Put('bindings/:id/deactivate')
+  @ApiOperation({ summary: 'Gỡ gán mẫu khỏi quy trình' })
+  async deactivateBinding(@Req() req: any, @Param('id') id: string) {
+    return firstValueFrom(this.kpiService.DeleteFormTemplateBinding({
+      id: Number(id),
+      organizationId: this.getOrganizationId(req),
+    }, this.getGrpcMetadata(req))).catch((e) => this.handleRpcError(e));
   }
 }

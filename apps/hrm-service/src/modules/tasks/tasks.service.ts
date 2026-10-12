@@ -1304,8 +1304,8 @@ export class TasksService {
       this.prisma.kpiEvaluation.findMany({ orderBy: { createdAt: 'desc' }, select: { employeeCode: true, totalScore: true }, distinct: ['employeeCode'] }),
     ]);
 
-    const loadMap = new Map(loadCounts.map((i: any) => [i.employeeCode, i._count.taskId]));
-    const kpiMap = new Map(evaluations.map((i: any) => [i.employeeCode, i.totalScore || 75]));
+    const loadMap = new Map<string, number>(loadCounts.map((i: any) => [String(i.employeeCode), Number(i._count.taskId)] as const));
+    const kpiMap = new Map<string, number>(evaluations.map((i: any) => [String(i.employeeCode), Number(i.totalScore || 75)] as const));
     return { employees, loadMap, kpiMap };
   }
 

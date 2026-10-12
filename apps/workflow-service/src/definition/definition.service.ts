@@ -8,6 +8,7 @@ export interface CreateDefinitionDto {
   description?: string;
   graph: any;
   organizationId?: string;
+  ownerUnitCode?: string;
   createdBy?: string;
 }
 
@@ -16,6 +17,7 @@ export interface UpdateDefinitionDto {
   name?: string;
   description?: string;
   graph?: any;
+  ownerUnitCode?: string;
 }
 
 @Injectable()
@@ -34,6 +36,7 @@ export class DefinitionService {
           description: dto.description,
           isActive: true,
           organizationId: dto.organizationId,
+          ownerUnitCode: dto.ownerUnitCode,
           createdBy: dto.createdBy,
         },
       });
@@ -70,6 +73,7 @@ export class DefinitionService {
           code: dto.code ?? def.code,
           name: dto.name ?? def.name,
           description: dto.description ?? def.description,
+          ownerUnitCode: dto.ownerUnitCode ?? def.ownerUnitCode,
         },
       });
 
@@ -150,6 +154,10 @@ export class DefinitionService {
 
       const latestVersion = def.versions[0];
       if (!latestVersion) throw new NotFoundException(`No versions found for process ${id}`);
+
+      if (!def.ownerUnitCode) {
+        throw new BadRequestException('Cần gán đơn vị sở hữu cho quy trình trước khi phát hành');
+      }
 
       // Đã published → idempotent return
       if (latestVersion.status === "PUBLISHED") {

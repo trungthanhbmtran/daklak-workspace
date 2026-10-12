@@ -45,6 +45,7 @@ model ProcessDefinition {
   name           String
   description    String?  @db.Text
   organizationId String?  @map("organization_id")
+  ownerUnitCode  String?  @map("owner_unit_code")
   createdBy      String?  @map("created_by")
   isActive       Boolean  @default(false)
   createdAt      DateTime @default(now()) @map("created_at")
@@ -55,6 +56,7 @@ model ProcessDefinition {
 
   @@index([isActive])
   @@index([organizationId])
+  @@index([ownerUnitCode])
   @@map("process_definitions")
 }
 

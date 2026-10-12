@@ -221,6 +221,7 @@ export class WorkflowService implements OnModuleInit {
       bpmnLogic: body.bpmnLogic ? JSON.stringify(body.bpmnLogic) : undefined,
       uiMetadata: body.uiMetadata ? JSON.stringify(body.uiMetadata) : undefined,
       organizationId: this.getOrganizationId(user),
+      ownerUnitCode: body.ownerUnitCode,
       createdBy: user?.id?.toString(),
     };
     const result = (await firstValueFrom(
@@ -245,6 +246,7 @@ export class WorkflowService implements OnModuleInit {
       bpmnLogic: body.bpmnLogic ? JSON.stringify(body.bpmnLogic) : undefined,
       uiMetadata: body.uiMetadata ? JSON.stringify(body.uiMetadata) : undefined,
       organizationId: this.getOrganizationId(user),
+      ownerUnitCode: body.ownerUnitCode,
     };
     const result = (await firstValueFrom(
       this.workflowGrpcService.UpdateWorkflow(payload),

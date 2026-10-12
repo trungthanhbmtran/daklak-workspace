@@ -46,6 +46,8 @@ export interface Workflow {
   name: string;
   code: string;
   description?: string;
+  organizationId?: string;
+  ownerUnitCode?: string;
   status?: string;
   version?: number;
   definition?: WorkflowGraph | { graph?: WorkflowGraph };
@@ -106,6 +108,7 @@ export interface SaveWorkflowInput {
   name: string;
   code: string;
   description?: string;
+  ownerUnitCode?: string;
   definition: WorkflowGraph;
 }
 export interface WorkflowActionInput {

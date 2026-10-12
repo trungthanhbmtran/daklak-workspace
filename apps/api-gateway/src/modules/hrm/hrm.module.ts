@@ -19,6 +19,7 @@ import { EmployeeService } from './employee.service';
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.TASK),
     registerGrpcService(MICROSERVICES.KPI),
+    registerGrpcService(MICROSERVICES.WORKFLOW),
     registerGrpcService(MICROSERVICES.MASTER_PLAN),
     registerGrpcService(MICROSERVICES.RANK_QUOTA),
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),

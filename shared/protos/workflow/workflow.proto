@@ -351,6 +351,7 @@ message CreateWorkflowRequest {
   string organizationId = 8;
   string bpmnLogic = 9;
   string uiMetadata = 10;
+  string ownerUnitCode = 11;
 }
 
 message UpdateWorkflowRequest {
@@ -364,6 +365,7 @@ message UpdateWorkflowRequest {
   string organizationId = 8;
   string bpmnLogic = 9;
   string uiMetadata = 10;
+  string ownerUnitCode = 11;
 }
 
 message FindOneWorkflowRequest {
@@ -415,6 +417,8 @@ message WorkflowResponse {
   string bpmnLogic = 14;
   string uiMetadata = 15;
   string statusLabel = 16;
+  string organizationId = 17;
+  string ownerUnitCode = 18;
 }
 
 message WorkflowDefinition {

@@ -233,15 +233,52 @@ exports.Prisma.KpiFormTemplateScalarFieldEnum = {
   formCode: 'formCode',
   name: 'name',
   description: 'description',
+  category: 'category',
+  targetRole: 'targetRole',
+  schemaVersion: 'schemaVersion',
+  status: 'status',
+  version: 'version',
+  xmlContent: 'xmlContent',
   templateFileId: 'templateFileId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   organizationId: 'organizationId'
 };
 
+exports.Prisma.KpiFormTemplateVersionScalarFieldEnum = {
+  id: 'id',
+  formCode: 'formCode',
+  version: 'version',
+  xmlContent: 'xmlContent',
+  status: 'status',
+  createdBy: 'createdBy',
+  publishedBy: 'publishedBy',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.KpiFormTemplateBindingScalarFieldEnum = {
+  id: 'id',
+  formCode: 'formCode',
+  organizationId: 'organizationId',
+  unitCode: 'unitCode',
+  processDefinitionId: 'processDefinitionId',
+  processCode: 'processCode',
+  templateVersion: 'templateVersion',
+  nodeCode: 'nodeCode',
+  phase: 'phase',
+  effectiveFrom: 'effectiveFrom',
+  effectiveTo: 'effectiveTo',
+  isActive: 'isActive',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.KpiFormDocumentScalarFieldEnum = {
   id: 'id',
   formCode: 'formCode',
+  templateVersion: 'templateVersion',
   evaluationId: 'evaluationId',
   documentFileId: 'documentFileId',
   contentJson: 'contentJson',
@@ -500,8 +537,32 @@ exports.Prisma.KpiFormTemplateOrderByRelevanceFieldEnum = {
   formCode: 'formCode',
   name: 'name',
   description: 'description',
+  category: 'category',
+  targetRole: 'targetRole',
+  schemaVersion: 'schemaVersion',
+  status: 'status',
+  xmlContent: 'xmlContent',
   templateFileId: 'templateFileId',
   organizationId: 'organizationId'
+};
+
+exports.Prisma.KpiFormTemplateVersionOrderByRelevanceFieldEnum = {
+  formCode: 'formCode',
+  xmlContent: 'xmlContent',
+  status: 'status',
+  createdBy: 'createdBy',
+  publishedBy: 'publishedBy'
+};
+
+exports.Prisma.KpiFormTemplateBindingOrderByRelevanceFieldEnum = {
+  formCode: 'formCode',
+  organizationId: 'organizationId',
+  unitCode: 'unitCode',
+  processDefinitionId: 'processDefinitionId',
+  processCode: 'processCode',
+  nodeCode: 'nodeCode',
+  phase: 'phase',
+  createdBy: 'createdBy'
 };
 
 exports.Prisma.KpiFormDocumentOrderByRelevanceFieldEnum = {
@@ -627,6 +688,8 @@ exports.Prisma.ModelName = {
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationTask: 'KpiEvaluationTask',
   KpiFormTemplate: 'KpiFormTemplate',
+  KpiFormTemplateVersion: 'KpiFormTemplateVersion',
+  KpiFormTemplateBinding: 'KpiFormTemplateBinding',
   KpiFormDocument: 'KpiFormDocument',
   MasterPlan: 'MasterPlan',
   Task: 'Task',

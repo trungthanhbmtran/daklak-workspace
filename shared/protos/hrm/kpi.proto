@@ -24,6 +24,12 @@ service KpiService {
   rpc GetFormTemplateXml (GetFormTemplateXmlRequest) returns (FormTemplateXmlResponse) {}
   rpc SaveFormTemplateXml (SaveFormTemplateXmlRequest) returns (FormTemplateXmlResponse) {}
   rpc ValidateFormTemplateXml (ValidateFormTemplateXmlRequest) returns (ValidateFormTemplateXmlResponse) {}
+  rpc CreateFormTemplate (CreateFormTemplateRequest) returns (FormTemplateDetailResponse) {}
+  rpc ListFormTemplateBindings (ListFormTemplateBindingsRequest) returns (FormTemplateBindingsResponse) {}
+  rpc CreateFormTemplateBinding (CreateFormTemplateBindingRequest) returns (FormTemplateBindingResponse) {}
+  rpc DeleteFormTemplateBinding (DeleteFormTemplateBindingRequest) returns (FormTemplateBindingResponse) {}
+  rpc PublishFormTemplate (PublishFormTemplateRequest) returns (FormTemplateDetailResponse) {}
+  rpc ResolveFormTemplateBinding (ResolveFormTemplateBindingRequest) returns (ResolvedFormTemplateResponse) {}
 }
 
 message FindPeriodsRequest {}
@@ -239,6 +245,11 @@ message FormTemplateItem {
   int32 documentCount = 10;
   bool hasXmlFile = 11;
   int32 xmlSize = 12;
+  string organizationId = 13;
+  string status = 14;
+  repeated string unitCodes = 15;
+  repeated string processCodes = 16;
+  int32 version = 17;
 }
 
 message FormTemplatesResponse {
@@ -249,6 +260,7 @@ message FormTemplatesResponse {
 
 message GetFormTemplateDetailRequest {
   string formCode = 1;
+  string organizationId = 2;
 }
 
 message FormTemplateDetailResponse {
@@ -264,10 +276,12 @@ message UpdateFormTemplateRequest {
   string name = 2;
   string description = 3;
   optional string templateFileId = 4;
+  string organizationId = 5;
 }
 
 message GetFormTemplateXmlRequest {
   string formCode = 1;
+  string organizationId = 2;
 }
 
 message FormTemplateXmlResponse {
@@ -282,6 +296,7 @@ message FormTemplateXmlResponse {
 message SaveFormTemplateXmlRequest {
   string formCode = 1;
   string xmlContent = 2;
+  string organizationId = 3;
 }
 
 message ValidateFormTemplateXmlRequest {
@@ -293,5 +308,97 @@ message ValidateFormTemplateXmlResponse {
   string message = 2;
   optional string error = 3;
   repeated string placeholders = 4;
+}
+
+message CreateFormTemplateRequest {
+  string name = 1;
+  string description = 2;
+  string category = 3;
+  string targetRole = 4;
+  string xmlContent = 5;
+  string organizationId = 6;
+  string createdBy = 7;
+}
+
+message FormTemplateBindingItem {
+  int32 id = 1;
+  string formCode = 2;
+  string organizationId = 3;
+  string unitCode = 4;
+  string processDefinitionId = 5;
+  string processCode = 6;
+  string nodeCode = 7;
+  string phase = 8;
+  string effectiveFrom = 9;
+  string effectiveTo = 10;
+  bool isActive = 11;
+  int32 templateVersion = 12;
+}
+
+message ListFormTemplateBindingsRequest {
+  string formCode = 1;
+  string organizationId = 2;
+}
+
+message FormTemplateBindingsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated FormTemplateBindingItem data = 3;
+}
+
+message CreateFormTemplateBindingRequest {
+  string formCode = 1;
+  string organizationId = 2;
+  string unitCode = 3;
+  string processDefinitionId = 4;
+  string processCode = 5;
+  string nodeCode = 6;
+  string phase = 7;
+  string effectiveFrom = 8;
+  string effectiveTo = 9;
+  string createdBy = 10;
+}
+
+message FormTemplateBindingResponse {
+  bool success = 1;
+  string message = 2;
+  FormTemplateBindingItem data = 3;
+}
+
+message DeleteFormTemplateBindingRequest {
+  int32 id = 1;
+  string organizationId = 2;
+}
+
+message PublishFormTemplateRequest {
+  string formCode = 1;
+  string organizationId = 2;
+  string publishedBy = 3;
+}
+
+message ResolveFormTemplateBindingRequest {
+  string organizationId = 1;
+  string unitCode = 2;
+  string processDefinitionId = 3;
+  string nodeCode = 4;
+  string phase = 5;
+}
+
+message ResolvedFormTemplateResponse {
+  bool success = 1;
+  string message = 2;
+  ResolvedFormTemplate data = 3;
+}
+
+message ResolvedFormTemplate {
+  int32 bindingId = 3;
+  string formCode = 4;
+  string name = 5;
+  string unitCode = 6;
+  string processCode = 7;
+  string nodeCode = 8;
+  string phase = 9;
+  int32 templateVersion = 10;
+  string xmlContent = 11;
 }
 

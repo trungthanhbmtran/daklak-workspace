@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   FileSpreadsheet,
   FileCode2,
@@ -20,6 +21,7 @@ import {
   Save,
   Tag
 } from 'lucide-react';
+import { GitBranch, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +46,17 @@ import {
   useValidateKpiXml
 } from '@/features/hrm/hooks/useKpiForms';
 import { kpiFormsApi, KpiFormTemplateItem, ValidateXmlResult } from '@/features/hrm/api/kpi-forms.api';
+import { organizationApi } from '@/features/system-admin/organization/api';
+import type { OrganizationUnitNode } from '@/features/system-admin/organization/types';
+import { workflowApi } from '@/features/workflow/api';
+import { unwrapData } from '@/lib/api-helper';
+
+function flattenUnits(nodes: OrganizationUnitNode[], parentPath = ''): Array<{ code: string; name: string }> {
+  return nodes.flatMap((unit) => {
+    const name = parentPath ? `${parentPath} / ${unit.name}` : unit.name;
+    return [...(unit.code ? [{ code: unit.code, name }] : []), ...flattenUnits(unit.children ?? [], name)];
+  });
+}
 
 export function EvaluationFormsClient() {
   const { data: forms = [], isLoading, refetch, isRefetching } = useGetKpiForms();
@@ -63,6 +76,41 @@ export function EvaluationFormsClient() {
   const [editingXmlText, setEditingXmlText] = useState('');
   const [validationResult, setValidationResult] = useState<ValidateXmlResult | null>(null);
   const [hasCopied, setHasCopied] = useState(false);
+  const [createSheetOpen, setCreateSheetOpen] = useState(false);
+  const [createName, setCreateName] = useState('');
+  const [createDescription, setCreateDescription] = useState('');
+  const [createCategory, setCreateCategory] = useState('');
+  const [createTargetRole, setCreateTargetRole] = useState('');
+  const [createXml, setCreateXml] = useState('<?xml version="1.0" encoding="UTF-8"?>\n<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="NEW_TEMPLATE" schemaVersion="1.0">\n  <Header><DocumentTitle>{{documentTitle}}</DocumentTitle></Header>\n  <Body>{{content}}</Body>\n</KpiFormDocument>');
+  const [assignForm, setAssignForm] = useState<KpiFormTemplateItem | null>(null);
+  const [assignUnitCode, setAssignUnitCode] = useState('');
+  const [assignWorkflowId, setAssignWorkflowId] = useState('');
+  const [assignNodeCode, setAssignNodeCode] = useState('');
+  const [assignPhase, setAssignPhase] = useState('');
+  const [assignFrom, setAssignFrom] = useState('');
+  const [assignTo, setAssignTo] = useState('');
+  const [isSavingNewTemplate, setIsSavingNewTemplate] = useState(false);
+  const [isSavingBinding, setIsSavingBinding] = useState(false);
+
+  const unitsQuery = useQuery({
+    queryKey: ['organizations', 'tree'],
+    queryFn: async () => {
+      const result = await organizationApi.getTree();
+      return Array.isArray(result?.data) ? result.data : [];
+    },
+  });
+  const units = useMemo(() => flattenUnits(unitsQuery.data ?? []), [unitsQuery.data]);
+  const workflowsQuery = useQuery({
+    queryKey: ['workflow', 'definitions', 'form-template-assignment'],
+    queryFn: () => workflowApi.list({ skip: 0, take: 100 }),
+    enabled: Boolean(assignForm),
+  });
+  const assignableWorkflows = (workflowsQuery.data?.data ?? []).filter((workflow) => workflow.ownerUnitCode === assignUnitCode);
+  const bindingsQuery = useQuery({
+    queryKey: ['kpi-form-bindings', assignForm?.formCode],
+    queryFn: async () => unwrapData<any[]>(await kpiFormsApi.listBindings(assignForm!.formCode), []),
+    enabled: Boolean(assignForm),
+  });
 
   // Meta Edit states
   const [metaName, setMetaName] = useState('');
@@ -172,6 +220,82 @@ export function EvaluationFormsClient() {
     }
   };
 
+  const handleCreateTemplate = async () => {
+    if (!createName.trim() || !createXml.trim()) {
+      toast.error('Nhập tên mẫu và nội dung XML');
+      return;
+    }
+    setIsSavingNewTemplate(true);
+    try {
+      await kpiFormsApi.create({
+        name: createName.trim(),
+        description: createDescription.trim() || undefined,
+        category: createCategory.trim() || undefined,
+        targetRole: createTargetRole.trim() || undefined,
+        xmlContent: createXml,
+      });
+      toast.success('Đã tạo mẫu XML nháp');
+      setCreateSheetOpen(false);
+      setCreateName('');
+      setCreateDescription('');
+      await refetch();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Không thể tạo mẫu XML');
+    } finally {
+      setIsSavingNewTemplate(false);
+    }
+  };
+
+  const handlePublishTemplate = async (form: KpiFormTemplateItem) => {
+    try {
+      await kpiFormsApi.publish(form.formCode);
+      toast.success(`Đã phát hành mẫu ${form.name}`);
+      await refetch();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Không thể phát hành mẫu');
+    }
+  };
+
+  const handleCreateBinding = async () => {
+    const workflow = assignableWorkflows.find((item) => item.id === assignWorkflowId);
+    if (!assignForm || !assignUnitCode || !workflow) {
+      toast.error('Chọn đơn vị và quy trình có cùng đơn vị sở hữu');
+      return;
+    }
+    setIsSavingBinding(true);
+    try {
+      await kpiFormsApi.createBinding(assignForm.formCode, {
+        unitCode: assignUnitCode,
+        processDefinitionId: workflow.id,
+        processCode: workflow.code,
+        nodeCode: assignNodeCode.trim() || undefined,
+        phase: assignPhase || undefined,
+        effectiveFrom: assignFrom || undefined,
+        effectiveTo: assignTo || undefined,
+      });
+      toast.success('Đã gán mẫu cho đơn vị và quy trình');
+      setAssignNodeCode('');
+      setAssignPhase('');
+      await bindingsQuery.refetch();
+      await refetch();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Không thể gán mẫu cho quy trình');
+    } finally {
+      setIsSavingBinding(false);
+    }
+  };
+
+  const handleDeactivateBinding = async (id: number) => {
+    try {
+      await kpiFormsApi.deactivateBinding(id);
+      toast.success('Đã gỡ gán mẫu');
+      await bindingsQuery.refetch();
+      await refetch();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Không thể gỡ cấu hình gán mẫu');
+    }
+  };
+
   const getFormBadgeColor = (code: string) => {
     switch (code) {
       case 'MAU_01':
@@ -215,7 +339,7 @@ export function EvaluationFormsClient() {
                 Nơi Chứa Mẫu Đánh Giá & Quản Lý File Mẫu XML
               </CardTitle>
               <CardDescription className="text-slate-300 text-sm max-w-3xl leading-relaxed">
-                Kho lưu trữ trung tâm các biểu mẫu đánh giá, xếp loại KPI/OKR chuẩn hóa của Ban Tổ chức Tỉnh ủy theo Hướng dẫn số 05-HD/TU và Quy định số 01-QĐ/BTCTU. Hỗ trợ xem trước, tải về, chỉnh sửa và kiểm định tính hợp lệ XML của 05 biểu mẫu hành chính (Mẫu 01 đến Mẫu 05).
+                Kho mẫu XML động cho nhiều đơn vị và quy trình. Tạo mẫu, kiểm tra XML, phát hành và gán vào đúng bước xử lý.
               </CardDescription>
             </div>
 
@@ -230,6 +354,9 @@ export function EvaluationFormsClient() {
                 <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
                 Làm mới
               </Button>
+              <Button size="sm" onClick={() => setCreateSheetOpen(true)} className="h-10 gap-2 bg-white text-blue-900 hover:bg-blue-50">
+                <Plus className="h-4 w-4" /> Tạo mẫu
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -243,8 +370,8 @@ export function EvaluationFormsClient() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Tổng số Biểu mẫu</p>
-            <h4 className="text-2xl font-black text-foreground mt-0.5">{forms.length} Mẫu chuẩn</h4>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">Mẫu 01 - Mẫu 05 (Quy chế BTCTU)</p>
+            <h4 className="text-2xl font-black text-foreground mt-0.5">{forms.length} Mẫu</h4>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">Danh sách mở rộng theo nhu cầu đơn vị</p>
           </div>
         </Card>
 
@@ -265,8 +392,8 @@ export function EvaluationFormsClient() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Đối tượng áp dụng</p>
-            <h4 className="text-2xl font-black text-foreground mt-0.5">22 VTVL & 05 Phòng</h4>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">Bao phủ toàn diện cơ quan</p>
+            <h4 className="text-2xl font-black text-foreground mt-0.5">Theo quy trình</h4>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">Đơn vị sở hữu được cấu hình trên quy trình</p>
           </div>
         </Card>
 
@@ -344,6 +471,9 @@ export function EvaluationFormsClient() {
                       v{item.schemaVersion}
                     </span>
                   </div>
+                  <Badge variant={item.status === 'PUBLISHED' ? 'default' : 'secondary'} className="mt-2 w-fit text-[10px]">
+                    {item.status === 'PUBLISHED' ? 'Đã phát hành' : 'Bản nháp'}
+                  </Badge>
 
                   <CardTitle className="text-base font-bold text-foreground mt-3 leading-snug break-words">
                     {item.name}
@@ -400,6 +530,16 @@ export function EvaluationFormsClient() {
 
                 <CardFooter className="p-4 pt-0 bg-muted/10 border-t flex flex-wrap gap-2 justify-between items-center min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      setAssignForm(item);
+                      setAssignUnitCode('');
+                      setAssignWorkflowId('');
+                    }} className="h-8 px-2.5 text-xs gap-1.5">
+                      <GitBranch className="w-3.5 h-3.5" /> Gán quy trình
+                    </Button>
+                    {item.status !== 'PUBLISHED' && <Button variant="outline" size="sm" onClick={() => void handlePublishTemplate(item)} className="h-8 px-2.5 text-xs gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Phát hành
+                    </Button>}
                     <Button
                       variant="outline"
                       size="sm"
@@ -423,7 +563,9 @@ export function EvaluationFormsClient() {
                     <Button
                       variant="outline"
                       size="sm"
+                      disabled={item.organizationId === 'DEFAULT'}
                       onClick={() => handleOpenEditXml(item)}
+                      title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Sửa XML'}
                       className="h-8 px-2.5 text-xs gap-1.5 hover:text-indigo-600 hover:border-indigo-300"
                     >
                       <Code2 className="w-3.5 h-3.5" /> Sửa XML
@@ -433,9 +575,10 @@ export function EvaluationFormsClient() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    disabled={item.organizationId === 'DEFAULT'}
                     onClick={() => handleOpenEditMeta(item)}
+                    title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Chỉnh sửa thông tin biểu mẫu'}
                     className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                    title="Chỉnh sửa thông tin biểu mẫu"
                   >
                     <Edit className="w-3.5 h-3.5" />
                   </Button>
@@ -788,6 +931,51 @@ export function EvaluationFormsClient() {
                 <Save className="w-3.5 h-3.5" />
               )}
               Lưu thông tin
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={createSheetOpen} onOpenChange={setCreateSheetOpen}>
+        <SheetContent className="w-full sm:max-w-2xl flex flex-col gap-0 p-0 min-w-0">
+          <SheetHeader className="border-b bg-muted/20 p-6">
+            <SheetTitle>Tạo mẫu XML</SheetTitle>
+            <SheetDescription>Mẫu được lưu ở trạng thái nháp. Kiểm tra nội dung trước khi phát hành và gán quy trình.</SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 space-y-4 overflow-y-auto p-6">
+            <div className="space-y-2"><Label>Tên mẫu</Label><Input value={createName} onChange={(event) => setCreateName(event.target.value)} placeholder="Ví dụ: Phiếu đề xuất đánh giá chuyên đề" /></div>
+            <div className="space-y-2"><Label>Phân nhóm</Label><Input value={createCategory} onChange={(event) => setCreateCategory(event.target.value)} placeholder="Ví dụ: Đánh giá định kỳ" /></div>
+            <div className="space-y-2"><Label>Đối tượng sử dụng</Label><Input value={createTargetRole} onChange={(event) => setCreateTargetRole(event.target.value)} placeholder="Đơn vị hoặc vai trò áp dụng" /></div>
+            <div className="space-y-2"><Label>Mô tả</Label><Textarea value={createDescription} onChange={(event) => setCreateDescription(event.target.value)} rows={2} /></div>
+            <div className="space-y-2"><Label>Nội dung XML</Label><Textarea value={createXml} onChange={(event) => setCreateXml(event.target.value)} rows={18} className="min-h-[360px] resize-y font-mono text-xs" /></div>
+          </div>
+          <SheetFooter className="border-t bg-muted/20 p-4">
+            <Button variant="outline" onClick={() => setCreateSheetOpen(false)}>Đóng</Button>
+            <Button onClick={() => void handleCreateTemplate()} disabled={isSavingNewTemplate}>
+              {isSavingNewTemplate ? <RefreshCw className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}Tạo mẫu nháp
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={Boolean(assignForm)} onOpenChange={(open) => !open && setAssignForm(null)}>
+        <SheetContent className="w-full sm:max-w-xl flex flex-col gap-0 p-0 min-w-0">
+          <SheetHeader className="border-b bg-muted/20 p-6">
+            <SheetTitle>Gán mẫu vào quy trình</SheetTitle>
+            <SheetDescription className="break-words">{assignForm?.name} · chọn đơn vị sở hữu và quy trình tương ứng.</SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 min-h-0 space-y-5 overflow-y-auto p-6">
+            <div className="space-y-2"><Label>Đơn vị</Label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={assignUnitCode} onChange={(event) => { setAssignUnitCode(event.target.value); setAssignWorkflowId(''); }}><option value="">Chọn đơn vị</option>{units.map((unit) => <option key={unit.code} value={unit.code}>{unit.name} · {unit.code}</option>)}</select>{unitsQuery.isError && <p className="text-xs text-destructive">Không tải được danh sách đơn vị.</p>}</div>
+            <div className="space-y-2"><Label>Quy trình thuộc đơn vị đã chọn</Label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={assignWorkflowId} onChange={(event) => setAssignWorkflowId(event.target.value)} disabled={!assignUnitCode || workflowsQuery.isPending}><option value="">Chọn quy trình</option>{assignableWorkflows.map((workflow) => <option key={workflow.id} value={workflow.id}>{workflow.name} · {workflow.code}</option>)}</select>{workflowsQuery.isError && <p className="text-xs text-destructive">Không tải được quy trình.</p>}{assignUnitCode && !workflowsQuery.isPending && assignableWorkflows.length === 0 && <p className="text-xs text-muted-foreground">Đơn vị này chưa có quy trình. Hãy gán đơn vị sở hữu ở phần thiết kế quy trình trước.</p>}</div>
+            <div className="space-y-2"><Label>Mã bước xử lý (tùy chọn)</Label><Input value={assignNodeCode} onChange={(event) => setAssignNodeCode(event.target.value)} placeholder="Ví dụ: review_department" /><p className="text-xs text-muted-foreground">Để trống nếu mẫu áp dụng cho toàn bộ quy trình.</p></div>
+            <div className="space-y-2"><Label>Giai đoạn KPI (tùy chọn)</Label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={assignPhase} onChange={(event) => setAssignPhase(event.target.value)}><option value="">Tất cả giai đoạn</option><option value="REGISTRATION">Đăng ký đầu kỳ</option><option value="SELF_EVAL">Tự đánh giá</option><option value="COLLECTIVE_EVAL">Đánh giá tập thể</option><option value="FINAL">Tổng hợp cuối kỳ</option></select></div>
+            <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Hiệu lực từ</Label><Input type="date" value={assignFrom} onChange={(event) => setAssignFrom(event.target.value)} /></div><div className="space-y-2"><Label>Hiệu lực đến</Label><Input type="date" value={assignTo} onChange={(event) => setAssignTo(event.target.value)} /></div></div>
+            <div className="space-y-2"><Label>Cấu hình đang gán</Label>{bindingsQuery.isPending ? <p className="text-sm text-muted-foreground">Đang tải…</p> : (bindingsQuery.data ?? []).filter((binding: any) => binding.isActive).length === 0 ? <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">Chưa có quy trình nào được gán mẫu.</p> : <div className="space-y-2">{(bindingsQuery.data ?? []).filter((binding: any) => binding.isActive).map((binding: any) => <div key={binding.id} className="flex min-w-0 items-center justify-between gap-3 rounded-md border p-3"><div className="min-w-0"><p className="break-words text-sm font-medium">{binding.processCode} · {binding.unitCode}</p><p className="break-words text-xs text-muted-foreground">{binding.nodeCode || 'Toàn quy trình'}{binding.phase ? ` · ${binding.phase}` : ''}</p></div><Button variant="outline" size="sm" onClick={() => void handleDeactivateBinding(binding.id)}>Gỡ</Button></div>)}</div>}</div>
+          </div>
+          <SheetFooter className="border-t bg-muted/20 p-4">
+            <Button variant="outline" onClick={() => setAssignForm(null)}>Đóng</Button>
+            <Button onClick={() => void handleCreateBinding()} disabled={isSavingBinding || !assignWorkflowId || !assignUnitCode}>
+              {isSavingBinding ? <RefreshCw className="mr-2 size-4 animate-spin" /> : <GitBranch className="mr-2 size-4" />}Gán mẫu
             </Button>
           </SheetFooter>
         </SheetContent>

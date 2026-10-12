@@ -198,6 +198,11 @@ export class CreateWorkflowDto {
   @IsObject()
   @IsOptional()
   uiMetadata?: Record<string, any>;
+
+  @ApiProperty({ required: false, description: 'Mã đơn vị sở hữu quy trình' })
+  @IsString()
+  @IsOptional()
+  ownerUnitCode?: string;
 }
 
 export class UpdateWorkflowDto extends CreateWorkflowDto {}

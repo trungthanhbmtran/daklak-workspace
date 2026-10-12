@@ -15,6 +15,37 @@ export interface KpiFormTemplateItem {
   documentCount: number;
   hasXmlFile: boolean;
   xmlSize: number;
+  organizationId?: string;
+  status?: string;
+  version?: number;
+  unitCodes?: string[];
+  processCodes?: string[];
+}
+
+export interface KpiFormTemplateBinding {
+  id: number;
+  formCode: string;
+  organizationId: string;
+  unitCode: string;
+  processDefinitionId: string;
+  processCode: string;
+  nodeCode?: string;
+  phase?: string;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+  isActive: boolean;
+}
+
+export interface ResolvedKpiFormTemplate {
+  bindingId: number;
+  formCode: string;
+  name: string;
+  unitCode: string;
+  processCode: string;
+  nodeCode: string;
+  phase: string;
+  templateVersion: number;
+  xmlContent: string;
 }
 
 export interface KpiFormDetailResponse {
@@ -77,6 +108,30 @@ export const kpiFormsApi = {
   // Kiểm tra tính hợp lệ cú pháp XML
   validateXml(xmlContent: string): Promise<ApiResponse<ValidateXmlResult>> {
     return apiClient.post('/hrm/kpi-forms/validate-xml', { xmlContent }) as any;
+  },
+
+  create(payload: { name: string; description?: string; category?: string; targetRole?: string; xmlContent: string }): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/kpi-forms', payload) as any;
+  },
+
+  publish(formCode: string): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/kpi-forms/${encodeURIComponent(formCode)}/publish`) as any;
+  },
+
+  listBindings(formCode: string): Promise<ApiResponse<KpiFormTemplateBinding[]>> {
+    return apiClient.get(`/hrm/kpi-forms/${encodeURIComponent(formCode)}/bindings`) as any;
+  },
+
+  createBinding(formCode: string, payload: Omit<KpiFormTemplateBinding, 'id' | 'formCode' | 'organizationId' | 'isActive'>): Promise<ApiResponse<KpiFormTemplateBinding>> {
+    return apiClient.post(`/hrm/kpi-forms/${encodeURIComponent(formCode)}/bindings`, payload) as any;
+  },
+
+  deactivateBinding(id: number): Promise<ApiResponse<KpiFormTemplateBinding>> {
+    return apiClient.put(`/hrm/kpi-forms/bindings/${id}/deactivate`) as any;
+  },
+
+  resolveBinding(query: { unitCode: string; processDefinitionId: string; nodeCode?: string; phase?: string }): Promise<ApiResponse<ResolvedKpiFormTemplate>> {
+    return apiClient.get('/hrm/kpi-forms/resolve/binding', { params: query }) as any;
   },
 
   // Đường dẫn download trực tiếp file .xml

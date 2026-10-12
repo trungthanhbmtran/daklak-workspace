@@ -76,8 +76,8 @@ export class KpiEvaluationsController {
   }
 
   @GrpcMethod('KpiService', 'GetFormTemplateDetail')
-  getFormTemplateDetail(data: { formCode: string }) {
-    return this.kpiEvaluationsService.getFormTemplateDetail(data.formCode);
+  getFormTemplateDetail(data: { formCode: string; organizationId?: string }) {
+    return this.kpiEvaluationsService.getFormTemplateDetail(data.formCode, data.organizationId);
   }
 
   @GrpcMethod('KpiService', 'UpdateFormTemplate')
@@ -86,17 +86,47 @@ export class KpiEvaluationsController {
   }
 
   @GrpcMethod('KpiService', 'GetFormTemplateXml')
-  getFormTemplateXml(data: { formCode: string }) {
-    return this.kpiEvaluationsService.getFormTemplateXml(data.formCode);
+  getFormTemplateXml(data: { formCode: string; organizationId?: string }) {
+    return this.kpiEvaluationsService.getFormTemplateXml(data.formCode, data.organizationId);
   }
 
   @GrpcMethod('KpiService', 'SaveFormTemplateXml')
-  saveFormTemplateXml(data: { formCode: string; xmlContent: string }) {
-    return this.kpiEvaluationsService.saveFormTemplateXml(data.formCode, data.xmlContent);
+  saveFormTemplateXml(data: { formCode: string; xmlContent: string; organizationId?: string }) {
+    return this.kpiEvaluationsService.saveFormTemplateXml(data.formCode, data.xmlContent, data.organizationId);
   }
 
   @GrpcMethod('KpiService', 'ValidateFormTemplateXml')
   validateFormTemplateXml(data: { xmlContent: string }) {
     return this.kpiEvaluationsService.validateFormTemplateXml(data.xmlContent);
+  }
+
+  @GrpcMethod('KpiService', 'CreateFormTemplate')
+  createFormTemplate(data: any) {
+    return this.kpiEvaluationsService.createFormTemplate(data);
+  }
+
+  @GrpcMethod('KpiService', 'ListFormTemplateBindings')
+  listFormTemplateBindings(data: any) {
+    return this.kpiEvaluationsService.listFormTemplateBindings(data.formCode, data.organizationId);
+  }
+
+  @GrpcMethod('KpiService', 'CreateFormTemplateBinding')
+  createFormTemplateBinding(data: any) {
+    return this.kpiEvaluationsService.createFormTemplateBinding(data);
+  }
+
+  @GrpcMethod('KpiService', 'DeleteFormTemplateBinding')
+  deleteFormTemplateBinding(data: any) {
+    return this.kpiEvaluationsService.deleteFormTemplateBinding(data.id, data.organizationId);
+  }
+
+  @GrpcMethod('KpiService', 'PublishFormTemplate')
+  publishFormTemplate(data: any) {
+    return this.kpiEvaluationsService.publishFormTemplate(data.formCode, data.organizationId, data.publishedBy);
+  }
+
+  @GrpcMethod('KpiService', 'ResolveFormTemplateBinding')
+  resolveFormTemplateBinding(data: any) {
+    return this.kpiEvaluationsService.resolveFormTemplateBinding(data);
   }
 }

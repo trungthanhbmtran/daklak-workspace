@@ -4,6 +4,11 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Feature] Quản lý mẫu XML động theo đơn vị và quy trình (12/10/2026)**
+  - **Yêu cầu**: Cho phép tạo nhiều mẫu theo tên, lưu phiên bản XML, gán mẫu cho đơn vị và quy trình cụ thể; mỗi quy trình phải khai báo phòng ban sở hữu.
+  - **Thực hiện**: Bổ sung ownerUnitCode cho quy trình và chặn phát hành quy trình chưa có đơn vị sở hữu; xây dựng CRUD tạo/phát hành mẫu, lưu phiên bản, gán/gỡ gán theo đơn vị + quy trình + bước/phase + thời hạn; thêm API tra cứu mẫu áp dụng và giao diện cấu hình tại Trung tâm Mẫu đánh giá.
+  - **Kiểm chứng**: Prisma generate và TypeScript typecheck cho HRM Service, Workflow Service, API Gateway và admin_khcn thành công; `git diff --check` sạch. Migration đã được tạo nhưng chưa áp dụng vào cơ sở dữ liệu.
+
 - [x] **[Workflow Engine & Data] Nạp Dữ Liệu Quy Trình Nghiệp Vụ Ban Tổ Chức Tỉnh Ủy Vào Workflow Service (12/10/2026)**
   - **Yêu cầu**: Dựa vào các sơ đồ luồng quản lý công việc và KPI Ban Tổ chức Tỉnh ủy trong `docs/diagrams/quan-ly-cong-viec-ban-to-chuc.md`, nạp dữ liệu quy trình hoàn chỉnh vào `workflow-service` và gán đơn vị là Ban Tổ chức Tỉnh ủy (`BTCTU_DAKLAK`).
   - **Chi tiết**:
