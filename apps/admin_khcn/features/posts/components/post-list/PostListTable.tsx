@@ -285,7 +285,7 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
             <Text as="span" className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10.5px] font-bold ${statusObj.bg} ${statusObj.text}`}>
               <Text as="span" className={`w-1.5 h-1.5 rounded-full ${statusObj.dot} shrink-0`} />
               <StatusIcon className="h-3.5 w-3.5 shrink-0" />
-              {getStatusLabel(post.status)}
+              {post.statusLabel || getStatusLabel(post.status)}
             </Text>
 
             <Text as="span" className="inline-flex items-center gap-1 text-[9px] font-mono text-muted-foreground font-extrabold uppercase px-2">

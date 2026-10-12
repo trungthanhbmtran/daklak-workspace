@@ -29,6 +29,42 @@ export class TaskSharedService {
     this.chatService = this.chatClient.getService('ChatService');
   }
 
+  public getTaskStatusLabel(status: string | null | undefined): string {
+    if (!status) return '—';
+    const upper = String(status).trim().toUpperCase();
+    const map: Record<string, string> = {
+      TEMPLATE: 'Chờ giao',
+      TODO: 'Chờ thực hiện',
+      PENDING_ACCEPTANCE: 'Chờ tiếp nhận',
+      PENDING_APPROVAL: 'Chờ phê duyệt',
+      IN_PROGRESS: 'Đang thực hiện',
+      PROCESSING: 'Đang thực hiện',
+      REVIEWING: 'Chờ duyệt',
+      DONE: 'Hoàn thành',
+      COMPLETED: 'Đã hoàn thành',
+      OVERDUE: 'Quá hạn',
+      RETURNED: 'Trả lại',
+      REJECTED: 'Đã từ chối',
+      CANCELLED: 'Đã hủy',
+      CANCELED: 'Đã hủy',
+      UNASSIGNED: 'Chờ phân công',
+    };
+    return map[upper] || String(status);
+  }
+
+  public getPriorityLabel(priority: string | null | undefined): string {
+    if (!priority) return '—';
+    const upper = String(priority).trim().toUpperCase();
+    const map: Record<string, string> = {
+      LOW: 'Ưu tiên thấp',
+      NORMAL: 'Bình thường',
+      MEDIUM: 'Bình thường',
+      HIGH: 'Ưu tiên cao',
+      URGENT: 'Khẩn cấp',
+    };
+    return map[upper] || String(priority);
+  }
+
   public async resolveAssigneeCodes(tasks: any[]): Promise<Map<number, string>> {
     const userIds = new Set<number>();
     tasks.forEach(t => {
@@ -839,6 +875,7 @@ export class TaskSharedService {
       assigneeCode: t.assigneeCode ?? '',
       assignerCode: t.assignerCode ?? '',
       status: t.status ?? '',
+      statusLabel: this.getTaskStatusLabel(t.status),
       dueDate: dueDateStr,
       startDate: startDateStr,
       createdAt: createdAtStr,
@@ -856,6 +893,7 @@ export class TaskSharedService {
       rejectReason: t.rejectReason ?? '',
       assignerName: t.assignerName ?? '',
       priority: t.priority ?? '',
+      priorityLabel: this.getPriorityLabel(t.priority),
       supervisorName: t.supervisorName ?? '',
       conversationId: t.conversationId ?? '',
       coassigneeCodes: t.coassigneeCodes || [],

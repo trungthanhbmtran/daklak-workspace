@@ -262,10 +262,51 @@ export class DocumentService {
     return this.prisma.documentLog.create({ data: { documentId, action, note, userId, userName } });
   }
 
+  private getDocumentStatusLabel(status: string | null | undefined): string {
+    if (!status) return '—';
+    const map: Record<string, string> = {
+      DRAFT: 'Dự thảo',
+      RECEIVED: 'Đã tiếp nhận',
+      PROCESSING: 'Đang xử lý',
+      PENDING_APPROVAL: 'Chờ phê duyệt',
+      PUBLISHED: 'Đã ban hành',
+      RESOLVED: 'Đã giải quyết',
+      RETURNED: 'Trả lại',
+      OVERDUE: 'Quá hạn',
+      ARCHIVED: 'Lưu trữ',
+    };
+    return map[String(status).trim().toUpperCase()] || String(status);
+  }
+
+  private getUrgencyLabel(urgency: string | null | undefined): string {
+    if (!urgency) return 'Bình thường';
+    const map: Record<string, string> = {
+      NORMAL: 'Bình thường',
+      URGENT: 'Khẩn',
+      FLASH: 'Hỏa tốc',
+      EXPRESS: 'Hỏa tốc',
+    };
+    return map[String(urgency).trim().toUpperCase()] || String(urgency);
+  }
+
+  private getSecurityLevelLabel(sec: string | null | undefined): string {
+    if (!sec) return 'Thường';
+    const map: Record<string, string> = {
+      NORMAL: 'Thường',
+      CONFIDENTIAL: 'Mật',
+      SECRET: 'Tối mật',
+      TOP_SECRET: 'Tuyệt mật',
+    };
+    return map[String(sec).trim().toUpperCase()] || String(sec);
+  }
+
   private mapToProto(doc: any) {
     if (!doc) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
     return {
       id: doc.id, documentNumber: doc.documentNumber || "", notation: doc.notation || "", abstract: doc.abstract || "", content: doc.content || "", typeId: doc.typeId || "", fieldId: doc.fieldId || "", issuingAuthorityId: doc.issuingAuthorityId || "", issuerName: doc.issuerName || "", signerId: doc.signerId || "", signerName: doc.signerName || "", signerPosition: doc.signerPosition || "", issueDate: doc.issueDate instanceof Date ? doc.issueDate.toISOString() : (doc.issueDate || ""), arrivalDate: doc.arrivalDate instanceof Date ? doc.arrivalDate.toISOString() : (doc.arrivalDate || ""), arrivalNumber: doc.arrivalNumber || "", processingDeadline: doc.processingDeadline instanceof Date ? doc.processingDeadline.toISOString() : (doc.processingDeadline || ""), recipients: doc.recipients || "", urgency: doc.urgency || "NORMAL", securityLevel: doc.securityLevel || "NORMAL", status: doc.status || "DRAFT", isPublic: !!doc.isPublic, isIncoming: !!doc.isIncoming, fileId: doc.fileId || "", fileUrl: doc.fileId ? `/api/v1/admin/media/download/${doc.fileId}` : "", signatureValid: !!doc.signatureValid, pageCount: doc.pageCount || 1, attachmentCount: doc.attachmentCount || 0, linkedDocumentId: doc.linkedDocumentId || "", fiscalYear: doc.fiscalYear || 0, transparencyCategory: doc.transparencyCategory || "", createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : (doc.createdAt || ""), updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : (doc.updatedAt || ""), typeName: doc.typeName || "", fieldName: doc.fieldName || "",
+      statusLabel: this.getDocumentStatusLabel(doc.status),
+      urgencyLabel: this.getUrgencyLabel(doc.urgency),
+      securityLevelLabel: this.getSecurityLevelLabel(doc.securityLevel),
     };
   }
 

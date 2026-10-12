@@ -130,6 +130,9 @@ message Document {
   string updatedAt = 31;
   string typeName = 32;
   string fieldName = 33;
+  string statusLabel = 35;
+  string urgencyLabel = 36;
+  string securityLevelLabel = 37;
 }
 
 message DocumentResponse {

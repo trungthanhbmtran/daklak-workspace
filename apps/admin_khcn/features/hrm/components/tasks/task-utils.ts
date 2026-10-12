@@ -1,4 +1,5 @@
-export const translateTaskStatus = (status: string) => {
+export const translateTaskStatus = (status: string, label?: string) => {
+  if (label) return label;
   if (!status) return "Chưa xác định";
   const map: Record<string, string> = {
     TODO: "Cần làm",

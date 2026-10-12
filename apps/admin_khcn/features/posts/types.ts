@@ -50,6 +50,7 @@ export interface Post {
   categoryId?: string;
   category?: Category;
   status: PostStatus;
+  statusLabel?: string;
   thumbnail?: string;
   authorId?: string;
   currentVersion: number;

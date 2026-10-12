@@ -414,6 +414,7 @@ message WorkflowResponse {
   string publishedAt = 13;
   string bpmnLogic = 14;
   string uiMetadata = 15;
+  string statusLabel = 16;
 }
 
 message WorkflowDefinition {
@@ -579,6 +580,7 @@ message WorkflowInstanceResponse {
   string lastCommandId = 17;
   string lastCommandStatus = 18;
   string lastCommandError = 19;
+  string statusLabel = 20;
 }
 
 message ListInstancesRequest {

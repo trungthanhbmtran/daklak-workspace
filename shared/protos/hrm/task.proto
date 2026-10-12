@@ -1,4 +1,4 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package task;
 
@@ -156,6 +156,8 @@ message TaskResponse {
   repeated TaskParticipantResponse participants = 34;
   string type = 35;
   string meetingLink = 36;
+  string statusLabel = 37;
+  string priorityLabel = 38;
 }
 
 message TaskPlan {

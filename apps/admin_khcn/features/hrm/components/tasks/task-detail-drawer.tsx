@@ -109,7 +109,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
                 <Badge variant={isCompleted ? "default" : "outline"} className={isCompleted ? "bg-green-500 text-white" : getTaskStatusColor(currentTask.status || "")}>
-                  {translateTaskStatus(currentTask.status || "")}
+                  {currentTask.statusLabel || translateTaskStatus(currentTask.status || "")}
                 </Badge>
                 <div className="flex gap-2">
                   {canReassign && !isCompleted && (

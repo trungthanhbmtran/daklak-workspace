@@ -30,6 +30,22 @@ export class PostsService implements OnModuleInit {
     }
   }
 
+  public getPostStatusLabel(status: string | null | undefined): string {
+    if (!status) return '—';
+    const map: Record<string, string> = {
+      DRAFT: 'Bản nháp',
+      SUBMITTED: 'Đã gửi duyệt',
+      UNDER_REVIEW: 'Đang kiểm duyệt',
+      PENDING_APPROVAL: 'Chờ phê duyệt',
+      APPROVED: 'Đã phê duyệt',
+      PUBLISHED: 'Đã xuất bản',
+      UNPUBLISHED: 'Hạ bài',
+      ARCHIVED: 'Lưu trữ',
+      REJECTED: 'Đã từ chối',
+    };
+    return map[String(status).trim().toUpperCase()] || String(status);
+  }
+
   /**
    * Chuyển đổi cấu trúc Lexical JSON sang HTML cơ bản để render ở Portal
    */
@@ -296,6 +312,7 @@ export class PostsService implements OnModuleInit {
 
     return {
       ...post,
+      statusLabel: this.getPostStatusLabel(post.status),
       translations: latestTranslations
     };
   }
@@ -566,7 +583,8 @@ export class PostsService implements OnModuleInit {
       const translations: any = {};
       // Re-fetch translations if we filtered them above, or just keep as is for list
       // For list, we usually only care about the current lang or availability
-      return { ...finalPost, translations };
+      const statusLabel = this.getPostStatusLabel(finalPost.status);
+      return { ...finalPost, statusLabel, translations };
     });
 
     return {

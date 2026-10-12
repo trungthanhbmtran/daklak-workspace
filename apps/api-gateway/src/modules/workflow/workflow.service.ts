@@ -16,6 +16,10 @@ import {
   UpdateWorkflowDto,
   StartWorkflowDto,
 } from './dto/workflow.dto';
+import {
+  getWorkflowStatusLabel,
+  normalizeWorkflow,
+} from '../../common/utils/language-normalization.util';
 
 @Injectable()
 export class WorkflowService implements OnModuleInit {
@@ -164,6 +168,9 @@ export class WorkflowService implements OnModuleInit {
         res.uiMetadata = JSON.parse(res.uiMetadata);
       } catch {}
     }
+    if (res.status) {
+      res.statusLabel = getWorkflowStatusLabel(res.status);
+    }
     return res;
   }
 
@@ -293,8 +300,11 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListInstances(payload),
     ).catch((e) => this.handleRpcError(e))) as any;
+    const items = (result?.data || []).map((inst: any) =>
+      normalizeWorkflow(inst),
+    );
     return {
-      data: result?.data || [],
+      data: items,
       meta: result?.meta || {},
       message: 'OK',
     };
@@ -304,7 +314,11 @@ export class WorkflowService implements OnModuleInit {
     const result = await firstValueFrom(
       this.workflowGrpcService.GetInstance({ id, organizationId }),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result || {}, meta: {}, message: 'OK' };
+    return {
+      data: result ? normalizeWorkflow(result) : {},
+      meta: {},
+      message: 'OK',
+    };
   }
 
   async getLogs(instanceId: string, organizationId?: string) {

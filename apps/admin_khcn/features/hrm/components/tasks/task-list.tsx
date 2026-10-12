@@ -28,26 +28,33 @@ import { translateTaskStatus, getTaskStatusColor } from "./task-utils";
 
 // ── Badge helpers ──────────────────────────────────────────────────────────────
 
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string, label?: string) => {
   return (
     <Badge variant="outline" className={getTaskStatusColor(status)}>
-      {translateTaskStatus(status)}
+      {label || translateTaskStatus(status)}
     </Badge>
   );
 };
 
-const getPriorityBadge = (priority: string) => {
-  switch (priority?.toUpperCase()) {
+const getPriorityBadge = (priority: string, label?: string) => {
+  const displayLabel = label || priority;
+  const p = priority?.toUpperCase();
+  switch (p) {
     case "CAO":
-      return <Badge variant="destructive">Cao</Badge>;
+    case "HIGH":
+      return <Badge variant="destructive">{displayLabel || "Cao"}</Badge>;
     case "THƯỜNG":
-      return <Badge variant="outline" className="text-blue-600">Thường</Badge>;
+    case "NORMAL":
+    case "MEDIUM":
+      return <Badge variant="outline" className="text-blue-600">{displayLabel || "Thường"}</Badge>;
     case "THẤP":
-      return <Badge variant="outline" className="text-slate-500">Thấp</Badge>;
+    case "LOW":
+      return <Badge variant="outline" className="text-slate-500">{displayLabel || "Thấp"}</Badge>;
     case "KHẨN":
-      return <Badge variant="destructive" className="bg-red-700 animate-pulse">Khẩn</Badge>;
+    case "URGENT":
+      return <Badge variant="destructive" className="bg-red-700 animate-pulse">{displayLabel || "Khẩn"}</Badge>;
     default:
-      return <Badge variant="outline" className="text-slate-500">{priority}</Badge>;
+      return <Badge variant="outline" className="text-slate-500">{displayLabel}</Badge>;
   }
 };
 
@@ -310,11 +317,11 @@ export function TaskList() {
             },
             {
               header: "Trạng thái",
-              cell: (task: any) => getStatusBadge(task.status)
+              cell: (task: any) => getStatusBadge(task.status, task.statusLabel)
             },
             {
               header: "Mức độ",
-              cell: (task: any) => getPriorityBadge(task.priority)
+              cell: (task: any) => getPriorityBadge(task.priority, task.priorityLabel)
             },
             {
               header: "Người xử lý",

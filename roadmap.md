@@ -4,6 +4,16 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Backend & Architecture] Mở Rộng Chuẩn Hóa Ngôn Ngữ & Tìm Kiếm Đồng Nhất Trên Toàn Bộ Microservices (HRM, Document, Posts, Workflow, API Gateway) (12/10/2026)**
+  - **Vấn đề**: Người dùng yêu cầu mở rộng kiến trúc xử lý ngôn ngữ tập trung: tất cả các service còn lại (`hrm-service`, `document-service`, `posts-service`, `workflow-service`, và `api-gateway`) đều phải xử lý ngôn ngữ/mã trạng thái/độ ưu tiên trước ở backend, tự động đính kèm `statusLabel`, `priorityLabel`, `urgencyLabel`, v.v. Frontend chỉ nhận và render kết quả hiển thị, không làm lại logic mapping này.
+  - **Khắc phục**:
+    1. Xây dựng bộ chuẩn hóa ngôn ngữ trung tâm tại `apps/api-gateway/src/common/utils/language-normalization.util.ts` và tích hợp vào các gateway services (`tasks`, `documents`, `posts`, `workflow`, `user`).
+    2. Cập nhật `hrm-service` (`task-shared.service.ts`): Tự động bổ sung `statusLabel`, `priorityLabel` vào `toTaskResponse`.
+    3. Cập nhật `document-service` (`document.service.ts`): Tự động bổ sung `statusLabel`, `urgencyLabel`, `securityLevelLabel` vào kết quả văn bản.
+    4. Cập nhật `posts-service` (`posts.service.ts`): Tự động bổ sung `statusLabel` vào kết quả bài viết.
+    5. Cập nhật frontend `admin_khcn` (`TaskBadges.tsx`, `ProcessingRow.tsx`, `PostListTable.tsx`, `task-list.tsx`, `task-detail-drawer.tsx`): Sử dụng trực tiếp nhãn ngôn ngữ từ backend, loại bỏ các hàm mapping/translate trùng lặp ở client.
+  - **Kiểm chứng**: Typecheck `tsc --noEmit` thành công trên toàn bộ 5 dự án liên quan (`api-gateway`, `hrm-service`, `document-service`, `posts-service`, `admin_khcn`), Unit test Jest 14/14 tests PASS, đối soát diff 7 bộ ràng buộc.
+
 - [x] **[Backend & Architecture] Chuẩn hóa Chuyển đổi Mã/Tên sang Tiếng Việt & Tìm kiếm Đa ngôn ngữ Đồng nhất trên Backend (12/10/2026)**
   - **Vấn đề**: Logic convert các mã cũ (`TODO`, `PENDING_ACCEPTANCE`, `IN_PROGRESS`, `COMPLETED`, field labels) sang tiếng Việt đang bị viết rải rác dưới client (`ReportViewer.tsx`, `fieldHelpers.ts`). Tương tự, bộ lọc tìm kiếm cũng bị xử lý thủ công dưới client với các hàm dịch cục bộ, không đồng nhất khi tìm kiếm bằng tiếng Việt có dấu/không dấu hoặc các mã/ngôn ngữ khác.
   - **Khắc phục**:

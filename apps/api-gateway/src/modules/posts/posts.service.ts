@@ -2,6 +2,7 @@ import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { normalizeResponsePayload } from '../../common/utils/language-normalization.util';
 
 @Injectable()
 export class PostsService implements OnModuleInit {
@@ -16,7 +17,7 @@ export class PostsService implements OnModuleInit {
   }
 
   async create(createPostDto: any, req: any) {
-    return firstValueFrom(
+    const res = await firstValueFrom(
       this.postGrpcService.createPost({
         ...createPostDto,
         authorId: req.user.id,
@@ -25,24 +26,27 @@ export class PostsService implements OnModuleInit {
       console.error('RPC Call Failed', e.message);
       return null;
     });
+    return normalizeResponsePayload(res, 'post');
   }
 
   async findAll(query: any) {
-    return firstValueFrom(this.postGrpcService.listPosts(query)).catch((e) => {
+    const res = await firstValueFrom(this.postGrpcService.listPosts(query)).catch((e) => {
       console.error('RPC Call Failed', e.message);
       return null;
     });
+    return normalizeResponsePayload(res, 'post');
   }
 
   async findOne(id: string) {
-    return firstValueFrom(this.postGrpcService.getPost({ id })).catch((e) => {
+    const res = await firstValueFrom(this.postGrpcService.getPost({ id })).catch((e) => {
       console.error('RPC Call Failed', e.message);
       return null;
     });
+    return normalizeResponsePayload(res, 'post');
   }
 
   async update(id: string, updatePostDto: any, req: any) {
-    return firstValueFrom(
+    const res = await firstValueFrom(
       this.postGrpcService.updatePost({
         id,
         ...updatePostDto,
@@ -52,6 +56,7 @@ export class PostsService implements OnModuleInit {
       console.error('RPC Call Failed', e.message);
       return null;
     });
+    return normalizeResponsePayload(res, 'post');
   }
 
   async remove(id: string, req: any) {

@@ -17,7 +17,8 @@ interface ProcessingRowProps {
 }
 
 export const ProcessingRow = React.memo(function ProcessingRow({ doc }: ProcessingRowProps) {
-  const status = STATUS_MAP[doc.status] ?? { label: doc.status, cls: "bg-muted text-muted-foreground" };
+  const statusBase = STATUS_MAP[doc.status] ?? { label: doc.status, cls: "bg-muted text-muted-foreground" };
+  const status = { ...statusBase, label: doc.statusLabel || statusBase.label };
   const isOverdue = doc.status === "OVERDUE";
   const initial = (doc.signerName?.charAt(0) || "U").toUpperCase();
 

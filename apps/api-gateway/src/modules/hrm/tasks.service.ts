@@ -15,6 +15,7 @@ import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 import { clientIp } from '../../core/client-ip';
 import { randomUUID } from 'crypto';
 import { Metadata } from '@grpc/grpc-js';
+import { normalizeTask } from '../../common/utils/language-normalization.util';
 
 @Injectable()
 export class TasksService implements OnModuleInit {
@@ -143,30 +144,7 @@ export class TasksService implements OnModuleInit {
 
   translateTaskData(task: any) {
     if (!task) return task;
-    const statusMap: Record<string, string> = {
-      ASSIGNED: 'Mới giao',
-      IN_PROGRESS: 'Đang xử lý',
-      PENDING_REVIEW: 'Chờ duyệt',
-      COMPLETED: 'Hoàn thành',
-      OVERDUE: 'Quá hạn',
-      REJECTED: 'Bị từ chối',
-      DRAFT: 'Nháp',
-    };
-    const priorityMap: Record<string, string> = {
-      HIGH: 'Cao',
-      NORMAL: 'Thường',
-      LOW: 'Thấp',
-      URGENT: 'Khẩn',
-    };
-    if (task.status && statusMap[task.status])
-      task.status = statusMap[task.status];
-    if (task.priority && priorityMap[task.priority])
-      task.priority = priorityMap[task.priority];
-    if (task.children)
-      task.children.forEach((c: any) => this.translateTaskData(c));
-    if (task.subTasks)
-      task.subTasks.forEach((c: any) => this.translateTaskData(c));
-    return task;
+    return normalizeTask(task);
   }
 
   // --- Endpoints ---

@@ -32,7 +32,7 @@ export function TaskStatusBadge({ code, fallbackLabel, className, showIcon = fal
   const matched = categories.find((c: any) => c.code === code);
   
   const config = TASK_STATUS_CONFIG[code] || TASK_STATUS_CONFIG.TODO;
-  const label = matched?.name || config?.label || fallbackLabel || code;
+  const label = fallbackLabel || matched?.name || config?.label || code;
 
   // If we just want the simple color badge (from utils.tsx)
   if (!showIcon) {
@@ -72,7 +72,7 @@ export function TaskPriorityBadge({ code, fallbackLabel, className }: TaskPriori
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
   const categories = prioritiesRes?.data || [];
   const matched = categories.find((c: any) => c.code === code);
-  const label = matched?.name || fallbackLabel || code;
+  const label = fallbackLabel || matched?.name || code;
 
   let colorCls = 'bg-slate-50 text-slate-600 border-slate-200';
   let dotCls = 'bg-slate-500';
