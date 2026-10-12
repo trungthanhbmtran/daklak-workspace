@@ -4,6 +4,17 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[CSDL & HRM] Sửa Lỗi 500 Column kpi_form_templates.category Does Not Exist Tại /admin/services/hrm/work-plans/evaluation-forms (12/10/2026)**
+  - **Vấn đề**: Khi truy cập trang "Nơi Chứa Mẫu Đánh Giá & Quản Lý File Mẫu XML" (`/admin/services/hrm/work-plans/evaluation-forms`), API Gateway ném `[AllExceptionsFilter] [InternalServerErrorException] Internal server error` tại `KpiFormsController.handleRpcError` dòng 69:172.
+  - **Nguyên nhân cốt lõi**:
+    - Trong CSDL MySQL `admin_hrm`, bảng `kpi_form_templates` thiếu các cột mới được khai báo trong Prisma schema (`category`, `schema_version`, `status`, `target_role`, `version`, `xml_content`).
+    - Bảng `kpi_form_template_bindings` và `kpi_form_template_versions` chưa được khởi tạo trong CSDL, khiến lệnh `prisma.kpiFormTemplate.findMany({ include: { bindings: ... } })` trong `KpiEvaluationsService.findFormTemplates` văng lỗi `P2022: ColumnNotFound (Unknown column 'kpi_form_templates.category' in 'field list')`.
+  - **Thực hiện**:
+    - Chạy đồng bộ an toàn CSDL bằng Prisma DB Push cho `apps/hrm-service` (`prisma/schema`), bổ sung đầy đủ các cột và tạo các bảng liên kết `kpi_form_template_versions`, `kpi_form_template_bindings` theo chuẩn Additive Migration (Zero-Downtime).
+    - Khởi động lại microservice `hrm-service` để cập nhật Prisma Client runtime.
+  - **Kiểm chứng**:
+    - Truy cập trang `http://113.184.220.82/admin/services/hrm/work-plans/evaluation-forms` bằng trình duyệt thực tế: Trang tải thành công 100%, hiển thị trọn vẹn danh sách 5 biểu mẫu (Mẫu 01 đến Mẫu 05) và các thông số, không phát sinh lỗi 500 hay Exception (ảnh `eval_forms_page_verified_1791819028919.png`).
+
 - [x] **[Auth & Microservices] Sửa Lỗi UnauthorizedException: Invalid Delegation Token Tại /admin/services/hrm/work-plans/kpi-formulas (12/10/2026)**
   - **Vấn đề**: Khi mở trang Quản lý Công việc & KPI -> Công thức tính KPI (`/admin/services/hrm/work-plans/kpi-formulas`), hệ thống bị lỗi `[AllExceptionsFilter] [UnauthorizedException] Invalid delegation token` tại `TasksService.handleRpcError` dòng 618:104, khiến phiên làm việc bị ngắt kết nối và văng ra màn hình đăng nhập (Infinite Logout Loop).
   - **Nguyên nhân cốt lõi**:
