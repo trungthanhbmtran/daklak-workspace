@@ -81,15 +81,29 @@ export class ReportsService implements OnModuleInit {
   async createReportDefinition(payloadStr: string, _userDataStr: string) {
     try {
       const payload = JSON.parse(payloadStr);
-      const definition = await this.prisma.reportDefinition.create({
-        data: {
-          code: payload.code,
-          name: payload.name,
-          description: payload.description,
-          configuration: payload.configuration,
-          organizationId: payload.organizationId,
-        },
-      });
+      let definition;
+      if (payload.id) {
+        definition = await this.prisma.reportDefinition.update({
+          where: { id: Number(payload.id) },
+          data: {
+            name: payload.name,
+            description: payload.description,
+            configuration: payload.configuration,
+            version: { increment: 1 },
+          },
+        });
+      } else {
+        const genCode = payload.code || `REP_${Date.now()}`;
+        definition = await this.prisma.reportDefinition.create({
+          data: {
+            code: genCode,
+            name: payload.name || 'Báo cáo mới',
+            description: payload.description,
+            configuration: payload.configuration,
+            organizationId: payload.organizationId,
+          },
+        });
+      }
 
       // Invalidate caches
       this.defsCache = null;

@@ -8,6 +8,7 @@ import {
 } from '../../api';
 import { Button } from '../../../../components/ui/button';
 import { Badge } from '../../../../components/ui/badge';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   RefreshCw,
@@ -19,6 +20,7 @@ import {
   AlertCircle,
   Table as TableIcon,
   Search,
+  Settings2,
 } from 'lucide-react';
 
 interface ReportViewerProps {
@@ -94,6 +96,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   config,
   onBack,
 }) => {
+  const router = useRouter();
   const [runId, setRunId] = useState<string | null>(null);
   const [tableSearch, setTableSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -233,6 +236,15 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/services/reports/${definitionId}/design`)}
+              className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5"
+            >
+              <Settings2 className="w-4 h-4 text-slate-500" />
+              Thiết kế lại
+            </Button>
             {rows.length > 0 && (
               <Button
                 variant="outline"

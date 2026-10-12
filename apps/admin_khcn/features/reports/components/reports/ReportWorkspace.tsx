@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import {
   useGetReportDefinitions,
-  useCreateReportDefinition,
   useAssignReport,
   useGetReportDashboardStats,
 } from '../../api';
@@ -63,9 +62,7 @@ import {
 } from '../../../../components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 
-import { ReportDesigner } from './designer/ReportDesigner';
-import { ReportViewer } from './ReportViewer';
-import { ReportConfigAST, ReportDefinition } from '../../types';
+import { ReportDefinition } from '../../types';
 
 export const ReportWorkspace = () => {
   const router = useRouter();
@@ -80,27 +77,13 @@ export const ReportWorkspace = () => {
     refetch: refetchStats,
     isRefetching: isRefetchingStats,
   } = useGetReportDashboardStats();
-  const createMutation = useCreateReportDefinition();
   const assignMutation = useAssignReport();
 
-  const [isDesigning, setIsDesigning] = useState(false);
-  const [viewingReport, setViewingReport] = useState<{
-    id: number;
-    config: any;
-  } | null>(null);
   const [sharingReport, setSharingReport] = useState<number | null>(null);
   const [assigneeType, setAssigneeType] = useState('UNIT');
   const [assigneeId, setAssigneeId] = useState('2');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSaveConfig = async (config: ReportConfigAST) => {
-    await createMutation.mutateAsync({
-      name: 'Báo cáo mới ' + new Date().getTime(),
-      configuration: config,
-    });
-    setIsDesigning(false);
-  };
 
   const allReports = reports || [];
   const filteredReports = allReports.filter((r) =>
@@ -119,25 +102,6 @@ export const ReportWorkspace = () => {
     refetchReports();
     refetchStats();
   };
-
-  if (isDesigning) {
-    return (
-      <ReportDesigner
-        onSave={handleSaveConfig}
-        onCancel={() => setIsDesigning(false)}
-      />
-    );
-  }
-
-  if (viewingReport) {
-    return (
-      <ReportViewer
-        definitionId={viewingReport.id}
-        config={viewingReport.config}
-        onBack={() => setViewingReport(null)}
-      />
-    );
-  }
 
   const renderReportGrid = (items: ReportDefinition[]) => {
     if (isLoading) {
@@ -167,7 +131,7 @@ export const ReportWorkspace = () => {
             cáo mới hoặc làm mới dữ liệu.
           </p>
           <Button
-            onClick={() => setIsDesigning(true)}
+            onClick={() => router.push('/services/reports/new')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-5 shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -228,17 +192,16 @@ export const ReportWorkspace = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem
-                        onClick={() =>
-                          setViewingReport({
-                            id: report.id,
-                            config: report.configuration,
-                          })
-                        }
+                        onClick={() => router.push(`/services/reports/${report.id}`)}
                       >
                         <Play className="w-4 h-4 mr-2 text-indigo-600" /> Chạy
                         báo cáo
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setIsDesigning(true)}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push(`/services/reports/${report.id}/design`)
+                        }
+                      >
                         <Settings2 className="w-4 h-4 mr-2" /> Thiết kế lại
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -288,7 +251,9 @@ export const ReportWorkspace = () => {
                     variant="outline"
                     size="sm"
                     className="bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
-                    onClick={() => setIsDesigning(true)}
+                    onClick={() =>
+                      router.push(`/services/reports/${report.id}/design`)
+                    }
                   >
                     Thiết kế
                   </Button>
@@ -296,12 +261,7 @@ export const ReportWorkspace = () => {
                     variant="default"
                     size="sm"
                     className="bg-indigo-600 hover:bg-indigo-700 shadow-sm"
-                    onClick={() =>
-                      setViewingReport({
-                        id: report.id,
-                        config: report.configuration,
-                      })
-                    }
+                    onClick={() => router.push(`/services/reports/${report.id}`)}
                   >
                     <Play className="w-4 h-4 mr-1.5" /> Chạy báo cáo
                   </Button>
@@ -312,7 +272,9 @@ export const ReportWorkspace = () => {
                     variant="outline"
                     className="flex-1 bg-white border-slate-200 hover:bg-slate-50 hover:text-indigo-600 text-slate-700 font-medium transition-colors text-xs"
                     size="sm"
-                    onClick={() => setIsDesigning(true)}
+                    onClick={() =>
+                      router.push(`/services/reports/${report.id}/design`)
+                    }
                   >
                     <Settings2 className="w-3.5 h-3.5 mr-1.5" /> Thiết kế
                   </Button>
@@ -320,12 +282,7 @@ export const ReportWorkspace = () => {
                     variant="default"
                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 shadow-sm font-medium transition-colors text-xs"
                     size="sm"
-                    onClick={() =>
-                      setViewingReport({
-                        id: report.id,
-                        config: report.configuration,
-                      })
-                    }
+                    onClick={() => router.push(`/services/reports/${report.id}`)}
                   >
                     <Play className="w-3.5 h-3.5 mr-1.5" /> Xem trước & Chạy
                   </Button>
@@ -382,7 +339,7 @@ export const ReportWorkspace = () => {
               Làm mới
             </Button>
             <Button
-              onClick={() => setIsDesigning(true)}
+              onClick={() => router.push('/services/reports/new')}
               className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow transition-all flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
