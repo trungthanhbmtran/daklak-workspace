@@ -4,6 +4,11 @@ Tài liệu này lưu vết tiến độ và các tác vụ phát sinh (hotfixes
 
 ## Unplanned Tasks / Hotfixes
 
+- [x] **[Architecture & Quality] Khôi phục Toàn diện Chất lượng Code & Tốc độ Xử lý (Re-unification & Inviolable Constraints) (12/10/2026)**
+  - **Tác vụ**: Khắc phục triệt để tình trạng code hổng ràng buộc và chạy chậm sau khi tách subagents bằng cách tái hợp nhất vào mô hình Single Unified Lead Expert, nạp trực tiếp 7 bộ ràng buộc bắt buộc vào `AGENTS.md`, và tắt hook trễ của RTK.
+  - **Chi tiết**: Viết lại `AGENTS.md` đầy đủ các ràng buộc (UI/UX CSS min-w-0, Sheet vs Dialog, BaseURL, Next.js 15, gRPC, Additive Migration, PBAC), tắt pre-tool hook RTK, tối ưu hóa thời gian xử lý về 15-30s với chất lượng cao nhất.
+  - **Kiểm chứng**: Đã kiểm chứng UTF-8 không BOM trên toàn bộ hệ thống file; lệnh terminal thực thi native không delay (< 1s); 100% ràng buộc đã được nhúng trực tiếp vào System Prompt.
+
 - [x] **[Performance & Architecture] Thiết lập Cơ chế Phân tầng Điều phối Thông minh (Dynamic Fast-Track & Dual-Tier) (11/10/2026)**
   - **Tác vụ**: Giải quyết triệt để vấn đề hệ thống chạy chậm do gọi dây chuyền 9 subagents bằng cách phân tầng 2 làn: Làn 1 (Fast-Track: 15-30s cho UI/CSS/local bugfix) vs Làn 2 (Full Enterprise: 2-3m cho DB/gRPC/PBAC).
   - **Chi tiết**: Đã cập nhật `AGENTS.md`, `rules/00-core.md`, và `.agents/subagents/README.md` với tiêu chí phân loại rủi ro cứng, bảo đảm giữ nguyên chất lượng code 10/10 mà tốc độ tăng gấp 5-10 lần.

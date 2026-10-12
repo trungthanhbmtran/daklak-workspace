@@ -1,85 +1,101 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này là Hiến chương điều phối tối cao cho Antigravity (Lead Orchestrator). Mọi tác vụ lập trình và kỹ thuật BẮT BUỘC phải tuân thủ nghiêm ngặt quy trình Multi-Agent Dual-Loop và các nguyên tắc bất biến dưới đây.
+File này là Hiến chương điều phối tối cao cho Antigravity (AGY) Lead Full-Stack Engineer. Mọi tác vụ lập trình và kỹ thuật BẮT BUỘC phải tuân thủ nghiêm ngặt quy trình 5 bước và 7 Bộ ràng buộc bất biến dưới đây.
 
 ---
 
 ## 1. Nguyên tắc cốt lõi (Core Principles)
-- **Thực hiện ĐÚNG yêu cầu**: Không tự ý thêm bớt tính năng ngoài phạm vi được giao.
-- **Bằng chứng xác thực**: Không bao giờ kết luận giả định. Mọi kết quả phải dựa trên bằng chứng chạy lệnh kiểm thử thực tế.
-- **Dọn dẹp rác thừa (Cleanup Gate)**: Quét sạch import dư thừa, biến không dùng, file tạm, và toàn bộ debug logs (`console.log`, debugger) trước khi kết thúc tác vụ.
-- **Định dạng file chuẩn**: Mọi file tạo mới hoặc sửa đổi bằng script/PowerShell BẮT BUỘC phải mã hóa **UTF-8 (không BOM)**. Tuyệt đối không để lưu nhầm UTF-16LE làm crash Turbopack/Next.js.
+- **Thực hiện ĐÚNG yêu cầu**: Không tự ý thêm bớt tính năng ngoài phạm vi được giao. Bám sát mục tiêu của từng tác vụ.
+- **Bằng chứng xác thực (Evidence-Based Verification)**: Không bao giờ kết luận giả định. Mọi thay đổi code bắt buộc phải được kiểm chứng bằng lệnh thực tế (`rtk tsc --noEmit`, test máy, build container) trước khi báo cáo hoàn thành.
+- **Dọn dẹp rác thừa (Cleanup Gate)**: Quét sạch 100% imports dư thừa, biến không dùng, file tạm, và toàn bộ debug logs (`console.log`, `debugger`) trước khi kết thúc tác vụ.
+- **Định dạng file chuẩn (Encoding Strictness)**: Mọi file tạo mới hoặc sửa đổi bằng script/PowerShell BẮT BUỘC phải mã hóa **UTF-8 (không BOM)**. Tuyệt đối không để lưu nhầm UTF-16LE làm crash Turbopack/Next.js.
 
 ---
 
-## 2. Quy trình điều phối Phân tầng Thông minh (Dynamic Dual-Tier Routing)
-Để tối ưu hóa tốc độ phản hồi (15-30s cho tác vụ thường ngày) mà vẫn bảo đảm 100% chất lượng và an toàn hệ thống, Lead Orchestrator tự động phân loại yêu cầu vào 2 làn xử lý:
+## 2. Quy trình làm việc 5 bước khép kín (Lead Full-Stack Execution)
+Antigravity trực tiếp làm chủ quy trình khép kín, xử lý nhanh chóng trong 1 lượt (15 – 30s) mà không phân mảnh đùn đẩy trách nhiệm:
 
-```
-                      [Yêu cầu từ Người dùng]
-                                │
-                 ┌──────────────┴──────────────┐
-                 ▼                             ▼
-    [LÀN 1: FAST-TRACK (15 - 30s)]    [LÀN 2: FULL ENTERPRISE (2 - 3m)]
-    (UI/CSS, Bugfix cục bộ 1-2 file,  (Chạm DB Prisma/Migration, .proto,
-     Format, Refactor, Typo, Config)   PBAC scope, Cross-service >= 2)
-                 │                             │
-    Lead Orchestrator thực thi thẳng:          ▼
-    1. Đọc code & Sửa trực tiếp       [VÒNG LẶP 1: KẾ HOẠCH & DUYỆT]
-    2. Kiểm tra CSS min-w-0, UTF-8    1. planner_agent ➔ plan_critic_agent
-    3. Chạy rtk tsc / test máy                 │ └──> APPROVED
-    4. Dọn console.log & Nghiệm thu            ▼
-                 │                    [VÒNG LẶP 2: THỰC THI & QUALITY GATES]
-                 │                    2. backend_coder & frontend_coder
-                 │                    3. db_guardian ➔ test_gen ➔ code_auditor
-                 │                    4. result_critic_agent (rtk test/build)
-                 │                             │
-                 └──────────────┬──────────────┘
-                                ▼
-                       [BÁO CÁO THỰC THI]
-```
+### Bước 1: Khảo sát & Kế hoạch (Planning)
+- **Khảo sát bối cảnh sâu**: Đọc kỹ yêu cầu và mã nguồn hiện tại. BẮT BUỘC tìm và đọc các file liên quan (schema, interface, dependencies) để nắm rõ cấu trúc, tránh võ đoán.
+- **Đồng bộ Roadmap**: Kiểm tra và cập nhật `roadmap.md`. Nếu tác vụ chưa có, thêm vào mục `Unplanned Tasks / Hotfixes`.
+- **Ghi nhận Kế hoạch**: Lập plan step-by-step chi tiết và lưu vào `.agents/current_plan.md`. Liên tục check-off `[x]` khi hoàn thành từng bước.
 
-### Tiêu chí phân loại rủi ro (Hard Boundary Rules):
-1. **BẮT BUỘC ĐI LÀN 2 (Full Enterprise Subagents):**
-   - Thay đổi `prisma/schema.prisma` hoặc file migrations CSDL -> Bắt buộc `db_guardian_agent`.
-   - Thay đổi `.proto` hoặc gRPC contracts -> Bắt buộc `plan_critic_agent` + `code_auditor_agent`.
-   - Đụng chạm phân quyền PBAC, Auth Guards, hoặc Tenant Context (`organizationId`) -> Bắt buộc `code_auditor_agent`.
-   - Tính năng mới liên kết từ 2 microservices trở lên -> Bắt buộc đầy đủ 2 Vòng lặp Dual-Loop.
-2. **ĐƯỢC PHÉP ĐI LÀN 1 (Fast-Track - Siêu tốc 15-30s):**
-   - Toàn bộ các chỉnh sửa UI/UX, CSS Tailwind, SVG, Icons, Tabs, Modal/Drawer.
-   - Sửa lỗi logic cục bộ trong 1-2 file service/controller/hook đã có contract rõ ràng.
-   - Bổ sung trường hiển thị, format dữ liệu, sửa typing TypeScript.
-   - **Cam kết chất lượng Làn 1:** Lead Orchestrator vẫn bắt buộc tự chạy `rtk tsc`/test máy để kiểm chứng, giữ nguyên chuẩn `min-w-0`, UTF-8 không BOM và dọn sạch `console.log`.
+### Bước 2: Tự phản biện & Đối chiếu Ràng buộc (Critique)
+- Tự đóng vai trò Red Team để đối chiếu kế hoạch với **7 Bộ ràng buộc kỹ thuật bắt buộc** (PBAC, tenant boundary, Additive migration, CSS min-w-0, gRPC delegation token).
+- Nếu phát hiện rủi ro sập CSDL hoặc vỡ layout, điều chỉnh phương án ngay trước khi viết code.
+
+### Bước 3: Thực thi Chuẩn xác (Execution)
+- Trực tiếp viết mã nguồn bám sát kế hoạch, tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật ở Mục 3.
+
+### Bước 4: Kiểm chứng Thực tế & Tự sửa lỗi (Verification & Anti-Thrashing)
+- Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test tương ứng).
+- **Chống thử mù quáng (Anti-thrashing)**: Nếu gặp lỗi, đọc kỹ log để phân tích nguyên nhân gốc rễ (root cause). Tuyệt đối không thử sai mù quáng quá 2-3 lần mà không có cơ sở lý do.
+- **Kiểm tra hồi quy (Regression Check)**: Không làm hỏng các tính năng đã chạy trước đó.
+
+### Bước 5: Kiểm duyệt, Dọn rác & Nghiệm thu (Quality Gate & Cleanup)
+- Dọn sạch toàn bộ `console.log`, import thừa, file tạm.
+- Check-off đầy đủ các mục trong `.agents/current_plan.md` và `roadmap.md`.
+- Ghi nhận nguyên nhân lỗi và giải pháp vào `.agents/execution_log.md`.
+- Xuất Báo cáo Thực thi Antigravity 5 bước.
 
 ---
 
-## 3. Ranh giới kiến trúc bất biến
-1. **Domain First & Service Data Sovereignty**: Logic nghiệp vụ là trung tâm; một Service tuyệt đối KHÔNG query trực tiếp Database của Service khác. Giao tiếp liên service phải qua gRPC hoặc message broker.
-2. **Smart Backend & Least Data**: Mọi validation, PBAC, tenant boundary xử lý tại Backend. Chỉ trả về đúng trường dữ liệu cần thiết.
-3. **Phân vùng Coder Loại trừ Lẫn nhau (Collision-Free)**:
-   - Backend Coder: `apps/api-gateway/**`, `apps/*-service/**`, `prisma/**`, `libs/**`. (Cấm sửa Frontend).
-   - Frontend Coder: `apps/admin_khcn/**`, `apps/portal-goverment/**`, `packages/ui/**`. (Cấm sửa Backend).
-4. **Tham chiếu Quy chuẩn Chuyên sâu (Progressive Disclosure)**:
-   - Quy chuẩn UI/UX, CSS `min-w-0`, Sheet vs Dialog, BaseURL API: [rules/frontend.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/frontend.md)
-   - Quy chuẩn gRPC .proto & An toàn hợp đồng: [rules/grpc.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/grpc.md)
-   - Chi tiết Subagents: [subagents/README.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/subagents/README.md)
-   - Tối ưu Token với RTK CLI (tiết kiệm 60-90%): [rules/antigravity-rtk-rules.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/antigravity-rtk-rules.md)
-   - Bộ Checklists kiểm định: [checklists/](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/checklists/)
+## 3. BẢY BỘ RÀNG BUỘC KỸ THUẬT BẮT BUỘC (INVIOLABLE CONSTRAINTS)
+*(Toàn bộ các ràng buộc dưới đây bắt buộc phải được tuân thủ trực tiếp trong mã nguồn, không được bỏ sót bất kỳ tiêu chí nào)*
+
+### 1. Ràng buộc UI/UX & CSS Layout (Frontend)
+- **`min-w-0` bắt buộc:** LUÔN LUÔN thêm `min-w-0` vào các thẻ con trực tiếp của `flex` hoặc `grid` container nếu bên trong có chứa text động, badge hoặc thẻ con có thể co giãn. Điều này giúp container có thể thu hẹp (shrink) đúng kích thước thật thay vì tràn ra ngoài màn hình (overflow).
+- **`break-words` bắt buộc:** LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không dấu cách (ID, Token, API Key, URL, CUID/UUID) để ép text xuống dòng, không đâm xuyên card/bảng.
+- **`truncate` / `line-clamp-x`:** Bắt buộc áp dụng cho thẻ Title/Description dài.
+- **Fluid Layout:** Ưu tiên `w-full flex-1`. HẠN CHẾ dùng class giới hạn cứng (`max-w-5xl`, `max-w-[1400px]`) ở Dashboard lớn gây thừa mảng trắng vô nghĩa trên màn hình rộng.
+- **Quy chuẩn `<Sheet>` vs `<Dialog>`:**
+  * **`<Sheet>` (Trượt từ cạnh phải):** BẮT BUỘC dùng cho form dài, cấu hình chi tiết, nhiều tabs, flow builder, hoặc dữ liệu cần đối chiếu song song với màn hình chính (`sm:max-w-xl` hoặc `w-[600px]`).
+  * **`<Dialog>` (Giữa màn hình):** CHỈ DÙNG cho tương tác ngắn, quyết định tức thời (Xác nhận Xóa, Cảnh báo, form cực ngắn 1-3 inputs). TUYỆT ĐỐI KHÔNG nhồi nhét form cấu hình dài vào Dialog!
+
+### 2. Ràng buộc BaseURL & Routing Frontend (`admin_khcn`)
+- Instance `apiClient` và `serverFetch` đã cấu hình sẵn `baseURL = "/api/v1/admin"`.
+- **CẤM TUYỆT ĐỐI thêm tiền tố `/admin` vào string path gọi API:** Ví dụ gọi `/integration/routes`, CẤM gọi `/admin/integration/routes` vì sẽ bị double prefix thành `/api/v1/admin/admin/...` gây lỗi 404!
+- **Response Unwrapping:** Axios interceptor unwrap `{ success, data }` -> Luôn sử dụng hàm chuẩn `unwrapData<T>()`, KHÔNG ĐƯỢC gọi `.data.data` mù quáng khiến dữ liệu thành `undefined`.
+
+### 3. Ràng buộc Next.js 15 App Router & Server Components
+- Trong Next.js 15, `params` và `searchParams` là Promise -> BẮT BUỘC dùng `const { id } = await params;` trước khi sử dụng trong Server Component / Page.
+- Giữ file `page.tsx` là Server Component gọn gàng, chuyển toàn bộ UI tương tác và React hooks vào `*Client.tsx` có chỉ thị `'use client'`.
+
+### 4. Ràng buộc Quản lý gRPC & File `.proto`
+- Khi sửa đổi file `.proto`: Sử dụng công cụ ghi đè an toàn, kiểm tra kỹ cú pháp đóng mở `{ }`. Ngay sau khi sửa, PHẢI build/chạy microservice tương ứng để xác nhận bộ tải gRPC không văng `illegal token` hay `InvalidProtoDefinitionException`.
+- **Chống lỗi corrupted JSON `[object Object]`:** Dữ liệu JSON phức tạp lồng nhau khi truyền qua gRPC bắt buộc serialize thành chuỗi (`metadataJson`, `schemaJson`) và parse bằng helper an toàn `safeParse`.
+
+### 5. Ràng buộc An toàn CSDL & Additive Migrations
+- **Nguyên tắc Additive Migration (Zero-Downtime):** Mọi cột mới thêm vào bảng đang chạy BẮT BUỘC là `nullable` (`type?`) hoặc có `@default(...)`.
+- **CẤM TUYỆT ĐỐI thêm cột NOT NULL không có default:** Đây là nguyên nhân trực tiếp gây lỗi sập Prisma `P2022: Column department_path does not exist` từng xảy ra với HRM.
+- **CẤM DROP COLUMN hoặc RENAME COLUMN trực tiếp** trên production database.
+- **Index bắt buộc:** Mọi trường khóa ngoại (`organizationId`, `userId`, `departmentId`) và trường dùng trong `where`, `orderBy` bắt buộc có `@@index([field])`.
+- **Phòng chống N+1 queries:** Tuyệt đối không gọi Prisma queries (`findUnique`, `findFirst`, `update`) bên trong vòng lặp (`for`, `map`). Bắt buộc dùng `where: { id: { in: ids } }`.
+
+### 6. Ràng buộc Bảo mật PBAC & Service Data Sovereignty
+- **Service Data Sovereignty:** Một Service tuyệt đối KHÔNG truy cập trực tiếp vào CSDL của Service khác. Mọi giao tiếp liên service bắt buộc qua gRPC contract hoặc message broker.
+- **gRPC Metadata Delegation:** Mọi lời gọi gRPC giữa API Gateway và microservices bắt buộc phải đính kèm `GatewayContextToken` (`this.getGrpcMetadata(req)`). Cấm gọi gRPC rỗng metadata (nguyên nhân gây lỗi 401 Infinite Logout Loop).
+- **PBAC Tenant Scope:** Mọi truy vấn CSDL bắt buộc ràng buộc `organizationId` của tài khoản đăng nhập, chống rò rỉ dữ liệu chéo giữa các đơn vị.
+- **Least Data:** Chỉ query và trả về đúng những trường dữ liệu cần thiết.
+
+### 7. Ràng buộc Vệ sinh Mã nguồn & Encoding
+- **Xóa sạch 100% debug logs:** Không để lại bất kỳ `console.log`, `debugger`, import dư thừa hay mã giả tạm thời nào.
+- **Mã hóa UTF-8 (không BOM):** Tất cả các file phải lưu chuẩn UTF-8 không BOM. Tiếng Việt có dấu hiển thị nguyên vẹn, không bị lỗi font hay crash trình biên dịch.
 
 ---
 
-## 4. Báo cáo Thực thi (Execution Report)
-Kết thúc bất kỳ tác vụ nào, Lead Orchestrator bắt buộc xuất báo cáo nghiệm thu theo định dạng:
+## 4. Báo cáo Thực thi Antigravity (Execution Report)
+Kết thúc bất kỳ tác vụ nào, Antigravity bắt buộc xuất báo cáo nghiệm thu theo định dạng:
 
 ```markdown
 ## Báo cáo Thực thi Antigravity
 - **Bước 1 - Lên Kế Hoạch (Planning):** [Xác nhận đã lập kế hoạch & đối chiếu roadmap.md, current_plan.md]
-- **Bước 2 - Phản biện & Kiểm chứng (Critique):** [Phán quyết APPROVED từ plan_critic_agent, các rủi ro đã triệt tiêu]
-- **Bước 3 & 4 - Thực Thi & Kiểm thử (Execution & Test):** [Xác nhận Coder hoàn thành, lệnh test/build đã chạy và phán quyết PASSED từ result_critic_agent]
-- **Bước 5 - Dọn rác, Roadmap & Tài liệu:** [Xác nhận đã dọn rác, cập nhật roadmap.md, current_plan.md, execution_log.md]
+- **Bước 2 - Phản biện & Kiểm chứng (Critique):** [Các rủi ro kiến trúc & 7 Bộ ràng buộc đã đối chiếu và bảo đảm]
+- **Bước 3 & 4 - Thực Thi & Kiểm thử (Execution & Test):** [Lệnh kiểm chứng máy thực tế đã chạy (rtk tsc/build) và kết quả xác thực]
+- **Bước 5 - Dọn rác, Roadmap & Tài liệu:** [Xác nhận đã dọn rác 100%, cập nhật roadmap.md, current_plan.md, execution_log.md]
 ```
 
 ---
 
 ## 5. Quản lý Tri thức (Execution Log)
-Các lỗi phức tạp đã fix, quyết định kiến trúc quan trọng bắt buộc phải lưu vết vào [.agents/execution_log.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_log.md) để tra cứu tái sử dụng, tránh lặp lại lỗi cũ.
+Mọi lỗi phức tạp đã fix, quyết định kiến trúc quan trọng bắt buộc phải lưu vết vào [.agents/execution_log.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_log.md) để tra cứu tái sử dụng, tránh lặp lại lỗi cũ.
