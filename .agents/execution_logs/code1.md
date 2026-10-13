@@ -59,6 +59,35 @@
 - **Kiểm chứng máy thực tế:**
   - `pnpm --filter admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%).
   - `pnpm --filter api-gateway run build`: Exit code 0 (Pass 100%).
+
+## [2026-10-13] Nạp Cấu trúc XML vào Biểu mẫu Seed HRM: Bộ 1 (HD05-HD/TU & QĐ 39-QĐ/TU) & Bộ 2 (QĐ 348-QĐ/BTCTW Phụ lục VIII)
+- **Mục tiêu:** Cập nhật trọn vẹn dữ liệu XML biểu mẫu vào CSDL seed của `hrm-service`:
+  1. **BỘ 1 (HD05-TU / QĐ39-TU):** Cấu trúc XML Đánh giá, xếp loại cán bộ hằng quý (thang điểm 100: 30đ Tiêu chí chung + 70đ KPI Nhiệm vụ với chỉ số A, B, C, D; khống chế trần xuất sắc 20%; cảnh báo điều chuyển nếu 2 quý liên tiếp không hoàn thành):
+     - `HD05_QD39_TU`: Trọn bộ container XML `OfficialEvaluationSystem`.
+     - `M01_TOTRINH`: Mẫu 01 - Tờ trình đề nghị đánh giá, xếp loại quý.
+     - `M02_TUKIEMDIEM`: Mẫu 02 - Bản tự kiểm điểm cá nhân (2A, 2B, 2C).
+     - `M03_SCORECARD_KPI`: Mẫu 03 - Bản tự đánh giá & Scorecard KPI hằng quý (Section A: 30đ, Section B: 70đ).
+     - `M04_TONGHOP_QUY`: Mẫu 04 - Bảng tổng hợp kết quả đánh giá và đề xuất xếp loại quý.
+     - `M05_BAOCAO_QUYETDINH`: Mẫu 05 - Báo cáo / Quyết định phê duyệt mức xếp loại chất lượng quý.
+  2. **BỘ 2 (QĐ348-BTCTW Phụ lục VIII):** Cấu trúc XML Kết nối, chia sẻ dữ liệu CSDL Đảng & Cán bộ giữa Ban Tổ chức Tỉnh ủy với Trung tâm Dữ liệu Quốc gia (LGSP / TSLCD):
+     - `QD348_BTCTW`: Trọn bộ container XML `PartyDataIntegrationSystem`.
+     - `M01_KHAI_THAC`: Mẫu 01 - Phiếu đề nghị kết nối, chia sẻ dữ liệu.
+     - `M02_CHAP_THUAN`: Mẫu 02 - Quyết định chấp thuận kết nối, chia sẻ dữ liệu.
+     - `M03_XUNG_DOT`: Mẫu 03 - Biên bản phát hiện xung đột dữ liệu (Single Source of Truth).
+     - `M04_TAM_NGUNG`: Mẫu 04 - Thông báo tạm ngừng / chấm dứt kết nối.
+     - `M05_BAOCAO_NAM`: Mẫu 05 - Báo cáo kết quả kết nối, chia sẻ dữ liệu hằng năm (Đúng, Đủ, Sạch, Sống).
+- **Phạm vi file đã thực hiện:**
+  - `apps/hrm-service/templates/kpi-forms/`: Tạo 12 file XML mẫu chuẩn định dạng UTF-8 không BOM:
+    * `hd05-qd39-tu-full.xml`, `m01-totrinh.xml`, `m02-tukiemdiem.xml`, `m03-scorecard-kpi.xml`, `m04-tonghop-quy.xml`, `m05-baocao-quyetdinh.xml`
+    * `qd348-btctw-full.xml`, `m01-khai-thac.xml`, `m02-chap-thuan.xml`, `m03-xung-dot.xml`, `m04-tam-ngung.xml`, `m05-baocao-nam.xml`
+  - `apps/hrm-service/src/modules/kpi-evaluations/kpi-template-xml.util.ts`: Cập nhật `DEFAULT_KPI_FORM_TEMPLATES` đồng bộ 17 biểu mẫu (5 mẫu gốc + 6 mẫu Bộ 1 + 6 mẫu Bộ 2).
+  - `apps/hrm-service/src/modules/kpi-evaluations/kpi-evaluations.service.ts`: Cập nhật fallback upsert tự động lưu đầy đủ category, targetRole, schemaVersion và xmlContent khi query.
+  - `apps/hrm-service/prisma/btctu-kpi-engine.seed.ts`: Nạp và upsert 100% 17 biểu mẫu vào `kpi_form_templates` và `kpi_form_template_versions` (version 1, status PUBLISHED).
+- **Kiểm chứng máy thực tế:**
+  - `pnpm --filter hrm-service run build`: Mã thoát 0 (Generated Prisma client + nest build hoàn tất).
+  - `npx ts-node prisma/btctu-kpi-engine.seed.ts`: Mã thoát 0 (Đã nạp thành công 17 biểu mẫu hành chính & cấu trúc XML vào CSDL).
+  - `pnpm --filter admin_khcn run typecheck` (`tsc --noEmit`): Mã thoát 0 (Pass 100%).
+
   - Rà soát diff: 100% tuân thủ 7 Bộ ràng buộc kỹ thuật.
 
 

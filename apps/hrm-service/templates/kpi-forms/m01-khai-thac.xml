@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 01: PHIẾU ĐỀ NGHỊ KẾT NỐI, CHIA SẺ DỮ LIỆU (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
+<Form01_DataConnectionRequest id="M01_KHAI_THAC" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
+    <RequestingAgency>
+        <AgencyName>Tỉnh ủy Đắk Lắk</AgencyName>
+        <Address>Số 14 Lê Duẩn, TP. Buôn Ma Thuột</Address>
+        <HeadOfAgency>Lương Nguyễn Minh Triết</HeadOfAgency>
+        <TechnicalContact name="Nguyễn Văn B" phone="0912345678" email="cntt@btctu.daklak.gov.vn"/>
+    </RequestingAgency>
+    <Purpose>Đối soát CSDL Đảng viên &amp; CSDL Cán bộ công chức khối Đảng</Purpose>
+    <ConnectionMethod infrastructure="TSLCD" protocol="REST_API_HTTPS"/>
+    <RequestedDataLevel>Level2_Conditional</RequestedDataLevel>
+</Form01_DataConnectionRequest>

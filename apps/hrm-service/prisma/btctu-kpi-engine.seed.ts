@@ -1,6 +1,10 @@
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import 'dotenv/config';
 import type { PrismaClient as PrismaClientType } from '../src/generated/prisma/client';
+import {
+  DEFAULT_KPI_FORM_TEMPLATES,
+  getTemplateXmlContent,
+} from '../src/modules/kpi-evaluations/kpi-template-xml.util';
 
 let PrismaClient: typeof PrismaClientType;
 try {
@@ -268,50 +272,66 @@ export async function seedBtctuKpiEngine(prismaInstance?: any) {
     console.log(`✅ Đã nạp thành công ${periodsData.length} Kỳ đánh giá (Quý I - IV/2026, Năm 2026 và 12 tháng).`);
 
     // =========================================================================
-    // 4. NẠP DANH MỤC BIỂU MẪU HÀNH CHÍNH (MẪU 01 - 05)
+    // 4. NẠP DANH MỤC BIỂU MẪU HÀNH CHÍNH & CẤU TRÚC XML (BỘ 1 & BỘ 2)
+    // Căn cứ: HD 05-HD/TU, QĐ 39-QĐ/TU và QĐ 348-QĐ/BTCTW
     // =========================================================================
-    const forms = [
-      {
-        formCode: 'MAU_01',
-        name: 'Bản đăng ký khung danh mục sản phẩm, công việc chuẩn đầu kỳ',
-        description: 'Áp dụng cho chuyên viên và cán bộ đăng ký khung khối lượng, độ khó và hạn định công việc đầu kỳ đánh giá.',
-        templateFileId: 'mau-01-dang-ky-dau-ky.xml',
-      },
-      {
-        formCode: 'MAU_02',
-        name: 'Bản tự đánh giá, chấm điểm KPI/OKR cá nhân định kỳ',
-        description: 'Phiếu tự chấm điểm 30đ tiêu chí chung và 70đ kết quả công việc 4 thành tố (Khối lượng, Chất lượng, Tiến độ, Thái độ).',
-        templateFileId: 'mau-02-tu-danh-gia-ca-nhan.xml',
-      },
-      {
-        formCode: 'MAU_03',
-        name: 'Bản nhận xét, đánh giá của cấp ủy và tập thể lãnh đạo phòng',
-        description: 'Phiếu nhận xét ưu/khuyết điểm, xếp loại của Chi bộ và đánh giá của Lãnh đạo phòng trực tiếp.',
-        templateFileId: 'mau-03-nhan-xet-tap-the.xml',
-      },
-      {
-        formCode: 'MAU_04',
-        name: 'Bảng tổng hợp kết quả đánh giá tập thể phòng & nhiệm vụ nổi trội',
-        description: 'Tổng hợp phân bổ xếp loại của phòng, trừ điểm chất lượng (-5%, -15%, -35%) và cộng thưởng việc nổi trội (+10%).',
-        templateFileId: 'mau-04-tong-hop-phong.xml',
-      },
-      {
-        formCode: 'MAU_05',
-        name: 'Dự thảo quyết định & Bảng tổng hợp xếp loại toàn cơ quan',
-        description: 'Quyết định chốt xếp loại của Trưởng ban, áp dụng trần 20% Hoàn thành xuất sắc và trần Người đứng đầu.',
-        templateFileId: 'mau-05-tong-hop-co-quan.xml',
-      },
-    ];
-
-    for (const f of forms) {
+    for (const f of DEFAULT_KPI_FORM_TEMPLATES) {
+      const xml = getTemplateXmlContent(f.formCode);
       await prisma.kpiFormTemplate.upsert({
         where: { formCode: f.formCode },
-        update: f,
-        create: f,
+        update: {
+          name: f.name,
+          description: f.description,
+          category: f.category,
+          targetRole: f.targetRole,
+          schemaVersion: f.schemaVersion || '1.0',
+          templateFileId: f.fileName,
+          xmlContent: xml,
+          status: 'PUBLISHED',
+          version: 1,
+          organizationId,
+        },
+        create: {
+          formCode: f.formCode,
+          name: f.name,
+          description: f.description,
+          category: f.category,
+          targetRole: f.targetRole,
+          schemaVersion: f.schemaVersion || '1.0',
+          templateFileId: f.fileName,
+          xmlContent: xml,
+          status: 'PUBLISHED',
+          version: 1,
+          organizationId,
+        },
+      });
+
+      // Tạo/Cập nhật bản ghi version 1 đã PUBLISHED
+      await prisma.kpiFormTemplateVersion.upsert({
+        where: {
+          formCode_version: {
+            formCode: f.formCode,
+            version: 1,
+          },
+        },
+        update: {
+          xmlContent: xml,
+          status: 'PUBLISHED',
+          publishedBy: 'Ban Tổ chức Tỉnh ủy Đắk Lắk',
+          publishedAt: new Date(),
+        },
+        create: {
+          formCode: f.formCode,
+          version: 1,
+          xmlContent: xml,
+          status: 'PUBLISHED',
+          publishedBy: 'Ban Tổ chức Tỉnh ủy Đắk Lắk',
+          publishedAt: new Date(),
+        },
       });
     }
 
-    console.log(`✅ Đã nạp thành công danh mục ${forms.length} Biểu mẫu hành chính (Mẫu 01 - 05).`);
+    console.log(`✅ Đã nạp thành công danh mục ${DEFAULT_KPI_FORM_TEMPLATES.length} Biểu mẫu hành chính & Cấu trúc XML (Bộ 1 HD05-TU/QD39-TU và Bộ 2 QD348-BTCTW).`);
 
     // =========================================================================
     // 5. NẠP DỮ LIỆU ĐÁNH GIÁ MẪU & NHIỆM VỤ THỰC TẾ ĐỂ BẮT ĐẦU THỬ NGHIỆM

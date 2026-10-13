@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 02: QUYẾT ĐỊNH CHẤP THUẬN KẾT NỐI, CHIA SẺ DỮ LIỆU (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
+<Form02_ConnectionApprovalDecision id="M02_CHAP_THUAN" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
+    <DecisionNumber>567-QĐ/BTCTW</DecisionNumber>
+    <ApprovingBody>Ban Tổ chức Trung ương</ApprovingBody>
+    <GranteeAgency>Tỉnh ủy Đắk Lắk</GranteeAgency>
+    <ApprovedAPIServices>
+        <API id="API_01" path="/category/hscb/get-user-info" level="Mức 2"/>
+        <API id="API_03" path="/category/csdldv/v1/danh-muc/get-list" level="Mức 1"/>
+    </ApprovedAPIServices>
+    <SecurityRequirements minSecurityLevel="Level3"/>
+</Form02_ConnectionApprovalDecision>

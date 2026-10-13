@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 03: BẢN TỰ ĐÁNH GIÁ & SCORECARD KPI HẰNG QUÝ (Thang điểm 100) (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
+<Form03_QuarterlyKPIScorecard id="M03_SCORECARD_KPI" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU">
+    <EvaluationPeriod quarter="Q3" year="2026"/>
+    <OfficialRef citizenID="066095001234" fullName="Nguyễn Văn A"/>
+    
+    <!-- PHẦN A: NHÓM TIÊU CHÍ CHUNG (TỐI ĐA 30 ĐIỂM) -->
+    <SectionA_GeneralCriteria maxScore="30.0" achievedScore="30.0">
+        <Criterion id="1.1" name="Phẩm chất chính trị, đạo đức, lối sống, nêu gương" max="18.0" score="18.0" status="Ensured"/>
+        <Criterion id="2.1" name="Tư duy đổi mới, khát vọng cống hiến, dám nghĩ dám làm" max="4.0" score="4.0" status="Ensured"/>
+        <Criterion id="3.1" name="Tự phê bình và phê bình, tự soi tự sửa, khắc phục hạn chế" max="8.0" score="8.0" status="Ensured"/>
+    </SectionA_GeneralCriteria>
+
+    <!-- PHẦN B: KẾT QUẢ THỰC HIỆN NHIỆM VỤ - KPI (TỐI ĐA 70 ĐIỂM) -->
+    <SectionB_TaskKPI maxScore="70.0">
+        <TaskList>
+            <!-- Ví dụ Đầu việc 1 -->
+            <TaskItem id="T1" difficultyGroup="Group3" baseScore="250">
+                <TaskName>Thẩm định Tờ trình bổ nhiệm cán bộ diện BTVTU quản lý</TaskName>
+                <OutputProduct>Tờ trình + Bản tổng hợp nhân sự</OutputProduct>
+                <PlannedQuantity>4</PlannedQuantity>
+                <CompletedQuantity>4</CompletedQuantity>
+                <QualityFactor>1.00</QualityFactor> <!-- Nếu có lỗi chủ quan bị trừ 25% -> 0.75 -->
+                <SLAFactor>1.15</SLAFactor> <!-- Vượt tiến độ 3-4 ngày -->
+                <CalculatedScore>287.5</CalculatedScore>
+            </TaskItem>
+        </TaskList>
+        
+        <!-- Công thức quy đổi chỉ số A, B, C, D -->
+        <KPI_Metrics>
+            <MetricA_QuantityPercentage>100.0</MetricA_QuantityPercentage>
+            <MetricB_QualityPercentage>95.0</MetricB_QualityPercentage>
+            <MetricC_SLAProgressPercentage>105.0</MetricC_SLAProgressPercentage>
+            <MetricD_LeadershipPercentage>100.0</MetricD_LeadershipPercentage>
+            <AverageKPIPercentage>100.0</AverageKPIPercentage>
+            <RawKPIScore>70.0</RawKPIScore>
+            <FinalSectionBScore cap="70.0">70.0</FinalSectionBScore> <!-- Khống chế trần 70đ -->
+        </KPI_Metrics>
+    </SectionB_TaskKPI>
+
+    <!-- TỔNG HỢP & TỰ ĐỀ XUẤT XẾP LOẠI -->
+    <TotalScore cap="100.0">100.0</TotalScore>
+    <SelfProposedClassification>HOÀN THÀNH XUẤT SẮC NHIỆM VỤ</SelfProposedClassification>
+    
+    <!-- DANH MỤC SẢN PHẨM NỔI TRỘI (NẾU ĐỀ XUẤT XUẤT SẮC) -->
+    <OutstandingProducts>
+        <Product id="P1">Hoàn thành Đề án chuyển đổi số CSDL Đảng viên vượt tiến độ 05 ngày</Product>
+    </OutstandingProducts>
+</Form03_QuarterlyKPIScorecard>

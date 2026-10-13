@@ -374,19 +374,28 @@ export class KpiEvaluationsService implements OnModuleInit {
       for (const def of DEFAULT_KPI_FORM_TEMPLATES) {
         const found = dbTemplates.find((t) => t.formCode === def.formCode);
         if (!found) {
+          const xml = getTemplateXmlContent(def.formCode);
           await this.prisma.kpiFormTemplate.upsert({
             where: { formCode: def.formCode },
             update: {
               name: def.name,
               description: def.description,
+              category: def.category,
+              targetRole: def.targetRole,
+              schemaVersion: def.schemaVersion,
               templateFileId: def.fileName,
+              xmlContent: xml,
               organizationId: 'DEFAULT',
             },
             create: {
               formCode: def.formCode,
               name: def.name,
               description: def.description,
+              category: def.category,
+              targetRole: def.targetRole,
+              schemaVersion: def.schemaVersion,
               templateFileId: def.fileName,
+              xmlContent: xml,
               organizationId: 'DEFAULT',
             },
           });

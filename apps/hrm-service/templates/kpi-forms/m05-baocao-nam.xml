@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 05: BÁO CÁO KẾT QUẢ KẾT NỐI, CHIA SẺ DỮ LIỆU HẰNG NĂM (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
+<Form05_AnnualIntegrationReport id="M05_BAOCAO_NAM" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
+    <ReportingYear>2026</ReportingYear>
+    <ReportingAgency>Ban Tổ chức Tỉnh ủy Đắk Lắk</ReportingAgency>
+    <Metrics>
+        <TotalAPICalls>125000</TotalAPICalls>
+        <SuccessfulSyncRate>99.8</SuccessfulSyncRate>
+        <DataCleanlinessRate>98.5</DataCleanlinessRate> <!-- Nguyên tắc Đúng, Đủ, Sạch, Sống -->
+        <SecurityIncidentsCount>0</SecurityIncidentsCount>
+    </Metrics>
+</Form05_AnnualIntegrationReport>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 03: BIÊN BẢN PHÁT HIỆN XUNG ĐỘT DỮ LIỆU (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
+<Form03_DataConflictReport id="M03_XUNG_DOT" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
+    <ReportDate>2026-10-05</ReportDate>
+    <ConflictDetails>
+        <CitizenID>066095001234</CitizenID>
+        <FieldRef name="NgayVaoDangChinhThuc"/>
+        <PartyDBValue>2018-05-19</PartyDBValue>
+        <NationalCivilDBValue>2018-05-20</NationalCivilDBValue>
+        <SingleSourceOfTruthRef>CSDL Tổ chức Đảng, Đảng viên</SingleSourceOfTruthRef>
+    </ConflictDetails>
+</Form03_DataConflictReport>

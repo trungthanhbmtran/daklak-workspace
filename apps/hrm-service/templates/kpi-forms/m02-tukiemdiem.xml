@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 02: BẢN TỰ KIỂM ĐIỂM CÁ NHÂN (Mẫu 2A: Lãnh đạo; 2B: Công chức; 2C: Khác) (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
+<Form02_SelfReviewForm id="M02_TUKIEMDIEM" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU" templateType="2A">
+    <PersonalInformation>
+        <CitizenID>066095001234</CitizenID>
+        <FullName>Nguyễn Văn A</FullName>
+        <PartyPosition>Bí thư Chi bộ</PartyPosition>
+        <GovernmentPosition>Trưởng phòng Tổ chức Cán bộ</GovernmentPosition>
+        <Department>Phòng Tổ chức Cán bộ - BTCTU</Department>
+    </PersonalInformation>
+    <SelfReviewContent>
+        <PoliticalIdeology status="Pass">Tuyệt đối trung thành với Đảng, bản lĩnh chính trị vững vàng</PoliticalIdeology>
+        <MoralLifestyle status="Pass">Trong sáng, khiêm tốn, chấp hành nghiêm chuẩn mực đạo đức</MoralLifestyle>
+        <WorkDiscipline status="Pass">Chấp hành nghiêm sự phân công, quy chế làm việc</WorkDiscipline>
+        <SelfCorrection>Thực hiện nghiêm túc tự soi, tự sửa, khắc phục hạn chế kỳ trước</SelfCorrection>
+    </SelfReviewContent>
+</Form02_SelfReviewForm>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 05: BÁO CÁO / QUYẾT ĐỊNH PHÊ DUYỆT MỨC XẾP LOẠI CHẤT LƯỢNG QUÝ (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
+<Form05_FinalEvaluationReport id="M05_BAOCAO_QUYETDINH" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU">
+    <ReportNumber>89-BC/TU</ReportNumber>
+    <ReportDate>2026-09-30</ReportDate>
+    <EvaluationPeriod quarter="Q3" year="2026"/>
+    <FinalApprovalResults>
+        <GradeExcellentTotalCount>3</GradeExcellentTotalCount>
+        <GradeGoodTotalCount>11</GradeGoodTotalCount>
+        <GradeSatisfactoryTotalCount>1</GradeSatisfactoryTotalCount>
+        <GradeUnsatisfactoryTotalCount>0</GradeUnsatisfactoryTotalCount>
+    </FinalApprovalResults>
+    <SanctionsAndAdjustments>
+        <ConsecutiveUnsatisfactoryAlerts count="0"/> <!-- Cảnh báo nếu 2 quý liên tiếp không hoàn thành để điều chuyển -->
+    </SanctionsAndAdjustments>
+</Form05_FinalEvaluationReport>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 04: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ VÀ ĐỀ XUẤT XẾP LOẠI QUÝ (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
+<Form04_SummaryEvaluationTable id="M04_TONGHOP_QUY" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU">
+    <EvaluationPeriod quarter="Q3" year="2026"/>
+    <AuthorityBody>Ban Thường vụ Tỉnh ủy / Tập thể Lãnh đạo Ban</AuthorityBody>
+    <SummaryList>
+        <SummaryRecord stt="1">
+            <CitizenID>066095001234</CitizenID>
+            <FullName>Nguyễn Văn A</FullName>
+            <Position>Trưởng phòng Tổ chức Cán bộ</Position>
+            <SelfScore>100.0</SelfScore>
+            <SelfProposedGrade>Hoàn thành xuất sắc nhiệm vụ</SelfProposedGrade>
+            <AppraisalScore>100.0</AppraisalScore>
+            <AuthorityProposedGrade>Hoàn thành xuất sắc nhiệm vụ</AuthorityProposedGrade>
+            <ExceedingQuotaCheck passesExcellentLimit="true">Nằm trong tỷ lệ 20% xuất sắc</ExceedingQuotaCheck>
+            <Notes>Sản phẩm chất lượng cao, vượt tiến độ SLA</Notes>
+        </SummaryRecord>
+    </SummaryList>
+</Form04_SummaryEvaluationTable>

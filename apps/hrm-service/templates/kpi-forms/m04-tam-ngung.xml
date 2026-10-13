@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- MẪU 04: THÔNG BÁO TẠM NGỪNG / CHẤM DỨT KẾT NỐI (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
+<Form04_SuspensionNotice id="M04_TAM_NGUNG" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
+    <NoticeNumber>89-TB/BTCTW</NoticeNumber>
+    <ActionType>Tạm ngừng</ActionType> <!-- Tạm ngừng hoặc Chấm dứt -->
+    <Reason>Bảo trì hệ thống mạng diện rộng của Đảng</Reason>
+    <EffectiveTime>2026-11-01T00:00:00+07:00</EffectiveTime>
+    <ExpectedResumeTime>2026-11-02T06:00:00+07:00</ExpectedResumeTime>
+</Form04_SuspensionNotice>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficialEvaluationSystem province="DakLak" framework="HD05-TU_QD39-TU">
+    
+    <!-- MẪU 01: TỜ TRÌNH ĐỀ NGHỊ ĐÁNH GIÁ, XẾP LOẠI QUÝ -->
+    <Form01_SubmissionHeader id="M01_TOTRINH">
+        <OrganizationCode>BTCTU_DAKLAK</OrganizationCode>
+        <OrganizationName>Ban Tổ chức Tỉnh ủy Đắk Lắk</OrganizationName>
+        <SubmissionNumber>123-TTr/BTCTU</SubmissionNumber>
+        <SubmissionDate>2026-09-25</SubmissionDate>
+        <EvaluationPeriod quarter="Q3" year="2026"/>
+        <TargetAudience>Cán bộ lãnh đạo, quản lý thuộc diện quản lý</TargetAudience>
+        <SummaryContent>
+            <TotalEvaluatedOfficials>15</TotalEvaluatedOfficials>
+            <ProposedExcellent>3</ProposedExcellent> <!-- Tối đa 20% -->
+            <ProposedGood>11</ProposedGood>
+            <ProposedSatisfactory>1</ProposedSatisfactory>
+            <ProposedUnsatisfactory>0</ProposedUnsatisfactory>
+        </SummaryContent>
+    </Form01_SubmissionHeader>
+
+    <!-- MẪU 02: BẢN TỰ KIỂM ĐIỂM CÁ NHÂN (Mẫu 2A: Lãnh đạo; 2B: Công chức; 2C: Khác) -->
+    <Form02_SelfReviewForm id="M02_TUKIEMDIEM" templateType="2A">
+        <PersonalInformation>
+            <CitizenID>066095001234</CitizenID>
+            <FullName>Nguyễn Văn A</FullName>
+            <PartyPosition>Bí thư Chi bộ</PartyPosition>
+            <GovernmentPosition>Trưởng phòng Tổ chức Cán bộ</GovernmentPosition>
+            <Department>Phòng Tổ chức Cán bộ - BTCTU</Department>
+        </PersonalInformation>
+        <SelfReviewContent>
+            <PoliticalIdeology status="Pass">Tuyệt đối trung thành với Đảng, bản lĩnh chính trị vững vàng</PoliticalIdeology>
+            <MoralLifestyle status="Pass">Trong sáng, khiêm tốn, chấp hành nghiêm chuẩn mực đạo đức</MoralLifestyle>
+            <WorkDiscipline status="Pass">Chấp hành nghiêm sự phân công, quy chế làm việc</WorkDiscipline>
+            <SelfCorrection>Thực hiện nghiêm túc tự soi, tự sửa, khắc phục hạn chế kỳ trước</SelfCorrection>
+        </SelfReviewContent>
+    </Form02_SelfReviewForm>
+
+    <!-- MẪU 03: BẢN TỰ ĐÁNH GIÁ & SCORECARD KPI HẰNG QUÝ (Thang điểm 100) -->
+    <Form03_QuarterlyKPIScorecard id="M03_SCORECARD_KPI">
+        <EvaluationPeriod quarter="Q3" year="2026"/>
+        <OfficialRef citizenID="066095001234" fullName="Nguyễn Văn A"/>
+        
+        <!-- PHẦN A: NHÓM TIÊU CHÍ CHUNG (TỐI ĐA 30 ĐIỂM) -->
+        <SectionA_GeneralCriteria maxScore="30.0" achievedScore="30.0">
+            <Criterion id="1.1" name="Phẩm chất chính trị, đạo đức, lối sống, nêu gương" max="18.0" score="18.0" status="Ensured"/>
+            <Criterion id="2.1" name="Tư duy đổi mới, khát vọng cống hiến, dám nghĩ dám làm" max="4.0" score="4.0" status="Ensured"/>
+            <Criterion id="3.1" name="Tự phê bình và phê bình, tự soi tự sửa, khắc phục hạn chế" max="8.0" score="8.0" status="Ensured"/>
+        </SectionA_GeneralCriteria>
+
+        <!-- PHẦN B: KẾT QUẢ THỰC HIỆN NHIỆM VỤ - KPI (TỐI ĐA 70 ĐIỂM) -->
+        <SectionB_TaskKPI maxScore="70.0">
+            <TaskList>
+                <!-- Ví dụ Đầu việc 1 -->
+                <TaskItem id="T1" difficultyGroup="Group3" baseScore="250">
+                    <TaskName>Thẩm định Tờ trình bổ nhiệm cán bộ diện BTVTU quản lý</TaskName>
+                    <OutputProduct>Tờ trình + Bản tổng hợp nhân sự</OutputProduct>
+                    <PlannedQuantity>4</PlannedQuantity>
+                    <CompletedQuantity>4</CompletedQuantity>
+                    <QualityFactor>1.00</QualityFactor> <!-- Nếu có lỗi chủ quan bị trừ 25% -> 0.75 -->
+                    <SLAFactor>1.15</SLAFactor> <!-- Vượt tiến độ 3-4 ngày -->
+                    <CalculatedScore>287.5</CalculatedScore>
+                </TaskItem>
+            </TaskList>
+            
+            <!-- Công thức quy đổi chỉ số A, B, C, D -->
+            <KPI_Metrics>
+                <MetricA_QuantityPercentage>100.0</MetricA_QuantityPercentage>
+                <MetricB_QualityPercentage>95.0</MetricB_QualityPercentage>
+                <MetricC_SLAProgressPercentage>105.0</MetricC_SLAProgressPercentage>
+                <MetricD_LeadershipPercentage>100.0</MetricD_LeadershipPercentage>
+                <AverageKPIPercentage>100.0</AverageKPIPercentage>
+                <RawKPIScore>70.0</RawKPIScore>
+                <FinalSectionBScore cap="70.0">70.0</FinalSectionBScore> <!-- Khống chế trần 70đ -->
+            </KPI_Metrics>
+        </SectionB_TaskKPI>
+
+        <!-- TỔNG HỢP & TỰ ĐỀ XUẤT XẾP LOẠI -->
+        <TotalScore cap="100.0">100.0</TotalScore>
+        <SelfProposedClassification>HOÀN THÀNH XUẤT SẮC NHIỆM VỤ</SelfProposedClassification>
+        
+        <!-- DANH MỤC SẢN PHẨM NỔI TRỘI (NẾU ĐỀ XUẤT XUẤT SẮC) -->
+        <OutstandingProducts>
+            <Product id="P1">Hoàn thành Đề án chuyển đổi số CSDL Đảng viên vượt tiến độ 05 ngày</Product>
+        </OutstandingProducts>
+    </Form03_QuarterlyKPIScorecard>
+
+    <!-- MẪU 04: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ VÀ ĐỀ XUẤT XẾP LOẠI QUÝ -->
+    <Form04_SummaryEvaluationTable id="M04_TONGHOP_QUY">
+        <EvaluationPeriod quarter="Q3" year="2026"/>
+        <AuthorityBody>Ban Thường vụ Tỉnh ủy / Tập thể Lãnh đạo Ban</AuthorityBody>
+        <SummaryList>
+            <SummaryRecord stt="1">
+                <CitizenID>066095001234</CitizenID>
+                <FullName>Nguyễn Văn A</FullName>
+                <Position>Trưởng phòng Tổ chức Cán bộ</Position>
+                <SelfScore>100.0</SelfScore>
+                <SelfProposedGrade>Hoàn thành xuất sắc nhiệm vụ</SelfProposedGrade>
+                <AppraisalScore>100.0</AppraisalScore>
+                <AuthorityProposedGrade>Hoàn thành xuất sắc nhiệm vụ</AuthorityProposedGrade>
+                <ExceedingQuotaCheck passesExcellentLimit="true">Nằm trong tỷ lệ 20% xuất sắc</ExceedingQuotaCheck>
+                <Notes>Sản phẩm chất lượng cao, vượt tiến độ SLA</Notes>
+            </SummaryRecord>
+        </SummaryList>
+    </Form04_SummaryEvaluationTable>
+
+    <!-- MẪU 05: BÁO CÁO / QUYẾT ĐỊNH PHÊ DUYỆT MỨC XẾP LOẠI CHẤT LƯỢNG QUÝ -->
+    <Form05_FinalEvaluationReport id="M05_BAOCAO_QUYETDINH">
+        <ReportNumber>89-BC/TU</ReportNumber>
+        <ReportDate>2026-09-30</ReportDate>
+        <EvaluationPeriod quarter="Q3" year="2026"/>
+        <FinalApprovalResults>
+            <GradeExcellentTotalCount>3</GradeExcellentTotalCount>
+            <GradeGoodTotalCount>11</GradeGoodTotalCount>
+            <GradeSatisfactoryTotalCount>1</GradeSatisfactoryTotalCount>
+            <GradeUnsatisfactoryTotalCount>0</GradeUnsatisfactoryTotalCount>
+        </FinalApprovalResults>
+        <SanctionsAndAdjustments>
+            <ConsecutiveUnsatisfactoryAlerts count="0"/> <!-- Cảnh báo nếu 2 quý liên tiếp không hoàn thành để điều chuyển -->
+        </SanctionsAndAdjustments>
+    </Form05_FinalEvaluationReport>
+
+</OfficialEvaluationSystem>
