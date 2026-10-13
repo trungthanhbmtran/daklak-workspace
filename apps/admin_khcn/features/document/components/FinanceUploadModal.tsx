@@ -100,19 +100,6 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
         attachmentExcels.map(file => uploadFile(file))
       );
 
-      console.log("Dữ liệu sẵn sàng lưu DB:", {
-        ...values,
-        decisionFile: {
-          id: decisionMedia.id,
-          url: decisionMedia.downloadUrl
-        },
-        attachments: excelUploads.map(m => ({
-          id: m.id,
-          url: m.downloadUrl,
-          name: m.fileName
-        }))
-      });
-
       onClose();
       form.reset();
       setDecisionPdf(null);

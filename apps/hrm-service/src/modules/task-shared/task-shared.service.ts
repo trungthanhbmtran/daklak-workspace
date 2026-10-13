@@ -469,6 +469,8 @@ export class TaskSharedService {
           
           if (employeeDeptMap && employeeDeptMap.has(assigneeCode)) {
             assigneeDeptId = employeeDeptMap.get(assigneeCode)!;
+          } else if (t.departmentId) {
+            assigneeDeptId = Number(t.departmentId);
           } else {
             const assigneeEmp = await this.prisma.employee.findUnique({
               where: { employeeCode: assigneeCode },
@@ -947,7 +949,6 @@ export class TaskSharedService {
     return {
       id: t.id ?? 0,
       title: t.title ?? '',
-      description: '',
       assigneeCode: t.assigneeCode ?? '',
       assignerCode: t.assignerCode ?? '',
       status: t.status ?? '',
@@ -958,31 +959,21 @@ export class TaskSharedService {
       updatedAt: updatedAtStr,
       baseScore: Number((t.metadata as any)?.baseScore ?? 0),
       weight: Number((t.metadata as any)?.weight ?? 0),
-      scoringMethod: String((t.metadata as any)?.scoringMethod ?? ''),
-      bonusPerDay: Number((t.metadata as any)?.bonusPerDay ?? 0),
-      penaltyPerDay: Number((t.metadata as any)?.penaltyPerDay ?? 0),
       supervisorCode: t.supervisorCode ?? '',
       planId: t.planId ?? 0,
       assigneeName: t.assigneeName ?? '',
       departmentId: t.departmentId ?? 0,
       parentId: t.parentId ?? 0,
-      rejectReason: t.rejectReason ?? '',
       assignerName: t.assignerName ?? '',
       priority: t.priority ?? '',
       priorityLabel: this.getPriorityLabel(t.priority),
       supervisorName: t.supervisorName ?? '',
-      conversationId: t.conversationId ?? '',
-      coassigneeCodes: t.coassigneeCodes || [],
-      allowedActions: [],
-      plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
       rootTaskId: t.rootTaskId ?? 0,
       progress: t.progress ?? 0,
       coassigneeNames: t.coassigneeNames || [],
       children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponseSummary(child)) : [],
-      workflowInstId: undefined,
       metadata: t.metadata?.taskType ? { taskType: t.metadata.taskType } : undefined,
       sourceDocumentRef: t.sourceDocumentRef || (t.metadata?.sourceDocumentRef || ''),
-      participants: [],
     };
   }
 

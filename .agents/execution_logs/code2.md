@@ -1,5 +1,29 @@
 # Code 2 Execution Log
 
+## 2026-10-13: Rà soát Toàn diện Vi phạm Quy tắc Dự án, Chuẩn hóa Mã Nguồn & Lập Báo cáo Hiệu năng - Rủi ro Hệ thống
+- **Nội dung tác vụ**:
+  1. *Rà soát Vi phạm Hiến chương Kỹ thuật*:
+     - **Ràng buộc 7 (Vệ sinh mã nguồn)**: Loại bỏ triệt để 100% `console.log` còn sót trong frontend tại `FinanceUploadModal.tsx`, `BannerForm.tsx`, `categories/api.ts`, và `auth.ts`.
+     - **Ràng buộc 4 & 6 (Bảo mật gRPC & Token Delegation)**: Khắc phục `AiGatewayController` (`apps/api-gateway/src/modules/ai/ai.controller.ts`), bổ sung `TokenIssuerService` và `getGrpcMetadata(req)` tự động ký gRPC delegation token kèm user-id và client IP; xây dựng helper `safeParseJson` ngăn chặn crash unhandled JSON.parse khi RPC trả về text thường.
+     - **Ràng buộc 1 (UI/UX & Typography tiếng Việt)**: Chuẩn hóa `KpiFormulasClient.tsx`, `AiQuotaPlanModal.tsx`, và `ManualPlanSelectorByRankClient.tsx`: thay thế `font-black` (gây bẹt/đè nét chữ tiếng Việt) sang `font-bold`, chuẩn hóa `break-words` sang `wrap-break-word` kết hợp `min-w-0`.
+  2. *Báo cáo Chuyên sâu Hiệu năng & Rủi ro Hệ thống (Artifact Report)*:
+     - Tạo báo cáo toàn diện `system-performance-and-risk-report.md` phân tích kiến trúc microservices (10+ services), nhận diện 5 rủi ro trọng yếu: Database SPOF (1x MySQL cho toàn bộ service), thiếu gRPC deadline/timeout gây cascading failure, N+1 queries trong interactive transactions, nguy cơ OOMKilled do giới hạn RAM Docker, và ma trận đánh giá rủi ro (Risk Matrix).
+     - Đề xuất lộ trình khắc phục 3 giai đoạn: Giai đoạn 1 (Ngay lập tức: Connection limit, gRPC client deadline, batch DB updates), Giai đoạn 2 (Tách CSDL vật lý, Circuit Breaker), Giai đoạn 3 (Event-Driven với RabbitMQ, Observability OpenTelemetry/Grafana).
+- **Tập tin đã cập nhật**:
+  - `apps/admin_khcn/features/document/components/FinanceUploadModal.tsx`
+  - `apps/admin_khcn/features/posts/components/BannerForm.tsx`
+  - `apps/admin_khcn/features/system-admin/categories/api.ts`
+  - `apps/admin_khcn/lib/auth.ts`
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`
+  - `apps/admin_khcn/features/hrm/components/work-plans/kpi/KpiFormulasClient.tsx`
+  - `apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx`
+  - `apps/admin_khcn/features/hrm/components/work-plans/master-plans/ManualPlanSelectorByRankClient.tsx`
+  - `brain/system-performance-and-risk-report.md` (Artifact Báo cáo)
+- **Kiểm chứng máy**:
+  - Typecheck `apps/api-gateway`: `./apps/api-gateway/node_modules/.bin/tsc -p apps/api-gateway/tsconfig.json --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> PASS (Exit 0, 0 errors).
+  - Build `apps/admin_khcn`: `npm run build` -> PASS (Exit 0, 83 routes biên dịch thành công 100%).
+
 ## 2026-10-13: Critical Review & Loại Bỏ Triệt Để Phản Mẫu Ép Kiểu (Forced Conversion) tại Luồng Chính Sách Người Dùng
 - **Nội dung tác vụ**: Thực hiện Critical Review toàn diện luồng API `GET /api/v1/admin/users/:id/policies` từ Microservice `user-service` -> `api-gateway` -> `apiClient` -> UI Component theo đúng yêu cầu:
   1. *Phát hiện phản mẫu (Anti-pattern Findings)*: Cách viết trước đó sử dụng các tầng fallback `as any` cùng chuỗi if/ternary kiểm tra nhiều thuộc tính giả định (`data?.policies`, `data?.data`, `res?.policies`, `rawPolicies as any`) là kỹ thuật "ép convert" chắp vá, che giấu sai lệch contract dữ liệu và vi phạm nguyên tắc Dumb Client và Type Integrity.

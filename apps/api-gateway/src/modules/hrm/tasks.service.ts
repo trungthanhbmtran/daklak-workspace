@@ -352,43 +352,50 @@ export class TasksService implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
 
-    const requestPayload = {
-      assigneeCode: finalAssigneeCode,
-      assignerCode: finalAssignerCode,
-      filter,
-      search,
-      status,
-      priority,
-      type,
-      statsFilter,
-      departmentId: finalDepartmentId,
-      planId:
-        planId && planId !== 'undefined' ? parseInt(planId, 10) : undefined,
-      isSupervisor: isSupervisor === 'true',
+    const requestPayload: any = {
       currentEmployeeCode: user?.employeeCode,
       isAdmin,
       isLeader,
-      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
-      role,
       page: page ? parseInt(page, 10) : 1,
       limit: limit ? parseInt(limit, 10) : 20,
-      viewMode,
-      referenceDate,
       summary: summary === 'true',
     };
+
+    if (finalAssigneeCode) requestPayload.assigneeCode = finalAssigneeCode;
+    if (finalAssignerCode) requestPayload.assignerCode = finalAssignerCode;
+    if (filter && filter !== 'ALL' && filter !== 'undefined') requestPayload.filter = filter;
+    if (search && search.trim() && search !== 'undefined') requestPayload.search = search.trim();
+    if (status && status !== 'ALL' && status !== 'undefined') requestPayload.status = status;
+    if (priority && priority !== 'ALL' && priority !== 'undefined') requestPayload.priority = priority;
+    if (type && type !== 'ALL' && type !== 'undefined') requestPayload.type = type;
+    if (statsFilter && statsFilter !== 'undefined') requestPayload.statsFilter = statsFilter;
+    if (finalDepartmentId) requestPayload.departmentId = finalDepartmentId;
+    if (planId && planId !== 'undefined') requestPayload.planId = parseInt(planId, 10);
+    if (isSupervisor === 'true') requestPayload.isSupervisor = true;
+    if (user?.unitId) requestPayload.currentUserDept = parseInt(user.unitId, 10);
+    if (user?.id) requestPayload.currentUserId = parseInt(user.id, 10);
+    if (role && role !== 'undefined') requestPayload.role = role;
+    if (viewMode && viewMode !== 'undefined') requestPayload.viewMode = viewMode;
+    if (referenceDate && referenceDate !== 'undefined') requestPayload.referenceDate = referenceDate;
 
     const response: any = await firstValueFrom(
       this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
 
     if (response?.data) {
+      const isSummary = summary === 'true';
       if (Array.isArray(response.data)) {
         await this.populateUsers(response.data);
         response.data.forEach((t: any) => this.translateTaskData(t));
+        if (isSummary) {
+          response.data = response.data.map((t: any) => this.pruneSummaryTask(t));
+        }
       } else {
         await this.populateUsers([response.data]);
         this.translateTaskData(response.data);
+        if (isSummary) {
+          response.data = this.pruneSummaryTask(response.data);
+        }
       }
     }
 
@@ -397,6 +404,45 @@ export class TasksService implements OnModuleInit {
       response.meta.currentEmployeeCode = user.employeeCode;
     }
     return response;
+  }
+
+  private pruneSummaryTask(t: any): any {
+    if (!t) return t;
+    const cleaned: any = {
+      id: t.id,
+      title: t.title,
+      status: t.status,
+      statusLabel: t.statusLabel,
+      priority: t.priority,
+      priorityLabel: t.priorityLabel,
+      dueDate: t.dueDate,
+      startDate: t.startDate,
+      progress: t.progress ?? 0,
+      assigneeCode: t.assigneeCode || undefined,
+      assigneeName: t.assigneeName || undefined,
+      assignerCode: t.assignerCode || undefined,
+      assignerName: t.assignerName || undefined,
+      supervisorCode: t.supervisorCode || undefined,
+      supervisorName: t.supervisorName || undefined,
+      coassigneeNames: (Array.isArray(t.coassigneeNames) && t.coassigneeNames.length > 0) ? t.coassigneeNames : undefined,
+      sourceDocumentRef: t.sourceDocumentRef || undefined,
+      baseScore: t.baseScore ? Number(t.baseScore) : undefined,
+      weight: t.weight ? Number(t.weight) : undefined,
+      parentId: t.parentId ? Number(t.parentId) : undefined,
+      planId: t.planId ? Number(t.planId) : undefined,
+      isOverdueWarned: t.isOverdueWarned || undefined,
+      isDeadlineWarned: t.isDeadlineWarned || undefined,
+      isRiskWarned: t.isRiskWarned || undefined,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+    };
+    if (t.metadata?.taskType) {
+      cleaned.metadata = { taskType: t.metadata.taskType };
+    }
+    if (Array.isArray(t.children) && t.children.length > 0) {
+      cleaned.children = t.children.map((c: any) => this.pruneSummaryTask(c));
+    }
+    return cleaned;
   }
 
   async update(req: any, id: number, body: any) {

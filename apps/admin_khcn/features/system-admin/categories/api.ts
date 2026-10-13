@@ -44,7 +44,7 @@ export const categoryApi = {
   fetchGroups: async (): Promise<{ code: string; name: string }[]> => {
     try {
       const res: any = await apiClient.get("/categories/groups");
-      console.log("[categoryApi] fetchGroups raw response:", res);
+
       return res.data;
     } catch (err) {
       console.error("[categoryApi] fetchGroups error:", err);

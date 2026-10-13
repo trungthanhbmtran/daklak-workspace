@@ -147,7 +147,7 @@ export function AiQuotaPlanModal({
                 <div className="p-2 bg-primary rounded-xl text-primary-foreground shrink-0 shadow-sm">
                   <Bot className="w-5 h-5" />
                 </div>
-                <SheetTitle className="text-lg sm:text-xl font-black text-foreground break-words min-w-0">
+                <SheetTitle className="text-lg sm:text-xl font-bold text-foreground wrap-break-word min-w-0">
                   Trợ lý AI Đề xuất Định mức & Kế hoạch Nhiệm vụ
                 </SheetTitle>
                 <Badge
@@ -157,7 +157,7 @@ export function AiQuotaPlanModal({
                   <Sparkles className="w-3 h-3 text-amber-500 shrink-0" /> Chuẩn Trung ương
                 </Badge>
               </div>
-              <SheetDescription className="text-xs text-muted-foreground leading-relaxed break-words min-w-0">
+              <SheetDescription className="text-xs text-muted-foreground leading-relaxed wrap-break-word min-w-0">
                 Tự động phân tích biên chế, chức trách vị trí việc làm và mảng nghiệp vụ để tính toán định mức khối lượng công việc khoa học theo NĐ 62, NĐ 106, QĐ 137.
               </SheetDescription>
             </div>

@@ -226,7 +226,7 @@ export function KpiFormulasClient() {
                 Theo Hướng dẫn 05-HD/TU
               </Badge>
             </div>
-            <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl text-foreground break-words">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl text-foreground wrap-break-word">
               Công thức tính điểm KPI
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -821,7 +821,7 @@ export function KpiFormulasClient() {
                         <Badge className="bg-emerald-600 text-white font-mono text-xs">Hợp lệ</Badge>
                       </div>
                       <div className="mt-1.5 flex items-baseline gap-2">
-                        <span className="text-4xl font-black text-emerald-950 tracking-tight">{previewScore}</span>
+                        <span className="text-4xl font-bold text-emerald-950 tracking-tight">{previewScore}</span>
                         <span className="text-sm font-semibold text-emerald-800">/ 100 điểm</span>
                       </div>
                       <div className="mt-3 pt-2.5 border-t border-emerald-200/80 space-y-1 text-xs text-emerald-900 leading-relaxed">
@@ -863,7 +863,7 @@ export function KpiFormulasClient() {
             <CardContent className="space-y-2.5 p-4">
               {systemVariables.map((variable) => (
                 <div key={variable.code} className="flex gap-3 rounded-xl border bg-card p-3 shadow-2xs">
-                  <span className="flex h-8 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 font-mono font-black text-indigo-700 border border-indigo-200 text-sm">
+                  <span className="flex h-8 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 font-mono font-bold text-indigo-700 border border-indigo-200 text-sm">
                     {variable.code}
                   </span>
                   <div className="min-w-0">

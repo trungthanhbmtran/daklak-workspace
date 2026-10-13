@@ -115,9 +115,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
             loadedStyles = { ...DEFAULT_STYLES, ...parsed };
             isSlogan = true;
           }
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        } catch (e) {
-          console.log("metaDescription is not a JSON styling config");
+        } catch {
+          // ignore non-JSON styling
         }
       }
       setCustomStyles(loadedStyles);

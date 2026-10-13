@@ -487,14 +487,14 @@ export function ManualPlanSelectorByRankClient() {
                                     <div className="p-2.5 bg-primary/15 rounded-xl text-primary shrink-0 shadow-2xs">
                                         <Target className="w-6 h-6" />
                                     </div>
-                                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-black text-foreground tracking-tight break-words min-w-0">
+                                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight wrap-break-word min-w-0">
                                         Giao Định Mức Chỉ Tiêu Công Việc Theo Vị Trí Việc Làm
                                     </CardTitle>
                                     <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-semibold gap-1 border-primary/20 shrink-0">
                                         <Scale className="w-3 h-3" /> NĐ 62 • NĐ 106 • QĐ 137
                                     </Badge>
                                 </div>
-                                <CardDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words min-w-0">
+                                <CardDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed wrap-break-word min-w-0">
                                     Kế thừa trực tiếp Định biên biên chế từ Quản trị Tổ chức, thiết lập chỉ tiêu số lượng công việc theo <strong className="text-foreground">Tháng</strong>, <strong className="text-foreground">Quý</strong>, và <strong className="text-foreground">Năm</strong> làm căn cứ giao việc và đánh giá KPI.
                                 </CardDescription>
                             </div>

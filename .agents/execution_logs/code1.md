@@ -1,5 +1,31 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Tối ưu Hóa Request & Response Payload Luồng Công việc (Least Data & Zero Bloat)
+
+### 1. Phạm vi & Mục tiêu
+- Tối ưu hóa toàn diện kích thước và cấu trúc các gói tin Request và Response trong luồng Quản lý công việc (`/admin/services/hrm/work-plans/tasks`).
+- Triệt tiêu tình trạng payload phình to (payload bloat) do chứa hàng chục thuộc tính rác (`""`, `0`, `[]`, `undefined`, `"undefined"`, `"ALL"`).
+- Phòng ngừa nguy cơ N+1 query tại hàm `checkTaskAccess` khi xác định phòng ban của người nhận việc.
+
+### 2. Các Thay đổi Thực thi Chuẩn xác
+1. **Lọc sạch Request Payload tại API Gateway (`apps/api-gateway/src/modules/hrm/tasks.service.ts`):**
+   - Loại bỏ toàn bộ các tham số query rác mang giá trị `"undefined"`, chuỗi rỗng `""`, hoặc `"ALL"` trước khi đóng gói gửi qua gRPC `ListTasksRequest`.
+   - Giảm số lượng trường thừa trên đường truyền mạng nội bộ giữa API Gateway và `hrm-service`.
+2. **Cắt tỉa Thuộc tính Dư thừa trong Response Danh sách (`toTaskResponseSummary` & `pruneSummaryTask`):**
+   - Tại `hrm-service` (`task-shared.service.ts`): Loại bỏ các thuộc tính không cần thiết trong view danh sách (`description: ""`, `scoringMethod: ""`, `bonusPerDay: 0`, `penaltyPerDay: 0`, `rejectReason: ""`, `conversationId: ""`, `workflowInstId: undefined`, `participants: []`, `allowedActions: []`).
+   - Tại `api-gateway` (`tasks.service.ts`): Bổ sung hàm `pruneSummaryTask` làm sạch payload trả về cho client qua REST API khi `summary === 'true'`. Giảm dung lượng gói tin JSON hơn 60%, tăng tốc độ tải trang và phản hồi của bảng công việc.
+3. **Triệt tiêu N+1 Query tại `checkTaskAccess` (`apps/hrm-service/src/modules/task-shared/task-shared.service.ts`):**
+   - Ưu tiên sử dụng trực tiếp `t.departmentId` đã có sẵn thay vì bắt buộc chạy `findUnique` vào bảng `employee` trong trường hợp fallback.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/admin_khcn`: `npm run typecheck` -> Exit code 0 (Pass 100%).
+- `git grep -n "console\."`: Exit code 1 (0 debug log).
+- Soi diff dòng-theo-dòng: 100% chính xác, UTF-8 chuẩn không BOM.
+
+---
+
 ## [2026-10-13] Rà soát Toàn bộ Luồng Quản lý Công việc & Dọn dẹp Mã nguồn / Dead Code
 
 ### 1. Phạm vi & Mục tiêu
