@@ -88,6 +88,27 @@
   - `npx ts-node prisma/btctu-kpi-engine.seed.ts`: Mã thoát 0 (Đã nạp thành công 17 biểu mẫu hành chính & cấu trúc XML vào CSDL).
   - `pnpm --filter admin_khcn run typecheck` (`tsc --noEmit`): Mã thoát 0 (Pass 100%).
 
-  - Rà soát diff: 100% tuân thủ 7 Bộ ràng buộc kỹ thuật.
+
+### [13/10/2026] Khắc phục Triệt để Lỗi Không Hiển thị Data XML Trong Các Biểu Mẫu KPI Đánh Giá Tại `/admin/services/hrm/work-plans/evaluation-forms`
+- **Yêu cầu & Vấn đề phát hiện:**
+  - Người dùng truy cập `http://113.184.220.82/admin/services/hrm/work-plans/evaluation-forms`, bấm vào các biểu mẫu nhưng không thấy dữ liệu XML bên trong ("không thấy data XML trong các mẫu trên này bạn chưa import đúng chứ").
+  - **Nguyên nhân gốc rễ:**
+    1. `apps/hrm-service/Dockerfile` ở stage `runner` chỉ copy `dist` và `protos`, **hoàn toàn bỏ quên thư mục `templates/`**. Khi chạy container trên VPS, `fs.existsSync(filePath)` luôn trả về `false`, khiến service trả về fallback XML trống `<Placeholder>Nội dung đang được cập nhật</Placeholder>`.
+    2. Trong `kpi-evaluations.service.ts`, hàm `findFormTemplates()` chỉ chạy upsert khi `dbTemplates.length < DEFAULT_KPI_FORM_TEMPLATES.length` và `!found`. Nếu các bản ghi mẫu đã được sinh từ trước với nội dung rỗng/placeholder, hệ thống không bao giờ tự động cập nhật lại nội dung XML thật vào DB.
+    3. Tại `api-gateway`, endpoint `GET /admin/hrm/kpi-forms/:formCode/xml` trả về envelope phẳng `{ success, formCode, xmlContent }` không có wrapper `data: { ... }`. Trong khi đó, frontend `EvaluationFormsClient.tsx` tại các hàm `handleDownloadXml`, `handleExportDocx`, `handlePrintPdf`, `handleOpenEditXml` lại truy cập `res.data?.xmlContent`, dẫn đến `xml` luôn bị `undefined` -> báo lỗi "Nội dung file XML đang trống" / mở editor trống trơn.
+- **Giải pháp xử lý:**
+  1. **Nhúng trực tiếp 100% dữ liệu 17 mẫu XML vào TypeScript** (`kpi-templates-embedded.data.ts`): Đảm bảo dù chạy trên Docker không mount volume, môi trường dev hay test, dữ liệu XML gốc của cả 17 mẫu đều luôn sẵn sàng 100%, không bao giờ bị phụ thuộc vào đường dẫn đĩa vật lý.
+  2. **Tự động làm lành (Self-Healing) & Tự động Import vào DB**:
+     - Trong `kpi-evaluations.service.ts`, các hàm `findFormTemplates`, `getFormTemplateDetail`, `getFormTemplateXml` đều tích hợp kiểm tra `isPlaceholderXml()`. Nếu bản ghi trong CSDL còn là placeholder hoặc rỗng, hệ thống sẽ tự động cập nhật đè dữ liệu XML chuẩn vào bảng `kpi_form_templates` và `kpi_form_template_versions`.
+     - Tạo script đồng bộ độc lập `apps/hrm-service/prisma/sync-kpi-templates.ts`.
+  3. **Cập nhật Dockerfile**: Bổ sung `COPY templates` vào cả `/app/templates` và `/app/dist/apps/hrm-service/templates`.
+  4. **Chuẩn hóa API Gateway & Frontend**:
+     - `api-gateway` `kpi-forms.controller.ts`: Đảm bảo `getXml` trả về đồng thời cả `data: { xmlContent, ... }` lẫn `xmlContent` ở root.
+     - `admin_khcn` `EvaluationFormsClient.tsx` & `useKpiForms.ts`: Truy xuất an toàn `res?.data?.xmlContent || res?.xmlContent || ''`.
+- **Kiểm chứng máy thực tế:**
+  - `apps/hrm-service`: `npm run build` -> Exit code 0 (Pass 100%).
+  - `apps/api-gateway`: `npm run build` -> Exit code 0 (Pass 100%).
+  - `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> Exit code 0 (Pass 100%).
+
 
 

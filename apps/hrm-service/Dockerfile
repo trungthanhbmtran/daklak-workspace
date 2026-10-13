@@ -56,6 +56,8 @@ COPY --chown=app:app --from=builder /app/apps/hrm-service/src/generated ./src/ge
 
 # Copy thư mục build và protos từ builder stage
 COPY --chown=app:app --from=builder /app/apps/hrm-service/dist ./dist
+COPY --chown=app:app --from=builder /app/apps/hrm-service/templates ./templates
+COPY --chown=app:app --from=builder /app/apps/hrm-service/templates ./dist/apps/hrm-service/templates
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 EXPOSE 8080

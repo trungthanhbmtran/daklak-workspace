@@ -51,8 +51,15 @@ export function useGetKpiFormXml(formCode: string | null) {
     queryKey: KPI_FORMS_QUERY_KEYS.xml(formCode || ''),
     queryFn: async () => {
       if (!formCode) return null;
-      const res = await kpiFormsApi.getXml(formCode);
-      return unwrapData<KpiFormXmlResponse>(res, null as any);
+      const res: any = await kpiFormsApi.getXml(formCode);
+      if (!res) return null;
+      const inner = res.data && typeof res.data === 'object' ? res.data : res;
+      return {
+        formCode: inner.formCode || res.formCode || formCode,
+        xmlContent: inner.xmlContent || res.xmlContent || '',
+        placeholders: inner.placeholders || res.placeholders || [],
+        xmlSize: inner.xmlSize || res.xmlSize || 0,
+      };
     },
     enabled: Boolean(formCode),
     staleTime: 60 * 1000,

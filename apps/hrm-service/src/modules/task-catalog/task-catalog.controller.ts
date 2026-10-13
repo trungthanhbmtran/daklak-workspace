@@ -12,6 +12,7 @@ export class TaskCatalogController {
   // --- Rank Quotas ---
   @GrpcMethod('TaskService', 'SaveRankQuotas')
   saveRankQuotas(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -21,6 +22,7 @@ export class TaskCatalogController {
 
   @GrpcMethod('TaskService', 'GetRankQuotasByRank')
   getRankQuotasByRank(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -31,6 +33,7 @@ export class TaskCatalogController {
   // --- Task Templates ---
   @GrpcMethod('TaskService', 'FindTaskTemplates')
   findTaskTemplates(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -40,6 +43,7 @@ export class TaskCatalogController {
 
   @GrpcMethod('TaskService', 'CreateTaskTemplate')
   createTaskTemplate(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -49,6 +53,7 @@ export class TaskCatalogController {
 
   @GrpcMethod('TaskService', 'UpdateTaskTemplate')
   updateTaskTemplate(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -58,6 +63,7 @@ export class TaskCatalogController {
 
   @GrpcMethod('TaskService', 'DeleteTaskTemplate')
   deleteTaskTemplate(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;
@@ -67,6 +73,7 @@ export class TaskCatalogController {
 
   @GrpcMethod('TaskService', 'BulkUpdateTaskTemplates')
   bulkUpdateTaskTemplates(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;

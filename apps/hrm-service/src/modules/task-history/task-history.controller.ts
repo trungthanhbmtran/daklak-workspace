@@ -11,6 +11,7 @@ export class TaskHistoryController {
 
   @GrpcMethod('TaskService', 'GetTaskHistory')
   getTaskHistory(data: any, @CurrentUser() user: any) {
+    data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
       data.currentUserId = user.id;

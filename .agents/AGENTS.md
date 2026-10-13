@@ -110,6 +110,8 @@ Mỗi lệnh (`/code1 <prompt>` hoặc `/code2 <prompt>`) là một **quy trình
 ### 4. Ràng buộc Quản lý gRPC & File `.proto`
 - Khi sửa đổi file `.proto`: Sử dụng công cụ ghi đè an toàn, kiểm tra kỹ cú pháp đóng mở `{ }`. Ngay sau khi sửa, PHẢI build/chạy microservice tương ứng để xác nhận bộ tải gRPC không văng `illegal token` hay `InvalidProtoDefinitionException`.
 - **Chống lỗi corrupted JSON `[object Object]`:** Dữ liệu JSON phức tạp lồng nhau khi truyền qua gRPC bắt buộc serialize thành chuỗi (`metadataJson`, `schemaJson`) và parse bằng helper an toàn `safeParse`.
+- **Ràng buộc An toàn Payload gRPC & Khởi tạo Tham số:** Trong các gRPC method handler của NestJS Microservices, bộ giải mã gRPC có thể truyền `data = undefined` khi Client/Gateway gọi request rỗng (GET requests). BẮT BUỘC khởi tạo `data = data || {};` ngay đầu handler trước khi truy xuất hay gán bất kỳ thuộc tính nào.
+- **Ràng buộc Phân phối Tài nguyên theo Ngữ cảnh Quyền (PBAC Context Scoping):** Mọi thông tin chứng thực/phân quyền (`id`, `employeeCode`, `unitId`, `permissionsFlatten`) trích xuất từ `@CurrentUser() user` chỉ dùng để: (1) Kiểm tra quyền truy cập tài nguyên (authorization check), (2) Giới hạn phạm vi dữ liệu theo đúng thẩm quyền được cấp (`where: { departmentId: user.unitId }`, `where: { employeeCode: user.employeeCode }` hoặc phân cấp Ban/Phòng/Chuyên viên), (3) Ghi nhận vết kiểm toán (Audit Trail). TUYỆT ĐỐI KHÔNG gán cẩu thả các trường user vào payload `data` mà không kiểm tra khởi tạo hoặc không dùng quyền để phân phối tài nguyên.
 
 ### 5. Ràng buộc An toàn CSDL & Additive Migrations
 - **Nguyên tắc Additive Migration (Zero-Downtime):** Mọi cột mới thêm vào bảng đang chạy BẮT BUỘC là `nullable` (`type?`) hoặc có `@default(...)`.

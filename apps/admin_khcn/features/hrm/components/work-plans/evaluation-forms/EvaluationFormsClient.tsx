@@ -101,8 +101,8 @@ export function EvaluationFormsClient() {
   const handleDownloadXml = async (item: KpiFormTemplateItem) => {
     setExportingXmlCode(item.formCode);
     try {
-      const res = await kpiFormsApi.getXml(item.formCode);
-      const xml = res.data?.xmlContent || '';
+      const res: any = await kpiFormsApi.getXml(item.formCode);
+      const xml = res?.data?.xmlContent || res?.xmlContent || '';
       if (!xml) {
         toast.error('Nội dung file XML đang trống');
         return;
@@ -121,8 +121,8 @@ export function EvaluationFormsClient() {
   const handleExportDocx = async (item: KpiFormTemplateItem) => {
     setExportingDocxCode(item.formCode);
     try {
-      const res = await kpiFormsApi.getXml(item.formCode);
-      const xml = res.data?.xmlContent || '';
+      const res: any = await kpiFormsApi.getXml(item.formCode);
+      const xml = res?.data?.xmlContent || res?.xmlContent || '';
       if (!xml) {
         toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
         return;
@@ -186,8 +186,8 @@ export function EvaluationFormsClient() {
   // In / Xuất PDF trực tiếp theo chuẩn văn bản hành chính
   const handlePrintPdf = async (item: KpiFormTemplateItem) => {
     try {
-      const res = await kpiFormsApi.getXml(item.formCode);
-      const xml = res.data?.xmlContent || '';
+      const res: any = await kpiFormsApi.getXml(item.formCode);
+      const xml = res?.data?.xmlContent || res?.xmlContent || '';
       if (!xml) {
         toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
         return;
@@ -266,9 +266,9 @@ export function EvaluationFormsClient() {
     setEditXmlFormCode(form.formCode);
     setValidationResult(null);
     try {
-      const res = await kpiFormsApi.getXml(form.formCode);
-      const data = res.data;
-      setEditingXmlText(data?.xmlContent || '');
+      const res: any = await kpiFormsApi.getXml(form.formCode);
+      const xml = res?.data?.xmlContent || res?.xmlContent || '';
+      setEditingXmlText(xml);
     } catch {
       toast.error('Không thể nạp nội dung XML mẫu');
       setEditingXmlText('');
