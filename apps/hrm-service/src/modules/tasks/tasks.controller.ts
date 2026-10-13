@@ -1,5 +1,5 @@
 import { Controller, UseInterceptors } from '@nestjs/common';
-import { GrpcMethod, EventPattern } from '@nestjs/microservices';
+import { GrpcMethod, EventPattern, Payload } from '@nestjs/microservices';
 import { TasksService } from './tasks.service';
 import { GrpcAuthGuard, CurrentUser } from '../../../../../shared/security/grpc-auth';
 import { UseGuards } from '@nestjs/common';
@@ -12,7 +12,7 @@ export class TasksController {
   // ─── CRUD ────────────────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'CreateTask')
-  createTask(data: any, @CurrentUser() user: any) {
+  createTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -22,7 +22,7 @@ export class TasksController {
     } return this.tasksService.createTask(data); }
 
   @GrpcMethod('TaskService', 'ListTasks')
-  listTasks(data: any, @CurrentUser() user: any) {
+  listTasks(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -32,7 +32,7 @@ export class TasksController {
     } return this.tasksService.listTasks(data); }
 
   @GrpcMethod('TaskService', 'GetTask')
-  getTask(data: any, @CurrentUser() user: any) {
+  getTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode || data.currentEmployeeCode;
@@ -48,7 +48,7 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTask')
-  updateTask(data: any, @CurrentUser() user: any) {
+  updateTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -58,7 +58,7 @@ export class TasksController {
     } return this.tasksService.updateTask(data.id, data); }
 
   @GrpcMethod('TaskService', 'ExtendTask')
-  extendTask(data: any, @CurrentUser() user: any) {
+  extendTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -68,7 +68,7 @@ export class TasksController {
     } return this.tasksService.extendTask(data.id, data.dueDate, data.reason, data.actorCode || data.currentEmployeeCode); }
 
   @GrpcMethod('TaskService', 'DeleteTask')
-  deleteTask(data: any, @CurrentUser() user: any) {
+  deleteTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -81,7 +81,7 @@ export class TasksController {
 
 
   @GrpcMethod('TaskService', 'GetTaskTree')
-  getTaskTree(data: any, @CurrentUser() user: any) {
+  getTaskTree(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -91,7 +91,7 @@ export class TasksController {
     } return this.tasksService.getTaskTree(data.id, data); }
 
   @GrpcMethod('TaskService', 'RecordAttendance')
-  recordAttendance(data: any, @CurrentUser() user: any) {
+  recordAttendance(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -105,7 +105,7 @@ export class TasksController {
   // ─── Status & Progress ────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: any, @CurrentUser() user: any) {
+  updateTaskStatus(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -120,7 +120,7 @@ export class TasksController {
   // ─── Hierarchy ────────────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'BreakdownTask')
-  breakdownTask(data: any, @CurrentUser() user: any) {
+  breakdownTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -130,7 +130,7 @@ export class TasksController {
     } return this.tasksService.breakdownTask(data.parentId, data); }
 
   @GrpcMethod('TaskService', 'GetSubTasks')
-  getSubTasks(data: any, @CurrentUser() user: any) {
+  getSubTasks(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -142,7 +142,7 @@ export class TasksController {
   // ─── Participants ─────────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: any, @CurrentUser() user: any) {
+  assignTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -152,7 +152,7 @@ export class TasksController {
     } return this.tasksService.assignTask(data.id, data); }
 
   @GrpcMethod('TaskService', 'RecommendAssignees')
-  recommendAssignees(data: any, @CurrentUser() user: any) {
+  recommendAssignees(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -162,7 +162,7 @@ export class TasksController {
     } return this.tasksService.recommendAssignees(data); }
 
   @GrpcMethod('TaskService', 'RequestCoordination')
-  requestCoordination(data: any, @CurrentUser() user: any) {
+  requestCoordination(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -172,7 +172,7 @@ export class TasksController {
     } return this.tasksService.requestCoordination(data.taskId, data); }
 
   @GrpcMethod('TaskService', 'RespondTask')
-  respondTask(data: any, @CurrentUser() user: any) {
+  respondTask(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -184,7 +184,7 @@ export class TasksController {
   // ─── Comments ─────────────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'AddComment')
-  addComment(data: any, @CurrentUser() user: any) {
+  addComment(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -194,7 +194,7 @@ export class TasksController {
     } return this.tasksService.addComment(data.taskId, data); }
 
   @GrpcMethod('TaskService', 'GetComments')
-  getComments(data: any, @CurrentUser() user: any) {
+  getComments(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -206,7 +206,7 @@ export class TasksController {
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
 
   @GrpcMethod('TaskService', 'CreateStep')
-  createStep(data: any, @CurrentUser() user: any) {
+  createStep(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -216,7 +216,7 @@ export class TasksController {
     } return this.tasksService.createStep(data.taskId, data); }
 
   @GrpcMethod('TaskService', 'UpdateStep')
-  updateStep(data: any, @CurrentUser() user: any) {
+  updateStep(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -226,7 +226,7 @@ export class TasksController {
     } return this.tasksService.updateStep(data.taskId, data.stepId, data); }
 
   @GrpcMethod('TaskService', 'ListSteps')
-  listSteps(data: any, @CurrentUser() user: any) {
+  listSteps(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -236,7 +236,7 @@ export class TasksController {
     } return this.tasksService.listSteps(data.taskId); }
 
   @GrpcMethod('TaskService', 'DeleteStep')
-  deleteStep(data: any, @CurrentUser() user: any) {
+  deleteStep(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;

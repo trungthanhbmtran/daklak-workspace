@@ -1,5 +1,5 @@
 import { Controller, UseInterceptors } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { TaskCatalogService } from './task-catalog.service';
 import { GrpcAuthGuard, CurrentUser } from '../../../../../shared/security/grpc-auth';
 import { UseGuards } from '@nestjs/common';
@@ -11,7 +11,7 @@ export class TaskCatalogController {
 
   // --- Rank Quotas ---
   @GrpcMethod('TaskService', 'SaveRankQuotas')
-  saveRankQuotas(data: any, @CurrentUser() user: any) {
+  saveRankQuotas(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -21,7 +21,7 @@ export class TaskCatalogController {
     } return this.service.saveRankQuotas(data); }
 
   @GrpcMethod('TaskService', 'GetRankQuotasByRank')
-  getRankQuotasByRank(data: any, @CurrentUser() user: any) {
+  getRankQuotasByRank(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -32,7 +32,7 @@ export class TaskCatalogController {
 
   // --- Task Templates ---
   @GrpcMethod('TaskService', 'FindTaskTemplates')
-  findTaskTemplates(data: any, @CurrentUser() user: any) {
+  findTaskTemplates(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -42,7 +42,7 @@ export class TaskCatalogController {
     } return this.service.findTaskTemplates(data); }
 
   @GrpcMethod('TaskService', 'CreateTaskTemplate')
-  createTaskTemplate(data: any, @CurrentUser() user: any) {
+  createTaskTemplate(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -52,7 +52,7 @@ export class TaskCatalogController {
     } return this.service.createTaskTemplate(data); }
 
   @GrpcMethod('TaskService', 'UpdateTaskTemplate')
-  updateTaskTemplate(data: any, @CurrentUser() user: any) {
+  updateTaskTemplate(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -62,7 +62,7 @@ export class TaskCatalogController {
     } return this.service.updateTaskTemplate(data.id, data); }
 
   @GrpcMethod('TaskService', 'DeleteTaskTemplate')
-  deleteTaskTemplate(data: any, @CurrentUser() user: any) {
+  deleteTaskTemplate(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -72,7 +72,7 @@ export class TaskCatalogController {
     } return this.service.deleteTaskTemplate(data.id); }
 
   @GrpcMethod('TaskService', 'BulkUpdateTaskTemplates')
-  bulkUpdateTaskTemplates(data: any, @CurrentUser() user: any) {
+  bulkUpdateTaskTemplates(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;

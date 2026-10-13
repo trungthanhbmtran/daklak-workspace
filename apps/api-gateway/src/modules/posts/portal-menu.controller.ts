@@ -61,21 +61,17 @@ export class PortalMenuController {
 
   @Get()
   async findAll(@Query() query: any) {
-    console.log('Gateway: Calling ListPortalMenus with query:', query);
     const result = await firstValueFrom(
       this.portalMenuService.listPortalMenus(query),
     ).catch((e) => this.handleRpcError(e));
-    console.log('Gateway: ListPortalMenus response received');
     return result;
   }
 
   @Get('quick-setup')
   async getQuickSetupData() {
-    console.log('Gateway: Calling GetQuickSetupData');
     const result = await firstValueFrom(
       this.portalMenuService.getQuickSetupData({}),
     ).catch((e) => this.handleRpcError(e));
-    console.log('Gateway: GetQuickSetupData response received');
     return result;
   }
 

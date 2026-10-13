@@ -500,7 +500,7 @@ export class TasksService implements OnModuleInit {
     evidenceData?: any,
   ) {
     let finalEvidence = evidence;
-    if (evidenceData) {
+    if (evidenceData && (evidenceData.itemType === 'step' || evidenceData.itemType === 'subtask')) {
       finalEvidence =
         `📋 Báo cáo hoàn thành [${evidenceData.itemType === 'step' ? 'Bước' : 'Nhiệm vụ con'}]: **${evidenceData.itemTitle}**\n${evidenceData.text || ''}`.trim();
       if (evidenceData.files && evidenceData.files.length > 0) {
@@ -520,6 +520,7 @@ export class TasksService implements OnModuleInit {
           rejectReason,
           actionName,
           evidence: finalEvidence,
+          evidenceDataJson: evidenceData ? JSON.stringify(evidenceData) : '',
           actorCode: user?.employeeCode || '',
           currentUserPermissions: user?.permissionsFlatten || [],
           currentUserId: user?.id,
@@ -761,7 +762,8 @@ export class TasksService implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e))) as any;
-    if (response?.data) this.translateTaskData(response.data);
+    const target = response?.data ? response.data : response;
+    if (target) this.translateTaskData(target);
     return response;
   }
 

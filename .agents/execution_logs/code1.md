@@ -1,5 +1,34 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Khắc phục Triệt để Đứt gãy Runtime Workflow Công việc & Thẩm định Đánh giá KPI
+
+### 1. Phạm vi & Mục tiêu
+- Rà soát toàn bộ dự án `daklak-workspace` trên tất cả các microservices và front-end (`hrm-service`, `api-gateway`, `admin_khcn`, `workflow-service`, `user-service`, `report-service`).
+- Xử lý triệt để đứt gãy luồng cập nhật trạng thái nhiệm vụ, phân công, phản hồi và thẩm định đánh giá KPI của Lãnh đạo (`TaskEvaluationApprovalSheet`).
+
+### 2. Nguyên nhân Gốc & Giải pháp Kỹ thuật
+1. **Khôi phục Luồng Thực thi Runtime tại `hrm-service` (`tasks.service.ts`):**
+   - Triệt tiêu các stub `outboxEvent` bị nuốt tại `updateTaskStatus`, `assignTask`, và `respondTask`.
+   - Kết nối trực tiếp vào luồng chuyển trạng thái thực thụ: cập nhật `Task.status`, `isCompleted`, `completedAt`, `rejectReason`, `TaskParticipant`, `TaskHistory`, và phát sự kiện `task.completed`, `task.state_changed` sang `report-service`.
+   - Cho phép Lãnh đạo thẩm định đánh giá (`EVALUATE_APPROVE`) hoặc yêu cầu làm lại (`RETURN`) đối với các công việc đã ở trạng thái hoàn thành mà không bị chặn bởi ngoại lệ.
+2. **Khắc phục Ghi đè Minh chứng & Thất thoát Điểm số Đánh giá tại `api-gateway`:**
+   - Tại `apps/api-gateway/src/modules/hrm/tasks.service.ts`: Khắc phục lỗi ghi đè `finalEvidence` thành `undefined` khi `evidenceData.itemType === 'evaluation'`.
+   - Bổ sung trường `evidenceDataJson` vào proto `UpdateTaskStatusRequest` (`task.proto`) và truyền qua gRPC để lưu trữ nguyên vẹn cấu trúc điểm 4 thành tố (Khối lượng, Chất lượng, Tiến độ, Trách nhiệm) vào `task.metadata.evaluation` và `task_histories`.
+3. **Dọn rác & Chuẩn hóa Tuân thủ 7 Bộ Ràng buộc Kỹ thuật:**
+   - Quét sạch các `console.log` debug tại `portal-menu.controller.ts` và `posts-category.controller.ts`.
+   - Kiểm tra encoding UTF-8 không BOM trên toàn bộ các file sửa đổi.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/admin_khcn`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/workflow-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/user-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/report-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/chat-service`, `apps/posts-service`, `apps/media-service`, `apps/portal-goverment`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+
+---
+
 ## [2026-10-13] Khắc phục Triệt để Lỗi Chức năng Giao việc Mới (Create Task Sheet)
 
 ### 1. Phạm vi & Mục tiêu

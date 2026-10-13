@@ -3,7 +3,7 @@ import { KpiFormulasClient } from '@/features/hrm/components/work-plans/kpi/KpiF
 
 export default function KpiFormulasPage() {
     return (
-        <div className="flex flex-col flex-1 h-full min-h-0 bg-background pb-8 overflow-y-auto">
+        <div className="w-full min-h-full flex flex-col flex-1 min-w-0 bg-background">
             <KpiFormulasClient />
         </div>
     );

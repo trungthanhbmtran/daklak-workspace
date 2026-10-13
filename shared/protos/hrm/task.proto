@@ -298,6 +298,7 @@ message UpdateTaskStatusRequest {
   repeated string currentUserPermissions = 8;
   int32 currentUserDept = 9;
   optional string evidence = 10;
+  optional string evidenceDataJson = 11;
 }
 
 message UpdateTaskRequest {

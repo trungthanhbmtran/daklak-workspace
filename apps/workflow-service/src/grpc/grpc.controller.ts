@@ -48,14 +48,28 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
   async findOneWorkflow(@Payload() data: any) {
-    const def = await this.definitionService.getDefinitionById(data.id, data.organizationId);
-    return this.mapToWorkflowResponse(def, def.versions[0]);
+    try {
+      const def = await this.definitionService.getDefinitionById(data.id, data.organizationId);
+      return this.mapToWorkflowResponse(def, def.versions[0]);
+    } catch (e: any) {
+      if (e?.status === 404 || e?.message?.includes('not found')) {
+        throw new RpcException({ code: status.NOT_FOUND, message: `Process definition ${data.id} not found` });
+      }
+      throw e;
+    }
   }
 
   @GrpcMethod('WorkflowService', 'FindWorkflowByCode')
   async findWorkflowByCode(@Payload() data: any) {
-    const def = await this.definitionService.getDefinition(data.code, data.organizationId);
-    return this.mapToWorkflowResponse(def, def.versions[0]);
+    try {
+      const def = await this.definitionService.getDefinition(data.code, data.organizationId);
+      return this.mapToWorkflowResponse(def, def.versions[0]);
+    } catch (e: any) {
+      if (e?.status === 404 || e?.message?.includes('not found')) {
+        throw new RpcException({ code: status.NOT_FOUND, message: `Process definition code ${data.code} not found` });
+      }
+      throw e;
+    }
   }
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')

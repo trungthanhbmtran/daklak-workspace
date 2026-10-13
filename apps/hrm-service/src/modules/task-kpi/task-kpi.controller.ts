@@ -1,5 +1,5 @@
-﻿import { Controller, UseInterceptors } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { Controller, UseInterceptors } from '@nestjs/common';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { TaskKpiService } from './task-kpi.service';
 import { GrpcAuthGuard, CurrentUser } from '../../../../../shared/security/grpc-auth';
 import { UseGuards } from '@nestjs/common';
@@ -10,7 +10,7 @@ export class TaskKpiController {
   constructor(private readonly service: TaskKpiService) {}
 
   @GrpcMethod('TaskService', 'UpsertTaskKpiSetting')
-  upsertTaskKpiSetting(data: any, @CurrentUser() user: any) {
+  upsertTaskKpiSetting(@Payload() data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
       data.currentEmployeeCode = user.employeeCode;
@@ -37,12 +37,12 @@ export class TaskKpiController {
   }
 
   @GrpcMethod('TaskService', 'SaveGlobalKpiSettings')
-  saveGlobalKpiSettings(data: any) {
+  saveGlobalKpiSettings(@Payload() data: any) {
     return this.service.upsertTaskKpiSetting(data);
   }
 
   @GrpcMethod('TaskService', 'PreviewGlobalKpiSettings')
-  previewGlobalKpiSettings(data: any) {
+  previewGlobalKpiSettings(@Payload() data: any) {
     let settings: any;
     try { settings = JSON.parse(data.settingsJson || '{}'); }
     catch { return { success: true, valid: false, error: 'Cấu hình gửi lên không phải JSON hợp lệ.' }; }

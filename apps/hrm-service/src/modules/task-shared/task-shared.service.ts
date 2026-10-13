@@ -172,7 +172,7 @@ export class TaskSharedService {
         return definition;
       }
     } catch (e) {
-      this.logger.error(`Failed to fetch workflow definition for ${workflowId}`, e);
+      this.logger.warn(`Workflow definition ${workflowId} not available, will fallback to trigger code`);
     }
     return null;
   }
@@ -625,12 +625,14 @@ export class TaskSharedService {
 
       if (activeWorkflowId && currentNodeId) {
          definition = await this.getWorkflowDefinition(activeWorkflowId);
-      } else if (!activeWorkflowId) {
+      }
+      if (!definition) {
         try {
-          const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
+          const workflowCode = metadata.workflowCode || 'TASK_PROCESSING_ID';
+          const defaultId = await this.getWorkflowIdByTrigger(workflowCode);
           if (defaultId) {
             definition = await this.getWorkflowDefinition(defaultId);
-            currentNodeId = metadata.currentNodeId || null;
+            currentNodeId = currentNodeId || metadata.currentNodeId || null;
           }
         } catch (err) {}
       }
@@ -793,13 +795,15 @@ export class TaskSharedService {
 
     if (activeWorkflowId && currentNodeId) {
        definition = await this.getWorkflowDefinition(activeWorkflowId);
-    } else if (!activeWorkflowId) {
-      // Không có workflow — thử load theo code mặc định
+    }
+    if (!definition) {
+      // Không có workflow hoặc ID không hợp lệ — thử load theo code hoặc code mặc định
       try {
-        const defaultId = await this.getWorkflowIdByTrigger('TASK_PROCESSING_ID');
+        const workflowCode = metadata.workflowCode || 'TASK_PROCESSING_ID';
+        const defaultId = await this.getWorkflowIdByTrigger(workflowCode);
         if (defaultId) {
           definition = await this.getWorkflowDefinition(defaultId);
-          currentNodeId = metadata.currentNodeId || null;
+          currentNodeId = currentNodeId || metadata.currentNodeId || null;
         }
       } catch (err) {
         this.logger.warn('Failed to load default workflow TASK_PROCESSING_ID', err);

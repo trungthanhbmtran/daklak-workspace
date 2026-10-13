@@ -8,6 +8,7 @@ import {
   Delete,
   Inject,
   Query,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -58,14 +59,11 @@ export class PostsCategoryController {
       search: query.q || query.search || undefined,
     };
 
-    console.log('Gateway: Calling ListCategories with payload:', payload);
     const result: any = await firstValueFrom(
       this.categoryService.listCategories(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
-      return null;
+      throw new InternalServerErrorException(e?.message || 'RPC Call Failed');
     });
-    console.log('Gateway: ListCategories response received');
     return {
       data: result?.data,
       meta: result?.meta || {},

@@ -710,20 +710,61 @@ export class TasksService {
     return transition;
   }
 
-  private async recordTaskStatusHistory(id: number, rawTask: any, updateData: any, transition: any, action: string, actorCode?: string, rejectReason?: string) {
+  private async recordTaskStatusHistory(id: number, rawTask: any, updateData: any, transition: any, action: string, actorCode?: string, rejectReason?: string, context?: any, evidenceData?: any) {
     const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
     if (isReject) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Từ chối việc', actorCode, newValue: { reason: rejectReason } } });
+      await this.prisma.taskHistory.create({
+        data: {
+          taskId: id,
+          action: action === 'RETURN' ? 'Yêu cầu hoàn thiện / Bổ sung minh chứng' : 'Từ chối việc',
+          actorCode,
+          newValue: {
+            reason: rejectReason,
+            status: updateData.status,
+            evidence: context?.evidence || rejectReason,
+            note: rejectReason,
+          } as any,
+        },
+      });
+      return;
     }
 
-    const isStartProgress = !isReject && updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS';
+    const isStartProgress = updateData.status === 'IN_PROGRESS' && action === 'IN_PROGRESS';
     if (isStartProgress) {
       await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Nhận việc', actorCode } });
+      return;
     }
 
-    const isStatusChange = !isReject && !isStartProgress && rawTask.status !== updateData.status;
+    if (action === 'EVALUATE_APPROVE') {
+      await this.prisma.taskHistory.create({
+        data: {
+          taskId: id,
+          action: 'Phê duyệt & Đánh giá',
+          actorCode,
+          newValue: {
+            status: updateData.status,
+            evidence: context?.evidence || null,
+            feedback: evidenceData?.feedback || null,
+            scores: evidenceData?.scores || null,
+          } as any,
+        },
+      });
+      return;
+    }
+
+    const isStatusChange = rawTask.status !== updateData.status;
     if (isStatusChange) {
-      await this.prisma.taskHistory.create({ data: { taskId: id, action: 'Chuyển trạng thái', actorCode, newValue: { status: updateData.status } } });
+      await this.prisma.taskHistory.create({
+        data: {
+          taskId: id,
+          action: 'Chuyển trạng thái',
+          actorCode,
+          newValue: {
+            status: updateData.status,
+            ...(context?.evidence ? { evidence: context.evidence } : {}),
+          } as any,
+        },
+      });
     }
   }
 
@@ -851,21 +892,18 @@ export class TasksService {
   }
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionName?: string) {
-    const rawTask = await this.prisma.task.findUnique({ where: { id } });
-    await this.prisma.outboxEvent.create({ data: { workflowInstanceId: (rawTask?.metadata as any)?.workflowInstanceId || 'TASK', processVersion: 1, nodeId: 'UPDATE', commandType: 'UPDATE_STATUS', payload: { businessId: id, status, rejectReason, actorCode } } });
-    return { success: true, message: 'Yêu cầu cập nhật trạng thái đã được đưa vào hàng đợi xử lý' };
-  }
-  async _old_updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any, actionName?: string) {
     if (context) await this.shared.populateQueryHierarchy(context);
 
     const rawTask = await this.findTaskOrFail(id);
-    if (rawTask.status === 'COMPLETED') {
+    const action = actionName || status;
+    const actor = actorCode || context?.currentEmployeeCode;
+
+    // Cho phép trả lại (RETURN) hoặc thẩm định đánh giá (EVALUATE_APPROVE) kể cả khi task đã COMPLETED
+    if (rawTask.status === 'COMPLETED' && action !== 'RETURN' && status !== 'RETURNED' && action !== 'EVALUATE_APPROVE') {
       throw new RpcException('Nhiệm vụ này đã hoàn thành, không thể thay đổi.');
     }
     const [enriched] = await this.shared.enrichTasks([rawTask]);
 
-    const action = actionName || status;
-    const actor = actorCode || context?.currentEmployeeCode;
     const transition = await this.validateWorkflowTransition(enriched, action, context, actor);
 
     await this.notif.notifyApprovalRequired(enriched, transition.nextNodeData, actor);
@@ -873,17 +911,47 @@ export class TasksService {
     const updateData: any = { status: transition.targetStatus || status };
     if (transition.isCompleted !== undefined) {
       updateData.isCompleted = transition.isCompleted;
+    } else if (updateData.status === 'COMPLETED') {
+      updateData.isCompleted = true;
+    } else if (updateData.status === 'RETURNED' || updateData.status === 'REJECTED') {
+      updateData.isCompleted = false;
     }
+
     if (rejectReason !== undefined) updateData.rejectReason = rejectReason;
-    if (updateData.isCompleted) updateData.completedAt = new Date();
+    if (updateData.isCompleted) {
+      updateData.completedAt = new Date();
+    } else if (updateData.status === 'RETURNED' || updateData.status === 'REJECTED') {
+      updateData.completedAt = null;
+    }
+
     if (transition.nextNodeId) {
       updateData.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: transition.nextNodeId };
+    }
+
+    // Parse và lưu thông tin thẩm định đánh giá nếu có (EVALUATE_APPROVE)
+    let evidenceData: any = context?.evidenceData;
+    if (!evidenceData && context?.evidenceDataJson) {
+      try {
+        evidenceData = JSON.parse(context.evidenceDataJson);
+      } catch {}
+    }
+    if (evidenceData?.scores) {
+      updateData.metadata = {
+        ...((rawTask.metadata as any) || {}),
+        ...(updateData.metadata || {}),
+        evaluation: {
+          scores: evidenceData.scores,
+          feedback: evidenceData.feedback || rejectReason || context?.evidence || '',
+          evaluatedBy: actor,
+          evaluatedAt: new Date().toISOString(),
+        },
+      };
     }
 
     // P1-FIX: Dùng include trong update thay vì gọi findTaskOrFail lần 2
     const resultTask = await this.prisma.task.update({ where: { id }, data: updateData, include: this.taskInclude });
 
-    await this.recordTaskStatusHistory(id, rawTask, updateData, transition, action, actor, rejectReason);
+    await this.recordTaskStatusHistory(id, rawTask, updateData, transition, action, actor, rejectReason, context, evidenceData);
     await this.handleStatusSideEffects(id, rawTask, resultTask, enriched, updateData, transition, context, actor);
 
     return this.toResponse(resultTask, context);
@@ -986,10 +1054,6 @@ export class TasksService {
   }
 
   async assignTask(id: number, data: any) {
-    await this.prisma.outboxEvent.create({ data: { workflowInstanceId: 'TASK', processVersion: 1, nodeId: 'ASSIGN', commandType: 'ASSIGN', payload: { businessId: id, ...data } } });
-    return { success: true, message: 'Lệnh phân công đã được đưa vào hàng đợi xử lý' };
-  }
-  async _old_assignTask(id: number, data: any) {
     if (data) await this.shared.populateQueryHierarchy(data);
 
     const rawTask = await this.prisma.task.findUnique({ where: { id }, include: { participants: true } });
@@ -1078,11 +1142,7 @@ export class TasksService {
     return { success: true, message: 'Đã gửi yêu cầu xin phối hợp', data: await this.toResponse(await this.findTaskOrFail(id)) };
   }
 
-  async respondTask(id: number, data: any) {
-    await this.prisma.outboxEvent.create({ data: { workflowInstanceId: 'TASK', processVersion: 1, nodeId: 'RESPOND', commandType: data.action, payload: { businessId: id, ...data } } });
-    return { success: true, message: 'Phản hồi đã được đưa vào hàng đợi xử lý' };
-  }
-  async _old_respondTask(id: number, data: { action: 'ACCEPT' | 'REJECT' | 'REQUEST_COORDINATION', rejectReason?: string, message?: string, currentEmployeeCode?: string }) {
+  async respondTask(id: number, data: { action: 'ACCEPT' | 'REJECT' | 'REQUEST_COORDINATION', rejectReason?: string, message?: string, currentEmployeeCode?: string }) {
     if (data) await this.shared.populateQueryHierarchy(data);
     const rawTask = await this.findTaskOrFail(id);
 
