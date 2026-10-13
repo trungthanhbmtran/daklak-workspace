@@ -40,6 +40,25 @@
   * Next.js 15 App Router: Giữ Server Component và Client Component đúng phân tầng.
   * Clean code: 100% zero debug logs, encoding UTF-8 không BOM.
 
+## [2026-10-13] Khắc phục triệt để lỗi chồng đè nội dung và giải phóng thanh cuộn (Scroll Release) tại `rank-templates`
+- **Vấn đề phản hồi:**
+  * Nội dung các thẻ và danh sách bị đè lên nhau, list dài bị fix cứng chiều cao không scroll được, làm người dùng bị che mất thông tin bên dưới.
+- **Nguyên nhân cốt lõi phát hiện:**
+  * Layout cha `apps/admin_khcn/app/services/hrm/work-plans/layout.tsx` bị đặt 2 lớp `h-full overflow-hidden`, chặn đứng hoàn toàn cơ chế cuộn của `service-layout` và con bên trong.
+  * Form thêm nhanh (Quick Add Bar) và thẻ nhiệm vụ cố ép hiển thị ngang (`md:flex-row`) trong khi không gian cột phải bị thu hẹp do cột trái chiếm chỗ, gây co cụm và chồng đè các ô input lên nhau.
+  * Radix `ScrollArea` bị kẹt trong flex container không co giãn được, gây mất thanh cuộn.
+- **Biện pháp xử lý & hoàn thiện:**
+  1. `apps/admin_khcn/app/services/hrm/work-plans/layout.tsx`: Gỡ bỏ triệt để các thuộc tính `h-full overflow-hidden` khóa cứng; chuyển sang `min-h-full flex flex-col w-full min-w-0` giúp toàn trang cuộn tự nhiên mượt mà trên `service-layout`.
+  2. `apps/admin_khcn/features/hrm/components/work-plans/master-plans/RankTaskCatalogManager.tsx`:
+     * Đổi breakpoint từ `md:flex-row` sang `lg:flex-row` đảm bảo ở màn hình vừa và nhỏ 2 cột tự động xếp dọc (stacked) rộng rãi, không bị ép hẹp.
+     * Cột trái: Bổ sung nút gập/mở sidebar VTVL (`PanelLeftClose` / `PanelLeftOpen`), thanh cuộn độc lập `max-h-[460px] lg:max-h-[calc(100vh-320px)] overflow-y-auto pr-1` chuẩn CSS.
+     * Quick Add Bar: Tái thiết kế dạng Responsive Grid 12 cột (`sm:grid-cols-12`) có label rõ ràng cho từng ô, chống triệt để mọi va chạm đè text.
+     * Thẻ nhiệm vụ: Thiết kế thông thoáng, tên nhiệm vụ hiển thị đầy đủ (`whitespace-normal break-words leading-relaxed text-sm`), hàng metadata badge và nút bấm tách biệt rõ ràng.
+     * Cột phải: Thanh cuộn độc lập `max-h-[580px] lg:max-h-[calc(100vh-320px)] overflow-y-auto pr-1`, người dùng cuộn xem được 100% danh sách dù có hàng trăm nhiệm vụ.
+- **Kiểm chứng máy:**
+  * `npx tsc --noEmit` trong `apps/admin_khcn`: Exit code 0 (Pass 100%).
+
+
 
 ### 1. Phạm vi & File tác động
 - `apps/user-service/prisma/seeds/menus.seed.ts`: Bổ sung menu `HRM_POSITIONS_MENU` ("Khung Vị trí việc làm", route `/services/hrm/job-positions`, icon `Briefcase`).

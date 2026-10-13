@@ -20,8 +20,6 @@ import {
   AlertTriangle,
   SlidersHorizontal,
   X,
-  FileSpreadsheet,
-  HelpCircle,
   RotateCcw,
   Info,
 } from 'lucide-react';
@@ -37,7 +35,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -45,18 +43,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Heading, Text } from "@/components/ui/typography";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 
 interface SelectedPlanItem {
     id: string;
@@ -267,13 +256,12 @@ export function ManualPlanSelectorByRankClient() {
         if (unitPositionsList.length > 0) {
             setVtvlViewSource('DEPARTMENT');
         } else {
-            // Khi bộ phận chưa có bản ghi định biên riêng, tự động chuyển sang Danh mục chuẩn để không bị rỗng
             setVtvlViewSource('ALL');
         }
     }, [unitPositionsList.length, selectedUnitId]);
 
     // 5. Nạp cấu trúc định biên đã lưu trong CSDL
-    const { data: existingQuotasData, isLoading: isLoadingQuotas, refetch: refetchQuotas } = useQuery({
+    const { data: existingQuotasData, refetch: refetchQuotas } = useQuery({
         queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter, selectedUnitId],
         queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter, activeDomainFilter, selectedUnitId, selectedUnitCode),
         enabled: !!activeRankFilter,
@@ -311,7 +299,7 @@ export function ManualPlanSelectorByRankClient() {
         );
     }, [rankTasksRepository, activeRankFilter, activeDomainFilter]);
 
-    // Thêm nhiệm vụ (từ mẫu hoặc tự nhập) vào bảng định biên
+    // Thêm nhiệm vụ vào bảng định biên
     const handleAssignTask = () => {
         let taskTitle = '';
         let taskUnit = 'Lượt';
@@ -484,43 +472,43 @@ export function ManualPlanSelectorByRankClient() {
 
     return (
         <TooltipProvider>
-            <div className="w-full flex-1 flex flex-col min-w-0 space-y-4">
+            <div className="w-full flex flex-col min-w-0 space-y-4 pb-6">
                 {/* HERO COMMAND HEADER */}
-                <Card className="w-full shadow-sm border rounded-2xl bg-card overflow-hidden min-w-0">
-                    <CardHeader className="p-5 sm:p-6 bg-linear-to-r from-primary/10 via-primary/5 to-transparent relative min-w-0">
+                <Card className="w-full shadow-sm border rounded-2xl bg-card min-w-0">
+                    <CardHeader className="p-4 sm:p-6 bg-linear-to-r from-primary/10 via-primary/5 to-transparent relative min-w-0">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
                             {/* TITLE & DESCRIPTION */}
-                            <div className="min-w-0 space-y-1">
+                            <div className="min-w-0 space-y-1.5 flex-1">
                                 <div className="flex items-center gap-2.5 flex-wrap min-w-0">
                                     <div className="p-2.5 bg-primary/15 rounded-xl text-primary shrink-0 shadow-2xs">
                                         <Target className="w-6 h-6" />
                                     </div>
-                                    <CardTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight truncate min-w-0">
+                                    <CardTitle className="text-lg sm:text-xl md:text-2xl font-black text-foreground tracking-tight break-words min-w-0">
                                         Giao Định Mức Chỉ Tiêu Công Việc Theo Vị Trí Việc Làm
                                     </CardTitle>
                                     <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-semibold gap-1 border-primary/20 shrink-0">
                                         <Scale className="w-3 h-3" /> NĐ 62 • NĐ 106 • QĐ 137
                                     </Badge>
                                 </div>
-                                <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-4xl leading-relaxed break-words min-w-0">
+                                <CardDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed break-words min-w-0">
                                     Kế thừa trực tiếp Định biên biên chế từ Quản trị Tổ chức, thiết lập chỉ tiêu số lượng công việc theo <strong className="text-foreground">Tháng</strong>, <strong className="text-foreground">Quý</strong>, và <strong className="text-foreground">Năm</strong> làm căn cứ giao việc và đánh giá KPI.
                                 </CardDescription>
                             </div>
 
                             {/* ACTIONS & SELECTOR */}
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0 min-w-0">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full lg:w-auto shrink-0 min-w-0">
                                 {/* NÚT TRỢ LÝ AI NỔI BẬT */}
                                 <Button
                                     onClick={() => setIsAiModalOpen(true)}
-                                    size="lg"
-                                    className="gap-2 font-black rounded-xl bg-linear-to-r from-indigo-600 via-primary to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all text-xs sm:text-sm px-4 h-11 shrink-0"
+                                    size="default"
+                                    className="gap-2 font-black rounded-xl bg-linear-to-r from-indigo-600 via-primary to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all text-xs px-3.5 h-10 shrink-0"
                                 >
                                     <Sparkles className="w-4 h-4 animate-pulse text-amber-300 shrink-0" />
-                                    <span>Trợ lý AI Đề xuất Định mức & Kế hoạch</span>
+                                    <span>Trợ lý AI Đề xuất Định mức</span>
                                 </Button>
 
                                 {/* BỘ CHỌN BỘ PHẬN TỔ CHỨC */}
-                                <div className="w-full sm:w-[320px] shrink-0 min-w-0 bg-background/80 p-2 rounded-xl border border-border/80 shadow-2xs">
+                                <div className="w-full sm:w-[280px] md:w-[320px] shrink-0 min-w-0 bg-background/80 p-2 rounded-xl border border-border/80 shadow-2xs">
                                     <div className="flex items-center justify-between mb-1 px-1">
                                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                                             <Building2 className="w-3 h-3 text-primary" />
@@ -543,47 +531,63 @@ export function ManualPlanSelectorByRankClient() {
                         </div>
 
                         {/* MINI STATS RIBBON */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-4 mt-2 border-t border-border/50 text-xs min-w-0">
-                            <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
-                                <span className="text-[10px] text-muted-foreground block truncate">Vị trí việc làm</span>
-                                <span className="font-bold text-foreground text-xs truncate block mt-0.5">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 pt-4 mt-2 border-t border-border/50 text-xs min-w-0">
+                            {/* STAT 1: VTVL */}
+                            <div className="p-3 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                                <span className="text-[10px] font-medium text-muted-foreground block truncate">Vị trí việc làm</span>
+                                <span className="font-bold text-foreground text-xs block mt-0.5 break-words line-clamp-1" title={activeRankObj?.name || activeRankFilter}>
                                     {activeRankObj?.name || activeRankFilter || 'Chưa chọn VTVL'}
                                 </span>
                             </div>
 
-                            <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
-                                <span className="text-[10px] text-muted-foreground block truncate">Biên chế theo định biên</span>
-                                <span className="font-bold text-foreground text-xs truncate block mt-0.5">
+                            {/* STAT 2: BIÊN CHẾ */}
+                            <div className="p-3 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                                <span className="text-[10px] font-medium text-muted-foreground block truncate">Biên chế theo định biên</span>
+                                <span className="font-bold text-foreground text-xs block mt-0.5 truncate">
                                     {activeRankObj?.quantity != null
-                                        ? `${activeRankObj.quantity} biên chế (${activeRankObj.currentCount ?? 0} hiện có)`
-                                        : 'Áp dụng dùng chung'}
+                                        ? `${activeRankObj.quantity} biên chế (${activeRankObj.currentCount ?? 0} có mặt)`
+                                        : 'Dùng chung toàn hệ thống'}
                                 </span>
                             </div>
 
-                            <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
-                                <span className="text-[10px] text-muted-foreground block truncate">Nhiệm vụ đã gán</span>
-                                <span className="font-bold text-primary text-xs truncate block mt-0.5">
+                            {/* STAT 3: NHIỆM VỤ ĐÃ GÁN */}
+                            <div className="p-3 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                                <span className="text-[10px] font-medium text-muted-foreground block truncate">Nhiệm vụ đã gán</span>
+                                <span className="font-bold text-primary text-xs block mt-0.5 truncate">
                                     {addedPlans.length} nhiệm vụ
                                 </span>
                             </div>
 
-                            <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
-                                <span className="text-[10px] text-muted-foreground block truncate">Tổng chỉ tiêu Tháng / Quý / Năm</span>
-                                <span className="font-bold text-foreground text-xs truncate block mt-0.5 tabular-nums">
-                                    <span className="text-blue-600 dark:text-blue-400">{summaryTotals.month}</span> /{' '}
-                                    <span className="text-amber-600 dark:text-amber-400">{summaryTotals.quarter}</span> /{' '}
-                                    <span className="text-emerald-600 dark:text-emerald-400">{summaryTotals.year}</span>
-                                </span>
+                            {/* STAT 4: TỔNG CHỈ TIÊU */}
+                            <div className="p-3 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                                <span className="text-[10px] font-medium text-muted-foreground block truncate">Tổng chỉ tiêu T / Q / N</span>
+                                <div className="flex items-center gap-1.5 mt-1 font-bold text-xs tabular-nums flex-wrap">
+                                    <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold" title="Tổng Tháng">
+                                        {summaryTotals.month}T
+                                    </span>
+                                    <span className="text-muted-foreground">/</span>
+                                    <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold" title="Tổng Quý">
+                                        {summaryTotals.quarter}Q
+                                    </span>
+                                    <span className="text-muted-foreground">/</span>
+                                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold" title="Tổng Năm">
+                                        {summaryTotals.year}N
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs col-span-2 sm:col-span-1">
+                            {/* STAT 5: TRỌNG SỐ W% */}
+                            <div className="p-3 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs col-span-2 sm:col-span-1">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] text-muted-foreground block truncate">Tổng trọng số (W%)</span>
-                                    <span className={`font-black text-xs tabular-nums ${totalWeight === 100 ? 'text-emerald-600 dark:text-emerald-400' : totalWeight > 100 ? 'text-rose-600' : 'text-amber-600 dark:text-amber-400'}`}>
+                                    <span className="text-[10px] font-medium text-muted-foreground block truncate">Tổng trọng số (W%)</span>
+                                    <span className={cn(
+                                        "font-black text-xs tabular-nums",
+                                        totalWeight === 100 ? "text-emerald-600 dark:text-emerald-400" : totalWeight > 100 ? "text-rose-600" : "text-amber-600 dark:text-amber-400"
+                                    )}>
                                         {totalWeight}%
                                     </span>
                                 </div>
-                                <div className="mt-1 space-y-1">
+                                <div className="mt-1.5 space-y-1">
                                     <Progress
                                         value={Math.min(100, totalWeight)}
                                         className={cn(
@@ -591,19 +595,19 @@ export function ManualPlanSelectorByRankClient() {
                                             totalWeight === 100 ? "[&>div]:bg-emerald-600" : totalWeight > 100 ? "[&>div]:bg-rose-600" : "[&>div]:bg-amber-500"
                                         )}
                                     />
-                                    <div className="flex items-center justify-end">
+                                    <div className="flex items-center justify-between text-[10px]">
                                         {totalWeight === 100 ? (
-                                            <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 py-0 h-4">
-                                                <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" /> Chuẩn 100%
-                                            </Badge>
+                                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                                                <CheckCircle2 className="w-3 h-3" /> Đạt chuẩn 100%
+                                            </span>
                                         ) : totalWeight > 100 ? (
-                                            <Badge variant="outline" className="text-[9px] bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/30 py-0 h-4">
-                                                <AlertTriangle className="w-2.5 h-2.5 mr-0.5" /> Vượt {Math.round((totalWeight - 100) * 10) / 10}%
-                                            </Badge>
+                                            <span className="text-rose-600 font-semibold flex items-center gap-0.5">
+                                                <AlertTriangle className="w-3 h-3" /> Vượt {(totalWeight - 100).toFixed(1)}%
+                                            </span>
                                         ) : (
-                                            <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 py-0 h-4">
-                                                <SlidersHorizontal className="w-2.5 h-2.5 mr-0.5" /> Thiếu {Math.round((100 - totalWeight) * 10) / 10}%
-                                            </Badge>
+                                            <span className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-0.5">
+                                                <SlidersHorizontal className="w-3 h-3" /> Còn thiếu {(100 - totalWeight).toFixed(1)}%
+                                            </span>
                                         )}
                                     </div>
                                 </div>
@@ -612,26 +616,26 @@ export function ManualPlanSelectorByRankClient() {
                     </CardHeader>
                 </Card>
 
-                {/* MAIN CONTENT AREA */}
-                <div className="flex-1 flex flex-col lg:flex-row min-h-[640px] gap-4 min-w-0 items-stretch">
+                {/* MAIN CONTENT WORKSPACE: CỘT TRÁI (BẢNG ĐỊNH BIÊN) & CỘT PHẢI (DANH SÁCH VTVL) */}
+                <div className="flex flex-col lg:flex-row gap-4 min-w-0 items-start">
                     {/* CỘT TRÁI: KHU VỰC THIẾT LẬP CHỈ TIÊU & BẢNG ĐỊNH BIÊN */}
-                    <div className="flex-1 min-w-0 flex flex-col bg-card rounded-2xl border shadow-xs overflow-hidden">
+                    <div className="flex-1 min-w-0 w-full flex flex-col bg-card rounded-2xl border shadow-xs">
                         {/* THANH THÔNG TIN VỊ TRÍ ĐANG CHỌN & LĨNH VỰC */}
-                        <div className="p-4 border-b bg-muted/20 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between min-w-0">
-                            <div className="flex items-center gap-3 min-w-0">
+                        <div className="p-4 border-b bg-muted/20 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between min-w-0">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
                                 <div className="w-2 h-7 bg-primary rounded-full shrink-0" />
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                        <Heading level="h4" className="font-extrabold text-foreground truncate text-base min-w-0">
+                                        <Heading level="h4" className="font-extrabold text-foreground break-words text-base min-w-0">
                                             {activeRankObj?.name || activeRankFilter || 'Chưa chọn VTVL'}
                                         </Heading>
                                         {activeRankObj?.quantity != null && (
                                             <Badge variant="secondary" className="text-xs bg-primary/10 text-primary font-semibold border-primary/20 shrink-0">
-                                                Định biên: {activeRankObj.quantity} biên chế ({activeRankObj.currentCount ?? 0} hiện có)
+                                                Định biên: {activeRankObj.quantity} ({activeRankObj.currentCount ?? 0} có mặt)
                                             </Badge>
                                         )}
                                     </div>
-                                    <Text variant="small" className="text-xs text-muted-foreground mt-0.5 font-normal truncate block min-w-0">
+                                    <Text variant="small" className="text-xs text-muted-foreground mt-0.5 font-normal break-words block min-w-0">
                                         Mã VTVL: <code className="font-mono font-medium">{activeRankFilter || '---'}</code>
                                         {selectedUnit ? ` • Thuộc: ${selectedUnit.name}` : ' • Áp dụng dùng chung'}
                                     </Text>
@@ -639,9 +643,9 @@ export function ManualPlanSelectorByRankClient() {
                             </div>
 
                             {/* SELECT LĨNH VỰC CHUYÊN MÔN */}
-                            <div className="w-full sm:w-[300px] shrink-0 min-w-0">
+                            <div className="w-full sm:w-[260px] md:w-[300px] shrink-0 min-w-0">
                                 <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
-                                    <SelectTrigger className="h-10 rounded-xl bg-background border-input shadow-xs text-xs">
+                                    <SelectTrigger className="h-9 rounded-xl bg-background border-input shadow-xs text-xs">
                                         <SelectValue placeholder="Chọn mảng nghiệp vụ..." />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -655,54 +659,53 @@ export function ManualPlanSelectorByRankClient() {
                             </div>
                         </div>
 
-                        {/* KHỐI INPUT GÁN NHIỆM VỤ & CHỈ TIÊU (ENTERPRISE FORM) */}
-                        <div className="p-4 border-b bg-background/80 space-y-3 min-w-0">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-w-0">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 truncate min-w-0">
-                                        <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-                                        Thêm nhiệm vụ định biên
-                                    </span>
-
-                                    {/* CHUYỂN ĐỔI CHẾ ĐỘ THÊM */}
-                                    <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border text-[11px]">
-                                        <button
-                                            type="button"
-                                            onClick={() => setTaskInputMode('TEMPLATE')}
-                                            className={cn(
-                                                "px-2.5 py-1 rounded-md font-medium transition-all",
-                                                taskInputMode === 'TEMPLATE'
-                                                    ? "bg-background text-primary shadow-xs font-bold"
-                                                    : "text-muted-foreground hover:text-foreground"
-                                            )}
-                                        >
-                                            Kho mẫu ({availableTasks.length})
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setTaskInputMode('CUSTOM')}
-                                            className={cn(
-                                                "px-2.5 py-1 rounded-md font-medium transition-all",
-                                                taskInputMode === 'CUSTOM'
-                                                    ? "bg-background text-primary shadow-xs font-bold"
-                                                    : "text-muted-foreground hover:text-foreground"
-                                            )}
-                                        >
-                                            Nhiệm vụ chuyên thù
-                                        </button>
+                        {/* KHỐI INPUT GÁN NHIỆM VỤ & CHỈ TIÊU (TWO-TIER ENTERPRISE FORM) */}
+                        <div className="p-4 border-b bg-background/90 space-y-3.5 min-w-0">
+                            {/* HÀNG 1: CHỌN CHẾ ĐỘ & CHỌN/NHẬP TÊN NHIỆM VỤ */}
+                            <div className="flex flex-col gap-2 min-w-0">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 min-w-0">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                                            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                                            Thêm nhiệm vụ
+                                        </span>
+                                        {/* NÚT CHUYỂN CHẾ ĐỘ THÊM */}
+                                        <div className="flex items-center bg-muted/80 p-0.5 rounded-lg border text-[11px] shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => setTaskInputMode('TEMPLATE')}
+                                                className={cn(
+                                                    "px-2.5 py-1 rounded-md font-medium transition-all",
+                                                    taskInputMode === 'TEMPLATE'
+                                                        ? "bg-background text-primary shadow-xs font-bold"
+                                                        : "text-muted-foreground hover:text-foreground"
+                                                )}
+                                            >
+                                                Kho mẫu ({availableTasks.length})
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTaskInputMode('CUSTOM')}
+                                                className={cn(
+                                                    "px-2.5 py-1 rounded-md font-medium transition-all",
+                                                    taskInputMode === 'CUSTOM'
+                                                        ? "bg-background text-primary shadow-xs font-bold"
+                                                        : "text-muted-foreground hover:text-foreground"
+                                                )}
+                                            >
+                                                Nhiệm vụ chuyên thù
+                                            </button>
+                                        </div>
                                     </div>
+
+                                    <span className="text-[11px] text-muted-foreground italic shrink-0 hidden md:inline">
+                                        * Quý (x3) và Năm (x12) tự tính đồng bộ từ Tháng
+                                    </span>
                                 </div>
 
-                                <span className="text-[11px] text-muted-foreground italic shrink-0 hidden md:inline">
-                                    * Quý (x3) và Năm (x12) tự tính khi nhập Tháng
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end min-w-0">
+                                {/* INPUT / SELECT TÊN NHIỆM VỤ */}
                                 {taskInputMode === 'TEMPLATE' ? (
-                                    /* CHỌN NHIỆM VỤ TỪ THƯ VIỆN MẪU */
-                                    <div className="md:col-span-5 space-y-1 min-w-0">
-                                        <Label className="text-xs text-muted-foreground font-medium">Nhiệm vụ mẫu từ thư viện</Label>
+                                    <div className="w-full min-w-0">
                                         <Select
                                             value={selectedTaskId}
                                             onValueChange={val => {
@@ -714,15 +717,15 @@ export function ManualPlanSelectorByRankClient() {
                                             }}
                                         >
                                             <SelectTrigger className="w-full h-10 rounded-xl bg-background shadow-xs border-input text-xs min-w-0">
-                                                <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ kho nghiệp vụ --" />
+                                                <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ kho nghiệp vụ chuẩn hóa --" />
                                             </SelectTrigger>
                                             <SelectContent className="max-h-72">
                                                 {availableTasks.map(task => {
                                                     const isAdded = addedPlans.some(p => p.title === task.taskName);
                                                     return (
                                                         <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs">
-                                                            <div className="truncate max-w-[420px]">
-                                                                {task.taskName} {isAdded ? <span className="text-muted-foreground italic font-normal ml-1">(Đã có)</span> : ''}
+                                                            <div className="truncate max-w-[500px]">
+                                                                {task.taskName} {isAdded ? <span className="text-muted-foreground italic font-normal ml-1">(Đã thêm)</span> : ''}
                                                             </div>
                                                         </SelectItem>
                                                     );
@@ -731,21 +734,18 @@ export function ManualPlanSelectorByRankClient() {
                                         </Select>
                                     </div>
                                 ) : (
-                                    /* NHẬP NHIỆM VỤ CHUYÊN THÙ */
-                                    <div className="md:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-0">
-                                        <div className="sm:col-span-2 space-y-1 min-w-0">
-                                            <Label className="text-xs text-muted-foreground font-medium">Tên nhiệm vụ chuyên thù</Label>
+                                    <div className="flex flex-col sm:flex-row gap-2.5 w-full min-w-0">
+                                        <div className="flex-1 min-w-0">
                                             <Input
-                                                placeholder="Nhập nhiệm vụ chuyên thù..."
+                                                placeholder="Nhập tên nhiệm vụ chuyên thù (VD: Thẩm định hồ sơ công tác cán bộ đột xuất...)"
                                                 value={customTaskName}
                                                 onChange={e => setCustomTaskName(e.target.value)}
                                                 className="h-10 rounded-xl bg-background text-xs"
                                             />
                                         </div>
-                                        <div className="space-y-1 min-w-0">
-                                            <Label className="text-xs text-muted-foreground font-medium">ĐVT</Label>
+                                        <div className="w-full sm:w-[140px] shrink-0">
                                             <Input
-                                                placeholder="Lượt / Báo cáo"
+                                                placeholder="ĐVT (Lượt/Báo cáo)"
                                                 value={customUnit}
                                                 onChange={e => setCustomUnit(e.target.value)}
                                                 className="h-10 rounded-xl bg-background text-xs"
@@ -753,85 +753,88 @@ export function ManualPlanSelectorByRankClient() {
                                         </div>
                                     </div>
                                 )}
+                            </div>
 
+                            {/* HÀNG 2: 4 CHỈ TIÊU (THÁNG, QUÝ, NĂM, TRỌNG SỐ) & NÚT THÊM - ĐẦY ĐỦ RỘNG RÃI */}
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-end min-w-0 pt-1">
                                 {/* CHỈ TIÊU THÁNG */}
-                                <div className="md:col-span-2 space-y-1 min-w-0">
-                                    <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                                        <Calendar className="w-3 h-3 text-blue-500 shrink-0" />
-                                        Tháng
+                                <div className="space-y-1 min-w-0">
+                                    <Label className="text-[11px] text-muted-foreground font-semibold flex items-center justify-between">
+                                        <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                            <Calendar className="w-3 h-3" /> Tháng
+                                        </span>
+                                        <span className="text-[9px] text-muted-foreground">(x1)</span>
                                     </Label>
-                                    <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
-                                        <Input
-                                            type="number"
-                                            min={0.1}
-                                            step={0.5}
-                                            value={monthlyTarget}
-                                            onChange={e => handleMonthlyTargetChange(Number(e.target.value))}
-                                            className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent text-blue-600 dark:text-blue-400"
-                                        />
-                                    </div>
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={0.5}
+                                        value={monthlyTarget}
+                                        onChange={e => handleMonthlyTargetChange(Number(e.target.value))}
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-blue-600 dark:text-blue-400 tabular-nums shadow-xs"
+                                    />
                                 </div>
 
                                 {/* CHỈ TIÊU QUÝ */}
-                                <div className="md:col-span-1 space-y-1 min-w-0">
-                                    <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                                        <Calendar className="w-3 h-3 text-amber-500 shrink-0" />
-                                        Quý
+                                <div className="space-y-1 min-w-0">
+                                    <Label className="text-[11px] text-muted-foreground font-semibold flex items-center justify-between">
+                                        <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                                            <Calendar className="w-3 h-3" /> Quý
+                                        </span>
+                                        <span className="text-[9px] text-muted-foreground">(x3)</span>
                                     </Label>
-                                    <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
-                                        <Input
-                                            type="number"
-                                            min={0.1}
-                                            step={0.5}
-                                            value={quarterlyTarget}
-                                            onChange={e => setQuarterlyTarget(Math.max(0.1, Number(e.target.value)))}
-                                            className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent text-amber-600 dark:text-amber-400"
-                                        />
-                                    </div>
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={0.5}
+                                        value={quarterlyTarget}
+                                        onChange={e => setQuarterlyTarget(Math.max(0.1, Number(e.target.value)))}
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-amber-600 dark:text-amber-400 tabular-nums shadow-xs"
+                                    />
                                 </div>
 
                                 {/* CHỈ TIÊU NĂM */}
-                                <div className="md:col-span-1 space-y-1 min-w-0">
-                                    <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                                        <Calendar className="w-3 h-3 text-emerald-500 shrink-0" />
-                                        Năm
+                                <div className="space-y-1 min-w-0">
+                                    <Label className="text-[11px] text-muted-foreground font-semibold flex items-center justify-between">
+                                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                                            <Calendar className="w-3 h-3" /> Năm
+                                        </span>
+                                        <span className="text-[9px] text-muted-foreground">(x12)</span>
                                     </Label>
-                                    <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
-                                        <Input
-                                            type="number"
-                                            min={0.1}
-                                            step={1}
-                                            value={yearlyTarget}
-                                            onChange={e => setYearlyTarget(Math.max(0.1, Number(e.target.value)))}
-                                            className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent text-emerald-600 dark:text-emerald-400"
-                                        />
-                                    </div>
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={1}
+                                        value={yearlyTarget}
+                                        onChange={e => setYearlyTarget(Math.max(0.1, Number(e.target.value)))}
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-emerald-600 dark:text-emerald-400 tabular-nums shadow-xs"
+                                    />
                                 </div>
 
-                                {/* TRỌNG SỐ (W%) */}
-                                <div className="md:col-span-1 space-y-1 min-w-0">
-                                    <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                                        <Scale className="w-3 h-3 text-purple-500 shrink-0" />
-                                        W(%)
+                                {/* TRỌNG SỐ W% */}
+                                <div className="space-y-1 min-w-0">
+                                    <Label className="text-[11px] text-muted-foreground font-semibold flex items-center justify-between">
+                                        <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                                            <Scale className="w-3 h-3" /> Trọng số
+                                        </span>
+                                        <span className="text-[9px] text-muted-foreground">(%)</span>
                                     </Label>
-                                    <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
-                                        <Input
-                                            type="number"
-                                            min={0.1}
-                                            step={1}
-                                            value={weight}
-                                            onChange={e => setWeight(Math.max(0.1, Number(e.target.value)))}
-                                            className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent text-foreground"
-                                        />
-                                    </div>
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={1}
+                                        value={weight}
+                                        onChange={e => setWeight(Math.max(0.1, Number(e.target.value)))}
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-purple-700 dark:text-purple-400 tabular-nums shadow-xs"
+                                    />
                                 </div>
 
-                                {/* NÚT THÊM */}
-                                <div className="md:col-span-2 min-w-0">
+                                {/* NÚT THÊM VÀO BẢNG */}
+                                <div className="col-span-2 sm:col-span-1 min-w-0">
                                     <Button
                                         onClick={handleAssignTask}
                                         disabled={taskInputMode === 'TEMPLATE' ? !selectedTaskId : !customTaskName.trim()}
-                                        className="w-full h-10 rounded-xl font-bold shadow-xs gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                        className="w-full h-10 rounded-xl font-bold shadow-xs gap-1.5 transition-all hover:scale-[1.02] active:scale-[0.98] text-xs"
                                     >
                                         <Plus className="w-4 h-4" />
                                         <span>Thêm vào bảng</span>
@@ -841,7 +844,7 @@ export function ManualPlanSelectorByRankClient() {
                         </div>
 
                         {/* ENTERPRISE TABLE TOOLBAR */}
-                        <div className="px-4 py-2.5 border-b bg-muted/15 flex flex-wrap items-center justify-between gap-3 min-w-0 text-xs">
+                        <div className="px-4 py-2.5 border-b bg-muted/15 flex flex-wrap items-center justify-between gap-2.5 min-w-0 text-xs">
                             <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-sm">
                                 <div className="relative w-full">
                                     <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-muted-foreground" />
@@ -878,7 +881,7 @@ export function ManualPlanSelectorByRankClient() {
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent side="top">
-                                        <p className="text-xs">Tự động điều chỉnh tỷ lệ trọng số các nhiệm vụ sao cho tổng bằng đúng 100%</p>
+                                        <p className="text-xs">Tự động tính toán phân bổ trọng số các nhiệm vụ sao cho tổng bằng đúng 100%</p>
                                     </TooltipContent>
                                 </Tooltip>
 
@@ -920,197 +923,185 @@ export function ManualPlanSelectorByRankClient() {
                             </div>
                         </div>
 
-                        {/* BẢNG CHỈ TIÊU BẮT BUỘC THEO THÁNG / QUÝ / NĂM (RESPONSIVE WRAPPER) */}
-                        <div className="flex-1 overflow-hidden bg-background relative flex flex-col min-w-0">
-                            <ScrollArea className="flex-1 h-full min-w-0">
-                                <div className="min-w-[760px] pb-6">
-                                    <Table className="w-full table-fixed min-w-0">
-                                        <TableHeader className="bg-muted/50 sticky top-0 backdrop-blur-sm z-10 border-b">
-                                            <TableRow className="hover:bg-transparent">
-                                                <TableHead className="w-[48px] text-center font-bold text-muted-foreground text-xs">STT</TableHead>
-                                                <TableHead className="font-bold text-muted-foreground text-xs min-w-0">Tên nhiệm vụ định biên bắt buộc</TableHead>
-                                                <TableHead className="w-[80px] font-bold text-muted-foreground text-center text-xs">Đơn vị</TableHead>
-                                                <TableHead className="w-[95px] font-bold text-blue-600 dark:text-blue-400 text-center text-xs">Chỉ tiêu Tháng</TableHead>
-                                                <TableHead className="w-[95px] font-bold text-amber-600 dark:text-amber-400 text-center text-xs">Chỉ tiêu Quý</TableHead>
-                                                <TableHead className="w-[95px] font-bold text-emerald-600 dark:text-emerald-400 text-center text-xs">Chỉ tiêu Năm</TableHead>
-                                                <TableHead className="w-[85px] font-bold text-purple-600 dark:text-purple-400 text-center text-xs">Trọng số (W%)</TableHead>
-                                                <TableHead className="w-[50px] text-center"></TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {displayedTablePlans.map((plan, idx) => (
-                                                <TableRow key={plan.id} className="group transition-colors hover:bg-muted/15 border-b">
-                                                    <TableCell className="text-center font-bold text-xs text-muted-foreground py-3">
-                                                        {idx + 1}
-                                                    </TableCell>
-                                                    <TableCell className="py-3 pr-2 min-w-0">
-                                                        <div className="min-w-0">
-                                                            <p className="text-xs sm:text-sm font-medium text-foreground leading-snug break-words">
-                                                                {plan.title}
-                                                            </p>
-                                                            <span className="text-[11px] text-muted-foreground font-mono">
-                                                                {plan.rankType}
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="text-center text-xs text-muted-foreground">
-                                                        <Badge variant="outline" className="font-normal text-[11px] px-1.5 py-0 bg-muted/30">
-                                                            {plan.unit || 'Lượt'}
-                                                        </Badge>
-                                                    </TableCell>
+                        {/* BẢNG CHỈ TIÊU: CUỘN MƯỢT CẢ DỌC VÀ NGANG, KHÔNG BAO GIỜ BỊ ĐÈ NÉT */}
+                        <div className="w-full overflow-auto max-h-[540px] min-h-[300px] border-b relative bg-background">
+                            <table className="w-full min-w-[860px] border-collapse text-xs">
+                                <thead className="sticky top-0 z-20 bg-muted/95 backdrop-blur-md border-b shadow-2xs">
+                                    <tr>
+                                        <th className="w-[48px] min-w-[48px] py-3 text-center font-bold text-muted-foreground">STT</th>
+                                        <th className="min-w-[280px] py-3 px-3 text-left font-bold text-muted-foreground">Tên nhiệm vụ định biên bắt buộc</th>
+                                        <th className="w-[85px] min-w-[85px] py-3 text-center font-bold text-muted-foreground">Đơn vị</th>
+                                        <th className="w-[110px] min-w-[110px] py-3 text-center font-bold text-blue-600 dark:text-blue-400">Chỉ tiêu Tháng</th>
+                                        <th className="w-[110px] min-w-[110px] py-3 text-center font-bold text-amber-600 dark:text-amber-400">Chỉ tiêu Quý</th>
+                                        <th className="w-[115px] min-w-[115px] py-3 text-center font-bold text-emerald-600 dark:text-emerald-400">Chỉ tiêu Năm</th>
+                                        <th className="w-[95px] min-w-[95px] py-3 text-center font-bold text-purple-600 dark:text-purple-400">Trọng số (W%)</th>
+                                        <th className="w-[50px] min-w-[50px] py-3 text-center font-bold text-muted-foreground">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {displayedTablePlans.map((plan, idx) => (
+                                        <tr key={plan.id} className="group transition-colors hover:bg-muted/15 border-b">
+                                            <td className="text-center font-bold text-xs text-muted-foreground py-3">
+                                                {idx + 1}
+                                            </td>
+                                            <td className="py-3 px-3 min-w-0">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs sm:text-sm font-medium text-foreground leading-relaxed break-words">
+                                                        {plan.title}
+                                                    </p>
+                                                    <span className="text-[11px] text-muted-foreground font-mono">
+                                                        {plan.rankType}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="text-center text-xs text-muted-foreground py-3">
+                                                <Badge variant="outline" className="font-normal text-[11px] px-2 py-0.5 bg-muted/30">
+                                                    {plan.unit || 'Lượt'}
+                                                </Badge>
+                                            </td>
 
-                                                    {/* Ô SỬA CHỈ TIÊU THÁNG */}
-                                                    <TableCell>
-                                                        <div className="flex justify-center">
-                                                            <Input
-                                                                type="number"
-                                                                min={0.1}
-                                                                step={0.5}
-                                                                value={plan.monthlyTarget}
-                                                                onChange={e => {
-                                                                    const m = Number(e.target.value);
-                                                                    setAddedPlans(prev => prev.map(p => p.id === plan.id ? {
-                                                                        ...p,
-                                                                        monthlyTarget: m,
-                                                                        targetValue: m,
-                                                                    } : p));
-                                                                }}
-                                                                className="w-20 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-blue-600 dark:text-blue-400 tabular-nums"
-                                                            />
-                                                        </div>
-                                                    </TableCell>
+                                            {/* Ô SỬA CHỈ TIÊU THÁNG */}
+                                            <td className="py-3 px-2 text-center">
+                                                <Input
+                                                    type="number"
+                                                    min={0.1}
+                                                    step={0.5}
+                                                    value={plan.monthlyTarget}
+                                                    onChange={e => {
+                                                        const m = Number(e.target.value);
+                                                        setAddedPlans(prev => prev.map(p => p.id === plan.id ? {
+                                                            ...p,
+                                                            monthlyTarget: m,
+                                                            targetValue: m,
+                                                        } : p));
+                                                    }}
+                                                    className="w-[74px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-blue-600 dark:text-blue-400 tabular-nums shadow-2xs"
+                                                />
+                                            </td>
 
-                                                    {/* Ô SỬA CHỈ TIÊU QUÝ */}
-                                                    <TableCell>
-                                                        <div className="flex justify-center">
-                                                            <Input
-                                                                type="number"
-                                                                min={0.1}
-                                                                step={0.5}
-                                                                value={plan.quarterlyTarget}
-                                                                onChange={e => {
-                                                                    const qua = Number(e.target.value);
-                                                                    setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, quarterlyTarget: qua } : p));
-                                                                }}
-                                                                className="w-20 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-amber-600 dark:text-amber-400 tabular-nums"
-                                                            />
-                                                        </div>
-                                                    </TableCell>
+                                            {/* Ô SỬA CHỈ TIÊU QUÝ */}
+                                            <td className="py-3 px-2 text-center">
+                                                <Input
+                                                    type="number"
+                                                    min={0.1}
+                                                    step={0.5}
+                                                    value={plan.quarterlyTarget}
+                                                    onChange={e => {
+                                                        const qua = Number(e.target.value);
+                                                        setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, quarterlyTarget: qua } : p));
+                                                    }}
+                                                    className="w-[74px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-amber-600 dark:text-amber-400 tabular-nums shadow-2xs"
+                                                />
+                                            </td>
 
-                                                    {/* Ô SỬA CHỈ TIÊU NĂM */}
-                                                    <TableCell>
-                                                        <div className="flex justify-center">
-                                                            <Input
-                                                                type="number"
-                                                                min={0.1}
-                                                                step={1}
-                                                                value={plan.yearlyTarget}
-                                                                onChange={e => {
-                                                                    const y = Number(e.target.value);
-                                                                    setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, yearlyTarget: y } : p));
-                                                                }}
-                                                                className="w-22 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-emerald-600 dark:text-emerald-400 tabular-nums"
-                                                            />
-                                                        </div>
-                                                    </TableCell>
+                                            {/* Ô SỬA CHỈ TIÊU NĂM */}
+                                            <td className="py-3 px-2 text-center">
+                                                <Input
+                                                    type="number"
+                                                    min={0.1}
+                                                    step={1}
+                                                    value={plan.yearlyTarget}
+                                                    onChange={e => {
+                                                        const y = Number(e.target.value);
+                                                        setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, yearlyTarget: y } : p));
+                                                    }}
+                                                    className="w-[78px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-emerald-600 dark:text-emerald-400 tabular-nums shadow-2xs"
+                                                />
+                                            </td>
 
-                                                    {/* TRỌNG SỐ */}
-                                                    <TableCell>
-                                                        <div className="flex justify-center">
-                                                            <Input
-                                                                type="number"
-                                                                min={0.1}
-                                                                step={1}
-                                                                value={plan.weight || 10}
-                                                                onChange={e => {
-                                                                    const w = Number(e.target.value);
-                                                                    setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, weight: w } : p));
-                                                                }}
-                                                                className="w-20 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-purple-700 dark:text-purple-400 tabular-nums"
-                                                            />
-                                                        </div>
-                                                    </TableCell>
+                                            {/* TRỌNG SỐ */}
+                                            <td className="py-3 px-2 text-center">
+                                                <Input
+                                                    type="number"
+                                                    min={0.1}
+                                                    step={1}
+                                                    value={plan.weight || 10}
+                                                    onChange={e => {
+                                                        const w = Number(e.target.value);
+                                                        setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, weight: w } : p));
+                                                    }}
+                                                    className="w-[66px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-purple-700 dark:text-purple-400 tabular-nums shadow-2xs"
+                                                />
+                                            </td>
 
-                                                    {/* XÓA */}
-                                                    <TableCell className="text-center">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => setAddedPlans(prev => prev.filter(p => p.id !== plan.id))}
-                                                            className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg opacity-70 group-hover:opacity-100 transition-all"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
+                                            {/* XÓA */}
+                                            <td className="text-center py-3">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => setAddedPlans(prev => prev.filter(p => p.id !== plan.id))}
+                                                    className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg opacity-70 group-hover:opacity-100 transition-all mx-auto"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
 
-                                            {displayedTablePlans.length === 0 && (
-                                                <TableRow>
-                                                    <TableCell colSpan={8} className="h-[280px] text-center">
-                                                        <div className="flex flex-col items-center justify-center text-muted-foreground space-y-3">
-                                                            <div className="w-14 h-14 rounded-full bg-muted/40 flex items-center justify-center">
-                                                                <Target className="w-7 h-7 opacity-30 text-primary" />
+                                    {displayedTablePlans.length === 0 && (
+                                        <tr>
+                                            <td colSpan={8} className="h-[280px] text-center">
+                                                <div className="flex flex-col items-center justify-center text-muted-foreground space-y-3 py-10">
+                                                    <div className="w-14 h-14 rounded-full bg-muted/40 flex items-center justify-center">
+                                                        <Target className="w-7 h-7 opacity-30 text-primary" />
+                                                    </div>
+                                                    {tableSearchQuery ? (
+                                                        <>
+                                                            <Text variant="small" className="font-semibold text-foreground">Không tìm thấy nhiệm vụ nào khớp với từ khóa</Text>
+                                                            <Button variant="outline" size="sm" onClick={() => setTableSearchQuery('')} className="text-xs">
+                                                                Xóa từ khóa tìm kiếm
+                                                            </Button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Text variant="small" className="font-semibold text-foreground">Chưa có nhiệm vụ định biên nào cho vị trí việc làm này</Text>
+                                                            <Text variant="small" className="opacity-70 text-xs font-normal max-w-sm">
+                                                                Bạn có thể dùng nút &quot;Trợ lý AI Đề xuất&quot; phía trên hoặc chọn nhiệm vụ mẫu ở khung trên để thiết lập.
+                                                            </Text>
+                                                            <div className="flex items-center gap-2 pt-1">
+                                                                <Button size="sm" onClick={() => setIsAiModalOpen(true)} className="gap-1.5 text-xs bg-primary/10 text-primary hover:bg-primary/20">
+                                                                    <Sparkles className="w-3.5 h-3.5" /> Khởi chạy AI Đề xuất
+                                                                </Button>
                                                             </div>
-                                                            {tableSearchQuery ? (
-                                                                <>
-                                                                    <Text variant="small" className="font-semibold text-foreground">Không tìm thấy nhiệm vụ nào khớp với từ khóa</Text>
-                                                                    <Button variant="outline" size="sm" onClick={() => setTableSearchQuery('')} className="text-xs">
-                                                                        Xóa từ khóa tìm kiếm
-                                                                    </Button>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <Text variant="small" className="font-semibold text-foreground">Chưa có nhiệm vụ định biên nào cho vị trí việc làm này</Text>
-                                                                    <Text variant="small" className="opacity-70 text-xs font-normal max-w-sm">
-                                                                        Bạn có thể dùng nút &quot;Trợ lý AI Đề xuất&quot; phía trên hoặc chọn nhiệm vụ mẫu ở khung trên để thiết lập.
-                                                                    </Text>
-                                                                    <div className="flex items-center gap-2 pt-1">
-                                                                        <Button size="sm" onClick={() => setIsAiModalOpen(true)} className="gap-1.5 text-xs bg-primary/10 text-primary hover:bg-primary/20">
-                                                                            <Sparkles className="w-3.5 h-3.5" /> Khởi chạy AI Đề xuất
-                                                                        </Button>
-                                                                    </div>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </ScrollArea>
-
-                            {/* THANH TỔNG HỢP CHỈ TIÊU TRÊN BẢNG */}
-                            {addedPlans.length > 0 && (
-                                <div className="p-3 bg-muted/30 border-t flex flex-wrap items-center justify-between gap-3 text-xs min-w-0">
-                                    <span className="text-muted-foreground">
-                                        Tổng số: <strong className="text-foreground">{addedPlans.length}</strong> nhiệm vụ định biên
-                                    </span>
-                                    <div className="flex items-center gap-4 flex-wrap tabular-nums">
-                                        <span className="text-blue-600 dark:text-blue-400 font-medium">
-                                            Tổng Tháng: <strong>{summaryTotals.month}</strong>
-                                        </span>
-                                        <span className="text-amber-600 dark:text-amber-400 font-medium">
-                                            Tổng Quý: <strong>{summaryTotals.quarter}</strong>
-                                        </span>
-                                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                                            Tổng Năm: <strong>{summaryTotals.year}</strong>
-                                        </span>
-                                        <span className={cn(
-                                            "font-bold",
-                                            totalWeight === 100 ? "text-emerald-600" : totalWeight > 100 ? "text-rose-600" : "text-amber-600"
-                                        )}>
-                                            Tổng W%: <strong>{totalWeight}%</strong>
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
+
+                        {/* THANH TỔNG HỢP CHỈ TIÊU TRÊN BẢNG */}
+                        {addedPlans.length > 0 && (
+                            <div className="p-3.5 bg-muted/30 flex flex-wrap items-center justify-between gap-3 text-xs min-w-0">
+                                <span className="text-muted-foreground">
+                                    Tổng số: <strong className="text-foreground">{addedPlans.length}</strong> nhiệm vụ định biên
+                                </span>
+                                <div className="flex items-center gap-4 flex-wrap tabular-nums">
+                                    <span className="text-blue-600 dark:text-blue-400 font-medium">
+                                        Tổng Tháng: <strong>{summaryTotals.month}</strong>
+                                    </span>
+                                    <span className="text-amber-600 dark:text-amber-400 font-medium">
+                                        Tổng Quý: <strong>{summaryTotals.quarter}</strong>
+                                    </span>
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                        Tổng Năm: <strong>{summaryTotals.year}</strong>
+                                    </span>
+                                    <span className={cn(
+                                        "font-bold",
+                                        totalWeight === 100 ? "text-emerald-600" : totalWeight > 100 ? "text-rose-600" : "text-amber-600"
+                                    )}>
+                                        Tổng W%: <strong>{totalWeight}%</strong>
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* CỘT PHẢI: BỘ LỌC & DANH SÁCH VỊ TRÍ VIỆC LÀM THEO BỘ PHẬN HOẶC TOÀN HỆ THỐNG */}
-                    <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-3 bg-card text-card-foreground rounded-2xl border p-4 shadow-xs overflow-hidden min-w-0">
+                    {/* CỘT PHẢI: BỘ LỌC & DANH SÁCH VỊ TRÍ VIỆC LÀM - CUỘN ĐỘC LẬP MƯỢT MÀ */}
+                    <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-3 bg-card text-card-foreground rounded-2xl border p-4 shadow-xs min-w-0">
                         {/* TABS CHUYỂN ĐỔI NGUỒN VTVL */}
                         <div className="space-y-2 shrink-0 min-w-0">
                             <div className="flex items-center justify-between min-w-0">
@@ -1223,70 +1214,70 @@ export function ManualPlanSelectorByRankClient() {
                             />
                         </div>
 
-                        {/* DANH SÁCH CUỘN VTVL */}
-                        <div className="flex-1 min-h-[320px] overflow-hidden flex flex-col min-w-0">
-                            <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-1.5 px-0.5 min-w-0">
+                        {/* DANH SÁCH CUỘN VTVL ĐỘC LẬP: KHÔNG BỊ TRÓI CHIỀU CAO CỨNG, CUỘN MƯỢT MÀ */}
+                        <div className="flex flex-col min-w-0 space-y-1.5">
+                            <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-1 px-0.5 min-w-0">
                                 <span>Danh sách ({filteredRanksList.length} VTVL)</span>
                                 {isLoadingStaffing && <RefreshCw className="w-3 h-3 animate-spin text-primary shrink-0" />}
                             </div>
 
-                            <ScrollArea className="flex-1 h-full pr-2 min-w-0">
-                                <div className="space-y-2 pb-3 min-w-0">
-                                    {filteredRanksList.map((rank: any) => {
-                                        const isSelected = activeRankFilter === rank.code;
-                                        return (
-                                            <div
-                                                key={rank.code}
-                                                onClick={() => setActiveRankFilter(rank.code)}
-                                                className={cn(
-                                                    "p-3 rounded-xl border cursor-pointer transition-all min-w-0",
-                                                    isSelected
-                                                        ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary/20"
-                                                        : "bg-background border-border/70 hover:bg-muted/40 hover:border-primary/40"
+                            <div className="max-h-[580px] min-h-[300px] overflow-y-auto overflow-x-hidden pr-1.5 space-y-2 rounded-xl">
+                                {filteredRanksList.map((rank: any) => {
+                                    const isSelected = activeRankFilter === rank.code;
+                                    return (
+                                        <div
+                                            key={rank.code}
+                                            onClick={() => setActiveRankFilter(rank.code)}
+                                            className={cn(
+                                                "p-3 rounded-xl border cursor-pointer transition-all min-w-0 group",
+                                                isSelected
+                                                    ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary/20 border-l-4 border-l-primary"
+                                                    : "bg-background border-border/70 hover:bg-muted/40 hover:border-primary/40"
+                                            )}
+                                        >
+                                            <div className="flex items-start justify-between gap-2 min-w-0">
+                                                <h4 className={cn(
+                                                    "text-xs sm:text-sm font-semibold leading-relaxed break-words min-w-0",
+                                                    isSelected ? "text-primary" : "text-foreground"
                                                 )}
-                                            >
-                                                <div className="flex items-start justify-between gap-2 min-w-0">
-                                                    <h4 className={cn(
-                                                        "text-xs sm:text-sm font-semibold leading-snug break-words min-w-0",
-                                                        isSelected ? "text-primary" : "text-foreground"
-                                                    )}>
-                                                        {rank.name}
-                                                    </h4>
-                                                    {rank.quantity != null && (
-                                                        <Badge variant="outline" className="text-[10px] shrink-0 font-bold bg-muted/50 border-primary/20 text-foreground">
-                                                            {rank.quantity} ĐB
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center justify-between mt-1 text-[11px] text-muted-foreground font-mono min-w-0">
-                                                    <span className="truncate">{rank.code}</span>
-                                                    {rank.currentCount != null && (
-                                                        <span className="font-sans text-[10px] text-muted-foreground shrink-0">
-                                                            Hiện có: {rank.currentCount}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                title={rank.name}
+                                                >
+                                                    {rank.name}
+                                                </h4>
+                                                {rank.quantity != null && (
+                                                    <Badge variant="outline" className="text-[10px] shrink-0 font-bold bg-muted/50 border-primary/20 text-foreground">
+                                                        {rank.quantity} ĐB
+                                                    </Badge>
+                                                )}
                                             </div>
-                                        );
-                                    })}
-
-                                    {filteredRanksList.length === 0 && (
-                                        <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
-                                            Không tìm thấy vị trí việc làm nào phù hợp.
+                                            <div className="flex items-center justify-between mt-1.5 text-[11px] text-muted-foreground font-mono min-w-0">
+                                                <span className="truncate">{rank.code}</span>
+                                                {rank.currentCount != null && (
+                                                    <span className="font-sans text-[10px] text-muted-foreground shrink-0 font-medium">
+                                                        Có mặt: {rank.currentCount}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            </ScrollArea>
+                                    );
+                                })}
+
+                                {filteredRanksList.length === 0 && (
+                                    <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                                        Không tìm thấy vị trí việc làm nào phù hợp.
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ACTION FOOTER BAR */}
-                <Card className="rounded-2xl border shadow-sm bg-card shrink-0 min-w-0">
-                    <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-4 min-w-0">
-                        <div className="text-xs text-muted-foreground flex items-center gap-4 flex-wrap min-w-0">
-                            <span className="truncate">
-                                Đang cấu hình: <strong className="text-foreground">{activeRankObj?.name || activeRankFilter}</strong>
+                {/* ACTION FOOTER BAR: DOCK STICKY SANG TRỌNG TIỆN LỢI */}
+                <Card className="rounded-2xl border shadow-md bg-card shrink-0 min-w-0 sticky bottom-2 z-30">
+                    <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-3.5 min-w-0">
+                        <div className="text-xs text-muted-foreground flex items-center gap-3 flex-wrap min-w-0">
+                            <span className="break-words">
+                                Đang chọn: <strong className="text-foreground">{activeRankObj?.name || activeRankFilter}</strong>
                             </span>
                             <span>•</span>
                             <span>
@@ -1294,7 +1285,7 @@ export function ManualPlanSelectorByRankClient() {
                             </span>
                             <span>•</span>
                             <span className={cn(
-                                "font-semibold",
+                                "font-bold",
                                 totalWeight === 100 ? "text-emerald-600" : totalWeight > 100 ? "text-rose-600" : "text-amber-600"
                             )}>
                                 Trọng số: {totalWeight}%
@@ -1304,7 +1295,7 @@ export function ManualPlanSelectorByRankClient() {
                             onClick={handleSubmitPlan}
                             disabled={isSavingPlan || addedPlans.length === 0}
                             size="lg"
-                            className="w-full sm:w-auto gap-2 font-bold px-8 rounded-xl shadow-md hover:shadow-lg transition-all"
+                            className="w-full sm:w-auto gap-2 font-bold px-8 rounded-xl shadow-md hover:shadow-lg transition-all h-11"
                         >
                             {isSavingPlan ? (
                                 <>Đang lưu...</>

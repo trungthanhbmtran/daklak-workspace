@@ -43,15 +43,15 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="flex flex-col p-6 h-full overflow-hidden bg-slate-50/50">
-      <div className="flex flex-col gap-2 mb-4 shrink-0">
-        <h1 className="text-3xl font-bold tracking-tight">Quản lý Công việc & KPI</h1>
-        <p className="text-muted-foreground">
+    <div className="flex flex-col w-full min-h-full">
+      <div className="flex flex-col gap-1.5 mb-4 shrink-0">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Quản lý Công việc & KPI</h1>
+        <p className="text-sm text-muted-foreground">
           Theo dõi tiến độ, phân công, thực hiện dự án và đánh giá chất lượng công việc.
         </p>
       </div>
 
-      <div className="flex border-b border-slate-200 shrink-0 overflow-x-auto hide-scrollbar">
+      <div className="flex border-b border-slate-200 shrink-0 overflow-x-auto hide-scrollbar mb-4">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href;
           const Icon = tab.icon;
@@ -60,7 +60,7 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
               key={tab.href}
               href={tab.href}
               className={`flex items-center gap-2 px-4 py-2 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${isActive
-                ? "border-blue-600 text-blue-600"
+                ? "border-blue-600 text-blue-600 font-semibold"
                 : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
                 }`}
             >
@@ -71,9 +71,10 @@ export default function WorkPlansLayout({ children }: { children: React.ReactNod
         })}
       </div>
 
-      <div className="flex-col flex-1 min-h-0 pt-4 flex relative overflow-hidden">
+      <div className="w-full flex-1 flex flex-col min-w-0">
         {children}
       </div>
     </div>
   );
 }
+

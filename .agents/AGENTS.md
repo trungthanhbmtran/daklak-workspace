@@ -72,7 +72,7 @@ Mỗi lệnh (`/code1 <prompt>` hoặc `/code2 <prompt>`) là một **quy trình
 - **Kiểm chứng máy (Automated Verification):** Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test của service tương ứng).
 - **Phản biện kết quả thực thi (Post-Execution Diff Critique Gate):**
   * Không bao giờ thỏa mãn chỉ vì `tsc` báo pass. BẮT BUỘC soi từng dòng `git diff` vừa sinh ra đối chiếu trực tiếp với 7 Bộ ràng buộc kỹ thuật:
-    - *UI/UX*: Có thẻ con flex nào thiếu `min-w-0`? Chuỗi dài thiếu `break-words`? Form dài có bị nhét nhầm vào `<Dialog>` thay vì `<Sheet>`?
+    - *UI/UX*: Có thẻ con flex nào thiếu `min-w-0`? Chuỗi dài thiếu `break-words`? Form dài có bị nhét nhầm vào `<Dialog>` thay vì `<Sheet>`? Có bị hardcode chiều cao cố định (`h-[600px]`) hoặc lạm dụng `overflow-hidden` khóa nghẽn thanh cuộn không? Breakpoint chia 2 cột có bị ép sớm ở `md` làm đè chữ không? Accordion dữ liệu async có bị lỗi đóng sập do uncontrolled `defaultValue` không?
     - *Routing*: Có lọt tiền tố thừa `/admin` vào `apiClient` không?
     - *Backend & DB*: Cột mới có đảm bảo `nullable` hoặc `@default` không? Query CSDL có bị lọt ngoài `organizationId` scope không? Lời gọi gRPC có thiếu metadata token không?
     - *Logic & Edge Cases*: Có nuốt lỗi âm thầm (`catch {}` rỗng) không? Tham số `null`/`undefined`/mảng rỗng có bị vỡ app không?
@@ -91,9 +91,20 @@ Mỗi lệnh (`/code1 <prompt>` hoặc `/code2 <prompt>`) là một **quy trình
 
 ### 1. Ràng buộc UI/UX & CSS Layout (Frontend)
 - **`min-w-0` bắt buộc:** LUÔN LUÔN thêm `min-w-0` vào các thẻ con trực tiếp của `flex` hoặc `grid` container nếu bên trong có chứa text động, badge hoặc thẻ con có thể co giãn. Điều này giúp container có thể thu hẹp (shrink) đúng kích thước thật thay vì tràn ra ngoài màn hình (overflow).
-- **`break-words` bắt buộc:** LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không dấu cách (ID, Token, API Key, URL, CUID/UUID) để ép text xuống dòng, không đâm xuyên card/bảng.
+- **`break-words` bắt buộc:** LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không dấu cách (ID, Token, API Key, URL, CUID/UUID) và `whitespace-normal break-words leading-relaxed` cho nội dung nhiệm vụ/văn bản dài để ép text xuống dòng, không đâm xuyên card hay chèn ép cụm nút thao tác.
 - **`truncate` / `line-clamp-x`:** Bắt buộc áp dụng cho thẻ Title/Description dài.
-- **Fluid Layout:** Ưu tiên `w-full flex-1`. HẠN CHẾ dùng class giới hạn cứng (`max-w-5xl`, `max-w-[1400px]`) ở Dashboard lớn gây thừa mảng trắng vô nghĩa trên màn hình rộng.
+- **Fluid Layout & Chống Khóa Cứng Thanh Cuộn (Anti-Scroll Trap & Zero Layout Clipping):**
+  * **CẤM TUYỆT ĐỐI áp dụng `overflow-hidden` và chiều cao cố định (`h-[600px]`, `h-full`) tại layout trang con / feature layout**: `service-layout` bên ngoài đã cấu hình sẵn vùng cuộn (`overflow-y-auto`). Việc lạm dụng `overflow-hidden` tại sub-layout sẽ khóa cứng trang, làm mất thanh cuộn và cắt phăng phần dưới của danh sách dài khiến người dùng không thể xem đầy đủ thông tin.
+  * **Chuẩn cuộn phân tầng:** Sub-layout bắt buộc dùng `w-full min-h-full flex flex-col flex-1 min-w-0` để toàn trang cuộn tự nhiên trên `service-layout`. Khi thiết kế danh sách/card dài cần cuộn nội bộ, BẮT BUỘC dùng `max-h-[...] overflow-y-auto pr-1` chuẩn CSS native.
+  * HẠN CHẾ dùng class giới hạn cứng (`max-w-5xl`, `max-w-[1400px]`) ở Dashboard lớn gây thừa mảng trắng vô nghĩa trên màn hình rộng.
+- **Chống Chồng Đè Nội Dung & Thiết Kế Đa Cột Responsive (Zero Overlap & Multi-Column Breakpoints):**
+  * **CẤM dùng breakpoint vội vàng `md:flex-row` (768px) cho layout 2 cột có sidebar/danh mục:** Khi trừ đi sidebar chính của hệ thống (~260px) và cột trái (~320px), cột còn lại chỉ còn dưới 400px, khiến các input và nội dung bị bóp nghẹt chồng đè lên nhau.
+  * **Quy chuẩn 2 cột Enterprise:** Layout 2 cột (Sidebar danh mục + Chi tiết) BẮT BUỘC dùng `lg:flex-row` (>= 1024px) để đảm bảo không gian. Khi màn hình < 1024px, BẮT BUỘC tự động chuyển về xếp dọc (stacked `flex-col`) 100% chiều rộng. Khuyến khích hỗ trợ nút gập/mở sidebar (`PanelLeftClose`/`PanelLeftOpen`) để giải phóng không gian.
+  * **Form thêm/sửa nhanh trên toolbar:** CẤM xếp ngang 3-4 inputs trong không gian hẹp. BẮT BUỘC dùng Responsive Grid (`grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end`) với nhãn (Label) rõ ràng trên từng input.
+  * **Cấu trúc Thẻ danh sách (List Items):** Tên/nội dung text dài BẮT BUỘC nằm ở vùng riêng (`min-w-0 flex-1`), cụm metadata và nút thao tác (Sửa, Xóa) BẮT BUỘC có vùng neo riêng (`shrink-0`), tuyệt đối không để nút bấm hay badge đè lên chữ.
+- **Xử lý Thành phần Radix UI Bất đồng bộ (Async Radix UI State Handling):**
+  * Khi sử dụng `Accordion` hay `Collapsible` cho dữ liệu bất đồng bộ tải từ API (React Query), CẤM dùng `defaultValue` kiểu uncontrolled vì Radix chỉ khởi tạo 1 lần lúc mount khi data còn rỗng, dẫn đến toàn bộ danh mục bị đóng sập/trắng trơn khi data về.
+  * BẮT BUỘC dùng **Controlled State** (`value={openKeys} onValueChange={setOpenKeys}`) và tự động mở tất cả các nhóm khi dữ liệu tải xong (`useEffect`).
 - **Quy chuẩn `<Sheet>` vs `<Dialog>`:**
   * **`<Sheet>` (Trượt từ cạnh phải):** BẮT BUỘC dùng cho form dài, cấu hình chi tiết, nhiều tabs, flow builder, hoặc dữ liệu cần đối chiếu song song với màn hình chính (`sm:max-w-xl` hoặc `w-[600px]`).
   * **`<Dialog>` (Giữa màn hình):** CHỈ DÙNG cho tương tác ngắn, quyết định tức thời (Xác nhận Xóa, Cảnh báo, form cực ngắn 1-3 inputs). TUYỆT ĐỐI KHÔNG nhồi nhét form cấu hình dài vào Dialog!

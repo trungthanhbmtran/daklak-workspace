@@ -158,3 +158,29 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Đồng bộ bản dựng standalone vào `daklak-workspace-admin-frontend-1` và khởi động lại container thành công.
   - Kiểm tra live route `/admin/services/hrm/work-plans/manual-selector`: HTTP 200 OK (`Content-Type: text/html; charset=utf-8`, prerendered static).
   - Kiểm tra mã hóa: Cả 2 file đều là `UTF-8 (No BOM)`. Không có `console.log` dư thừa.
+
+## 2026-10-13: Khắc phục Triệt để Lỗi Nội dung Chồng đè & Các List Danh sách Bị Khóa Cứng Không Cuộn Được
+- **Nguyên nhân gốc rễ phát hiện:**
+  1. *Lỗi xung đột Scroll giữa Layout cha và Khung con:* `service-layout` bên ngoài đã có `overflow-y-auto`. Việc khung bên trong đặt `min-h-[640px]`, `overflow-hidden` và lạm dụng Radix `<ScrollArea>` với `h-full` mà không có giới hạn `max-h` khiến Radix viewport tính chiều cao bằng 100% nội dung nở rộng, làm tê liệt thanh cuộn nội bộ; các item thừa bị `overflow-hidden` cắt phăng, người dùng không thể cuộn xuống xem danh sách VTVL và các nhiệm vụ dài.
+  2. *Lỗi đè nét tại Khung Thêm nhiệm vụ:* Việc ép 6 inputs vào một hàng 12 cột khiến các ô Tháng, Quý, Năm, Trọng số chỉ nhận được `col-span-1` (~58px), làm tiêu đề nhãn, icon và ô số bị bóp méo, chồng đè lên nhau.
+  3. *Lỗi tràn ô bảng chỉ tiêu:* Độ rộng các cột Tháng/Quý/Năm trong bảng đặt nhỏ hơn padding và chiều rộng input khiến input tràn ra ngoài viền cột, gây hiện tượng chữ và số dính chùm.
+- **Giải pháp xử lý:**
+  1. *Giải phóng cuộn tự nhiên (Zero Scroll Trap):*
+     - Bỏ các bẫy `overflow-hidden` cứng tại các card cha.
+     - Cột danh sách VTVL: Cấu hình vùng cuộn độc lập `max-h-[580px] min-h-[300px] overflow-y-auto overflow-x-hidden pr-1.5`, cuộn mượt mà không bao giờ bị khóa cứng dù có 50+ VTVL.
+     - Bảng nhiệm vụ: Cấu hình vùng cuộn 2 chiều độc lập `w-full overflow-auto max-h-[540px] min-h-[300px]` với `thead` gắn `sticky top-0 z-20 bg-muted/95 backdrop-blur-md`, vừa cuộn ngang thoải mái (`min-w-[860px]`), vừa cuộn dọc êm ái mà tiêu đề cột luôn ghim ở đầu.
+  2. *Tái cấu trúc Khung Thêm nhiệm vụ 2 tầng (Two-tier Form):*
+     - Hàng 1: Nút chuyển chế độ (Kho mẫu / Nhiệm vụ chuyên thù) + Ô chọn/nhập tên nhiệm vụ rộng rãi 100%.
+     - Hàng 2: Grid 5 cột cân bằng (`grid-cols-2 sm:grid-cols-5 gap-2.5 items-end`). Mỗi ô (Tháng, Quý, Năm, Trọng số, Nút Thêm) đạt chuẩn độ rộng 120-140px, hiển thị sắc nét đầy đủ nhãn và icon.
+  3. *Tái định biên kích thước các cột bảng:*
+     - Cột STT: `48px`, Tên nhiệm vụ: `min-w-[280px]` (`break-words`), ĐVT: `85px`, Tháng: `110px` (input `74px`), Quý: `110px` (input `74px`), Năm: `115px` (input `78px`), Trọng số: `95px` (input `66px`), Xóa: `50px`. Toàn bộ inputs căn giữa `mx-auto` với khoảng đệm an toàn 15-20px mỗi bên, triệt tiêu hoàn toàn nguy cơ đè nét.
+  4. *Docking Thanh Thao tác (Action Footer Bar):*
+     - Gắn `sticky bottom-2 z-30` cho thanh Footer bên dưới, giúp nút "LƯU CẤU TRÚC ĐỊNH BIÊN" và tiến độ trọng số luôn nổi thuận tiện khi cuộn trang dài.
+- **Tập tin đã sửa đổi**:
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/ManualPlanSelectorByRankClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/ManualPlanSelectorByRankClient.tsx)
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx)
+- **Kiểm chứng máy thực tế:**
+  - `pnpm --filter admin_khcn run typecheck`: 0 lỗi TypeScript.
+  - `pnpm --filter admin_khcn run build`: Biên dịch 83 routes tĩnh thành công (Exit status 0).
+  - Triển khai vào container `daklak-workspace-admin-frontend-1` và kiểm tra live: HTTP 200 OK (`remote file exists`).
+  - Kiểm tra mã hóa: UTF-8 không BOM, 0 console.log.

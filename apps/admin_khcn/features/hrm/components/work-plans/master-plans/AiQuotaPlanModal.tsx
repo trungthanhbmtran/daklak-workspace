@@ -358,10 +358,10 @@ export function AiQuotaPlanModal({
                   </TabsList>
 
                   <TabsContent value="QUOTAS" className="mt-3 min-w-0 space-y-3">
-                    <div className="rounded-xl border overflow-x-auto bg-card min-w-0">
+                    <div className="rounded-xl border overflow-auto max-h-[380px] bg-card min-w-0">
                       <div className="min-w-[620px]">
-                        <Table className="w-full table-fixed min-w-0">
-                        <TableHeader className="bg-muted/50 border-b">
+                        <Table className="w-full text-xs min-w-0">
+                        <TableHeader className="bg-muted/90 sticky top-0 backdrop-blur-sm border-b z-10">
                           <TableRow>
                             <TableHead className="w-[40px] text-center text-xs font-bold">#</TableHead>
                             <TableHead className="text-xs font-bold min-w-0">Nhiệm vụ trọng tâm</TableHead>
