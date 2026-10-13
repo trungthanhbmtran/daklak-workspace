@@ -50,6 +50,49 @@ function removeVietnameseTones(str: string): string {
     .toLowerCase();
 }
 
+export function inferUnitCategory(node: { name?: string; code?: string; categoryCode?: string }): string {
+  if (node.categoryCode) return node.categoryCode;
+  const name = (node.name || "").toLowerCase();
+  const code = (node.code || "").toUpperCase();
+  if (
+    code.startsWith("BTC") ||
+    code.startsWith("BTCTU") ||
+    name.includes("đảng") ||
+    name.includes("tỉnh ủy") ||
+    name.includes("huyện ủy") ||
+    name.includes("thị ủy") ||
+    name.includes("thành ủy") ||
+    name.includes("ban tổ chức") ||
+    name.includes("tuyên giáo") ||
+    name.includes("dân vận") ||
+    name.includes("nội chính") ||
+    name.includes("kiểm tra") ||
+    name.includes("ubkt")
+  ) {
+    return "DANG";
+  }
+  if (
+    name.includes("sở") ||
+    name.includes("ubnd") ||
+    name.includes("ủy ban") ||
+    name.includes("hội đồng") ||
+    name.includes("thanh tra") ||
+    name.includes("văn phòng ubnd")
+  ) {
+    return "CHINH_QUYEN";
+  }
+  if (
+    name.includes("trung tâm") ||
+    name.includes("ban quản lý") ||
+    name.includes("trường") ||
+    name.includes("bệnh viện") ||
+    name.includes("đài")
+  ) {
+    return "SU_NGHIEP";
+  }
+  return "OTHER";
+}
+
 export function flattenUnitHierarchy(
   nodes: OrganizationUnitNode[],
   parentPath: string[] = [],
@@ -61,12 +104,13 @@ export function flattenUnitHierarchy(
     if (node.code) {
       const pathStr = parentPath.join(" › ");
       const searchIndex = `${removeVietnameseTones(node.name)} ${node.code.toLowerCase()} ${removeVietnameseTones(node.shortName || "")} ${removeVietnameseTones(pathStr)}`;
+      const category = inferUnitCategory(node);
       result.push({
         id: node.id,
         code: node.code,
         name: node.name,
         shortName: node.shortName,
-        categoryCode: node.categoryCode,
+        categoryCode: category,
         level,
         path: parentPath,
         pathString: pathStr,
@@ -547,8 +591,9 @@ function TreeUnitNodeItem({
   const children = node.children ?? node.subordinateUnits ?? [];
   const hasChildren = children.length > 0;
   const isExpanded = node.code ? Boolean(expandedNodes[node.code]) : true;
-  const isSelected = node.code && selectedCode === node.code;
-  const catBadge = getCategoryBadge(node.categoryCode);
+  const categoryCode = inferUnitCategory(node);
+  const catBadge = getCategoryBadge(categoryCode);
+  const isSelected = Boolean(selectedCode && node.code && selectedCode === node.code);
 
   return (
     <div className="select-none">
@@ -588,7 +633,7 @@ function TreeUnitNodeItem({
             }}
             className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer"
           >
-            {node.categoryCode === "DANG" ? (
+            {categoryCode === "DANG" ? (
               <Landmark className="size-3.5 shrink-0 text-red-500" />
             ) : hasChildren ? (
               <Building2 className="size-3.5 shrink-0 text-blue-500" />
@@ -601,7 +646,7 @@ function TreeUnitNodeItem({
                 {node.code}
               </span>
             )}
-            {node.categoryCode && (
+            {categoryCode && (
               <span className={`hidden sm:inline-flex rounded-xs border px-1 py-0 text-[9px] font-medium ${catBadge.bg}`}>
                 {catBadge.label}
               </span>

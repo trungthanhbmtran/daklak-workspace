@@ -24,13 +24,16 @@ Không phân chia Backend hay Frontend. Được sử dụng để thực thi đ
 2. **Bước 2: Khảo sát Mã nguồn Thực tế & Khóa Ranh giới File (Real Code Inspection & Anti-Hallucination):**
    - **Triệt tiêu ảo giác AI:** Dùng công cụ đọc file (`view_file`, tìm kiếm code) mở trực tiếp các file schema (`schema.prisma`), contract gRPC (`shared/protos/`), controllers, routes liên quan trong repo. Tuyệt đối không suy đoán trường dữ liệu hoặc endpoint.
    - Khóa cứng danh sách các file thuộc sở hữu của tác vụ này; tuyệt đối không chạm vào file ngoài phạm vi để chống xung đột mã nguồn.
+   - Với tác vụ frontend, bắt buộc đọc `.agents/rules/frontend.md` và API contract thực tế; xác định business rule/source of truth thuộc backend/service nào.
 
 3. **Bước 3: Hoạch định Giải pháp Kỹ thuật:**
    - Phân tích logic nghiệp vụ, luồng dữ liệu, API contract hoặc schema cần sửa đổi dựa trên dữ liệu thực tế đã khảo sát ở Bước 2.
    - Chuẩn bị giải pháp đối chiếu chặt chẽ với **7 Bộ ràng buộc kỹ thuật** trước khi sửa code.
 
 4. **Bước 4: Thực thi Mã nguồn Chuẩn xác theo 7 Bộ Ràng buộc Kỹ thuật:**
-   - **UI/UX & CSS Layout:** Bắt buộc `min-w-0` cho các thẻ con trực tiếp của `flex`/`grid` chứa text động; bắt buộc `break-words` cho chuỗi dài/ID/token; dùng `<Sheet>` cho form dài/cấu hình chi tiết; chỉ dùng `<Dialog>` cho xác nhận ngắn/alert.
+   - **UI/UX & CSS Layout:** Bắt buộc `min-w-0` cho các thẻ con trực tiếp của `flex`/`grid` chứa text động; dùng `wrap-break-word` (Tailwind v4) cho văn bản dài, `break-all` khi cần ngắt ID/token dài; không dùng `break-words`. Lint warning mới trong file sửa phải được xử lý trước khi hoàn tất. Dùng `<Sheet>` cho form dài/cấu hình chi tiết; chỉ dùng `<Dialog>` cho xác nhận ngắn/alert.
+   - **Frontend state & rendering:** đặt state ở component nhỏ nhất sở hữu hành vi; chỉ nâng state lên cha khi nhiều component thực sự dùng chung hoặc state thuộc URL. Không đưa state UI cục bộ vào global store, không lưu state suy ra lần nữa. Cô lập cập nhật để tránh re-render cả page/subtree không liên quan; dùng memoization khi có chi phí cụ thể, không rải đại trà. Với mỗi Dialog/Sheet, dùng controlled `open`/`onOpenChange` với state mặc định đóng và state riêng cho từng surface. Chỉ mount nội dung nặng, fetch hoặc transform dữ liệu sau khi người dùng mở; gate query bằng `enabled: open` hoặc guard tương đương, không tải khi page mount lúc modal/sheet còn đóng.
+   - **Dumb client boundary:** Frontend chỉ trình bày dữ liệu, state tương tác cục bộ, định dạng hiển thị và gọi API contract/hook. Không sở hữu hoặc nhân đôi business rules, quyết định quyền cuối cùng, workflow transitions, KPI/số liệu cốt lõi hay validation bảo vệ dữ liệu. Backend là source of truth; client validation chỉ hỗ trợ UX. Nếu thiếu API/contract, ghi rõ gap và chuyển đúng backend owner/lane, không mock hay tự dựng luật trong UI.
    - **Routing Frontend:** Không thêm prefix `/admin` khi gọi API qua `apiClient` hoặc `serverFetch` (BaseURL đã có sẵn `/api/v1/admin`). Unwrap bằng `unwrapData()`.
    - **Next.js 15 App Router:** Bắt buộc `await params` / `await searchParams`. Giữ `page.tsx` là Server Component gọn gàng, chuyển UI tương tác vào `*Client.tsx` ('use client').
    - **gRPC & Proto:** Serialize chuỗi an toàn (`metadataJson`) cho JSON phức tạp lồng nhau; luôn đính kèm metadata token xác thực (`GatewayContextToken`).

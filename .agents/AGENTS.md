@@ -59,6 +59,7 @@ Mỗi lệnh (`/code1 <prompt>`, `/code2 <prompt>` hoặc `/code3 <prompt>`) là
 ### Bước 2: Khảo sát Mã nguồn Thực tế & Khóa Ranh giới File (Real Code Inspection & Anti-Hallucination)
 - **Triệt tiêu ảo giác AI:** Dùng công cụ đọc file (`view_file`, tìm kiếm code) mở trực tiếp các file schema (`schema.prisma`), contract gRPC (`shared/protos/`), controllers, routes liên quan trong repo. Không được suy đoán trường dữ liệu hoặc endpoint.
 - Khóa cứng danh sách các file thuộc sở hữu của tác vụ này; tuyệt đối không chạm vào file nằm ngoài phạm vi hoặc file đang do lane khác xử lý để triệt tiêu nguy cơ xung đột mã nguồn.
+- Với tác vụ frontend, bắt buộc đọc `.agents/rules/frontend.md` và contract/API thực tế; xác nhận Backend/service nào sở hữu từng business rule và source of truth.
 
 ### Bước 3: Hoạch định Giải pháp Kỹ thuật
 - Phân tích logic nghiệp vụ, luồng dữ liệu, API contract hoặc schema cần sửa đổi dựa trên dữ liệu thực tế đã khảo sát ở Bước 2.
@@ -66,14 +67,16 @@ Mỗi lệnh (`/code1 <prompt>`, `/code2 <prompt>` hoặc `/code3 <prompt>`) là
 
 ### Bước 4: Thực thi Chuẩn xác theo 7 Bộ Ràng buộc Kỹ thuật
 - Triển khai code bám sát yêu cầu nghiệp vụ của prompt, không tự ý thêm bớt tính năng ngoài phạm vi.
-- Tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật (PBAC tenant scope, additive migration CSDL, BaseURL không lặp `/admin`, Next.js 15 App Router, UI flex `min-w-0` / `break-words`, Sheet thay vì Dialog cho form dài, serialize JSON gRPC an toàn, mã hóa UTF-8 không BOM).
+- Tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật (PBAC tenant scope, additive migration CSDL, BaseURL không lặp `/admin`, Next.js 15 App Router, UI flex `min-w-0` / `wrap-break-word`, Sheet thay vì Dialog cho form dài, serialize JSON gRPC an toàn, mã hóa UTF-8 không BOM).
 
 ### Bước 5: Kiểm chứng Máy Thực tế & Phản biện Kết quả (Verification & Diff Critique Gate)
 - **Kiểm chứng máy (Automated Verification):** Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test của service tương ứng).
+- **Không chấp nhận warning mới:** Warning lint phát sinh từ dòng/file đang sửa là lỗi nghiệm thu, kể cả khi lệnh trả exit code 0. Sửa theo gợi ý canonical của công cụ; không bỏ qua hoặc thêm suppress/disable để che warning. Warning cũ ngoài phạm vi phải ghi rõ file và rule, không được nhận là warning đã xử lý.
 - **Phản biện kết quả thực thi (Post-Execution Diff Critique Gate):**
   * Không bao giờ thỏa mãn chỉ vì `tsc` báo pass. BẮT BUỘC soi từng dòng `git diff` vừa sinh ra đối chiếu trực tiếp với 7 Bộ ràng buộc kỹ thuật:
-    - *UI/UX*: Có thẻ con flex nào thiếu `min-w-0`? Chuỗi dài thiếu `break-words`? Form dài có bị nhét nhầm vào `<Dialog>` thay vì `<Sheet>`? Có bị hardcode chiều cao cố định (`h-[600px]`) hoặc lạm dụng `overflow-hidden` khóa nghẽn thanh cuộn không? Breakpoint chia 2 cột có bị ép sớm ở `md` làm đè chữ không? Accordion dữ liệu async có bị lỗi đóng sập do uncontrolled `defaultValue` không?
+    - *UI/UX*: Có thẻ con flex nào thiếu `min-w-0`? Chuỗi dài thiếu `wrap-break-word`? Có utility Tailwind nào bị lint cảnh báo hoặc có tên canonical được công cụ gợi ý không? Form dài có bị nhét nhầm vào `<Dialog>` thay vì `<Sheet>`? Có bị hardcode chiều cao cố định (`h-[600px]`) hoặc lạm dụng `overflow-hidden` khóa nghẽn thanh cuộn không? Breakpoint chia 2 cột có bị ép sớm ở `md` làm đè chữ không? Accordion dữ liệu async có bị lỗi đóng sập do uncontrolled `defaultValue` không?
     - *Routing*: Có lọt tiền tố thừa `/admin` vào `apiClient` không?
+    - *Frontend dumb client*: Có rule/decision nghiệp vụ, quyền cuối cùng, workflow, KPI hoặc validation authoritative nào bị đặt/nhân đôi ở frontend không? Nếu thiếu API/contract thì nêu gap đúng service owner, không hoàn tất bằng mock hoặc rule tạm trong UI.
     - *Backend & DB*: Cột mới có đảm bảo `nullable` hoặc `@default` không? Query CSDL có bị lọt ngoài `organizationId` scope không? Lời gọi gRPC có thiếu metadata token không?
     - *Logic & Edge Cases*: Có nuốt lỗi âm thầm (`catch {}` rỗng) không? Tham số `null`/`undefined`/mảng rỗng có bị vỡ app không?
   * **Chống thử mù quáng (Anti-thrashing):** Nếu phát hiện lỗi hoặc vi phạm khi phản biện diff, phân tích tận gốc và tự sửa ngay trước khi bàn giao.
@@ -91,7 +94,7 @@ Mỗi lệnh (`/code1 <prompt>`, `/code2 <prompt>` hoặc `/code3 <prompt>`) là
 
 ### 1. Ràng buộc UI/UX & CSS Layout (Frontend)
 - **`min-w-0` bắt buộc:** LUÔN LUÔN thêm `min-w-0` vào các thẻ con trực tiếp của `flex` hoặc `grid` container nếu bên trong có chứa text động, badge hoặc thẻ con có thể co giãn. Điều này giúp container có thể thu hẹp (shrink) đúng kích thước thật thay vì tràn ra ngoài màn hình (overflow).
-- **`break-words` bắt buộc:** LUÔN LUÔN thêm `break-words` hoặc `break-all` kết hợp `whitespace-pre-wrap` cho các thẻ hiển thị chuỗi dài không dấu cách (ID, Token, API Key, URL, CUID/UUID) và `whitespace-normal break-words leading-relaxed` cho nội dung nhiệm vụ/văn bản dài để ép text xuống dòng, không đâm xuyên card hay chèn ép cụm nút thao tác.
+- **Quy tắc ngắt dòng Tailwind CSS v4:** Dùng `wrap-break-word` để ngắt từ cho nội dung dài; không dùng class `break-words` trong code mới vì lint báo thay bằng `wrap-break-word`. Với chuỗi định danh dài không có dấu cách (ID, Token, API Key, URL, CUID/UUID), dùng `break-all` khi cần ngắt giữa chuỗi và kết hợp `whitespace-pre-wrap` nếu cần giữ xuống dòng. Nội dung nhiệm vụ/văn bản dài dùng `whitespace-normal wrap-break-word leading-relaxed` để không tràn card hoặc chèn ép cụm nút.
 - **`truncate` / `line-clamp-x`:** Bắt buộc áp dụng cho thẻ Title/Description dài.
 - **Fluid Layout & Chống Khóa Cứng Thanh Cuộn (Anti-Scroll Trap & Zero Layout Clipping):**
   * **CẤM TUYỆT ĐỐI áp dụng `overflow-hidden` và chiều cao cố định (`h-[600px]`, `h-full`) tại layout trang con / feature layout**: `service-layout` bên ngoài đã cấu hình sẵn vùng cuộn (`overflow-y-auto`). Việc lạm dụng `overflow-hidden` tại sub-layout sẽ khóa cứng trang, làm mất thanh cuộn và cắt phăng phần dưới của danh sách dài khiến người dùng không thể xem đầy đủ thông tin.
@@ -108,6 +111,14 @@ Mỗi lệnh (`/code1 <prompt>`, `/code2 <prompt>` hoặc `/code3 <prompt>`) là
 - **Quy chuẩn `<Sheet>` vs `<Dialog>`:**
   * **`<Sheet>` (Trượt từ cạnh phải):** BẮT BUỘC dùng cho form dài, cấu hình chi tiết, nhiều tabs, flow builder, hoặc dữ liệu cần đối chiếu song song với màn hình chính (`sm:max-w-xl` hoặc `w-[600px]`).
   * **`<Dialog>` (Giữa màn hình):** CHỈ DÙNG cho tương tác ngắn, quyết định tức thời (Xác nhận Xóa, Cảnh báo, form cực ngắn 1-3 inputs). TUYỆT ĐỐI KHÔNG nhồi nhét form cấu hình dài vào Dialog!
+
+### Frontend State Ownership, Rendering, and Modal/Sheet Loading
+- **State ownership:** Đặt state ở component nhỏ nhất sở hữu hành vi; chỉ lift state lên cha khi nhiều component thực sự dùng chung hoặc state thuộc URL. Không đưa state UI cục bộ vào global store.
+- **Single source of truth:** Không lưu lại state có thể suy ra từ props/data; giữ state cần thiết tối thiểu và tránh hai state phải đồng bộ cùng một giá trị.
+- **Giảm re-render không cần thiết:** Cô lập state trong subtree sở hữu để cập nhật đúng phần giao diện liên quan; tránh setState ở page/root cho tương tác cục bộ. Chỉ dùng memoization khi có chi phí render lặp cụ thể, không rải `useMemo`/`React.memo` đại trà.
+- **Dialog/Sheet controlled open:** Component sở hữu giữ state controlled mặc định đóng (`const [open, setOpen] = useState(false)`) và truyền `open`/`onOpenChange`; mỗi modal/sheet độc lập có state mở riêng.
+- **Lazy content/data:** Chỉ mount nội dung nặng và bắt đầu fetch/transform dữ liệu sau thao tác mở; gate query bằng `enabled: open` hoặc guard tương đương. Không tải dữ liệu lúc page mount khi modal/sheet còn đóng. Có thể giữ cache sau lần mở đầu nếu phù hợp UX, tránh refetch không cần thiết.
+- **Frontend là dumb client:** Chỉ đảm nhiệm trình bày dữ liệu, state tương tác cục bộ, định dạng hiển thị và gửi thao tác qua API contract/hook có sẵn. Không tự quyết định quyền cuối cùng, chuyển trạng thái workflow, quy tắc nghiệp vụ, tính KPI/số liệu cốt lõi hoặc validation bảo vệ dữ liệu; Backend/service sở hữu nghiệp vụ và là source of truth. Client-side validation chỉ hỗ trợ UX, Backend vẫn phải xác thực. Dùng kết quả Backend (`allowed`, permission, workflow state...) để quyết định UI. Nếu thiếu API/contract cho yêu cầu, ghi rõ gap và chuyển đúng backend owner/lane; không mock hay tự dựng luật trong UI.
 
 ### 2. Ràng buộc BaseURL & Routing Frontend (`admin_khcn`)
 - Instance `apiClient` và `serverFetch` đã cấu hình sẵn `baseURL = "/api/v1/admin"`.

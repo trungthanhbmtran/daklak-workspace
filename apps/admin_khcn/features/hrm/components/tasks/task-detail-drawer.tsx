@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
   BellRing, MessageSquare, CheckCircle2,
-  ArrowRightCircle, Repeat, Briefcase, Calendar
+  ArrowRightCircle, Repeat, Briefcase, Calendar, Award
 } from "lucide-react";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
 import { TaskHistoryTab } from "./task-detail-history-tab";
+import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
 import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
 import { TaskAssignDialog } from "./task-assign-dialog";
@@ -44,6 +45,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const { user } = useUser();
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isExtendOpen, setIsExtendOpen] = useState(false);
+  const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
   const [respondAction, setRespondAction] = useState<"REJECT" | "REQUEST_COORDINATION" | null>(null);
 
   // ── Queries ──
@@ -111,21 +113,30 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 <Badge variant={isCompleted ? "default" : "outline"} className={isCompleted ? "bg-green-500 text-white" : getTaskStatusColor(currentTask.status || "")}>
                   {currentTask.statusLabel || translateTaskStatus(currentTask.status || "")}
                 </Badge>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEvaluationOpen(true)}
+                    className="text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 font-semibold shadow-2xs text-xs"
+                  >
+                    <Award className="w-3.5 h-3.5 mr-1 text-indigo-600" />
+                    Đánh giá công việc
+                  </Button>
                   {canReassign && !isCompleted && (
-                    <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
+                    <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 text-xs">
                       <Briefcase className="w-3 h-3" />
                       Giao lại / Phối hợp
                     </Button>
                   )}
                   {isAssigner && !isCompleted && (
-                    <Button variant="outline" size="sm" onClick={() => setIsExtendOpen(true)} className="text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-100 hover:text-purple-700">
+                    <Button variant="outline" size="sm" onClick={() => setIsExtendOpen(true)} className="text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-100 hover:text-purple-700 text-xs">
                       <Calendar className="w-3 h-3" />
                       Gia hạn
                     </Button>
                   )}
                   {!isCompleted && (
-                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700" iconStart={<BellRing className="w-3 h-3" />}>Đôn đốc</Button>
+                    <Button variant="outline" size="sm" className="text-orange-600 border-orange-200 bg-orange-50 hover:bg-orange-100 hover:text-orange-700 text-xs" iconStart={<BellRing className="w-3 h-3" />}>Đôn đốc</Button>
                   )}
                 </div>
               </div>
@@ -246,7 +257,10 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
                 Trao đổi {comments.length > 0 && `(${comments.length})`}
               </TabsTrigger>
               <TabsTrigger value="history">Lịch sử</TabsTrigger>
-              <TabsTrigger value="kpi">KPI</TabsTrigger>
+              <TabsTrigger value="kpi" className="gap-1.5">
+                <Award className="w-3.5 h-3.5 text-indigo-600" />
+                Đánh giá & KPI
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -288,44 +302,108 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
               </ScrollArea>
             </TabsContent>
 
-            {/* ── Tab KPI ── */}
+            {/* ── Tab Đánh giá & KPI ── */}
             <TabsContent value="kpi" className="m-0 h-full outline-none data-[state=inactive]:hidden">
               <ScrollArea className="h-full">
-                <div className="p-6 h-full">
-                  {currentTask.kpi ? (
-                    <div className="space-y-4 mt-4 bg-white p-4 rounded-lg border">
-                      <Heading level="h4" className="font-semibold">Kết quả đánh giá KPI</Heading>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Xếp loại chất lượng</Text>
-                          <Badge variant="default" className="bg-green-500">{currentTask.kpi.qualityGrade}</Badge>
-                        </div>
-                        <div>
-                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm</Text>
-                          <Text variant="large" weight="bold">{currentTask.kpi.totalScore} / 100</Text>
-                        </div>
-                        <div>
-                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm tiến độ</Text>
-                          <p className="font-medium">{currentTask.kpi.timelinessScore}</p>
-                        </div>
-                        <div>
-                          <Text variant="small" className="text-slate-500 mb-1 font-normal">Điểm chất lượng</Text>
-                          <p className="font-medium">{currentTask.kpi.qualityScore}</p>
-                        </div>
-                        {currentTask.kpi.note && (
-                          <div className="col-span-2">
-                            <Text variant="small" className="text-slate-500 mb-1 font-normal">Ghi chú</Text>
-                            <Text variant="small" className="italic bg-slate-50 p-2 rounded font-normal">{currentTask.kpi.note}</Text>
+                <div className="p-6 h-full space-y-4">
+                  {currentTask.kpi || currentTask.metadata?.evaluation ? (
+                    (() => {
+                      const evalData = currentTask.metadata?.evaluation || {};
+                      const kpiData = currentTask.kpi || {};
+                      const total = evalData.totalScore ?? kpiData.totalScore ?? 0;
+                      const rank = evalData.rankGrade ?? kpiData.qualityGrade ?? "HOÀN THÀNH";
+
+                      return (
+                        <div className="space-y-4 bg-white p-5 rounded-xl border shadow-xs min-w-0">
+                          <div className="flex items-center justify-between border-b pb-3">
+                            <Heading level="h4" className="font-bold flex items-center gap-1.5 text-indigo-700">
+                              <Award className="w-4 h-4 text-indigo-600" />
+                              Kết quả Thẩm định & Đánh giá của Lãnh đạo
+                            </Heading>
+                            <Badge className="bg-emerald-600 text-white font-bold">
+                              {rank}
+                            </Badge>
                           </div>
-                        )}
-                      </div>
-                      <Text variant="small" className="text-slate-400 font-normal">
-                        Đánh giá lúc {safeFormatDate(currentTask.kpi.evaluatedAt, "dd/MM/yyyy HH:mm")} bởi {currentTask.kpi.evaluator?.fullName || "Quản lý"}
-                      </Text>
-                    </div>
+
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="p-3 bg-slate-50 rounded-lg border">
+                              <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm nhiệm vụ</Text>
+                              <Text variant="large" weight="bold" className="text-2xl text-foreground font-mono">
+                                {total} <span className="text-xs font-normal text-slate-500">/ 100đ</span>
+                              </Text>
+                            </div>
+                            <div className="p-3 bg-slate-50 rounded-lg border">
+                              <Text variant="small" className="text-slate-500 mb-1 font-normal">Thời điểm phê duyệt</Text>
+                              <p className="font-semibold text-slate-800">
+                                {safeFormatDate(evalData.evaluatedAt || kpiData.evaluatedAt || currentTask.updatedAt, "dd/MM/yyyy HH:mm")}
+                              </p>
+                              <span className="text-[11px] text-slate-500">Bởi Lãnh đạo phụ trách</span>
+                            </div>
+
+                            <div className="p-2.5 bg-blue-50/50 rounded-lg border border-blue-100">
+                              <span className="text-slate-500 block">Khối lượng (A):</span>
+                              <strong className="text-blue-700">{evalData.volumePct ?? 100}% (K={evalData.difficultyK ?? 1.0})</strong>
+                            </div>
+                            <div className="p-2.5 bg-emerald-50/50 rounded-lg border border-emerald-100">
+                              <span className="text-slate-500 block">Chất lượng (B):</span>
+                              <strong className="text-emerald-700">{evalData.qualityScore ?? kpiData.qualityScore ?? 100}đ</strong>
+                            </div>
+                            <div className="p-2.5 bg-purple-50/50 rounded-lg border border-purple-100">
+                              <span className="text-slate-500 block">Tiến độ (C):</span>
+                              <strong className="text-purple-700">{evalData.timelinessScore ?? kpiData.timelinessScore ?? 100}đ</strong>
+                            </div>
+                            <div className="p-2.5 bg-amber-50/50 rounded-lg border border-amber-100">
+                              <span className="text-slate-500 block">Trách nhiệm (D):</span>
+                              <strong className="text-amber-700">{evalData.attitudeScore ?? 10}/10đ</strong>
+                            </div>
+
+                            {(evalData.feedback || kpiData.note) && (
+                              <div className="col-span-2 p-3 bg-indigo-50/30 rounded-lg border border-indigo-100">
+                                <Text variant="small" className="text-indigo-900 font-semibold mb-1">
+                                  Ý kiến chỉ đạo & Nhận xét của Lãnh đạo:
+                                </Text>
+                                <p className="text-slate-700 italic break-words leading-relaxed text-xs">
+                                  "{evalData.feedback || kpiData.note}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-2 flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setIsEvaluationOpen(true)}
+                              className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs font-semibold"
+                            >
+                              <Award className="w-3.5 h-3.5 mr-1.5" />
+                              Cập nhật / Đánh giá lại
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })()
                   ) : (
-                    <div className="text-sm text-slate-500 italic p-8 text-center">
-                      Công việc chưa được đánh giá KPI.
+                    <div className="p-6 bg-white rounded-xl border text-center space-y-4 shadow-xs">
+                      <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+                        <Award className="w-6 h-6" />
+                      </div>
+                      <div className="space-y-1">
+                        <Heading level="h4" className="font-bold text-foreground">
+                          Công việc chưa được thẩm định & đánh giá
+                        </Heading>
+                        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                          Luồng sau khi hoàn thành công việc yêu cầu Lãnh đạo / Người phụ trách đối chiếu nguồn dữ liệu hệ thống với báo cáo của chuyên viên để chốt điểm KPI.
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsEvaluationOpen(true)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm"
+                      >
+                        <Award className="w-4 h-4 mr-1.5" />
+                        Mở màn hình Thẩm định & Đánh giá của Lãnh đạo
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -360,6 +438,13 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
             onOpenChange={setIsExtendOpen}
             taskId={taskId}
             currentDueDate={currentTask.dueDate}
+          />
+        )}
+        {isEvaluationOpen && (
+          <TaskEvaluationApprovalSheet
+            task={currentTask}
+            open={isEvaluationOpen}
+            onOpenChange={setIsEvaluationOpen}
           />
         )}
       </SheetContent>

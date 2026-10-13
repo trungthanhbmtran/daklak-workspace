@@ -232,3 +232,25 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - `npm --prefix apps/admin_khcn run typecheck`: Hoàn thành với exit code 0 (0 lỗi TypeScript).
   - `npm --prefix apps/api-gateway run build`: Hoàn thành với exit code 0.
 
+## 2026-10-13: Nạp Dữ liệu Thư viện Nhiệm vụ Mẫu & Định biên VTVL (Rank Templates & Quotas) từ File Excel KPI BTCTU
+- **Nội dung tác vụ**:
+  1. Phân rã toàn diện dữ liệu từ file Excel `docs/bang-kpi-dinh-bien-vtvl-btctu.xlsx`:
+     - Sheet 1: 06 Trục kết quả KPI (70 điểm) & Hệ số K_P, K_Q theo chuẩn Hướng dẫn 05-HD/TU và Quyết định 137-QĐ/TW.
+     - Sheet 2: 19 dòng khung VTVL chi tiết từ `LĐB-01` đến `CNTT-03` cho Ban Lãnh đạo Ban và 4 phòng nghiệp vụ BTCTU (TCĐ-ĐV, TCCB, BVCTNB, Văn phòng), đầy đủ định mức giờ/SP, kế hoạch SP/năm và FTE.
+     - Sheet 3: Danh mục kế hoạch công việc và nhiệm vụ phát sinh thực tế.
+  2. Nạp dữ liệu vào CSDL `admin_hrm`:
+     - Bảng `task_rank_templates`: Nạp thành công 134 bản ghi nhiệm vụ mẫu theo phân loại:
+       + Khối Đảng (`DANG`): 104 nhiệm vụ chuẩn hóa gắn với toàn bộ các mã chức danh VTVL BTCTU (`TRUONG_BAN`, `PHO_TRUONG_BAN`, `R_P_TCCB_TP`, `R_P_TCCB_PTP1..2`, `R_P_TCCB_CV`, `R_P_TCD_DV_TP`, `R_P_TCD_DV_PTP1..2`, `R_P_TCD_DV_CV`, `R_P_BVCTNB_TP`, `R_P_BVCTNB_PTP1..2`, `R_P_BVCTNB_CV`, `R_VP_CVP`, `R_VP_PCVP1..2`, `R_VP_CV_IT`, `R_VP_NV`).
+       + Khối Công chức (`CONG_CHUC`): 19 nhiệm vụ (Chuyên viên cao cấp, Chuyên viên chính, Trưởng phòng, Chuyên viên, Cán sự).
+       + Khối Viên chức (`VIEN_CHUC`): 11 nhiệm vụ (Giảng viên chính, Bác sĩ chính, Kỹ sư chính, Chuyên viên, Nhân viên...).
+     - Bảng `rank_quotas`: Nạp 166 bản ghi định mức (targetValue, monthlyTarget, quarterlyTarget, yearlyTarget, weight) liên kết chính xác theo từng mã phòng ban (`department_id`: 56 Ban, 57 TCĐ-ĐV, 58 TCCB, 59 BVCTNB, 60 Văn phòng).
+  3. Khắc phục triệt để lỗi MySQL 8.0: Escape từ khóa dành riêng `` `rank` `` trong câu lệnh INSERT vào `task_rank_templates`.
+  4. Đảm bảo giao diện tại URL `http://113.184.220.82/admin/services/hrm/work-plans/rank-templates` hiển thị đầy đủ, chính xác, trực quan theo các Tabs (Công chức NĐ 62, Viên chức NĐ 106, Cơ quan Đảng QĐ 137).
+- **Kiểm chứng máy thực tế**:
+  - `SELECT COUNT(*) FROM task_rank_templates`: 134 bản ghi (104 Đảng, 19 Công chức, 11 Viên chức).
+  - `SELECT COUNT(*) FROM rank_quotas`: 166 bản ghi định mức.
+  - `npm --prefix apps/admin_khcn run typecheck`: Hoàn thành với exit code 0 (0 lỗi TypeScript).
+  - `npm --prefix apps/hrm-service run build`: Hoàn thành với exit code 0.
+  - Đã dọn sạch 100% file script và thư mục tạm (`seed_kpi_rank_templates.js`, `parse_xlsx.js`, `extract_xlsx.ps1`, `temp_xlsx/`).
+
+

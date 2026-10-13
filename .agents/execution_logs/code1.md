@@ -1,5 +1,43 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Triển khai Màn hình Thẩm định & Đánh giá Công việc của Lãnh đạo phụ trách (Đối chiếu Đa nguồn & Phê duyệt KPI)
+
+### 1. Vấn đề & Yêu cầu Nghiệp vụ
+- Luồng công việc sau khi cán bộ/chuyên viên báo cáo hoàn thành cần có màn hình chuyên dụng dành cho Lãnh đạo / Người phụ trách quản lý để thẩm định và phê duyệt đánh giá.
+- Màn hình Lãnh đạo phải hiển thị đầy đủ thông tin đối chiếu liên quan đến nhiệm vụ từ 2 nguồn:
+  1. **Nguồn từ hệ thống (System Metrics)**: Tự động đo lường độ lệch thời gian (Sớm X ngày / Đúng hạn / Trễ Y ngày), Tiến độ Checklist các bước, Nhiệm vụ con, Lịch sử xin gia hạn hợp lệ, Căn cứ văn bản nguồn (`sourceDocumentRef`), Điểm cơ sở VTVL (`baseScore`, `weight`).
+  2. **Nguồn từ tự báo cáo (Assignee Self-Report)**: Nội dung giải trình kết quả của chuyên viên, Sản phẩm đầu ra đạt được, Danh sách tài liệu/file minh chứng đính kèm (có link xem/tải trực tiếp).
+- Khung thẩm định & cho điểm của Lãnh đạo bám sát 4 thành tố Đắk Lắk (A. Khối lượng 35%, B. Chất lượng 35%, C. Tiến độ 20%, D. Thái độ/Trách nhiệm 10%), tự động tính điểm theo thời gian thực thang 100 và phân mức xếp loại chuẩn (Hoàn thành xuất sắc, Tốt, Hoàn thành, Không hoàn thành).
+- Hỗ trợ 2 hành động: "Phê duyệt & Chốt điểm đánh giá" (cập nhật trạng thái `COMPLETED`, lưu scores, feedback) và "Yêu cầu làm lại / Bổ sung minh chứng" (trả lại trạng thái `RETURNED`, ghi nhận lý do chỉ đạo vào nhật ký công việc).
+
+### 2. Biện pháp Xử lý & File Tác động
+- **`apps/admin_khcn/features/hrm/components/tasks/TaskEvaluationApprovalSheet.tsx` (Tạo mới):**
+  * Thiết kế Sheet Enterprise chuyên dụng cho Lãnh đạo (`sm:max-w-3xl w-full`), Header cố định, Body cuộn tự nhiên (Native Scroll, Zero Scroll Trap), Footer cố định 2 hành động rõ ràng.
+  * Phân vùng 1: Bảng đối chiếu song song 2 cột (Responsive Grid `grid-cols-1 md:grid-cols-2`), Cột trái: Nguồn Hệ thống (Checklist, Thời hạn, Gia hạn, Điểm cơ sở), Cột phải: Nguồn Tự báo cáo (Giải trình, Sản phẩm đầu ra, File đính kèm).
+  * Phân vùng 2: Khối thẩm định & cho điểm 4 thành tố (Khối lượng % + Hệ số K + Đột xuất; Chất lượng 5 mức chuẩn; Tiến độ theo ngày trễ + Nút bảo lưu lý do khách quan; Thái độ/Trách nhiệm).
+  * Thẻ tổng hợp điểm realtime kèm Xếp loại đề xuất nổi bật (Gradient Card).
+  * Ô ý kiến nhận xét, chỉ đạo của Lãnh đạo.
+  * Hộp thoại Dialog xác nhận "Yêu cầu làm lại" kèm lý do chỉ đạo bắt buộc.
+- **`apps/admin_khcn/features/hrm/hooks/useTasks.ts`:**
+  * Bổ sung mutation hook `useEvaluateTask` hỗ trợ action `APPROVE` và `RETURN`, cập nhật status qua endpoint `/hrm/tasks/{id}/status`, serialize an toàn `evidenceData` và invalidates cache React Query liên quan.
+- **`apps/admin_khcn/features/hrm/types/task.ts`:**
+  * Bổ sung trường `baseScore?: number; weight?: number;` vào interface `HrmTask`.
+- **`apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`:**
+  * Thêm nút "Đánh giá công việc" (Icon `Award`) màu Indigo nổi bật trên Header Drawer.
+  * Cập nhật tab "Đánh giá & KPI": Xem kết quả điểm 4 thành tố nếu đã có đánh giá; hoặc hiển thị Card hướng dẫn kèm nút mở Sheet đánh giá nếu chưa đánh giá.
+  * Nhúng `<TaskEvaluationApprovalSheet>` để mở nhanh từ Drawer.
+- **`apps/admin_khcn/features/hrm/components/tasks/task-list.tsx`:**
+  * Bổ sung trạng thái `REVIEWING` (Chờ đánh giá) vào bộ lọc trạng thái.
+  * Thêm nút thao tác nhanh "Đánh giá" (Icon `Award`) ở cột Thao tác cho từng dòng công việc.
+  * Nhúng `<TaskEvaluationApprovalSheet>` đồng bộ trạng thái danh sách khi đánh giá thành công.
+- **`apps/admin_khcn/features/workflow/components/OrganizationUnitSelector.tsx`:**
+  * Sửa lỗi biến `isSelected` bị thiếu trong component `TreeNode`, đảm bảo biên dịch TypeScript 100% không lỗi.
+
+### 3. Kiểm chứng Máy Thực tế & Phản biện Diff
+- Lệnh kiểm chứng: `rtk npx tsc --noEmit` tại `apps/admin_khcn` -> `TypeScript: No errors found` (Exit code 0).
+- Phản biện diff:
+  * 100% tuân thủ 7 Bộ ràng buộc kỹ thuật (Sheet thay vì Dialog cho form dài, zero scroll trap, `min-w-0` / `break-words`, responsive grid 2 cột `md:grid-cols-2`, UTF-8 không BOM, sạch sẽ debug log).
+
 ## [2026-10-13] Dọn dẹp các Menu Dư thừa Không còn Sử dụng trong Phân hệ HRM (`sys_menus`)
 
 ### 1. Vấn đề phát hiện

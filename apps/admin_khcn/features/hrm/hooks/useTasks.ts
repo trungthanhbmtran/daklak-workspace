@@ -197,6 +197,68 @@ export function useUpdateStatus(taskId: number | undefined) {
   });
 }
 
+/**
+ * Hook dành cho Lãnh đạo / Người phụ trách thẩm định, phê duyệt và chốt điểm đánh giá công việc.
+ */
+export function useEvaluateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: {
+      id: number;
+      payload: {
+        action: 'APPROVE' | 'RETURN';
+        status?: string;
+        scores?: {
+          volumePct: number;
+          difficultyK: number;
+          isUnexpected?: boolean;
+          qualityGrade: string;
+          qualityScore: number;
+          timelinessScore: number;
+          attitudeScore: number;
+          totalScore: number;
+          rankGrade: string;
+        };
+        feedback?: string;
+        rejectReason?: string;
+        evidenceData?: any;
+      };
+    }) => {
+      const status = payload.action === 'APPROVE' ? 'COMPLETED' : 'RETURNED';
+      const evidence = payload.action === 'APPROVE'
+        ? `⭐ [LÃNH ĐẠO ĐÁNH GIÁ & PHÊ DUYỆT]:\n- Điểm tổng hợp: ${payload.scores?.totalScore ?? 0}/100 (${payload.scores?.rankGrade ?? 'HOÀN THÀNH'})\n- Khối lượng (A): ${payload.scores?.volumePct ?? 100}% (Hệ số K=${payload.scores?.difficultyK ?? 1.0})\n- Chất lượng (B): ${payload.scores?.qualityScore ?? 100}đ\n- Tiến độ (C): ${payload.scores?.timelinessScore ?? 100}đ\n- Trách nhiệm (D): ${payload.scores?.attitudeScore ?? 10}đ\n- Ý kiến chỉ đạo: ${payload.feedback || 'Hoàn thành tốt'}`
+        : `⚠️ [LÃNH ĐẠO YÊU CẦU BỔ SUNG MINH CHỨNG / LÀM LẠI]:\n${payload.rejectReason || payload.feedback || 'Yêu cầu kiểm tra và hoàn thiện lại kết quả công việc'}`;
+
+      return hrmTasksApi.updateStatus(id, {
+        status,
+        actionName: payload.action === 'APPROVE' ? 'EVALUATE_APPROVE' : 'RETURN',
+        rejectReason: payload.action === 'RETURN' ? (payload.rejectReason || payload.feedback) : undefined,
+        evidence,
+        evidenceData: {
+          itemType: 'evaluation',
+          itemTitle: 'Thẩm định & Đánh giá công việc của Lãnh đạo',
+          scores: payload.scores,
+          feedback: payload.feedback,
+          action: payload.action,
+        },
+      });
+    },
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: hrmKeys.taskDetail(variables.id) });
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      qc.invalidateQueries({ queryKey: hrmKeys.taskHistory(variables.id) });
+      toast.success(
+        variables.payload.action === 'APPROVE'
+          ? "Đã phê duyệt và chốt điểm đánh giá nhiệm vụ"
+          : "Đã chuyển yêu cầu hoàn thiện lại cho cán bộ"
+      );
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Đánh giá thất bại, vui lòng thử lại");
+    },
+  });
+}
+
 /** Phản hồi nhận việc (ACCEPT / REJECT / REQUEST_COORDINATION) */
 export function useRespondTask(taskId: number | undefined) {
   const qc = useQueryClient();

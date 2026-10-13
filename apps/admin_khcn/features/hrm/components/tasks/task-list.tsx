@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HrmTask } from "../../types/task";
 import { format } from "date-fns";
-import { Eye, Clock, ChevronRight, ChevronDown, Repeat, Briefcase, AlertTriangle } from "lucide-react";
+import { Eye, Clock, ChevronRight, ChevronDown, Repeat, Briefcase, AlertTriangle, Award } from "lucide-react";
 import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
+import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList, useTaskDetail } from "../../hooks/useTasks";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -160,6 +161,7 @@ export function TaskList() {
   }, [search]);
 
   const [selectedTask, setSelectedTask] = useState<HrmTask | null>(null);
+  const [evaluatingTask, setEvaluatingTask] = useState<HrmTask | null>(null);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
@@ -230,6 +232,7 @@ export function TaskList() {
               <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
               <SelectItem value="ASSIGNED">Mới giao</SelectItem>
               <SelectItem value="IN_PROGRESS">Đang xử lý</SelectItem>
+              <SelectItem value="REVIEWING">Chờ đánh giá</SelectItem>
               <SelectItem value="PENDING_REVIEW">Chờ duyệt</SelectItem>
               <SelectItem value="COMPLETED">Hoàn thành</SelectItem>
               <SelectItem value="OVERDUE">Quá hạn</SelectItem>
@@ -362,10 +365,22 @@ export function TaskList() {
               header: "Thao tác",
               className: "text-right",
               cell: (task: any) => (
-                <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
-                  <Eye className="w-3 h-3" />
-                  Chi tiết
-                </Button>
+                <div className="flex items-center justify-end gap-1.5 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEvaluatingTask(task)}
+                    className="h-8 px-2 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 font-medium shadow-2xs"
+                    title="Mở màn hình Thẩm định & Đánh giá công việc"
+                  >
+                    <Award className="w-3.5 h-3.5 mr-1 text-indigo-600" />
+                    Đánh giá
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
+                    <Eye className="w-3.5 h-3.5 mr-1" />
+                    Chi tiết
+                  </Button>
+                </div>
               )
             }
           ]}
@@ -395,11 +410,20 @@ export function TaskList() {
       }
 
       {isCreateTaskOpen && (
-          <CreateTaskDialog
-                  open={isCreateTaskOpen}
-                  onOpenChange={setIsCreateTaskOpen}
-                />
-          )}
-    </div >
+        <CreateTaskDialog
+          open={isCreateTaskOpen}
+          onOpenChange={setIsCreateTaskOpen}
+        />
+      )}
+
+      {evaluatingTask && (
+        <TaskEvaluationApprovalSheet
+          task={evaluatingTask}
+          open={!!evaluatingTask}
+          onOpenChange={(open) => !open && setEvaluatingTask(null)}
+          onSuccess={() => refetch()}
+        />
+      )}
+    </div>
   );
 }
