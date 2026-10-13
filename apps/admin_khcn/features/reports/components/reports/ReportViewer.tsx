@@ -44,7 +44,10 @@ import {
   getFriendlyFieldLabel,
   getStatusBadgeCls,
 } from '@/features/reports/utils/fieldHelpers';
-import { kpiFormsApi } from '@/features/hrm/api/kpi-forms.api';
+import {
+  getMau05DecisionData,
+  printMau05Decision,
+} from '@/features/reports/utils/mau05DecisionHelper';
 
 interface ReportViewerProps {
   definitionId: number;
@@ -134,37 +137,6 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const [activeSopStep, setActiveSopStep] = useState<string>('ALL');
   const [isMau05Open, setIsMau05Open] = useState(false);
 
-  // In / Xuất PDF quyết định Mẫu 05 chuẩn Thể thức Nghị định 30/2020 & Văn bản Đảng thông qua Server API Printer
-  const handlePrintMau05Decision = () => {
-    const printUrl = kpiFormsApi.getPrintUrl('M05_BAOCAO_QUYETDINH');
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.style.visibility = 'hidden';
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.src = printUrl;
-    document.body.appendChild(iframe);
-
-    iframe.onload = () => {
-      setTimeout(() => {
-        try {
-          iframe.contentWindow?.focus();
-          iframe.contentWindow?.print();
-        } finally {
-          setTimeout(() => {
-            if (document.body.contains(iframe)) {
-              document.body.removeChild(iframe);
-            }
-          }, 3000);
-        }
-      }, 400);
-    };
-  };
-
   // Debounce tìm kiếm
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -252,6 +224,14 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   };
 
   const rows = useMemo(() => snapshot?.data || [], [snapshot]);
+
+  // Source of Truth duy nhất đồng bộ cho cả bản hiển thị (Sheet) và bản in (Print / PDF)
+  const mau05Data = useMemo(() => getMau05DecisionData(rows), [rows]);
+
+  // In / Xuất PDF quyết định Mẫu 05 chuẩn Thể thức Nghị định 30/2020 & Văn bản Đảng đồng bộ từ 1 nguồn duy nhất
+  const handlePrintMau05Decision = () => {
+    printMau05Decision(mau05Data);
+  };
 
   // Danh sách các phòng ban phân biệt để làm bộ lọc
   const departmentsList = useMemo(() => {
@@ -1379,7 +1359,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </SheetDescription>
           </SheetHeader>
 
-          {/* Trang giấy A4 mô phỏng chuẩn Thể thức Văn bản Đảng & Nghị định 30/2020 */}
+          {/* Trang giấy A4 mô phỏng chuẩn Thể thức Văn bản Đảng & Nghị định 30/2020 - Đồng bộ 100% từ Source of Truth duy nhất */}
           <div
             className="my-6 p-8 sm:p-14 bg-white text-black border border-slate-300 shadow-md max-w-3xl mx-auto rounded-none text-[13pt] leading-[1.4] select-text"
             style={{ fontFamily: "'Times New Roman', 'Tinos', 'Liberation Serif', serif" }}
@@ -1389,16 +1369,16 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <tbody>
                 <tr>
                   <td className="w-[45%] align-top text-center p-0">
-                    <p className="uppercase text-[12pt] text-black">TỈNH ỦY ĐẮK LẮK</p>
-                    <p className="uppercase text-[12.5pt] font-bold text-black">BAN TỔ CHỨC TỈNH ỦY</p>
+                    <p className="uppercase text-[12pt] text-black">{mau05Data.agencyName}</p>
+                    <p className="uppercase text-[12.5pt] font-bold text-black">{mau05Data.organizationName}</p>
                     <div className="w-24 h-[1.5px] bg-black mx-auto mt-1" />
-                    <p className="text-[12pt] text-black mt-1">Số 125-QĐ/BTCTU</p>
+                    <p className="text-[12pt] text-black mt-1">Số {mau05Data.decisionNumber}</p>
                   </td>
                   <td className="w-[55%] align-top text-center p-0">
                     <p className="uppercase font-bold text-[13pt] text-black">ĐẢNG CỘNG SẢN VIỆT NAM</p>
                     <div className="w-36 h-[1.5px] bg-black mx-auto mt-1" />
                     <p className="italic text-[13pt] text-black mt-1">
-                      Buôn Ma Thuột, ngày 28 tháng 03 năm 2026
+                      {mau05Data.decisionDate}
                     </p>
                   </td>
                 </tr>
@@ -1408,65 +1388,64 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             {/* Tiêu đề Quyết định */}
             <div className="text-center my-6 space-y-2">
               <h2 className="text-[15pt] font-bold uppercase text-black tracking-wide">
-                QUYẾT ĐỊNH
+                {mau05Data.documentTitle}
               </h2>
               <p className="font-bold text-[13pt] text-black max-w-xl mx-auto leading-normal">
-                Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy Quý I năm 2026
+                {mau05Data.subTitle}
               </p>
               <div className="w-20 h-[1px] bg-black mx-auto mt-2" />
             </div>
 
             {/* Căn cứ pháp lý */}
             <div className="space-y-1.5 italic text-[13pt] text-black text-justify leading-[1.4]">
-              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và tổ chức bộ máy cơ quan;</p>
-              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ, công chức, viên chức hằng quý và hằng năm;</p>
-              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về quy chế kết nối, chia sẻ dữ liệu và kiểm tra nghiệp vụ Ngành Tổ chức xây dựng Đảng;</p>
-              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Biên bản cuộc họp của Hội đồng Thẩm định đánh giá xếp loại cơ quan Ban Tổ chức Tỉnh ủy ngày 25 tháng 03 năm 2026;</p>
-              <p style={{ textIndent: '1.27cm' }}>- Xét đề nghị của Trưởng phòng Tổ chức cán bộ và Chánh Văn phòng Ban,</p>
+              {mau05Data.legalBases.map((base, idx) => (
+                <p key={idx} style={{ textIndent: '1.27cm' }}>- {base}</p>
+              ))}
             </div>
 
             {/* Nội dung các Điều */}
             <div className="space-y-4 pt-3 text-[13pt] text-black leading-[1.4]">
               <p className="text-center font-bold uppercase text-[13.5pt] tracking-wider my-3">
-                BAN TỔ CHỨC TỈNH ỦY QUYẾT ĐỊNH:
+                {mau05Data.organizationName} QUYẾT ĐỊNH:
               </p>
 
               <div>
                 <p className="font-bold text-black text-justify" style={{ textIndent: '1.27cm' }}>
-                  Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk:
+                  Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan {mau05Data.organizationName} Đắk Lắk:
                 </p>
                 <div className="mt-2 pl-8 space-y-1 text-black text-[13pt]">
-                  <p>1. <strong>Tập thể Lãnh đạo Ban:</strong> Điểm KPI 98.5/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
-                  <p>2. <strong>Phòng Tổ chức đảng, đảng viên:</strong> Điểm KPI 96.0/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
-                  <p>3. <strong>Phòng Tổ chức cán bộ:</strong> Điểm KPI 95.5/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
-                  <p>4. <strong>Phòng Bảo vệ chính trị nội bộ:</strong> Điểm KPI 88.5/100 • Xếp loại: <strong>Hoàn thành tốt nhiệm vụ</strong>.</p>
-                  <p>5. <strong>Văn phòng Ban:</strong> Điểm KPI 87.0/100 • Xếp loại: <strong>Hoàn thành tốt nhiệm vụ</strong>.</p>
+                  {mau05Data.collectives.map((c, idx) => (
+                    <p key={idx}>
+                      {idx + 1}. <strong>{c.name}:</strong> Điểm KPI {c.score.toFixed(1)}/100 • Xếp loại: <strong>{c.rank}</strong>.
+                    </p>
+                  ))}
                 </div>
               </div>
 
               <div>
                 <p className="font-bold text-black text-justify" style={{ textIndent: '1.27cm' }}>
-                  Điều 2. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 23 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk, cụ thể:
+                  Điều 2. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với {mau05Data.individuals.total} cán bộ, công chức cơ quan {mau05Data.organizationName} Đắk Lắk, cụ thể:
                 </p>
                 <div className="mt-2 pl-8 space-y-1.5 text-black text-[13pt]">
                   <p>
-                    • <strong>1. Hoàn thành xuất sắc nhiệm vụ: 04 đồng chí</strong> (Tỷ lệ 17.4% tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):
+                    • <strong>1. Hoàn thành xuất sắc nhiệm vụ: 0{mau05Data.individuals.excellentCount} đồng chí</strong> (Tỷ lệ {mau05Data.individuals.excellentRatio} tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):
                   </p>
                   <ul className="list-disc pl-8 space-y-1 text-black">
-                    <li>Đ/c Nguyễn Thượng Hải - Trưởng ban Tổ chức Tỉnh ủy (100.0 điểm)</li>
-                    <li>Đ/c Lưu Vĩnh Hưng - Phó Trưởng ban Thường trực (98.0 điểm)</li>
-                    <li>Đ/c Công chức 1 - Trưởng phòng Tổ chức đảng, đảng viên (97.0 điểm)</li>
-                    <li>Đ/c Công chức 8 - Chuyên viên Quản lý Cán bộ & CSDL Mẫu 2C (99.5 điểm)</li>
+                    {mau05Data.individuals.excellentList.map((cadre, idx) => (
+                      <li key={idx}>
+                        Đ/c {cadre.name} - {cadre.title} ({cadre.score.toFixed(1)} điểm)
+                      </li>
+                    ))}
                   </ul>
 
                   <p className="pt-1">
-                    • <strong>2. Hoàn thành tốt nhiệm vụ: 18 đồng chí</strong> (Tỷ lệ 78.3% tổng biên chế, bao gồm các trường hợp đạt trên 90 điểm nhưng áp trần 20% theo quy định).
+                    • <strong>2. Hoàn thành tốt nhiệm vụ: {mau05Data.individuals.goodCount} đồng chí</strong> (Tỷ lệ {mau05Data.individuals.goodRatio} tổng biên chế, bao gồm các trường hợp đạt trên 90 điểm nhưng áp trần 20% theo quy định).
                   </p>
                   <p>
-                    • <strong>3. Hoàn thành nhiệm vụ: 01 đồng chí</strong> (Tỷ lệ 4.3% tổng biên chế).
+                    • <strong>3. Hoàn thành nhiệm vụ: 0{mau05Data.individuals.satisfactoryCount} đồng chí</strong> (Tỷ lệ {mau05Data.individuals.satisfactoryRatio} tổng biên chế).
                   </p>
                   <p>
-                    • <strong>4. Không hoàn thành nhiệm vụ: 0 đồng chí</strong> (0%).
+                    • <strong>4. Không hoàn thành nhiệm vụ: 0{mau05Data.individuals.unsatisfactoryCount} đồng chí</strong> ({mau05Data.individuals.unsatisfactoryRatio}).
                   </p>
                 </div>
               </div>
@@ -1488,20 +1467,19 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                   <td className="w-1/2 align-top text-left p-0">
                     <p className="font-bold italic text-[12pt] text-black">Nơi nhận:</p>
                     <div className="text-[11pt] leading-[1.35] text-black mt-1 space-y-0.5">
-                      <p>- Thường trực Tỉnh ủy (để b/c);</p>
-                      <p>- Lãnh đạo Ban;</p>
-                      <p>- 05 Phòng chuyên môn;</p>
-                      <p>- Lưu: VT, TC-CB.</p>
+                      {mau05Data.recipients.map((r, idx) => (
+                        <p key={idx}>{r}</p>
+                      ))}
                     </div>
                   </td>
                   <td className="w-1/2 align-top text-center p-0">
-                    <p className="uppercase font-bold text-[13pt] text-black">TRƯỞNG BAN</p>
+                    <p className="uppercase font-bold text-[13pt] text-black">{mau05Data.signerTitle}</p>
                     <div className="my-6 relative flex items-center justify-center">
                       <div className="w-20 h-20 rounded-full border-2 border-red-500/40 text-red-600 text-[10px] flex items-center justify-center text-center p-1 rotate-12 select-none uppercase font-bold">
                         Ban Tổ chức Tỉnh ủy Đắk Lắk
                       </div>
                     </div>
-                    <p className="text-[13pt] font-bold text-black">Nguyễn Thượng Hải</p>
+                    <p className="text-[13pt] font-bold text-black">{mau05Data.signerName}</p>
                   </td>
                 </tr>
               </tbody>

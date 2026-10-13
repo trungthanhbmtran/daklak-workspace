@@ -72,10 +72,23 @@ const menuData: MenuSeed[] = [
 export async function seedMenus(prisma: PrismaClient) {
   console.log('🔹 Seeding Menus...');
 
-  await prisma.menu.deleteMany({ where: { code: 'HRM_DASHBOARD_MENU' } });
-  await prisma.menu.deleteMany({ where: { code: 'HRM_POSITIONS_MENU' } });
-  await prisma.menu.deleteMany({ where: { code: 'API_GATEWAY_GROUP' } });
-  await prisma.menu.deleteMany({ where: { code: 'SYS_ENDPOINT' } });
+  await prisma.menu.deleteMany({
+    where: {
+      code: {
+        in: [
+          'HRM_DASHBOARD_MENU',
+          'HRM_POSITIONS_MENU',
+          'HRM_PROJECT_MENU',
+          'HRM_CRITERIA_MENU',
+          'HRM_PERSONAL_KPI_MENU',
+          'HRM_REVIEW_KPI_MENU',
+          'HRM_DASHBOARD_KPI_MENU',
+          'API_GATEWAY_GROUP',
+          'SYS_ENDPOINT',
+        ],
+      },
+    },
+  });
 
   for (const menu of menuData) {
     const parent = menu.parentCode

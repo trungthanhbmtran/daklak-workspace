@@ -92,7 +92,7 @@ export const btctuCadreRows = [
   // --- 2. PHÒNG TỔ CHỨC ĐẢNG, ĐẢNG VIÊN (04 VTVL) ---
   {
     cadreCode: 'BTCTU_006',
-    fullName: 'Công chức 1',
+    fullName: 'Lê Đình Hoàng',
     departmentName: 'Phòng Tổ chức đảng, đảng viên',
     jobTitle: 'Trưởng phòng TCĐ-ĐV',
     sChung: 29.0,
@@ -107,7 +107,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_007',
-    fullName: 'Công chức 2',
+    fullName: 'Phạm Văn Minh',
     departmentName: 'Phòng Tổ chức đảng, đảng viên',
     jobTitle: 'Phó Trưởng phòng (TCCSĐ)',
     sChung: 27.0,
@@ -122,7 +122,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_008',
-    fullName: 'Công chức 3',
+    fullName: 'Vũ Thị Mai',
     departmentName: 'Phòng Tổ chức đảng, đảng viên',
     jobTitle: 'Phó Trưởng phòng (Nghiệp vụ ĐV & LGSP)',
     sChung: 27.5,
@@ -137,7 +137,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_009',
-    fullName: 'Công chức 4',
+    fullName: 'Đặng Quang Huy',
     departmentName: 'Phòng Tổ chức đảng, đảng viên',
     jobTitle: 'Chuyên viên CSDL & CĐS Đảng viên',
     sChung: 26.5,
@@ -154,7 +154,7 @@ export const btctuCadreRows = [
   // --- 3. PHÒNG TỔ CHỨC CÁN BỘ (04 VTVL) ---
   {
     cadreCode: 'BTCTU_010',
-    fullName: 'Công chức 5',
+    fullName: 'Hoàng Đức Nam',
     departmentName: 'Phòng Tổ chức cán bộ',
     jobTitle: 'Trưởng phòng TCCB',
     sChung: 29.0,
@@ -169,7 +169,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_011',
-    fullName: 'Công chức 6',
+    fullName: 'Trần Quốc Tuấn',
     departmentName: 'Phòng Tổ chức cán bộ',
     jobTitle: 'Phó Trưởng phòng (Quy hoạch, Bổ nhiệm)',
     sChung: 27.5,
@@ -184,7 +184,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_012',
-    fullName: 'Công chức 7',
+    fullName: 'Bùi Thị Bích Ngọc',
     departmentName: 'Phòng Tổ chức cán bộ',
     jobTitle: 'Phó Trưởng phòng (Biên chế & Đào tạo)',
     sChung: 26.5,
@@ -199,7 +199,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_013',
-    fullName: 'Công chức 8',
+    fullName: 'Nguyễn Tiến Đạt',
     departmentName: 'Phòng Tổ chức cán bộ',
     jobTitle: 'Chuyên viên QLCB & CSDL Mẫu 2C',
     sChung: 29.5,
@@ -216,7 +216,7 @@ export const btctuCadreRows = [
   // --- 4. PHÒNG BẢO VỆ CHÍNH TRỊ NỘI BỘ (04 VTVL) ---
   {
     cadreCode: 'BTCTU_014',
-    fullName: 'Công chức 9',
+    fullName: 'Ngô Thanh Tùng',
     departmentName: 'Phòng Bảo vệ chính trị nội bộ',
     jobTitle: 'Trưởng phòng BVCTNB',
     sChung: 28.5,
@@ -231,7 +231,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_015',
-    fullName: 'Công chức 10',
+    fullName: 'Đinh Trọng Hưng',
     departmentName: 'Phòng Bảo vệ chính trị nội bộ',
     jobTitle: 'Phó Trưởng phòng (Thẩm tra xác minh)',
     sChung: 27.0,
@@ -246,7 +246,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_016',
-    fullName: 'Công chức 11',
+    fullName: 'Dương Văn Hùng',
     departmentName: 'Phòng Bảo vệ chính trị nội bộ',
     jobTitle: 'Phó Trưởng phòng (Yếu tố nước ngoài)',
     sChung: 26.5,
@@ -261,7 +261,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_017',
-    fullName: 'Công chức 12',
+    fullName: 'Phan Thành Trung',
     departmentName: 'Phòng Bảo vệ chính trị nội bộ',
     jobTitle: 'Chuyên viên Biệt phái BVCTNB Mức 3',
     sChung: 26.0,
@@ -278,7 +278,7 @@ export const btctuCadreRows = [
   // --- 5. KHỐI VĂN PHÒNG BAN (06 VTVL) ---
   {
     cadreCode: 'BTCTU_018',
-    fullName: 'Công chức 13',
+    fullName: 'Chu Văn Kiên',
     departmentName: 'Văn phòng Ban',
     jobTitle: 'Chánh Văn phòng Ban',
     sChung: 28.0,
@@ -293,7 +293,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_019',
-    fullName: 'Công chức 14',
+    fullName: 'Nguyễn Hồng Ánh',
     departmentName: 'Văn phòng Ban',
     jobTitle: 'Phó Chánh Văn phòng (Sức khỏe cán bộ)',
     sChung: 26.5,
@@ -308,7 +308,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_020',
-    fullName: 'Công chức 15',
+    fullName: 'Lương Đình Quý',
     departmentName: 'Văn phòng Ban',
     jobTitle: 'Phó Chánh Văn phòng (Tài chính, Mật & CNTT)',
     sChung: 27.0,
@@ -323,7 +323,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_021',
-    fullName: 'Công chức 16',
+    fullName: 'Trương Minh Cường',
     departmentName: 'Văn phòng Ban',
     jobTitle: 'Chuyên viên Quản trị Mạng & ATTT Cấp 3',
     sChung: 26.0,
@@ -338,7 +338,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_022',
-    fullName: 'Công chức 17',
+    fullName: 'Võ Thành Danh',
     departmentName: 'Văn phòng Ban',
     jobTitle: 'Chuyên viên ATTT & Phần mềm Cơ yếu',
     sChung: 25.5,
@@ -353,7 +353,7 @@ export const btctuCadreRows = [
   },
   {
     cadreCode: 'BTCTU_023',
-    fullName: 'Công chức 18',
+    fullName: 'Lê Thu Thảo',
     departmentName: 'Văn phòng Ban',
     jobTitle: 'Nhân viên Văn thư - Lưu trữ - Kế toán',
     sChung: 24.5,

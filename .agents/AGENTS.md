@@ -1,16 +1,16 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 hoặc gọi trực tiếp) đều là code chung, bám sát các bước thực hiện của riêng từng yêu cầu và tuân thủ nghiêm ngặt 7 bộ ràng buộc kỹ thuật dưới đây.
+File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 / Code 3 hoặc gọi trực tiếp) đều là code chung, bám sát các bước thực hiện của riêng từng yêu cầu và tuân thủ nghiêm ngặt 7 bộ ràng buộc kỹ thuật dưới đây.
 
 ---
 
 ## 1. Cấu trúc thư mục .agents
-- `commands/`: Quy trình thực hiện chuẩn cho các coder lane (`commands/code1.md`, `commands/code2.md`).
+- `commands/`: Quy trình thực hiện chuẩn cho các coder lane (`commands/code1.md`, `commands/code2.md`, `commands/code3.md`).
 - `checklists/`: Bộ tiêu chuẩn nghiệm thu và phản biện kỹ thuật.
 - `rules/`: Quy tắc bất biến bắt buộc phải tuân thủ (kiến trúc, boundaries, security, UI/UX, service sovereignty).
-- `skills/`: Hướng dẫn công nghệ chuyên sâu và kỹ năng thực thi (`code1`, `code2`, `critical-review`, v.v.).
+- `skills/`: Hướng dẫn công nghệ chuyên sâu và kỹ năng thực thi (`code1`, `code2`, `code3`, `critical-review`, v.v.).
 - `architecture/`: Bản đồ các services, dependencies, workflow flow và source of truth.
-- `execution_logs/`: Nhật ký thực thi theo từng lane (`code1.md`, `code2.md`).
+- `execution_logs/`: Nhật ký thực thi theo từng lane (`code1.md`, `code2.md`, `code3.md`).
 
 ---
 
@@ -30,16 +30,16 @@ File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhấ
 
 ## 3. Quy trình thực thi theo từng lệnh (End-to-End & Tuân thủ SDLC nghiêm ngặt)
 
-Mỗi lệnh (`/code1 <prompt>` hoặc `/code2 <prompt>`) là một **quy trình thực thi độc lập, trọn vẹn từ đầu đến cuối (Full End-to-End SDLC)**. Không có chuyện lập kế hoạch chung rồi đến bước code mới chẻ nhánh.
+Mỗi lệnh (`/code1 <prompt>`, `/code2 <prompt>` hoặc `/code3 <prompt>`) là một **quy trình thực thi độc lập, trọn vẹn từ đầu đến cuối (Full End-to-End SDLC)**. Không có chuyện lập kế hoạch chung rồi đến bước code mới chẻ nhánh.
 
 ### Mục đích phân tách & Quyền quyết định của người dùng:
-- **Tuân thủ kỹ năng & quy chuẩn như nhau (Uniform Skills & Rules Compliance):** Cả Code 1 và Code 2 đều có quyền hạn, trách nhiệm và phải tuân thủ 100% các kỹ năng (`.agents/skills/`) cùng 7 Bộ ràng buộc kỹ thuật như nhau. Không có con agent nào bị giới hạn hay phân biệt kỹ năng.
-- **Người dùng toàn quyền chỉ định (User-Determined Lane Routing):** Chỉ dựa vào yêu cầu công việc thực tế, người dùng tự quyết định dùng con nào (`/code1 <prompt>` hay `/code2 <prompt>`) để chạy prompt xử lý tương ứng.
-- **Cách ly phạm vi để chống trùng đè code (Code Conflict Isolation):** Mục đích duy nhất của việc phân tách 2 lane là để khi người dùng cần chạy các tác vụ độc lập, mỗi bên khóa chặt tập file riêng biệt, tuyệt đối không dẫm chân lên nhau.
-- **Không phân chia Backend / Frontend:** Cả Code 1 và Code 2 đều là Coder toàn diện (Full-stack), có đầy đủ năng lực thực hiện trọn gói mọi bước từ khảo sát, giải pháp kiến trúc, triển khai mã nguồn đến kiểm chứng.
+- **Tuân thủ kỹ năng & quy chuẩn như nhau (Uniform Skills & Rules Compliance):** Cả Code 1, Code 2 và Code 3 đều có quyền hạn, trách nhiệm và phải tuân thủ 100% các kỹ năng (`.agents/skills/`) cùng 7 Bộ ràng buộc kỹ thuật như nhau. Không có con agent nào bị giới hạn hay phân biệt kỹ năng.
+- **Người dùng toàn quyền chỉ định (User-Determined Lane Routing):** Chỉ dựa vào yêu cầu công việc thực tế, người dùng tự quyết định dùng con nào (`/code1 <prompt>`, `/code2 <prompt>` hay `/code3 <prompt>`) để chạy prompt xử lý tương ứng.
+- **Cách ly phạm vi để chống trùng đè code (Code Conflict Isolation):** Mục đích của các lane là cho phép người dùng chạy tác vụ độc lập; mỗi lane khóa chặt tập file riêng biệt và tuyệt đối không dẫm chân lên lane khác.
+- **Không phân chia Backend / Frontend:** Cả Code 1, Code 2 và Code 3 đều là Coder toàn diện (Full-stack), có đầy đủ năng lực thực hiện trọn gói mọi bước từ khảo sát, giải pháp kiến trúc, triển khai mã nguồn đến kiểm chứng.
 
 ```
-[User gọi /code1 <prompt> hoặc /code2 <prompt>]
+[User gọi /code1 <prompt>, /code2 <prompt> hoặc /code3 <prompt>]
       │
       ▼
 [Autonomous End-to-End SDLC Lane]
@@ -81,7 +81,7 @@ Mỗi lệnh (`/code1 <prompt>` hoặc `/code2 <prompt>`) là một **quy trình
 
 ### Bước 6: Dọn rác & Báo cáo Kết quả (Cleanup & Audit Gate)
 - Dọn sạch 100% debug logs (`console.log`, `debugger`), imports dư thừa, biến không dùng, file tạm.
-- Ghi nhận tóm tắt kết quả vào execution log tương ứng ([`.agents/execution_logs/code1.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code1.md) hoặc [`.agents/execution_logs/code2.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code2.md)).
+- Ghi nhận tóm tắt kết quả vào execution log tương ứng ([`.agents/execution_logs/code1.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code1.md) hoặc [`.agents/execution_logs/code2.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code2.md) hoặc [`.agents/execution_logs/code3.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code3.md)).
 - Xuất Báo cáo Thực thi đầy đủ theo đúng mẫu quy chuẩn.
 
 ---
@@ -164,4 +164,4 @@ Kết thúc bất kỳ tác vụ nào, agent xuất báo cáo nghiệm thu theo 
 ---
 
 ## 6. Quản lý Tri thức (Execution Log)
-Mỗi coder ghi nhật ký riêng: Code 1 append `.agents/execution_logs/code1.md`, Code 2 append `.agents/execution_logs/code2.md`. Ghi nhận ngắn gọn ngày, tên tác vụ/tính năng, danh sách file đã sửa và bằng chứng lệnh kiểm chứng thực tế đã chạy.
+Mỗi coder ghi nhật ký riêng: Code 1 append `.agents/execution_logs/code1.md`, Code 2 append `.agents/execution_logs/code2.md`, Code 3 append `.agents/execution_logs/code3.md`. Ghi nhận ngắn gọn ngày, tên tác vụ/tính năng, danh sách file đã sửa và bằng chứng lệnh kiểm chứng thực tế đã chạy.

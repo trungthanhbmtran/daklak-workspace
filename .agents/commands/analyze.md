@@ -19,6 +19,6 @@ Build the evidence base for the plan. Preserve existing user work and do not edi
 
 ## Output
 
-Write a concise context digest in .agents/current_plan.md for Codex plan critique and the applicable Code 1 and/or Code 2 coder. Include the likely file ownership boundaries and any risks that block safe parallel work. Write a decision record under .agents/reports/<task-id>/codex-orchestrator.md using .agents/templates/decision-record.md.
+Write a concise context digest in .agents/current_plan.md for Codex plan critique and the applicable Code 1, Code 2, and/or Code 3 coder. Include the likely file ownership boundaries and any risks that block safe parallel work. Write a decision record under .agents/reports/<task-id>/codex-orchestrator.md using .agents/templates/decision-record.md.
 
 Do not include private chain-of-thought, credentials, internal tokens, or security bypass values in the report.

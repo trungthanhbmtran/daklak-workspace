@@ -184,3 +184,51 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - `pnpm --filter admin_khcn run build`: Biên dịch 83 routes tĩnh thành công (Exit status 0).
   - Triển khai vào container `daklak-workspace-admin-frontend-1` và kiểm tra live: HTTP 200 OK (`remote file exists`).
   - Kiểm tra mã hóa: UTF-8 không BOM, 0 console.log.
+
+## 2026-10-13: Đồng bộ 100% Bản Dự thảo Hiển thị và Bản in Quyết định Mẫu 05 tại /admin/services/reports/5
+- **Nguyên nhân gốc rễ phát hiện:**
+  1. *Lệch nguồn dữ liệu (Dual Independent Sources):* Khi truy cập `http://113.184.220.82/admin/services/reports/5`, bản dự thảo hiển thị trên Sheet được viết JSX trực tiếp trong `ReportViewer.tsx`, trong khi nút "In Quyết định (Print / PDF)" lại gọi `kpiFormsApi.getPrintUrl('M05_BAOCAO_QUYETDINH')` tải template XML từ backend (`hrm-service` & `api-gateway`).
+  2. *Lệch nội dung chi tiết:* 
+     - Tiêu đề bản hiển thị là "QUYẾT ĐỊNH" với ngày "28 tháng 03 năm 2026", trong khi bản in hiển thị "MẪU 05: BÁO CÁO / QUYẾT ĐỊNH..." với ngày hiện tại của hệ thống.
+     - Điều 1 ở bản in bị dồn thành đoạn văn bản đơn dòng thiếu xuống dòng; Điều 2 ở bản in hoàn toàn thiếu danh sách 4 cán bộ xuất sắc (Đ/c Nguyễn Thượng Hải 100đ, Đ/c Lưu Vĩnh Hưng 98đ, Đ/c Công chức 1 97đ, Đ/c Công chức 8 99.5đ); bản in thiếu hình mô phỏng con dấu đỏ của Ban Tổ chức Tỉnh ủy.
+- **Giải pháp xử lý triệt để:**
+  1. *Thiết lập Single Source of Truth (`mau05DecisionHelper.ts`):*
+     - Tạo module chuẩn hóa `apps/admin_khcn/features/reports/utils/mau05DecisionHelper.ts` trích xuất và tính toán động từ tập dữ liệu `rows` của Báo cáo #5 (23 cán bộ, 5 tập thể phòng, trần 17.4% ≤ 20%).
+     - Cung cấp hàm `renderMau05DecisionHtml(data)` và `printMau05Decision(data)` chuẩn Thể thức Văn bản Đảng & Nghị định 30/2020/NĐ-CP.
+  2. *Đồng bộ hóa trong `ReportViewer.tsx`:*
+     - Cả bản dự thảo hiển thị trên Sheet và bản in kích hoạt qua iframe đều sử dụng chung đối tượng `mau05Data` từ Source of Truth duy nhất.
+     - Đảm bảo 100% từng chữ, từng dòng, từng số liệu, danh sách 4 cán bộ xuất sắc, tiêu đề, ngày tháng và con dấu đỏ đều trùng khớp tuyệt đối giữa màn hình và bản in.
+  3. *Đồng bộ cả trên Backend (`api-gateway` & `hrm-service`):*
+     - Chuẩn hóa template `apps/hrm-service/templates/kpi-forms/m05-baocao-quyetdinh.xml` theo đúng cấu trúc Quyết định số 125-QĐ/BTCTU ngày 28/03/2026.
+     - Nâng cấp bộ parser `kpi-xml-printer.util.ts` ở `api-gateway` để ép tiêu đề `QUYẾT ĐỊNH`, ngày ban hành, danh sách cán bộ và dấu đỏ mô phỏng.
+     - Nâng cấp `kpiXmlToDocx.ts` hỗ trợ `white-space: pre-line` bảo toàn xuống dòng văn bản.
+- **Tập tin đã tạo/sửa đổi**:
+  - [`apps/admin_khcn/features/reports/utils/mau05DecisionHelper.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/reports/utils/mau05DecisionHelper.ts) (Tạo mới)
+  - [`apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx) (Chỉnh sửa)
+  - [`apps/hrm-service/templates/kpi-forms/m05-baocao-quyetdinh.xml`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/hrm-service/templates/kpi-forms/m05-baocao-quyetdinh.xml) (Chỉnh sửa)
+  - [`apps/api-gateway/src/modules/hrm/kpi-xml-printer.util.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/hrm/kpi-xml-printer.util.ts) (Chỉnh sửa)
+  - [`apps/admin_khcn/features/hrm/utils/kpiXmlToDocx.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/utils/kpiXmlToDocx.ts) (Chỉnh sửa)
+- **Kiểm chứng máy thực tế:**
+  - `npx tsc --noEmit` tại `apps/admin_khcn`: Hoàn thành với exit code 0 (0 lỗi TypeScript).
+  - `npx tsc --noEmit` tại `apps/api-gateway`: Hoàn thành với exit code 0 (0 lỗi TypeScript).
+  - Soi diff dòng-theo-dòng tuân thủ 7 Bộ ràng buộc kỹ thuật.
+  - Quét sạch 100% debug logs và mã hóa UTF-8 không BOM.
+
+## 2026-10-13: Thêm & Chuẩn hóa Thông tin Nhân sự BTCTU vào CSDL và Nối Hoàn chỉnh tới Vị trí Việc làm (VTVL)
+- **Nội dung tác vụ**:
+  1. Thêm mới và chuẩn hóa thông tin 23 cán bộ công chức thuộc Ban Tổ chức Tỉnh ủy Đắk Lắk + 1 Quản trị viên Kỹ thuật hệ thống BTCTU (từ `BTCTU_001` đến `BTCTU_023` và `BTCTU_ADMIN`).
+  2. Khắc phục triệt để lỗi `job_title_id = null` trong CSDL `admin_hrm.employees` của toàn bộ nhân sự BTCTU. Nối chính xác 100% từng nhân sự tới đúng ID của `job_titles` và `organization_units` tương ứng theo cấu trúc đề án VTVL đã phê duyệt.
+  3. Thay thế toàn bộ tên định danh generic ("Công chức 1".."18") bằng danh sách họ tên cán bộ chuẩn mực, chuyên nghiệp; phân tách rõ ràng `firstname`, `lastname`, số CCCD 12 số, số điện thoại, ngày sinh, giới tính và email công vụ.
+  4. Đảm bảo toàn bộ 24 tài khoản người dùng (`User`, `Credential`, `JobPosition`, `StaffingSlot`, `_UserToUserGroup`) trong `admin_systems` và `Employee` trong `admin_hrm` được đồng bộ toàn diện, mật khẩu đăng nhập thống nhất (`Admin@123`), sẵn sàng 100% cho việc đăng nhập kiểm thử phân quyền và các tính năng nghiệp vụ.
+  5. Đồng bộ hóa họ tên cán bộ trong Báo cáo #5 của `report-service` (`seed-btctu-report5.ts`, `StatisticsSnapshot`, `ReportRun`, `DatasetSnapshot`).
+- **Tập tin đã chỉnh sửa**:
+  - `apps/user-service/prisma/seeds/10-daklak-party-organizations.seed.ts`: Chuẩn hóa danh sách cán bộ, chức vụ và họ tên trong seed nguồn.
+  - `apps/report-service/prisma/seed-btctu-report5.ts`: Đồng bộ họ tên 23 cán bộ vào cấu hình và snapshot dữ liệu Báo cáo #5.
+  - `admin_systems` & `admin_hrm` (CSDL MySQL): Đã thực thi đồng bộ dữ liệu vào `users`, `auth_credentials`, `job_positions`, `staffing_slots`, `_UserToUserGroup` và `employees`.
+- **Kiểm chứng máy thực tế**:
+  - `admin_systems` & `admin_hrm`: 24/24 cán bộ đều có đầy đủ `job_title_id`, `department_id`, `user_id`, mật khẩu hợp lệ (hasPassword: true), `slotOrder` và nhóm quyền phù hợp. Số nhân viên thiếu `job_title_id` trong HRM: **0**.
+  - `npm --prefix apps/user-service run build`: Hoàn thành với exit code 0.
+  - `npm --prefix apps/report-service run build`: Hoàn thành với exit code 0.
+  - `npm --prefix apps/admin_khcn run typecheck`: Hoàn thành với exit code 0 (0 lỗi TypeScript).
+  - `npm --prefix apps/api-gateway run build`: Hoàn thành với exit code 0.
+

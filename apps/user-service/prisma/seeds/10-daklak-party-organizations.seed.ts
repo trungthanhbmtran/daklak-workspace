@@ -692,30 +692,30 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
     { email: 'phoban4@daklak.gov.vn', username: 'phoban4', fullName: 'Y Nhuân Byă', employeeCode: 'BTCTU_005', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 4, roleGroup: 'BTCTU_LANH_DAO_BAN' },
 
     // Phòng TCĐ-ĐV
-    { email: 'tcd_tp@daklak.gov.vn', username: 'tcd_tp', fullName: 'Công chức 1', employeeCode: 'BTCTU_006', jobCode: 'R_P_TCD_DV_TP', orgCode: 'P_TCD_DV', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tcd_ptp1@daklak.gov.vn', username: 'tcd_ptp1', fullName: 'Công chức 2', employeeCode: 'BTCTU_007', jobCode: 'R_P_TCD_DV_PTP1', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tcd_ptp2@daklak.gov.vn', username: 'tcd_ptp2', fullName: 'Công chức 3', employeeCode: 'BTCTU_008', jobCode: 'R_P_TCD_DV_PTP2', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tcd_cv@daklak.gov.vn', username: 'tcd_cv', fullName: 'Công chức 4', employeeCode: 'BTCTU_009', jobCode: 'R_P_TCD_DV_CV', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CV_TCD_DV' },
+    { email: 'tcd_tp@daklak.gov.vn', username: 'tcd_tp', fullName: 'Lê Đình Hoàng', employeeCode: 'BTCTU_006', jobCode: 'R_P_TCD_DV_TP', orgCode: 'P_TCD_DV', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'tcd_ptp1@daklak.gov.vn', username: 'tcd_ptp1', fullName: 'Phạm Văn Minh', employeeCode: 'BTCTU_007', jobCode: 'R_P_TCD_DV_PTP1', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'tcd_ptp2@daklak.gov.vn', username: 'tcd_ptp2', fullName: 'Vũ Thị Mai', employeeCode: 'BTCTU_008', jobCode: 'R_P_TCD_DV_PTP2', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'tcd_cv@daklak.gov.vn', username: 'tcd_cv', fullName: 'Đặng Quang Huy', employeeCode: 'BTCTU_009', jobCode: 'R_P_TCD_DV_CV', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CV_TCD_DV' },
 
     // Phòng TCCB
-    { email: 'tccb_tp@daklak.gov.vn', username: 'tccb_tp', fullName: 'Công chức 5', employeeCode: 'BTCTU_010', jobCode: 'R_P_TCCB_TP', orgCode: 'P_TCCB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tccb_ptp1@daklak.gov.vn', username: 'tccb_ptp1', fullName: 'Công chức 6', employeeCode: 'BTCTU_011', jobCode: 'R_P_TCCB_PTP1', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tccb_ptp2@daklak.gov.vn', username: 'tccb_ptp2', fullName: 'Công chức 7', employeeCode: 'BTCTU_012', jobCode: 'R_P_TCCB_PTP2', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tccb_cv@daklak.gov.vn', username: 'tccb_cv', fullName: 'Công chức 8', employeeCode: 'BTCTU_013', jobCode: 'R_P_TCCB_CV', orgCode: 'P_TCCB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CV_TCCB' },
+    { email: 'tccb_tp@daklak.gov.vn', username: 'tccb_tp', fullName: 'Hoàng Đức Nam', employeeCode: 'BTCTU_010', jobCode: 'R_P_TCCB_TP', orgCode: 'P_TCCB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'tccb_ptp1@daklak.gov.vn', username: 'tccb_ptp1', fullName: 'Trần Quốc Tuấn', employeeCode: 'BTCTU_011', jobCode: 'R_P_TCCB_PTP1', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'tccb_ptp2@daklak.gov.vn', username: 'tccb_ptp2', fullName: 'Bùi Thị Bích Ngọc', employeeCode: 'BTCTU_012', jobCode: 'R_P_TCCB_PTP2', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'tccb_cv@daklak.gov.vn', username: 'tccb_cv', fullName: 'Nguyễn Tiến Đạt', employeeCode: 'BTCTU_013', jobCode: 'R_P_TCCB_CV', orgCode: 'P_TCCB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CV_TCCB' },
 
     // Phòng BVCTNB
-    { email: 'bvctnb_tp@daklak.gov.vn', username: 'bvctnb_tp', fullName: 'Công chức 9', employeeCode: 'BTCTU_014', jobCode: 'R_P_BVCTNB_TP', orgCode: 'P_BVCTNB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'bvctnb_ptp1@daklak.gov.vn', username: 'bvctnb_ptp1', fullName: 'Công chức 10', employeeCode: 'BTCTU_015', jobCode: 'R_P_BVCTNB_PTP1', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'bvctnb_ptp2@daklak.gov.vn', username: 'bvctnb_ptp2', fullName: 'Công chức 11', employeeCode: 'BTCTU_016', jobCode: 'R_P_BVCTNB_PTP2', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'bvctnb_cv@daklak.gov.vn', username: 'bvctnb_cv', fullName: 'Công chức 12', employeeCode: 'BTCTU_017', jobCode: 'R_P_BVCTNB_CV', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CB_BVCTNB' },
+    { email: 'bvctnb_tp@daklak.gov.vn', username: 'bvctnb_tp', fullName: 'Ngô Thanh Tùng', employeeCode: 'BTCTU_014', jobCode: 'R_P_BVCTNB_TP', orgCode: 'P_BVCTNB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'bvctnb_ptp1@daklak.gov.vn', username: 'bvctnb_ptp1', fullName: 'Đinh Trọng Hưng', employeeCode: 'BTCTU_015', jobCode: 'R_P_BVCTNB_PTP1', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'bvctnb_ptp2@daklak.gov.vn', username: 'bvctnb_ptp2', fullName: 'Dương Văn Hùng', employeeCode: 'BTCTU_016', jobCode: 'R_P_BVCTNB_PTP2', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'bvctnb_cv@daklak.gov.vn', username: 'bvctnb_cv', fullName: 'Phan Thành Trung', employeeCode: 'BTCTU_017', jobCode: 'R_P_BVCTNB_CV', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CB_BVCTNB' },
 
     // Khối Văn phòng Ban
-    { email: 'vp_cvp@daklak.gov.vn', username: 'vp_cvp', fullName: 'Công chức 13', employeeCode: 'BTCTU_018', jobCode: 'R_VP_CVP', orgCode: 'VAN_PHONG', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'vp_pcvp1@daklak.gov.vn', username: 'vp_pcvp1', fullName: 'Công chức 14', employeeCode: 'BTCTU_019', jobCode: 'R_VP_PCVP1', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'vp_pcvp2@daklak.gov.vn', username: 'vp_pcvp2', fullName: 'Công chức 15', employeeCode: 'BTCTU_020', jobCode: 'R_VP_PCVP2', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'vp_it1@daklak.gov.vn', username: 'vp_it1', fullName: 'Công chức 16', employeeCode: 'BTCTU_021', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_ADMIN_CNTT' },
-    { email: 'vp_it2@daklak.gov.vn', username: 'vp_it2', fullName: 'Công chức 17', employeeCode: 'BTCTU_022', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 2, roleGroup: 'BTCTU_ADMIN_CNTT' },
-    { email: 'vp_nv@daklak.gov.vn', username: 'vp_nv', fullName: 'Công chức 18', employeeCode: 'BTCTU_023', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_VAN_THU' },
+    { email: 'vp_cvp@daklak.gov.vn', username: 'vp_cvp', fullName: 'Chu Văn Kiên', employeeCode: 'BTCTU_018', jobCode: 'R_VP_CVP', orgCode: 'VAN_PHONG', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'vp_pcvp1@daklak.gov.vn', username: 'vp_pcvp1', fullName: 'Nguyễn Hồng Ánh', employeeCode: 'BTCTU_019', jobCode: 'R_VP_PCVP1', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'vp_pcvp2@daklak.gov.vn', username: 'vp_pcvp2', fullName: 'Lương Đình Quý', employeeCode: 'BTCTU_020', jobCode: 'R_VP_PCVP2', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
+    { email: 'vp_it1@daklak.gov.vn', username: 'vp_it1', fullName: 'Trương Minh Cường', employeeCode: 'BTCTU_021', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_ADMIN_CNTT' },
+    { email: 'vp_it2@daklak.gov.vn', username: 'vp_it2', fullName: 'Võ Thành Danh', employeeCode: 'BTCTU_022', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 2, roleGroup: 'BTCTU_ADMIN_CNTT' },
+    { email: 'vp_nv@daklak.gov.vn', username: 'vp_nv', fullName: 'Lê Thu Thảo', employeeCode: 'BTCTU_023', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_VAN_THU' },
 
     // Quản trị viên Hệ thống Ban Tổ chức
     { email: 'admin_btc@daklak.gov.vn', username: 'admin_btc', fullName: 'Quản trị viên Hệ thống BTCTU', employeeCode: 'BTCTU_ADMIN', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'ADMIN_SYSTEM' },

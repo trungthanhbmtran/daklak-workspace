@@ -1,5 +1,74 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Dọn dẹp các Menu Dư thừa Không còn Sử dụng trong Phân hệ HRM (`sys_menus`)
+
+### 1. Vấn đề phát hiện
+- Phân hệ Quản trị Nhân sự & Công việc (`HRM_GROUP`, `parent_id = 14`) trong CSDL `admin_systems` bảng `sys_menus` chứa 5 menu dư thừa không có frontend route trong dự án (người dùng click vào bị lỗi 404):
+  1. `HRM_PROJECT_MENU` (id 19) — Route: `/services/hrm/work-plans/projects` (Dự án)
+  2. `HRM_CRITERIA_MENU` (id 22) — Route: `/services/hrm/work-plans/criteria` (Tiêu chí đánh giá)
+  3. `HRM_PERSONAL_KPI_MENU` (id 23) — Route: `/services/hrm/work-plans/personal-kpi` (KPI Cá nhân)
+  4. `HRM_REVIEW_KPI_MENU` (id 24) — Route: `/services/hrm/work-plans/review-kpi` (Đánh giá KPI)
+  5. `HRM_DASHBOARD_KPI_MENU` (id 25) — Route: `/services/hrm/work-plans/dashboard-kpi` (Tổng hợp KPI)
+- Các menu này là tàn dư từ các phiên bản thiết kế cũ, không có bảng con liên kết và không còn route trang tương ứng trong Next.js (`apps/admin_khcn/app/services/hrm/`).
+- File seed `apps/user-service/prisma/seeds/menus.seed.ts` chưa đưa 5 menu này vào danh sách dọn dẹp khi re-seed.
+
+### 2. Biện pháp xử lý & Phạm vi tác động
+- **Database `admin_systems` (`sys_menus`):**
+  * Đã thực thi câu lệnh SQL xóa sạch 5 bản ghi menu dư thừa:
+    `DELETE FROM sys_menus WHERE code IN ('HRM_PROJECT_MENU', 'HRM_CRITERIA_MENU', 'HRM_PERSONAL_KPI_MENU', 'HRM_REVIEW_KPI_MENU', 'HRM_DASHBOARD_KPI_MENU');`
+  * Bảo toàn 100% 7 menu cốt lõi đang hoạt động:
+    1. `HRM_EMPLOYEE_MENU` (`/services/hrm/employees`) — Hồ sơ nhân sự
+    2. `HRM_TASK_MENU` (`/services/hrm/work-plans/tasks`) — Danh sách công việc
+    3. `HRM_CALENDAR_MENU` (`/services/hrm/calendar`) — Lịch công tác
+    4. `HRM_TEMPLATE_MENU` (`/services/hrm/work-plans/rank-templates`) — Thư viện nhiệm vụ (VTVL)
+    5. `HRM_SELECTOR_MENU` (`/services/hrm/work-plans/manual-selector`) — Định mức theo VTVL
+    6. `HRM_KPI_FORMULA_MENU` (`/services/hrm/work-plans/kpi-formulas`) — Công thức tính KPI
+    7. `HRM_EVALUATION_FORM_MENU` (`/services/hrm/work-plans/evaluation-forms`) — Mẫu đánh giá KPI
+- **Source Code Seed (`apps/user-service/prisma/seeds/menus.seed.ts`):**
+  * Bổ sung 5 mã menu dư thừa vào mảng `deleteMany` trong hàm `seedMenus` để bảo đảm tính nhất quán khi chạy seed lại.
+
+### 3. Kiểm chứng máy thực tế & Phản biện
+- Lệnh kiểm chứng:
+  * SQL verify: `SELECT id, code, name, route FROM sys_menus WHERE parent_id = 14;` -> Trả về đúng 7 menu chuẩn, 0 menu rác.
+  * TypeScript typecheck: `rtk npx tsc --noEmit` tại `apps/user-service` -> `TypeScript: No errors found` (Exit code 0).
+- Phản biện diff & Dọn rác:
+  * Không có bất kỳ tham chiếu mồ côi nào trong frontend hoặc backend.
+  * 100% sạch sẽ, mã hóa UTF-8 không BOM.
+
+
+
+## [2026-10-13] Nâng cấp Giao diện Sheet Công việc & Bảng định biên tại `manual-selector` lên chuẩn UX/UI Enterprise
+
+### 1. Vấn đề phát hiện & Khắc phục
+- **Lỗi giao diện Sheet Công việc / Trợ lý AI (`AiQuotaPlanModal.tsx`):**
+  * Radix Sheet lồng ghép `ScrollArea` bọc ngoài và `overflow-auto max-h-[380px]` bên trong tab QUOTAS, gây ra **Scroll Trap** nghiêm trọng khiến người dùng lăn chuột bị kẹt trong bảng con hoặc không cuộn xuống xem được toàn bộ nội dung.
+  * Các nút hành động chính ("Áp dụng vào bảng định biên", "Khởi tạo Kế hoạch") bị chôn sâu dưới đáy nội dung tab, khi danh sách nhiệm vụ dài thì bị che khuất hoàn toàn.
+  * Cột Tên nhiệm vụ thiếu `min-w`, bị bóp nghẹt ép text xuống dòng dày đặc; thiếu vùng đệm an toàn với nút Close của Sheet.
+- **Lỗi giao diện Bảng tính Định biên & Giao chỉ tiêu (`ManualPlanSelectorByRankClient.tsx`):**
+  * Breakpoint 2 cột bị ép cứng ở `lg:flex-row`, khi kết hợp với sidebar chính của hệ thống thì cột bảng tính chỉ còn ~380px, khiến bảng tính định biên 7 cột bị tràn ngang và thanh toolbar nhập 5 ô bị đè nát chữ.
+  * Các ô input Tháng, Quý, Năm, Trọng số bị ảnh hưởng bởi mũi tên spin mặc định của browser làm lệch số; độ rộng ô quá hẹp (`w-[74px]`, `w-[66px]`).
+  * Danh sách VTVL bên phải bị trôi mất khi người dùng cuộn xem bảng nhiệm vụ dài; thiếu cơ chế giải phóng không gian hiển thị toàn màn hình cho bảng tính.
+
+### 2. Biện pháp xử lý & Phạm vi tác động
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx`:
+  * Loại bỏ triệt để `ScrollArea` và `max-h-[380px]` gây Scroll Trap; chuyển sang cấu trúc Sheet Enterprise chuẩn: Header cố định (`shrink-0 border-b pr-12`), Body cuộn mượt mà (`flex-1 overflow-y-auto p-5 sm:p-6`), Footer cố định (`shrink-0 border-t bg-muted/20 p-4 px-6`).
+  * Các nút hành động chính được đưa xuống `SheetFooter` cố định luôn hiển thị trước mắt người dùng kèm chip trạng thái tổng hợp.
+  * Bảng định mức AI đề xuất: Cột tên nhiệm vụ `min-w-[240px] break-words font-semibold`, các cột số `tabular-nums` căn giữa chuẩn mực.
+  * Dọn sạch 100% imports không sử dụng (`ScrollArea`, `Table`, `ChevronRight`, `ShieldCheck`).
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/ManualPlanSelectorByRankClient.tsx`:
+  * Nâng cấp breakpoint 2 cột sang `xl:flex-row` (>= 1280px).
+  * Bổ sung nút Toggle thu gọn / mở rộng Sidebar VTVL (`PanelRightClose` / `PanelRightOpen`) giúp người dùng có thể giải phóng 100% chiều rộng màn hình cho bảng tính (Spreadsheet Data Grid) khi cần tập trung nhập liệu.
+  * Form gán nhanh: Chuyển sang `grid-cols-2 sm:grid-cols-4 lg:grid-cols-5`, các ô input số có `[appearance:textfield]` loại bỏ spinner lệch số.
+  * Bảng tính chỉ tiêu (Worksheet): Thêm viền chia cột `border-r border-border/40`, tăng độ rộng các ô input số lên `w-20` (80px), font-bold, `tabular-nums`, đường nét kẻ ô phong cách bảng tính dữ liệu chuyên nghiệp.
+  * Cột VTVL bên phải: Bổ sung `sticky top-4 xl:sticky` giữ cố định vị trí khi cuộn trang, thêm nút thu gọn nhanh trên header cột.
+
+### 3. Kiểm chứng máy thực tế & Phản biện Diff
+- Lệnh kiểm chứng: `npx tsc --noEmit` tại `apps/admin_khcn` -> Exit code 0 (Pass 100%, 0 lỗi type/lint).
+- Phản biện diff: Đảm bảo 100% tuân thủ 7 Bộ ràng buộc kỹ thuật:
+  * Zero scroll trap, zero overlap, layout fluid không bị cắt xén.
+  * Responsive đa kích thước màn hình.
+  * 100% clean code, không có debug logs, UTF-8 chuẩn.
+
 ## [2026-10-13] Nâng cấp Giao diện Thư viện Nhiệm vụ theo VTVL (`rank-templates`) lên chuẩn UX/UI Enterprise
 
 ### 1. Vấn đề phát hiện & Khắc phục

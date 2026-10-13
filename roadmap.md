@@ -622,3 +622,11 @@ eport-service v?i pi-management.
 - **Kiểm chứng cấu hình**: PowerShell assertions PASS cho mapping, PLAN_APPROVED gate, tách log, profile đồng bộ, dispatcher, gitignore và UTF-8 không BOM; `git diff --check` PASS.
 - **Runner**: chưa dispatch. Orchestrator từ chối tạo worktree do checkout đang có thay đổi HRM/proto chưa commit. Đã lưu prompts sẵn chạy riêng trong `.agents/reports/20261013-independent-code-lanes/`; không tuyên bố hai agent đã chạy.
 
+
+## Agent Workflow: Bổ sung Code 3 độc lập (13/10/2026)
+
+- [x] Thêm command `/code3 <prompt>` và skill Code 3 theo cùng quy trình full-stack end-to-end, 6 bước và 7 bộ ràng buộc như Code 1/2.
+- [x] Tách nhật ký append-only tại `.agents/execution_logs/code3.md` và decision record tại `.agents/reports/<task-id>/code3.md`; chặn việc ghi chéo log và file điều phối.
+- [x] Đồng bộ `analyze.md`, `plan.md`, dispatcher `implement.md`, charter `.agents/AGENTS.md`, hướng dẫn execution log và ngoại lệ `.gitignore`.
+- [x] Theo charter hiện hành, Code 1, Code 2 và Code 3 đều là lane full-stack độc lập; các nhãn Backend/Frontend ở mục lịch sử phía trên không còn là quy tắc định tuyến.
+- **Kiểm chứng**: PowerShell assertions PASS cho trigger, 6 bước, full-stack scope, log/report isolation, routing, ignore rules và UTF-8 không BOM; `git diff --check` PASS.

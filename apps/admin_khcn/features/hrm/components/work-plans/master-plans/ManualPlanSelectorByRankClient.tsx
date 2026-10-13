@@ -22,6 +22,9 @@ import {
   X,
   RotateCcw,
   Info,
+  PanelRightClose,
+  PanelRightOpen,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { hrmRankQuotasApi, type AiSuggestedQuotaItem } from '@/features/hrm/api/rank-quotas.api';
@@ -158,6 +161,7 @@ export function ManualPlanSelectorByRankClient() {
     const [yearlyTarget, setYearlyTarget] = useState<number>(12);
     const [weight, setWeight] = useState<number>(10);
     const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+    const [isVtvlSidebarOpen, setIsVtvlSidebarOpen] = useState<boolean>(true);
     
     // Tìm kiếm trong danh sách VTVL & tìm trong bảng
     const [searchRankText, setSearchRankText] = useState<string>('');
@@ -617,7 +621,7 @@ export function ManualPlanSelectorByRankClient() {
                 </Card>
 
                 {/* MAIN CONTENT WORKSPACE: CỘT TRÁI (BẢNG ĐỊNH BIÊN) & CỘT PHẢI (DANH SÁCH VTVL) */}
-                <div className="flex flex-col lg:flex-row gap-4 min-w-0 items-start">
+                <div className="flex flex-col xl:flex-row gap-4 min-w-0 items-start">
                     {/* CỘT TRÁI: KHU VỰC THIẾT LẬP CHỈ TIÊU & BẢNG ĐỊNH BIÊN */}
                     <div className="flex-1 min-w-0 w-full flex flex-col bg-card rounded-2xl border shadow-xs">
                         {/* THANH THÔNG TIN VỊ TRÍ ĐANG CHỌN & LĨNH VỰC */}
@@ -642,20 +646,43 @@ export function ManualPlanSelectorByRankClient() {
                                 </div>
                             </div>
 
-                            {/* SELECT LĨNH VỰC CHUYÊN MÔN */}
-                            <div className="w-full sm:w-[260px] md:w-[300px] shrink-0 min-w-0">
-                                <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
-                                    <SelectTrigger className="h-9 rounded-xl bg-background border-input shadow-xs text-xs">
-                                        <SelectValue placeholder="Chọn mảng nghiệp vụ..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {DOMAINS.map(domain => (
-                                            <SelectItem key={domain.code} value={domain.code} className="cursor-pointer text-xs">
-                                                {domain.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            {/* CỤM SELECT LĨNH VỰC & NÚT TOGGLE CỘT VTVL */}
+                            <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 min-w-0">
+                                <div className="w-full sm:w-[240px] md:w-[280px] shrink-0 min-w-0">
+                                    <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
+                                        <SelectTrigger className="h-9 rounded-xl bg-background border-input shadow-xs text-xs">
+                                            <SelectValue placeholder="Chọn mảng nghiệp vụ..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {DOMAINS.map(domain => (
+                                                <SelectItem key={domain.code} value={domain.code} className="cursor-pointer text-xs">
+                                                    {domain.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsVtvlSidebarOpen(!isVtvlSidebarOpen)}
+                                    className="h-9 px-3 rounded-xl gap-1.5 text-xs shrink-0 hidden xl:flex hover:bg-muted"
+                                    title={isVtvlSidebarOpen ? "Thu gọn danh sách VTVL để mở rộng bảng tính tối đa" : "Hiện lại danh sách VTVL"}
+                                >
+                                    {isVtvlSidebarOpen ? (
+                                        <>
+                                            <PanelRightClose className="w-3.5 h-3.5 text-primary" />
+                                            <span className="font-semibold">Mở rộng bảng</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PanelRightOpen className="w-3.5 h-3.5 text-primary" />
+                                            <span className="font-semibold">Hiện VTVL ({filteredRanksList.length})</span>
+                                        </>
+                                    )}
+                                </Button>
                             </div>
                         </div>
 
@@ -756,7 +783,7 @@ export function ManualPlanSelectorByRankClient() {
                             </div>
 
                             {/* HÀNG 2: 4 CHỈ TIÊU (THÁNG, QUÝ, NĂM, TRỌNG SỐ) & NÚT THÊM - ĐẦY ĐỦ RỘNG RÃI */}
-                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 items-end min-w-0 pt-1">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 items-end min-w-0 pt-1">
                                 {/* CHỈ TIÊU THÁNG */}
                                 <div className="space-y-1 min-w-0">
                                     <Label className="text-[11px] text-muted-foreground font-semibold flex items-center justify-between">
@@ -771,7 +798,7 @@ export function ManualPlanSelectorByRankClient() {
                                         step={0.5}
                                         value={monthlyTarget}
                                         onChange={e => handleMonthlyTargetChange(Number(e.target.value))}
-                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-blue-600 dark:text-blue-400 tabular-nums shadow-xs"
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-blue-600 dark:text-blue-400 tabular-nums shadow-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />
                                 </div>
 
@@ -789,7 +816,7 @@ export function ManualPlanSelectorByRankClient() {
                                         step={0.5}
                                         value={quarterlyTarget}
                                         onChange={e => setQuarterlyTarget(Math.max(0.1, Number(e.target.value)))}
-                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-amber-600 dark:text-amber-400 tabular-nums shadow-xs"
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-amber-600 dark:text-amber-400 tabular-nums shadow-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />
                                 </div>
 
@@ -807,7 +834,7 @@ export function ManualPlanSelectorByRankClient() {
                                         step={1}
                                         value={yearlyTarget}
                                         onChange={e => setYearlyTarget(Math.max(0.1, Number(e.target.value)))}
-                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-emerald-600 dark:text-emerald-400 tabular-nums shadow-xs"
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-emerald-600 dark:text-emerald-400 tabular-nums shadow-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />
                                 </div>
 
@@ -825,12 +852,12 @@ export function ManualPlanSelectorByRankClient() {
                                         step={1}
                                         value={weight}
                                         onChange={e => setWeight(Math.max(0.1, Number(e.target.value)))}
-                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-purple-700 dark:text-purple-400 tabular-nums shadow-xs"
+                                        className="h-10 rounded-xl text-center font-bold text-sm bg-background border-input text-purple-700 dark:text-purple-400 tabular-nums shadow-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />
                                 </div>
 
                                 {/* NÚT THÊM VÀO BẢNG */}
-                                <div className="col-span-2 sm:col-span-1 min-w-0">
+                                <div className="col-span-2 sm:col-span-4 lg:col-span-1 min-w-0">
                                     <Button
                                         onClick={handleAssignTask}
                                         disabled={taskInputMode === 'TEMPLATE' ? !selectedTaskId : !customTaskName.trim()}
@@ -924,44 +951,44 @@ export function ManualPlanSelectorByRankClient() {
                         </div>
 
                         {/* BẢNG CHỈ TIÊU: CUỘN MƯỢT CẢ DỌC VÀ NGANG, KHÔNG BAO GIỜ BỊ ĐÈ NÉT */}
-                        <div className="w-full overflow-auto max-h-[540px] min-h-[300px] border-b relative bg-background">
+                        <div className="w-full overflow-auto max-h-[580px] min-h-[300px] border-b relative bg-background">
                             <table className="w-full min-w-[860px] border-collapse text-xs">
                                 <thead className="sticky top-0 z-20 bg-muted/95 backdrop-blur-md border-b shadow-2xs">
                                     <tr>
-                                        <th className="w-[48px] min-w-[48px] py-3 text-center font-bold text-muted-foreground">STT</th>
-                                        <th className="min-w-[280px] py-3 px-3 text-left font-bold text-muted-foreground">Tên nhiệm vụ định biên bắt buộc</th>
-                                        <th className="w-[85px] min-w-[85px] py-3 text-center font-bold text-muted-foreground">Đơn vị</th>
-                                        <th className="w-[110px] min-w-[110px] py-3 text-center font-bold text-blue-600 dark:text-blue-400">Chỉ tiêu Tháng</th>
-                                        <th className="w-[110px] min-w-[110px] py-3 text-center font-bold text-amber-600 dark:text-amber-400">Chỉ tiêu Quý</th>
-                                        <th className="w-[115px] min-w-[115px] py-3 text-center font-bold text-emerald-600 dark:text-emerald-400">Chỉ tiêu Năm</th>
-                                        <th className="w-[95px] min-w-[95px] py-3 text-center font-bold text-purple-600 dark:text-purple-400">Trọng số (W%)</th>
+                                        <th className="w-[48px] min-w-[48px] py-3 text-center font-bold text-muted-foreground border-r border-border/40">STT</th>
+                                        <th className="min-w-[280px] py-3 px-3 text-left font-bold text-muted-foreground border-r border-border/40">Tên nhiệm vụ định biên bắt buộc</th>
+                                        <th className="w-[85px] min-w-[85px] py-3 text-center font-bold text-muted-foreground border-r border-border/40">Đơn vị</th>
+                                        <th className="w-[110px] min-w-[110px] py-3 text-center font-bold text-blue-600 dark:text-blue-400 border-r border-border/40">Chỉ tiêu Tháng</th>
+                                        <th className="w-[110px] min-w-[110px] py-3 text-center font-bold text-amber-600 dark:text-amber-400 border-r border-border/40">Chỉ tiêu Quý</th>
+                                        <th className="w-[115px] min-w-[115px] py-3 text-center font-bold text-emerald-600 dark:text-emerald-400 border-r border-border/40">Chỉ tiêu Năm</th>
+                                        <th className="w-[95px] min-w-[95px] py-3 text-center font-bold text-purple-600 dark:text-purple-400 border-r border-border/40">Trọng số (W%)</th>
                                         <th className="w-[50px] min-w-[50px] py-3 text-center font-bold text-muted-foreground">Xóa</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {displayedTablePlans.map((plan, idx) => (
                                         <tr key={plan.id} className="group transition-colors hover:bg-muted/15 border-b">
-                                            <td className="text-center font-bold text-xs text-muted-foreground py-3">
+                                            <td className="text-center font-bold text-xs text-muted-foreground py-3 border-r border-border/30">
                                                 {idx + 1}
                                             </td>
-                                            <td className="py-3 px-3 min-w-0">
+                                            <td className="py-3 px-3 min-w-0 border-r border-border/30">
                                                 <div className="min-w-0">
-                                                    <p className="text-xs sm:text-sm font-medium text-foreground leading-relaxed break-words">
+                                                    <p className="text-xs sm:text-sm font-semibold text-foreground leading-relaxed break-words">
                                                         {plan.title}
                                                     </p>
-                                                    <span className="text-[11px] text-muted-foreground font-mono">
+                                                    <span className="text-[11px] text-muted-foreground font-mono mt-0.5 block">
                                                         {plan.rankType}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="text-center text-xs text-muted-foreground py-3">
+                                            <td className="text-center text-xs text-muted-foreground py-3 border-r border-border/30">
                                                 <Badge variant="outline" className="font-normal text-[11px] px-2 py-0.5 bg-muted/30">
                                                     {plan.unit || 'Lượt'}
                                                 </Badge>
                                             </td>
 
                                             {/* Ô SỬA CHỈ TIÊU THÁNG */}
-                                            <td className="py-3 px-2 text-center">
+                                            <td className="py-3 px-2 text-center border-r border-border/30">
                                                 <Input
                                                     type="number"
                                                     min={0.1}
@@ -970,17 +997,17 @@ export function ManualPlanSelectorByRankClient() {
                                                     onChange={e => {
                                                         const m = Number(e.target.value);
                                                         setAddedPlans(prev => prev.map(p => p.id === plan.id ? {
-                                                            ...p,
-                                                            monthlyTarget: m,
-                                                            targetValue: m,
+                                                             ...p,
+                                                             monthlyTarget: m,
+                                                             targetValue: m,
                                                         } : p));
                                                     }}
-                                                    className="w-[74px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-blue-600 dark:text-blue-400 tabular-nums shadow-2xs"
+                                                    className="w-20 h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-blue-600 dark:text-blue-400 tabular-nums shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 />
                                             </td>
 
                                             {/* Ô SỬA CHỈ TIÊU QUÝ */}
-                                            <td className="py-3 px-2 text-center">
+                                            <td className="py-3 px-2 text-center border-r border-border/30">
                                                 <Input
                                                     type="number"
                                                     min={0.1}
@@ -990,12 +1017,12 @@ export function ManualPlanSelectorByRankClient() {
                                                         const qua = Number(e.target.value);
                                                         setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, quarterlyTarget: qua } : p));
                                                     }}
-                                                    className="w-[74px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-amber-600 dark:text-amber-400 tabular-nums shadow-2xs"
+                                                    className="w-20 h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-amber-600 dark:text-amber-400 tabular-nums shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 />
                                             </td>
 
                                             {/* Ô SỬA CHỈ TIÊU NĂM */}
-                                            <td className="py-3 px-2 text-center">
+                                            <td className="py-3 px-2 text-center border-r border-border/30">
                                                 <Input
                                                     type="number"
                                                     min={0.1}
@@ -1005,12 +1032,12 @@ export function ManualPlanSelectorByRankClient() {
                                                         const y = Number(e.target.value);
                                                         setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, yearlyTarget: y } : p));
                                                     }}
-                                                    className="w-[78px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-emerald-600 dark:text-emerald-400 tabular-nums shadow-2xs"
+                                                    className="w-20 h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-emerald-600 dark:text-emerald-400 tabular-nums shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 />
                                             </td>
 
                                             {/* TRỌNG SỐ */}
-                                            <td className="py-3 px-2 text-center">
+                                            <td className="py-3 px-2 text-center border-r border-border/30">
                                                 <Input
                                                     type="number"
                                                     min={0.1}
@@ -1020,7 +1047,7 @@ export function ManualPlanSelectorByRankClient() {
                                                         const w = Number(e.target.value);
                                                         setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, weight: w } : p));
                                                     }}
-                                                    className="w-[66px] h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-purple-700 dark:text-purple-400 tabular-nums shadow-2xs"
+                                                    className="w-20 h-8 mx-auto text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-purple-700 dark:text-purple-400 tabular-nums shadow-2xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 />
                                             </td>
 
@@ -1100,176 +1127,190 @@ export function ManualPlanSelectorByRankClient() {
                         )}
                     </div>
 
-                    {/* CỘT PHẢI: BỘ LỌC & DANH SÁCH VỊ TRÍ VIỆC LÀM - CUỘN ĐỘC LẬP MƯỢT MÀ */}
-                    <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-3 bg-card text-card-foreground rounded-2xl border p-4 shadow-xs min-w-0">
-                        {/* TABS CHUYỂN ĐỔI NGUỒN VTVL */}
-                        <div className="space-y-2 shrink-0 min-w-0">
-                            <div className="flex items-center justify-between min-w-0">
-                                <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 truncate">
-                                    <Layers className="w-3.5 h-3.5 text-primary shrink-0" />
-                                    Nguồn Vị trí việc làm
-                                </Label>
-                                {unitPositionsList.length > 0 && (
-                                    <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary shrink-0">
-                                        Bộ phận có {unitPositionsList.length} VTVL
-                                    </Badge>
-                                )}
-                            </div>
+                    {/* CỘT PHẢI: BỘ LỌC & DANH SÁCH VỊ TRÍ VIỆC LÀM - ĐÓNG MỞ LINH HOẠT & CUỘN MƯỢT MÀ */}
+                    {isVtvlSidebarOpen && (
+                        <div className="w-full xl:w-[380px] shrink-0 flex flex-col gap-3 bg-card text-card-foreground rounded-2xl border p-4 shadow-xs min-w-0 sticky top-4 xl:sticky animate-in fade-in-50 duration-200">
+                            {/* TABS CHUYỂN ĐỔI NGUỒN VTVL */}
+                            <div className="space-y-2 shrink-0 min-w-0">
+                                <div className="flex items-center justify-between min-w-0">
+                                    <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 truncate">
+                                        <Layers className="w-3.5 h-3.5 text-primary shrink-0" />
+                                        Nguồn Vị trí việc làm
+                                    </Label>
+                                    <div className="flex items-center gap-1">
+                                        {unitPositionsList.length > 0 && (
+                                            <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary shrink-0">
+                                                {unitPositionsList.length} VTVL
+                                            </Badge>
+                                        )}
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setIsVtvlSidebarOpen(false)}
+                                            className="h-6 w-6 text-muted-foreground hover:text-foreground rounded-md hidden xl:flex"
+                                            title="Thu gọn cột danh sách VTVL"
+                                        >
+                                            <PanelRightClose className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </div>
+                                </div>
 
-                            <Tabs value={vtvlViewSource} onValueChange={(val: any) => setVtvlViewSource(val)} className="w-full">
-                                <TabsList className="w-full grid grid-cols-2 p-1 bg-muted rounded-xl h-9">
-                                    <TabsTrigger value="DEPARTMENT" className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-                                        Của bộ phận ({unitPositionsList.length})
-                                    </TabsTrigger>
-                                    <TabsTrigger value="ALL" className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
-                                        Tất cả danh mục chuẩn
-                                    </TabsTrigger>
-                                </TabsList>
-                            </Tabs>
-                        </div>
-
-                        {/* NẾU BỘ PHẬN CHƯA CÓ VỊ TRÍ VIỆC LÀM RIÊNG */}
-                        {vtvlViewSource === 'DEPARTMENT' && unitPositionsList.length === 0 && (
-                            <Alert className="py-2.5 px-3 bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200">
-                                <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                                <AlertTitle className="text-xs font-bold">Chưa có cơ cấu VTVL riêng</AlertTitle>
-                                <AlertDescription className="text-[11px] mt-0.5 leading-relaxed">
-                                    Bộ phận này chưa ban hành định biên vị trí riêng trong CSDL.
-                                    <Button
-                                        variant="link"
-                                        size="sm"
-                                        onClick={() => setVtvlViewSource('ALL')}
-                                        className="h-auto p-0 text-[11px] text-primary font-bold underline ml-1"
-                                    >
-                                        Xem danh mục chuẩn &rarr;
-                                    </Button>
-                                </AlertDescription>
-                            </Alert>
-                        )}
-
-                        {/* NẾU CHỌN TẤT CẢ DANH MỤC CHUẨN: HIỂN THỊ PHÂN LOẠI CÔNG CHỨC / VIÊN CHỨC / KHỐI ĐẢNG */}
-                        {vtvlViewSource === 'ALL' && (
-                            <div className="space-y-2 shrink-0 pt-1 border-t min-w-0">
-                                <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Phân loại ngạch</Label>
-                                <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                                    <TabsList className="w-full grid grid-cols-3 p-1 bg-muted rounded-xl h-8">
-                                        <TabsTrigger value="CONG_CHUC" className="rounded-lg text-[11px]">Công chức</TabsTrigger>
-                                        <TabsTrigger value="VIEN_CHUC" className="rounded-lg text-[11px]">Viên chức</TabsTrigger>
-                                        <TabsTrigger value="DANG" className="rounded-lg text-[11px]">Khối Đảng</TabsTrigger>
+                                <Tabs value={vtvlViewSource} onValueChange={(val: any) => setVtvlViewSource(val)} className="w-full">
+                                    <TabsList className="w-full grid grid-cols-2 p-1 bg-muted rounded-xl h-9">
+                                        <TabsTrigger value="DEPARTMENT" className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                                            Của bộ phận ({unitPositionsList.length})
+                                        </TabsTrigger>
+                                        <TabsTrigger value="ALL" className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                                            Tất cả danh mục chuẩn
+                                        </TabsTrigger>
                                     </TabsList>
                                 </Tabs>
                             </div>
-                        )}
 
-                        {/* LỌC THEO NHÓM NGÀNH / VỊ TRÍ */}
-                        <div className="space-y-1.5 shrink-0 min-w-0">
-                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhóm Ngành / Vị trí</Label>
-                            <Popover open={isGroupOpen} onOpenChange={setIsGroupOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={isGroupOpen}
-                                        className="w-full justify-between h-9 rounded-xl bg-background shadow-xs border-input font-normal text-xs"
-                                    >
-                                        <span className="truncate">{activeGroup === 'ALL' ? 'Tất cả các nhóm' : currentGroups.find(g => g.id === activeGroup)?.name || 'Chọn nhóm ngành...'}</span>
-                                        <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[320px] p-0" align="start">
-                                    <Command>
-                                        <CommandInput placeholder="Tìm nhanh nhóm ngành..." className="h-9 text-xs" />
-                                        <CommandList>
-                                            <CommandEmpty>Không tìm thấy nhóm.</CommandEmpty>
-                                            <CommandGroup>
-                                                {currentGroups.map(group => (
-                                                    <CommandItem
-                                                        key={group.id}
-                                                        value={group.name}
-                                                        onSelect={() => {
-                                                            setActiveGroup(group.id);
-                                                            setIsGroupOpen(false);
-                                                        }}
-                                                        className="text-xs"
-                                                    >
-                                                        {group.name}
-                                                        <Check className={cn("ml-auto h-3.5 w-3.5", activeGroup === group.id ? "opacity-100" : "opacity-0")} />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-
-                        {/* Ô TÌM KIẾM VTVL */}
-                        <div className="relative shrink-0 min-w-0">
-                            <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-muted-foreground" />
-                            <Input 
-                                placeholder="Lọc theo tên VTVL hoặc mã..." 
-                                value={searchRankText}
-                                onChange={e => setSearchRankText(e.target.value)}
-                                className="pl-9 h-9 text-xs rounded-xl border-input bg-muted/20 focus-visible:bg-background"
-                            />
-                        </div>
-
-                        {/* DANH SÁCH CUỘN VTVL ĐỘC LẬP: KHÔNG BỊ TRÓI CHIỀU CAO CỨNG, CUỘN MƯỢT MÀ */}
-                        <div className="flex flex-col min-w-0 space-y-1.5">
-                            <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-1 px-0.5 min-w-0">
-                                <span>Danh sách ({filteredRanksList.length} VTVL)</span>
-                                {isLoadingStaffing && <RefreshCw className="w-3 h-3 animate-spin text-primary shrink-0" />}
-                            </div>
-
-                            <div className="max-h-[580px] min-h-[300px] overflow-y-auto overflow-x-hidden pr-1.5 space-y-2 rounded-xl">
-                                {filteredRanksList.map((rank: any) => {
-                                    const isSelected = activeRankFilter === rank.code;
-                                    return (
-                                        <div
-                                            key={rank.code}
-                                            onClick={() => setActiveRankFilter(rank.code)}
-                                            className={cn(
-                                                "p-3 rounded-xl border cursor-pointer transition-all min-w-0 group",
-                                                isSelected
-                                                    ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary/20 border-l-4 border-l-primary"
-                                                    : "bg-background border-border/70 hover:bg-muted/40 hover:border-primary/40"
-                                            )}
+                            {/* NẾU BỘ PHẬN CHƯA CÓ VỊ TRÍ VIỆC LÀM RIÊNG */}
+                            {vtvlViewSource === 'DEPARTMENT' && unitPositionsList.length === 0 && (
+                                <Alert className="py-2.5 px-3 bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200">
+                                    <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                    <AlertTitle className="text-xs font-bold">Chưa có cơ cấu VTVL riêng</AlertTitle>
+                                    <AlertDescription className="text-[11px] mt-0.5 leading-relaxed">
+                                        Bộ phận này chưa ban hành định biên vị trí riêng trong CSDL.
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            onClick={() => setVtvlViewSource('ALL')}
+                                            className="h-auto p-0 text-[11px] text-primary font-bold underline ml-1"
                                         >
-                                            <div className="flex items-start justify-between gap-2 min-w-0">
-                                                <h4 className={cn(
-                                                    "text-xs sm:text-sm font-semibold leading-relaxed break-words min-w-0",
-                                                    isSelected ? "text-primary" : "text-foreground"
-                                                )}
-                                                title={rank.name}
-                                                >
-                                                    {rank.name}
-                                                </h4>
-                                                {rank.quantity != null && (
-                                                    <Badge variant="outline" className="text-[10px] shrink-0 font-bold bg-muted/50 border-primary/20 text-foreground">
-                                                        {rank.quantity} ĐB
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center justify-between mt-1.5 text-[11px] text-muted-foreground font-mono min-w-0">
-                                                <span className="truncate">{rank.code}</span>
-                                                {rank.currentCount != null && (
-                                                    <span className="font-sans text-[10px] text-muted-foreground shrink-0 font-medium">
-                                                        Có mặt: {rank.currentCount}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                            Xem danh mục chuẩn &rarr;
+                                        </Button>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
 
-                                {filteredRanksList.length === 0 && (
-                                    <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
-                                        Không tìm thấy vị trí việc làm nào phù hợp.
-                                    </div>
-                                )}
+                            {/* NẾU CHỌN TẤT CẢ DANH MỤC CHUẨN: HIỂN THỊ PHÂN LOẠI CÔNG CHỨC / VIÊN CHỨC / KHỐI ĐẢNG */}
+                            {vtvlViewSource === 'ALL' && (
+                                <div className="space-y-2 shrink-0 pt-1 border-t min-w-0">
+                                    <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Phân loại ngạch</Label>
+                                    <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
+                                        <TabsList className="w-full grid grid-cols-3 p-1 bg-muted rounded-xl h-8">
+                                            <TabsTrigger value="CONG_CHUC" className="rounded-lg text-[11px]">Công chức</TabsTrigger>
+                                            <TabsTrigger value="VIEN_CHUC" className="rounded-lg text-[11px]">Viên chức</TabsTrigger>
+                                            <TabsTrigger value="DANG" className="rounded-lg text-[11px]">Khối Đảng</TabsTrigger>
+                                        </TabsList>
+                                    </Tabs>
+                                </div>
+                            )}
+
+                            {/* LỌC THEO NHÓM NGÀNH / VỊ TRÍ */}
+                            <div className="space-y-1.5 shrink-0 min-w-0">
+                                <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhóm Ngành / Vị trí</Label>
+                                <Popover open={isGroupOpen} onOpenChange={setIsGroupOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            aria-expanded={isGroupOpen}
+                                            className="w-full justify-between h-9 rounded-xl bg-background shadow-xs border-input font-normal text-xs"
+                                        >
+                                            <span className="truncate">{activeGroup === 'ALL' ? 'Tất cả các nhóm' : currentGroups.find(g => g.id === activeGroup)?.name || 'Chọn nhóm ngành...'}</span>
+                                            <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[320px] p-0" align="start">
+                                        <Command>
+                                            <CommandInput placeholder="Tìm nhanh nhóm ngành..." className="h-9 text-xs" />
+                                            <CommandList>
+                                                <CommandEmpty>Không tìm thấy nhóm.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {currentGroups.map(group => (
+                                                        <CommandItem
+                                                            key={group.id}
+                                                            value={group.name}
+                                                            onSelect={() => {
+                                                                setActiveGroup(group.id);
+                                                                setIsGroupOpen(false);
+                                                            }}
+                                                            className="text-xs"
+                                                        >
+                                                            {group.name}
+                                                            <Check className={cn("ml-auto h-3.5 w-3.5", activeGroup === group.id ? "opacity-100" : "opacity-0")} />
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+
+                            {/* Ô TÌM KIẾM VTVL */}
+                            <div className="relative shrink-0 min-w-0">
+                                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Lọc theo tên VTVL hoặc mã..." 
+                                    value={searchRankText}
+                                    onChange={e => setSearchRankText(e.target.value)}
+                                    className="pl-9 h-9 text-xs rounded-xl border-input bg-muted/20 focus-visible:bg-background"
+                                />
+                            </div>
+
+                            {/* DANH SÁCH CUỘN VTVL ĐỘC LẬP: KHÔNG BỊ TRÓI CHIỀU CAO CỨNG, CUỘN MƯỢT MÀ */}
+                            <div className="flex flex-col min-w-0 space-y-1.5">
+                                <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-1 px-0.5 min-w-0">
+                                    <span>Danh sách ({filteredRanksList.length} VTVL)</span>
+                                    {isLoadingStaffing && <RefreshCw className="w-3 h-3 animate-spin text-primary shrink-0" />}
+                                </div>
+
+                                <div className="max-h-[580px] min-h-[300px] overflow-y-auto overflow-x-hidden pr-1.5 space-y-2 rounded-xl">
+                                    {filteredRanksList.map((rank: any) => {
+                                        const isSelected = activeRankFilter === rank.code;
+                                        return (
+                                            <div
+                                                key={rank.code}
+                                                onClick={() => setActiveRankFilter(rank.code)}
+                                                className={cn(
+                                                    "p-3 rounded-xl border cursor-pointer transition-all min-w-0 group",
+                                                    isSelected
+                                                        ? "bg-primary/10 border-primary shadow-xs ring-1 ring-primary/20 border-l-4 border-l-primary"
+                                                        : "bg-background border-border/70 hover:bg-muted/40 hover:border-primary/40"
+                                                )}
+                                            >
+                                                <div className="flex items-start justify-between gap-2 min-w-0">
+                                                    <h4 className={cn(
+                                                        "text-xs sm:text-sm font-semibold leading-relaxed break-words min-w-0",
+                                                        isSelected ? "text-primary" : "text-foreground"
+                                                    )}
+                                                    title={rank.name}
+                                                    >
+                                                        {rank.name}
+                                                    </h4>
+                                                    {rank.quantity != null && (
+                                                        <Badge variant="outline" className="text-[10px] shrink-0 font-bold bg-muted/50 border-primary/20 text-foreground">
+                                                            {rank.quantity} ĐB
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between mt-1.5 text-[11px] text-muted-foreground font-mono min-w-0">
+                                                    <span className="truncate">{rank.code}</span>
+                                                    {rank.currentCount != null && (
+                                                        <span className="font-sans text-[10px] text-muted-foreground shrink-0 font-medium">
+                                                            Có mặt: {rank.currentCount}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+
+                                    {filteredRanksList.length === 0 && (
+                                        <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                                            Không tìm thấy vị trí việc làm nào phù hợp.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* ACTION FOOTER BAR: DOCK STICKY SANG TRỌNG TIỆN LỢI */}

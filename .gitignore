@@ -87,6 +87,7 @@ docs/*
 !docs/rebuild api manager/
 !.agents/commands/code1.md
 !.agents/commands/code2.md
+!.agents/commands/code3.md
 !.agents/execution_logs/
 !.agents/execution_logs/**
 
@@ -94,3 +95,5 @@ docs/*
 !.agents/skills/code1/*
 !.agents/skills/code2/
 !.agents/skills/code2/*
+!.agents/skills/code3/
+!.agents/skills/code3/*

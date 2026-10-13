@@ -1569,6 +1569,7 @@ export function generatePrintDocumentHtml(data: ParsedXmlDocumentData): string {
       font-size: 13pt;
       text-align: justify;
       text-indent: 1.27cm;
+      white-space: pre-line;
     }
     .sig-table {
       width: 100%;

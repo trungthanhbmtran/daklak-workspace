@@ -373,13 +373,17 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
 
     if (isMau05) {
       result.signatureType = 'DECISION';
-      result.documentTitle = result.documentTitle || 'QUYẾT ĐỊNH';
+      result.documentTitle = 'QUYẾT ĐỊNH';
       if (!result.subTitle) {
         result.subTitle = 'Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy Quý I năm 2026';
       }
       if (!result.decisionNumber) {
         result.decisionNumber = '125-QĐ/BTCTU';
       }
+      if (!result.decisionDate) {
+        result.decisionDate = 'Buôn Ma Thuột, ngày 28 tháng 03 năm 2026';
+      }
+      result.signers.rightDate = result.decisionDate;
 
       if (result.legalBasis.length === 0) {
         result.legalBasis = [
@@ -418,11 +422,11 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       if (articleItems.length === 0) {
         articleItems.push({
           prefix: 'Điều 1. ',
-          content: 'Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk: 1. Tập thể Lãnh đạo Ban: Hoàn thành xuất sắc nhiệm vụ (Điểm KPI: 98.5); 2. Phòng Tổ chức đảng, đảng viên: Hoàn thành xuất sắc nhiệm vụ (Điểm KPI: 96.0); 3. Phòng Tổ chức cán bộ: Hoàn thành xuất sắc nhiệm vụ (Điểm KPI: 95.5); 4. Phòng Bảo vệ chính trị nội bộ: Hoàn thành tốt nhiệm vụ (Điểm KPI: 88.5); 5. Văn phòng Ban: Hoàn thành tốt nhiệm vụ (Điểm KPI: 87.0).',
+          content: 'Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk:\n1. Tập thể Lãnh đạo Ban: Điểm KPI 98.5/100 • Xếp loại: Hoàn thành xuất sắc nhiệm vụ.\n2. Phòng Tổ chức đảng, đảng viên: Điểm KPI 96.0/100 • Xếp loại: Hoàn thành xuất sắc nhiệm vụ.\n3. Phòng Tổ chức cán bộ: Điểm KPI 95.5/100 • Xếp loại: Hoàn thành xuất sắc nhiệm vụ.\n4. Phòng Bảo vệ chính trị nội bộ: Điểm KPI 88.5/100 • Xếp loại: Hoàn thành tốt nhiệm vụ.\n5. Văn phòng Ban: Điểm KPI 87.0/100 • Xếp loại: Hoàn thành tốt nhiệm vụ.',
         });
         articleItems.push({
           prefix: 'Điều 2. ',
-          content: 'Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 23 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk: 1. Hoàn thành xuất sắc nhiệm vụ: 04 đồng chí (Tỷ lệ 17.4% tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04); 2. Hoàn thành tốt nhiệm vụ: 18 đồng chí (Tỷ lệ 78.3% tổng biên chế); 3. Hoàn thành nhiệm vụ: 01 đồng chí (4.3% tổng biên chế); 4. Không hoàn thành nhiệm vụ: 0 đồng chí (0%).',
+          content: 'Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 23 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk, cụ thể:\n• 1. Hoàn thành xuất sắc nhiệm vụ: 04 đồng chí (Tỷ lệ 17.4% tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):\n  - Đ/c Nguyễn Thượng Hải - Trưởng ban Tổ chức Tỉnh ủy (100.0 điểm)\n  - Đ/c Lưu Vĩnh Hưng - Phó Trưởng ban Thường trực (98.0 điểm)\n  - Đ/c Công chức 1 - Trưởng phòng Tổ chức đảng, đảng viên (97.0 điểm)\n  - Đ/c Công chức 8 - Chuyên viên Quản lý Cán bộ & CSDL Mẫu 2C (99.5 điểm)\n• 2. Hoàn thành tốt nhiệm vụ: 18 đồng chí (Tỷ lệ 78.3% tổng biên chế, bao gồm các trường hợp đạt trên 90 điểm nhưng áp trần 20% theo quy định).\n• 3. Hoàn thành nhiệm vụ: 01 đồng chí (Tỷ lệ 4.3% tổng biên chế).\n• 4. Không hoàn thành nhiệm vụ: 0 đồng chí (0%).',
         });
         articleItems.push({
           prefix: 'Điều 3. ',
@@ -620,6 +624,7 @@ export function generatePrintDocumentHtml(data: ParsedXmlDocumentData): string {
       font-size: 13pt;
       text-align: justify;
       text-indent: 1.27cm;
+      white-space: pre-line;
     }
     .sig-table {
       width: 100%;
@@ -754,8 +759,16 @@ export function generatePrintDocumentHtml(data: ParsedXmlDocumentData): string {
         </td>
         <td style="text-align: center;">
           <div class="sig-title">${(data.signers.rightTitle || 'TRƯỞNG PHÒNG CHUYÊN MÔN').toUpperCase()}</div>
-          <div class="sig-sub">${data.signers.rightSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
-          <div class="sig-space"></div>
+          ${data.signatureType === 'DECISION' ? `
+            <div style="margin: 14px auto; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 76px; height: 76px; border: 2px solid rgba(220, 38, 38, 0.45); border-radius: 50%; color: #dc2626; font-size: 9.5px; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; transform: rotate(12deg); user-select: none;">
+                Ban Tổ chức Tỉnh ủy Đắk Lắk
+              </div>
+            </div>
+          ` : `
+            <div class="sig-sub">${data.signers.rightSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
+            <div class="sig-space"></div>
+          `}
           <div class="sig-name">${data.signers.rightName || ''}</div>
         </td>
       </tr>
