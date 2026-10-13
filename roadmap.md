@@ -612,3 +612,13 @@ eport-service v?i pi-management.
   - Cập nhật CSDL MySQL `admin_workflow` (`process_versions`): gán `label` Tiếng Việt cho toàn bộ edges của các quy trình trong hệ thống.
   - Bổ sung từ điển dịch dự phòng `EDGE_ACTION_LABELS` trong `WorkflowEditorScreen.tsx` để canvas luôn hiển thị Tiếng Việt chuyên nghiệp, không lọt mã code tiếng Anh thô ráp.
 
+
+
+## Agent Workflow: Tách Code 1 / Code 2 và nhật ký độc lập (13/10/2026)
+
+- [x] **Code 1 — Backend Coder**: thêm lệnh riêng tại `.agents/commands/code1.md`, profile Backend trỏ đúng lệnh và chỉ ghi `.agents/execution_logs/code1-backend.md`.
+- [x] **Code 2 — Frontend Coder**: thêm lệnh riêng tại `.agents/commands/code2.md`, profile Frontend trỏ đúng lệnh và chỉ ghi `.agents/execution_logs/code2-frontend.md`.
+- Cập nhật `implement.md` làm dispatcher theo ownership đã duyệt; đồng bộ charter và handoff; coordinator giữ shared archive, các coder không ghi dùng chung.
+- **Kiểm chứng cấu hình**: PowerShell assertions PASS cho mapping, PLAN_APPROVED gate, tách log, profile đồng bộ, dispatcher, gitignore và UTF-8 không BOM; `git diff --check` PASS.
+- **Runner**: chưa dispatch. Orchestrator từ chối tạo worktree do checkout đang có thay đổi HRM/proto chưa commit. Đã lưu prompts sẵn chạy riêng trong `.agents/reports/20261013-independent-code-lanes/`; không tuyên bố hai agent đã chạy.
+

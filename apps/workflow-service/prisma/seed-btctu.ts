@@ -162,7 +162,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_ldb_approve',
       type: 'userTask',
-      position: { x: 1600, y: 270 },
+      position: { x: 1900, y: 270 },
       data: {
         label: 'Lãnh đạo Ban thẩm định & Ký duyệt (Ký số)',
         description: 'Lãnh đạo Ban xem xét, phê duyệt kết quả, thực hiện ký số chứng thư CA Chuyên dùng phát hành hoặc trình Ban Thường vụ Tỉnh ủy',
@@ -184,7 +184,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'gateway_ldb_check',
       type: 'exclusiveGateway',
-      position: { x: 1900, y: 270 },
+      position: { x: 2220, y: 270 },
       data: {
         label: 'Kết luận Phê duyệt Ban?',
         description: 'Phê duyệt / Trình BTVTU -> Tự động tính KPI; Yêu cầu rà soát -> Trả về phòng; Đình chỉ -> Hủy',
@@ -193,7 +193,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'task_auto_kpi',
       type: 'serviceTask',
-      position: { x: 2200, y: 270 },
+      position: { x: 2520, y: 270 },
       data: {
         label: 'Hệ thống tự động tính điểm KPI 4 thành tố',
         description: 'Rule Engine tính điểm KPI_i = K * [A%*ScoreA + B%*ScoreB + C%*ScoreC + D%*ScoreD], tự động trừ điểm lỗi B% (5%/15%/35%) và đồng bộ dữ liệu sang HRM Service',
@@ -205,7 +205,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'end_completed',
       type: 'end',
-      position: { x: 2520, y: 270 },
+      position: { x: 2820, y: 270 },
       data: {
         label: 'Hoàn thành nhiệm vụ & Lưu trữ ATTT Cấp độ 3',
         description: 'Nhiệm vụ hoàn tất, chuyển trạng thái DONE, lưu vết hồ sơ điện tử an toàn',
@@ -215,7 +215,7 @@ export const btctuTaskManagementGraph = {
     {
       id: 'end_rejected',
       type: 'end',
-      position: { x: 1900, y: 70 },
+      position: { x: 2220, y: 70 },
       data: {
         label: 'Đình chỉ / Hủy nhiệm vụ theo chỉ đạo BTVTU',
         description: 'Nhiệm vụ dừng thực hiện, chuyển trạng thái CANCELLED',
@@ -288,6 +288,7 @@ export const btctuTaskManagementGraph = {
       target: 'task_ldb_approve',
       type: 'custom',
       sourceHandle: 'true',
+      targetHandle: 'target-left',
       label: 'Đạt chuẩn · Ký nháy trình Lãnh đạo Ban',
       action: 'SUBMIT_TO_BAN',
       condition: 'variables.reviewDecision === "DAT_YEU_CAU"',
@@ -295,8 +296,10 @@ export const btctuTaskManagementGraph = {
     {
       id: 'e_ldb_gw_eval',
       source: 'task_ldb_approve',
-      target: 'gateway_ldp_check',
+      target: 'gateway_ldb_check',
       type: 'custom',
+      sourceHandle: 'source-right',
+      targetHandle: 'target-left',
       label: 'Xem xét & Phê duyệt Tờ trình',
       action: 'EVALUATE_DECISION',
     },
@@ -305,7 +308,8 @@ export const btctuTaskManagementGraph = {
       source: 'gateway_ldb_check',
       target: 'task_ldp_review',
       type: 'custom',
-      sourceHandle: 'rework',
+      sourceHandle: 'source-bottom',
+      targetHandle: 'target-top',
       label: 'Chỉ đạo rà soát lại',
       action: 'BAN_REQUEST_REVIEW',
       condition: 'variables.banDecision === "YEU_CAU_RA_SOAT_LAI"',
@@ -316,6 +320,7 @@ export const btctuTaskManagementGraph = {
       target: 'task_auto_kpi',
       type: 'custom',
       sourceHandle: 'approve',
+      targetHandle: 'target-left',
       label: 'Phê duyệt (Ký số CA) / Trình BTVTU',
       action: 'BAN_APPROVE',
       condition: 'variables.banDecision === "PHE_DUYET_BAN_HANH" || variables.banDecision === "TRINH_BTV_TINH_UY"',
@@ -679,7 +684,8 @@ export const btctuKpiEvaluationGraph = {
       source: 'gateway_council_check',
       target: 'task_mau03_phong_hop',
       type: 'custom',
-      sourceHandle: 'rework',
+      sourceHandle: 'source-bottom',
+      targetHandle: 'target-bottom',
       label: 'Yêu cầu phòng rà soát lại',
       action: 'REQUEST_REWORK',
       condition: 'variables.councilVerdict === "YEU_CAU_DIEU_CHINH"',

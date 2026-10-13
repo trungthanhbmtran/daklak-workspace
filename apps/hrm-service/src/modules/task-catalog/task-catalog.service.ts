@@ -8,38 +8,78 @@ export class TaskCatalogService {
 
   // --- RANK QUOTAS ---
   async saveRankQuotas(data: any) {
-    const { rankCode, domainCode = 'GENERIC', quotas } = data;
-    await this.prisma.rankQuota.deleteMany({ where: { rankCode, domainCode } });
-    await this.cache.delete(rankCode + '_' + domainCode);
+    const { rankCode, domainCode = 'GENERIC', quotas, departmentId, unitCode } = data;
+    const deptId = departmentId ? Number(departmentId) : null;
+    const deleteWhere: any = { rankCode, domainCode };
+    if (deptId != null && deptId > 0) {
+      deleteWhere.departmentId = deptId;
+    } else {
+      deleteWhere.departmentId = null;
+    }
+    await this.prisma.rankQuota.deleteMany({ where: deleteWhere });
+    await this.cache.delete(`${rankCode}_${domainCode}_${deptId ?? 'ALL'}`);
+    await this.cache.delete(`${rankCode}_${domainCode}`);
 
     if (quotas && quotas.length > 0) {
       await this.prisma.rankQuota.createMany({
-        data: quotas.map((q: any) => ({
-          rankCode,
-          domainCode,
-          taskName: q.taskName,
-          unit: q.unit,
-          targetValue: q.targetValue,
-          weight: q.weight
-        }))
+        data: quotas.map((q: any) => {
+          const targetVal = Number(q.targetValue ?? q.monthlyTarget ?? 1);
+          const monthly = Number(q.monthlyTarget ?? targetVal);
+          const quarterly = Number(q.quarterlyTarget ?? (monthly * 3));
+          const yearly = Number(q.yearlyTarget ?? (monthly * 12));
+          return {
+            rankCode,
+            domainCode,
+            departmentId: deptId,
+            unitCode: unitCode || null,
+            taskName: q.taskName,
+            unit: q.unit || 'Lượt',
+            targetValue: targetVal,
+            monthlyTarget: monthly,
+            quarterlyTarget: quarterly,
+            yearlyTarget: yearly,
+            weight: Number(q.weight ?? 1),
+          };
+        }),
       });
     }
 
     return {
       success: true,
       message: 'Lưu định biên thành công',
-      data: await this.prisma.rankQuota.findMany({ where: { rankCode, domainCode } })
+      data: await this.prisma.rankQuota.findMany({ where: deleteWhere }),
     };
   }
 
   async getRankQuotasByRank(data: any) {
-    const { rankCode, domainCode = 'GENERIC' } = data;
-    const cacheKey = `${rankCode}_${domainCode}`;
+    const { rankCode, domainCode = 'GENERIC', departmentId } = data;
+    const deptId = departmentId ? Number(departmentId) : null;
+    const cacheKey = `${rankCode}_${domainCode}_${deptId ?? 'ALL'}`;
     const cached = await this.cache.get<any>(cacheKey);
     if (cached) return cached;
 
-    const quotas = await this.prisma.rankQuota.findMany({ where: { rankCode, domainCode } });
-    const result = { success: true, message: 'Lấy định biên thành công', data: quotas };
+    let quotas: any[] = [];
+    if (deptId != null && deptId > 0) {
+      quotas = await this.prisma.rankQuota.findMany({
+        where: { rankCode, domainCode, departmentId: deptId },
+      });
+    }
+
+    // Nếu bộ phận chưa có định biên riêng, fallback sang định biên mẫu chung theo ngạch (departmentId: null)
+    if (!quotas || quotas.length === 0) {
+      quotas = await this.prisma.rankQuota.findMany({
+        where: { rankCode, domainCode, departmentId: null },
+      });
+    }
+
+    const normalized = quotas.map((q) => ({
+      ...q,
+      monthlyTarget: q.monthlyTarget || q.targetValue || 1,
+      quarterlyTarget: q.quarterlyTarget || (q.monthlyTarget ? q.monthlyTarget * 3 : q.targetValue * 3),
+      yearlyTarget: q.yearlyTarget || (q.monthlyTarget ? q.monthlyTarget * 12 : q.targetValue * 12),
+    }));
+
+    const result = { success: true, message: 'Lấy định biên thành công', data: normalized };
     await this.cache.set(cacheKey, result);
     return result;
   }

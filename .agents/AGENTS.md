@@ -1,61 +1,92 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này là Hiến chương kỹ thuật dùng chung cho Codex và Antigravity trong dự án. Điều phối viên phải tuân thủ quy trình lập kế hoạch, phản biện plan, thực thi song song theo ranh giới file, tích hợp và kiểm chứng cùng 7 bộ ràng buộc dưới đây.
+File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 hoặc gọi trực tiếp) đều là code chung, bám sát các bước thực hiện của riêng từng yêu cầu và tuân thủ nghiêm ngặt 7 bộ ràng buộc kỹ thuật dưới đây.
 
 ---
 
-## 1. Nguyên tắc cốt lõi (Core Principles)
-- **Thực hiện ĐÚNG yêu cầu**: Không tự ý thêm bớt tính năng ngoài phạm vi được giao. Bám sát mục tiêu của từng tác vụ.
-- **Bằng chứng xác thực (Evidence-Based Verification)**: Không bao giờ kết luận giả định. Mọi thay đổi code bắt buộc phải được kiểm chứng bằng lệnh thực tế (`rtk tsc --noEmit`, test máy, build container) trước khi báo cáo hoàn thành.
-- **Dọn dẹp rác thừa (Cleanup Gate)**: Quét sạch 100% imports dư thừa, biến không dùng, file tạm, và toàn bộ debug logs (`console.log`, `debugger`) trước khi kết thúc tác vụ.
-- **Định dạng file chuẩn (Encoding Strictness)**: Mọi file tạo mới hoặc sửa đổi bằng script/PowerShell BẮT BUỘC phải mã hóa **UTF-8 (không BOM)**. Tuyệt đối không để lưu nhầm UTF-16LE làm crash Turbopack/Next.js.
+## 1. Cấu trúc thư mục .agents
+- `commands/`: Quy trình thực hiện chuẩn cho các coder lane (`commands/code1.md`, `commands/code2.md`).
+- `checklists/`: Bộ tiêu chuẩn nghiệm thu và phản biện kỹ thuật.
+- `rules/`: Quy tắc bất biến bắt buộc phải tuân thủ (kiến trúc, boundaries, security, UI/UX, service sovereignty).
+- `skills/`: Hướng dẫn công nghệ chuyên sâu và kỹ năng thực thi (`code1`, `code2`, `critical-review`, v.v.).
+- `architecture/`: Bản đồ các services, dependencies, workflow flow và source of truth.
+- `execution_logs/`: Nhật ký thực thi theo từng lane (`code1.md`, `code2.md`).
 
 ---
 
-## 2. Quy trình điều phối bắt buộc
+## 2. Nguyên tắc cốt lõi & Architecture Guardian
+- **Hiểu sâu sắc Cấu trúc Hệ thống & Chống Trùng lặp Chức năng (Architecture Pre-flight & Deduplication):** Agent BẮT BUỘC phải đọc và thấu hiểu bản đồ kiến trúc hệ thống (`.agents/architecture/`, `.agents/rules/source-of-truth.md`) trước khi thực hiện bất kỳ tác vụ nào. Tuyệt đối không tự ý tạo mới module, bảng CSDL, service logic hoặc chức năng đã tồn tại hoặc thuộc quyền sở hữu của service khác. Mọi thực thể phải thuộc về đúng Service chủ quản (Source of Truth).
+- **Triệt tiêu Ảo giác AI (Anti-AI Hallucination & Zero Assumptions):** Không bao giờ suy đoán hoặc giả định rằng một bảng, cột, API endpoint, gRPC method, interface, hay biến môi trường tồn tại. Agent BẮT BUỘC phải dùng công cụ kiểm tra trực tiếp các file mã nguồn thực tế trong repo (`schema.prisma`, `.proto`, controllers, types). Nếu không tìm thấy, phải đối chiếu kiến trúc hoặc báo cáo rõ ràng, tuyệt đối không "bịa" ra code/mockup giả định.
+- **Tuân thủ Chặt chẽ Quy trình Phát triển Phần mềm (Strict SDLC Compliance):** Mọi tác vụ phải tuân thủ nghiêm ngặt quy trình phát triển phần mềm gồm các cửa ải bắt buộc (SDLC Gates): từ khảo sát kiến trúc, kiểm tra trùng lặp, khảo sát mã nguồn thực tế đến kiểm chứng máy và phản biện diff trước khi hoàn thành.
+- **Thực hiện ĐÚNG yêu cầu:** Không tự ý thêm bớt tính năng ngoài phạm vi được giao. Bám sát mục tiêu của từng tác vụ.
+- **Bằng chứng xác thực (Evidence-Based Verification):** Không bao giờ kết luận giả định. Mọi thay đổi code bắt buộc phải được kiểm chứng bằng lệnh thực tế (`rtk tsc --noEmit`, test máy, build container) trước khi báo cáo hoàn thành.
+- **Dọn dẹp rác thừa (Cleanup Gate):** Quét sạch 100% imports dư thừa, biến không dùng, file tạm, và toàn bộ debug logs (`console.log`, `debugger`) trước khi kết thúc tác vụ.
+- **Định dạng file chuẩn (Encoding Strictness):** Mọi file tạo mới hoặc sửa đổi bằng script/PowerShell BẮT BUỘC phải mã hóa **UTF-8 (không BOM)**. Tuyệt đối không để lưu nhầm UTF-16LE làm crash Turbopack/Next.js.
+- **Service Data Sovereignty:** Tuyệt đối không query trực tiếp DB của service khác.
+- **Domain First & Smart Backend:** Framework không định nghĩa model nghiệp vụ; bảo mật, phân quyền (PBAC) và tenant boundaries xử lý hoàn toàn tại server.
+- **Least Data:** Chỉ query và trả về đúng trường dữ liệu cần thiết.
 
-Codex là điều phối viên mặc định cho quy trình hỗn hợp tài khoản. Codex lập plan và tự phản biện trước; chỉ sau khi plan đạt mới giao hai phần code độc lập cho hai phiên Antigravity. Hai agent coder không tự mở rộng phạm vi hoặc sửa phần của nhau.
+---
 
-### Bước 1: Khảo sát & Lập kế hoạch (Codex, chỉ đọc mã sản phẩm)
-- Khảo sát yêu cầu và các file liên quan (schema, interface, dependencies).
-- Trước khi plan, kiểm tra git status/diff; tra blacklist, các bản đồ kiến trúc/source-of-truth liên quan, mục execution_log theo từ khóa và Git history của file bị ảnh hưởng. Đối chiếu quyết định cũ với code/schema/proto hiện tại; không áp lại bản sửa lịch sử một cách máy móc.
-- Ghi context digest có đường dẫn nguồn, lỗi lịch sử liên quan và sự kiện hiện tại đã xác minh vào plan để hai coder cùng dùng.
-- Không sửa roadmap trong pha plan. Ghi đề xuất roadmap vào plan; điều phối viên chỉ cập nhật roadmap sau khi implementation được tích hợp nếu task cần.
-- Lưu plan step-by-step vào .agents/current_plan.md, gồm yêu cầu, contract, tiêu chí nghiệm thu, danh sách file, chủ sở hữu từng file, phụ thuộc và lệnh kiểm chứng dự kiến.
+## 3. Quy trình thực thi theo từng lệnh (End-to-End & Tuân thủ SDLC nghiêm ngặt)
 
-### Bước 2: Phản biện Plan (Codex, chưa cho phép viết mã sản phẩm)
-- Đối chiếu plan với rule/checklist phù hợp: PBAC, tenant boundary, additive migration, service sovereignty, CSS min-w-0, API contract và gRPC delegation.
-- Kiểm tra phạm vi file giữa Backend và Frontend không giao nhau; file dùng chung phải có đúng một chủ sở hữu trong plan.
-- Ghi PLAN_APPROVED hoặc PLAN_REVISE trong .agents/current_plan.md. Nếu PLAN_REVISE, sửa plan và phản biện lại. Chỉ bắt đầu code sau PLAN_APPROVED.
+Mỗi lệnh (`/code1 <prompt>` hoặc `/code2 <prompt>`) là một **quy trình thực thi độc lập, trọn vẹn từ đầu đến cuối (Full End-to-End SDLC)**. Không có chuyện lập kế hoạch chung rồi đến bước code mới chẻ nhánh.
 
-### Bước 3: Thực thi song song (hai worker Antigravity)
-- Chuẩn bị hai handoff riêng cho backend-coder và frontend-coder khi plan xác định hai phần độc lập và đã chốt contract. Khi các tool MCP cục bộ daklak-agent-orchestrator sẵn sàng, dùng chúng để tạo worktree riêng và dispatch hai lane. Cấu hình có thể dùng chung phiên Antigravity hiện tại (`accountMode: shared`) hoặc hai phiên được cô lập riêng (`accountMode: isolated`); phải báo đúng chế độ và quota tương ứng. Nếu tool hoặc runner chưa sẵn sàng, xuất hai prompt sẵn dùng và nêu rõ blocker; không được tuyên bố agent đã chạy.
-- Mỗi agent làm trong Git worktree riêng. Chỉ sửa file được giao; không sửa .agents/current_plan.md, .agents/execution_log.md, roadmap.md hoặc file của agent còn lại.
-- Nếu cần sửa file shared (libs/**, root configs, hoặc contract), plan phải chỉ định duy nhất một agent sở hữu file đó; agent còn lại chỉ đọc.
-- Mỗi agent đọc cùng context digest, báo cáo file đã sửa, kiểm chứng đã chạy, vấn đề còn mở, decision record và không tự merge worktree.
+### Mục đích phân tách & Quyền quyết định của người dùng:
+- **Tuân thủ kỹ năng & quy chuẩn như nhau (Uniform Skills & Rules Compliance):** Cả Code 1 và Code 2 đều có quyền hạn, trách nhiệm và phải tuân thủ 100% các kỹ năng (`.agents/skills/`) cùng 7 Bộ ràng buộc kỹ thuật như nhau. Không có con agent nào bị giới hạn hay phân biệt kỹ năng.
+- **Người dùng toàn quyền chỉ định (User-Determined Lane Routing):** Chỉ dựa vào yêu cầu công việc thực tế, người dùng tự quyết định dùng con nào (`/code1 <prompt>` hay `/code2 <prompt>`) để chạy prompt xử lý tương ứng.
+- **Cách ly phạm vi để chống trùng đè code (Code Conflict Isolation):** Mục đích duy nhất của việc phân tách 2 lane là để khi người dùng cần chạy các tác vụ độc lập, mỗi bên khóa chặt tập file riêng biệt, tuyệt đối không dẫm chân lên nhau.
+- **Không phân chia Backend / Frontend:** Cả Code 1 và Code 2 đều là Coder toàn diện (Full-stack), có đầy đủ năng lực thực hiện trọn gói mọi bước từ khảo sát, giải pháp kiến trúc, triển khai mã nguồn đến kiểm chứng.
 
-### Bước 4: Kiểm chứng, Tích hợp & Phản biện Kết quả (Codex điều phối)
-- Nghiệm thu từng worktree riêng ngay khi agent hoàn tất, đối chiếu đúng phần file được giao, tiêu chí trong plan và các ràng buộc kỹ thuật.
-- Ghi AGENT_ACCEPTED hoặc AGENT_REVISION_REQUIRED cho từng lane. Nếu cần sửa, gửi finding cho đúng coder; không tích hợp phần chưa được chấp nhận.
-- Sau khi cả hai lane được chấp nhận, tích hợp và rà soát chéo contract, file overlap, tương thích Backend/Frontend rồi chạy kiểm chứng toàn cục.
-- **Kiểm chứng máy (Automated Verification):** Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test tương ứng).
-- **Phản biện Kết quả Thực thi (Post-Execution Diff Critique Gate):**
+```
+[User gọi /code1 <prompt> hoặc /code2 <prompt>]
+      │
+      ▼
+[Autonomous End-to-End SDLC Lane]
+      ├── Bước 1: Hiểu Cấu trúc Hệ thống & Kiểm tra Trùng lặp Chức năng (Architecture Pre-flight & Deduplication)
+      ├── Bước 2: Khảo sát Mã nguồn Thực tế & Khóa Ranh giới File (Real Code Inspection & Anti-Hallucination)
+      ├── Bước 3: Hoạch định Giải pháp Kỹ thuật & Đối chiếu 7 Bộ ràng buộc
+      ├── Bước 4: Thực thi Mã nguồn Chuẩn xác theo 7 Bộ ràng buộc
+      ├── Bước 5: Kiểm chứng Máy Thực tế (rtk tsc --noEmit / build) & Phản biện Diff Dòng-theo-dòng
+      └── Bước 6: Dọn rác 100%, Ghi Nhật ký & Báo cáo Nghiệm thu Hoàn tất
+```
+
+### Bước 1: Hiểu Cấu trúc Hệ thống & Kiểm tra Trùng lặp Chức năng (Architecture Pre-flight & Deduplication)
+- Tra cứu bản đồ kiến trúc hệ thống (`.agents/architecture/service-map.md`, `.agents/rules/source-of-truth.md`).
+- Xác định đúng Service chủ quản sở hữu thực thể/nghiệp vụ được giao.
+- Kiểm tra tính năng/model/DTO đã có trong hệ thống chưa. **Tuyệt đối KHÔNG code trùng lặp tính năng** hoặc xây dựng lại cấu trúc dữ liệu đã được service khác quản lý (ví dụ: VTVL, định biên, phân công nằm tại `user-service`; quy trình nằm tại `workflow-service`; API nội bộ/liên thông tại `api-gateway`; báo cáo/dashboard tại `report-service`).
+
+### Bước 2: Khảo sát Mã nguồn Thực tế & Khóa Ranh giới File (Real Code Inspection & Anti-Hallucination)
+- **Triệt tiêu ảo giác AI:** Dùng công cụ đọc file (`view_file`, tìm kiếm code) mở trực tiếp các file schema (`schema.prisma`), contract gRPC (`shared/protos/`), controllers, routes liên quan trong repo. Không được suy đoán trường dữ liệu hoặc endpoint.
+- Khóa cứng danh sách các file thuộc sở hữu của tác vụ này; tuyệt đối không chạm vào file nằm ngoài phạm vi hoặc file đang do lane khác xử lý để triệt tiêu nguy cơ xung đột mã nguồn.
+
+### Bước 3: Hoạch định Giải pháp Kỹ thuật
+- Phân tích logic nghiệp vụ, luồng dữ liệu, API contract hoặc schema cần sửa đổi dựa trên dữ liệu thực tế đã khảo sát ở Bước 2.
+- Chuẩn bị giải pháp đối chiếu chặt chẽ với **7 Bộ ràng buộc kỹ thuật** trước khi chỉnh sửa file.
+
+### Bước 4: Thực thi Chuẩn xác theo 7 Bộ Ràng buộc Kỹ thuật
+- Triển khai code bám sát yêu cầu nghiệp vụ của prompt, không tự ý thêm bớt tính năng ngoài phạm vi.
+- Tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật (PBAC tenant scope, additive migration CSDL, BaseURL không lặp `/admin`, Next.js 15 App Router, UI flex `min-w-0` / `break-words`, Sheet thay vì Dialog cho form dài, serialize JSON gRPC an toàn, mã hóa UTF-8 không BOM).
+
+### Bước 5: Kiểm chứng Máy Thực tế & Phản biện Kết quả (Verification & Diff Critique Gate)
+- **Kiểm chứng máy (Automated Verification):** Chạy lệnh kiểm tra thực tế (`rtk tsc --noEmit`, `rtk lint`, hoặc build test của service tương ứng).
+- **Phản biện kết quả thực thi (Post-Execution Diff Critique Gate):**
   * Không bao giờ thỏa mãn chỉ vì `tsc` báo pass. BẮT BUỘC soi từng dòng `git diff` vừa sinh ra đối chiếu trực tiếp với 7 Bộ ràng buộc kỹ thuật:
     - *UI/UX*: Có thẻ con flex nào thiếu `min-w-0`? Chuỗi dài thiếu `break-words`? Form dài có bị nhét nhầm vào `<Dialog>` thay vì `<Sheet>`?
     - *Routing*: Có lọt tiền tố thừa `/admin` vào `apiClient` không?
     - *Backend & DB*: Cột mới có đảm bảo `nullable` hoặc `@default` không? Query CSDL có bị lọt ngoài `organizationId` scope không? Lời gọi gRPC có thiếu metadata token không?
     - *Logic & Edge Cases*: Có nuốt lỗi âm thầm (`catch {}` rỗng) không? Tham số `null`/`undefined`/mảng rỗng có bị vỡ app không?
-  * **Chống thử mù quáng (Anti-thrashing):** Nếu gặp lỗi hoặc phát hiện vi phạm khi phản biện diff, phân tích tận gốc và tự sửa ngay trước khi bàn giao.
-  * **Phản biện độc lập chuyên sâu (Khi cần):** Với các tác vụ nhạy cảm liên quan tới CSDL lớn hoặc PBAC đa service, có thể kích hoạt skill `critical-review` hoặc `code_auditor_agent` để có góc nhìn thẩm định độc lập.
+  * **Chống thử mù quáng (Anti-thrashing):** Nếu phát hiện lỗi hoặc vi phạm khi phản biện diff, phân tích tận gốc và tự sửa ngay trước khi bàn giao.
+  * **Phản biện độc lập chuyên sâu (Khi cần):** Với các tác vụ nhạy cảm liên quan tới CSDL lớn hoặc PBAC đa service, có thể kích hoạt skill `critical-review` để có góc nhìn thẩm định độc lập.
 
-### Bước 5: Cập nhật tài liệu & Nghiệm thu
-- Dọn sạch toàn bộ console.log, import thừa, file tạm.
-- Điều phối viên check-off .agents/current_plan.md, cập nhật roadmap.md nếu phù hợp và ghi quyết định/lỗi đáng lưu ý vào .agents/execution_log.md.
-- Xuất Báo cáo Thực thi đầy đủ.
+### Bước 6: Dọn rác & Báo cáo Kết quả (Cleanup & Audit Gate)
+- Dọn sạch 100% debug logs (`console.log`, `debugger`), imports dư thừa, biến không dùng, file tạm.
+- Ghi nhận tóm tắt kết quả vào execution log tương ứng ([`.agents/execution_logs/code1.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code1.md) hoặc [`.agents/execution_logs/code2.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code2.md)).
+- Xuất Báo cáo Thực thi đầy đủ theo đúng mẫu quy chuẩn.
 
 ---
 
-## 3. BẢY BỘ RÀNG BUỘC KỸ THUẬT BẮT BUỘC (INVIOLABLE CONSTRAINTS)
+## 4. BẢY BỘ RÀNG BUỘC KỸ THUẬT BẮT BUỘC (INVIOLABLE CONSTRAINTS)
 *(Toàn bộ các ràng buộc dưới đây bắt buộc phải được tuân thủ trực tiếp trong mã nguồn, không được bỏ sót bất kỳ tiêu chí nào)*
 
 ### 1. Ràng buộc UI/UX & CSS Layout (Frontend)
@@ -87,8 +118,13 @@ Codex là điều phối viên mặc định cho quy trình hỗn hợp tài kho
 - **Index bắt buộc:** Mọi trường khóa ngoại (`organizationId`, `userId`, `departmentId`) và trường dùng trong `where`, `orderBy` bắt buộc có `@@index([field])`.
 - **Phòng chống N+1 queries:** Tuyệt đối không gọi Prisma queries (`findUnique`, `findFirst`, `update`) bên trong vòng lặp (`for`, `map`). Bắt buộc dùng `where: { id: { in: ids } }`.
 
-### 6. Ràng buộc Bảo mật PBAC & Service Data Sovereignty
+### 6. Ràng buộc Bảo mật PBAC & Service Data Sovereignty & Source of Truth
 - **Service Data Sovereignty:** Một Service tuyệt đối KHÔNG truy cập trực tiếp vào CSDL của Service khác. Mọi giao tiếp liên service bắt buộc qua gRPC contract hoặc message broker.
+- **Ràng buộc Source of Truth của các Service nền tảng (BẮT BUỘC TUÂN THỦ TRƯỚC KHI CODE):**
+  * **`user-service` là Source of Truth DUY NHẤT** cho: User, Account, PBAC, Organization và **Cấu trúc Vị trí việc làm (VTVL) định biên** (`job_titles`, `org_staffing`, `staffing_slots`), kèm **Phân công theo dõi** (lĩnh vực `staffing_slot_domains`, địa bàn `staffing_slot_geographic_areas`, phòng ban theo dõi `staffing_slot_monitored_units`). Các coder agents khi làm việc tại `hrm-service` hay bất kỳ service nào TUYỆT ĐỐI KHÔNG được tự ý bỏ qua hoặc dựng lại khung VTVL rời rạc; bắt buộc phải tích hợp và tham chiếu dữ liệu từ `user-service`.
+  * **`workflow-service` là trung tâm quy trình:** Nơi lưu trữ, cấu hình và mô tả toàn bộ các nghiệp vụ hệ thống (BPMN Definitions, State Machines, Swimlanes, Transitions). Các service domain chỉ lưu dữ liệu nghiệp vụ và phải ủy quyền điều phối luồng duyệt cho `workflow-service`.
+  * **`api-gateway` (API Manager):** Quản lý tập trung các nguồn kết nối chính của toàn hệ thống, xây dựng các API nội bộ và các API liên thông (LGSP, DVC, bên ngoài). Không chứa business logic domain.
+  * **`report-service`:** Nơi thiết kế báo cáo hệ thống, xây dựng các Dashboard phân quyền sử dụng báo cáo cho từng cá nhân, đơn vị; là nơi các đơn vị truy cập theo dõi tiến độ, hiệu suất và số liệu toàn diện. Thu thập số liệu qua gRPC/RabbitMQ, không query chéo CSDL.
 - **gRPC Metadata Delegation:** Mọi lời gọi gRPC giữa API Gateway và microservices bắt buộc phải đính kèm `GatewayContextToken` (`this.getGrpcMetadata(req)`). Cấm gọi gRPC rỗng metadata (nguyên nhân gây lỗi 401 Infinite Logout Loop).
 - **PBAC Tenant Scope:** Mọi truy vấn CSDL bắt buộc ràng buộc `organizationId` của tài khoản đăng nhập, chống rò rỉ dữ liệu chéo giữa các đơn vị.
 - **Least Data:** Chỉ query và trả về đúng những trường dữ liệu cần thiết.
@@ -99,19 +135,20 @@ Codex là điều phối viên mặc định cho quy trình hỗn hợp tài kho
 
 ---
 
-## 4. Báo cáo Thực thi Antigravity (Execution Report)
-Kết thúc bất kỳ tác vụ nào, Antigravity bắt buộc xuất báo cáo nghiệm thu theo định dạng:
+## 5. Báo cáo Thực thi (Execution Report)
+Kết thúc bất kỳ tác vụ nào, agent xuất báo cáo nghiệm thu theo định dạng chuẩn mực:
 
 ```markdown
-## Báo cáo Thực thi Antigravity
-- **Bước 1 - Lên Kế Hoạch (Planning):** [Xác nhận đã lập kế hoạch & đối chiếu roadmap.md, current_plan.md]
-- **Bước 2 - Phản biện Kế hoạch (Plan Critique):** [Các rủi ro kiến trúc & 7 Bộ ràng buộc đã đối chiếu và chặn trước khi viết code]
-- **Bước 3 - Thực thi Chuẩn xác (Execution):** [Mã nguồn đã triển khai theo kế hoạch]
-- **Bước 4 - Kiểm chứng Máy & Phản biện Kết quả (Verification & Result Critique):** [Lệnh kiểm chứng máy thực tế đã chạy (rtk tsc/build) VÀ Kết quả phản biện diff đối chiếu 7 Bộ ràng buộc/edge-cases]
-- **Bước 5 - Dọn rác, Roadmap & Tài liệu:** [Xác nhận đã dọn rác 100%, cập nhật roadmap.md, current_plan.md, execution_log.md]
+## Báo cáo Thực thi
+- **Bước 1 - Kiến trúc & Kiểm tra Trùng lặp:** [Xác nhận Source of Truth của service chủ quản, kiểm tra trùng lặp chức năng/entity]
+- **Bước 2 - Khảo sát Thực tế & Chống Ảo giác:** [Danh sách file schema/proto/code thực tế đã đọc, danh sách file khóa phạm vi]
+- **Bước 3 - Giải pháp Kỹ thuật:** [Giải pháp thiết kế bám sát 7 Bộ ràng buộc kỹ thuật]
+- **Bước 4 - Thực thi Chuẩn xác:** [Mã nguồn đã triển khai theo yêu cầu, tuân thủ 7 Bộ ràng buộc kỹ thuật]
+- **Bước 5 - Kiểm chứng Máy & Phản biện Diff:** [Lệnh kiểm chứng máy thực tế đã chạy (rtk tsc/build) VÀ Kết quả phản biện diff đối chiếu 7 Bộ ràng buộc/edge-cases]
+- **Bước 6 - Dọn rác & Hoàn tất:** [Xác nhận đã dọn rác 100%, ghi execution log]
 ```
 
 ---
 
-## 5. Quản lý Tri thức (Execution Log)
-Mọi lỗi phức tạp đã fix, quyết định kiến trúc quan trọng bắt buộc phải lưu vết vào [.agents/execution_log.md](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_log.md) để tra cứu tái sử dụng, tránh lặp lại lỗi cũ.
+## 6. Quản lý Tri thức (Execution Log)
+Mỗi coder ghi nhật ký riêng: Code 1 append `.agents/execution_logs/code1.md`, Code 2 append `.agents/execution_logs/code2.md`. Ghi nhận ngắn gọn ngày, tên tác vụ/tính năng, danh sách file đã sửa và bằng chứng lệnh kiểm chứng thực tế đã chạy.

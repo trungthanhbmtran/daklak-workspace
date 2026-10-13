@@ -1,12 +1,34 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Target, Trash2, Save, Plus, Search, Check, ChevronsUpDown } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Target,
+  Trash2,
+  Save,
+  Plus,
+  Search,
+  Check,
+  ChevronsUpDown,
+  Building2,
+  Calendar,
+  Sparkles,
+  Layers,
+  RefreshCw,
+  Bot,
+  Zap,
+  Scale,
+  CheckCircle2,
+  AlertTriangle,
+  BrainCircuit,
+  PieChart,
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { hrmRankQuotasApi } from '@/features/hrm/api';
+import { hrmRankQuotasApi, type AiSuggestedQuotaItem } from '@/features/hrm/api/rank-quotas.api';
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
+import { OrganizationUnitSelector, flattenUnitHierarchy } from '@/features/workflow/components/OrganizationUnitSelector';
+import { AiQuotaPlanModal } from './AiQuotaPlanModal';
 import { toast } from 'sonner';
 
 import { cn } from "@/lib/utils";
@@ -20,6 +42,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Heading, Text } from "@/components/ui/typography";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Table,
@@ -34,41 +57,85 @@ interface SelectedPlanItem {
     id: string;
     title: string;
     rankType: string;
-    targetValue: number;
     unit: string;
+    targetValue: number;
+    monthlyTarget: number;
+    quarterlyTarget: number;
+    yearlyTarget: number;
     weight: number;
 }
-
-
 
 export function ManualPlanSelectorByRankClient() {
     const DOMAINS = [
         { code: 'GENERIC', name: 'Dùng chung / Hành chính' },
-        { code: 'IOC', name: 'Trung tâm Điều hành thông minh (IOC)' },
-        { code: 'IT', name: 'Công nghệ thông tin' },
-        { code: 'HEALTHCARE', name: 'Y tế' },
-        { code: 'EDUCATION', name: 'Giáo dục' },
         { code: 'CONG_TAC_TO_CHUC', name: 'Công tác Tổ chức, Cán bộ, Đảng viên' },
         { code: 'CONG_TAC_KIEM_TRA', name: 'Công tác Kiểm tra, Giám sát' },
         { code: 'CONG_TAC_NOI_CHINH', name: 'Công tác Nội chính, BVCTNB' },
         { code: 'CONG_TAC_VAN_PHONG', name: 'Công tác Văn phòng cấp ủy' },
+        { code: 'IOC', name: 'Trung tâm Điều hành thông minh (IOC)' },
+        { code: 'IT', name: 'Công nghệ thông tin' },
+        { code: 'HEALTHCARE', name: 'Y tế' },
+        { code: 'EDUCATION', name: 'Giáo dục' },
     ];
 
+    // 1. Cây cơ cấu tổ chức & Bộ phận đã chọn
+    const [selectedUnitCode, setSelectedUnitCode] = useState<string>('BTCTU_DAKLAK');
+    const { data: orgTreeRes, isLoading: isLoadingOrgTree } = useQuery({
+        queryKey: ['org-tree-manual-selector'],
+        queryFn: () => organizationApi.getTree(),
+        staleTime: 5 * 60 * 1000,
+    });
+    const unitTree = orgTreeRes?.data || [];
+    const flatUnits = useMemo(() => flattenUnitHierarchy(unitTree), [unitTree]);
+    const selectedUnit = useMemo(() => flatUnits.find(u => u.code === selectedUnitCode), [flatUnits, selectedUnitCode]);
+    const selectedUnitId = selectedUnit?.id;
+
+    // 2. Định biên theo bộ phận (Vị trí việc làm thực tế của bộ phận trong tổ chức)
+    const { data: unitStaffingReportRes, isLoading: isLoadingStaffing } = useQuery({
+        queryKey: ['staffing-report-selector', selectedUnitId],
+        queryFn: () => organizationApi.getStaffingReport(selectedUnitId!),
+        enabled: !!selectedUnitId,
+        staleTime: 60 * 1000,
+    });
+    const unitStaffingList = useMemo(() => {
+        const raw = unitStaffingReportRes?.allReport || unitStaffingReportRes?.data || [];
+        return Array.isArray(raw) ? raw : [];
+    }, [unitStaffingReportRes]);
+
+    // 3. Toàn bộ danh mục chức danh/VTVL hệ thống
     const { data: jobTitlesRes = { allTitles: [], govTitles: [], partyTitles: [] } } = useQuery({
         queryKey: ['job-titles-all'],
         queryFn: async () => (await organizationApi.getJobTitles()).data,
         staleTime: 5 * 60 * 1000,
     });
 
-    // Phân loại chức danh: Công chức vs Viên chức vs Cơ quan Đảng
     const congChucRanks = jobTitlesRes.govTitles;
     const vienChucRanks = jobTitlesRes.allTitles.filter((j: any) => j.category && j.category.includes('Viên chức'));
     const partyRanks = jobTitlesRes.partyTitles || [];
 
+    // Chuyển đổi VTVL từ Staffing của bộ phận sang cấu trúc thống nhất
+    const unitPositionsList = useMemo(() => {
+        if (!selectedUnitId || unitStaffingList.length === 0) return [];
+        return unitStaffingList.map((st: any) => {
+            const matchedTitle = jobTitlesRes.allTitles.find((t: any) => t.id === st.jobTitleId);
+            return {
+                id: st.id,
+                jobTitleId: st.jobTitleId,
+                code: matchedTitle?.code || `JOB_${st.jobTitleId}`,
+                name: st.jobTitleName || matchedTitle?.name || 'Vị trí việc làm',
+                quantity: st.quantity ?? 1,
+                currentCount: st.currentCount ?? 0,
+                category: matchedTitle?.category || (selectedUnitCode?.startsWith('BTCTU') || selectedUnitCode?.startsWith('TU') ? 'Khối Đảng' : 'Chính quyền'),
+                isFromDepartment: true,
+            };
+        });
+    }, [selectedUnitId, unitStaffingList, jobTitlesRes.allTitles, selectedUnitCode]);
+
+    // 4. Thư viện nhiệm vụ mẫu
     const { data: templatesData } = useTaskTemplatesList();
     const serverTemplates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
 
-    const rankTasksRepository = serverTemplates.map((t: any) => ({
+    const rankTasksRepository = useMemo(() => serverTemplates.map((t: any) => ({
         id: t.id.toString(),
         classification: t.classification,
         rank: t.rank,
@@ -76,105 +143,189 @@ export function ManualPlanSelectorByRankClient() {
         taskName: t.taskName,
         defaultUnit: t.defaultUnit || 'Lượt',
         defaultWeight: t.defaultWeight || 1
-    }));
+    })), [serverTemplates]);
 
-    const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC' | 'DANG'>('CONG_CHUC');
+    // Chế độ xem danh sách VTVL: Theo bộ phận hay Toàn hệ thống
+    const [vtvlViewSource, setVtvlViewSource] = useState<'DEPARTMENT' | 'ALL'>('DEPARTMENT');
+    const [classification, setClassification] = useState<'CONG_CHUC' | 'VIEN_CHUC' | 'DANG'>('DANG');
     const [activeRankFilter, setActiveRankFilter] = useState<string>('');
-    const [activeDomainFilter, setActiveDomainFilter] = useState<string>('GENERIC');
+    const [activeDomainFilter, setActiveDomainFilter] = useState<string>('CONG_TAC_TO_CHUC');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
-    const [targetValue, setTargetValue] = useState<number>(1);
+    
+    // Các trường chỉ tiêu: Tháng, Quý, Năm, Trọng số
+    const [monthlyTarget, setMonthlyTarget] = useState<number>(1);
+    const [quarterlyTarget, setQuarterlyTarget] = useState<number>(3);
+    const [yearlyTarget, setYearlyTarget] = useState<number>(12);
     const [weight, setWeight] = useState<number>(1);
+    const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+    
     const [searchRankText, setSearchRankText] = useState<string>('');
     const [activeGroup, setActiveGroup] = useState<string>('ALL');
     const [isGroupOpen, setIsGroupOpen] = useState(false);
 
-    const { isPending } = useCreateMasterPlan();
+    const { isPending: isSavingPlan } = useCreateMasterPlan();
 
-    const activeRanksList = classification === 'CONG_CHUC'
-        ? congChucRanks
-        : classification === 'VIEN_CHUC'
-        ? vienChucRanks
-        : partyRanks;
+    // Handler nhận định mức tự động từ Trợ lý AI
+    const handleApplyAiQuotas = (items: AiSuggestedQuotaItem[]) => {
+        const newPlans: SelectedPlanItem[] = items.map((item, idx) => ({
+            id: `ai_${Date.now()}_${idx}`,
+            title: item.taskName,
+            rankType: activeRankFilter || 'VTVL',
+            unit: item.unit || 'Lượt',
+            targetValue: item.monthlyTarget,
+            monthlyTarget: item.monthlyTarget,
+            quarterlyTarget: item.quarterlyTarget,
+            yearlyTarget: item.yearlyTarget,
+            weight: item.weight || 1,
+        }));
+        setAddedPlans(newPlans);
+    };
 
-    const currentGroups = React.useMemo(() => {
+    // Đồng bộ tự động Quý = Tháng * 3 và Năm = Tháng * 12 khi người dùng gõ Tháng
+    const handleMonthlyTargetChange = (val: number) => {
+        const m = Math.max(0.1, Number(val));
+        setMonthlyTarget(m);
+        setQuarterlyTarget(Math.round(m * 3 * 10) / 10);
+        setYearlyTarget(Math.round(m * 12 * 10) / 10);
+    };
+
+    // Danh sách VTVL hiển thị bên cột phải
+    const displayRanksList = useMemo(() => {
+        if (vtvlViewSource === 'DEPARTMENT' && unitPositionsList.length > 0) {
+            return unitPositionsList;
+        }
+        const activeList = classification === 'CONG_CHUC'
+            ? congChucRanks
+            : classification === 'VIEN_CHUC'
+            ? vienChucRanks
+            : partyRanks;
+        return activeList.map((r: any) => ({
+            ...r,
+            quantity: undefined,
+            currentCount: undefined,
+            isFromDepartment: false,
+        }));
+    }, [vtvlViewSource, unitPositionsList, classification, congChucRanks, vienChucRanks, partyRanks]);
+
+    // Nhóm VTVL
+    const currentGroups = useMemo(() => {
         const catSet = new Map<string, string>();
-        activeRanksList.forEach((r: any) => {
+        displayRanksList.forEach((r: any) => {
             const cat = r.category || 'Khác';
             if (!catSet.has(cat)) catSet.set(cat, cat);
         });
         const groups = Array.from(catSet.entries()).map(([id, name]) => ({ id, name }));
         groups.unshift({ id: 'ALL', name: 'Tất cả các nhóm VTVL' });
         return groups;
-    }, [activeRanksList]);
+    }, [displayRanksList]);
 
-    // Auto-reset group khi chuyển phân loại
+    // Tự động reset group khi chuyển danh sách
     useEffect(() => {
         if (currentGroups.length > 1 && !currentGroups.find(g => g.id === activeGroup)) {
             setActiveGroup('ALL');
         }
-    }, [classification, currentGroups, activeGroup]);
+    }, [displayRanksList, currentGroups, activeGroup]);
 
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    const { data: existingQuotasData, isLoading: isLoadingQuotas } = useQuery({
-        queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter],
-        queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter, activeDomainFilter),
+    // Lọc theo từ khóa tìm kiếm & nhóm
+    const filteredRanksList = useMemo(() => {
+        const byGroup = activeGroup === 'ALL'
+            ? displayRanksList
+            : displayRanksList.filter((r: any) => (r.category || 'Khác') === activeGroup);
+        const q = searchRankText.toLowerCase().trim();
+        if (!q) return byGroup;
+        return byGroup.filter((r: any) =>
+            (r.name && r.name.toLowerCase().includes(q)) ||
+            (r.code && r.code.toLowerCase().includes(q))
+        );
+    }, [displayRanksList, activeGroup, searchRankText]);
+
+    // Tự động chọn VTVL đầu tiên nếu danh sách thay đổi hoặc rank hiện tại không còn
+    useEffect(() => {
+        if (filteredRanksList.length > 0) {
+            const exists = filteredRanksList.find((r: any) => r.code === activeRankFilter);
+            if (!exists) {
+                setActiveRankFilter(filteredRanksList[0].code);
+            }
+        }
+    }, [filteredRanksList, activeRankFilter]);
+
+    // Tự động chuyển mode xem VTVL của bộ phận nếu bộ phận có định biên
+    useEffect(() => {
+        if (unitPositionsList.length > 0) {
+            setVtvlViewSource('DEPARTMENT');
+        }
+    }, [unitPositionsList.length, selectedUnitId]);
+
+    // 5. Nạp cấu trúc định biên đã lưu trong CSDL
+    const { data: existingQuotasData, isLoading: isLoadingQuotas, refetch: refetchQuotas } = useQuery({
+        queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter, selectedUnitId],
+        queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter, activeDomainFilter, selectedUnitId, selectedUnitCode),
         enabled: !!activeRankFilter,
         staleTime: 0,
     });
 
     useEffect(() => {
-        if (existingQuotasData?.data) {
-            setAddedPlans(existingQuotasData.data.map((q: any) => ({
-                id: q.id.toString(),
-                title: q.taskName,
-                rankType: q.rankCode,
-                targetValue: q.targetValue,
-                unit: q.unit,
-                weight: q.weight || 1
-            })));
+        if (existingQuotasData?.data && Array.isArray(existingQuotasData.data)) {
+            setAddedPlans(existingQuotasData.data.map((q: any) => {
+                const m = Number(q.monthlyTarget || q.targetValue || 1);
+                const qua = Number(q.quarterlyTarget || (m * 3));
+                const y = Number(q.yearlyTarget || (m * 12));
+                return {
+                    id: q.id?.toString() || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                    title: q.taskName,
+                    rankType: q.rankCode,
+                    unit: q.unit || 'Lượt',
+                    targetValue: m,
+                    monthlyTarget: m,
+                    quarterlyTarget: qua,
+                    yearlyTarget: y,
+                    weight: Number(q.weight || 1),
+                };
+            }));
         } else {
             setAddedPlans([]);
         }
     }, [existingQuotasData, activeRankFilter]);
 
-    const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter && item.domainCode === activeDomainFilter);
+    // Nhiệm vụ mẫu phù hợp từ kho thư viện
+    const availableTasks = useMemo(() => {
+        return rankTasksRepository.filter(item => 
+            (item.rank === activeRankFilter || item.rank === 'ALL' || !item.rank) &&
+            (item.domainCode === activeDomainFilter || item.domainCode === 'GENERIC')
+        );
+    }, [rankTasksRepository, activeRankFilter, activeDomainFilter]);
 
-    // Lọc VTVL theo nhóm (category) đã chọn
-    const groupedRanksList = activeGroup === 'ALL'
-        ? activeRanksList
-        : activeRanksList.filter((r: any) => (r.category || 'Khác') === activeGroup);
-
-    const filteredRanksList = groupedRanksList.filter((r: any) =>
-        r.name.toLowerCase().includes(searchRankText.toLowerCase()) ||
-        r.code.toLowerCase().includes(searchRankText.toLowerCase())
-    );
-
-    useEffect(() => {
-        if (groupedRanksList.length > 0 && !groupedRanksList.find((r: any) => r.code === activeRankFilter)) {
-            setActiveRankFilter(groupedRanksList[0].code);
-        }
-    }, [classification, activeGroup, groupedRanksList, activeRankFilter]);
-
-
+    // Thêm nhiệm vụ mẫu vào bảng định biên
     const handleAssignTask = () => {
-        const task = availableTasks.find(t => t.id === selectedTaskId);
-        if (!task || addedPlans.some(p => p.title === task.taskName && p.rankType === activeRankFilter)) return;
+        const task = rankTasksRepository.find(t => t.id === selectedTaskId);
+        if (!task) return;
+        if (addedPlans.some(p => p.title === task.taskName && p.rankType === activeRankFilter)) {
+            toast.warning('Nhiệm vụ này đã có trong danh sách định biên.');
+            return;
+        }
 
-        setAddedPlans([...addedPlans, {
-            // eslint-disable-next-line react-hooks/purity
+        setAddedPlans(prev => [...prev, {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             title: task.taskName,
             rankType: activeRankFilter,
-            targetValue: targetValue,
-            unit: task.defaultUnit,
-            weight: 1
+            unit: task.defaultUnit || 'Lượt',
+            targetValue: monthlyTarget,
+            monthlyTarget: monthlyTarget,
+            quarterlyTarget: quarterlyTarget,
+            yearlyTarget: yearlyTarget,
+            weight: weight || task.defaultWeight || 1,
         }]);
 
         setSelectedTaskId('');
-        setTargetValue(1);
+        setMonthlyTarget(1);
+        setQuarterlyTarget(3);
+        setYearlyTarget(12);
+        setWeight(1);
+        toast.info('Đã thêm nhiệm vụ vào bảng định biên.');
     };
 
+    // Lưu toàn bộ cấu trúc định biên
     const handleSubmitPlan = async () => {
         if (!activeRankFilter) {
             toast.error('Vui lòng chọn vị trí việc làm trước khi lưu định biên.');
@@ -182,198 +333,457 @@ export function ManualPlanSelectorByRankClient() {
         }
 
         try {
-            const quotas = addedPlans.map(p => ({
+            const quotasPayload = addedPlans.map(p => ({
                 taskName: p.title,
                 unit: p.unit,
-                targetValue: Number(p.targetValue),
-                weight: 1
+                targetValue: Number(p.monthlyTarget),
+                monthlyTarget: Number(p.monthlyTarget),
+                quarterlyTarget: Number(p.quarterlyTarget),
+                yearlyTarget: Number(p.yearlyTarget),
+                weight: Number(p.weight || 1),
+                departmentId: selectedUnitId || undefined,
+                unitCode: selectedUnitCode || undefined,
             }));
-            await hrmRankQuotasApi.save(activeRankFilter, activeDomainFilter, quotas);
-            toast.success('Lưu định biên thành công!', {
-                description: `Đã cập nhật ${addedPlans.length} chỉ tiêu vào danh sách.`
+
+            await hrmRankQuotasApi.save(
+                activeRankFilter,
+                activeDomainFilter,
+                quotasPayload,
+                selectedUnitId,
+                selectedUnitCode
+            );
+
+            toast.success('Lưu cấu trúc định biên thành công!', {
+                description: `Đã cập nhật ${addedPlans.length} chỉ tiêu theo Tháng, Quý, Năm cho VTVL ${activeRankFilter}.`
             });
-        // eslint-disable-next-line unused-imports/no-unused-vars
-        } catch (error) {
+            refetchQuotas();
+        } catch {
             toast.error('Có lỗi xảy ra', {
-                description: 'Không thể lưu định biên vào lúc này.'
+                description: 'Không thể lưu định biên vào lúc này. Vui lòng thử lại.'
             });
         }
     };
 
-    return (
-        <Card className="w-full max-w-[1400px] mx-auto mt-6 shadow-xl border overflow-hidden h-[calc(100vh-100px)] min-h-[700px] flex flex-col bg-card rounded-2xl shrink-0">
-            <CardHeader className="shrink-0 bg-card border-b pb-4 pt-6 px-6 relative overflow-hidden">
-                <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-transparent pointer-events-none" />
-                <div className="relative z-10">
-                    <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl font-black text-foreground tracking-tight">
-                        <div className="p-2.5 bg-primary/10 rounded-xl">
-                            <Target className="w-6 h-6 text-primary" />
-                        </div>
-                        Cấu Hình Chỉ Tiêu Định Biên Theo Vị Trí Việc Làm
-                    </CardTitle>
-                    <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                        Thiết lập và phân bổ danh mục công việc bắt buộc cho từng vị trí việc làm. Giúp tự động hóa việc giao việc và đánh giá KPI một cách khoa học.
-                    </CardDescription>
-                </div>
-            </CardHeader>
+    // Thống kê tổng chỉ tiêu
+    const summaryTotals = useMemo(() => {
+        return addedPlans.reduce((acc, p) => ({
+            month: acc.month + (p.monthlyTarget || 0),
+            quarter: acc.quarter + (p.quarterlyTarget || 0),
+            year: acc.year + (p.yearlyTarget || 0),
+        }), { month: 0, quarter: 0, year: 0 });
+    }, [addedPlans]);
 
-            <CardContent className="flex-1 flex flex-col lg:flex-row min-h-0 p-6 gap-6">
-                {/* LEFT COLUMN: MAIN CONTENT AREA */}
-                <div className="flex-1 min-w-0 flex flex-col min-h-0 bg-card rounded-2xl border shadow-sm overflow-hidden h-full">
-                    <div className="p-4 border-b bg-muted/30 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-6 bg-primary rounded-full" />
-                            <Heading level="h4" className="font-bold tracking-tight text-foreground">Danh sách chỉ tiêu bắt buộc</Heading>
+    const totalWeight = useMemo(() => {
+        return Math.round(addedPlans.reduce((acc, p) => acc + (Number(p.weight) || 0), 0) * 10) / 10;
+    }, [addedPlans]);
+
+    const activeRankObj = useMemo(() => {
+        return displayRanksList.find((r: any) => r.code === activeRankFilter);
+    }, [displayRanksList, activeRankFilter]);
+
+    return (
+        <div className="w-full flex-1 flex flex-col min-w-0 space-y-4">
+            {/* HERO COMMAND HEADER */}
+            <Card className="w-full shadow-sm border rounded-2xl bg-card overflow-hidden min-w-0">
+                <CardHeader className="p-5 sm:p-6 bg-linear-to-r from-primary/10 via-primary/5 to-transparent relative min-w-0">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 min-w-0">
+                        {/* TITLE & DESCRIPTION */}
+                        <div className="min-w-0 space-y-1">
+                            <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                                <div className="p-2.5 bg-primary/15 rounded-xl text-primary shrink-0 shadow-2xs">
+                                    <Target className="w-6 h-6" />
+                                </div>
+                                <CardTitle className="text-xl sm:text-2xl font-black text-foreground tracking-tight truncate min-w-0">
+                                    Giao Định Mức Chỉ Tiêu Công Việc Theo Vị Trí Việc Làm
+                                </CardTitle>
+                                <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-semibold gap-1 border-primary/20 shrink-0">
+                                    <Scale className="w-3 h-3" /> NĐ 62 • NĐ 106 • QĐ 137
+                                </Badge>
+                            </div>
+                            <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-4xl leading-relaxed break-words min-w-0">
+                                Kế thừa trực tiếp Định biên biên chế từ Quản trị Tổ chức, thiết lập chỉ tiêu số lượng công việc theo <strong className="text-foreground">Tháng</strong>, <strong className="text-foreground">Quý</strong>, và <strong className="text-foreground">Năm</strong> làm căn cứ giao việc và đánh giá KPI.
+                            </CardDescription>
                         </div>
-                        <div className="w-full sm:w-[300px]">
+
+                        {/* ACTIONS & SELECTOR */}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0 min-w-0">
+                            {/* NÚT TRỢ LÝ AI NỔI BẬT */}
+                            <Button
+                                onClick={() => setIsAiModalOpen(true)}
+                                size="lg"
+                                className="gap-2 font-black rounded-xl bg-linear-to-r from-indigo-600 via-primary to-purple-600 text-white shadow-md hover:shadow-lg hover:scale-102 active:scale-98 transition-all text-xs sm:text-sm px-4 h-11 shrink-0"
+                            >
+                                <Sparkles className="w-4 h-4 animate-pulse text-amber-300 shrink-0" />
+                                <span>Trợ lý AI Đề xuất Định mức & Kế hoạch</span>
+                            </Button>
+
+                            {/* BỘ CHỌN BỘ PHẬN TỔ CHỨC */}
+                            <div className="w-full sm:w-[320px] shrink-0 min-w-0 bg-background/80 p-2 rounded-xl border border-border/80 shadow-2xs">
+                                <div className="flex items-center justify-between mb-1 px-1">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                                        <Building2 className="w-3 h-3 text-primary" />
+                                        Bộ phận tổ chức
+                                    </span>
+                                    {selectedUnit && (
+                                        <Badge variant="outline" className="text-[9px] font-mono py-0 h-4 bg-muted/40">
+                                            {selectedUnit.code}
+                                        </Badge>
+                                    )}
+                                </div>
+                                <OrganizationUnitSelector
+                                    value={selectedUnitCode}
+                                    onChange={(code) => setSelectedUnitCode(code)}
+                                    unitTree={unitTree}
+                                    isLoading={isLoadingOrgTree}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* MINI STATS RIBBON */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-4 mt-2 border-t border-border/50 text-xs min-w-0">
+                        <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                            <span className="text-[10px] text-muted-foreground block truncate">Vị trí việc làm</span>
+                            <span className="font-bold text-foreground text-xs truncate block mt-0.5">
+                                {activeRankObj?.name || activeRankFilter || 'Chưa chọn VTVL'}
+                            </span>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                            <span className="text-[10px] text-muted-foreground block truncate">Biên chế theo định biên</span>
+                            <span className="font-bold text-foreground text-xs truncate block mt-0.5">
+                                {activeRankObj?.quantity != null
+                                    ? `${activeRankObj.quantity} biên chế (${activeRankObj.currentCount ?? 0} hiện có)`
+                                    : 'Áp dụng dùng chung'}
+                            </span>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                            <span className="text-[10px] text-muted-foreground block truncate">Nhiệm vụ đã gán</span>
+                            <span className="font-bold text-primary text-xs truncate block mt-0.5">
+                                {addedPlans.length} nhiệm vụ
+                            </span>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
+                            <span className="text-[10px] text-muted-foreground block truncate">Tổng chỉ tiêu Tháng / Quý / Năm</span>
+                            <span className="font-bold text-foreground text-xs truncate block mt-0.5">
+                                <span className="text-blue-600 dark:text-blue-400">{summaryTotals.month}</span> /{' '}
+                                <span className="text-amber-600 dark:text-amber-400">{summaryTotals.quarter}</span> /{' '}
+                                <span className="text-emerald-600 dark:text-emerald-400">{summaryTotals.year}</span>
+                            </span>
+                        </div>
+
+                        <div className="p-2.5 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs col-span-2 sm:col-span-1">
+                            <span className="text-[10px] text-muted-foreground block truncate">Tổng trọng số (W%)</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className={`font-black text-xs ${totalWeight === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                    {totalWeight}%
+                                </span>
+                                {totalWeight === 100 ? (
+                                    <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 py-0 h-4">
+                                        Chuẩn 100%
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 py-0 h-4">
+                                        Cần cân đối 100%
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+
+            {/* MAIN CONTENT AREA */}
+            <div className="flex-1 flex flex-col lg:flex-row min-h-[620px] gap-4 min-w-0">
+                {/* CỘT TRÁI: KHU VỰC THIẾT LẬP CHỈ TIÊU & BẢNG ĐỊNH BIÊN */}
+                <div className="flex-1 min-w-0 flex flex-col bg-card rounded-2xl border shadow-xs overflow-hidden h-full">
+                    {/* THANH THÔNG TIN VỊ TRÍ ĐANG CHỌN & LĨNH VỰC */}
+                    <div className="p-4 border-b bg-muted/20 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-2 h-7 bg-primary rounded-full shrink-0" />
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                    <Heading level="h4" className="font-extrabold text-foreground truncate text-base min-w-0">
+                                        {activeRankObj?.name || activeRankFilter || 'Chưa chọn VTVL'}
+                                    </Heading>
+                                    {activeRankObj?.quantity != null && (
+                                        <Badge variant="secondary" className="text-xs bg-primary/10 text-primary font-semibold border-primary/20 shrink-0">
+                                            Định biên: {activeRankObj.quantity} biên chế ({activeRankObj.currentCount ?? 0} hiện có)
+                                        </Badge>
+                                    )}
+                                </div>
+                                <Text variant="small" className="text-xs text-muted-foreground mt-0.5 font-normal truncate block min-w-0">
+                                    Mã VTVL: <code className="font-mono font-medium">{activeRankFilter || '---'}</code>
+                                    {selectedUnit ? ` • Thuộc: ${selectedUnit.name}` : ' • Áp dụng dùng chung'}
+                                </Text>
+                            </div>
+                        </div>
+
+                        {/* SELECT LĨNH VỰC CHUYÊN MÔN */}
+                        <div className="w-full sm:w-[300px] shrink-0 min-w-0">
                             <Select value={activeDomainFilter} onValueChange={setActiveDomainFilter}>
-                                <SelectTrigger className="h-10 rounded-xl bg-background border-input shadow-sm">
-                                    <SelectValue placeholder="Chọn lĩnh vực..." />
+                                <SelectTrigger className="h-10 rounded-xl bg-background border-input shadow-xs text-xs">
+                                    <SelectValue placeholder="Chọn mảng nghiệp vụ..." />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {DOMAINS.map(domain => (
-                                        <SelectItem key={domain.code} value={domain.code} className="cursor-pointer">
+                                        <SelectItem key={domain.code} value={domain.code} className="cursor-pointer text-xs">
                                             {domain.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-
-                            <div className="flex w-full sm:w-auto items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
-                                <div className="px-3 text-xs font-medium text-muted-foreground border-r border-input bg-muted/50 h-full flex items-center">Trọng số</div>
-                                <Input
-                                    type="number"
-                                    value={weight}
-                                    onChange={e => setWeight(Math.max(0.1, Number(e.target.value)))}
-                                    className="w-20 h-full border-0 focus-visible:ring-0 text-center font-semibold text-sm bg-transparent"
-                                    step="0.1"
-                                />
-                            </div>
-
                         </div>
                     </div>
 
-                    <div className="p-4 border-b bg-background flex flex-col xl:flex-row gap-4 items-start xl:items-center justify-between">
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full flex-1 min-w-0">
-                            <Select
-                                value={selectedTaskId}
-                                onValueChange={val => {
-                                    setSelectedTaskId(val);
-                                    const task = availableTasks.find(t => t.id === val);
-                                    if (task) setTargetValue(task.defaultWeight);
-                                }}
-                            >
-                                <SelectTrigger className="w-full flex-1 min-w-0 h-10 rounded-xl bg-background shadow-sm border-input">
-                                    <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ thư viện --" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableTasks.map(task => {
-                                        const isAdded = addedPlans.some(p => p.title === task.taskName);
-                                        return (
-                                            <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-sm">
-                                                <div className="truncate max-w-[300px] sm:max-w-[400px] md:max-w-[600px]">
-                                                    {task.taskName} {isAdded ? <Text as="span" variant="small" className="text-muted-foreground ml-1 italic font-normal">(Đã thêm)</Text> : ''}
-                                                </div>
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
+                    {/* KHỐI INPUT GÁN NHIỆM VỤ & CHỈ TIÊU THÁNG / QUÝ / NĂM */}
+                    <div className="p-4 border-b bg-background/80 space-y-3 min-w-0">
+                        <div className="flex items-center justify-between min-w-0">
+                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 truncate min-w-0">
+                                <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                                Thêm nhiệm vụ định biên & Chỉ tiêu thực hiện
+                            </span>
+                            <span className="text-[11px] text-muted-foreground italic shrink-0 hidden sm:inline">
+                                * Quý (x3) và Năm (x12) tự động tính từ Tháng
+                            </span>
+                        </div>
 
-                            <div className="flex w-full sm:w-auto items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-sm shrink-0">
-                                <div className="px-3 text-xs font-medium text-muted-foreground border-r border-input bg-muted/50 h-full flex items-center">Chỉ tiêu</div>
-                                <Input
-                                    type="number"
-                                    value={targetValue}
-                                    onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
-                                    className="w-20 h-full border-0 focus-visible:ring-0 text-center font-semibold text-sm bg-transparent"
-                                />
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end min-w-0">
+                            {/* CHỌN NHIỆM VỤ TỪ THƯ VIỆN MẪU */}
+                            <div className="md:col-span-5 space-y-1 min-w-0">
+                                <Label className="text-xs text-muted-foreground font-medium">Nhiệm vụ mẫu từ thư viện</Label>
+                                <Select
+                                    value={selectedTaskId}
+                                    onValueChange={val => {
+                                        setSelectedTaskId(val);
+                                        const task = rankTasksRepository.find(t => t.id === val);
+                                        if (task) {
+                                            setWeight(task.defaultWeight || 1);
+                                        }
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full h-10 rounded-xl bg-background shadow-xs border-input text-xs min-w-0">
+                                        <SelectValue placeholder="-- Chọn nhiệm vụ mẫu từ kho nghiệp vụ --" />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-72">
+                                        {availableTasks.map(task => {
+                                            const isAdded = addedPlans.some(p => p.title === task.taskName);
+                                            return (
+                                                <SelectItem key={task.id} value={task.id} disabled={isAdded} className="text-xs">
+                                                    <div className="truncate max-w-[420px]">
+                                                        {task.taskName} {isAdded ? <span className="text-muted-foreground italic font-normal ml-1">(Đã thêm)</span> : ''}
+                                                    </div>
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
-                            <Button
-                                onClick={handleAssignTask}
-                                disabled={!selectedTaskId}
-                                className="w-full sm:w-auto h-10 px-5 rounded-xl font-semibold shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0"
-                             iconStart={<Plus className="w-4 h-4" />}>Thêm</Button>
+                            {/* CHỈ TIÊU THÁNG */}
+                            <div className="md:col-span-2 space-y-1 min-w-0">
+                                <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                                    <Calendar className="w-3 h-3 text-blue-500 shrink-0" />
+                                    Tháng
+                                </Label>
+                                <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={0.5}
+                                        value={monthlyTarget}
+                                        onChange={e => handleMonthlyTargetChange(Number(e.target.value))}
+                                        className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* CHỈ TIÊU QUÝ */}
+                            <div className="md:col-span-2 space-y-1 min-w-0">
+                                <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                                    <Calendar className="w-3 h-3 text-amber-500 shrink-0" />
+                                    Quý
+                                </Label>
+                                <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={0.5}
+                                        value={quarterlyTarget}
+                                        onChange={e => setQuarterlyTarget(Math.max(0.1, Number(e.target.value)))}
+                                        className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent text-amber-600 dark:text-amber-400"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* CHỈ TIÊU NĂM */}
+                            <div className="md:col-span-2 space-y-1 min-w-0">
+                                <Label className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                                    <Calendar className="w-3 h-3 text-emerald-500 shrink-0" />
+                                    Năm
+                                </Label>
+                                <div className="flex items-center bg-background border border-input rounded-xl overflow-hidden h-10 shadow-xs">
+                                    <Input
+                                        type="number"
+                                        min={0.1}
+                                        step={1}
+                                        value={yearlyTarget}
+                                        onChange={e => setYearlyTarget(Math.max(0.1, Number(e.target.value)))}
+                                        className="h-full border-0 focus-visible:ring-0 text-center font-bold text-sm bg-transparent text-emerald-600 dark:text-emerald-400"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* NÚT THÊM */}
+                            <div className="md:col-span-1 min-w-0">
+                                <Button
+                                    onClick={handleAssignTask}
+                                    disabled={!selectedTaskId}
+                                    className="w-full h-10 rounded-xl font-bold shadow-xs transition-all hover:scale-105 active:scale-95"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-hidden bg-background relative">
-                        <ScrollArea className="h-full">
-                            <Table className="w-full table-fixed">
-                                <TableHeader className="bg-muted/50 sticky top-0 backdrop-blur-sm z-10">
+                    {/* BẢNG CHỈ TIÊU BẮT BUỘC THEO THÁNG / QUÝ / NĂM */}
+                    <div className="flex-1 overflow-hidden bg-background relative flex flex-col min-w-0">
+                        <ScrollArea className="flex-1 h-full min-w-0">
+                            <Table className="w-full table-fixed min-w-0">
+                                <TableHeader className="bg-muted/50 sticky top-0 backdrop-blur-sm z-10 border-b">
                                     <TableRow className="hover:bg-transparent">
-                                        <TableHead className="font-semibold text-muted-foreground">Tên nhiệm vụ</TableHead>
-                                        <TableHead className="w-[100px] font-semibold text-muted-foreground text-center">Đơn vị</TableHead>
-                                        <TableHead className="w-[120px] font-semibold text-muted-foreground text-center">Chỉ tiêu</TableHead>
-                                        <TableHead className="w-[100px] font-semibold text-muted-foreground text-center">Trọng số</TableHead>
-                                        <TableHead className="w-[80px]"></TableHead>
+                                        <TableHead className="w-[50px] text-center font-bold text-muted-foreground text-xs">STT</TableHead>
+                                        <TableHead className="font-bold text-muted-foreground text-xs min-w-0">Tên nhiệm vụ định biên bắt buộc</TableHead>
+                                        <TableHead className="w-[85px] font-bold text-muted-foreground text-center text-xs">Đơn vị</TableHead>
+                                        <TableHead className="w-[95px] font-bold text-blue-600 dark:text-blue-400 text-center text-xs">Chỉ tiêu Tháng</TableHead>
+                                        <TableHead className="w-[95px] font-bold text-amber-600 dark:text-amber-400 text-center text-xs">Chỉ tiêu Quý</TableHead>
+                                        <TableHead className="w-[95px] font-bold text-emerald-600 dark:text-emerald-400 text-center text-xs">Chỉ tiêu Năm</TableHead>
+                                        <TableHead className="w-[85px] font-bold text-muted-foreground text-center text-xs">Hệ số (W%)</TableHead>
+                                        <TableHead className="w-[60px] text-center"></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {addedPlans.map((plan, idx) => (
-                                        <TableRow key={plan.id} className="group transition-colors hover:bg-muted/10">
-                                            <TableCell className="font-medium text-foreground py-3 pr-4">
-                                                <div className="flex items-start gap-3">
-                                                    <Text as="span" className="flex items-center justify-center w-6 h-6 rounded-full bg-muted font-semibold text-muted-foreground shrink-0 mt-0.5">
-                                                        {idx + 1}
-                                                    </Text>
-                                                    <Text as="span" className="mt-0.5 leading-relaxed line-clamp-3 overflow-hidden text-ellipsis break-words font-normal">{plan.title}</Text>
+                                        <TableRow key={plan.id} className="group transition-colors hover:bg-muted/15 border-b">
+                                            <TableCell className="text-center font-bold text-xs text-muted-foreground py-3">
+                                                {idx + 1}
+                                            </TableCell>
+                                            <TableCell className="py-3 pr-2 min-w-0">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs sm:text-sm font-medium text-foreground leading-snug break-words">
+                                                        {plan.title}
+                                                    </p>
+                                                    <span className="text-[11px] text-muted-foreground font-mono">
+                                                        {plan.rankType}
+                                                    </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-center text-muted-foreground">
-                                                {plan.unit || 'Lượt'}
+                                            <TableCell className="text-center text-xs text-muted-foreground">
+                                                <Badge variant="outline" className="font-normal text-[11px] px-1.5 py-0 bg-muted/30">
+                                                    {plan.unit || 'Lượt'}
+                                                </Badge>
                                             </TableCell>
+
+                                            {/* Ô SỬA CHỈ TIÊU THÁNG */}
                                             <TableCell>
                                                 <div className="flex justify-center">
                                                     <Input
                                                         type="number"
-                                                        value={plan.targetValue}
+                                                        min={0.1}
+                                                        step={0.5}
+                                                        value={plan.monthlyTarget}
                                                         onChange={e => {
-                                                            const val = Number(e.target.value);
-                                                            setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
+                                                            const m = Number(e.target.value);
+                                                            setAddedPlans(prev => prev.map(p => p.id === plan.id ? {
+                                                                ...p,
+                                                                monthlyTarget: m,
+                                                                targetValue: m,
+                                                            } : p));
                                                         }}
-                                                        className="w-24 h-8 text-center font-bold text-sm bg-background border-input focus-visible:ring-primary/30 transition-shadow rounded-lg"
+                                                        className="w-18 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-blue-600 dark:text-blue-400"
                                                     />
                                                 </div>
                                             </TableCell>
 
+                                            {/* Ô SỬA CHỈ TIÊU QUÝ */}
                                             <TableCell>
                                                 <div className="flex justify-center">
                                                     <Input
                                                         type="number"
-                                                        value={plan.weight || 1}
+                                                        min={0.1}
+                                                        step={0.5}
+                                                        value={plan.quarterlyTarget}
                                                         onChange={e => {
-                                                            const val = Number(e.target.value);
-                                                            setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, weight: val } : p));
+                                                            const qua = Number(e.target.value);
+                                                            setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, quarterlyTarget: qua } : p));
                                                         }}
-                                                        className="w-24 h-8 text-center font-bold text-sm bg-background border-input focus-visible:ring-primary/30 transition-shadow rounded-lg"
-                                                        step="0.1"
+                                                        className="w-18 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-amber-600 dark:text-amber-400"
                                                     />
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-right">
+
+                                            {/* Ô SỬA CHỈ TIÊU NĂM */}
+                                            <TableCell>
+                                                <div className="flex justify-center">
+                                                    <Input
+                                                        type="number"
+                                                        min={0.1}
+                                                        step={1}
+                                                        value={plan.yearlyTarget}
+                                                        onChange={e => {
+                                                            const y = Number(e.target.value);
+                                                            setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, yearlyTarget: y } : p));
+                                                        }}
+                                                        className="w-18 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg text-emerald-600 dark:text-emerald-400"
+                                                    />
+                                                </div>
+                                            </TableCell>
+
+                                            {/* TRỌNG SỐ */}
+                                            <TableCell>
+                                                <div className="flex justify-center">
+                                                    <Input
+                                                        type="number"
+                                                        min={0.1}
+                                                        step={1}
+                                                        value={plan.weight || 1}
+                                                        onChange={e => {
+                                                            const w = Number(e.target.value);
+                                                            setAddedPlans(prev => prev.map(p => p.id === plan.id ? { ...p, weight: w } : p));
+                                                        }}
+                                                        className="w-16 h-8 text-center font-bold text-xs bg-background border-input focus-visible:ring-primary/30 rounded-lg"
+                                                    />
+                                                </div>
+                                            </TableCell>
+
+                                            {/* XÓA */}
+                                            <TableCell className="text-center">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
-                                                    className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                                    onClick={() => setAddedPlans(prev => prev.filter(p => p.id !== plan.id))}
+                                                    className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg opacity-70 group-hover:opacity-100 transition-all"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
+
                                     {addedPlans.length === 0 && (
                                         <TableRow>
-                                            <TableCell colSpan={4} className="h-[300px] text-center">
-                                                <div className="flex flex-col items-center justify-center text-muted-foreground space-y-3">
-                                                    <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
-                                                        <Target className="w-8 h-8 opacity-20" />
+                                            <TableCell colSpan={8} className="h-[280px] text-center">
+                                                <div className="flex flex-col items-center justify-center text-muted-foreground space-y-2.5">
+                                                    <div className="w-14 h-14 rounded-full bg-muted/40 flex items-center justify-center">
+                                                        <Target className="w-7 h-7 opacity-30 text-primary" />
                                                     </div>
-                                                    <Text variant="small" className="font-normal">Chưa có nhiệm vụ bắt buộc nào cho vị trí việc làm này.</Text>
-                                                    // eslint-disable-next-line react/no-unescaped-entities
-                                                    <Text variant="small" className="opacity-60 font-normal">Hãy chọn một nhiệm vụ mẫu từ thư viện và nhấn "Thêm"</Text>
+                                                    <Text variant="small" className="font-semibold text-foreground">Chưa có nhiệm vụ định biên nào cho vị trí việc làm này</Text>
+                                                    <Text variant="small" className="opacity-70 text-xs font-normal max-w-sm">
+                                                        Bạn có thể dùng nút &quot;Trợ lý AI Đề xuất&quot; phía trên hoặc chọn nhiệm vụ mẫu ở khung để thiết lập.
+                                                    </Text>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -381,117 +791,224 @@ export function ManualPlanSelectorByRankClient() {
                                 </TableBody>
                             </Table>
                         </ScrollArea>
+
+                        {/* THANH TỔNG HỢP CHỈ TIÊU NHANH TRÊN BẢNG */}
+                        {addedPlans.length > 0 && (
+                            <div className="p-3 bg-muted/30 border-t flex flex-wrap items-center justify-between gap-3 text-xs min-w-0">
+                                <span className="text-muted-foreground">
+                                    Tổng số nhiệm vụ: <strong className="text-foreground">{addedPlans.length}</strong>
+                                </span>
+                                <div className="flex items-center gap-4 flex-wrap">
+                                    <span className="text-blue-600 dark:text-blue-400 font-medium">
+                                        Tổng Tháng: <strong>{summaryTotals.month}</strong>
+                                    </span>
+                                    <span className="text-amber-600 dark:text-amber-400 font-medium">
+                                        Tổng Quý: <strong>{summaryTotals.quarter}</strong>
+                                    </span>
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                                        Tổng Năm: <strong>{summaryTotals.year}</strong>
+                                    </span>
+                                    <span className={`font-bold ${totalWeight === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                        Tổng Trọng số: <strong>{totalWeight}%</strong>
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN: FILTER SECTION */}
-                <div className="w-full lg:w-[350px] xl:w-[400px] shrink-0 flex flex-col gap-4 bg-card text-card-foreground rounded-2xl border p-4 shadow-sm h-full overflow-hidden">
-                    <div className="space-y-3 shrink-0">
-                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Phân loại VTVL</Label>
-                        <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
-                            <TabsList className="w-full grid grid-cols-3 p-1 bg-muted rounded-xl">
-                                <TabsTrigger value="CONG_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs">Công chức</TabsTrigger>
-                                <TabsTrigger value="VIEN_CHUC" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs">Viên chức</TabsTrigger>
-                                <TabsTrigger value="DANG" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs">Khối Đảng</TabsTrigger>
+                {/* CỘT PHẢI: BỘ LỌC & DANH SÁCH VỊ TRÍ VIỆC LÀM THEO BỘ PHẬN HOẶC TOÀN HỆ THỐNG */}
+                <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-3 bg-card text-card-foreground rounded-2xl border p-4 shadow-xs h-full overflow-hidden min-w-0">
+                    {/* TABS CHUYỂN ĐỔI NGUỒN VTVL */}
+                    <div className="space-y-2 shrink-0 min-w-0">
+                        <div className="flex items-center justify-between min-w-0">
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 truncate">
+                                <Layers className="w-3.5 h-3.5 text-primary shrink-0" />
+                                Nguồn Vị trí việc làm
+                            </Label>
+                            {unitPositionsList.length > 0 && (
+                                <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary shrink-0">
+                                    Bộ phận có {unitPositionsList.length} VTVL
+                                </Badge>
+                            )}
+                        </div>
+
+                        <Tabs value={vtvlViewSource} onValueChange={(val: any) => setVtvlViewSource(val)} className="w-full">
+                            <TabsList className="w-full grid grid-cols-2 p-1 bg-muted rounded-xl h-9">
+                                <TabsTrigger value="DEPARTMENT" className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                                    Của bộ phận ({unitPositionsList.length})
+                                </TabsTrigger>
+                                <TabsTrigger value="ALL" className="rounded-lg text-xs font-semibold data-[state=active]:bg-background data-[state=active]:shadow-xs">
+                                    Tất cả danh mục chuẩn
+                                </TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
 
-                    <div className="space-y-3 flex-1 flex flex-col min-h-0">
-                        <div className="flex flex-col gap-2 shrink-0">
-                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhóm Ngành / Vị trí</Label>
-                            <Popover open={isGroupOpen} onOpenChange={setIsGroupOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        aria-expanded={isGroupOpen}
-                                        className="w-full justify-between h-10 rounded-xl bg-background shadow-sm border-input font-normal"
-                                    >
-                                        <span className="truncate">{activeGroup === 'ALL' ? 'Tất cả các ngành' : currentGroups.find(g => g.id === activeGroup)?.name || 'Chọn nhóm ngành...'}</span>
-                                        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[350px] lg:w-[300px] xl:w-[350px] p-0" align="start">
-                                    <Command>
-                                        <CommandInput placeholder="Tìm nhanh nhóm ngành..." className="h-9" />
-                                        <CommandList>
-                                            <CommandEmpty>Không tìm thấy nhóm.</CommandEmpty>
-                                            <CommandGroup>
-                                                {currentGroups.map(group => (
-                                                    <CommandItem
-                                                        key={group.id}
-                                                        value={group.name}
-                                                        onSelect={() => {
-                                                            setActiveGroup(group.id);
-                                                            setIsGroupOpen(false);
-                                                        }}
-                                                    >
-                                                        {group.name}
-                                                        <Check className={cn("ml-auto h-4 w-4", activeGroup === group.id ? "opacity-100" : "opacity-0")} />
-                                                    </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
+                    {/* NẾU CHỌN TẤT CẢ DANH MỤC CHUẨN: HIỂN THỊ PHÂN LOẠI CÔNG CHỨC / VIÊN CHỨC / KHỐI ĐẢNG */}
+                    {vtvlViewSource === 'ALL' && (
+                        <div className="space-y-2 shrink-0 pt-1 border-t min-w-0">
+                            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Phân loại ngạch</Label>
+                            <Tabs value={classification} onValueChange={(val: any) => setClassification(val)} className="w-full">
+                                <TabsList className="w-full grid grid-cols-3 p-1 bg-muted rounded-xl h-8">
+                                    <TabsTrigger value="CONG_CHUC" className="rounded-lg text-[11px]">Công chức</TabsTrigger>
+                                    <TabsTrigger value="VIEN_CHUC" className="rounded-lg text-[11px]">Viên chức</TabsTrigger>
+                                    <TabsTrigger value="DANG" className="rounded-lg text-[11px]">Khối Đảng</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                        </div>
+                    )}
+
+                    {/* LỌC THEO NHÓM NGÀNH / VỊ TRÍ */}
+                    <div className="space-y-1.5 shrink-0 min-w-0">
+                        <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Nhóm Ngành / Vị trí</Label>
+                        <Popover open={isGroupOpen} onOpenChange={setIsGroupOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={isGroupOpen}
+                                    className="w-full justify-between h-9 rounded-xl bg-background shadow-xs border-input font-normal text-xs"
+                                >
+                                    <span className="truncate">{activeGroup === 'ALL' ? 'Tất cả các nhóm' : currentGroups.find(g => g.id === activeGroup)?.name || 'Chọn nhóm ngành...'}</span>
+                                    <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[320px] p-0" align="start">
+                                <Command>
+                                    <CommandInput placeholder="Tìm nhanh nhóm ngành..." className="h-9 text-xs" />
+                                    <CommandList>
+                                        <CommandEmpty>Không tìm thấy nhóm.</CommandEmpty>
+                                        <CommandGroup>
+                                            {currentGroups.map(group => (
+                                                <CommandItem
+                                                    key={group.id}
+                                                    value={group.name}
+                                                    onSelect={() => {
+                                                        setActiveGroup(group.id);
+                                                        setIsGroupOpen(false);
+                                                    }}
+                                                    className="text-xs"
+                                                >
+                                                    {group.name}
+                                                    <Check className={cn("ml-auto h-3.5 w-3.5", activeGroup === group.id ? "opacity-100" : "opacity-0")} />
+                                                </CommandItem>
+                                            ))}
+                                        </CommandGroup>
+                                    </CommandList>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+
+                    {/* Ô TÌM KIẾM VTVL */}
+                    <div className="relative shrink-0 min-w-0">
+                        <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-muted-foreground" />
+                        <Input 
+                            placeholder="Lọc theo tên VTVL hoặc mã..." 
+                            value={searchRankText}
+                            onChange={e => setSearchRankText(e.target.value)}
+                            className="pl-8.5 h-8.5 text-xs rounded-xl border-input bg-muted/20 focus-visible:bg-background"
+                        />
+                    </div>
+
+                    {/* DANH SÁCH CUỘN VTVL */}
+                    <div className="flex-1 min-h-0 overflow-hidden flex flex-col min-w-0">
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground pb-1.5 px-0.5 min-w-0">
+                            <span>Danh sách ({filteredRanksList.length} VTVL)</span>
+                            {isLoadingStaffing && <RefreshCw className="w-3 h-3 animate-spin text-primary shrink-0" />}
                         </div>
 
-                        <div className="flex items-center justify-between shrink-0 mt-1">
-                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Danh mục Vị trí việc làm</Label>
-                        </div>
-                        <div className="relative shrink-0">
-                            <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
-                            <Input 
-                                placeholder="Lọc theo tên ngành hoặc mã..." 
-                                value={searchRankText}
-                                onChange={e => setSearchRankText(e.target.value)}
-                                className="pl-9 h-9 text-sm rounded-lg border-muted/60 bg-muted/20 focus-visible:bg-white"
-                            />
-                        </div>
-                        <div className="flex-1 min-h-0 overflow-hidden">
-                            <ScrollArea className="h-full pr-4">
-                                <div className="space-y-2 pb-4">
-                                    {filteredRanksList.map((rank: any) => (
+                        <ScrollArea className="flex-1 h-full pr-2 min-w-0">
+                            <div className="space-y-2 pb-3 min-w-0">
+                                {filteredRanksList.map((rank: any) => {
+                                    const isSelected = activeRankFilter === rank.code;
+                                    return (
                                         <div
                                             key={rank.code}
                                             onClick={() => setActiveRankFilter(rank.code)}
-                                            className={`p-3 rounded-xl border cursor-pointer transition-all ${activeRankFilter === rank.code
-                                                ? 'bg-primary/10 border-primary shadow-sm'
-                                                : 'bg-background border-transparent hover:bg-muted/50 hover:border-muted'
+                                            className={`p-3 rounded-xl border cursor-pointer transition-all min-w-0 ${isSelected
+                                                ? 'bg-primary/10 border-primary shadow-xs ring-1 ring-primary/20'
+                                                : 'bg-background border-border/70 hover:bg-muted/40 hover:border-primary/40'
                                                 }`}
                                         >
-                                            <h4 className={`text-sm font-semibold leading-tight ${activeRankFilter === rank.code ? 'text-primary' : 'text-foreground'}`}>
-                                                {rank.name}
-                                            </h4>
-                                            <Text variant="small" className="text-[11px] text-muted-foreground font-mono mt-1 font-normal">{rank.code}</Text>
+                                            <div className="flex items-start justify-between gap-2 min-w-0">
+                                                <h4 className={`text-xs sm:text-sm font-semibold leading-snug break-words min-w-0 ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                                                    {rank.name}
+                                                </h4>
+                                                {rank.quantity != null && (
+                                                    <Badge variant="outline" className="text-[10px] shrink-0 font-bold bg-muted/50 border-primary/20 text-foreground">
+                                                        {rank.quantity} ĐB
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center justify-between mt-1 text-[11px] text-muted-foreground font-mono min-w-0">
+                                                <span className="truncate">{rank.code}</span>
+                                                {rank.currentCount != null && (
+                                                    <span className="font-sans text-[10px] text-muted-foreground shrink-0">
+                                                        Hiện có: {rank.currentCount}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </ScrollArea>
-                        </div>
+                                    );
+                                })}
+
+                                {filteredRanksList.length === 0 && (
+                                    <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                                        Không tìm thấy vị trí việc làm nào phù hợp.
+                                    </div>
+                                )}
+                            </div>
+                        </ScrollArea>
                     </div>
                 </div>
-            </CardContent>
+            </div>
 
-            <CardFooter className="flex justify-between items-center px-6 py-4 border-t bg-card relative z-10 shrink-0">
-                <div className="text-xs text-muted-foreground">
-                    Tổng số nhiệm vụ định biên: <strong className="text-foreground">{addedPlans.length}</strong>
-                </div>
-                <Button
-                    onClick={handleSubmitPlan}
-                    disabled={isPending || addedPlans.length === 0}
-                    size="lg"
-                    className="gap-2 font-bold px-8 rounded-xl shadow-md hover:shadow-lg transition-all"
-                >
-                    {isPending ? (
-                        <>Đang lưu...</>
-                    ) : (
-                        <><Save className="w-4 h-4" /> LƯU CẤU TRÚC ĐỊNH BIÊN</>
-                    )}
-                </Button>
-            </CardFooter>
-        </Card>
+            {/* ACTION FOOTER BAR */}
+            <Card className="rounded-2xl border shadow-sm bg-card shrink-0 min-w-0">
+                <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-4 min-w-0">
+                    <div className="text-xs text-muted-foreground flex items-center gap-4 flex-wrap min-w-0">
+                        <span className="truncate">
+                            Đang cấu hình: <strong className="text-foreground">{activeRankObj?.name || activeRankFilter}</strong>
+                        </span>
+                        <span>•</span>
+                        <span>
+                            Tổng nhiệm vụ: <strong className="text-foreground">{addedPlans.length}</strong>
+                        </span>
+                        <span>•</span>
+                        <span className={totalWeight === 100 ? 'text-emerald-600 font-semibold' : 'text-amber-600 font-semibold'}>
+                            Trọng số: {totalWeight}%
+                        </span>
+                    </div>
+                    <Button
+                        onClick={handleSubmitPlan}
+                        disabled={isSavingPlan || addedPlans.length === 0}
+                        size="lg"
+                        className="w-full sm:w-auto gap-2 font-bold px-8 rounded-xl shadow-md hover:shadow-lg transition-all"
+                    >
+                        {isSavingPlan ? (
+                            <>Đang lưu...</>
+                        ) : (
+                            <><Save className="w-4 h-4" /> LƯU CẤU TRÚC ĐỊNH BIÊN</>
+                        )}
+                    </Button>
+                </CardFooter>
+            </Card>
+
+            {/* MODAL TRỢ LÝ AI ĐỀ XUẤT ĐỊNH MỨC & KẾ HOẠCH */}
+            <AiQuotaPlanModal
+                isOpen={isAiModalOpen}
+                onClose={() => setIsAiModalOpen(false)}
+                unitName={selectedUnit?.name || 'Đơn vị'}
+                unitCode={selectedUnitCode}
+                rankName={activeRankObj?.name || activeRankFilter}
+                rankCode={activeRankFilter}
+                classification={classification}
+                domainCode={activeDomainFilter}
+                headcount={activeRankObj?.quantity || 1}
+                onApplyQuotas={handleApplyAiQuotas}
+            />
+        </div>
     );
 }

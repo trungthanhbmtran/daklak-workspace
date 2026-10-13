@@ -45,7 +45,10 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
     const groupRanks = (allRanks: any[]) => {
         const groups: Record<string, any[]> = {};
         allRanks.forEach(r => {
-            const cat = r.category || 'Khác';
+            let cat = r.category || 'Khác';
+            if (cat === 'EXECUTIVE' || cat === 'MANAGER') cat = 'Chức danh Lãnh đạo, quản lý';
+            else if (cat === 'STAFF') cat = 'Chức danh nghề nghiệp chuyên ngành & Dùng chung';
+            else if (cat === 'SUPPORT') cat = 'Hỗ trợ, phục vụ';
             if (!groups[cat]) {
                 groups[cat] = [];
             }
@@ -58,9 +61,10 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
     return (
         <div className="flex flex-col md:flex-row gap-6 h-[600px]">
             {/* Left Sidebar: Ranks */}
-            <div className="w-full md:w-[280px] flex-shrink-0 flex flex-col h-full border rounded-xl overflow-hidden bg-background shadow-sm">
-                <div className="p-4 bg-muted/30 border-b flex-shrink-0">
-                    <Heading level="h4" className="font-semibold uppercase tracking-wider">Danh mục Vị trí việc làm</Heading>
+            <div className="w-full md:w-[280px] shrink-0 flex flex-col h-full border rounded-xl overflow-hidden bg-background shadow-xs">
+                <div className="p-4 bg-muted/30 border-b shrink-0 space-y-1">
+                    <Heading level="h4" className="font-semibold uppercase tracking-wider text-xs">VTVL Khối Viên chức</Heading>
+                    <p className="text-[11px] text-muted-foreground leading-tight break-words">Theo Nghị định 106/2020/NĐ-CP & NĐ 115/2020/NĐ-CP</p>
                 </div>
                 <ScrollArea className="flex-1 w-full">
                     <Accordion type="multiple" defaultValue={Object.keys(rankGroups)} className="w-full">

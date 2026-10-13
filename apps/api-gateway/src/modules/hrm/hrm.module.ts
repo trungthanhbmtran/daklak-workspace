@@ -23,6 +23,7 @@ import { EmployeeService } from './employee.service';
     registerGrpcService(MICROSERVICES.MASTER_PLAN),
     registerGrpcService(MICROSERVICES.RANK_QUOTA),
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
+    registerGrpcService(MICROSERVICES.AI),
   ],
   controllers: [
     EmployeeController,

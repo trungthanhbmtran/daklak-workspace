@@ -7,7 +7,7 @@ import { CategoryItem } from '@/features/system-admin/categories/types';
 interface UseTaskConfigFormProps {
     templates: any[];
     ranks: CategoryItem[];
-    classification: 'CONG_CHUC' | 'VIEN_CHUC';
+    classification: 'CONG_CHUC' | 'VIEN_CHUC' | 'DANG';
     defaultRank: string;
 }
 

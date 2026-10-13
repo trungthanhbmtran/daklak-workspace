@@ -19,6 +19,11 @@ message RankQuota {
   float weight = 6;
   string createdAt = 7;
   string updatedAt = 8;
+  int32 departmentId = 10;
+  float monthlyTarget = 11;
+  float quarterlyTarget = 12;
+  float yearlyTarget = 13;
+  string unitCode = 14;
 }
 
 message RankQuotaPayload {
@@ -26,12 +31,19 @@ message RankQuotaPayload {
   string unit = 2;
   float targetValue = 3;
   float weight = 4;
+  int32 departmentId = 5;
+  float monthlyTarget = 6;
+  float quarterlyTarget = 7;
+  float yearlyTarget = 8;
+  string unitCode = 9;
 }
 
 message SaveRankQuotasRequest {
   string rankCode = 1;
   string domainCode = 3;
   repeated RankQuotaPayload quotas = 2;
+  int32 departmentId = 4;
+  string unitCode = 5;
 }
 
 message SaveRankQuotasResponse {
@@ -43,6 +55,8 @@ message SaveRankQuotasResponse {
 message GetRankQuotasByRankRequest {
   string rankCode = 1;
   string domainCode = 2;
+  int32 departmentId = 3;
+  string unitCode = 4;
 }
 
 message RankQuotaList {

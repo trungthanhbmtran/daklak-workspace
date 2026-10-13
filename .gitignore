@@ -52,12 +52,6 @@ logs/
 !.agents/agents/chatgpt-planner.md
 !.agents/agents/chatgpt-planner.toml
 !.agents/agents/gemini-executor.md
-!.agents/agents/backend-coder.md
-!.agents/agents/frontend-coder.md
-!.agents/agents/backend-coder/
-!.agents/agents/backend-coder/agent.md
-!.agents/agents/frontend-coder/
-!.agents/agents/frontend-coder/agent.md
 !.agents/subagents/
 .agents/subagents/*
 !.agents/subagents/README.md
@@ -91,3 +85,12 @@ docs/*
 !docs/diagrams/
 !docs/diagrams/**
 !docs/rebuild api manager/
+!.agents/commands/code1.md
+!.agents/commands/code2.md
+!.agents/execution_logs/
+!.agents/execution_logs/**
+
+!.agents/skills/code1/
+!.agents/skills/code1/*
+!.agents/skills/code2/
+!.agents/skills/code2/*

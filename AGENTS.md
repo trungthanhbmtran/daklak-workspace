@@ -1,14 +1,12 @@
 # Repository Agent Entry Point
 
-Read [.agents/AGENTS.md](.agents/AGENTS.md) and the Codex role guide at [.agents/roles/codex-orchestrator.md](.agents/roles/codex-orchestrator.md) before changing product code. They define this repository's shared engineering charter and operating protocol.
+Tất cả quy tắc, ràng buộc kỹ thuật và quy trình thực thi của dự án được quy định tập trung tại:
+👉 [.agents/AGENTS.md](.agents/AGENTS.md)
 
-## Required multi-agent sequence
+## Nguyên tắc vận hành
 
-1. Codex acts as planner: inspect the request, current working-tree changes, and relevant source files. Cross-check `.agents/rules/blacklist.md`, the relevant architecture/source-of-truth maps, matching entries in `.agents/execution_log.md`, and Git history for affected paths. Verify historical claims against current code; do not copy old fixes blindly. Write the contract, acceptance criteria, dependencies, exact file ownership, and verification commands to `.agents/current_plan.md`.
-2. Codex critiques the plan against the charter, blacklist, relevant historical incidents, architecture evidence, and checklists. Resolve findings and record `PLAN_APPROVED` before any product-code edits. If a material requirement remains ambiguous, ask the user first.
-3. Once approved, prepare two Antigravity handoffs for independent Backend and Frontend tasks. When `daklak-agent-orchestrator` MCP tools are available and configured, prepare isolated worktrees and dispatch both lanes in parallel. The runners may use one explicitly shared signed-in account or independently isolated accounts according to `.agent-orchestrator.local.json`; never describe shared mode as separate account sessions. If tools or runners are unavailable, return ready-to-run prompts and state the blocker; do not claim they ran. Use only the relevant coder for one-lane tasks.
-4. Review each coder's worktree separately as soon as it completes. Record AGENT_ACCEPTED or AGENT_REVISION_REQUIRED for that lane and write its auditable decision record under `.agents/reports/<task-id>/`; return only its findings to that coder and keep it out of integration until accepted. After both lanes are accepted, integrate them and run a final cross-lane contract and verification review. Coders do not edit coordinator-owned planning or logs.
-
-Antigravity workspace agent profiles belong in `.agents/agents/`. Repository files define roles and handoff instructions; they do not authenticate or launch external accounts. Use signed-in platform sessions and isolated Git worktrees for parallel runs. Never store account credentials in this repository.
-
-For every task, each role must record a concise, evidence-based decision summary: sources inspected, applicable blacklist/history findings, architecture/source-of-truth checks, chosen approach and short rationale, risks, and verification evidence. Do not expose or request private chain-of-thought; use the decision-record template in `.agents/templates/`.
+1. **Hiến chương kỹ thuật duy nhất:** Đọc và tuân thủ tuyệt đối [`.agents/AGENTS.md`](.agents/AGENTS.md) cùng 7 Bộ ràng buộc kỹ thuật bất biến trước và trong khi sửa mã nguồn.
+2. **Hiểu rõ cấu trúc hệ thống & Chống trùng lặp chức năng:** BẮT BUỘC tra cứu bản đồ kiến trúc (`.agents/architecture/`) và Source of Truth (`.agents/rules/source-of-truth.md`) TRƯỚC KHI code. Tuyệt đối không tự ý dựng lại thực thể, model hoặc chức năng đã tồn tại ở service khác.
+3. **Triệt tiêu ảo giác AI (Anti-AI Hallucination):** Không giả định (Zero Assumptions). Mọi cấu trúc dữ liệu, bảng CSDL, API endpoint, gRPC method phải được kiểm chứng bằng việc đọc file mã nguồn thực tế trong repo (`schema.prisma`, `.proto`, controllers, types). Cấm tự bịa ra code hoặc implementation giả định.
+4. **Tuân thủ quy trình phát triển phần mềm nghiêm ngặt:** Triển khai qua các cửa ải kiểm soát chặt chẽ: Khảo sát thực tế -> Hoạch định bám sát 7 Bộ ràng buộc -> Thực thi chuẩn xác -> Kiểm chứng máy thực tế (`rtk tsc --noEmit` / build) -> Soi diff dòng-theo-dòng -> Dọn rác 100%.
+5. **Dọn rác:** Quét sạch 100% debug logs (`console.log`, `debugger`), imports dư thừa và file tạm trước khi báo cáo hoàn thành.

@@ -73,6 +73,7 @@ export async function seedMenus(prisma: PrismaClient) {
   console.log('🔹 Seeding Menus...');
 
   await prisma.menu.deleteMany({ where: { code: 'HRM_DASHBOARD_MENU' } });
+  await prisma.menu.deleteMany({ where: { code: 'HRM_POSITIONS_MENU' } });
   await prisma.menu.deleteMany({ where: { code: 'API_GATEWAY_GROUP' } });
   await prisma.menu.deleteMany({ where: { code: 'SYS_ENDPOINT' } });
 

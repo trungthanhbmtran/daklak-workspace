@@ -108,14 +108,14 @@ export default function UnitJobTemplatesClient() {
   return (
     <div className="flex h-[calc(100vh-8rem)] bg-background flex-col rounded-xl border overflow-hidden shadow-sm">
       <div className="flex flex-col sm:flex-row items-start sm:items-center px-4 sm:px-6 py-4 sm:py-5 border-b shrink-0 bg-card gap-4 sm:gap-0">
-        <div className="flex items-center">
+        <div className="flex items-center min-w-0">
           <div className="p-2 bg-primary/10 rounded-lg mr-4 shrink-0">
             <Building2 className="h-6 w-6 text-primary" />
           </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">Phân loại chức danh theo Đơn vị</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Thiết lập danh sách chức danh chuẩn (Job Titles) được phép sử dụng cho từng Loại đơn vị (Unit Types).
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground truncate">Khung Danh mục Vị trí việc làm theo Đơn vị</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+              Căn cứ pháp lý: Nghị định 62/2020/NĐ-CP (Khối Hành chính nhà nước), Nghị định 106/2020/NĐ-CP (Đơn vị sự nghiệp công lập) và Quy định 137-QĐ/TW (Cơ quan Đảng).
             </p>
           </div>
         </div>

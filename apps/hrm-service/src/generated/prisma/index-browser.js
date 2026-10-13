@@ -440,9 +440,14 @@ exports.Prisma.RankQuotaScalarFieldEnum = {
   id: 'id',
   rankCode: 'rankCode',
   domainCode: 'domainCode',
+  departmentId: 'departmentId',
+  unitCode: 'unitCode',
   taskName: 'taskName',
   unit: 'unit',
   targetValue: 'targetValue',
+  monthlyTarget: 'monthlyTarget',
+  quarterlyTarget: 'quarterlyTarget',
+  yearlyTarget: 'yearlyTarget',
   weight: 'weight',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -679,6 +684,7 @@ exports.Prisma.TaskRankTemplateOrderByRelevanceFieldEnum = {
 exports.Prisma.RankQuotaOrderByRelevanceFieldEnum = {
   rankCode: 'rankCode',
   domainCode: 'domainCode',
+  unitCode: 'unitCode',
   taskName: 'taskName',
   unit: 'unit',
   organizationId: 'organizationId'

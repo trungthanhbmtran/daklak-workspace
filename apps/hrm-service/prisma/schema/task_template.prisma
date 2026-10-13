@@ -20,18 +20,25 @@ model TaskRankTemplate {
 }
 
 model RankQuota {
-  id          Int    @id @default(autoincrement())
-  rankCode    String @map("rank_code")
-  domainCode  String @default("GENERIC") @map("domain_code")
-  taskName    String @map("task_name")
-  unit        String @map("unit")
-  targetValue Float  @map("target_value")
-  weight      Float? @map("weight")
+  id              Int      @id @default(autoincrement())
+  rankCode        String   @map("rank_code")
+  domainCode      String   @default("GENERIC") @map("domain_code")
+  departmentId    Int?     @map("department_id")
+  unitCode        String?  @map("unit_code")
+  taskName        String   @map("task_name")
+  unit            String   @map("unit")
+  targetValue     Float    @map("target_value")
+  monthlyTarget   Float?   @default(0) @map("monthly_target")
+  quarterlyTarget Float?   @default(0) @map("quarterly_target")
+  yearlyTarget    Float?   @default(0) @map("yearly_target")
+  weight          Float?   @map("weight")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   organizationId String @default("DEFAULT") @map("organization_id")
 
+  @@index([rankCode, domainCode])
+  @@index([departmentId])
   @@map("rank_quotas")
 }

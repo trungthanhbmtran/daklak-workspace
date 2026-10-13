@@ -326,7 +326,41 @@ async function main() {
     // 3. Chức danh nghề nghiệp HỖ TRỢ, PHỤC VỤ
     { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác văn thư, lưu trữ tại đơn vị SNCL', defaultUnit: 'Lượt', defaultWeight: 40, target: 1000, standardDurationDays: 1 },
     { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Quản trị cơ sở vật chất, bảo trì trang thiết bị văn phòng', defaultUnit: 'Lượt', defaultWeight: 30, target: 50, standardDurationDays: 1 },
-    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác lễ tân, khánh tiết, phục vụ hội nghị', defaultUnit: 'Lượt', defaultWeight: 30, target: 30, standardDurationDays: 1 }
+    { classification: 'VIEN_CHUC', rank: 'VC_HT_HANG_5', rankNameVN: 'Viên chức Hỗ trợ phục vụ Hạng V (Nhân viên)', taskName: 'Thực hiện công tác lễ tân, khánh tiết, phục vụ hội nghị', defaultUnit: 'Lượt', defaultWeight: 30, target: 30, standardDurationDays: 1 },
+    // ==========================================
+    // KHỐI CƠ QUAN ĐẢNG, MẶT TRẬN TỔ QUỐC VÀ CÁC ĐOÀN THỂ
+    // Căn cứ pháp lý: Quy định số 137-QĐ/TW của Ban Bí thư & Hướng dẫn của Ban Tổ chức Trung ương
+    // ==========================================
+    // 1. Lãnh đạo, quản lý cấp Tỉnh / Ban Đảng
+    { classification: 'DANG', rank: 'TRUONG_BAN', rankNameVN: 'Trưởng ban (Ban Tỉnh ủy)', taskName: 'Chỉ đạo toàn diện hoạt động của Ban, tham mưu Tỉnh ủy và Ban Thường vụ Tỉnh ủy', defaultUnit: 'Nhiệm vụ', defaultWeight: 35, target: 12, standardDurationDays: 30 },
+    { classification: 'DANG', rank: 'TRUONG_BAN', rankNameVN: 'Trưởng ban (Ban Tỉnh ủy)', taskName: 'Chủ trì xây dựng các Nghị quyết, Chỉ thị, Đề án chuyên đề của Tỉnh ủy', defaultUnit: 'Đề án/Nghị quyết', defaultWeight: 35, target: 4, standardDurationDays: 30 },
+    { classification: 'DANG', rank: 'TRUONG_BAN', rankNameVN: 'Trưởng ban (Ban Tỉnh ủy)', taskName: 'Thẩm định hồ sơ bổ nhiệm, luân chuyển, quy hoạch cán bộ diện Ban Thường vụ quản lý', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 20, standardDurationDays: 5 },
+
+    { classification: 'DANG', rank: 'PHO_TRUONG_BAN', rankNameVN: 'Phó Trưởng ban (Ban Tỉnh ủy)', taskName: 'Chỉ đạo thực hiện các lĩnh vực công tác Đảng được phân công phụ trách', defaultUnit: 'Lĩnh vực/Nhiệm vụ', defaultWeight: 30, target: 12, standardDurationDays: 15 },
+    { classification: 'DANG', rank: 'PHO_TRUONG_BAN', rankNameVN: 'Phó Trưởng ban (Ban Tỉnh ủy)', taskName: 'Trực tiếp chỉ đạo thẩm định hồ sơ công tác cán bộ, bảo vệ chính trị nội bộ', defaultUnit: 'Hồ sơ', defaultWeight: 35, target: 30, standardDurationDays: 3 },
+    { classification: 'DANG', rank: 'PHO_TRUONG_BAN', rankNameVN: 'Phó Trưởng ban (Ban Tỉnh ủy)', taskName: 'Chủ trì các đoàn kiểm tra, giám sát chuyên đề công tác Đảng', defaultUnit: 'Đoàn kiểm tra', defaultWeight: 35, target: 6, standardDurationDays: 10 },
+
+    // 2. Lãnh đạo cấp phòng thuộc Ban Đảng
+    { classification: 'DANG', rank: 'TRUONG_PHONG', rankNameVN: 'Trưởng phòng (thuộc Ban Đảng)', taskName: 'Quản lý, điều hành chuyên môn nghiệp vụ của phòng', defaultUnit: 'Nhiệm vụ', defaultWeight: 25, target: 12, standardDurationDays: 5 },
+    { classification: 'DANG', rank: 'TRUONG_PHONG', rankNameVN: 'Trưởng phòng (thuộc Ban Đảng)', taskName: 'Chủ trì soạn thảo báo cáo, đề án, quy định chuyên đề công tác Đảng', defaultUnit: 'Báo cáo/Đề án', defaultWeight: 35, target: 10, standardDurationDays: 7 },
+    { classification: 'DANG', rank: 'TRUONG_PHONG', rankNameVN: 'Trưởng phòng (thuộc Ban Đảng)', taskName: 'Thẩm định độc lập hồ sơ nhân sự, đảng viên, bảo vệ chính trị nội bộ', defaultUnit: 'Hồ sơ', defaultWeight: 40, target: 50, standardDurationDays: 2 },
+
+    { classification: 'DANG', rank: 'PHO_PHONG', rankNameVN: 'Phó Trưởng phòng (thuộc Ban Đảng)', taskName: 'Tham mưu xử lý hồ sơ nghiệp vụ chuyên sâu theo lĩnh vực phân công', defaultUnit: 'Hồ sơ', defaultWeight: 40, target: 40, standardDurationDays: 2 },
+    { classification: 'DANG', rank: 'PHO_PHONG', rankNameVN: 'Phó Trưởng phòng (thuộc Ban Đảng)', taskName: 'Tham gia thẩm tra, xác minh lý lịch phục vụ công tác cán bộ', defaultUnit: 'Vụ việc/Hồ sơ', defaultWeight: 35, target: 15, standardDurationDays: 5 },
+    { classification: 'DANG', rank: 'PHO_PHONG', rankNameVN: 'Phó Trưởng phòng (thuộc Ban Đảng)', taskName: 'Dự thảo các văn bản hướng dẫn nghiệp vụ công tác Đảng', defaultUnit: 'Văn bản', defaultWeight: 25, target: 15, standardDurationDays: 3 },
+
+    // 3. Nghiệp vụ chuyên môn công tác Đảng (Chuyên viên)
+    { classification: 'DANG', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên công tác Đảng', taskName: 'Thẩm định hồ sơ cán bộ, quy hoạch, bổ nhiệm, điều động, luân chuyển', defaultUnit: 'Hồ sơ', defaultWeight: 30, target: 50, standardDurationDays: 2 },
+    { classification: 'DANG', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên công tác Đảng', taskName: 'Thẩm tra, xác minh lý lịch phục vụ công tác bảo vệ chính trị nội bộ', defaultUnit: 'Hồ sơ', defaultWeight: 25, target: 20, standardDurationDays: 5 },
+    { classification: 'DANG', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên công tác Đảng', taskName: 'Quản lý cơ sở dữ liệu đảng viên, cấp phát thẻ Đảng, ứng dụng Sổ tay đảng viên điện tử', defaultUnit: 'Bản ghi/Hồ sơ', defaultWeight: 25, target: 200, standardDurationDays: 1 },
+    { classification: 'DANG', rank: 'SPECIALIST', rankNameVN: 'Chuyên viên công tác Đảng', taskName: 'Tham mưu văn bản, nghị quyết, chỉ thị, kết luận của Tỉnh ủy và Ban Thường vụ Tỉnh ủy', defaultUnit: 'Văn bản', defaultWeight: 20, target: 25, standardDurationDays: 3 },
+
+    // 4. Cán sự và Hỗ trợ phục vụ cơ quan Đảng
+    { classification: 'DANG', rank: 'OFFICER', rankNameVN: 'Cán sự cơ quan Đảng', taskName: 'Tiếp nhận, kiểm tra tính đầy đủ, hợp lệ của hồ sơ công tác Đảng', defaultUnit: 'Hồ sơ', defaultWeight: 50, target: 150, standardDurationDays: 1 },
+    { classification: 'DANG', rank: 'OFFICER', rankNameVN: 'Cán sự cơ quan Đảng', taskName: 'Cập nhật, chuẩn hóa số liệu đảng viên và tổ chức cơ sở đảng', defaultUnit: 'Bản ghi', defaultWeight: 50, target: 300, standardDurationDays: 2 },
+
+    { classification: 'DANG', rank: 'STAFF', rankNameVN: 'Nhân viên / Văn thư cơ quan Đảng', taskName: 'Tiếp nhận, đăng ký, chuyển giao văn bản đi/đến, quản lý tài liệu mật cơ quan Đảng', defaultUnit: 'Lượt văn bản', defaultWeight: 50, target: 1200, standardDurationDays: 1 },
+    { classification: 'DANG', rank: 'STAFF', rankNameVN: 'Nhân viên / Văn thư cơ quan Đảng', taskName: 'Phục vụ hội nghị, kỳ họp cấp ủy và quản lý cơ sở vật chất cơ quan Đảng', defaultUnit: 'Cuộc họp/Lượt', defaultWeight: 50, target: 40, standardDurationDays: 1 }
   ];
 
   const templatesToSeed = RANK_TEMPLATES.map(t => {
