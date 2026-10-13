@@ -1,5 +1,46 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Khắc phục Triệt để Lỗi 500 Khi Xem Chi tiết Công việc (Tasks Detail)
+
+### 1. Phạm vi & Mục tiêu
+- Điều tra và xử lý dứt điểm lỗi HTTP 500 khi người dùng bấm vào xem chi tiết công việc tại `http://113.184.220.82/admin/services/hrm/work-plans/tasks`.
+- Lỗi xuất hiện trong log API Gateway:
+  ```
+  [Nest] 8 - 10/13/2026, 8:44:56 PM WARN [AuthService] {"operation":"GET_EMPLOYEE","grpcCode":5,"reason":"service_error"}
+  [Nest] 8 - 10/13/2026, 8:44:59 PM ERROR [AllExceptionsFilter] [InternalServerErrorException] Internal server error
+      at TasksService.handleRpcError (/app/dist/apps/api-gateway/src/modules/hrm/tasks.service.js:47:15)
+      at async TasksService.getTask (/app/dist/apps/api-gateway/src/modules/hrm/tasks.service.js:627:27)
+  ```
+
+### 2. Nguyên nhân Gốc & Giải pháp Kỹ thuật
+1. **Thiếu `@Payload()` trong các gRPC controller handlers tại `hrm-service` (Root Cause chính):**
+   - Tại `apps/hrm-service/src/modules/tasks/tasks.controller.ts`, phương thức `getTask(data: any, @CurrentUser() user: any)` có tham số thứ 2 dùng custom parameter decorator (`@CurrentUser()`), nhưng tham số thứ nhất `data` không có decorator nào.
+   - Theo cơ chế parameter mapping của NestJS Microservices, khi một hàm có sử dụng custom decorator thì NestJS chuyển toàn bộ parameter resolution sang custom decorators. Do đó, tham số không có decorator sẽ nhận giá trị `undefined`.
+   - Kết quả: `data` trở thành `undefined`, dòng fallback `data = data || {}` khởi tạo object rỗng, làm `data.id = undefined`. Hàm `findTaskOrFail(id)` chạy Prisma query `prisma.task.findUnique({ where: { id: undefined } })` và quăng ngoại lệ `PrismaClientValidationError: Argument 'where' of type TaskWhereUniqueInput needs at least one of 'id' arguments`.
+   - Lỗi này cũng tiềm ẩn trên toàn bộ các method của `TasksController`, `TaskCatalogController`, `TaskHistoryController`, và `TaskKpiController`.
+   - Khắc phục: Khai báo `@Payload()` tường minh cho tham số `data` trên tất cả 21 handler gRPC của `TasksController`, và toàn bộ handler của `TaskCatalogController`, `TaskHistoryController`, `TaskKpiController`.
+2. **Khắc phục Workflow Definition lỗi thời & Fallback Tra cứu theo Workflow Code:**
+   - Trong bảng `admin_hrm.tasks`, một số task cũ lưu `metadata.workflowId = "cmsoh56aa000047odnhotm32r"` (đã bị xóa/thay thế trên database `admin_workflow`).
+   - Cập nhật `task-shared.service.ts`: Bổ sung cơ chế fallback tra cứu theo `metadata.workflowCode || 'TASK_PROCESSING_ID'` khi không tìm thấy workflow theo `workflowId`.
+   - Cập nhật `workflow-service` (`grpc.controller.ts`): Bắt ngoại lệ 404/NotFound và chuyển đổi an toàn thành `RpcException({ code: status.NOT_FOUND })` thay vì để văng unhandled 500 error.
+   - Cập nhật DB: Cập nhật `metadata.workflowId` cũ sang `cmv1uzsid000cr8eqruysyo27` (ID hoạt động hiện tại của quy trình `TASK_PROCESSING_ID`).
+3. **Chuẩn hóa Phản hồi & Dữ liệu tại API Gateway:**
+   - Tại `apps/api-gateway/src/modules/hrm/tasks.service.ts`: Trong `getTask`, hỗ trợ linh hoạt cả format bọc phong bì `response.data` lẫn format phẳng `response` qua `translateTaskData`.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `hrm-service`, `workflow-service`, `api-gateway`: Build thành công 100%, 0 errors.
+- Triển khai cập nhật dist và khởi động lại các container Docker (`daklak-workspace-hrm-service-1`, `daklak-workspace-api-gateway-1`, `daklak-workspace-workflow-service-1`).
+- Kiểm thử Runtime trực tiếp qua REST API Gateway:
+  - `POST /api/v1/admin/auth/login` -> HTTP 200 OK (Đăng nhập thành công).
+  - `GET /api/v1/admin/hrm/tasks/26` -> HTTP 200 OK (Chi tiết công việc 26 trả về đầy đủ metadata, participants, allowedActions).
+  - `GET /api/v1/admin/hrm/tasks/27` -> HTTP 200 OK.
+  - `GET /api/v1/admin/hrm/tasks/26/steps` -> HTTP 200 OK.
+  - `GET /api/v1/admin/hrm/tasks/26/history` -> HTTP 200 OK.
+  - `GET /api/v1/admin/hrm/tasks/26/subtasks` -> HTTP 200 OK.
+- Docker Container logs: `PrismaClientValidationError` được triệt tiêu 100%, không còn lỗi 500.
+
+---
+
 ## [2026-10-13] Khắc phục Triệt để Đứt gãy Runtime Workflow Công việc & Thẩm định Đánh giá KPI
 
 ### 1. Phạm vi & Mục tiêu
