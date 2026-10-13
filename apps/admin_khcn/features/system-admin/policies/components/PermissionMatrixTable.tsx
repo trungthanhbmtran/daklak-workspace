@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { useWatch } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,25 +18,31 @@ interface Props {
   form: any;
 }
 
-function MatrixCell({ action, perms, form }: { action: string; perms: Permission[]; form: any }) {
-  const perm = perms.find((p) => p.action === action);
-  const resourceCode = perms[0]?.code.split(":")[0] || "";
-  const { handleTogglePolicy, handleChangeEffect, handleChangeExpression } = usePolicyHandlers(form, resourceCode);
+interface MatrixCellProps {
+  action: string;
+  perms: Permission[];
+  form: any;
+  resourceCode: string;
+  resourceId: number;
+  currentPolicy?: Policy;
+}
 
-  const policies: Policy[] = useWatch({ control: form.control, name: "policies" }) || [];
+function MatrixCell({ action, perms, form, resourceCode, resourceId, currentPolicy }: MatrixCellProps) {
+  const perm = perms.find((p) => p.action === action);
+  const { handleTogglePolicy, handleChangeEffect, handleChangeExpression } = usePolicyHandlers(form, resourceCode);
 
   if (!perm) return <div className="text-muted-foreground/30 select-none flex items-center justify-center h-full text-xs font-mono">-</div>;
 
-  const currentPolicy = policies.find((p) => p.resourceCode === resourceCode && p.action === action);
   const isEnabled = !!currentPolicy;
   const hasCondition = !!currentPolicy?.conditions?.expression;
   const isDeny = currentPolicy?.effect === "DENY";
+  const targetResourceId = perm.id || resourceId || 0;
 
   return (
     <div className="flex items-center justify-center gap-1.5 group relative h-7 w-full">
       <Checkbox
         checked={isEnabled}
-        onCheckedChange={(checked) => handleTogglePolicy(action, !!checked, perm.id ?? 0)}
+        onCheckedChange={(checked) => handleTogglePolicy(action, !!checked, targetResourceId, resourceCode)}
         className={`h-4 w-4 rounded-sm border-muted-foreground/30 ${isDeny ? "data-[state=checked]:bg-destructive data-[state=checked]:border-destructive" : ""}`}
       />
 
@@ -62,7 +68,7 @@ function MatrixCell({ action, perms, form }: { action: string; perms: Permission
             <div className="space-y-4">
               <div className="space-y-2">
                 <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Effect (Tác dụng)</FormLabel>
-                <Select value={currentPolicy.effect || "ALLOW"} onValueChange={(val) => handleChangeEffect(action, val)}>
+                <Select value={currentPolicy?.effect || "ALLOW"} onValueChange={(val) => handleChangeEffect(action, val, targetResourceId, resourceCode)}>
                   <SelectTrigger className="h-8 text-xs font-medium">
                     <SelectValue />
                   </SelectTrigger>
@@ -79,8 +85,8 @@ function MatrixCell({ action, perms, form }: { action: string; perms: Permission
               <div className="space-y-2">
                 <Suspense fallback={<div className="h-8 rounded bg-muted/40 animate-pulse" />}>
                   <ConditionExpressionInput
-                    value={currentPolicy.conditions?.expression || ""}
-                    onChange={(expr) => handleChangeExpression(action, expr)}
+                    value={currentPolicy?.conditions?.expression || ""}
+                    onChange={(expr) => handleChangeExpression(action, expr, targetResourceId, resourceCode)}
                   />
                 </Suspense>
               </div>
@@ -93,6 +99,23 @@ function MatrixCell({ action, perms, form }: { action: string; perms: Permission
 }
 
 export function PermissionMatrixTable({ groupedPermissions, form }: Props) {
+  const policies: Policy[] = useWatch({ control: form.control, name: "policies" }) || [];
+
+  const policyMap = useMemo(() => {
+    const map = new Map<string, Policy>();
+    for (const p of policies) {
+      if (p.action) {
+        if (p.resourceCode) {
+          map.set(`${p.resourceCode}:${p.action}`, p);
+        }
+        if (p.resourceId) {
+          map.set(`${p.resourceId}:${p.action}`, p);
+        }
+      }
+    }
+    return map;
+  }, [policies]);
+
   return (
     <div className="border rounded-xl overflow-hidden bg-background shadow-sm">
       <Table>
@@ -108,22 +131,42 @@ export function PermissionMatrixTable({ groupedPermissions, form }: Props) {
         </TableHeader>
         <TableBody>
           {Object.entries(groupedPermissions).map(([resourceName, perms], index) => {
-            const resourceCode = perms[0]?.code.split(":")[0] || "";
+            const rawCode = perms[0]?.code || "";
+            const resourceCode = rawCode.includes(":")
+              ? rawCode.slice(0, rawCode.lastIndexOf(":"))
+              : rawCode;
+            const resourceId = perms.find((p) => p.id)?.id ?? 0;
+
             return (
               <TableRow key={resourceName} className={`group transition-colors ${index % 2 === 0 ? "bg-background" : "bg-muted/10"}`}>
-                <TableCell className="py-2.5">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-sm leading-tight text-foreground/90">{resourceName}</span>
-                    <span className="text-[10px] text-muted-foreground font-mono mt-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                <TableCell className="py-2.5 min-w-[200px]">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-semibold text-sm leading-tight text-foreground/90 truncate">{resourceName}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono mt-0.5 opacity-70 group-hover:opacity-100 transition-opacity truncate">
                       {resourceCode}
                     </span>
                   </div>
                 </TableCell>
-                {STD_ACTIONS.map((action) => (
-                  <TableCell key={action} className="py-2.5 px-0 align-middle">
-                    <MatrixCell action={action} perms={perms} form={form} />
-                  </TableCell>
-                ))}
+                {STD_ACTIONS.map((action) => {
+                  const perm = perms.find((p) => p.action === action);
+                  const currentPolicy =
+                    (resourceCode ? policyMap.get(`${resourceCode}:${action}`) : undefined) ||
+                    (perm?.id ? policyMap.get(`${perm.id}:${action}`) : undefined) ||
+                    (resourceId ? policyMap.get(`${resourceId}:${action}`) : undefined);
+
+                  return (
+                    <TableCell key={action} className="py-2.5 px-0 align-middle">
+                      <MatrixCell
+                        action={action}
+                        perms={perms}
+                        form={form}
+                        resourceCode={resourceCode}
+                        resourceId={resourceId}
+                        currentPolicy={currentPolicy}
+                      />
+                    </TableCell>
+                  );
+                })}
               </TableRow>
             );
           })}

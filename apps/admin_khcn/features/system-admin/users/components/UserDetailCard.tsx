@@ -48,7 +48,7 @@ export function UserDetailSheet({
 
   // Lazy load policies — chỉ fetch khi user mở collapsible
   const {
-    data: policiesData,
+    data: policies = [],
     isLoading: isPoliciesLoading,
   } = useUserPolicies(user?.id ?? null, policiesOpen && isOpen);
 
@@ -61,7 +61,7 @@ export function UserDetailSheet({
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && policiesData && visibleCount < policiesData.length) {
+        if (entries[0].isIntersecting && visibleCount < policies.length) {
           setVisibleCount((prev) => prev + 20);
         }
       },
@@ -78,7 +78,7 @@ export function UserDetailSheet({
         observer.unobserve(currentTarget);
       }
     };
-  }, [policiesData, visibleCount]);
+  }, [policies.length, visibleCount]);
 
   const isActive = user ? (user.status === "ACTIVE" || user.isActive !== false) : false;
   const lastLogin = user?.lastLogin;
@@ -164,9 +164,9 @@ export function UserDetailSheet({
                         <Button variant="ghost" className="w-full flex items-center justify-between group px-0 hover:bg-transparent h-auto py-1">
                           <Text variant="small" className="flex items-center gap-2 text-muted-foreground uppercase tracking-widest">
                             <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 2. Chính sách hiệu lực
-                            {policiesData && policiesData.length > 0 && (
+                            {policies.length > 0 && (
                               <Badge variant="outline" className="font-mono text-[9px] px-1.5 py-0 h-4 bg-muted ml-1">
-                                {policiesData.length}
+                                {policies.length}
                               </Badge>
                             )}
                           </Text>
@@ -185,18 +185,18 @@ export function UserDetailSheet({
                             <Text variant="muted" className="flex items-center justify-center gap-2 py-6">
                               <Loader2 className="w-4 h-4 animate-spin" /> Đang tải chính sách...
                             </Text>
-                          ) : !policiesData || policiesData.length === 0 ? (
+                          ) : policies.length === 0 ? (
                             <Text variant="small" className="text-muted-foreground italic text-center py-4">
                               Chưa có chính sách nào được áp dụng.
                             </Text>
                           ) : (
                             <div className="pt-1">
                               <ul className="text-xs space-y-3">
-                                {policiesData.slice(0, visibleCount).map((policy, idx) => (
+                                {policies.slice(0, visibleCount).map((policy, idx) => (
                                   <li key={idx} className="flex flex-col gap-1.5 pb-3 border-b last:border-0 last:pb-0">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
                                       <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                                      <Text as="span" weight="medium" className="flex-1 truncate">{policy.description ?? "—"}</Text>
+                                      <Text as="span" weight="medium" className="flex-1 truncate min-w-0">{policy.description ?? "—"}</Text>
                                       {policy.effect && (
                                         <Badge
                                           variant={policy.effect === "ALLOW" ? "default" : "destructive"}
@@ -206,19 +206,19 @@ export function UserDetailSheet({
                                         </Badge>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-3 pl-3.5 text-muted-foreground">
-                                      <span>
+                                    <div className="flex items-center gap-3 pl-3.5 text-muted-foreground min-w-0">
+                                      <span className="truncate min-w-0">
                                         Tài nguyên: <code className="bg-background px-1.5 py-0.5 rounded border text-[10px] font-mono">{policy.resource ?? "—"}</code>
                                       </span>
                                       {policy.action && (
-                                        <span>
+                                        <span className="truncate shrink-0">
                                           Hành động: <code className="bg-background px-1.5 py-0.5 rounded border text-[10px] font-mono">{policy.action}</code>
                                         </span>
                                       )}
                                     </div>
                                   </li>
                                 ))}
-                                {visibleCount < policiesData.length && (
+                                {visibleCount < policies.length && (
                                   <li ref={observerTarget} className="py-2 text-center text-muted-foreground text-[10px] uppercase font-bold flex justify-center items-center gap-2">
                                     <Loader2 className="w-3 h-3 animate-spin" /> Đang tải thêm...
                                   </li>

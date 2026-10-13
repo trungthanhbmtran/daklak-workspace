@@ -99,6 +99,7 @@ export class ResourcesController implements OnModuleInit {
           module: r.name ?? r.code ?? '',
           action: action,
           code: `${r.code}:${action}`,
+          resourceCode: r.code ?? '',
         });
       }
     }

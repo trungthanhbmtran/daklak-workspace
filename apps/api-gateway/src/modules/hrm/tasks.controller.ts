@@ -27,6 +27,20 @@ export class TasksController {
     return this.tasksService.create(req, body);
   }
 
+  @Get('supervisor-by-scope')
+  async getSupervisorByScope(
+    @Req() req: any,
+    @Query('departmentId') departmentId?: string,
+    @Query('domainId') domainId?: string,
+    @Query('assigneeCode') assigneeCode?: string,
+  ) {
+    return this.tasksService.getSupervisorByScope(req, {
+      departmentId: departmentId ? parseInt(departmentId, 10) : undefined,
+      domainId: domainId ? parseInt(domainId, 10) : undefined,
+      assigneeCode,
+    });
+  }
+
   @Get('kpi/variables')
   async getKpiSystemVariables(@Req() req: any) {
     return this.tasksService.getKpiSystemVariables(req);

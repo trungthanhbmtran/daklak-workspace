@@ -14,7 +14,7 @@ Build the evidence base for the plan. Preserve existing user work and do not edi
 3. Trace the relevant code path across UI, API Gateway, gRPC/proto, service, database/schema, and tests.
 4. Identify the source-of-truth service for every entity or policy involved. Check service-map.md, source-of-truth.md, dependency-map.md, workflow-map.md, and request-response-flow.md as applicable.
 5. Search .agents/rules/blacklist.md for applicable anti-patterns.
-6. Search .agents/execution_log.md by feature/error keywords and read only relevant incident sections. Inspect Git history for the affected paths. Treat both historical sources as context; verify their claims and proposed fixes against current source/schema/tests.
+6. Search `.agents/execution_log.md`, the relevant lane logs under `.agents/execution_logs/`, and prior reports by feature/error keywords; read only relevant incidents. Inspect Git history for affected paths. Treat history as context and verify claims/fixes against current source, schema, and tests.
 7. Record evidence with file paths and line/section references. Separate current verified behavior, historical information, assumptions, and documentation conflicts.
 
 ## Output

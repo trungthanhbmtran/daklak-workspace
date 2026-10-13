@@ -46,6 +46,7 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isExtendOpen, setIsExtendOpen] = useState(false);
   const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("processing");
   const [respondAction, setRespondAction] = useState<"REJECT" | "REQUEST_COORDINATION" | null>(null);
 
   // ── Queries ──
@@ -247,8 +248,8 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           </div>
         )}
 
-        {/* Tabs */}
-        <Tabs defaultValue="processing" className="flex-1 flex flex-col overflow-hidden min-h-0">
+        {/* Tabs - Controlled ActiveTab để Lazy Mount nội dung */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="px-6 py-4 bg-white border-b shrink-0">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="processing">Xử lý & Cập nhật</TabsTrigger>
@@ -265,149 +266,157 @@ export function TaskDetailDrawer({ task, open, onOpenChange }: TaskDetailDrawerP
           </div>
 
           <div className="flex-1 min-h-0 overflow-hidden relative">
-            {/* ── Tab Xử lý & Cập nhật ── */}
+            {/* ── Tab Xử lý & Cập nhật (Lazy Mount) ── */}
             <TabsContent value="processing" className="m-0 h-full outline-none data-[state=inactive]:hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6 space-y-6">
-                  <TaskProcessingTab
-                    taskId={taskId}
-                    currentTask={currentTask}
-                    isCompleted={isCompleted}
-                    isAssigned={isAssigned}
-                  />
-                </div>
-              </ScrollArea>
+              {activeTab === "processing" && (
+                <ScrollArea className="h-full">
+                  <div className="p-6 space-y-6">
+                    <TaskProcessingTab
+                      taskId={taskId}
+                      currentTask={currentTask}
+                      isCompleted={isCompleted}
+                      isAssigned={isAssigned}
+                    />
+                  </div>
+                </ScrollArea>
+              )}
             </TabsContent>
 
-            {/* ── Tab Trao đổi ── */}
+            {/* ── Tab Trao đổi (Lazy Mount) ── */}
             <TabsContent value="discussion" className="m-0 h-full outline-none data-[state=inactive]:hidden">
-              <div className="p-6 h-full flex flex-col min-h-0 overflow-hidden">
-                <TaskDiscussionTab
-                  conversationId={currentTask.conversationId}
-                  allowedActions={currentTask.allowedActions}
-                  participants={currentTask.participants}
-                />
-              </div>
-            </TabsContent>
-
-            {/* ── Tab Lịch sử ── */}
-            <TabsContent value="history" className="m-0 h-full outline-none data-[state=inactive]:hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <TaskHistoryTab
-                    taskId={taskId}
-                    currentTask={currentTask}
+              {activeTab === "discussion" && (
+                <div className="p-6 h-full flex flex-col min-h-0 overflow-hidden">
+                  <TaskDiscussionTab
+                    conversationId={currentTask.conversationId}
+                    allowedActions={currentTask.allowedActions}
+                    participants={currentTask.participants}
                   />
                 </div>
-              </ScrollArea>
+              )}
             </TabsContent>
 
-            {/* ── Tab Đánh giá & KPI ── */}
+            {/* ── Tab Lịch sử (Lazy Mount) ── */}
+            <TabsContent value="history" className="m-0 h-full outline-none data-[state=inactive]:hidden">
+              {activeTab === "history" && (
+                <ScrollArea className="h-full">
+                  <div className="p-6">
+                    <TaskHistoryTab
+                      taskId={taskId}
+                      currentTask={currentTask}
+                    />
+                  </div>
+                </ScrollArea>
+              )}
+            </TabsContent>
+
+            {/* ── Tab Đánh giá & KPI (Lazy Mount) ── */}
             <TabsContent value="kpi" className="m-0 h-full outline-none data-[state=inactive]:hidden">
-              <ScrollArea className="h-full">
-                <div className="p-6 h-full space-y-4">
-                  {currentTask.kpi || currentTask.metadata?.evaluation ? (
-                    (() => {
-                      const evalData = currentTask.metadata?.evaluation || {};
-                      const kpiData = currentTask.kpi || {};
-                      const total = evalData.totalScore ?? kpiData.totalScore ?? 0;
-                      const rank = evalData.rankGrade ?? kpiData.qualityGrade ?? "HOÀN THÀNH";
+              {activeTab === "kpi" && (
+                <ScrollArea className="h-full">
+                  <div className="p-6 h-full space-y-4">
+                    {currentTask.kpi || currentTask.metadata?.evaluation ? (
+                      (() => {
+                        const evalData = currentTask.metadata?.evaluation || {};
+                        const kpiData = currentTask.kpi || {};
+                        const total = evalData.totalScore ?? kpiData.totalScore ?? 0;
+                        const rank = evalData.rankGrade ?? kpiData.qualityGrade ?? "HOÀN THÀNH";
 
-                      return (
-                        <div className="space-y-4 bg-white p-5 rounded-xl border shadow-xs min-w-0">
-                          <div className="flex items-center justify-between border-b pb-3">
-                            <Heading level="h4" className="font-bold flex items-center gap-1.5 text-indigo-700">
-                              <Award className="w-4 h-4 text-indigo-600" />
-                              Kết quả Thẩm định & Đánh giá của Lãnh đạo
-                            </Heading>
-                            <Badge className="bg-emerald-600 text-white font-bold">
-                              {rank}
-                            </Badge>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-lg border">
-                              <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm nhiệm vụ</Text>
-                              <Text variant="large" weight="bold" className="text-2xl text-foreground font-mono">
-                                {total} <span className="text-xs font-normal text-slate-500">/ 100đ</span>
-                              </Text>
-                            </div>
-                            <div className="p-3 bg-slate-50 rounded-lg border">
-                              <Text variant="small" className="text-slate-500 mb-1 font-normal">Thời điểm phê duyệt</Text>
-                              <p className="font-semibold text-slate-800">
-                                {safeFormatDate(evalData.evaluatedAt || kpiData.evaluatedAt || currentTask.updatedAt, "dd/MM/yyyy HH:mm")}
-                              </p>
-                              <span className="text-[11px] text-slate-500">Bởi Lãnh đạo phụ trách</span>
+                        return (
+                          <div className="space-y-4 bg-white p-5 rounded-xl border shadow-xs min-w-0">
+                            <div className="flex items-center justify-between border-b pb-3">
+                              <Heading level="h4" className="font-bold flex items-center gap-1.5 text-indigo-700">
+                                <Award className="w-4 h-4 text-indigo-600" />
+                                Kết quả Thẩm định & Đánh giá của Lãnh đạo
+                              </Heading>
+                              <Badge className="bg-emerald-600 text-white font-bold">
+                                {rank}
+                              </Badge>
                             </div>
 
-                            <div className="p-2.5 bg-blue-50/50 rounded-lg border border-blue-100">
-                              <span className="text-slate-500 block">Khối lượng (A):</span>
-                              <strong className="text-blue-700">{evalData.volumePct ?? 100}% (K={evalData.difficultyK ?? 1.0})</strong>
-                            </div>
-                            <div className="p-2.5 bg-emerald-50/50 rounded-lg border border-emerald-100">
-                              <span className="text-slate-500 block">Chất lượng (B):</span>
-                              <strong className="text-emerald-700">{evalData.qualityScore ?? kpiData.qualityScore ?? 100}đ</strong>
-                            </div>
-                            <div className="p-2.5 bg-purple-50/50 rounded-lg border border-purple-100">
-                              <span className="text-slate-500 block">Tiến độ (C):</span>
-                              <strong className="text-purple-700">{evalData.timelinessScore ?? kpiData.timelinessScore ?? 100}đ</strong>
-                            </div>
-                            <div className="p-2.5 bg-amber-50/50 rounded-lg border border-amber-100">
-                              <span className="text-slate-500 block">Trách nhiệm (D):</span>
-                              <strong className="text-amber-700">{evalData.attitudeScore ?? 10}/10đ</strong>
-                            </div>
-
-                            {(evalData.feedback || kpiData.note) && (
-                              <div className="col-span-2 p-3 bg-indigo-50/30 rounded-lg border border-indigo-100">
-                                <Text variant="small" className="text-indigo-900 font-semibold mb-1">
-                                  Ý kiến chỉ đạo & Nhận xét của Lãnh đạo:
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                              <div className="p-3 bg-slate-50 rounded-lg border">
+                                <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm nhiệm vụ</Text>
+                                <Text variant="large" weight="bold" className="text-2xl text-foreground font-mono">
+                                  {total} <span className="text-xs font-normal text-slate-500">/ 100đ</span>
                                 </Text>
-                                <p className="text-slate-700 italic break-words leading-relaxed text-xs">
-                                  "{evalData.feedback || kpiData.note}"
-                                </p>
                               </div>
-                            )}
-                          </div>
+                              <div className="p-3 bg-slate-50 rounded-lg border">
+                                <Text variant="small" className="text-slate-500 mb-1 font-normal">Thời điểm phê duyệt</Text>
+                                <p className="font-semibold text-slate-800">
+                                  {safeFormatDate(evalData.evaluatedAt || kpiData.evaluatedAt || currentTask.updatedAt, "dd/MM/yyyy HH:mm")}
+                                </p>
+                                <span className="text-[11px] text-slate-500">Bởi Lãnh đạo phụ trách</span>
+                              </div>
 
-                          <div className="pt-2 flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setIsEvaluationOpen(true)}
-                              className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs font-semibold"
-                            >
-                              <Award className="w-3.5 h-3.5 mr-1.5" />
-                              Cập nhật / Đánh giá lại
-                            </Button>
+                              <div className="p-2.5 bg-blue-50/50 rounded-lg border border-blue-100">
+                                <span className="text-slate-500 block">Khối lượng (A):</span>
+                                <strong className="text-blue-700">{evalData.volumePct ?? 100}% (K={evalData.difficultyK ?? 1.0})</strong>
+                              </div>
+                              <div className="p-2.5 bg-emerald-50/50 rounded-lg border border-emerald-100">
+                                <span className="text-slate-500 block">Chất lượng (B):</span>
+                                <strong className="text-emerald-700">{evalData.qualityScore ?? kpiData.qualityScore ?? 100}đ</strong>
+                              </div>
+                              <div className="p-2.5 bg-purple-50/50 rounded-lg border border-purple-100">
+                                <span className="text-slate-500 block">Tiến độ (C):</span>
+                                <strong className="text-purple-700">{evalData.timelinessScore ?? kpiData.timelinessScore ?? 100}đ</strong>
+                              </div>
+                              <div className="p-2.5 bg-amber-50/50 rounded-lg border border-amber-100">
+                                <span className="text-slate-500 block">Trách nhiệm (D):</span>
+                                <strong className="text-amber-700">{evalData.attitudeScore ?? 10}/10đ</strong>
+                              </div>
+
+                              {(evalData.feedback || kpiData.note) && (
+                                <div className="col-span-2 p-3 bg-indigo-50/30 rounded-lg border border-indigo-100">
+                                  <Text variant="small" className="text-indigo-900 font-semibold mb-1">
+                                    Ý kiến chỉ đạo & Nhận xét của Lãnh đạo:
+                                  </Text>
+                                  <p className="text-slate-700 italic wrap-break-word leading-relaxed text-xs">
+                                    "{evalData.feedback || kpiData.note}"
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="pt-2 flex justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsEvaluationOpen(true)}
+                                className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs font-semibold"
+                              >
+                                <Award className="w-3.5 h-3.5 mr-1.5" />
+                                Cập nhật / Đánh giá lại
+                              </Button>
+                            </div>
                           </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="p-6 bg-white rounded-xl border text-center space-y-4 shadow-xs">
+                        <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+                          <Award className="w-6 h-6" />
                         </div>
-                      );
-                    })()
-                  ) : (
-                    <div className="p-6 bg-white rounded-xl border text-center space-y-4 shadow-xs">
-                      <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
-                        <Award className="w-6 h-6" />
+                        <div className="space-y-1">
+                          <Heading level="h4" className="font-bold text-foreground">
+                            Công việc chưa được thẩm định & đánh giá
+                          </Heading>
+                          <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+                            Luồng sau khi hoàn thành công việc yêu cầu Lãnh đạo / Người phụ trách đối chiếu nguồn dữ liệu hệ thống với báo cáo của chuyên viên để chốt điểm KPI.
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => setIsEvaluationOpen(true)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm"
+                        >
+                          <Award className="w-4 h-4 mr-1.5" />
+                          Mở màn hình Thẩm định & Đánh giá của Lãnh đạo
+                        </Button>
                       </div>
-                      <div className="space-y-1">
-                        <Heading level="h4" className="font-bold text-foreground">
-                          Công việc chưa được thẩm định & đánh giá
-                        </Heading>
-                        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-                          Luồng sau khi hoàn thành công việc yêu cầu Lãnh đạo / Người phụ trách đối chiếu nguồn dữ liệu hệ thống với báo cáo của chuyên viên để chốt điểm KPI.
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => setIsEvaluationOpen(true)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm"
-                      >
-                        <Award className="w-4 h-4 mr-1.5" />
-                        Mở màn hình Thẩm định & Đánh giá của Lãnh đạo
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
+                    )}
+                  </div>
+                </ScrollArea>
+              )}
             </TabsContent>
           </div>
         </Tabs>

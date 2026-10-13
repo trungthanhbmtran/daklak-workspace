@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
-import type { UserItem, UserDetail, UserCreatePayload } from "./types";
+import { unwrapData } from "@/lib/api-helper";
+import type { UserItem, UserDetail, UserCreatePayload, UserPolicyItem } from "./types";
 
 export const userApi = {
   list: async (params?: { page?: number; limit?: number; search?: string }): Promise<{ data: UserItem[], meta: { total: number } }> => {
@@ -18,12 +19,12 @@ export const userApi = {
 
   getOne: async (id: number): Promise<UserDetail> => {
     const res: any = await apiClient.get(`/users/${id}`);
-    return res?.data ?? res;
+    return unwrapData<UserDetail>(res, res);
   },
 
-  getPolicies: async (id: number): Promise<{ description?: string; resource?: string; action?: string; effect?: string }[]> => {
+  getPolicies: async (id: number): Promise<UserPolicyItem[]> => {
     const res: any = await apiClient.get(`/users/${id}/policies`);
-    return res?.data?.policies ?? res?.policies ?? res ?? [];
+    return unwrapData<UserPolicyItem[]>(res, []);
   },
 
   create: async (payload: UserCreatePayload): Promise<UserItem> => {

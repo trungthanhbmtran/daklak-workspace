@@ -241,9 +241,15 @@ export class TaskSharedService {
     // Co-assignees (Coordinators)
     const coassigneeCodes = data.coassigneeCodes || [];
     const coassigneePcts = data.coassigneePercentages || {};
-    for (const coCode of coassigneeCodes) {
+    for (let i = 0; i < coassigneeCodes.length; i++) {
+      const coCode = coassigneeCodes[i];
       if (coCode) {
-        const coPct = typeof coassigneePcts[coCode] === 'number' ? coassigneePcts[coCode] : 0;
+        let coPct = 0;
+        if (Array.isArray(coassigneePcts)) {
+          coPct = typeof coassigneePcts[i] === 'number' ? coassigneePcts[i] : 0;
+        } else if (typeof coassigneePcts === 'object' && coassigneePcts) {
+          coPct = typeof coassigneePcts[coCode] === 'number' ? coassigneePcts[coCode] : 0;
+        }
         participantsData.push({
           taskId,
           employeeCode: coCode,
@@ -332,14 +338,27 @@ export class TaskSharedService {
 
   public async populateQueryHierarchy(query: any) {
     if (!query.isAdmin && query.currentUserId) {
-      try {
-        const subordinatesRes: any = await firstValueFrom(
-          this.userService.GetSubordinates({ userId: query.currentUserId })
-        );
-        query.allowedDepartmentIds = subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [];
-        query.allowedEmployeeCodes = subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [];
-      } catch (e) {
+      const cacheKey = `subordinates:${query.currentUserId}`;
+      let hierarchy = await this.cache.get<{ allowedDepartmentIds: any[]; allowedEmployeeCodes: any[] }>(cacheKey);
+
+      if (!hierarchy) {
+        try {
+          const subordinatesRes: any = await firstValueFrom(
+            this.userService.GetSubordinates({ userId: query.currentUserId })
+          );
+          hierarchy = {
+            allowedDepartmentIds: subordinatesRes?.allowedDepartmentIds || subordinatesRes?.allowed_department_ids || [],
+            allowedEmployeeCodes: subordinatesRes?.allowedEmployeeCodes || subordinatesRes?.allowed_employee_codes || [],
+          };
+          // Cây cấp dưới ổn định trong phiên, cache 15 phút
+          await this.cache.set(cacheKey, hierarchy, 15 * 60 * 1000);
+        } catch (e) {
+          hierarchy = { allowedDepartmentIds: [], allowedEmployeeCodes: [] };
+        }
       }
+
+      query.allowedDepartmentIds = hierarchy.allowedDepartmentIds;
+      query.allowedEmployeeCodes = hierarchy.allowedEmployeeCodes;
     }
   }
 

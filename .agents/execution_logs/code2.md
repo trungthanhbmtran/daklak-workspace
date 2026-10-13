@@ -1,5 +1,21 @@
 # Code 2 Execution Log
 
+## 2026-10-13: Critical Review & Loại Bỏ Triệt Để Phản Mẫu Ép Kiểu (Forced Conversion) tại Luồng Chính Sách Người Dùng
+- **Nội dung tác vụ**: Thực hiện Critical Review toàn diện luồng API `GET /api/v1/admin/users/:id/policies` từ Microservice `user-service` -> `api-gateway` -> `apiClient` -> UI Component theo đúng yêu cầu:
+  1. *Phát hiện phản mẫu (Anti-pattern Findings)*: Cách viết trước đó sử dụng các tầng fallback `as any` cùng chuỗi if/ternary kiểm tra nhiều thuộc tính giả định (`data?.policies`, `data?.data`, `res?.policies`, `rawPolicies as any`) là kỹ thuật "ép convert" chắp vá, che giấu sai lệch contract dữ liệu và vi phạm nguyên tắc Dumb Client và Type Integrity.
+  2. *Giải pháp kiến trúc chuẩn*:
+     - **Domain Model (`types.ts`)**: Khai báo interface chuẩn `UserPolicyItem` ({ description, resource, action, effect }) và liên kết chặt chẽ vào `UserDetail.policies`.
+     - **API Contract Layer (`api.ts`)**: Chuẩn hóa `userApi.getPolicies: async (id: number): Promise<UserPolicyItem[]>` gọi `unwrapData<UserPolicyItem[]>(res, [])` duy nhất theo chuẩn `ApiResponse` của repository.
+     - **Dumb Client UI (`UserDetailCard.tsx`)**: Xóa bỏ hoàn toàn `rawPolicies as any` và chuỗi ternary fallback. Giao diện trực tiếp sử dụng `policies: UserPolicyItem[]` với fallback mặc định sạch `const { data: policies = [] } = useUserPolicies(...)`.
+- **Tập tin đã cập nhật**:
+  - `apps/admin_khcn/features/system-admin/users/types.ts`
+  - `apps/admin_khcn/features/system-admin/users/api.ts`
+  - `apps/admin_khcn/features/system-admin/users/components/UserDetailCard.tsx`
+- **Kiểm chứng máy**:
+  - `npm run typecheck` (`tsc --noEmit`) trong `apps/admin_khcn`: 0 errors.
+  - `npm run build` trong `apps/admin_khcn`: Biên dịch thành công 100% 83 routes.
+  - Cập nhật live container `daklak-workspace-admin-frontend-1`: Khởi động hoàn tất (`Ready in 209ms`), HTTP 200 OK.
+
 ## 2026-10-13: Căn chỉnh tọa độ & Luồng kết nối Sơ đồ Quy trình Workflow Service
 - **Nội dung tác vụ**: Điều chỉnh tọa độ vị trí các node và các cổng kết nối (handles) trong sơ đồ quy trình của `workflow-service` (`WF_BTCTU_QUAN_LY_CONG_VIEC` và `WF_BTCTU_DANH_GIA_KPI`) để phân biệt rõ ràng luồng nghiệp vụ thuận/nghịch và chống đè chéo đường nối.
 - **Tập tin đã sửa đổi**:
@@ -253,4 +269,34 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - `npm --prefix apps/hrm-service run build`: Hoàn thành với exit code 0.
   - Đã dọn sạch 100% file script và thư mục tạm (`seed_kpi_rank_templates.js`, `parse_xlsx.js`, `extract_xlsx.ps1`, `temp_xlsx/`).
 
-
+## 2026-10-13: Khắc phục Triệt để Lỗi Checkbox Policies Không Hoạt động (ID 12 & Ma trận Quyền PBAC)
+- **Nội dung tác vụ**:
+  1. *Truy tìm căn nguyên lỗi (Root Cause Analysis):*
+     - Backend `user-service`: Phương thức `findOneUserGroup` trong `pbac.service.ts` chỉ trả về `resource_code` (snake_case). Do cấu hình gRPC loader bật `keepCase: false`, protobuf serializer chỉ nhận diện thuộc tính camelCase `resourceCode`, khiến toàn bộ 55 quyền đã cấp của vai trò 12 bị rỗng `resourceCode: ""`.
+     - Frontend `admin_khcn`: `MatrixCell` và `usePolicyHandlers` chỉ dựa vào `p.resourceCode === resourceCode` để tìm policy hiện có. Do `p.resourceCode` rỗng, bảng ma trận hiển thị 100% checkbox chưa được tick.
+     - Schema validation `schemas.ts`: Trường `code` bị ép buộc `min(1)` trong khi bảng CSDL `user_groups` không có cột `code`, khiến thao tác lưu (submit) bị chặn âm thầm.
+  2. *Giải pháp triển khai trọn gói End-to-End:*
+     - `apps/user-service/src/modules/pbac/pbac.service.ts`: Bổ sung `resourceCode` song song `resource_code`; sửa logic `createUserGroup` sử dụng nested relation `create` thay vì `createMany` kèm `connect`.
+     - `apps/api-gateway/src/modules/users/pbac.controller.ts` & `resources.controller.ts`: Chuẩn hóa dữ liệu trả về gRPC gồm `resourceId`, `resourceCode`.
+     - `apps/admin_khcn/features/system-admin/policies/schemas.ts`: Chuyển `code` và `resourceCode` sang optional để đồng bộ với schema database `user_groups`.
+     - `apps/admin_khcn/features/system-admin/policies/hooks/usePolicyHandlers.ts`: Tối ưu hàm so khớp đa năng `isPolicyMatch` (hỗ trợ cả `resourceCode` và `resourceId`), khởi tạo an toàn mảng `latest`.
+     - `apps/admin_khcn/features/system-admin/policies/components/PermissionMatrixTable.tsx`: Nâng cấp `policyMap` O(1) tra cứu kết hợp `resourceCode` và `resourceId`, gom `useWatch` về cấp table; bổ sung `min-w-0` và `truncate` cho cell module.
+     - `apps/admin_khcn/features/system-admin/policies/components/PolicyForm.tsx`: Bổ sung cơ chế fallback ánh xạ `resourceId -> resourceCode` từ danh mục permissions; dọn sạch `console.log`.
+     - `apps/admin_khcn/features/system-admin/policies/api.ts`: Sử dụng `unwrapData` chuẩn; chuẩn hóa payload lưu.
+- **Tập tin đã chỉnh sửa**:
+  - [`apps/user-service/src/modules/pbac/pbac.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/user-service/src/modules/pbac/pbac.service.ts)
+  - [`apps/api-gateway/src/modules/users/pbac.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/pbac.controller.ts)
+  - [`apps/api-gateway/src/modules/users/resources.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/resources.controller.ts)
+  - [`apps/admin_khcn/features/system-admin/policies/schemas.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/policies/schemas.ts)
+  - [`apps/admin_khcn/features/system-admin/policies/types.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/policies/types.ts)
+  - [`apps/admin_khcn/features/system-admin/policies/hooks/usePolicyHandlers.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/policies/hooks/usePolicyHandlers.ts)
+  - [`apps/admin_khcn/features/system-admin/policies/components/PermissionMatrixTable.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/policies/components/PermissionMatrixTable.tsx)
+  - [`apps/admin_khcn/features/system-admin/policies/components/PolicyForm.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/policies/components/PolicyForm.tsx)
+  - [`apps/admin_khcn/features/system-admin/policies/api.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/policies/api.ts)
+- **Kiểm chứng máy thực tế**:
+  - `gRPC FindOneUserGroup({ id: 12 })`: Trả về 55 policies đầy đủ `resourceCode: "SYSTEM"`, `resourceId: 1`.
+  - `npm --prefix apps/user-service run build`: Exit code 0.
+  - `npm --prefix apps/api-gateway run build`: Exit code 0.
+  - `npm --prefix apps/admin_khcn run build`: Exit code 0 (Next.js 16.1.6 standalone production build thành công 83/83 routes).
+  - Đã triển khai và restart các container docker (`daklak-workspace-user-service-1`, `daklak-workspace-api-gateway-1`, `daklak-workspace-admin-frontend-1`) thành công, sẵn sàng kiểm thử trên `http://113.184.220.82/admin/services/admin/policies/12`.
+  - Quét sạch 100% debug logs và mã hóa UTF-8 không BOM.

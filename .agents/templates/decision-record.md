@@ -4,7 +4,7 @@
 
 - Task ID:
 - Agent and account/role:
-- Phase: PLAN / BACKEND / FRONTEND / REVIEW
+- Phase: PLAN / CODE1 / CODE2 / CODE3 / BACKEND / FRONTEND / REVIEW
 - Status:
 
 ## Request and scope

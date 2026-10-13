@@ -447,6 +447,17 @@ export class TasksService {
 
   private async executeCreateTaskTransaction(data: any, planId: number | null, parentId: number | null, creatorCode: string, workflowId: string | null, workflowCode: string | null, currentNodeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
+      let parsedMetadata: any = {};
+      if (data.metadataJson) {
+        try {
+          parsedMetadata = JSON.parse(data.metadataJson);
+        } catch {
+          parsedMetadata = {};
+        }
+      } else if (data.metadata && typeof data.metadata === 'object') {
+        parsedMetadata = data.metadata;
+      }
+
       const task = await tx.task.create({
         data: {
           parentId,
@@ -463,12 +474,33 @@ export class TasksService {
           domainId: data.domainId ? parseInt(data.domainId, 10) : null,
           monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
           metadata: {
-            taskType: data.metadata?.taskType || 'ONE_TIME',
-            ...(data.metadata?.recurrence && { recurrence: data.metadata.recurrence }),
+            ...parsedMetadata,
+            taskType: data.taskType || parsedMetadata?.taskType || 'ONE_TIME',
+            ...(data.sourceDocumentRef ? { sourceDocumentRef: data.sourceDocumentRef } : (parsedMetadata.sourceDocumentRef ? { sourceDocumentRef: parsedMetadata.sourceDocumentRef } : {})),
+            ...(data.baseScore !== undefined ? { baseScore: data.baseScore } : (parsedMetadata.baseScore !== undefined ? { baseScore: parsedMetadata.baseScore } : {})),
+            ...(data.weight !== undefined ? { weight: data.weight } : (parsedMetadata.weight !== undefined ? { weight: parsedMetadata.weight } : {})),
+            ...((data.recurrence || parsedMetadata?.recurrence) && { recurrence: data.recurrence || parsedMetadata?.recurrence }),
             ...(workflowId && { workflowId, workflowCode, currentNodeId })
           },
         },
       });
+
+      // Initial steps/checklist if provided
+      const rawSteps = Array.isArray(data.initialSteps) ? data.initialSteps : parsedMetadata.initialSteps;
+      if (Array.isArray(rawSteps) && rawSteps.length > 0) {
+        const stepsData = rawSteps
+          .filter((s: any) => (typeof s === 'string' && s.trim()) || (s && typeof s.title === 'string' && s.title.trim()))
+          .map((s: any, idx: number) => ({
+            taskId: task.id,
+            title: typeof s === 'string' ? s.trim() : s.title.trim(),
+            order: idx + 1,
+            baseScore: typeof s === 'object' && typeof s.baseScore === 'number' ? s.baseScore : 0,
+            status: 'TODO'
+          }));
+        if (stepsData.length > 0) {
+          await tx.taskStep.createMany({ data: stepsData });
+        }
+      }
 
       if (workflowId) {
         await (tx as any).outboxEvent.create({
@@ -567,6 +599,38 @@ export class TasksService {
     return createdTask;
   }
 
+  private async resolveSupervisorByScope(data: any): Promise<string | undefined> {
+    try {
+      let targetUnitId = data.departmentId ? parseInt(data.departmentId, 10) : (data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null);
+      if (!targetUnitId && data.assigneeCode && data.assigneeCode !== 'UNASSIGNED') {
+        const emp = await this.prisma.employee.findUnique({
+          where: { employeeCode: data.assigneeCode },
+          select: { departmentId: true },
+        });
+        if (emp?.departmentId) targetUnitId = emp.departmentId;
+      }
+
+      const targetDomainId = data.domainId ? parseInt(data.domainId, 10) : 0;
+      if (targetUnitId || targetDomainId) {
+        if (this.shared?.userService) {
+          const res: any = await firstValueFrom(
+            this.shared.userService.GetEmployeesByScope({
+              domain_id: targetDomainId || 0,
+              monitored_unit_id: targetUnitId || 0,
+            })
+          );
+          const codes = res?.employee_codes || res?.employeeCodes || [];
+          if (Array.isArray(codes) && codes.length > 0) {
+            return codes[0];
+          }
+        }
+      }
+    } catch (e) {
+      this.logger.warn('Failed to resolve supervisor by scope: ' + (e as any)?.message);
+    }
+    return undefined;
+  }
+
   async createTask(data: any) {
     let planId = data.planId || null;
     let parentId = data.parentId ? parseInt(data.parentId, 10) : null;
@@ -580,6 +644,10 @@ export class TasksService {
     const creatorCode = data.currentEmployeeCode || 'SYSTEM';
 
     await this.validateTaskAssignee(assigneeCode);
+
+    if (!data.supervisorCode) {
+      data.supervisorCode = await this.resolveSupervisorByScope(data);
+    }
 
     const workflowCode = await this.wf.resolveWorkflowCode(data, planId, parentId);
     const workflowId = workflowCode ? await this.shared.getWorkflowIdByTrigger(workflowCode) : null;

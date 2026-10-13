@@ -2,14 +2,14 @@
 
 ## Gate
 
-Thực thi theo prompt của người dùng hoặc task được giao. Các lane không phân chia cứng Backend / Frontend.
+Thực thi theo prompt của người dùng hoặc task được giao. Các lane có cùng năng lực; ownership Backend / Frontend được giao theo kế hoạch đã duyệt.
 
 ## Choose a lane
 
 - **Code 1** (`.agents/commands/code1.md`): lane full-stack độc lập (`/code1 <prompt>`).
 - **Code 2** (`.agents/commands/code2.md`): lane full-stack độc lập (`/code2 <prompt>`).
 - **Code 3** (`.agents/commands/code3.md`): lane full-stack độc lập (`/code3 <prompt>`).
-- Người dùng chọn lane; mỗi lane chỉ sửa phạm vi file được giao, tuân thủ cùng charter và không dùng chung execution log.
+- Người dùng chọn lane cho tác vụ đơn; coordinator phân công lane theo ownership khi kế hoạch tách Backend / Frontend. Mỗi lane chỉ sửa file được giao, tuân thủ cùng charter và giữ execution log riêng.
 
 ## Quy trình thực hiện
 

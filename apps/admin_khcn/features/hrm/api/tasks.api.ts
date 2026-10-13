@@ -19,6 +19,10 @@ export const hrmTasksApi = {
     return apiClient.post('/hrm/tasks', payload) as any;
   },
 
+  getSupervisorByScope(params: { departmentId?: number; domainId?: number; assigneeCode?: string }): Promise<ApiResponse<any>> {
+    return apiClient.get('/hrm/tasks/supervisor-by-scope', { params }) as any;
+  },
+
   /** Tạo nhiệm vụ con dưới task được giao. planId tự động propagate từ task cha phía backend. */
   createSubTask(parentId: string | number, payload: {
     title: string;

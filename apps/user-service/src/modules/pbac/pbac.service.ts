@@ -35,15 +35,14 @@ export class PbacService {
             : undefined,
         }));
 
-        await tx.policy.createMany({
-          data: policyCreates.map((pc) => ({
-            ...pc,
-            userGroups: { connect: { id: ug.id } },
-          })),
+        await tx.userGroup.update({
+          where: { id: ug.id },
+          data: {
+            policies: {
+              create: policyCreates,
+            },
+          },
         });
-        // Wait, prisma createMany doesn't support nested connects like that for implicit m:n.
-        // We have to create them and connect.
-        // Let's create policies first, then connect them to UserGroup.
       }
       return ug;
     });
@@ -101,6 +100,7 @@ export class PbacService {
         id: p.id,
         resourceId: p.resourceId,
         resource_id: p.resourceId,
+        resourceCode: p.resource?.code ?? '',
         resource_code: p.resource?.code ?? '',
         action: p.action,
         effect: p.effect,

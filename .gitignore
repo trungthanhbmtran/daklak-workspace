@@ -47,6 +47,10 @@ logs/
 !.agents/
 .agents/*
 !.agents/AGENTS.md
+!.agents/architecture/
+!.agents/architecture/**
+!.agents/rules/
+!.agents/rules/**
 !.agents/agents/
 .agents/agents/*
 !.agents/agents/chatgpt-planner.md

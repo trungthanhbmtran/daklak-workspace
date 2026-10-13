@@ -71,10 +71,10 @@ export function TaskEvaluationApprovalSheet({
   const { user } = useUser();
   const taskId = Number(task.id);
 
-  // ── Queries lấy dữ liệu đối chiếu ──
-  const { data: historyData } = useTaskHistory(taskId);
-  const { data: stepsData } = useTaskSteps(taskId);
-  const { data: subtasksData } = useTaskSubtasks(taskId);
+  // ── Queries lấy dữ liệu đối chiếu (Chỉ fetch khi Sheet thực sự mở - Lazy Gating) ──
+  const { data: historyData } = useTaskHistory(taskId, { enabled: open });
+  const { data: stepsData } = useTaskSteps(taskId, { enabled: open });
+  const { data: subtasksData } = useTaskSubtasks(taskId, { enabled: open });
 
   const historyList: any[] = (historyData as any)?.data ?? [];
   const stepsList: any[] = (stepsData as any)?.data ?? task.steps ?? [];
@@ -327,10 +327,10 @@ export function TaskEvaluationApprovalSheet({
                       Mã #{task.id}
                     </span>
                   </div>
-                  <SheetTitle className="text-lg sm:text-xl font-bold leading-tight break-words min-w-0 text-foreground pt-1">
+                  <SheetTitle className="text-lg sm:text-xl font-bold leading-tight wrap-break-word min-w-0 text-foreground pt-1">
                     {task.title}
                   </SheetTitle>
-                  <SheetDescription className="text-xs text-muted-foreground leading-relaxed break-words">
+                  <SheetDescription className="text-xs text-muted-foreground leading-relaxed wrap-break-word">
                     Đối chiếu song song dữ liệu tự động từ hệ thống và báo cáo kết quả của chuyên viên để chốt điểm KPI.
                   </SheetDescription>
                 </div>
@@ -468,7 +468,7 @@ export function TaskEvaluationApprovalSheet({
                     {/* Báo cáo tóm tắt */}
                     <div className="py-1 border-b border-purple-100 min-w-0">
                       <span className="text-slate-600 font-medium block mb-1">Giải trình kết quả:</span>
-                      <p className="text-slate-800 italic bg-white/80 p-2 rounded-lg border border-purple-100 break-words leading-relaxed text-[11px]">
+                      <p className="text-slate-800 italic bg-white/80 p-2 rounded-lg border border-purple-100 wrap-break-word leading-relaxed text-[11px]">
                         "{selfReport.summary}"
                       </p>
                     </div>
@@ -476,7 +476,7 @@ export function TaskEvaluationApprovalSheet({
                     {/* Sản phẩm đầu ra */}
                     <div className="flex items-start justify-between py-1 border-b border-purple-100 min-w-0 gap-2">
                       <span className="text-slate-600 shrink-0">Sản phẩm đầu ra:</span>
-                      <span className="font-semibold text-slate-800 break-words text-right">
+                      <span className="font-semibold text-slate-800 wrap-break-word text-right">
                         {selfReport.deliverable}
                       </span>
                     </div>

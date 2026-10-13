@@ -452,7 +452,7 @@ export function RankTaskCatalogManager({
                                                                     }`}
                                                                 >
                                                                     <div className="min-w-0 flex-1">
-                                                                        <p className={`text-xs leading-snug break-words ${isSelected ? 'text-primary font-bold' : 'text-foreground font-medium'}`}>
+                                                                        <p className={`text-xs leading-snug wrap-break-word ${isSelected ? 'text-primary font-bold' : 'text-foreground font-medium'}`}>
                                                                             {r.name}
                                                                         </p>
                                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate">
@@ -519,7 +519,7 @@ export function RankTaskCatalogManager({
                                         <PanelLeftOpen className="w-3 h-3" /> Đổi VTVL
                                     </Button>
                                 )}
-                                <h2 className="text-base sm:text-lg font-bold text-foreground break-words min-w-0">
+                                <h2 className="text-base sm:text-lg font-bold text-foreground wrap-break-word min-w-0">
                                     {currentSelectedRankInfo?.name || selectedRank}
                                 </h2>
                                 <Badge variant="outline" className="font-mono text-xs uppercase bg-background shrink-0">
@@ -531,7 +531,7 @@ export function RankTaskCatalogManager({
                                     </Badge>
                                 )}
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed break-words">
+                            <p className="text-xs text-muted-foreground leading-relaxed wrap-break-word">
                                 Danh mục công việc định mức chuẩn hóa theo phân hạng VTVL.
                             </p>
                         </div>
@@ -882,7 +882,7 @@ export function RankTaskCatalogManager({
                                                             {index + 1}
                                                         </span>
                                                         <div className="min-w-0 flex-1 space-y-1.5">
-                                                            <p className="text-xs sm:text-sm font-semibold text-foreground leading-relaxed break-words whitespace-normal">
+                                                            <p className="text-xs sm:text-sm font-semibold text-foreground leading-relaxed wrap-break-word whitespace-normal">
                                                                 {item.taskName}
                                                             </p>
                                                             <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
@@ -939,7 +939,7 @@ export function RankTaskCatalogManager({
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
                             Bạn có chắc chắn muốn xóa nhiệm vụ{' '}
-                            <span className="font-bold text-foreground break-words">
+                            <span className="font-bold text-foreground wrap-break-word">
                                 "{itemToDelete?.taskName}"
                             </span>{' '}
                             khỏi vị trí việc làm{' '}

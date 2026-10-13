@@ -1478,22 +1478,45 @@ export class UsersService implements OnModuleInit {
       return { employeeCodes: [] };
     }
 
-    const whereObj: any = {};
-    if (domainId) {
-      whereObj.domains = { some: { domainId } };
-    }
+    // 1. Tìm các StaffingSlot có phân công theo dõi đơn vị (monitoredUnits)
     if (monitoredUnitId) {
-      whereObj.monitoredUnits = { some: { unitId: monitoredUnitId } };
+      const unitSlots = await this.prisma.staffingSlot.findMany({
+        where: { monitoredUnits: { some: { unitId: monitoredUnitId } } },
+        select: { assignedEmployeeCode: true },
+      });
+      for (const slot of unitSlots) {
+        if (slot.assignedEmployeeCode) {
+          employeeCodes.add(slot.assignedEmployeeCode);
+        }
+      }
     }
 
-    const slots = await this.prisma.staffingSlot.findMany({
-      where: whereObj,
-      select: { assignedEmployeeCode: true },
-    });
+    // 2. Tìm các StaffingSlot có phân công theo dõi lĩnh vực (domains)
+    if (domainId) {
+      const domainSlots = await this.prisma.staffingSlot.findMany({
+        where: { domains: { some: { domainId } } },
+        select: { assignedEmployeeCode: true },
+      });
+      for (const slot of domainSlots) {
+        if (slot.assignedEmployeeCode) {
+          employeeCodes.add(slot.assignedEmployeeCode);
+        }
+      }
+    }
 
-    for (const slot of slots) {
-      if (slot.assignedEmployeeCode) {
-        employeeCodes.add(slot.assignedEmployeeCode);
+    // 3. Fallback: Nếu chưa có lãnh đạo phân công theo dõi đơn vị, tìm lãnh đạo trực tiếp của chính đơn vị đó
+    if (employeeCodes.size === 0 && monitoredUnitId) {
+      const directLeaderSlots = await this.prisma.staffingSlot.findMany({
+        where: {
+          staffing: { unitId: monitoredUnitId },
+          assignedEmployeeCode: { not: null },
+        },
+        include: { staffing: { include: { jobTitle: true } } },
+        orderBy: { staffing: { jobTitle: { rank: 'desc' } } },
+        take: 1,
+      });
+      if (directLeaderSlots.length > 0 && directLeaderSlots[0].assignedEmployeeCode) {
+        employeeCodes.add(directLeaderSlots[0].assignedEmployeeCode);
       }
     }
 

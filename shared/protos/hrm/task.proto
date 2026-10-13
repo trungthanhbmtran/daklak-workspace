@@ -160,6 +160,8 @@ message TaskResponse {
   string meetingLink = 36;
   string statusLabel = 37;
   string priorityLabel = 38;
+  string sourceDocumentRef = 39;
+  string metadataJson = 40;
 }
 
 message TaskPlan {
@@ -196,6 +198,8 @@ message CreateTaskRequest {
   repeated string currentUserPermissions = 25;
   string type = 26;
   string meetingLink = 27;
+  string sourceDocumentRef = 28;
+  string metadataJson = 29;
 }
 
 message ListTasksRequest {
@@ -489,6 +493,10 @@ message BreakdownTaskRequest {
   string currentEmployeeCode = 12;
   int32 currentUserDept = 13;
   repeated string currentUserPermissions = 14;
+  string priority = 15;
+  optional string supervisorCode = 16;
+  string sourceDocumentRef = 17;
+  string metadataJson = 18;
 }
 
 // Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ RequestCoordination Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬

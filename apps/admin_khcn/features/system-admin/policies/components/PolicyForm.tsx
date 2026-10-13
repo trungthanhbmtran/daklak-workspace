@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/typography";
 
-import { Permission } from "../types";
+import { Permission, Policy } from "../types";
 import { policyFormSchema, type PolicyFormValues } from "../schemas";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { policyApi } from "../api";
@@ -62,15 +62,37 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
     if (createMode) {
       form.reset({ name: "", code: "", description: "", active: 1, policies: [] });
     } else if (policyDetail) {
+      const resourceIdToCode = new Map<number, string>();
+      permissions.forEach((perm) => {
+        if (perm.id && perm.code) {
+          const code = perm.code.includes(":")
+            ? perm.code.slice(0, perm.code.lastIndexOf(":"))
+            : perm.code;
+          resourceIdToCode.set(perm.id, code);
+        }
+      });
+
+      const normalizedPolicies = (policyDetail.policies || []).map((p: Policy) => ({
+        ...p,
+        resourceId: p.resourceId,
+        resourceCode:
+          p.resourceCode ||
+          (p.resourceId ? resourceIdToCode.get(p.resourceId) : "") ||
+          "",
+        action: p.action,
+        effect: p.effect || "ALLOW",
+        conditions: p.conditions || { expression: "" },
+      }));
+
       form.reset({
         name: policyDetail.name || "",
         code: policyDetail.code || "",
         description: policyDetail.description || "",
         active: policyDetail.active ?? 1,
-        policies: policyDetail.policies || [],
+        policies: normalizedPolicies,
       });
     }
-  }, [policyDetail, createMode, form]);
+  }, [policyDetail, permissions, createMode, form]);
 
   // Gom nhóm available actions (permissions) theo Resource Name (module)
   const groupedPermissions = useMemo(() => {
@@ -117,10 +139,8 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
     saveMutation.mutate(payload);
   };
 
-  const onDelete = (reason?: string) => {
+  const onDelete = (_reason?: string) => {
     if (policyId) {
-      // In a real scenario, reason could be sent to the API
-      console.log("Deleting policy with reason:", reason);
       deleteMutation.mutate(policyId);
     }
   };
@@ -182,7 +202,7 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
                 )} />
                 <FormField control={form.control} name="code" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Mã vai trò (Code) *</FormLabel>
+                    <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Mã vai trò (Code)</FormLabel>
                     <FormControl><Input placeholder="VD: ADMIN" className="h-9 font-mono text-sm uppercase" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -218,7 +238,7 @@ export function PolicyForm({ policyId }: PolicyFormProps) {
                 </Text>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background">
                   {/* eslint-disable-next-line react-hooks/incompatible-library */}
-                  Đã cấu hình: {form.watch("policies").length} chính sách
+                  Đã cấu hình: {(form.watch("policies") || []).length} chính sách
                 </Badge>
               </div>
 

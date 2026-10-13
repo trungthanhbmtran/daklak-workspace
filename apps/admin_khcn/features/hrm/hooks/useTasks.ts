@@ -67,12 +67,14 @@ export function useTaskComments(conversationId: string | undefined) {
 
 /**
  * Cây nhiệm vụ con (delegation chain) của một task.
- * - enabled: chỉ fetch khi taskId có giá trị
+ * - enabled: chỉ fetch khi taskId có giá trị và options.enabled !== false
  */
-export function useTaskSubtasks(taskId: number | undefined) {
+export function useTaskSubtasks(taskId: number | undefined, options?: { enabled?: boolean }) {
+  const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
   return useQuery({
     queryKey: taskId ? hrmKeys.taskSubtasks(taskId) : [...hrmKeys.tasks(), 'subtasks', 'none'],
-    queryFn: taskId ? () => hrmTasksApi.getSubTasks(taskId) : skipToken,
+    queryFn: isEnabled && taskId ? () => hrmTasksApi.getSubTasks(taskId) : skipToken,
+    enabled: isEnabled,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false,
@@ -284,10 +286,12 @@ export function useRespondTask(taskId: number | undefined) {
 }
 
 /** Lịch sử thao tác của một task. */
-export function useTaskHistory(taskId: number | undefined) {
+export function useTaskHistory(taskId: number | undefined, options?: { enabled?: boolean }) {
+  const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
   return useQuery({
     queryKey: taskId ? hrmKeys.taskHistory(taskId) : [...hrmKeys.tasks(), "history", "none"],
-    queryFn: taskId ? () => hrmTasksApi.getHistory(taskId) : skipToken,
+    queryFn: isEnabled && taskId ? () => hrmTasksApi.getHistory(taskId) : skipToken,
+    enabled: isEnabled,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false,
@@ -295,10 +299,12 @@ export function useTaskHistory(taskId: number | undefined) {
 }
 
 /** Danh sách các bước thực hiện (steps/checklist) của một task. */
-export function useTaskSteps(taskId: number | undefined) {
+export function useTaskSteps(taskId: number | undefined, options?: { enabled?: boolean }) {
+  const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
   return useQuery({
     queryKey: taskId ? hrmKeys.taskSteps(taskId) : [...hrmKeys.tasks(), "steps", "none"],
-    queryFn: taskId ? () => hrmTasksApi.listSteps(taskId) : skipToken,
+    queryFn: isEnabled && taskId ? () => hrmTasksApi.listSteps(taskId) : skipToken,
+    enabled: isEnabled,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
   });

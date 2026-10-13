@@ -21,4 +21,5 @@ export interface Permission {
   module: string;
   action: string;
   code: string;
+  resourceCode?: string;
 }

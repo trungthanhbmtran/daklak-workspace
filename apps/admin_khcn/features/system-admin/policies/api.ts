@@ -1,36 +1,45 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { Policy, Permission } from "./types";
 
 export const policyApi = {
   getPolicys: async (): Promise<Policy[]> => {
     const res: any = await apiClient.get("/policys");
-    return res.data || [];
+    return unwrapData<Policy[]>(res, []);
   },
 
   getPermissionMatrix: async (): Promise<Permission[]> => {
     const res: any = await apiClient.get("/resources/permission-matrix");
-    return res.data || [];
+    return unwrapData<Permission[]>(res, []);
   },
 
   getPolicyById: async (id: number): Promise<Policy | null> => {
     const res: any = await apiClient.get(`/policys/${id}`);
-    if (res?.data?.policies) {
-      res.data.policies = res.data.policies.map((p: any) => ({
+    const data = unwrapData<any>(res, null);
+    if (data && Array.isArray(data.policies)) {
+      data.policies = data.policies.map((p: any) => ({
         ...p,
         resourceCode: p.resourceCode || p.resource_code || p.resource?.code || "",
         resourceId: p.resourceId || p.resource_id,
+        action: p.action,
+        effect: p.effect || "ALLOW",
+        conditions: p.conditions || { expression: "" },
       }));
     }
-    return res.data || null;
+    return data;
   },
 
   savePolicy: (data: Partial<Policy>) => {
     const payload = {
-      code: data.code,
       name: data.name,
+      code: data.code,
       description: data.description,
-      policies: data.policies || [],
+      policies: (data.policies || []).map((p) => ({
+        resourceId: p.resourceId,
+        action: p.action,
+        effect: p.effect || "ALLOW",
+        conditions: p.conditions?.expression ? p.conditions : undefined,
+      })),
     };
     if (data.id) {
       return apiClient.put(`/policys/${data.id}`, payload);

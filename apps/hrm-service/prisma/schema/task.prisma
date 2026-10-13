@@ -43,6 +43,9 @@ model Task {
 
   organizationId String @default("DEFAULT") @map("organization_id")
 
+  @@index([organizationId, isDeleted, status, dueDate])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, planId])
   @@index([dueDate])
   @@index([status, dueDate])
   @@index([isCompleted, dueDate])
@@ -71,6 +74,7 @@ model TaskStep {
   organizationId String @default("DEFAULT") @map("organization_id")
 
   @@index([taskId])
+  @@index([taskId, isDeleted, order])
   @@map("task_steps")
 }
 
@@ -87,6 +91,7 @@ model TaskAttachment {
   organizationId String @default("DEFAULT") @map("organization_id")
 
   @@index([taskId])
+  @@index([taskId, isDeleted])
   @@map("task_attachments")
 }
 
@@ -115,6 +120,8 @@ model TaskParticipant {
   organizationId String @default("DEFAULT") @map("organization_id")
 
   @@id([taskId, employeeCode, participantRole])
+  @@index([employeeCode, participantRole])
+  @@index([employeeCode, status])
   @@map("task_participants")
 }
 

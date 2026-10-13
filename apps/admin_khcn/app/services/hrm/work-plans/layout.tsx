@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   ListTodo,
-  Briefcase,
   Library,
   Settings,
   Calculator,

@@ -57,6 +57,11 @@ export class TasksService implements OnModuleInit {
     return meta;
   }
 
+  // ── High Performance In-Memory User Directory Cache ──
+  private userCacheMap = new Map<string, any>();
+  private userCacheExpiresAt = 0;
+  private readonly USER_CACHE_TTL = 10 * 60 * 1000; // 10 minutes TTL
+
   async populateUsers(tasks: any[]) {
     if (!tasks || tasks.length === 0) return tasks;
 
@@ -94,51 +99,60 @@ export class TasksService implements OnModuleInit {
 
     if (empCodes.size === 0 && userIds.size === 0) return tasks;
 
-    try {
-      const usersRes: any = await firstValueFrom(
-        this.userService.ListUsers({ take: 500 }),
-      );
-      const users = usersRes?.data || [];
-      const usersMap = new Map<string, any>();
-      users.forEach((u: any) => {
-        if (u.employeeCode) {
-          usersMap.set(u.employeeCode, u);
-        }
-        usersMap.set(String(u.id), u);
-      });
-
-      const mapUsers = (task: any) => {
-        if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') {
-          const u = usersMap.get(task.assigneeCode);
-          if (u) {
-            task.assigneeName = u.fullName || u.username;
-            task.assigneeAvatar = u.avatarUrl;
-            task.assigneeJobTitle = u.jobTitleName;
-            task.assigneeUnitName = u.unitName;
+    const now = Date.now();
+    // Chỉ fetch từ user-service khi cache trống hoặc hết hạn TTL 10 phút
+    if (this.userCacheMap.size === 0 || now > this.userCacheExpiresAt) {
+      try {
+        const usersRes: any = await firstValueFrom(
+          this.userService.ListUsers({ take: 500 }),
+        );
+        const users = usersRes?.data || [];
+        const newMap = new Map<string, any>();
+        users.forEach((u: any) => {
+          if (u.employeeCode) {
+            newMap.set(u.employeeCode, u);
           }
-        }
-        if (task.assignerCode) {
-          const u = usersMap.get(task.assignerCode);
-          if (u) task.assignerName = u.fullName || u.username;
-        }
-        if (task.supervisorCode) {
-          const u = usersMap.get(task.supervisorCode);
-          if (u) task.supervisorName = u.fullName || u.username;
-        }
-        if (task.coassigneeCodes && Array.isArray(task.coassigneeCodes)) {
-          task.coassigneeNames = task.coassigneeCodes
-            .map((code: string) => {
-              const u = usersMap.get(code);
-              return u ? u.fullName || u.username : code;
-            })
-            .filter(Boolean);
-        }
-        if (task.children) task.children.forEach(mapUsers);
-      };
-      tasks.forEach(mapUsers);
-    } catch (e) {
-      console.error('Failed to populate users:', e);
+          newMap.set(String(u.id), u);
+        });
+        this.userCacheMap = newMap;
+        this.userCacheExpiresAt = now + this.USER_CACHE_TTL;
+      } catch (e) {
+        // Fallback giữ nguyên cache cũ nếu có lỗi
+      }
     }
+
+    const usersMap = this.userCacheMap;
+
+    const mapUsers = (task: any) => {
+      if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') {
+        const u = usersMap.get(task.assigneeCode);
+        if (u) {
+          task.assigneeName = u.fullName || u.username;
+          task.assigneeAvatar = u.avatarUrl;
+          task.assigneeJobTitle = u.jobTitleName;
+          task.assigneeUnitName = u.unitName;
+        }
+      }
+      if (task.assignerCode) {
+        const u = usersMap.get(task.assignerCode);
+        if (u) task.assignerName = u.fullName || u.username;
+      }
+      if (task.supervisorCode) {
+        const u = usersMap.get(task.supervisorCode);
+        if (u) task.supervisorName = u.fullName || u.username;
+      }
+      if (task.coassigneeCodes && Array.isArray(task.coassigneeCodes)) {
+        task.coassigneeNames = task.coassigneeCodes
+          .map((code: string) => {
+            const u = usersMap.get(code);
+            return u ? u.fullName || u.username : code;
+          })
+          .filter(Boolean);
+      }
+      if (task.children) task.children.forEach(mapUsers);
+    };
+    tasks.forEach(mapUsers);
+
     return tasks;
   }
 
@@ -192,9 +206,46 @@ export class TasksService implements OnModuleInit {
       body.currentUserPermissions = req.user.permissionsFlatten || [];
     }
 
-    if (body.coAssigneeCodes) {
-      body.coassigneeCodes = body.coAssigneeCodes;
-      delete body.coAssigneeCodes;
+    if (body.supervisor) {
+      body.supervisorCode = body.supervisor;
+      delete body.supervisor;
+    }
+
+    if (body.baseScore !== undefined) {
+      body.baseScore = typeof body.baseScore === 'number' ? body.baseScore : parseFloat(body.baseScore) || 0;
+    }
+    if (body.weight !== undefined) {
+      body.weight = typeof body.weight === 'number' ? body.weight : parseFloat(body.weight) || 0;
+    }
+    if (body.assigneePercentage !== undefined) {
+      body.assigneePercentage = typeof body.assigneePercentage === 'number' ? body.assigneePercentage : parseFloat(body.assigneePercentage) || 100;
+    }
+    if (body.coassigneePercentages && typeof body.coassigneePercentages === 'object' && !Array.isArray(body.coassigneePercentages)) {
+      const codes = body.coassigneeCodes || [];
+      body.coassigneePercentages = codes.map((c: string) => Number(body.coassigneePercentages[c]) || 0);
+    } else if (Array.isArray(body.coassigneePercentages)) {
+      body.coassigneePercentages = body.coassigneePercentages.map((p: any) => Number(p) || 0);
+    }
+
+    const metadataObj = {
+      ...(body.metadata || {}),
+      ...(body.sourceDocumentRef ? { sourceDocumentRef: body.sourceDocumentRef } : {}),
+      ...(body.initialSteps ? { initialSteps: body.initialSteps } : {}),
+    };
+    body.metadataJson = JSON.stringify(metadataObj);
+    body.sourceDocumentRef = body.sourceDocumentRef || '';
+
+    if (!body.supervisorCode) {
+      try {
+        const resolved = await this.getSupervisorByScope(req, {
+          departmentId: body.departmentId,
+          assigneeCode: body.assigneeCode,
+          domainId: body.domainId,
+        });
+        if (resolved?.data?.supervisorCode) {
+          body.supervisorCode = resolved.data.supervisorCode;
+        }
+      } catch {}
     }
 
     const response: any = await firstValueFrom(
@@ -202,6 +253,59 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
+  }
+
+  async getSupervisorByScope(req: any, query: { departmentId?: number; domainId?: number; assigneeCode?: string }) {
+    let targetUnitId = query.departmentId;
+    const targetDomainId = query.domainId || 0;
+
+    if (!targetUnitId && query.assigneeCode && query.assigneeCode !== 'UNASSIGNED') {
+      const u = this.userCacheMap.get(query.assigneeCode);
+      if (u?.departmentId) {
+        targetUnitId = u.departmentId;
+      }
+    }
+
+    if (!targetUnitId && !targetDomainId) {
+      return { success: true, data: null };
+    }
+
+    try {
+      const res: any = await firstValueFrom(
+        this.userService.GetEmployeesByScope(
+          {
+            domain_id: targetDomainId,
+            monitored_unit_id: targetUnitId || 0,
+          },
+          this.getGrpcMetadata(req),
+        ),
+      );
+      const codes: string[] = res?.employee_codes || res?.employeeCodes || [];
+      if (codes.length > 0) {
+        const supervisorCode = codes[0];
+        if (this.userCacheMap.size === 0) {
+          await this.populateUsers([{ supervisorCode }]);
+        }
+        const u = this.userCacheMap.get(supervisorCode);
+        return {
+          success: true,
+          data: {
+            supervisorCode,
+            supervisorName: u ? u.fullName || u.username : supervisorCode,
+            supervisorJobTitle: u?.jobTitleName || undefined,
+            supervisorUnitName: u?.unitName || undefined,
+            reason: targetUnitId
+              ? 'Lãnh đạo được phân công theo dõi đơn vị trong định biên tổ chức'
+              : 'Lãnh đạo được phân công theo dõi lĩnh vực trong định biên tổ chức',
+            allMatchedCodes: codes,
+          },
+        };
+      }
+    } catch {
+      // Fallback null
+    }
+
+    return { success: true, data: null };
   }
 
   async list(
@@ -526,6 +630,12 @@ export class TasksService implements OnModuleInit {
       throw new Error('Nhiệm vụ không tồn tại');
     }
 
+    const metadataObj = {
+      ...(body.metadata || {}),
+      ...(body.sourceDocumentRef ? { sourceDocumentRef: body.sourceDocumentRef } : {}),
+      ...(body.initialSteps ? { initialSteps: body.initialSteps } : {}),
+    };
+
     const breakdownResponse: any = await firstValueFrom(
       this.taskService.BreakdownTask(
         {
@@ -535,6 +645,8 @@ export class TasksService implements OnModuleInit {
           id: id,
           parentId: id,
           assignerCode,
+          sourceDocumentRef: body.sourceDocumentRef || '',
+          metadataJson: JSON.stringify(metadataObj),
         },
         this.getGrpcMetadata(req),
       ),

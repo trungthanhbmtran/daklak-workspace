@@ -91,7 +91,12 @@ export class PbacController implements OnModuleInit {
         } else if (typeof p.conditions === 'object') {
           parsedConditions = p.conditions;
         }
-        return { ...p, conditions: parsedConditions };
+        return {
+          ...p,
+          resourceId: p.resourceId ?? p.resource_id,
+          resourceCode: p.resourceCode || p.resource_code || p.resource?.code || '',
+          conditions: parsedConditions,
+        };
       });
     }
     return { data: result };

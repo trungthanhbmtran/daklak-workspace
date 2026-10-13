@@ -9,7 +9,7 @@ Inspect the request and relevant repository files, then produce a reviewable imp
 
 ## Required context research
 
-Follow .agents/roles/agent-operations.md. Inspect the current diff; consult the relevant blacklist entries, architecture/source-of-truth maps, matching execution-log incidents, and Git history for affected paths. Search the large execution log by keywords and read only relevant sections. Verify history against current implementation and label historical facts or assumptions.
+Follow .agents/roles/codex-orchestrator.md and .agents/AGENTS.md. Inspect the current diff; consult applicable blacklist entries, architecture/source-of-truth maps, the coordinator archive (.agents/execution_log.md), relevant lane logs (.agents/execution_logs/), reports, and Git history for affected paths. Search large logs by keywords and read only relevant sections. Verify historical claims against current implementation and label facts versus assumptions.
 
 ## Required plan contents
 
