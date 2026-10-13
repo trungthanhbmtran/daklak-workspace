@@ -29,8 +29,8 @@ const NUMERIC_TAIL_RE = /\/\d+$/;
 const CUID_TAIL_RE = /\/c[a-z0-9]{24}$/i;
 const STATS_RE = /\/(reports|stats|metrics|dashboard|kpis)/i;
 
-const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report'];
-const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles', '/global-settings'];
+const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report', '/kpi-forms/'];
+const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles', '/global-settings', '/xml'];
 
 /* -------------------------------------------------------------------------- */
 /* deepClean                                                                   */
@@ -188,6 +188,13 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
     // allowed_paths (snake_case) ưu tiên hơn allowedPaths như code cũ
     const allowedPaths = deepClean(raw.allowed_paths ?? raw.allowedPaths);
     if (allowedPaths) result.allowedPaths = allowedPaths;
+
+    if ('xmlContent' in raw && raw.xmlContent !== undefined) {
+      result.xmlContent = raw.xmlContent;
+    }
+    if ('placeholders' in raw && raw.placeholders !== undefined) {
+      result.placeholders = raw.placeholders;
+    }
 
     return result;
   }

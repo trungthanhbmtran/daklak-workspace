@@ -44,6 +44,7 @@ import {
   getFriendlyFieldLabel,
   getStatusBadgeCls,
 } from '@/features/reports/utils/fieldHelpers';
+import { kpiFormsApi } from '@/features/hrm/api/kpi-forms.api';
 
 interface ReportViewerProps {
   definitionId: number;
@@ -132,6 +133,37 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const [filterMau04, setFilterMau04] = useState<string>('ALL');
   const [activeSopStep, setActiveSopStep] = useState<string>('ALL');
   const [isMau05Open, setIsMau05Open] = useState(false);
+
+  // In / Xuất PDF quyết định Mẫu 05 chuẩn Thể thức Nghị định 30/2020 & Văn bản Đảng thông qua Server API Printer
+  const handlePrintMau05Decision = () => {
+    const printUrl = kpiFormsApi.getPrintUrl('M05_BAOCAO_QUYETDINH');
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.src = printUrl;
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } finally {
+          setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+          }, 3000);
+        }
+      }, 400);
+    };
+  };
 
   // Debounce tìm kiếm
   useEffect(() => {
@@ -1323,7 +1355,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       <Sheet open={isMau05Open} onOpenChange={setIsMau05Open}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-4xl overflow-y-auto p-4 sm:p-8 bg-white min-w-0"
+          className="w-full sm:max-w-4xl overflow-y-auto p-4 sm:p-8 bg-slate-100/90 min-w-0"
         >
           <SheetHeader className="border-b border-slate-200 pb-4 text-left">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -1331,71 +1363,79 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 <FileText className="w-5 h-5 text-amber-600" />
                 Dự thảo Quyết định Phê duyệt Xếp loại Chất lượng (Mẫu 05)
               </SheetTitle>
-              <Button
-                size="sm"
-                onClick={() => window.print()}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs"
-              >
-                <Printer className="w-4 h-4" />
-                In Quyết định (Print)
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={handlePrintMau05Decision}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+                >
+                  <Printer className="w-4 h-4" />
+                  In Quyết định (Print / PDF)
+                </Button>
+              </div>
             </div>
             <SheetDescription className="text-xs text-slate-500">
               Văn bản hành chính Đảng ban hành kèm theo Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy
             </SheetDescription>
           </SheetHeader>
 
-          {/* Nội dung Quyết định Chuẩn Thể thức Văn bản Đảng */}
-          <div className="mt-6 space-y-6 text-slate-800 text-xs sm:text-sm leading-relaxed font-serif bg-slate-50/50 p-6 sm:p-8 rounded-xl border border-slate-200/90 shadow-inner">
+          {/* Trang giấy A4 mô phỏng chuẩn Thể thức Văn bản Đảng & Nghị định 30/2020 */}
+          <div
+            className="my-6 p-8 sm:p-14 bg-white text-black border border-slate-300 shadow-md max-w-3xl mx-auto rounded-none text-[13pt] leading-[1.4] select-text"
+            style={{ fontFamily: "'Times New Roman', 'Tinos', 'Liberation Serif', serif" }}
+          >
             {/* Header Thể thức Đảng */}
-            <div className="flex justify-between items-start gap-4 pb-4 border-b border-slate-300">
-              <div className="text-center font-bold">
-                <p className="uppercase text-[11px] sm:text-xs text-slate-700">TỈNH ỦY ĐẮK LẮK</p>
-                <p className="uppercase text-xs sm:text-sm font-black text-slate-900">BAN TỔ CHỨC TỈNH ỦY</p>
-                <div className="w-24 h-0.5 bg-rose-600 mx-auto mt-1" />
-                <p className="text-[11px] text-slate-600 font-sans mt-1">Số 125-QĐ/BTCTU</p>
-              </div>
-
-              <div className="text-center">
-                <p className="uppercase font-bold text-xs sm:text-sm text-slate-900">ĐẢNG CỘNG SẢN VIỆT NAM</p>
-                <div className="w-32 h-0.5 bg-slate-400 mx-auto mt-1" />
-                <p className="italic text-[11px] text-slate-600 mt-1 font-sans">
-                  Buôn Ma Thuột, ngày 28 tháng 03 năm 2026
-                </p>
-              </div>
-            </div>
+            <table className="w-full border-collapse mb-6" style={{ border: 'none' }}>
+              <tbody>
+                <tr>
+                  <td className="w-[45%] align-top text-center p-0">
+                    <p className="uppercase text-[12pt] text-black">TỈNH ỦY ĐẮK LẮK</p>
+                    <p className="uppercase text-[12.5pt] font-bold text-black">BAN TỔ CHỨC TỈNH ỦY</p>
+                    <div className="w-24 h-[1.5px] bg-black mx-auto mt-1" />
+                    <p className="text-[12pt] text-black mt-1">Số 125-QĐ/BTCTU</p>
+                  </td>
+                  <td className="w-[55%] align-top text-center p-0">
+                    <p className="uppercase font-bold text-[13pt] text-black">ĐẢNG CỘNG SẢN VIỆT NAM</p>
+                    <div className="w-36 h-[1.5px] bg-black mx-auto mt-1" />
+                    <p className="italic text-[13pt] text-black mt-1">
+                      Buôn Ma Thuột, ngày 28 tháng 03 năm 2026
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
             {/* Tiêu đề Quyết định */}
             <div className="text-center my-6 space-y-2">
-              <h2 className="text-base sm:text-xl font-black uppercase text-slate-900 tracking-wide">
+              <h2 className="text-[15pt] font-bold uppercase text-black tracking-wide">
                 QUYẾT ĐỊNH
               </h2>
-              <p className="font-bold text-xs sm:text-sm text-slate-800 max-w-xl mx-auto">
+              <p className="font-bold text-[13pt] text-black max-w-xl mx-auto leading-normal">
                 Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy Quý I năm 2026
               </p>
-              <div className="w-16 h-0.5 bg-slate-300 mx-auto" />
+              <div className="w-20 h-[1px] bg-black mx-auto mt-2" />
             </div>
 
             {/* Căn cứ pháp lý */}
-            <div className="space-y-1.5 italic text-[11px] sm:text-xs text-slate-600 text-justify">
-              <p>• Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và tổ chức bộ máy cơ quan;</p>
-              <p>• Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ, công chức, viên chức hằng quý và hằng năm;</p>
-              <p>• Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về quy chế kết nối, chia sẻ dữ liệu và kiểm tra nghiệp vụ Ngành Tổ chức xây dựng Đảng;</p>
-              <p>• Căn cứ Biên bản cuộc họp của Hội đồng Thẩm định đánh giá xếp loại cơ quan Ban Tổ chức Tỉnh ủy ngày 25 tháng 03 năm 2026;</p>
-              <p>• Xét đề nghị của Trưởng phòng Tổ chức cán bộ và Chánh Văn phòng Ban,</p>
+            <div className="space-y-1.5 italic text-[13pt] text-black text-justify leading-[1.4]">
+              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và tổ chức bộ máy cơ quan;</p>
+              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ, công chức, viên chức hằng quý và hằng năm;</p>
+              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về quy chế kết nối, chia sẻ dữ liệu và kiểm tra nghiệp vụ Ngành Tổ chức xây dựng Đảng;</p>
+              <p style={{ textIndent: '1.27cm' }}>- Căn cứ Biên bản cuộc họp của Hội đồng Thẩm định đánh giá xếp loại cơ quan Ban Tổ chức Tỉnh ủy ngày 25 tháng 03 năm 2026;</p>
+              <p style={{ textIndent: '1.27cm' }}>- Xét đề nghị của Trưởng phòng Tổ chức cán bộ và Chánh Văn phòng Ban,</p>
             </div>
 
             {/* Nội dung các Điều */}
-            <div className="space-y-4 pt-2">
-              <p className="text-center font-bold uppercase text-xs tracking-wider">
+            <div className="space-y-4 pt-3 text-[13pt] text-black leading-[1.4]">
+              <p className="text-center font-bold uppercase text-[13.5pt] tracking-wider my-3">
                 BAN TỔ CHỨC TỈNH ỦY QUYẾT ĐỊNH:
               </p>
 
               <div>
-                <p className="font-bold text-slate-900">
+                <p className="font-bold text-black text-justify" style={{ textIndent: '1.27cm' }}>
                   Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk:
                 </p>
-                <div className="mt-2 pl-4 space-y-1 text-slate-700 font-sans text-xs">
+                <div className="mt-2 pl-8 space-y-1 text-black text-[13pt]">
                   <p>1. <strong>Tập thể Lãnh đạo Ban:</strong> Điểm KPI 98.5/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
                   <p>2. <strong>Phòng Tổ chức đảng, đảng viên:</strong> Điểm KPI 96.0/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
                   <p>3. <strong>Phòng Tổ chức cán bộ:</strong> Điểm KPI 95.5/100 • Xếp loại: <strong>Hoàn thành xuất sắc nhiệm vụ</strong>.</p>
@@ -1405,14 +1445,14 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               </div>
 
               <div>
-                <p className="font-bold text-slate-900">
+                <p className="font-bold text-black text-justify" style={{ textIndent: '1.27cm' }}>
                   Điều 2. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 23 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk, cụ thể:
                 </p>
-                <div className="mt-2 pl-4 space-y-1.5 text-slate-700 font-sans text-xs">
+                <div className="mt-2 pl-8 space-y-1.5 text-black text-[13pt]">
                   <p>
                     • <strong>1. Hoàn thành xuất sắc nhiệm vụ: 04 đồng chí</strong> (Tỷ lệ 17.4% tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):
                   </p>
-                  <ul className="list-disc pl-6 space-y-0.5 text-slate-600">
+                  <ul className="list-disc pl-8 space-y-1 text-black">
                     <li>Đ/c Nguyễn Thượng Hải - Trưởng ban Tổ chức Tỉnh ủy (100.0 điểm)</li>
                     <li>Đ/c Lưu Vĩnh Hưng - Phó Trưởng ban Thường trực (98.0 điểm)</li>
                     <li>Đ/c Công chức 1 - Trưởng phòng Tổ chức đảng, đảng viên (97.0 điểm)</li>
@@ -1432,35 +1472,40 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               </div>
 
               <div>
-                <p className="font-bold text-slate-900">
+                <p className="font-bold text-black" style={{ textIndent: '1.27cm' }}>
                   Điều 3. Trách nhiệm thi hành:
                 </p>
-                <p className="pl-4 text-justify text-slate-700 text-xs font-sans mt-1">
-                  Văn phòng Ban, các phòng chuyên môn và các đồng chí có tên tại Điều 1, Điều 2 chịu trách nhiệm thi hành Quyết định này. Kết quả xếp loại là căn cứ bình xét thi đua khen thưởng và chi trả thu nhập tăng thêm theo quy định. Quyết định có hiệu lực kể từ ngày ký.
+                <p className="text-justify text-black text-[13pt] mt-1" style={{ textIndent: '1.27cm' }}>
+                  Văn phòng Ban, các phòng chuyên môn và các đồng chí có tên tại Điều 1, Điều 2 chịu trách nhiệm thi hành Quyết định này. Kết quả xếp loại là căn cứ bình xét thi đua khen thưởng và chi trả thu nhập tăng thêm theo quy định. Quyết định này có hiệu lực kể từ ngày ký.
                 </p>
               </div>
             </div>
 
             {/* Chữ ký & Nơi nhận */}
-            <div className="pt-8 flex justify-between items-start gap-4">
-              <div className="text-[11px] font-sans text-slate-600">
-                <p className="font-bold underline text-slate-700">Nơi nhận:</p>
-                <p>• Thường trực Tỉnh ủy (để b/c);</p>
-                <p>• Lãnh đạo Ban;</p>
-                <p>• 05 Phòng chuyên môn;</p>
-                <p>• Lưu: VT, TCCB.</p>
-              </div>
-
-              <div className="text-center font-bold">
-                <p className="uppercase text-xs sm:text-sm text-slate-900">TRƯỞNG BAN</p>
-                <div className="my-8 relative flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full border-2 border-red-500/40 text-red-600 text-[10px] flex items-center justify-center text-center p-1 rotate-12 select-none uppercase font-bold">
-                    Ban Tổ chức Tỉnh ủy Đắk Lắk
-                  </div>
-                </div>
-                <p className="text-sm font-black text-slate-900">Nguyễn Thượng Hải</p>
-              </div>
-            </div>
+            <table className="w-full border-collapse mt-8" style={{ border: 'none' }}>
+              <tbody>
+                <tr>
+                  <td className="w-1/2 align-top text-left p-0">
+                    <p className="font-bold italic text-[12pt] text-black">Nơi nhận:</p>
+                    <div className="text-[11pt] leading-[1.35] text-black mt-1 space-y-0.5">
+                      <p>- Thường trực Tỉnh ủy (để b/c);</p>
+                      <p>- Lãnh đạo Ban;</p>
+                      <p>- 05 Phòng chuyên môn;</p>
+                      <p>- Lưu: VT, TC-CB.</p>
+                    </div>
+                  </td>
+                  <td className="w-1/2 align-top text-center p-0">
+                    <p className="uppercase font-bold text-[13pt] text-black">TRƯỞNG BAN</p>
+                    <div className="my-6 relative flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-full border-2 border-red-500/40 text-red-600 text-[10px] flex items-center justify-center text-center p-1 rotate-12 select-none uppercase font-bold">
+                        Ban Tổ chức Tỉnh ủy Đắk Lắk
+                      </div>
+                    </div>
+                    <p className="text-[13pt] font-bold text-black">Nguyễn Thượng Hải</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </SheetContent>
       </Sheet>

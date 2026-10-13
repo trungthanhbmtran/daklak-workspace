@@ -357,10 +357,10 @@ export function AiQuotaPlanModal({
                     </TabsTrigger>
                   </TabsList>
 
-                  {/* TAB 1: BẢNG ĐỊNH MỨC NHIỆM VỤ */}
                   <TabsContent value="QUOTAS" className="mt-3 min-w-0 space-y-3">
-                    <div className="rounded-xl border overflow-hidden bg-card min-w-0">
-                      <Table className="w-full table-fixed min-w-0">
+                    <div className="rounded-xl border overflow-x-auto bg-card min-w-0">
+                      <div className="min-w-[620px]">
+                        <Table className="w-full table-fixed min-w-0">
                         <TableHeader className="bg-muted/50 border-b">
                           <TableRow>
                             <TableHead className="w-[40px] text-center text-xs font-bold">#</TableHead>
@@ -416,6 +416,7 @@ export function AiQuotaPlanModal({
                         </TableBody>
                       </Table>
                     </div>
+                  </div>
 
                     <div className="flex justify-end pt-1">
                       <Button

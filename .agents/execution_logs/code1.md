@@ -1,6 +1,45 @@
 # Execution Log — Lane 1 (Code 1)
 
-## [2026-10-13] Rà soát điều chỉnh Menu và Page liên quan bên trong HRM Service theo đúng Vị trí việc làm (VTVL) Trung ương quy định
+## [2026-10-13] Nâng cấp Giao diện Thư viện Nhiệm vụ theo VTVL (`rank-templates`) lên chuẩn UX/UI Enterprise
+
+### 1. Vấn đề phát hiện & Khắc phục
+- **Lỗi giao diện (Layout breakage):**
+  * Hardcode `h-[600px]` tại `CivilServantTaskConfig`, `PublicEmployeeTaskConfig`, `PartyTaskConfig` làm vỡ layout co giãn của Next.js parent container (`overflow-hidden`), khiến phần dưới danh sách nhiệm vụ bị cắt xén, thanh cuộn trong bị kẹt và không tương thích đa thiết bị.
+  * Radix Accordion ở cột danh mục VTVL khởi tạo `defaultValue` rỗng khi mount (do dữ liệu async chưa load xong), dẫn đến toàn bộ các nhóm VTVL bị đóng (collapsed) hoặc trống trơn khi vào trang.
+  * Lặp code 95% giữa 3 file `CivilServantTaskConfig`, `PublicEmployeeTaskConfig`, `PartyTaskConfig`.
+  * Thiếu trường `defaultWeight` (Trọng số mặc định % KPI) mặc dù backend `TaskRankTemplate` đã hỗ trợ.
+  * Thao tác xóa thiếu hộp thoại xác nhận an toàn; nút Sửa/Xóa hiển thị thô sơ.
+  * Thiếu tính năng tìm kiếm VTVL realtime và lọc theo trạng thái có/chưa có nhiệm vụ mẫu.
+
+### 2. Phạm vi & File tác động
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/RankTaskCatalogManager.tsx`:
+  * Tạo mới component hợp nhất quản lý Thư viện Nhiệm vụ VTVL theo chuẩn UX/UI Enterprise.
+  * Layout Fluid Responsive: `flex-1 min-h-0 flex flex-col md:flex-row gap-4 w-full`, xóa bỏ triệt để hardcode `h-[600px]`, cuộn độc lập cho cả 2 cột.
+  * Top Metric Strip: Hiển thị 4 chỉ số tổng quan (Tổng VTVL chuẩn hóa, Số VTVL đã có mẫu, Tổng nhiệm vụ mẫu, Tỷ lệ bao phủ VTVL %).
+  * Cột trái (VTVL Directory): Ô tìm kiếm realtime, Filter chip (Tất cả / Đã có mẫu / Chưa có), Accordion nhóm chức danh controlled tự động mở, Badge đếm số nhiệm vụ mẫu trên từng VTVL, Active state nổi bật `border-l-4 border-primary`.
+  * Cột phải (Task Catalog Management): Header VTVL chi tiết, Ô tìm kiếm nhiệm vụ mẫu, Quick Add Panel kèm gợi ý chip ĐVT một chạm (Văn bản, Báo cáo, Hồ sơ, Đề tài, Quyết định...), hỗ trợ Trọng số KPI (%), Sheet thêm mới trượt từ phải (chuẩn UX form dài), Inline edit và `AlertDialog` xác nhận xóa an toàn (chuẩn UX tương tác ngắn).
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/CivilServantTaskConfig.tsx`:
+  * Refactor sử dụng `RankTaskCatalogManager` cho Khối Công chức (Nghị định 62/2020/NĐ-CP & TT 12/2022/TT-BNV).
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/PublicEmployeeTaskConfig.tsx`:
+  * Refactor sử dụng `RankTaskCatalogManager` cho Khối Viên chức (Nghị định 106/2020/NĐ-CP & NĐ 115/2020/NĐ-CP).
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/PartyTaskConfig.tsx`:
+  * Refactor sử dụng `RankTaskCatalogManager` cho Khối Cơ quan Đảng (Quy định 137-QĐ/TW & Hướng dẫn BTCTW).
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/ConfigureRankTasksClient.tsx`:
+  * Nâng cấp Header Enterprise với icon `Library`, Badge "Chuẩn hóa Nhà nước", nút "Làm mới dữ liệu" và nút "Đồng bộ thư viện".
+  * Tab navigation hiện đại hiển thị số lượng nhiệm vụ mẫu trực tiếp trên từng tab.
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/hooks/useConfigureRankTasks.ts`:
+  * Bổ sung tính toán thống kê (statsByClass), hàm `refetchAll` làm mới dữ liệu và xử lý phòng hộ an toàn dữ liệu `templates`.
+- `apps/admin_khcn/features/hrm/components/work-plans/master-plans/hooks/useTaskConfigForm.ts`:
+  * Bổ sung quản lý `defaultWeight` (trọng số KPI %), trạng thái loading (`isSubmitting`, `isUpdating`, `deletingId`), hỗ trợ `AlertDialog` xác nhận xóa an toàn.
+
+### 3. Kiểm chứng máy thực tế & Phản biện
+- Lệnh kiểm chứng: `npx tsc --noEmit` trong `apps/admin_khcn` -> Exit code 0 (Pass 100%).
+- Tuân thủ 100% 7 Bộ ràng buộc kỹ thuật:
+  * UI/UX: `min-w-0` trên tất cả các flex/grid items có text; `break-words` trên text tên nhiệm vụ; Sheet cho form dài; Dialog cho xác nhận ngắn; Fluid layout không hardcode chiều cao.
+  * Routing: BaseURL không lặp `/admin`.
+  * Next.js 15 App Router: Giữ Server Component và Client Component đúng phân tầng.
+  * Clean code: 100% zero debug logs, encoding UTF-8 không BOM.
+
 
 ### 1. Phạm vi & File tác động
 - `apps/user-service/prisma/seeds/menus.seed.ts`: Bổ sung menu `HRM_POSITIONS_MENU` ("Khung Vị trí việc làm", route `/services/hrm/job-positions`, icon `Briefcase`).
@@ -190,3 +229,37 @@
   * `npm --prefix apps/api-gateway run build`: Exit code 0 (Pass 100%).
   * `npm --prefix apps/hrm-service run build`: Exit code 0 (Pass 100%).
   * Diff rà soát: Tuân thủ 100% 7 Bộ ràng buộc kỹ thuật (BaseURL không lặp `/admin`, UTF-8 không BOM, zero console.log).
+
+## [2026-10-13] Sửa Lỗi Font Chữ và Chuẩn Hóa Tiếng Việt Văn Bản Dự Thảo Quyết Định Mẫu 05 (Báo Cáo 5)
+- **Yêu cầu:** Khắc phục lỗi phông chữ tiếng Việt (lỗi dấu, trộn lẫn font-sans/font-serif, kích thước nhỏ và co giật chân chữ) tại bản "Dự thảo Quyết định Phê duyệt Xếp loại Chất lượng (Mẫu 05)" trên trang Chi tiết Báo cáo số 5 (`http://113.184.220.82/admin/services/reports/5`). Chuyển thành chuẩn tiếng Việt và chuẩn thể thức văn bản hành chính theo Nghị định 30/2020/NĐ-CP & Quy định 01-QĐ/TW.
+- **Phạm vi file đã triển khai:**
+  * `apps/admin_khcn/app/globals.css`:
+    - Nhúng Google Fonts Tinos (`@import url('https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap')`) — bộ phông tương thích hoàn toàn Unicode tiếng Việt của Times New Roman.
+    - Định nghĩa biến CSS `--font-serif` và `--font-times` trỏ về `"Times New Roman", "Tinos", "Liberation Serif", serif`.
+  * `apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx`:
+    - Loại bỏ 100% các class `font-sans` bị gán rải rác trong nội dung văn bản quyết định; đồng nhất toàn bộ khối quyết định sang phông Times New Roman / Tinos (`fontFamily: "'Times New Roman', 'Tinos', 'Liberation Serif', serif"`).
+    - Chuẩn hóa kích thước chữ và khoảng cách dòng: chữ nội dung nâng lên 13pt - 14pt (thay vì 11px/12px), giãn dòng `leading-[1.4]`, lề thụt đầu dòng `textIndent: '1.27cm'` theo đúng thể thức văn bản hành chính Việt Nam.
+    - Tái cấu trúc bố cục trang hiển thị: Mô phỏng tờ văn bản hành chính A4 trên nền giấy trắng (`bg-white text-black p-8 sm:p-12 shadow-sm rounded-none border border-slate-200`).
+    - Chuẩn hóa Tiêu đề Đảng, Quốc hiệu, Căn cứ pháp lý, Các Điều 1, 2, 3 và Bảng chữ ký/Nơi nhận 2 cột theo đúng thể thức Hướng dẫn 36-HD/VPTW và Nghị định 30/2020/NĐ-CP.
+    - Cải tiến chức năng in `handlePrintMau05Decision`: In trực tiếp qua iframe ẩn chuyên dụng, bản in và xuất PDF chỉ chứa 100% nội dung tờ quyết định A4, không có giao diện web thừa.
+- **Kiểm chứng máy thực tế:**
+  * `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%).
+  * Kiểm tra BOM & Encoding: Không có byte BOM, mã hóa UTF-8 thuần túy.
+  * Diff rà soát: Tuân thủ 100% 7 Bộ ràng buộc kỹ thuật.
+
+## [2026-10-13] Chuyển Chức Năng In Mẫu 05 Sang Gọi Trực Tiếp Endpoint Print của Server Thay Vì Dựng HTML Ở Client
+- **Yêu cầu:** Loại bỏ việc tự sinh chuỗi HTML tĩnh ở client tại hàm `handlePrintMau05Decision` trong `ReportViewer.tsx`, chuyển sang gọi trực tiếp endpoint API printer đã có trên server (`/api/v1/admin/hrm/kpi-forms/M05_BAOCAO_QUYETDINH/print`).
+- **Phạm vi file đã triển khai:**
+  * `apps/api-gateway/src/modules/hrm/kpi-xml-printer.util.ts`:
+    - Nâng cấp nhận diện `isMau05` (`M05_BAOCAO_QUYETDINH`, `MAU_05`, `Form05_FinalEvaluationReport`, `DecisionTerms`).
+    - Parse chuẩn các Điều 1, 2, 3 và trích yếu quyết định (`subTitle`), căn cứ pháp lý, khối chữ ký Trưởng ban Tổ chức Tỉnh ủy.
+    - Đảm bảo endpoint `GET /admin/hrm/kpi-forms/:formCode/print` render ra bản in Mẫu 05 chuẩn Nghị định 30/2020/NĐ-CP & văn bản Đảng.
+  * `apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx`:
+    - Xóa bỏ hoàn toàn hơn 220 dòng mã HTML hardcode trong `handlePrintMau05Decision`.
+    - Kết nối trực tiếp URL `kpiFormsApi.getPrintUrl('M05_BAOCAO_QUYETDINH')` qua hidden iframe chuyên dụng để kích hoạt in.
+- **Kiểm chứng máy thực tế:**
+  * `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%).
+  * `npm --prefix apps/api-gateway run build`: Exit code 0 (Pass 100%).
+  * Kiểm tra BOM & Encoding: 100% UTF-8 không BOM.
+  * Grep debug: 0 console.log, 0 debugger.
+  * Diff rà soát: Tuân thủ nghiêm ngặt 7 Bộ ràng buộc kỹ thuật.

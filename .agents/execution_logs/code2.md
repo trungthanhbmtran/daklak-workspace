@@ -98,3 +98,63 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
 - **Kiểm chứng máy**:
   - `npm --prefix apps/admin_khcn run typecheck` thành công 100% với exit code 0.
   - `git diff` sạch sẽ, không để lại debug log, mã hóa UTF-8 không BOM.
+
+## 2026-10-13: Khắc phục Triệt để Lỗi Không Hiển thị Ruột XML trong Mẫu Đánh giá tại /admin/services/hrm/work-plans/evaluation-forms
+- **Nguyên nhân gốc rễ phát hiện:**
+  1. Trong `shared/core/interceptors/transform.interceptor.ts`, hàm `detectListRequest(req)` xác định một request GET là danh sách (List) nếu đường dẫn không kết thúc bằng numeric id, UUID hoặc CUID. Vì mã biểu mẫu (`MAU_01`, `HD05_QD39_TU`) và hậu tố `/xml` không phải các định dạng ID trên nên interceptor hiểu nhầm `GET /api/v1/admin/hrm/kpi-forms/:formCode` và `.../:formCode/xml` là List request.
+  2. Do bị gắn nhãn List, interceptor tự động bọc đối tượng `data` vào trong một mảng: `data: [ { formCode: 'MAU_01', xmlContent: '...' } ]` và loại bỏ các trường đặc thù ở root (`xmlContent`, `placeholders`).
+  3. Phía frontend React Query (`useGetKpiFormDetail`, `useGetKpiFormXml`), khi đọc `res.data` (là Array), việc truy xuất `res.data.xmlContent` trả về `undefined` (`Array.prototype.xmlContent` không tồn tại) -> Giao diện Sheet Xem trước đánh giá là không có nội dung ruột XML.
+  4. Docker containers trên VPS (`admin-frontend`, `api-gateway`, `hrm-service`) chưa được đồng bộ các gói bản dựng mới nhất.
+- **Giải pháp xử lý:**
+  1. Cập nhật `shared/core/interceptors/transform.interceptor.ts`:
+     - Bổ sung `'/kpi-forms/'` vào `NON_LIST_CONTAINS` và `'/xml'` vào `NON_LIST_SUFFIXES`, giúp interceptor phân biệt chính xác: `GET /hrm/kpi-forms` là danh sách (List: 17 mẫu), còn `GET /hrm/kpi-forms/:formCode` và `.../:formCode/xml` là Detail (Object đơn lẻ).
+     - Giữ nguyên các trường `xmlContent` và `placeholders` ở root của response envelope.
+  2. Cập nhật `apps/admin_khcn/features/hrm/hooks/useKpiForms.ts` & `EvaluationFormsClient.tsx`:
+     - Bổ sung phòng thủ 2 lớp (Two-tier defense): Tự động bóc tách an toàn `Array.isArray(res?.data) ? res.data[0] : res?.data`, đảm bảo đọc được `xmlContent` dù backend trả về dạng Object hay Mảng.
+  3. Biên dịch và đồng bộ vào Live Containers:
+     - `pnpm --filter api-gateway run build`: Thành công mã thoát 0.
+     - `pnpm --filter admin_khcn run build`: Biên dịch Turbopack standalone thành công mã thoát 0.
+     - `docker cp` toàn bộ dist và standalone vào `daklak-workspace-api-gateway-1`, `daklak-workspace-hrm-service-1`, và `daklak-workspace-admin-frontend-1`.
+     - `docker restart` lại 3 container đồng bộ.
+- **Tập tin đã sửa đổi**:
+  - [`shared/core/interceptors/transform.interceptor.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/shared/core/interceptors/transform.interceptor.ts)
+  - [`apps/admin_khcn/features/hrm/hooks/useKpiForms.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/hooks/useKpiForms.ts)
+  - [`apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx)
+- **Kiểm chứng máy thực tế:**
+  - `pnpm --filter admin_khcn run typecheck`: 0 lỗi TypeScript.
+  - Lệnh gọi trực tiếp live API `GET /api/v1/admin/hrm/kpi-forms/MAU_01`: `MAU01_detail_is_array = False`, `MAU01_detail_xml_len = 3620` ký tự (ruột XML đầy đủ 100%).
+  - Lệnh gọi live API `GET /api/v1/admin/hrm/kpi-forms/HD05_QD39_TU`: `HD05_detail_xml_len = 6850` ký tự (ruột XML đầy đủ 100%).
+  - Lệnh gọi live API `GET /api/v1/admin/hrm/kpi-forms`: `list_is_array = True`, trả về đủ 17 biểu mẫu.
+  - Kiểm tra Nginx live port 80: HTTP 200 OK.
+
+## 2026-10-13: Khắc phục Lỗi Giao diện & Nâng cấp Enterprise UX/UI tại /admin/services/hrm/work-plans/manual-selector
+- **Nguyên nhân gốc rễ phát hiện:**
+  1. *Lỗi vỡ Layout bảng chỉ tiêu:* Các ô input chỉ tiêu và trọng số trong bảng sử dụng class Tailwind không hợp lệ `w-18`, ô tìm kiếm dùng `pl-8.5 h-8.5`, nút AI dùng `hover:scale-102`. Các class này không tồn tại trong config Tailwind mặc định khiến trình duyệt bung kích thước input lên ~150-180px, phá vỡ chiều rộng cột bảng (`w-[95px]`) và gây tràn ngang.
+  2. *Lỗi flexbox collapse:* Layout 2 cột dùng `h-full` mà thiếu giới hạn container `items-stretch` và `min-w-0` bao bọc, khiến `ScrollArea` bị co hoặc cuộn vô tận.
+  3. *Khuyết thiếu trường Trọng số W% ở form thêm:* Thanh "Thêm nhiệm vụ định biên & Chỉ tiêu thực hiện" có đủ Tháng, Quý, Năm nhưng khuyết hoàn toàn input Trọng số W%.
+  4. *Bẫy Empty State khi chuyển bộ phận:* Khi chọn phòng/ban chưa ban hành định biên riêng (`unitPositionsList.length === 0`), danh sách bị kẹt ở tab "Của bộ phận" hiển thị 0 VTVL với thông báo bế tắc, người dùng không chọn được VTVL để cấu hình.
+  5. *Thiếu tính năng tạo nhiệm vụ chuyên thù & công cụ Enterprise:* Chỉ cho phép chọn từ kho mẫu, không có cơ chế thêm nhiệm vụ chuyên thù ad-hoc và thiếu công cụ tự động cân đối trọng số 100%.
+- **Giải pháp & Nâng cấp Enterprise UX/UI:**
+  1. *Chuẩn hóa CSS & Layout Responsive:* Thay thế các class invalid (`w-18` -> `w-20`/`w-22`, `pl-8.5` -> `pl-9`, `hover:scale-102` -> `hover:scale-[1.02]`). Bọc toàn bộ bảng bằng container `min-w-[760px]` bên trong `ScrollArea` với `overflow-x-auto`, đảm bảo mọi cột hiển thị thoáng đãng và không bao giờ bị đè nét.
+  2. *Thêm trường Trọng số W% & Đồng bộ Quý/Năm:* Tích hợp đầy đủ trường Trọng số (W%) vào form thêm; tự động tính Quý = Tháng * 3 và Năm = Tháng * 12.
+  3. *Hỗ trợ 2 chế độ Thêm nhiệm vụ:*
+     - Chế độ "Kho mẫu": Tìm và chọn nhanh từ thư viện nhiệm vụ chuẩn hóa.
+     - Chế độ "Nhiệm vụ chuyên thù": Nhập trực tiếp tên nhiệm vụ và ĐVT linh hoạt cho các vị trí đặc thù.
+  4. *Bộ công cụ Enterprise Toolbar:*
+     - Nút "Cân đối 100% W": Tự động tính toán phân bổ trọng số các nhiệm vụ trong bảng sao cho tổng bằng đúng 100.0%.
+     - Nút "Đồng bộ Quý/Năm": Tự động cập nhật lại Quý (x3) và Năm (x12) theo Tháng cho toàn bộ bảng.
+     - Nút "Xóa trắng": Làm sạch bảng có xác nhận an toàn.
+     - Thanh tìm kiếm nhiệm vụ tức thời ngay trên bảng.
+  5. *Thanh Trạng thái & Tiến độ Trực quan:* Thanh Mini Stats hiển thị Progress bar và Badge cảnh báo theo thời gian thực (Chuẩn 100% màu xanh ngọc, Cần cân đối màu hổ phách, Vượt quá màu đỏ).
+  6. *Fallback thông minh Danh mục VTVL:* Nếu bộ phận chưa có định biên riêng, tự động chuyển hoặc hiển thị Alert kèm liên kết 1-click chuyển sang "Tất cả danh mục chuẩn".
+  7. *Sheet AI Modal:* Bọc bảng kết quả AI trong responsive container `min-w-[620px]` chống tràn.
+- **Tập tin đã sửa đổi**:
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/ManualPlanSelectorByRankClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/ManualPlanSelectorByRankClient.tsx)
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx)
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/hooks/useTaskConfigForm.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/hooks/useTaskConfigForm.ts)
+- **Kiểm chứng máy thực tế:**
+  - `pnpm --filter admin_khcn run typecheck`: 0 lỗi TypeScript (`tsc --noEmit` exit code 0).
+  - `pnpm --filter admin_khcn run build`: Biên dịch 83 routes tĩnh Next.js 16/Turbopack thành công (`exit code 0`).
+  - Đồng bộ bản dựng standalone vào `daklak-workspace-admin-frontend-1` và khởi động lại container thành công.
+  - Kiểm tra live route `/admin/services/hrm/work-plans/manual-selector`: HTTP 200 OK (`Content-Type: text/html; charset=utf-8`, prerendered static).
+  - Kiểm tra mã hóa: Cả 2 file đều là `UTF-8 (No BOM)`. Không có `console.log` dư thừa.

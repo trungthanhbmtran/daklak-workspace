@@ -133,7 +133,8 @@ export function EvaluationFormsClient() {
     setExportingXmlCode(item.formCode);
     try {
       const res: any = await kpiFormsApi.getXml(item.formCode);
-      const xml = res?.data?.xmlContent || res?.xmlContent || '';
+      const rawData = Array.isArray(res?.data) ? res.data[0] : res?.data;
+      const xml = rawData?.xmlContent || res?.xmlContent || '';
       if (!xml) {
         toast.error('Nội dung file XML đang trống');
         return;
@@ -153,7 +154,8 @@ export function EvaluationFormsClient() {
     setExportingDocxCode(item.formCode);
     try {
       const res: any = await kpiFormsApi.getXml(item.formCode);
-      const xml = res?.data?.xmlContent || res?.xmlContent || '';
+      const rawData = Array.isArray(res?.data) ? res.data[0] : res?.data;
+      const xml = rawData?.xmlContent || res?.xmlContent || '';
       if (!xml) {
         toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
         return;
@@ -359,7 +361,8 @@ export function EvaluationFormsClient() {
     setValidationResult(null);
     try {
       const res: any = await kpiFormsApi.getXml(form.formCode);
-      const xml = res?.data?.xmlContent || res?.xmlContent || '';
+      const rawData = Array.isArray(res?.data) ? res.data[0] : res?.data;
+      const xml = rawData?.xmlContent || res?.xmlContent || '';
       setEditingXmlText(xml);
     } catch {
       toast.error('Không thể nạp nội dung XML mẫu');
@@ -918,9 +921,13 @@ export function EvaluationFormsClient() {
                         onClick={async () => {
                           try {
                             const res: any = await kpiFormsApi.getXml(previewFormCode || '');
-                            if (res?.xmlContent || res?.data?.xmlContent) {
+                            const raw = Array.isArray(res?.data) ? res.data[0] : res?.data;
+                            const fetchedXml = raw?.xmlContent || res?.xmlContent || '';
+                            if (fetchedXml) {
                               toast.success('Đã nạp thành công ruột XML chuẩn!');
                               refetch();
+                            } else {
+                              toast.warning('Máy chủ chưa trả về nội dung XML');
                             }
                           } catch {
                             toast.error('Không thể nạp ruột XML');

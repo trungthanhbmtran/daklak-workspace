@@ -34,7 +34,8 @@ export function useGetKpiFormDetail(formCode: string | null) {
       if (!formCode) return null;
       const res: any = await kpiFormsApi.getDetail(formCode);
       if (!res) return null;
-      const inner = res.data && typeof res.data === 'object' ? res.data : res;
+      const rawData = Array.isArray(res.data) ? res.data[0] : res.data;
+      const inner = rawData && typeof rawData === 'object' ? rawData : res;
       return {
         ...inner,
         xmlContent: inner.xmlContent || res.xmlContent || '',
@@ -53,7 +54,8 @@ export function useGetKpiFormXml(formCode: string | null) {
       if (!formCode) return null;
       const res: any = await kpiFormsApi.getXml(formCode);
       if (!res) return null;
-      const inner = res.data && typeof res.data === 'object' ? res.data : res;
+      const rawData = Array.isArray(res.data) ? res.data[0] : res.data;
+      const inner = rawData && typeof rawData === 'object' ? rawData : res;
       return {
         formCode: inner.formCode || res.formCode || formCode,
         xmlContent: inner.xmlContent || res.xmlContent || '',

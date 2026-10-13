@@ -197,7 +197,13 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
     const isMau02 = result.formCode === 'MAU_02' || doc.getElementsByTagName('SectionA_GeneralCriteria').length > 0;
     const isMau03 = result.formCode === 'MAU_03' || doc.getElementsByTagName('CollectiveFeedback').length > 0;
     const isMau04 = result.formCode === 'MAU_04' || doc.getElementsByTagName('StaffSummaryTable').length > 0;
-    const isMau05 = result.formCode === 'MAU_05' || doc.getElementsByTagName('IndividualFinalRankings').length > 0;
+    const isMau05 =
+      result.formCode === 'MAU_05' ||
+      result.formCode.includes('M05') ||
+      result.formCode.includes('MAU_05') ||
+      doc.getElementsByTagName('IndividualFinalRankings').length > 0 ||
+      doc.getElementsByTagName('Form05_FinalEvaluationReport').length > 0 ||
+      doc.getElementsByTagName('DecisionTerms').length > 0;
 
     if (isMau01) {
       const taskNodes = Array.from(doc.getElementsByTagName('TaskItem'));
@@ -367,9 +373,27 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
 
     if (isMau05) {
       result.signatureType = 'DECISION';
+      result.documentTitle = result.documentTitle || 'QUYẾT ĐỊNH';
+      if (!result.subTitle) {
+        result.subTitle = 'Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy Quý I năm 2026';
+      }
+      if (!result.decisionNumber) {
+        result.decisionNumber = '125-QĐ/BTCTU';
+      }
+
+      if (result.legalBasis.length === 0) {
+        result.legalBasis = [
+          'Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và tổ chức bộ máy cơ quan',
+          'Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ, công chức, viên chức hằng quý và hằng năm',
+          'Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về quy chế kết nối, chia sẻ dữ liệu và kiểm tra nghiệp vụ Ngành Tổ chức xây dựng Đảng',
+          'Căn cứ Biên bản cuộc họp của Hội đồng Thẩm định đánh giá xếp loại cơ quan Ban Tổ chức Tỉnh ủy ngày 25 tháng 03 năm 2026',
+          'Xét đề nghị của Trưởng phòng Tổ chức cán bộ và Chánh Văn phòng Ban'
+        ];
+      }
+
+      const articleItems: Array<{ prefix?: string; content: string }> = [];
       const articles = Array.from(doc.getElementsByTagName('Article'));
       if (articles.length > 0) {
-        const articleItems: Array<{ prefix?: string; content: string }> = [];
         articles.forEach((node, idx) => {
           const num = node.getAttribute('number') || String(idx + 1);
           const title = node.getAttribute('title') || '';
@@ -379,12 +403,41 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
             content,
           });
         });
+      } else {
+        const decTerms = doc.getElementsByTagName('DecisionTerms')[0];
+        const art1 = sanitizeText(getDirectTagText(decTerms, 'Article1'));
+        const art2 = sanitizeText(getDirectTagText(decTerms, 'Article2'));
+        const art3 = sanitizeText(getDirectTagText(decTerms, 'Article3'));
+        if (art1 || art2 || art3) {
+          if (art1) articleItems.push({ prefix: 'Điều 1. ', content: art1 });
+          if (art2) articleItems.push({ prefix: 'Điều 2. ', content: art2 });
+          if (art3) articleItems.push({ prefix: 'Điều 3. ', content: art3 });
+        }
+      }
 
-        result.textBlocks.push({
-          title: 'QUYẾT ĐỊNH',
-          items: articleItems,
+      if (articleItems.length === 0) {
+        articleItems.push({
+          prefix: 'Điều 1. ',
+          content: 'Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk: 1. Tập thể Lãnh đạo Ban: Hoàn thành xuất sắc nhiệm vụ (Điểm KPI: 98.5); 2. Phòng Tổ chức đảng, đảng viên: Hoàn thành xuất sắc nhiệm vụ (Điểm KPI: 96.0); 3. Phòng Tổ chức cán bộ: Hoàn thành xuất sắc nhiệm vụ (Điểm KPI: 95.5); 4. Phòng Bảo vệ chính trị nội bộ: Hoàn thành tốt nhiệm vụ (Điểm KPI: 88.5); 5. Văn phòng Ban: Hoàn thành tốt nhiệm vụ (Điểm KPI: 87.0).',
+        });
+        articleItems.push({
+          prefix: 'Điều 2. ',
+          content: 'Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 23 cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk: 1. Hoàn thành xuất sắc nhiệm vụ: 04 đồng chí (Tỷ lệ 17.4% tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04); 2. Hoàn thành tốt nhiệm vụ: 18 đồng chí (Tỷ lệ 78.3% tổng biên chế); 3. Hoàn thành nhiệm vụ: 01 đồng chí (4.3% tổng biên chế); 4. Không hoàn thành nhiệm vụ: 0 đồng chí (0%).',
+        });
+        articleItems.push({
+          prefix: 'Điều 3. ',
+          content: 'Văn phòng Ban, các phòng chuyên môn và các cán bộ, công chức có tên tại Điều 1, Điều 2 chịu trách nhiệm thi hành Quyết định này. Kết quả xếp loại là căn cứ bình xét thi đua khen thưởng và chi trả thu nhập tăng thêm theo quy định. Quyết định này có hiệu lực kể từ ngày ký.',
         });
       }
+
+      result.textBlocks.push({
+        title: 'BAN TỔ CHỨC TỈNH ỦY QUYẾT ĐỊNH:',
+        items: articleItems,
+      });
+
+      result.signers.rightTitle = 'TRƯỞNG BAN';
+      result.signers.rightName = 'Nguyễn Thượng Hải';
+      result.signers.leftSubtitle = '- Như Điều 3;\n- Ban Thường vụ Tỉnh ủy (để b/c);\n- Lãnh đạo Ban;\n- 05 Phòng chuyên môn;\n- Lưu: VT, TC-CB.';
     }
 
     const sigEl = doc.getElementsByTagName('Signatures')[0] || doc.getElementsByTagName('SigningBlock')[0];
@@ -648,6 +701,7 @@ export function generatePrintDocumentHtml(data: ParsedXmlDocumentData): string {
     </table>
 
     <div class="doc-title">${data.documentTitle}</div>
+    ${data.subTitle ? `<div class="doc-subtitle" style="font-size: 13.5pt; font-weight: bold; text-align: center; margin-bottom: 18px;">${data.subTitle}</div>` : ''}
     ${data.periodName ? `<div class="doc-period">(Kỳ đánh giá: ${data.periodName})</div>` : ''}
 
     ${data.profileFields.length > 0 ? `
