@@ -128,6 +128,40 @@ export const btctuTaskManagementGraph = {
       },
     },
     {
+      id: 'task_officer_extension',
+      type: 'userTask',
+      position: { x: 960, y: 980 },
+      data: {
+        label: 'Chuyên viên lập Phiếu đề xuất xin gia hạn',
+        description: 'Đề xuất gia hạn trước 24h, giải trình lý do khách quan (liên thông quy trình WF_BTCTU_XIN_GIA_HAN_VIEC)',
+        targetStatus: 'PENDING_EXTENSION',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên 22 VTVL đang thụ lý',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'reasonCategory', label: 'Lý do xin gia hạn', type: 'select', options: ['CHO_VAN_BAN_CO_QUAN_NGOAI', 'BO_SUNG_MINH_CHUNG_XAC_MINH', 'NHIEM_VU_DOT_XUAT_CHEN_NGANG', 'LY_DO_KHACH_QUAN_KHAC'], required: true },
+          { id: 'f2', name: 'proposedDueDate', label: 'Thời hạn đề xuất mới', type: 'date', required: true },
+          { id: 'f3', name: 'detailedReason', label: 'Giải trình chi tiết lý do khách quan', type: 'textarea', required: true }
+        ]),
+      },
+    },
+    {
+      id: 'task_auto_link_extension',
+      type: 'serviceTask',
+      position: { x: 1280, y: 980 },
+      data: {
+        label: 'Tự động liên thông quy trình WF_BTCTU_XIN_GIA_HAN_VIEC',
+        description: 'Khởi tạo tiến trình WF_BTCTU_XIN_GIA_HAN_VIEC, cập nhật hạn mới vào Task sau khi Lãnh đạo Ban phê duyệt',
+        integrationCode: 'WF_BTCTU_XIN_GIA_HAN_VIEC',
+        endpoint: '/api/v1/workflow/trigger-subflow',
+        method: 'POST',
+      },
+    },
+    {
       id: 'task_ldp_review',
       type: 'userTask',
       position: { x: 1280, y: 510 },
@@ -241,12 +275,36 @@ export const btctuTaskManagementGraph = {
       action: 'DISPATCH_TO_DEPT',
     },
     {
-      id: 'e_gw_ldp',
+      id: 'e_gw_p_tccb',
       source: 'gateway_dept_router',
       target: 'task_ldp_dispatch',
       type: 'custom',
-      label: 'Tiếp nhận nhiệm vụ cấp phòng',
-      action: 'ROUTED_TO_DEPT',
+      label: 'Phòng TCCB · Bổ nhiệm cán bộ 5 bước',
+      action: 'ROUTE_P_TCCB',
+    },
+    {
+      id: 'e_gw_p_tcd_dv',
+      source: 'gateway_dept_router',
+      target: 'task_ldp_dispatch',
+      type: 'custom',
+      label: 'Phòng TCĐ-ĐV · Đảng viên & Huy hiệu Đảng LGSP',
+      action: 'ROUTE_P_TCD_DV',
+    },
+    {
+      id: 'e_gw_p_bvctnb',
+      source: 'gateway_dept_router',
+      target: 'task_ldp_dispatch',
+      type: 'custom',
+      label: 'Phòng BVCTNB · Thẩm tra chính trị CSDL Mức 3',
+      action: 'ROUTE_P_BVCTNB',
+    },
+    {
+      id: 'e_gw_van_phong',
+      source: 'gateway_dept_router',
+      target: 'task_ldp_dispatch',
+      type: 'custom',
+      label: 'Văn phòng · Văn thư Mật & ATTT Cấp 3',
+      action: 'ROUTE_VAN_PHONG',
     },
     {
       id: 'e_ldp_officer',
@@ -263,6 +321,30 @@ export const btctuTaskManagementGraph = {
       type: 'custom',
       label: 'Nộp sản phẩm kèm minh chứng',
       action: 'SUBMIT_FOR_REVIEW',
+    },
+    {
+      id: 'e_officer_to_ext',
+      source: 'task_officer_execute',
+      target: 'task_officer_extension',
+      type: 'custom',
+      label: 'Đề xuất xin gia hạn (trước 24h)',
+      action: 'REQUEST_EXTENSION',
+    },
+    {
+      id: 'e_ext_to_autolink',
+      source: 'task_officer_extension',
+      target: 'task_auto_link_extension',
+      type: 'custom',
+      label: 'Chuyển thẩm định gia hạn (WF_BTCTU_XIN_GIA_HAN_VIEC)',
+      action: 'TRIGGER_EXTENSION_SUBFLOW',
+    },
+    {
+      id: 'e_autolink_to_officer',
+      source: 'task_auto_link_extension',
+      target: 'task_officer_execute',
+      type: 'custom',
+      label: 'Cập nhật hạn mới · Tiếp tục thực thi',
+      action: 'RESUME_AFTER_EXTENSION',
     },
     {
       id: 'e_review_gw',
@@ -712,6 +794,1533 @@ export const btctuKpiEvaluationGraph = {
 };
 
 // ============================================================================
+// 3. QUY TRÌNH PHÊ DUYỆT XIN GIA HẠN THỜI HẠN CÔNG VIỆC
+// ============================================================================
+
+export const btctuTaskExtensionGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_extension',
+      type: 'start',
+      position: { x: 80, y: 200 },
+      data: {
+        label: 'Khởi tạo Đề xuất xin gia hạn thời hạn',
+        description: 'Chuyên viên gửi đề xuất gia hạn trước deadline ít nhất 24 giờ kèm lý do khách quan và tài liệu minh chứng',
+      },
+    },
+    {
+      id: 'task_extension_request',
+      type: 'userTask',
+      position: { x: 380, y: 200 },
+      data: {
+        label: 'Chuyên viên lập Phiếu đề xuất gia hạn',
+        description: 'Nhập thông tin nhiệm vụ, ngày hết hạn ban đầu, ngày đề xuất mới và giải trình lý do khách quan',
+        targetStatus: 'PENDING_EXTENSION',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên 22 VTVL đang thụ lý nhiệm vụ',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'taskId', label: 'Mã nhiệm vụ cần gia hạn', type: 'text', required: true },
+          { id: 'f2', name: 'currentDueDate', label: 'Thời hạn ban đầu', type: 'date', required: true },
+          { id: 'f3', name: 'proposedDueDate', label: 'Thời hạn đề xuất mới', type: 'date', required: true },
+          { id: 'f4', name: 'reasonCategory', label: 'Lý do xin gia hạn', type: 'select', options: ['CHO_VAN_BAN_CO_QUAN_NGOAI', 'BO_SUNG_MINH_CHUNG_XAC_MINH', 'NHIEM_VU_DOT_XUAT_CHEN_NGANG', 'LY_DO_KHACH_QUAN_KHAC'], required: true },
+          { id: 'f5', name: 'detailedReason', label: 'Giải trình chi tiết lý do khách quan', type: 'textarea', required: true },
+          { id: 'f6', name: 'proofDocument', label: 'Tài liệu minh chứng đính kèm', type: 'file' },
+        ]),
+      },
+    },
+    {
+      id: 'task_ldp_appraise',
+      type: 'userTask',
+      position: { x: 720, y: 200 },
+      data: {
+        label: 'Lãnh đạo Phòng thẩm định đề xuất gia hạn',
+        description: 'Trưởng/Phó phòng kiểm tra tính hợp lý, thời gian gửi (đủ 24h trước hạn) và xác nhận lý do khách quan',
+        targetStatus: 'APPRAISING_EXTENSION',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'LANH_DAO_PHONG',
+            description: 'Trưởng/Phó phòng chuyên môn',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'ldpDecision', label: 'Ý kiến thẩm định của Lãnh đạo Phòng', type: 'select', options: ['DONG_Y_TRINH_BAN', 'KHONG_DONG_Y'], required: true },
+          { id: 'f2', name: 'ldpAssessment', label: 'Nhận xét về tính khách quan và khối lượng công việc', type: 'textarea' },
+          { id: 'f3', name: 'adjustedDueDate', label: 'Thời hạn kiến nghị điều chỉnh', type: 'date' },
+        ]),
+      },
+    },
+    {
+      id: 'gw_ldp_extension',
+      type: 'exclusiveGateway',
+      position: { x: 1040, y: 200 },
+      data: {
+        label: 'Lãnh đạo Phòng đồng ý?',
+        description: 'Đồng ý -> Trình Lãnh đạo Ban; Không đồng ý -> Bác bỏ đề xuất gia hạn',
+      },
+    },
+    {
+      id: 'task_ldb_approve_extension',
+      type: 'userTask',
+      position: { x: 1360, y: 120 },
+      data: {
+        label: 'Lãnh đạo Ban xem xét & Phê duyệt gia hạn',
+        description: 'Lãnh đạo Ban phụ trách xem xét tính cấp bách và phê duyệt quyết định gia hạn thời hạn hoàn thành',
+        targetStatus: 'PENDING_BAN_APPROVAL',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Trưởng ban & các Phó trưởng ban Tổ chức Tỉnh ủy',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'ldbDecision', label: 'Quyết định của Lãnh đạo Ban', type: 'select', options: ['CHAP_THUAN_GIA_HAN', 'BAC_BO_GIA_HAN'], required: true },
+          { id: 'f2', name: 'finalApprovedDueDate', label: 'Thời hạn hoàn thành được duyệt mới', type: 'date' },
+          { id: 'f3', name: 'ldbDirective', label: 'Ý kiến chỉ đạo', type: 'textarea' },
+        ]),
+      },
+    },
+    {
+      id: 'gw_ldb_extension',
+      type: 'exclusiveGateway',
+      position: { x: 1680, y: 120 },
+      data: {
+        label: 'Lãnh đạo Ban chấp thuận?',
+        description: 'Chấp thuận -> Cập nhật hạn mới & Bảo lưu SLA; Bác bỏ -> Giữ nguyên hạn cũ',
+      },
+    },
+    {
+      id: 'task_auto_update_deadline',
+      type: 'serviceTask',
+      position: { x: 1980, y: 120 },
+      data: {
+        label: 'Tự động cập nhật hạn mới & Bảo lưu điểm SLA',
+        description: 'Rule Engine cập nhật ngày hạn mới vào Task, bảo lưu 100% điểm tiến độ C% không bị trừ điểm vi phạm hạn cũ',
+        integrationCode: 'HRM_SERVICE',
+        endpoint: '/api/v1/hrm/kpi/extend-task-deadline',
+        method: 'POST',
+      },
+    },
+    {
+      id: 'end_extension_approved',
+      type: 'end',
+      position: { x: 2300, y: 120 },
+      data: {
+        label: 'Gia hạn thành công & Bảo lưu SLA',
+        description: 'Thời hạn nhiệm vụ đã được cập nhật thành công trên hệ thống',
+        targetStatus: 'EXTENSION_APPROVED',
+      },
+    },
+    {
+      id: 'end_extension_rejected',
+      type: 'end',
+      position: { x: 1360, y: 380 },
+      data: {
+        label: 'Bác bỏ gia hạn · Giữ nguyên hạn cũ',
+        description: 'Đề xuất gia hạn bị từ chối, chuyên viên tiếp tục thực hiện theo hạn ban đầu',
+        targetStatus: 'EXTENSION_REJECTED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_ext_start_req',
+      source: 'start_extension',
+      target: 'task_extension_request',
+      type: 'custom',
+      label: 'Khởi tạo đề xuất gia hạn',
+      action: 'SUBMIT_REQUEST',
+    },
+    {
+      id: 'e_ext_req_ldp',
+      source: 'task_extension_request',
+      target: 'task_ldp_appraise',
+      type: 'custom',
+      label: 'Trình Lãnh đạo Phòng thẩm định',
+      action: 'SUBMIT_TO_LDP',
+    },
+    {
+      id: 'e_ext_ldp_gw',
+      source: 'task_ldp_appraise',
+      target: 'gw_ldp_extension',
+      type: 'custom',
+      label: 'Kiểm tra tính hợp lệ',
+      action: 'CHECK_LDP',
+    },
+    {
+      id: 'e_ext_gwldp_pass',
+      source: 'gw_ldp_extension',
+      target: 'task_ldb_approve_extension',
+      type: 'custom',
+      label: 'Đồng ý · Trình Lãnh đạo Ban',
+      action: 'LDP_ENDORSE',
+      condition: 'variables.ldpDecision === "DONG_Y_TRINH_BAN"',
+    },
+    {
+      id: 'e_ext_gwldp_reject',
+      source: 'gw_ldp_extension',
+      target: 'end_extension_rejected',
+      type: 'custom',
+      label: 'Không đồng ý · Giữ nguyên hạn',
+      action: 'LDP_REJECT',
+      condition: 'variables.ldpDecision === "KHONG_DONG_Y"',
+    },
+    {
+      id: 'e_ext_ldb_gw',
+      source: 'task_ldb_approve_extension',
+      target: 'gw_ldb_extension',
+      type: 'custom',
+      label: 'Lãnh đạo Ban xem xét',
+      action: 'CHECK_LDB',
+    },
+    {
+      id: 'e_ext_gwldb_pass',
+      source: 'gw_ldb_extension',
+      target: 'task_auto_update_deadline',
+      type: 'custom',
+      label: 'Chấp thuận gia hạn',
+      action: 'LDB_APPROVE',
+      condition: 'variables.ldbDecision === "CHAP_THUAN_GIA_HAN"',
+    },
+    {
+      id: 'e_ext_gwldb_reject',
+      source: 'gw_ldb_extension',
+      target: 'end_extension_rejected',
+      type: 'custom',
+      label: 'Bác bỏ · Giữ nguyên hạn',
+      action: 'LDB_REJECT',
+      condition: 'variables.ldbDecision === "BAC_BO_GIA_HAN"',
+    },
+    {
+      id: 'e_ext_auto_end',
+      source: 'task_auto_update_deadline',
+      target: 'end_extension_approved',
+      type: 'custom',
+      label: 'Cập nhật hạn mới hoàn tất',
+      action: 'AUTO_EXTENDED',
+    },
+  ],
+};
+
+// ============================================================================
+// 4. QUY TRÌNH THẨM TRA, XÁC MINH TIÊU CHUẨN CHÍNH TRỊ NỘI BỘ (QĐ 348-QĐ/BTCTW)
+// ============================================================================
+
+export const btctuBvctnbVerificationGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_bvctnb',
+      type: 'start',
+      position: { x: 80, y: 220 },
+      data: {
+        label: 'Tiếp nhận Yêu cầu thẩm tra chính trị nội bộ',
+        description: 'Tiếp nhận hồ sơ nhân sự từ Phòng TCCB hoặc cấp ủy cấp dưới phục vụ quy hoạch, bổ nhiệm, kết nạp Đảng',
+      },
+    },
+    {
+      id: 'task_bvctnb_assign',
+      type: 'userTask',
+      position: { x: 380, y: 220 },
+      data: {
+        label: 'Lãnh đạo Phòng BVCTNB phân công Chuyên viên thẩm tra',
+        description: 'Phân loại đối tượng cán bộ, mức độ nhạy cảm chính trị và phân công Chuyên viên VTVL BVCTNB chủ trì',
+        targetStatus: 'ASSIGNED_INVESTIGATOR',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'LANH_DAO_PHONG',
+            description: 'Trưởng/Phó Trưởng phòng BVCTNB',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'cadreName', label: 'Họ và tên cán bộ cần thẩm tra', type: 'text', required: true },
+          { id: 'f2', name: 'cadreIdCard', label: 'Số CCCD / Mã định danh', type: 'text', required: true },
+          { id: 'f3', name: 'currentPosition', label: 'Chức vụ, đơn vị công tác hiện tại', type: 'text', required: true },
+          { id: 'f4', name: 'purposeType', label: 'Mục đích thẩm tra', type: 'select', options: ['BO_NHIEM_QUY_HOACH', 'KET_NAP_DANG', 'DI_NUOC_NGOAI', 'BAO_VE_CHINH_TRI_DINH_KY'], required: true },
+          { id: 'f5', name: 'assigneeOfficer', label: 'Chuyên viên BVCTNB chủ trì thụ lý', type: 'user', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_bvctnb_investigate',
+      type: 'userTask',
+      position: { x: 720, y: 220 },
+      data: {
+        label: 'Chuyên viên thẩm tra hồ sơ & Tra cứu CSDL Mật Mức 3',
+        description: 'Đối soát hồ sơ lý lịch 2C, tra cứu cơ sở dữ liệu chính trị nội bộ mức độ mật, xác minh lịch sử chính trị và quan hệ thân nhân nước ngoài',
+        targetStatus: 'INVESTIGATING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên Phòng BVCTNB',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'dbQueryResult', label: 'Kết quả tra cứu CSDL Mật ATTT Cấp 3', type: 'select', options: ['KHONG_CO_VET_DEN', 'CO_THONG_TIN_CAN_LAM_RO'], required: true },
+          { id: 'f2', name: 'foreignRelationNotes', label: 'Quan hệ có yếu tố nước ngoài', type: 'textarea' },
+          { id: 'f3', name: 'needFieldCheck', label: 'Có cần xác minh thực địa tại địa phương?', type: 'boolean', default: false },
+        ]),
+      },
+    },
+    {
+      id: 'gw_bvctnb_need_field',
+      type: 'exclusiveGateway',
+      position: { x: 1040, y: 220 },
+      data: {
+        label: 'Có cần xác minh thực địa?',
+        description: 'Cần xác minh -> Cử đoàn thẩm tra cơ sở; Không cần -> Lập dự thảo Kết luận',
+      },
+    },
+    {
+      id: 'task_bvctnb_field_check',
+      type: 'userTask',
+      position: { x: 1360, y: 340 },
+      data: {
+        label: 'Tổ chức Đoàn xác minh thực địa tại cơ sở',
+        description: 'Làm việc với cấp ủy địa phương, cơ quan công an, nhân chứng lịch sử để thu thập chứng cứ và tài liệu gốc',
+        targetStatus: 'FIELD_CHECKING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Đoàn cán bộ thẩm tra BVCTNB',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'fieldLocation', label: 'Địa bàn / Cơ quan xác minh', type: 'text', required: true },
+          { id: 'f2', name: 'fieldFindings', label: 'Kết quả làm việc và biên bản xác minh', type: 'textarea', required: true },
+          { id: 'f3', name: 'policeVerificationProof', label: 'Biên bản phối hợp với cơ quan Công an', type: 'file' },
+        ]),
+      },
+    },
+    {
+      id: 'task_bvctnb_conclusion',
+      type: 'userTask',
+      position: { x: 1360, y: 120 },
+      data: {
+        label: 'Lập Báo cáo thẩm tra & Dự thảo Kết luận chính trị',
+        description: 'Tổng hợp toàn bộ tài liệu, đối chiếu tiêu chuẩn Quy định 348-QĐ/BTCTW, xây dựng dự thảo Kết luận về tiêu chuẩn chính trị',
+        targetStatus: 'DRAFTING_CONCLUSION',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên Phòng BVCTNB',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'politicalStandard', label: 'Đánh giá tiêu chuẩn chính trị theo QĐ 348', type: 'select', options: ['DU_TIEU_CHUAN_CHINH_TRI', 'CO_VAN_DE_CHINH_TRI_CAN_XIN_Y_KIEN'], required: true },
+          { id: 'f2', name: 'conclusionSummary', label: 'Tóm tắt nội dung Kết luận chính trị', type: 'textarea', required: true },
+          { id: 'f3', name: 'draftReportFile', label: 'Báo cáo thẩm tra chi tiết', type: 'file', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_bvctnb_ldp_review',
+      type: 'userTask',
+      position: { x: 1680, y: 220 },
+      data: {
+        label: 'Lãnh đạo Phòng BVCTNB duyệt Báo cáo & Ký nháy',
+        description: 'Kiểm tra cơ sở pháp lý, tính chặt chẽ của chứng cứ và ký nháy Tờ trình kết luận chính trị nội bộ',
+        targetStatus: 'LDP_REVIEWING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'LANH_DAO_PHONG',
+            description: 'Trưởng phòng BVCTNB',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'ldpDecision', label: 'Kết luận của Lãnh đạo Phòng BVCTNB', type: 'select', options: ['DONG_Y_TRINH_LANH_DAO_BAN', 'TRA_LAI_XAC_MINH_BO_SUNG'], required: true },
+          { id: 'f2', name: 'ldpComment', label: 'Ý kiến thẩm định của Trưởng phòng', type: 'textarea' },
+        ]),
+      },
+    },
+    {
+      id: 'task_bvctnb_ban_approval',
+      type: 'userTask',
+      position: { x: 2000, y: 220 },
+      data: {
+        label: 'Lãnh đạo Ban ký văn bản Kết luận Tiêu chuẩn chính trị',
+        description: 'Trưởng ban hoặc Phó Trưởng ban phụ trách ký ban hành văn bản Kết luận hoặc ký Tờ trình trình Ban Thường vụ Tỉnh ủy',
+        targetStatus: 'PENDING_BAN_CONCLUSION',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Trưởng ban / Phó ban Tổ chức Tỉnh ủy',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'banConclusionVerdict', label: 'Kết luận cuối cùng về tiêu chuẩn chính trị', type: 'select', options: ['KET_LUAN_DU_TIEU_CHUAN', 'BAO_CAO_XIN_Y_KIEN_THUONG_TRUC_TINH_UY'], required: true },
+          { id: 'f2', name: 'digitalSignHash', label: 'Chữ ký số Chuyên dùng', type: 'text' },
+        ]),
+      },
+    },
+    {
+      id: 'end_bvctnb_certified',
+      type: 'end',
+      position: { x: 2320, y: 220 },
+      data: {
+        label: 'Ban hành Kết luận & Mã hóa lưu CSDL Mật Cấp 3',
+        description: 'Kết luận chính trị nội bộ được phát hành chính thức và lưu trữ bảo mật Cấp độ 3',
+        targetStatus: 'CONCLUSION_ISSUED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_bvctnb_start_assign',
+      source: 'start_bvctnb',
+      target: 'task_bvctnb_assign',
+      type: 'custom',
+      label: 'Tiếp nhận hồ sơ',
+      action: 'ASSIGN_START',
+    },
+    {
+      id: 'e_bvctnb_assign_inv',
+      source: 'task_bvctnb_assign',
+      target: 'task_bvctnb_investigate',
+      type: 'custom',
+      label: 'Phân công Chuyên viên thẩm tra',
+      action: 'ASSIGN_INVESTIGATOR',
+    },
+    {
+      id: 'e_bvctnb_inv_gw',
+      source: 'task_bvctnb_investigate',
+      target: 'gw_bvctnb_need_field',
+      type: 'custom',
+      label: 'Đối soát CSDL Mật Mức 3',
+      action: 'CHECK_DOSSIER',
+    },
+    {
+      id: 'e_bvctnb_gw_no_field',
+      source: 'gw_bvctnb_need_field',
+      target: 'task_bvctnb_conclusion',
+      type: 'custom',
+      label: 'Không cần đi thực địa',
+      action: 'SKIP_FIELD',
+      condition: '!variables.needFieldCheck',
+    },
+    {
+      id: 'e_bvctnb_gw_need_field',
+      source: 'gw_bvctnb_need_field',
+      target: 'task_bvctnb_field_check',
+      type: 'custom',
+      label: 'Cần xác minh thực tế',
+      action: 'DO_FIELD_CHECK',
+      condition: 'variables.needFieldCheck === true',
+    },
+    {
+      id: 'e_bvctnb_field_concl',
+      source: 'task_bvctnb_field_check',
+      target: 'task_bvctnb_conclusion',
+      type: 'custom',
+      label: 'Hoàn tất xác minh cơ sở',
+      action: 'COMPLETE_FIELD',
+    },
+    {
+      id: 'e_bvctnb_concl_ldp',
+      source: 'task_bvctnb_conclusion',
+      target: 'task_bvctnb_ldp_review',
+      type: 'custom',
+      label: 'Trình Lãnh đạo Phòng duyệt',
+      action: 'SUBMIT_TO_LDP',
+    },
+    {
+      id: 'e_bvctnb_ldp_ban',
+      source: 'task_bvctnb_ldp_review',
+      target: 'task_bvctnb_ban_approval',
+      type: 'custom',
+      label: 'Trình Lãnh đạo Ban ký duyệt',
+      action: 'SUBMIT_TO_BAN',
+    },
+    {
+      id: 'e_bvctnb_ban_end',
+      source: 'task_bvctnb_ban_approval',
+      target: 'end_bvctnb_certified',
+      type: 'custom',
+      label: 'Ký ban hành Kết luận',
+      action: 'BAN_APPROVE_CONCLUSION',
+    },
+  ],
+};
+
+// ============================================================================
+// 5. QUY TRÌNH BỔ NHIỆM, LUÂN CHUYỂN CÁN BỘ 5 BƯỚC (PHÒNG TCCB)
+// ============================================================================
+
+export const btctuTccbAppointmentGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_appointment',
+      type: 'start',
+      position: { x: 80, y: 220 },
+      data: {
+        label: 'Khởi tạo Quy trình Bổ nhiệm Cán bộ',
+        description: 'Chủ trương bổ nhiệm từ Ban Thường vụ Tỉnh ủy hoặc đề xuất của cơ quan, đơn vị có nhu cầu kiện toàn nhân sự',
+      },
+    },
+    {
+      id: 'task_step1_survey',
+      type: 'userTask',
+      position: { x: 380, y: 220 },
+      data: {
+        label: 'Bước 1: Hội nghị Tập thể Lãnh đạo (Lần 1)',
+        description: 'Thảo luận, thống nhất về chủ trương, cơ cấu, số lượng, tiêu chuẩn, điều kiện và quy trình giới thiệu nhân sự',
+        targetStatus: 'STEP_1_COMPLETED',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Tập thể Lãnh đạo Ban',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'targetPosition', label: 'Vị trí / Chức danh bổ nhiệm', type: 'text', required: true },
+          { id: 'f2', name: 'step1Minutes', label: 'Biên bản Hội nghị bước 1', type: 'file', required: true },
+          { id: 'f3', name: 'resolutionApproved', label: 'Nghị quyết thông qua chủ trương', type: 'boolean', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_step2_expanded',
+      type: 'userTask',
+      position: { x: 720, y: 220 },
+      data: {
+        label: 'Bước 2: Hội nghị Tập thể Lãnh đạo mở rộng',
+        description: 'Thảo luận và giới thiệu nhân sự bằng phiếu kín theo danh sách quy hoạch đã được phê duyệt',
+        targetStatus: 'STEP_2_COMPLETED',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Tập thể Lãnh đạo mở rộng',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'nomineeList', label: 'Danh sách nhân sự được giới thiệu', type: 'textarea', required: true },
+          { id: 'f2', name: 'voteCountStep2', label: 'Kết quả kiểm phiếu bước 2', type: 'file', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_auto_call_bvctnb',
+      type: 'serviceTask',
+      position: { x: 890, y: 220 },
+      data: {
+        label: 'Tự động liên thông Thẩm tra Chính trị (Phòng BVCTNB)',
+        description: 'Tự động kích hoạt quy trình con WF_BTCTU_BVCTNB_XAC_MINH để tra cứu CSDL Mật ATTT Cấp 3 và thẩm tra tiêu chuẩn chính trị nhân sự',
+        integrationCode: 'WF_BTCTU_BVCTNB_XAC_MINH',
+        endpoint: '/api/v1/workflow/trigger-subflow',
+        method: 'POST',
+      },
+    },
+    {
+      id: 'task_step3_dossier',
+      type: 'userTask',
+      position: { x: 1140, y: 220 },
+      data: {
+        label: 'Bước 3: Thẩm định Hồ sơ Cán bộ & Tiêu chuẩn Chính trị',
+        description: 'Phòng TCCB số hóa Mẫu 2C; phối hợp Phòng BVCTNB thẩm tra tiêu chuẩn chính trị; lấy ý kiến UBKT và Thanh tra',
+        targetStatus: 'DOSSIER_AUDITING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên Phòng TCCB & BVCTNB',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'form2cVerified', label: 'Hồ sơ lý lịch 2C số hóa hợp lệ', type: 'boolean', required: true },
+          { id: 'f2', name: 'bvctnbConclusionStatus', label: 'Kết luận Tiêu chuẩn Chính trị từ BVCTNB', type: 'select', options: ['DAT_TIEU_CHUAN_CHINH_TRI', 'KHONG_DAT_HOAC_CAN_XAC_MINH'], required: true },
+          { id: 'f3', name: 'disciplinaryStatus', label: 'Rà soát Kỷ luật Đảng và Chính quyền', type: 'select', options: ['KHONG_VI_PHAM', 'CO_DON_THU_KHIEU_NAI', 'DANG_BI_KY_LUAT'], required: true },
+        ]),
+      },
+    },
+    {
+      id: 'gw_dossier_check',
+      type: 'exclusiveGateway',
+      position: { x: 1380, y: 220 },
+      data: {
+        label: 'Hồ sơ & Tiêu chuẩn chính trị Đạt chuẩn?',
+        description: 'Đạt chuẩn -> Chuyển sang Bước 4; Có vi phạm -> Dừng quy trình bổ nhiệm',
+      },
+    },
+    {
+      id: 'task_step4_key_officers',
+      type: 'userTask',
+      position: { x: 1700, y: 120 },
+      data: {
+        label: 'Bước 4: Hội nghị Cán bộ chủ chốt lấy phiếu tín nhiệm',
+        description: 'Lấy phiếu tín nhiệm của toàn thể cán bộ chủ chốt đối với nhân sự được lựa chọn sau bước 3',
+        targetStatus: 'STEP_4_COMPLETED',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Cán bộ chủ chốt cơ quan',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'step4VoteResults', label: 'Biên bản kiểm phiếu Hội nghị cán bộ chủ chốt', type: 'file', required: true },
+          { id: 'f2', name: 'confidenceRate', label: 'Tỷ lệ phiếu tín nhiệm (%)', type: 'number', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_step5_final_vote',
+      type: 'userTask',
+      position: { x: 2020, y: 120 },
+      data: {
+        label: 'Bước 5: Hội nghị Tập thể Lãnh đạo biểu quyết lần cuối',
+        description: 'Tập thể Lãnh đạo thảo luận, biểu quyết bằng phiếu kín nhân sự và hoàn thiện Tờ trình trình Ban Thường vụ Tỉnh ủy',
+        targetStatus: 'STEP_5_COMPLETED',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Tập thể Lãnh đạo Ban',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'finalVoteResult', label: 'Tỷ lệ biểu quyết thông qua (%)', type: 'number', required: true },
+          { id: 'f2', name: 'submissionReport', label: 'Tờ trình trình Ban Thường vụ Tỉnh ủy', type: 'file', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_btv_approval',
+      type: 'userTask',
+      position: { x: 2340, y: 120 },
+      data: {
+        label: 'Ban Thường vụ Tỉnh ủy xem xét & Ban hành Quyết định',
+        description: 'Hội nghị Ban Thường vụ Tỉnh ủy xem xét, quyết định bổ nhiệm và ban hành Quyết định bổ nhiệm cán bộ',
+        targetStatus: 'PENDING_BTV_APPROVAL',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Ban Thường vụ Tỉnh ủy',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'btvVerdict', label: 'Quyết định của Ban Thường vụ Tỉnh ủy', type: 'select', options: ['THONG_QUA_BO_NHIEM', 'KHONG_DONG_Y'], required: true },
+          { id: 'f2', name: 'decisionNumber', label: 'Số Quyết định bổ nhiệm', type: 'text' },
+        ]),
+      },
+    },
+    {
+      id: 'end_appointment_issued',
+      type: 'end',
+      position: { x: 2660, y: 120 },
+      data: {
+        label: 'Ban hành Quyết định Bổ nhiệm & Đồng bộ Hồ sơ 2C',
+        description: 'Hoàn tất quy trình bổ nhiệm cán bộ, cập nhật trạng thái chức vụ mới vào hệ thống',
+        targetStatus: 'APPOINTMENT_COMPLETED',
+      },
+    },
+    {
+      id: 'end_appointment_halted',
+      type: 'end',
+      position: { x: 1700, y: 360 },
+      data: {
+        label: 'Dừng quy trình bổ nhiệm do chưa đủ tiêu chuẩn',
+        description: 'Nhân sự không đáp ứng tiêu chuẩn chính trị hoặc có vi phạm kỷ luật, dừng xem xét',
+        targetStatus: 'APPOINTMENT_HALTED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_app_start_s1',
+      source: 'start_appointment',
+      target: 'task_step1_survey',
+      type: 'custom',
+      label: 'Khởi tạo quy trình bổ nhiệm',
+      action: 'INIT_APPOINTMENT',
+    },
+    {
+      id: 'e_app_s1_s2',
+      source: 'task_step1_survey',
+      target: 'task_step2_expanded',
+      type: 'custom',
+      label: 'Hoàn thành bước 1 · Sang bước 2',
+      action: 'COMPLETE_STEP1',
+    },
+    {
+      id: 'e_app_s2_bvctnb',
+      source: 'task_step2_expanded',
+      target: 'task_auto_call_bvctnb',
+      type: 'custom',
+      label: 'Lấy phiếu bước 2 · Kích hoạt thẩm tra chính trị',
+      action: 'TRIGGER_BVCTNB_CHECK',
+    },
+    {
+      id: 'e_app_bvctnb_s3',
+      source: 'task_auto_call_bvctnb',
+      target: 'task_step3_dossier',
+      type: 'custom',
+      label: 'Nhận kết quả thẩm tra · Hoàn thiện hồ sơ 2C',
+      action: 'COMPLETE_BVCTNB_CHECK',
+    },
+    {
+      id: 'e_app_s3_gw',
+      source: 'task_step3_dossier',
+      target: 'gw_dossier_check',
+      type: 'custom',
+      label: 'Đối soát tiêu chuẩn & chính trị',
+      action: 'CHECK_DOSSIER',
+    },
+    {
+      id: 'e_app_gw_pass',
+      source: 'gw_dossier_check',
+      target: 'task_step4_key_officers',
+      type: 'custom',
+      label: 'Đủ điều kiện · Sang bước 4',
+      action: 'DOSSIER_QUALIFIED',
+      condition: 'variables.bvctnbConclusionStatus === "DAT_TIEU_CHUAN_CHINH_TRI" && variables.disciplinaryStatus === "KHONG_VI_PHAM"',
+    },
+    {
+      id: 'e_app_gw_fail',
+      source: 'gw_dossier_check',
+      target: 'end_appointment_halted',
+      type: 'custom',
+      label: 'Có vi phạm · Dừng bổ nhiệm',
+      action: 'DOSSIER_DISQUALIFIED',
+      condition: 'variables.bvctnbConclusionStatus !== "DAT_TIEU_CHUAN_CHINH_TRI" || variables.disciplinaryStatus !== "KHONG_VI_PHAM"',
+    },
+    {
+      id: 'e_app_s4_s5',
+      source: 'task_step4_key_officers',
+      target: 'task_step5_final_vote',
+      type: 'custom',
+      label: 'Hoàn thành bước 4 · Biểu quyết bước 5',
+      action: 'COMPLETE_STEP4',
+    },
+    {
+      id: 'e_app_s5_btv',
+      source: 'task_step5_final_vote',
+      target: 'task_btv_approval',
+      type: 'custom',
+      label: 'Trình Ban Thường vụ Tỉnh ủy',
+      action: 'SUBMIT_TO_BTV',
+    },
+    {
+      id: 'e_app_btv_end',
+      source: 'task_btv_approval',
+      target: 'end_appointment_issued',
+      type: 'custom',
+      label: 'Ban hành Quyết định bổ nhiệm',
+      action: 'BTV_APPROVE',
+    },
+  ],
+};
+
+// ============================================================================
+// 6. QUY TRÌNH XÉT TẶNG HUY HIỆU ĐẢNG (PHÒNG TỔ CHỨC ĐẢNG - ĐẢNG VIÊN)
+// ============================================================================
+
+export const btctuTcdDvBadgeGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_badge',
+      type: 'start',
+      position: { x: 80, y: 220 },
+      data: {
+        label: 'Tiếp nhận Danh sách đề nghị tặng Huy hiệu Đảng',
+        description: 'Tiếp nhận Tờ trình và danh sách đảng viên đề nghị tặng Huy hiệu Đảng từ các Huyện ủy, Thị ủy, Thành ủy và Đảng ủy trực thuộc',
+      },
+    },
+    {
+      id: 'task_auto_verify_lgsp',
+      type: 'serviceTask',
+      position: { x: 380, y: 220 },
+      data: {
+        label: 'Hệ thống tự động đối soát CSDL Đảng viên qua LGSP',
+        description: 'Kiểm tra tự động ngày vào Đảng, ngày chính thức, năm tuổi Đảng và lịch sử sinh hoạt qua Trục liên thông LGSP',
+        integrationCode: 'LGSP_SERVICE',
+        endpoint: '/api/v1/lgsp/party-members/verify-badge-eligibility',
+        method: 'POST',
+      },
+    },
+    {
+      id: 'task_tcd_specialist_review',
+      type: 'userTask',
+      position: { x: 720, y: 220 },
+      data: {
+        label: 'Chuyên viên Phòng TCĐ-ĐV thẩm định hồ sơ đảng viên',
+        description: 'Rà soát tính hợp lệ của lý lịch đảng viên, kiểm tra điều kiện không bị kỷ luật và đối chiếu số năm tuổi Đảng',
+        targetStatus: 'SPECIALIST_REVIEWING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên Phòng TCĐ-ĐV',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'badgeCategory', label: 'Huy hiệu Đảng đề nghị (năm)', type: 'select', options: ['30_NAM', '40_NAM', '45_NAM', '50_NAM', '55_NAM', '60_NAM', '65_NAM', '70_NAM', '75_NAM', '80_NAM'], required: true },
+          { id: 'f2', name: 'eligibilityStatus', label: 'Kết quả thẩm định điều kiện', type: 'select', options: ['DU_DIEU_KIEN', 'CHUA_DU_TUOI_DANG', 'CO_VI_PHAM_KY_LUAT'], required: true },
+          { id: 'f3', name: 'specialistNotes', label: 'Ý kiến thẩm định chi tiết', type: 'textarea' },
+        ]),
+      },
+    },
+    {
+      id: 'gw_badge_eligibility',
+      type: 'exclusiveGateway',
+      position: { x: 1040, y: 220 },
+      data: {
+        label: 'Đủ điều kiện xét tặng?',
+        description: 'Đủ điều kiện -> Trình Lãnh đạo Phòng; Chưa đủ -> Trả hồ sơ về cơ sở',
+      },
+    },
+    {
+      id: 'task_tcd_ldp_review',
+      type: 'userTask',
+      position: { x: 1360, y: 120 },
+      data: {
+        label: 'Lãnh đạo Phòng TCĐ-ĐV ký nháy Tờ trình danh sách',
+        description: 'Trưởng phòng duyệt danh sách tổng hợp, mức tiền thưởng kèm theo và ký nháy Tờ trình trình Lãnh đạo Ban',
+        targetStatus: 'LDP_REVIEWING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'LANH_DAO_PHONG',
+            description: 'Trưởng phòng TCĐ-ĐV',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'ldpApproval', label: 'Ý kiến duyệt của Trưởng phòng', type: 'select', options: ['THONG_QUA_DANH_SACH', 'YEU_CAU_RA_SOAT_LAI'], required: true },
+          { id: 'f2', name: 'totalRewardAmount', label: 'Tổng kinh phí khen thưởng (VNĐ)', type: 'number' },
+        ]),
+      },
+    },
+    {
+      id: 'task_tcd_ldb_review',
+      type: 'userTask',
+      position: { x: 1680, y: 120 },
+      data: {
+        label: 'Lãnh đạo Ban Tổ chức Tỉnh ủy xem xét & Ký Tờ trình',
+        description: 'Lãnh đạo Ban phụ trách ký Tờ trình chính thức trình Thường trực Tỉnh ủy và Ban Thường vụ Tỉnh ủy',
+        targetStatus: 'LDB_REVIEWING',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Lãnh đạo Ban phụ trách',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'ldbDecision', label: 'Quyết định của Lãnh đạo Ban', type: 'select', options: ['KY_TRINH_BTV_TINH_UY', 'TRA_LAI_PHONG'], required: true },
+          { id: 'f2', name: 'signedDocumentFile', label: 'Tờ trình đã ký số', type: 'file' },
+        ]),
+      },
+    },
+    {
+      id: 'task_btv_badge_decision',
+      type: 'userTask',
+      position: { x: 2000, y: 120 },
+      data: {
+        label: 'Ban Thường vụ Tỉnh ủy ban hành Quyết định trao tặng',
+        description: 'Ký ban hành Quyết định tặng Huy hiệu Đảng đợt kỷ niệm và phân bổ kinh phí theo quy định Trung ương',
+        targetStatus: 'PENDING_BTV_DECISION',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Ban Thường vụ Tỉnh ủy',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'decisionNumber', label: 'Số Quyết định BTV Tỉnh ủy', type: 'text', required: true },
+          { id: 'f2', name: 'decisionSignDate', label: 'Ngày ký ban hành', type: 'date', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_badge_sync_lgsp',
+      type: 'serviceTask',
+      position: { x: 2320, y: 120 },
+      data: {
+        label: 'Tự động đồng bộ Huy hiệu Đảng vào CSDL Đảng viên',
+        description: 'Ghi nhận mã số Huy hiệu, ngày trao tặng vào hồ sơ đảng viên điện tử trên hệ thống cơ sở dữ liệu toàn tỉnh',
+        integrationCode: 'LGSP_SERVICE',
+        endpoint: '/api/v1/lgsp/party-members/sync-awarded-badge',
+        method: 'POST',
+      },
+    },
+    {
+      id: 'end_badge_awarded',
+      type: 'end',
+      position: { x: 2640, y: 120 },
+      data: {
+        label: 'Hoàn tất trao tặng Huy hiệu Đảng',
+        description: 'Quy trình khen thưởng hoàn tất, hồ sơ được lưu vết và vinh danh',
+        targetStatus: 'BADGE_AWARDED',
+      },
+    },
+    {
+      id: 'end_badge_rejected',
+      type: 'end',
+      position: { x: 1360, y: 340 },
+      data: {
+        label: 'Trả hồ sơ về cơ sở do chưa đủ tiêu chuẩn',
+        description: 'Hồ sơ chưa đủ điều kiện năm tuổi Đảng hoặc đang trong thời gian xem xét kỷ luật',
+        targetStatus: 'BADGE_REJECTED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_badge_start_auto',
+      source: 'start_badge',
+      target: 'task_auto_verify_lgsp',
+      type: 'custom',
+      label: 'Tiếp nhận hồ sơ',
+      action: 'SUBMIT_LIST',
+    },
+    {
+      id: 'e_badge_auto_spec',
+      source: 'task_auto_verify_lgsp',
+      target: 'task_tcd_specialist_review',
+      type: 'custom',
+      label: 'Đối soát tự động qua LGSP',
+      action: 'AUTO_VERIFIED',
+    },
+    {
+      id: 'e_badge_spec_gw',
+      source: 'task_tcd_specialist_review',
+      target: 'gw_badge_eligibility',
+      type: 'custom',
+      label: 'Thẩm định hồ sơ',
+      action: 'CHECK_ELIGIBILITY',
+    },
+    {
+      id: 'e_badge_gw_pass',
+      source: 'gw_badge_eligibility',
+      target: 'task_tcd_ldp_review',
+      type: 'custom',
+      label: 'Đủ điều kiện · Trình Trưởng phòng',
+      action: 'BADGE_QUALIFIED',
+      condition: 'variables.eligibilityStatus === "DU_DIEU_KIEN"',
+    },
+    {
+      id: 'e_badge_gw_fail',
+      source: 'gw_badge_eligibility',
+      target: 'end_badge_rejected',
+      type: 'custom',
+      label: 'Chưa đủ điều kiện · Trả hồ sơ',
+      action: 'BADGE_REJECTED',
+      condition: 'variables.eligibilityStatus !== "DU_DIEU_KIEN"',
+    },
+    {
+      id: 'e_badge_ldp_ldb',
+      source: 'task_tcd_ldp_review',
+      target: 'task_tcd_ldb_review',
+      type: 'custom',
+      label: 'Ký nháy trình Lãnh đạo Ban',
+      action: 'SUBMIT_TO_BAN',
+    },
+    {
+      id: 'e_badge_ldb_btv',
+      source: 'task_tcd_ldb_review',
+      target: 'task_btv_badge_decision',
+      type: 'custom',
+      label: 'Trình Ban Thường vụ Tỉnh ủy',
+      action: 'SUBMIT_TO_BTV',
+    },
+    {
+      id: 'e_badge_btv_sync',
+      source: 'task_btv_badge_decision',
+      target: 'task_badge_sync_lgsp',
+      type: 'custom',
+      label: 'Ban hành QĐ · Đồng bộ dữ liệu',
+      action: 'SYNC_DATA',
+    },
+    {
+      id: 'e_badge_sync_end',
+      source: 'task_badge_sync_lgsp',
+      target: 'end_badge_awarded',
+      type: 'custom',
+      label: 'Cập nhật hồ sơ thành công',
+      action: 'COMPLETED',
+    },
+  ],
+};
+
+// ============================================================================
+// 7. QUY TRÌNH QUẢN LÝ VÀ XỬ LÝ SỰ CỐ AN TOÀN THÔNG TIN CẤP ĐỘ 3 (VĂN PHÒNG BAN)
+// ============================================================================
+
+export const btctuSecurityIncidentGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_security_incident',
+      type: 'start',
+      position: { x: 80, y: 220 },
+      data: {
+        label: 'Phát hiện / Tiếp nhận Cảnh báo Sự cố ATTT',
+        description: 'Hệ thống SOC/SIEM cảnh báo xâm nhập hoặc Cán bộ Ban phát hiện hiện tượng bất thường, lộ lọt mã độc',
+      },
+    },
+    {
+      id: 'task_incident_triage',
+      type: 'userTask',
+      position: { x: 380, y: 220 },
+      data: {
+        label: 'Đội Ứng cứu ATTT tiếp nhận & Phân loại sự cố',
+        description: 'Xác minh sự cố thật/giả và xếp cấp độ (Cấp 1: Thấp - máy trạm; Cấp 2: Trung bình - dịch vụ nội bộ; Cấp 3: Khẩn cấp - CSDL Mật)',
+        targetStatus: 'TRIAGING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Cán bộ Chuyên trách CNTT/ATTT Văn phòng Ban',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'incidentType', label: 'Loại hình sự cố', type: 'select', options: ['TAN_CONG_TU_CHOI_DICH_VU_DDOS', 'MA_DOC_RANSOMWARE', 'LO_LOT_DU_LIEU_MAT', 'XAM_NHAP_TRAI_PHEP', 'SU_CO_PHAN_CUNG_MANG'], required: true },
+          { id: 'f2', name: 'severityLevel', label: 'Mức độ nghiêm trọng', type: 'select', options: ['MUC_1_THAP', 'MUC_2_TRUNG_BINH', 'MUC_3_NGHIEM_TRONG_CAP_3'], required: true },
+          { id: 'f3', name: 'affectedSystems', label: 'Hệ thống bị ảnh hưởng', type: 'multiselect', options: ['CSDL_CAN_BO_MAT', 'PORTAL_BAN_TO_CHUC', 'MAIL_CONG_VU', 'SERVER_UNG_DUNG', 'MAY_TRAM_LAN'], required: true },
+        ]),
+      },
+    },
+    {
+      id: 'gw_incident_severity',
+      type: 'exclusiveGateway',
+      position: { x: 720, y: 220 },
+      data: {
+        label: 'Mức độ khẩn cấp Cấp độ 3?',
+        description: 'Cấp 3 Khẩn cấp -> Cô lập VLAN ngay; Cấp 1, 2 -> Xử lý tiêu chuẩn',
+      },
+    },
+    {
+      id: 'task_emergency_containment',
+      type: 'userTask',
+      position: { x: 1040, y: 120 },
+      data: {
+        label: 'Kích hoạt Cô lập Khẩn cấp & Bảo toàn Hiện trường',
+        description: 'Ngắt kết nối mạng máy chủ nghi bị xâm nhập, phong tỏa VLAN, sao lưu bản chụp RAM và log audit phục vụ điều tra forensic',
+        targetStatus: 'CONTAINING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Đội Ứng cứu khẩn cấp ATTT',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'vlanIsolated', label: 'Đã cô lập VLAN máy chủ bị tấn công', type: 'boolean', required: true },
+          { id: 'f2', name: 'forensicSnapshotTaken', label: 'Đã trích xuất snapshot RAM và file log', type: 'boolean', required: true },
+          { id: 'f3', name: 'firewallRuleApplied', label: 'Quy tắc chặn IP/Subnet độc hại', type: 'textarea' },
+        ]),
+      },
+    },
+    {
+      id: 'task_eradication_recovery',
+      type: 'userTask',
+      position: { x: 1360, y: 220 },
+      data: {
+        label: 'Xử lý Triệt để & Khôi phục Hệ thống từ Backup sạch',
+        description: 'Bóc gỡ mã độc, vá lỗ hổng zero-day, khôi phục CSDL từ bản sao lưu toàn vẹn gần nhất và kiểm tra an toàn trước khi mở mạng',
+        targetStatus: 'RECOVERING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên viên kỹ thuật hạ tầng',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'vulnerabilityPatched', label: 'Mô tả lỗ hổng và giải pháp vá', type: 'textarea', required: true },
+          { id: 'f2', name: 'backupRestoredDate', label: 'Bản sao lưu sạch được sử dụng', type: 'date', required: true },
+          { id: 'f3', name: 'integrityCheckPassed', label: 'Kiểm tra toàn vẹn CSDL Đạt', type: 'boolean', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_post_incident_audit',
+      type: 'userTask',
+      position: { x: 1680, y: 220 },
+      data: {
+        label: 'Lập Báo cáo Khắc phục Sự cố & Trình Lãnh đạo Ban',
+        description: 'Tổng hợp nguyên nhân, đánh giá thiệt hại, báo cáo Lãnh đạo Ban, Sở Thông tin & Truyền thông và Cục ATTT / VNCERT',
+        targetStatus: 'REPORTING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'LANH_DAO_PHONG',
+            description: 'Chánh Văn phòng Ban',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'incidentReportFile', label: 'Báo cáo kỹ thuật điều tra sự cố', type: 'file', required: true },
+          { id: 'f2', name: 'externalNotificationSent', label: 'Đã báo cáo Sở TTTT / VNCERT theo quy định', type: 'boolean', required: true },
+          { id: 'f3', name: 'preventionMeasures', label: 'Phương án phòng ngừa tái diễn', type: 'textarea', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'end_incident_resolved',
+      type: 'end',
+      position: { x: 2000, y: 220 },
+      data: {
+        label: 'Đóng hồ sơ sự cố & Khôi phục vận hành bình thường',
+        description: 'Hệ thống an toàn trở lại, tài liệu điều tra được lưu vết kiểm toán',
+        targetStatus: 'INCIDENT_RESOLVED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_inc_start_tri',
+      source: 'start_security_incident',
+      target: 'task_incident_triage',
+      type: 'custom',
+      label: 'Tiếp nhận cảnh báo',
+      action: 'TRIAGE_START',
+    },
+    {
+      id: 'e_inc_tri_gw',
+      source: 'task_incident_triage',
+      target: 'gw_incident_severity',
+      type: 'custom',
+      label: 'Phân loại sự cố',
+      action: 'CHECK_SEVERITY',
+    },
+    {
+      id: 'e_inc_gw_crit',
+      source: 'gw_incident_severity',
+      target: 'task_emergency_containment',
+      type: 'custom',
+      label: 'Khẩn cấp · Cô lập ngay',
+      action: 'SEVERITY_HIGH',
+      condition: 'variables.severityLevel === "MUC_3_NGHIEM_TRONG_CAP_3"',
+    },
+    {
+      id: 'e_inc_gw_norm',
+      source: 'gw_incident_severity',
+      target: 'task_eradication_recovery',
+      type: 'custom',
+      label: 'Mức độ trung bình/thấp',
+      action: 'SEVERITY_STANDARD',
+      condition: 'variables.severityLevel !== "MUC_3_NGHIEM_TRONG_CAP_3"',
+    },
+    {
+      id: 'e_inc_cont_rec',
+      source: 'task_emergency_containment',
+      target: 'task_eradication_recovery',
+      type: 'custom',
+      label: 'Đã cô lập an toàn · Tiến hành xử lý',
+      action: 'CONTAINMENT_DONE',
+    },
+    {
+      id: 'e_inc_rec_rep',
+      source: 'task_eradication_recovery',
+      target: 'task_post_incident_audit',
+      type: 'custom',
+      label: 'Khôi phục xong · Lập báo cáo',
+      action: 'SUBMIT_REPORT',
+    },
+    {
+      id: 'e_inc_rep_end',
+      source: 'task_post_incident_audit',
+      target: 'end_incident_resolved',
+      type: 'custom',
+      label: 'Đóng hồ sơ sự cố',
+      action: 'INCIDENT_CLOSED',
+    },
+  ],
+};
+
+// ============================================================================
+// 8. QUY TRÌNH THU HỒI TÀI NGUYÊN & PHÂN QUYỀN KHI THÔI VIỆC (QUY TRÌNH 7a)
+// ============================================================================
+
+export const btctuOffboardingSecurityGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_offboarding',
+      type: 'start',
+      position: { x: 80, y: 220 },
+      data: {
+        label: 'Tiếp nhận Quyết định Nghỉ việc / Chuyển công tác',
+        description: 'Phòng TCCB ban hành hoặc chuyển giao Quyết định nghỉ hưu, chuyển công tác, thôi việc của cán bộ, công chức',
+      },
+    },
+    {
+      id: 'task_asset_handover',
+      type: 'userTask',
+      position: { x: 380, y: 220 },
+      data: {
+        label: 'Cán bộ thực hiện Bàn giao Tài sản & Thiết bị số',
+        description: 'Bàn giao máy tính làm việc, USB lưu trữ an toàn, token chữ ký số chuyên dùng, thẻ ra vào cơ quan',
+        targetStatus: 'HANDING_OVER',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Cán bộ thôi việc / chuyển công tác',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'computerHandedOver', label: 'Đã bàn giao máy tính trạm và phụ kiện', type: 'boolean', required: true },
+          { id: 'f2', name: 'caTokenHandedOver', label: 'Đã thu hồi USB Token Chữ ký số CA Ban Cơ yếu', type: 'boolean', required: true },
+          { id: 'f3', name: 'secureFilesHandedOver', label: 'Đã bàn giao toàn bộ hồ sơ mật đang quản lý', type: 'boolean', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_dept_confirm',
+      type: 'userTask',
+      position: { x: 720, y: 220 },
+      data: {
+        label: 'Trưởng phòng chuyên môn xác nhận hoàn tất bàn giao việc',
+        description: 'Kiểm tra tình trạng công việc còn dang dở, các nhiệm vụ phân công đã được giao lại cho nhân sự khác',
+        targetStatus: 'DEPT_CONFIRMED',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'LANH_DAO_PHONG',
+            description: 'Trưởng/Phó phòng chuyên môn trực tiếp',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'allTasksReassigned', label: 'Tất cả nhiệm vụ đã được chuyển giao', type: 'boolean', required: true },
+          { id: 'f2', name: 'deptHandoverMinutes', label: 'Biên bản bàn giao công việc cấp phòng', type: 'file', required: true },
+          { id: 'f3', name: 'ldpSignature', label: 'Xác nhận của Lãnh đạo Phòng', type: 'text', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_auto_revoke_access',
+      type: 'serviceTask',
+      position: { x: 1040, y: 220 },
+      data: {
+        label: 'Hệ thống tự động vô hiệu hóa Tài khoản & Thu hồi quyền PBAC',
+        description: 'Khóa tài khoản SSO, ngắt quyền truy cập toàn bộ module phần mềm, hủy VPN và vô hiệu hóa API keys',
+        integrationCode: 'USER_SERVICE',
+        endpoint: '/api/v1/user/accounts/revoke-all-access',
+        method: 'POST',
+      },
+    },
+    {
+      id: 'task_security_audit',
+      type: 'userTask',
+      position: { x: 1360, y: 220 },
+      data: {
+        label: 'Bộ phận ATTT Văn phòng kiểm tra & Ký xác nhận',
+        description: 'Rà soát nhật ký truy cập lần cuối, kiểm tra tình trạng xóa dữ liệu nhạy cảm trên máy tính trạm và ký Biên bản thanh lý tài nguyên số',
+        targetStatus: 'AUDIT_CONFIRMED',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Chuyên trách ATTT Văn phòng Ban',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'accountRevocationVerified', label: 'Đã xác nhận tài khoản bị khóa 100%', type: 'boolean', required: true },
+          { id: 'f2', name: 'hardDriveWiped', label: 'Dữ liệu đệm trên máy tính trạm đã dọn sạch', type: 'boolean', required: true },
+          { id: 'f3', name: 'offboardingReportFile', label: 'Biên bản thanh lý tài nguyên số ATTT Cấp độ 3', type: 'file', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'end_offboarding_completed',
+      type: 'end',
+      position: { x: 1680, y: 220 },
+      data: {
+        label: 'Hoàn tất thủ tục An toàn thông tin thôi việc',
+        description: 'Toàn bộ quyền và tài sản số của cán bộ đã được thu hồi an toàn tuyệt đối',
+        targetStatus: 'OFFBOARDING_COMPLETED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_off_start_hand',
+      source: 'start_offboarding',
+      target: 'task_asset_handover',
+      type: 'custom',
+      label: 'Tiếp nhận quyết định',
+      action: 'START_HANDOVER',
+    },
+    {
+      id: 'e_off_hand_dept',
+      source: 'task_asset_handover',
+      target: 'task_dept_confirm',
+      type: 'custom',
+      label: 'Bàn giao tài sản',
+      action: 'SUBMIT_HANDOVER',
+    },
+    {
+      id: 'e_off_dept_auto',
+      source: 'task_dept_confirm',
+      target: 'task_auto_revoke_access',
+      type: 'custom',
+      label: 'Trưởng phòng xác nhận',
+      action: 'CONFIRM_HANDOVER',
+    },
+    {
+      id: 'e_off_auto_sec',
+      source: 'task_auto_revoke_access',
+      target: 'task_security_audit',
+      type: 'custom',
+      label: 'Vô hiệu hóa quyền xong',
+      action: 'AUTO_REVOKED',
+    },
+    {
+      id: 'e_off_sec_end',
+      source: 'task_security_audit',
+      target: 'end_offboarding_completed',
+      type: 'custom',
+      label: 'Xác nhận an toàn · Hoàn tất',
+      action: 'COMPLETE_OFFBOARDING',
+    },
+  ],
+};
+
+// ============================================================================
+// 9. QUY TRÌNH THỬ NGHIỆM VÀ NGHIỆM THU HỆ THỐNG CNTT CẤP ĐỘ 3 (QUY TRÌNH 7b)
+// ============================================================================
+
+export const btctuSystemTestingGraph = {
+  viewport: { x: 0, y: 0, zoom: 0.85 },
+  nodes: [
+    {
+      id: 'start_system_testing',
+      type: 'start',
+      position: { x: 80, y: 220 },
+      data: {
+        label: 'Nộp Phiên bản Phát hành Thử nghiệm (Release Candidate)',
+        description: 'Đơn vị phát triển / Tổ dự án nộp bản build phần mềm kèm tài liệu đặc tả và kịch bản kiểm thử',
+      },
+    },
+    {
+      id: 'task_functional_testing',
+      type: 'userTask',
+      position: { x: 380, y: 220 },
+      data: {
+        label: 'Kiểm thử Chức năng & Nghiệp vụ 22 VTVL',
+        description: 'Tổ chức kiểm thử người dùng (UAT) trên môi trường Staging, đối soát các kịch bản đánh giá KPI, Mẫu 01-05 và phân quyền PBAC',
+        targetStatus: 'FUNCTIONAL_TESTING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Tổ Kiểm thử UAT & Đại diện các phòng',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'testCasesPassedRate', label: 'Tỷ lệ Test Case thành công (%)', type: 'number', required: true },
+          { id: 'f2', name: 'uatSignOff', label: 'Biên bản nghiệm thu UAT người dùng', type: 'file', required: true },
+          { id: 'f3', name: 'functionalStatus', label: 'Kết quả kiểm thử nghiệp vụ', type: 'select', options: ['DAT_YEU_CAU', 'CON_LOI_NGHIEP_VU'], required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_security_pentest',
+      type: 'userTask',
+      position: { x: 720, y: 220 },
+      data: {
+        label: 'Rà quét Lỗ hổng & Đánh giá ATTT Chuẩn Cấp độ 3',
+        description: 'Đơn vị chuyên trách ATTT quét lỗ hổng OWASP, kiểm tra mã hóa CSDL Mức 3, rà soát mã nguồn tĩnh (SAST/DAST) và Pentest',
+        targetStatus: 'SECURITY_TESTING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Đơn vị Đánh giá ATTT độc lập',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'criticalVulnCount', label: 'Số lượng lỗ hổng Nghiêm trọng (Critical)', type: 'number', required: true, default: 0 },
+          { id: 'f2', name: 'highVulnCount', label: 'Số lượng lỗ hổng Cao (High)', type: 'number', required: true, default: 0 },
+          { id: 'f3', name: 'securityReportFile', label: 'Báo cáo đánh giá An toàn thông tin Cấp 3', type: 'file', required: true },
+          { id: 'f4', name: 'pentestVerdict', label: 'Kết luận an toàn thông tin', type: 'select', options: ['DAT_TIEU_CHUAN_ATTT_CAP_3', 'KHONG_DAT_CON_LO_HONG_NGHIEM_TRONG'], required: true },
+        ]),
+      },
+    },
+    {
+      id: 'gw_testing_results',
+      type: 'exclusiveGateway',
+      position: { x: 1040, y: 220 },
+      data: {
+        label: 'Đạt chuẩn Nghiệp vụ & ATTT Cấp độ 3?',
+        description: 'Đạt chuẩn -> Trình Hội đồng nghiệm thu; Không đạt -> Yêu cầu khắc phục lỗ hổng',
+      },
+    },
+    {
+      id: 'task_remediation',
+      type: 'userTask',
+      position: { x: 1040, y: 380 },
+      data: {
+        label: 'Khắc phục Lỗ hổng & Sửa lỗi Phần mềm',
+        description: 'Đơn vị phát triển tiến hành vá lỗi bảo mật, cập nhật bản vá và gửi lại yêu cầu tái kiểm thử',
+        targetStatus: 'REMEDIATING',
+        assignments: [
+          {
+            unitScope: 'SAME_UNIT',
+            roleCode: 'CHUYEN_VIEN',
+            description: 'Đội ngũ Kỹ thuật Phát triển phần mềm',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'remediationChangelog', label: 'Nhật ký các bản vá bảo mật và lỗi đã sửa', type: 'textarea', required: true },
+          { id: 'f2', name: 'rescanRequested', label: 'Yêu cầu quét lại bảo mật', type: 'boolean', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_acceptance_board',
+      type: 'userTask',
+      position: { x: 1360, y: 120 },
+      data: {
+        label: 'Hội đồng Nghiệm thu Kỹ thuật thẩm định & Ký biên bản',
+        description: 'Hội đồng họp xem xét báo cáo UAT, báo cáo ATTT và ký Biên bản nghiệm thu chính thức',
+        targetStatus: 'BOARD_EVALUATING',
+        assignments: [
+          {
+            unitScope: 'PARENT_UNIT',
+            roleCode: 'LANH_DAO_BAN',
+            description: 'Chủ tịch & Thành viên Hội đồng nghiệm thu',
+          },
+        ],
+        formSchema: JSON.stringify([
+          { id: 'f1', name: 'boardDecision', label: 'Quyết nghị của Hội đồng nghiệm thu', type: 'select', options: ['NGHIEM_THU_DU_DIEU_KIEN_PROD', 'KHONG_DONG_Y_NGHIEM_THU'], required: true },
+          { id: 'f2', name: 'boardMinutesFile', label: 'Biên bản họp Hội đồng nghiệm thu', type: 'file', required: true },
+        ]),
+      },
+    },
+    {
+      id: 'task_auto_deploy_prod',
+      type: 'serviceTask',
+      position: { x: 1680, y: 120 },
+      data: {
+        label: 'Tự động Kích hoạt Pipeline Triển khai Production',
+        description: 'Kích hoạt CI/CD pipeline triển khai an toàn Blue-Green lên cụm máy chủ Production, sao lưu tự động và kiểm tra health check',
+        integrationCode: 'DEVOPS_SERVICE',
+        endpoint: '/api/v1/devops/deploy/production-release',
+        method: 'POST',
+      },
+    },
+    {
+      id: 'end_system_commissioned',
+      type: 'end',
+      position: { x: 2000, y: 120 },
+      data: {
+        label: 'Nghiệm thu thành công & Đưa vào vận hành chính thức',
+        description: 'Hệ thống đạt chuẩn ATTT Cấp độ 3 và vận hành chính thức phục vụ Ban Tổ chức Tỉnh ủy',
+        targetStatus: 'COMMISSIONED_IN_PRODUCTION',
+      },
+    },
+    {
+      id: 'end_system_rejected',
+      type: 'end',
+      position: { x: 1360, y: 280 },
+      data: {
+        label: 'Từ chối nghiệm thu do không đạt tiêu chuẩn kỹ thuật',
+        description: 'Hội đồng bác bỏ nghiệm thu, yêu cầu tái cấu trúc hoặc khắc phục triệt để',
+        targetStatus: 'COMMISSIONING_REJECTED',
+      },
+    },
+  ],
+  edges: [
+    {
+      id: 'e_sys_start_func',
+      source: 'start_system_testing',
+      target: 'task_functional_testing',
+      type: 'custom',
+      label: 'Nộp bản phát hành thử nghiệm',
+      action: 'SUBMIT_RELEASE',
+    },
+    {
+      id: 'e_sys_func_sec',
+      source: 'task_functional_testing',
+      target: 'task_security_pentest',
+      type: 'custom',
+      label: 'UAT hoàn thành · Chuyển Pentest',
+      action: 'PASS_UAT',
+    },
+    {
+      id: 'e_sys_sec_gw',
+      source: 'task_security_pentest',
+      target: 'gw_testing_results',
+      type: 'custom',
+      label: 'Đối soát kết quả kiểm thử',
+      action: 'CHECK_RESULTS',
+    },
+    {
+      id: 'e_sys_gw_pass',
+      source: 'gw_testing_results',
+      target: 'task_acceptance_board',
+      type: 'custom',
+      label: 'Đạt chuẩn · Trình Hội đồng nghiệm thu',
+      action: 'TESTING_PASSED',
+      condition: 'variables.pentestVerdict === "DAT_TIEU_CHUAN_ATTT_CAP_3" && variables.criticalVulnCount === 0',
+    },
+    {
+      id: 'e_sys_gw_fail',
+      source: 'gw_testing_results',
+      target: 'task_remediation',
+      type: 'custom',
+      label: 'Có lỗi bảo mật · Yêu cầu khắc phục',
+      action: 'NEED_REMEDIATION',
+      condition: 'variables.pentestVerdict !== "DAT_TIEU_CHUAN_ATTT_CAP_3" || variables.criticalVulnCount > 0',
+    },
+    {
+      id: 'e_sys_rem_sec',
+      source: 'task_remediation',
+      target: 'task_security_pentest',
+      type: 'custom',
+      label: 'Đã vá lỗi · Quét lại bảo mật',
+      action: 'RESCAN_SECURITY',
+    },
+    {
+      id: 'e_sys_board_deploy',
+      source: 'task_acceptance_board',
+      target: 'task_auto_deploy_prod',
+      type: 'custom',
+      label: 'Hội đồng nghiệm thu thông qua',
+      action: 'BOARD_PASSED',
+      condition: 'variables.boardDecision === "NGHIEM_THU_DU_DIEU_KIEN_PROD"',
+    },
+    {
+      id: 'e_sys_board_reject',
+      source: 'task_acceptance_board',
+      target: 'end_system_rejected',
+      type: 'custom',
+      label: 'Hội đồng bác bỏ nghiệm thu',
+      action: 'BOARD_REJECTED',
+      condition: 'variables.boardDecision !== "NGHIEM_THU_DU_DIEU_KIEN_PROD"',
+    },
+    {
+      id: 'e_sys_deploy_end',
+      source: 'task_auto_deploy_prod',
+      target: 'end_system_commissioned',
+      type: 'custom',
+      label: 'Triển khai Production thành công',
+      action: 'DEPLOYED_SUCCESS',
+    },
+  ],
+};
+
+// ============================================================================
 // CANONICAL COMPILATION & VALIDATION UTILITIES
 // ============================================================================
 
@@ -824,6 +2433,13 @@ export async function seedBtctuWorkflow(prismaClient?: PrismaClient) {
     // 1. Kiểm tra graph
     validateGraph(btctuTaskManagementGraph, 'WF_BTCTU_QUAN_LY_CONG_VIEC');
     validateGraph(btctuKpiEvaluationGraph, 'WF_BTCTU_DANH_GIA_KPI');
+    validateGraph(btctuTaskExtensionGraph, 'WF_BTCTU_XIN_GIA_HAN_VIEC');
+    validateGraph(btctuBvctnbVerificationGraph, 'WF_BTCTU_BVCTNB_XAC_MINH');
+    validateGraph(btctuTccbAppointmentGraph, 'WF_BTCTU_TCCB_BO_NHIEM');
+    validateGraph(btctuTcdDvBadgeGraph, 'WF_BTCTU_TCD_DV_HUY_HIEU_DANG');
+    validateGraph(btctuSecurityIncidentGraph, 'WF_ATTT_XU_LY_SU_CO');
+    validateGraph(btctuOffboardingSecurityGraph, 'WF_ATTT_THOI_VIEC_THU_HOI');
+    validateGraph(btctuSystemTestingGraph, 'WF_ATTT_THU_NGHIEM_NGHIEM_THU');
 
     // 2. Upsert ProcessTypes cho BTCTU
     const processTypesData = [
@@ -833,7 +2449,7 @@ export async function seedBtctuWorkflow(prismaClient?: PrismaClient) {
         description: 'Chu trình phân công, thực thi 22 VTVL và kiểm soát 3 mức lỗi theo Quy định 01-QĐ/BTCTU',
         ownerService: 'hrm-service',
         validTriggers: ['TASK_CREATED', 'TASK_ASSIGNED', 'TASK_DISPATCHED', 'ON_CREATE'],
-        validActions: ['ASSIGN_START', 'DISPATCH_TO_DEPT', 'ASSIGN_OFFICER', 'SUBMIT_FOR_REVIEW', 'RETURN', 'SUBMIT_TO_BAN', 'BAN_REQUEST_REVIEW', 'BAN_APPROVE', 'BAN_CANCEL'],
+        validActions: ['ASSIGN_START', 'DISPATCH_TO_DEPT', 'ASSIGN_OFFICER', 'SUBMIT_FOR_REVIEW', 'RETURN', 'SUBMIT_TO_BAN', 'BAN_REQUEST_REVIEW', 'BAN_APPROVE', 'BAN_CANCEL', 'REQUEST_EXTENSION', 'TRIGGER_EXTENSION_SUBFLOW', 'RESUME_AFTER_EXTENSION', 'ROUTE_P_TCCB', 'ROUTE_P_TCD_DV', 'ROUTE_P_BVCTNB', 'ROUTE_VAN_PHONG'],
         enforcementMode: 'ENFORCE',
         isActive: true,
       },
@@ -844,6 +2460,76 @@ export async function seedBtctuWorkflow(prismaClient?: PrismaClient) {
         ownerService: 'hrm-service',
         validTriggers: ['PERIOD_CLOSED', 'EVALUATION_INITIATED', 'SELF_EVALUATION_SUBMITTED'],
         validActions: ['INITIATE_PERIOD', 'SUBMIT_MAU_01', 'SUBMIT_MAU_02', 'SUBMIT_MAU_04', 'SUBMIT_MAU_03', 'CHECK_AUDIT', 'CAPS_APPLIED', 'COUNCIL_REVIEW', 'REQUEST_REWORK', 'COUNCIL_APPROVED', 'PUBLISH_RESULTS'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_TASK_EXTENSION',
+        name: 'Phê duyệt Xin gia hạn thời hạn công việc',
+        description: 'Quy trình thẩm định và phê duyệt đề xuất xin gia hạn thời hạn hoàn thành công việc gửi trước 24h, bảo lưu điểm tiến độ SLA',
+        ownerService: 'hrm-service',
+        validTriggers: ['EXTENSION_REQUESTED', 'TASK_AT_RISK', 'DEADLINE_APPROACHING'],
+        validActions: ['SUBMIT_REQUEST', 'SUBMIT_TO_LDP', 'CHECK_LDP', 'LDP_ENDORSE', 'LDP_REJECT', 'CHECK_LDB', 'LDB_APPROVE', 'LDB_REJECT', 'AUTO_EXTENDED'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_BVCTNB_VERIFICATION',
+        name: 'Thẩm tra, xác minh Tiêu chuẩn Chính trị Nội bộ',
+        description: 'Quy trình thẩm tra lý lịch chính trị theo Quy định 348-QĐ/BTCTW, tra cứu CSDL Mật ATTT Cấp 3 và kết luận tiêu chuẩn chính trị',
+        ownerService: 'hrm-service',
+        validTriggers: ['POLITICAL_CHECK_REQUESTED', 'DOSSIER_SUBMITTED'],
+        validActions: ['ASSIGN_START', 'ASSIGN_INVESTIGATOR', 'CHECK_DOSSIER', 'SKIP_FIELD', 'DO_FIELD_CHECK', 'COMPLETE_FIELD', 'SUBMIT_TO_LDP', 'SUBMIT_TO_BAN', 'BAN_APPROVE_CONCLUSION'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_CADRE_APPOINTMENT',
+        name: 'Bổ nhiệm, luân chuyển Cán bộ 5 bước',
+        description: 'Quy trình 5 bước bổ nhiệm cán bộ diện Ban Thường vụ Tỉnh ủy quản lý, thẩm định Mẫu 2C và liên thông tiêu chuẩn chính trị',
+        ownerService: 'hrm-service',
+        validTriggers: ['APPOINTMENT_INITIATED', 'PLANNING_APPROVED'],
+        validActions: ['INIT_APPOINTMENT', 'COMPLETE_STEP1', 'COMPLETE_STEP2', 'TRIGGER_BVCTNB_CHECK', 'COMPLETE_BVCTNB_CHECK', 'CHECK_DOSSIER', 'DOSSIER_QUALIFIED', 'DOSSIER_DISQUALIFIED', 'COMPLETE_STEP4', 'SUBMIT_TO_BTV', 'BTV_APPROVE'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_PARTY_MEMBER_BADGE',
+        name: 'Xét tặng Huy hiệu Đảng & Nghiệp vụ đảng viên',
+        description: 'Quy trình xét tặng Huy hiệu Đảng định kỳ, tự động đối soát CSDL Đảng viên qua LGSP và ban hành Quyết định BTV Tỉnh ủy',
+        ownerService: 'hrm-service',
+        validTriggers: ['BADGE_CAMPAIGN_OPENED', 'PROPOSAL_RECEIVED'],
+        validActions: ['SUBMIT_LIST', 'AUTO_VERIFIED', 'CHECK_ELIGIBILITY', 'BADGE_QUALIFIED', 'BADGE_REJECTED', 'SUBMIT_TO_BAN', 'SUBMIT_TO_BTV', 'SYNC_DATA', 'COMPLETED'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_SECURITY_INCIDENT',
+        name: 'Quản lý & Xử lý Sự cố An toàn Thông tin Cấp độ 3',
+        description: 'Quy trình ứng cứu sự cố ATTT theo Nghị định 85/2016/NĐ-CP & Nghị định 63/2026/NĐ-CP, cô lập hệ thống, khắc phục và báo cáo VNCERT',
+        ownerService: 'workflow-service',
+        validTriggers: ['INCIDENT_DETECTED', 'SOC_ALERT', 'MANUAL_REPORT'],
+        validActions: ['TRIAGE_START', 'CHECK_SEVERITY', 'SEVERITY_HIGH', 'SEVERITY_STANDARD', 'CONTAINMENT_DONE', 'SUBMIT_REPORT', 'INCIDENT_CLOSED'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_OFFBOARDING_SECURITY',
+        name: 'Thu hồi Tài nguyên & Phân quyền khi Thôi việc',
+        description: 'Quy trình vô hiệu hóa quyền truy cập, thu hồi chứng thư số CA, máy tính trạm và dọn sạch dữ liệu khi cán bộ thôi việc theo Quy trình 7a',
+        ownerService: 'workflow-service',
+        validTriggers: ['OFFBOARDING_INITIATED', 'DECISION_ISSUED'],
+        validActions: ['START_HANDOVER', 'SUBMIT_HANDOVER', 'CONFIRM_HANDOVER', 'AUTO_REVOKED', 'COMPLETE_OFFBOARDING'],
+        enforcementMode: 'ENFORCE',
+        isActive: true,
+      },
+      {
+        code: 'BTCTU_SYSTEM_TESTING_COMMISSIONING',
+        name: 'Thử nghiệm & Nghiệm thu Hệ thống CNTT Cấp độ 3',
+        description: 'Quy trình UAT, rà quét lỗ hổng ATTT Cấp độ 3 và thẩm định Hội đồng nghiệm thu trước khi đưa ứng dụng lên Production theo Quy trình 7b',
+        ownerService: 'workflow-service',
+        validTriggers: ['RELEASE_CANDIDATE_SUBMITTED', 'COMMISSIONING_REQUESTED'],
+        validActions: ['SUBMIT_RELEASE', 'PASS_UAT', 'CHECK_RESULTS', 'TESTING_PASSED', 'NEED_REMEDIATION', 'RESCAN_SECURITY', 'BOARD_PASSED', 'BOARD_REJECTED', 'DEPLOYED_SUCCESS'],
         enforcementMode: 'ENFORCE',
         isActive: true,
       },
@@ -888,6 +2574,76 @@ export async function seedBtctuWorkflow(prismaClient?: PrismaClient) {
         createdBy: 'BTCTU_ADMIN',
         isActive: true,
         graph: btctuKpiEvaluationGraph,
+      },
+      {
+        code: 'WF_BTCTU_XIN_GIA_HAN_VIEC',
+        name: 'Quy trình Phê duyệt Xin gia hạn Thời hạn Công việc (Ban Tổ chức Tỉnh ủy Đắk Lắk)',
+        description: 'Quy trình giải quyết đề xuất gia hạn hoàn thành nhiệm vụ theo quy định (Chuyên viên gửi trước 24h, Lãnh đạo Phòng thẩm định lý do khách quan, Lãnh đạo Ban phê duyệt, tự động bảo lưu điểm tiến độ C% không bị trừ SLA).',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'BTCTU_DAKLAK',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuTaskExtensionGraph,
+      },
+      {
+        code: 'WF_BTCTU_BVCTNB_XAC_MINH',
+        name: 'Quy trình Thẩm tra, Xác minh Tiêu chuẩn Chính trị Nội bộ (Phòng BVCTNB)',
+        description: 'Quy trình thẩm tra, xác minh lịch sử chính trị và chính trị hiện nay của cán bộ theo Quy định 348-QĐ/BTCTW; tra cứu CSDL An toàn thông tin Cấp độ 3; lập Báo cáo kết luận chính trị nội bộ trình Thường trực Tỉnh ủy.',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'P_BVCTNB',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuBvctnbVerificationGraph,
+      },
+      {
+        code: 'WF_BTCTU_TCCB_BO_NHIEM',
+        name: 'Quy trình Bổ nhiệm Cán bộ 5 bước (Phòng Tổ chức Cán bộ)',
+        description: 'Quy trình bổ nhiệm, luân chuyển cán bộ diện Ban Thường vụ Tỉnh ủy quản lý theo quy định Trung ương gồm 5 bước chặt chẽ, trích xuất dữ liệu Hồ sơ 2C số hóa, đối soát tiêu chuẩn chính trị với Phòng BVCTNB và trình BTV Tỉnh ủy.',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'P_TCCB',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuTccbAppointmentGraph,
+      },
+      {
+        code: 'WF_BTCTU_TCD_DV_HUY_HIEU_DANG',
+        name: 'Quy trình Xét tặng Huy hiệu Đảng (Phòng Tổ chức Đảng - Đảng viên)',
+        description: 'Quy trình tiếp nhận đề nghị, tự động đối soát CSDL Đảng viên qua LGSP, thẩm định hồ sơ, trình Lãnh đạo Ban và Ban Thường vụ Tỉnh ủy ban hành Quyết định trao tặng Huy hiệu Đảng định kỳ.',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'P_TCD_DV',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuTcdDvBadgeGraph,
+      },
+      {
+        code: 'WF_ATTT_XU_LY_SU_CO',
+        name: 'Quy trình Quản lý và Xử lý Sự cố An toàn Thông tin Cấp độ 3 (Văn phòng Ban)',
+        description: 'Quy trình ứng cứu sự cố an toàn thông tin theo Nghị định 85/2016/NĐ-CP & Nghị định 63/2026/NĐ-CP; tiếp nhận cảnh báo SIEM, cô lập khẩn cấp, khắc phục mã độc, điều tra nguyên nhân và báo cáo Đội ứng cứu sự cố Tỉnh & VNCERT.',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'VAN_PHONG',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuSecurityIncidentGraph,
+      },
+      {
+        code: 'WF_ATTT_THOI_VIEC_THU_HOI',
+        name: 'Quy trình Thu hồi Tài nguyên & Phân quyền khi Cán bộ Thôi việc (Quy trình 7a)',
+        description: 'Quy trình vô hiệu hóa quyền truy cập, thu hồi chứng thư số CA, máy tính, tài sản số và kiểm tra an toàn thông tin khi cán bộ chuyển công tác, nghỉ hưu hoặc thôi việc per Nghị định 63/2026/NĐ-CP.',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'VAN_PHONG',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuOffboardingSecurityGraph,
+      },
+      {
+        code: 'WF_ATTT_THU_NGHIEM_NGHIEM_THU',
+        name: 'Quy trình Thử nghiệm và Nghiệm thu Hệ thống CNTT Cấp độ 3 (Quy trình 7b)',
+        description: 'Quy trình kiểm thử chức năng, rà quét an toàn thông tin theo chuẩn Cấp độ 3 (NĐ 85/2016/NĐ-CP & NĐ 63/2026/NĐ-CP) và họp Hội đồng nghiệm thu trước khi đưa ứng dụng lên Production.',
+        organizationId: BTCTU_ORG_ID,
+        ownerUnitCode: 'VAN_PHONG',
+        createdBy: 'BTCTU_ADMIN',
+        isActive: true,
+        graph: btctuSystemTestingGraph,
       },
     ];
 
@@ -960,6 +2716,48 @@ export async function seedBtctuWorkflow(prismaClient?: PrismaClient) {
         processTypeCode: 'BTCTU_KPI_EVALUATION',
         definitionCode: 'WF_BTCTU_DANH_GIA_KPI',
         trigger: 'PERIOD_CLOSED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_TASK_EXTENSION',
+        definitionCode: 'WF_BTCTU_XIN_GIA_HAN_VIEC',
+        trigger: 'EXTENSION_REQUESTED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_BVCTNB_VERIFICATION',
+        definitionCode: 'WF_BTCTU_BVCTNB_XAC_MINH',
+        trigger: 'POLITICAL_CHECK_REQUESTED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_CADRE_APPOINTMENT',
+        definitionCode: 'WF_BTCTU_TCCB_BO_NHIEM',
+        trigger: 'APPOINTMENT_INITIATED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_PARTY_MEMBER_BADGE',
+        definitionCode: 'WF_BTCTU_TCD_DV_HUY_HIEU_DANG',
+        trigger: 'BADGE_CAMPAIGN_OPENED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_SECURITY_INCIDENT',
+        definitionCode: 'WF_ATTT_XU_LY_SU_CO',
+        trigger: 'INCIDENT_DETECTED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_OFFBOARDING_SECURITY',
+        definitionCode: 'WF_ATTT_THOI_VIEC_THU_HOI',
+        trigger: 'OFFBOARDING_INITIATED',
+        priority: 10,
+      },
+      {
+        processTypeCode: 'BTCTU_SYSTEM_TESTING_COMMISSIONING',
+        definitionCode: 'WF_ATTT_THU_NGHIEM_NGHIEM_THU',
+        trigger: 'RELEASE_CANDIDATE_SUBMITTED',
         priority: 10,
       },
     ];

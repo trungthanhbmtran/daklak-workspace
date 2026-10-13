@@ -414,4 +414,26 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Smoke test route trong container: `wget -S http://127.0.0.1:3000/admin/services/hrm/work-plans/rank-templates` -> `HTTP/1.1 200 OK`.
   - Quét mã nguồn: 0 `break-words`, 0 `font-black`, 0 `console.log`, chuẩn UTF-8 không BOM.
 
-
+## 2026-10-13: Biên Soạn Toàn Diện Tài Liệu Mô Tả Hệ Thống DakLak-Workspace Chuyên Sâu Cho Ban Tổ Chức Tỉnh Ủy Đắk Lắk
+- **Nội dung tác vụ**:
+  1. Khảo sát toàn diện hệ thống mã nguồn thực tế (`user-service`, `hrm-service`, `workflow-service`, `report-service`, `api-gateway`, `admin_khcn`), các tệp seed CSDL (`10-daklak-party-organizations.seed.ts`, `btctu-employees.seed.ts`, `seed-btctu.ts`, `seed-btctu-report5.ts`, `btctu-kpi-engine.seed.ts`) và hồ sơ an toàn thông tin Cấp độ 3.
+  2. Biên soạn tài liệu kỹ thuật và vận hành chính quy: `docs/TAI_LIEU_MO_TA_HE_THONG_BAN_TO_CHUC_TINH_UY_DAKLAK.md` (493 dòng, ~48.5 KB, UTF-8 không BOM) tập trung duy nhất và chuyên sâu cho đơn vị **Ban Tổ chức Tỉnh ủy Đắk Lắk (`BTCTU_DAKLAK`)**.
+  3. Cấu trúc tài liệu 10 chương bao quát trọn vẹn:
+     - **Chương I**: Tổng quan hệ thống & Khung pháp lý chuẩn Đảng (QĐ 01-QĐ/BTCTU, Hướng dẫn 05-HD/TU, QĐ 39-QĐ/TU, QĐ 348-QĐ/BTCTW, NĐ 85/2016/NĐ-CP, NĐ 63/2026/NĐ-CP, NQ 11-NQ/TU).
+     - **Chương II**: Cơ cấu tổ chức khối Đảng (05 tập thể phòng `TT-01` đến `TT-05`), Danh mục 22 VTVL định biên chuẩn mã CDE (`CDE-BTCTU-001` đến `022`), Danh sách định danh 23 cán bộ công chức thực tế (`BTCTU_001` đến `BTCTU_023`) và Quản trị viên `BTCTU_ADMIN`.
+     - **Chương III**: Kiến trúc kỹ thuật Microservices & Hạ tầng chuẩn ATTT Cấp độ 3 (3 vùng mạng cách ly DMZ - Private - Isolated; Docker, Nginx, Gateway, User, HRM, Workflow, Report, Media, MySQL, Redis, RabbitMQ, MinIO).
+     - **Chương IV**: Hệ thống 09 Quy trình nghiệp vụ chuyên biệt số hóa trên `workflow-service` (Công việc, KPI, Gia hạn trước 24h, Xác minh BVCTNB Mức 3, Bổ nhiệm TCCB 5 bước, Huy hiệu Đảng TCCSĐ, 3 quy trình an ninh mạng ATTT Cấp độ 3).
+     - **Chương V**: Quy trình thao tác chuẩn SOP 4 Bước & Bộ 05 Mẫu biểu hồ sơ hành chính điện tử (`MAU_01` đến `MAU_05`).
+     - **Chương VI**: Hệ thống công thức toán học ma trận 4 thành tố ($A\%, B\%, C\%, D\%$), kiểm soát chất lượng 3 mức lỗi, trễ hạn tiến độ, ma trận trọng số động theo 4 mảng việc nghiệp vụ (`DOM_THAM_DINH`, `DOM_VAN_THU`, `DOM_IT_ATTT`, `DOM_THAM_MUU`), thuật toán siết trần 20% Xuất sắc và trần người đứng đầu.
+     - **Chương VII**: Ma trận ánh xạ tự động 08 nguồn thu thập số liệu hệ sinh thái (`SRC_01` đến `SRC_08`).
+     - **Chương VIII**: Chính sách bảo mật PBAC, kiểm soát phạm vi đơn vị `BTCTU_DAKLAK`, mã hóa AES-256 và bảo vệ bí mật nhà nước theo NĐ 63/2026/NĐ-CP.
+     - **Chương IX**: Hướng dẫn khai thác và vận hành chi tiết cho từng nhóm cán bộ (Lãnh đạo Ban, Lãnh đạo Phòng, Chuyên viên, Văn phòng & Quản trị viên Kỹ thuật).
+     - **Chương X**: Kết luận và định hướng phát triển chuyển đổi số công tác Đảng tỉnh Đắk Lắk.
+- **Tập tin đã tạo/sửa đổi**:
+  - `docs/TAI_LIEU_MO_TA_HE_THONG_BAN_TO_CHUC_TINH_UY_DAKLAK.md` (Tạo mới, UTF-8 không BOM)
+  - `.agents/current_plan.md` (Cập nhật kế hoạch tác vụ)
+  - `.agents/execution_logs/code2.md` (Ghi nhận nhật ký tác vụ)
+- **Kiểm chứng máy thực tế**:
+  - Kiểm tra tệp tài liệu: 493 dòng, 48,446 bytes, mã hóa UTF-8 không BOM sạch sẽ.
+  - Sơ đồ trực quan Mermaid syntax kiểm tra chuẩn xác (flowchart, stateDiagram, graph TD, sequenceDiagram).
+  - Đối chiếu 100% khớp dữ liệu thực tế: 05 mã phòng ban, 22 mã VTVL, 23 mã cán bộ, 09 mã quy trình và công thức tính điểm KPI.

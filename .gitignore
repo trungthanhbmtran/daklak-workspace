@@ -91,6 +91,7 @@ logs/
 docs/
 !docs/
 docs/*
+!docs/TAI_LIEU_MO_TA_HE_THONG_BAN_TO_CHUC_TINH_UY_DAKLAK.md
 !docs/plans/
 !docs/plans/workflow-user-designed-processes.md
 !docs/diagrams/

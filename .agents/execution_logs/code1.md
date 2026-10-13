@@ -1,5 +1,109 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Kiểm thử Toàn diện 12 Trường hợp Quản lý Công việc Ban Tổ chức Tỉnh ủy (BTCTU)
+
+### 1. Phạm vi & Mục tiêu
+- Thực hiện kiểm thử toàn diện E2E (End-to-End Machine Verification) 12 trường hợp nghiệp vụ cốt lõi trong hệ thống quản lý công việc của Ban Tổ chức Tỉnh ủy Đắk Lắk (BTCTU).
+- Bao phủ toàn bộ các tương tác: Giao việc cá nhân, giao việc phối hợp (kèm % đóng góp), giao việc cấp phòng ban, chuyên viên từ chối, lãnh đạo giao lại, chuyên viên xin phối hợp, chuyên viên chấp nhận thực hiện, nhân viên khởi tạo công việc phát sinh mới, hoàn thành không minh chứng, lãnh đạo yêu cầu thực hiện lại (RETURN), hoàn thành có minh chứng đầy đủ, và lãnh đạo duyệt đồng ý (EVALUATE_APPROVE kèm chấm điểm KPI 4 thành tố).
+
+### 2. Ma trận Kết quả Kiểm thử Máy Thực tế (12/12 Cases Pass)
+| STT | Mã Case | Tên Trường hợp Nghiệp vụ | Mô tả & Thao tác | Vai trò Thực hiện | HTTP Code | Task ID | Kết quả |
+|---|---|---|---|---|---|---|---|
+| 1 | `CASE_01` | Giao cá nhân | Lãnh đạo phòng giao việc trực tiếp cho chuyên viên | `tccb_tp` -> `BTCTU_013` | 201 Created | #31 | **PASS** |
+| 2 | `CASE_02` | Giao phối hợp (kèm % đóng góp) | Phân chia tỷ lệ chủ trì (70%) và phối hợp (30%) | `truongban` -> `BTCTU_010`, `BTCTU_014` | 201 Created | #32 | **PASS** |
+| 3 | `CASE_03` | Giao phòng ban | Giao nhiệm vụ cho tập thể phòng ban (`DEPT_58`) | `truongban` -> `P_TCCB` | 201 Created | #33 | **PASS** |
+| 4 | `CASE_04` | Chuyên viên từ chối nhận việc | Chuyên viên gửi phản hồi `REJECT` kèm lý do chính đáng | `tccb_cv` (`BTCTU_013`) | 201 Created | #34 | **PASS** |
+| 5 | `CASE_05` | Lãnh đạo giao lại (Reassign) | Lãnh đạo điều chuyển người nhận việc sang `BTCTU_011` | `tccb_tp` (`BTCTU_010`) | 200 OK | #34 | **PASS** |
+| 6 | `CASE_06` | Xin phối hợp | Chuyên viên gửi yêu cầu xin thêm cán bộ/đơn vị phối hợp | `tccb_cv` (`BTCTU_013`) | 201 Created | #35 | **PASS** |
+| 7 | `CASE_07` | Chấp nhận thực hiện | Chuyên viên tiếp nhận việc, chuyển trạng thái `IN_PROGRESS` | `tccb_cv` (`BTCTU_013`) | 201 Created | #36 | **PASS** |
+| 8 | `CASE_08` | Công việc phát sinh do nhân viên khởi tạo | Chuyên viên chủ động lập việc đột xuất, tự động gán Lãnh đạo giám sát | `tccb_cv` (`BTCTU_013`) -> Sup: `BTCTU_010` | 201 Created | #37 | **PASS** |
+| 9 | `CASE_09` | Hoàn thành KHÔNG có minh chứng | Chuyên viên báo cáo hoàn thành nhưng không đính kèm file/link | `tccb_cv` (`BTCTU_013`) | 200 OK | #36 | **PASS** |
+| 10 | `CASE_10` | Lãnh đạo yêu cầu thực hiện lại (RETURN) | Lãnh đạo trả lại nhiệm vụ kèm lý do yêu cầu bổ sung minh chứng | `tccb_tp` (`BTCTU_010`) | 200 OK | #36 | **PASS** |
+| 11 | `CASE_11` | Hoàn thành CÓ MINH CHỨNG đầy đủ | Chuyên viên nộp báo cáo hoàn thành kèm link, file PDF và văn bản | `tccb_cv` (`BTCTU_013`) | 200 OK | #36 | **PASS** |
+| 12 | `CASE_12` | Lãnh đạo duyệt đồng ý & Đánh giá KPI | Lãnh đạo thẩm định nghiệm thu, chấm điểm KPI 4 thành tố (100 điểm) | `tccb_tp` (`BTCTU_010`) | 200 OK | #36 | **PASS** |
+
+### 3. Đối soát Cơ sở Dữ liệu & Tính toàn vẹn Dữ liệu
+- **CSDL `admin_hrm.tasks`:**
+  - Task #34: `status: PENDING_ACCEPTANCE`, `reject_reason` lưu đúng lý do từ chối ban đầu của chuyên viên, sau khi giao lại thì `assignee` được chuyển sang `BTCTU_011`.
+  - Task #35: `status: PENDING_COORDINATION`, participant `status: PENDING_COORDINATION`.
+  - Task #36: `status: COMPLETED`, `is_completed: 1`, `metadata.evaluation` lưu trữ trọn vẹn điểm số KPI 4 thành tố (`volume: 25, quality: 25, progress: 25, responsibility: 25`), người đánh giá `BTCTU_010` và thời gian đánh giá.
+- **CSDL `admin_hrm.task_histories`:** Ghi nhận chuỗi Audit Trail hoàn chỉnh gồm 9 bước liên tiếp cho Task #36: Khởi tạo -> Tiếp nhận -> Chuyển trạng thái -> Cập nhật tiến độ -> Yêu cầu hoàn thiện/Bổ sung minh chứng -> Chuyển trạng thái -> Cập nhật tiến độ -> Phê duyệt & Đánh giá -> Cập nhật tiến độ.
+- **Vệ sinh & Dọn rác:** Xóa file script kiểm thử `test-all-task-cases.js`, 100% không còn file rác.
+- **Mã hóa:** Kiểm tra buffer xác nhận UTF-8 không BOM (`BOM: false`).
+
+---
+
+## [2026-10-13] Kiểm thử Toàn diện Chức năng Tạo Công việc Ban Tổ chức Tỉnh ủy (BTCTU)
+
+### 1. Phạm vi & Mục tiêu
+- Thực hiện kiểm thử toàn diện E2E (End-to-End Smoke Test & Machine Verification) chức năng tạo công việc của Ban Tổ chức Tỉnh ủy Đắk Lắk (BTCTU).
+- Kiểm chứng tính tương thích giữa hệ thống PBAC định biên 22 VTVL (5 phòng ban thuộc BTCTU: Lãnh đạo Ban, Phòng TCĐ-ĐV, Phòng TCCB, Phòng BVCTNB, Văn phòng Ban) với API Gateway và HRM Service.
+- Đảm bảo tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật: Không lỗi 500/RPC exception, phân quyền PBAC chuẩn chỉ, dữ liệu lưu đúng cấu trúc bảng và vết kiểm toán (Audit Trail) đầy đủ.
+
+### 2. Kịch bản Kiểm thử & Kết quả Thực tế
+1. **TC1: Lãnh đạo Ban Tổ chức Tỉnh ủy (`truongban` - Nguyễn Thượng Hải, `BTCTU_001`) giao việc Cấp phòng:**
+   - Người nhận: `BTCTU_010` (Trưởng phòng TCCB - Hoàng Đức Nam).
+   - Nhiệm vụ: "Thẩm định quy hoạch cán bộ diện Ban Thường vụ Tỉnh ủy quản lý 2025-2030", độ khó K = 1.5, trọng số = 2, điểm chuẩn baseScore = 100.
+   - Checklist 3 bước theo quy trình thẩm định.
+   - Kết quả: **PASS (HTTP 201)** -> Sinh Task ID **#28**, tự động khởi tạo Chat Room ID `4a5a04a1-2119-461a-81f1-b6ec62eed853`.
+2. **TC2: Trưởng phòng TCCB (`tccb_tp` - Hoàng Đức Nam, `BTCTU_010`) giao việc Chuyên viên kèm Cán bộ Phối hợp & Tỷ lệ %:**
+   - Người chủ trì: `BTCTU_013` (Chuyên viên TCCB - Nguyễn Tiến Đạt) - Tỷ lệ đảm nhận: 70%.
+   - Cán bộ phối hợp: `BTCTU_012` (Phó Trưởng phòng 2 TCCB - Bùi Thị Bích Ngọc) - Tỷ lệ đảm nhận: 30%.
+   - Nhiệm vụ: "Rà soát và chuẩn hóa cơ sở dữ liệu hồ sơ cán bộ mẫu 2C toàn tỉnh", độ khó K = 1.2, trọng số = 1.5.
+   - Kết quả: **PASS (HTTP 201)** -> Sinh Task ID **#29**, tự động khởi tạo Chat Room ID `07f25123-e523-4c08-9f32-0995d7a03d89`.
+3. **TC3: Trưởng phòng Tổ chức Đảng - Đảng viên (`tcd_tp` - Lê Đình Hoàng, `BTCTU_006`) giao việc Thẩm định Huy hiệu Đảng:**
+   - Người nhận: `BTCTU_009` (Chuyên viên TCĐ-ĐV - Đặng Quang Huy) - Tỷ lệ đảm nhận: 100%.
+   - Nhiệm vụ: "Thẩm định danh sách xét tặng Huy hiệu Đảng đợt 7/11 năm 2026", căn cứ QĐ 24-QĐ/TW.
+   - Kết quả: **PASS (HTTP 201)** -> Sinh Task ID **#30**, tự động khởi tạo Chat Room ID `bfa39da8-dc2f-4e9d-a521-9733fbe5b26f`.
+4. **TC4: Người nhận việc (`tccb_cv` - Nguyễn Tiến Đạt, `BTCTU_013`) truy vấn danh sách & chi tiết công việc:**
+   - Đăng nhập JWT thành công, truy vấn `GET /api/v1/admin/hrm/tasks` và `GET /api/v1/admin/hrm/tasks/29`.
+   - Kết quả: **PASS (HTTP 200)** -> Trả về đúng Task #29, trạng thái `PENDING_ACCEPTANCE`, có 3 người tham gia (`participantsCount = 3`), danh sách quyền thao tác (`allowedActions = ['CHAT', 'ACCEPT', 'RECEIVE', 'IN_PROGRESS', 'REJECT', 'COORDINATE']`).
+
+### 3. Bằng chứng Xác minh Cơ sở Dữ liệu & Hệ thống
+- **CSDL `admin_hrm.tasks`:** Task 28, 29, 30 tồn tại với creator_employee_code tương ứng (`BTCTU_001`, `BTCTU_010`, `BTCTU_006`).
+- **CSDL `admin_hrm.task_participants`:**
+  - Task 28: `BTCTU_001` (OWNER, 100%), `BTCTU_010` (ASSIGNEE, 100%).
+  - Task 29: `BTCTU_010` (OWNER, 100%), `BTCTU_013` (ASSIGNEE, 70%), `BTCTU_012` (COORDINATOR, 30%).
+  - Task 30: `BTCTU_006` (OWNER, 100%), `BTCTU_009` (ASSIGNEE, 100%).
+- **CSDL `admin_hrm.task_steps`:** Lưu trữ chính xác thứ tự (`order`) và trạng thái (`TODO`) cho toàn bộ các bước checklist ban đầu của Task 28 và 29.
+- **CSDL `admin_hrm.task_histories`:** Ghi nhận vết kiểm toán "Khởi tạo công việc" của `BTCTU_001`, `BTCTU_010`, `BTCTU_006`.
+- **Dọn rác 100%:** Xóa toàn bộ file script kiểm thử tạm (`test-btctu-tasks.js`), không để lại rác mã nguồn.
+
+---
+
+## [2026-10-13] Bổ sung Toàn bộ Các Quy trình Hệ thống Đặc thù vào Seed Workflow Service
+
+### 1. Phạm vi & Mục tiêu
+- Bổ sung 7 quy trình nghiệp vụ hệ thống theo mô tả kiến trúc Ban Tổ chức Tỉnh ủy Đắk Lắk (BTCTU) và Hồ sơ ATTT Cấp độ 3 vào database seed của `apps/workflow-service`.
+- Nâng tổng số quy trình hệ thống từ 7 lên 14 quy trình chuẩn hóa, phủ kín 9 nhóm chức năng KPI/OKR, 5 tập thể phòng, 22 VTVL và các quy trình ATTT Cấp độ 3 (Nghị định 85/2016/NĐ-CP & Nghị định 63/2026/NĐ-CP).
+
+### 2. Danh sách Quy trình Nghiệp vụ Đã Bổ sung
+1. `WF_BTCTU_XIN_GIA_HAN_VIEC` (`BTCTU_TASK_EXTENSION`): Phê duyệt Xin gia hạn thời hạn hoàn thành công việc (Chuyên viên gửi trước 24h -> Trưởng phòng thẩm định -> Lãnh đạo Ban phê duyệt -> Cập nhật DueDate & Bảo lưu điểm SLA).
+2. `WF_BTCTU_BVCTNB_XAC_MINH` (`BTCTU_BVCTNB_VERIFICATION`): Thẩm tra, xác minh tiêu chuẩn chính trị nội bộ theo QĐ 348-QĐ/BTCTW (Phòng BVCTNB - CSDL Mật Cấp độ 3).
+3. `WF_BTCTU_TCCB_BO_NHIEM` (`BTCTU_CADRE_APPOINTMENT`): Thẩm định hồ sơ bổ nhiệm, luân chuyển cán bộ 5 bước (Phòng TCCB - Mẫu 2C số hóa, liên thông BVCTNB).
+4. `WF_BTCTU_TCD_DV_HUY_HIEU_DANG` (`BTCTU_PARTY_MEMBER_BADGE`): Xét tặng Huy hiệu Đảng & Nghiệp vụ đảng viên (Phòng TCĐ-ĐV - Đối soát tự động LGSP).
+5. `WF_ATTT_XU_LY_SU_CO` (`BTCTU_SECURITY_INCIDENT`): Quản lý & Xử lý sự cố ATTT Cấp độ 3 (Quy trình 7e - Văn phòng Ban).
+6. `WF_ATTT_THOI_VIEC_THU_HOI` (`BTCTU_OFFBOARDING_SECURITY`): Vô hiệu hóa quyền & Thu hồi tài nguyên số khi cán bộ thôi việc/nghỉ hưu (Quy trình 7a - NĐ 63/2026/NĐ-CP).
+7. `WF_ATTT_THU_NGHIEM_NGHIEM_THU` (`BTCTU_SYSTEM_TESTING_COMMISSIONING`): Thử nghiệm và nghiệm thu hệ thống CNTT Cấp độ 3 trước khi lên Production (Quy trình 7b).
+
+### 3. File Đã Chỉnh sửa & Kiểm chứng Thực tế
+- `apps/workflow-service/prisma/seed-btctu.ts`:
+  - Bổ sung 7 đồ thị BPMN Canonical, 7 `validateGraph`, 7 `ProcessType`, 7 `ProcessDefinition`, 7 `ProcessBinding`.
+  - Tích hợp nhánh Xin gia hạn (`task_officer_extension`, `task_auto_link_extension`) và phân luồng 4 phòng vào quy trình chính `WF_BTCTU_QUAN_LY_CONG_VIEC`.
+  - Tích hợp liên thông thẩm tra chính trị nội bộ (`task_auto_call_bvctnb` gọi `WF_BTCTU_BVCTNB_XAC_MINH`) vào Bước 3 quy trình `WF_BTCTU_TCCB_BO_NHIEM`.
+- `apps/workflow-service/prisma/update_diagram_positions.ts`: Nâng cấp đồng bộ tọa độ & đồ thị cho toàn bộ 9 quy trình hệ thống BTCTU.
+- `apps/workflow-service/prisma/update-edge-labels.ts`: Bổ sung từ điển nhãn tiếng Việt cho tất cả edges của các quy trình và luồng tích hợp mới.
+- **Bằng chứng Kiểm chứng Máy Thực tế:**
+  - `npm --prefix apps/workflow-service run prisma:seed` -> Exit code 0, nạp thành công 14 definitions, 14 versions, 15 types, 10 bindings.
+  - `npx ts-node -r tsconfig-paths/register prisma/update_diagram_positions.ts` -> Exit code 0, cập nhật thành công tọa độ & đồ thị cho cả 9 quy trình BTCTU.
+  - `npx ts-node -r tsconfig-paths/register prisma/update-edge-labels.ts` -> Exit code 0, cập nhật 100% nhãn tiếng Việt cho 14 quy trình.
+  - SQL verification: `SELECT COUNT(*) FROM process_definitions;` = 14; `total_versions` = 14.
+  - TypeScript build: `npm --prefix apps/workflow-service run build` -> Exit code 0, 0 errors.
+  - Docker Container: `daklak-workspace-workflow-service-1` restart thành công, gRPC (port 50060) và REST API (port 3001) hoạt động ổn định.
+  - File encoding: Kiểm tra Node.js buffer xác nhận 100% không có UTF-8 BOM (`BOM: false`).
+
+---
+
 ## [2026-10-13] Khắc phục Triệt để Lỗi 500 Khi Xem Chi tiết Công việc (Tasks Detail)
 
 ### 1. Phạm vi & Mục tiêu
