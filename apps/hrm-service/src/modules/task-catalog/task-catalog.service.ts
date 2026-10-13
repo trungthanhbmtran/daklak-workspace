@@ -150,14 +150,18 @@ export class TaskCatalogService {
     return { success: true, message: 'Xóa thành công' };
   }
 
-  async bulkUpdateTaskTemplates(templates: any[]) {
+  async bulkUpdateTaskTemplates(templates: any[], classification?: string) {
     await this.cache.clear();
     await this.prisma.$transaction(async (tx) => {
-      await tx.taskRankTemplate.deleteMany({});
+      if (classification) {
+        await tx.taskRankTemplate.deleteMany({ where: { classification } });
+      } else {
+        await tx.taskRankTemplate.deleteMany({});
+      }
       if (templates && templates.length > 0) {
         await tx.taskRankTemplate.createMany({
           data: templates.map((t: any) => ({
-            classification: t.classification,
+            classification: t.classification || classification,
             rank: t.rank,
             taskName: t.taskName,
             defaultUnit: t.defaultUnit,

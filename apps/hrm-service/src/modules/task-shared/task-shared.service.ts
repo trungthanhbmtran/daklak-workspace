@@ -937,6 +937,55 @@ export class TaskSharedService {
     };
   }
 
+  public toTaskResponseSummary(t: any): any {
+    if (!t) return null;
+    const createdAtStr = t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || new Date().toISOString());
+    const startDateStr = t.startDate instanceof Date ? t.startDate.toISOString() : (t.startDate || createdAtStr);
+    const dueDateStr = t.dueDate instanceof Date ? t.dueDate.toISOString() : (t.dueDate || startDateStr);
+    const updatedAtStr = t.updatedAt instanceof Date ? t.updatedAt.toISOString() : (t.updatedAt || createdAtStr);
+
+    return {
+      id: t.id ?? 0,
+      title: t.title ?? '',
+      description: '',
+      assigneeCode: t.assigneeCode ?? '',
+      assignerCode: t.assignerCode ?? '',
+      status: t.status ?? '',
+      statusLabel: this.getTaskStatusLabel(t.status),
+      dueDate: dueDateStr,
+      startDate: startDateStr,
+      createdAt: createdAtStr,
+      updatedAt: updatedAtStr,
+      baseScore: t.kpiSettings?.baseScore ?? 0,
+      weight: t.kpiSettings?.weight ?? 0,
+      scoringMethod: t.kpiSettings?.scoringMethod ?? '',
+      bonusPerDay: t.kpiSettings?.bonusPerDay ?? 0,
+      penaltyPerDay: t.kpiSettings?.penaltyPerDay ?? 0,
+      supervisorCode: t.supervisorCode ?? '',
+      planId: t.planId ?? 0,
+      assigneeName: t.assigneeName ?? '',
+      departmentId: t.departmentId ?? 0,
+      parentId: t.parentId ?? 0,
+      rejectReason: t.rejectReason ?? '',
+      assignerName: t.assignerName ?? '',
+      priority: t.priority ?? '',
+      priorityLabel: this.getPriorityLabel(t.priority),
+      supervisorName: t.supervisorName ?? '',
+      conversationId: t.conversationId ?? '',
+      coassigneeCodes: t.coassigneeCodes || [],
+      allowedActions: [],
+      plan: t.plan ? { id: t.plan.id ?? 0, title: t.plan.title ?? '' } : undefined,
+      rootTaskId: t.rootTaskId ?? 0,
+      progress: t.progress ?? 0,
+      coassigneeNames: t.coassigneeNames || [],
+      children: Array.isArray(t.children) ? t.children.map((child: any) => this.toTaskResponseSummary(child)) : [],
+      workflowInstId: undefined,
+      metadata: t.metadata?.taskType ? { taskType: t.metadata.taskType } : undefined,
+      sourceDocumentRef: t.sourceDocumentRef || (t.metadata?.sourceDocumentRef || ''),
+      participants: [],
+    };
+  }
+
   public toDelegationNode(t: any): any {
     if (!t) return null;
     const createdAtStr = t.createdAt instanceof Date ? t.createdAt.toISOString() : (t.createdAt || new Date().toISOString());

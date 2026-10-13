@@ -8,6 +8,9 @@ description: >-
 
 # Code 2 — Autonomous End-to-End Coder Lane 2
 
+## Execution Gate
+
+Trước khi sửa file, đọc .agents/current_plan.md và xác nhận có PLAN_APPROVED cùng danh sách ownership khớp lane/task. Nếu chưa có plan được duyệt, chỉ chuẩn bị evidence/điểm cần quyết định cho Codex coordinator; không tự phê duyệt kế hoạch hoặc bắt đầu code. Khi cần đổi scope/contract, báo coordinator để cập nhật và phản biện lại trước khi tiếp tục.
 Kỹ năng thực thi tác vụ lập trình độc lập (Lane 2) trọn gói từ đầu đến cuối (Full End-to-End).
 Không phân chia Backend hay Frontend. Được sử dụng để thực thi độc lập một tác vụ với phạm vi file riêng biệt, chống trùng đè mã nguồn với các lane khác.
 

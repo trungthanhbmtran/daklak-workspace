@@ -300,3 +300,69 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - `npm --prefix apps/admin_khcn run build`: Exit code 0 (Next.js 16.1.6 standalone production build thành công 83/83 routes).
   - Đã triển khai và restart các container docker (`daklak-workspace-user-service-1`, `daklak-workspace-api-gateway-1`, `daklak-workspace-admin-frontend-1`) thành công, sẵn sàng kiểm thử trên `http://113.184.220.82/admin/services/admin/policies/12`.
   - Quét sạch 100% debug logs và mã hóa UTF-8 không BOM.
+
+## 2026-10-13: Chuẩn hóa Typography Tiếng Việt & Tái cấu trúc Vị trí Icons Trang Biểu Mẫu Đánh Giá (evaluation-forms)
+- **Vấn đề phát hiện:**
+  1. *Lỗi vỡ font / méo dấu tiếng Việt (Typography Distortions):*
+     - Các class `font-black` (weight 900) kết hợp với `tracking-tight` và `uppercase` làm các dấu thanh tiếng Việt (hỏi, ngã, nặng, sắc, huyền, ơ, ư, â, ê) bị biến dạng, dày cộp như giọt mực dính chùm vào các ký tự kế bên trên các font giao diện Inter/Geist.
+     - Lạm dụng `break-words` thay vì `wrap-break-word` vi phạm Ràng buộc 1.
+  2. *Bất cân xứng cấu trúc vị trí Icons & Nhãn (Icon Alignment & Hierarchy):*
+     - Các dòng thông tin chi tiết (Mẫu chuẩn, Căn cứ pháp lý, Số lượng biến số, Giai đoạn KPI) sử dụng icon màu không có khung bọc cố định (width/height không đồng nhất), dẫn tới độ thụt đầu dòng (indentation) của các nhãn bị lệch hàng dọc, thiếu tính tự nhiên và trang trọng của giao diện hành chính công.
+     - Icon banner `FileSpreadsheet` nằm trơ trọi không có nền nhận diện thương hiệu.
+     - CardFooter nhồi nhét tới 7 nút bấm dàn ngang tự do (`flex-wrap gap-1.5`) gây lộn xộn, mất phân cấp giữa các hành động cốt lõi (Xem trước, Xuất văn bản) và các hành động kỹ thuật/quy trình (Sửa XML, Gán quy trình, Phát hành).
+- **Giải pháp xử lý:**
+  1. *Khôi phục Typography Tiếng Việt Chuẩn Hành chính:*
+     - Chuyển toàn bộ `font-black` sang `font-bold` (weight 700) hoặc `font-semibold` (weight 600) với tracking tự nhiên (`tracking-normal`), giúp tiếng Việt có dấu hiển thị sắc nét, thoáng đãng, sang trọng.
+     - Thay thế 100% `break-words` bằng `wrap-break-word` theo chuẩn Ràng buộc 1.
+     - Bổ sung `dark:bg-*` và `dark:text-*` cho các badges và banners thông báo để tương thích trọn vẹn Dark Mode.
+  2. *Chuẩn hóa Vị trí & Cấu trúc Icon (Natural & Aligned Icon System):*
+     - Banner Header: Bọc icon `FileSpreadsheet` trong khung glassmorphism hiện đại (`p-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/20`).
+     - Quick Stat Cards: Cấu hình khung chứa icon đồng nhất kích thước `h-11 w-11 rounded-xl` với icon `w-5 h-5` cân đối tâm, bỏ `font-black` và `uppercase tracking-wider` trên nhãn tiếng Việt.
+     - Thẻ biểu mẫu (Form Card Details): Đưa toàn bộ icon vào các box chuẩn hóa `w-6 h-6 rounded-md bg-muted/60 text-muted-foreground flex items-center justify-center shrink-0`, đảm bảo nhãn và nội dung mọi hàng dóng thẳng hàng dọc 100%.
+     - Tái cấu trúc CardFooter thành 2 tầng hành động rõ ràng:
+       - Hàng 1 (Nghiệp vụ trực quan): Nút `Xem trước` (Primary action chiếm `flex-1`), nút `Xuất DOCX` (Word chuẩn NĐ 30), nút `In / PDF`.
+       - Hàng 2 (Kỹ thuật & Luồng xử lý): Nút `Sửa XML` (Mã nguồn), nút `XML` (Tải tệp), nút `Gán quy trình`, nút `Phát hành` (nếu đang ở trạng thái Nháp), và nút `Edit` (chỉnh sửa metadata).
+- **Tập tin đã chỉnh sửa:**
+  - [`apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx)
+- **Kiểm chứng máy thực tế:**
+  - `npm run typecheck` tại `apps/admin_khcn`: Exit code 0 (0 lỗi TypeScript).
+  - `npm run build` tại `apps/admin_khcn`: Next.js 16.1.6 Turbopack production build thành công 83/83 routes (bao gồm `/services/hrm/work-plans/evaluation-forms`).
+  - Deploy bản dựng standalone vào container Docker `daklak-workspace-admin-frontend-1` và khởi động lại container thành công.
+  - Smoke test route trong container: `wget -S http://127.0.0.1:3000/admin/services/hrm/work-plans/evaluation-forms` -> `HTTP/1.1 200 OK`.
+  - Quét mã nguồn: 0 `break-words`, 0 `font-black`, 0 `console.log`, chuẩn UTF-8 không BOM.
+
+## 2026-10-13: Chuẩn hóa Typography Tiếng Việt & Tái cấu trúc Vị trí Icons Trang Thư viện VTVL (rank-templates)
+- **Vấn đề phát hiện:**
+  1. *Lỗi vỡ font / méo dấu tiếng Việt (Typography Distortions):*
+     - Tiêu đề chính `h1` và các chỉ số đo lường tại Metric Strip sử dụng `font-black` (weight 900) kết hợp `tracking-tight`, làm các ký tự tiếng Việt có dấu (`Vị trí việc làm`, `Nhiệm vụ`, `mẫu`, `vị trí`) bị đè nét, méo mó.
+     - Lạm dụng `uppercase tracking-wider` trên nhãn nhóm danh mục và form inputs tiếng Việt ("LÃNH ĐẠO, QUẢN LÝ", "NỘI DUNG NHIỆM VỤ MẪU", "ĐƠN VỊ TÍNH"), gây cảm giác thô cứng, mất tự nhiên.
+     - Sử dụng `break-words` thay vì `wrap-break-word` tại mô tả tiêu đề.
+  2. *Bất cân xứng cấu trúc vị trí Icons & Nhãn (Icon Alignment & Hierarchy):*
+     - Icon banner `Library` chưa có khung nhận diện thương hiệu tương xứng.
+     - Metric Strip sử dụng icon box nhỏ `p-2.5` với icon `w-4 h-4` thiếu đối xứng với khung thẻ.
+     - Khung tiêu đề VTVL đang chọn (`Active Rank Header`) thiếu icon định danh chức vụ, làm phần đầu trang bị mất cân bằng so với các nút hành động bên phải.
+     - Task List Item index hiển thị hình tròn `rounded-full` thiếu đồng bộ với hệ thống thẻ góc bo `rounded-md`/`rounded-xl`, và các badges ĐVT/Trọng số chưa có micro-icons hỗ trợ thị giác.
+- **Giải pháp xử lý:**
+  1. *Khôi phục Typography Tiếng Việt Chuẩn Hành chính:*
+     - Chuyển toàn bộ `font-black` sang `font-bold` (weight 700) hoặc `font-semibold` (weight 600) với tracking tự nhiên (`tracking-normal`).
+     - Bỏ `uppercase tracking-wider` trên nhãn tiếng Việt của Form và AccordionTrigger.
+     - Thay thế 100% `break-words` bằng `wrap-break-word`.
+     - Bổ sung `dark:bg-*` và `dark:text-*` cho các badges phân loại và triggers tab.
+  2. *Chuẩn hóa Vị trí & Cấu trúc Icon (Natural & Aligned Icon System):*
+     - Header Banner: Chuẩn hóa container icon `Library` kích thước `h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-xs`.
+     - Metric Strip: Nâng cấp đồng bộ 4 hộp icon `w-11 h-11 rounded-xl` với icon `w-5 h-5` cân đối tâm, có ring viền màu theme-aware.
+     - Sidebar VTVL Header: Chuẩn hóa icon box `w-8 h-8 rounded-lg bg-primary/10 border border-primary/20`.
+     - Active Rank Header: Bổ sung icon box `w-10 h-10 rounded-xl bg-primary/10 border border-primary/20` dóng thẳng hàng với tiêu đề VTVL và các badges mã ngạch.
+     - Form & Quick Add Chips: Bổ sung icon `<Tag>` cho nhãn "Gợi ý ĐVT:", chuẩn hóa icon box cho Sheet Add `<Sparkles>` và AlertDialog `<AlertCircle>`.
+     - Task Items: Thay đổi index thành `w-6 h-6 rounded-md bg-muted/80 text-xs font-semibold border border-border/50` dóng thẳng hàng với nội dung nhiệm vụ.
+- **Tập tin đã chỉnh sửa:**
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/ConfigureRankTasksClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/ConfigureRankTasksClient.tsx)
+  - [`apps/admin_khcn/features/hrm/components/work-plans/master-plans/RankTaskCatalogManager.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/master-plans/RankTaskCatalogManager.tsx)
+- **Kiểm chứng máy thực tế:**
+  - `npm run typecheck` tại `apps/admin_khcn`: Exit code 0 (0 lỗi TypeScript).
+  - `npm run build` tại `apps/admin_khcn`: Next.js 16.1.6 Turbopack production build thành công 83/83 routes (bao gồm `/services/hrm/work-plans/rank-templates`).
+  - Deploy bản dựng standalone vào container Docker `daklak-workspace-admin-frontend-1` và khởi động lại container thành công.
+  - Smoke test route trong container: `wget -S http://127.0.0.1:3000/admin/services/hrm/work-plans/rank-templates` -> `HTTP/1.1 200 OK`.
+  - Quét mã nguồn: 0 `break-words`, 0 `font-black`, 0 `console.log`, chuẩn UTF-8 không BOM.
+
+

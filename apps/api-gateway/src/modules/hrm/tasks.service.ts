@@ -326,6 +326,7 @@ export class TasksService implements OnModuleInit {
     type: string,
     viewMode: string,
     referenceDate: string,
+    summary?: string,
   ) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
@@ -370,6 +371,7 @@ export class TasksService implements OnModuleInit {
       limit: limit ? parseInt(limit, 10) : 20,
       viewMode,
       referenceDate,
+      summary: summary === 'true',
     };
 
     const response: any = await firstValueFrom(

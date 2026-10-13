@@ -98,6 +98,7 @@ export class TaskTemplatesController implements OnModuleInit {
       this.taskTemplateService.BulkUpdateTaskTemplates(
         {
           templates: body.templates,
+          classification: body.classification,
         },
         this.getGrpcMetadata(req),
       ),

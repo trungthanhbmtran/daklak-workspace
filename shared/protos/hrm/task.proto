@@ -227,6 +227,7 @@ message ListTasksRequest {
   string type = 22; // optional - filter by type
   string viewMode = 23; // optional - day | week | month | quarter | year
   string referenceDate = 24; // optional - ISO date string
+  bool summary = 25;
 }
 
 message UnitStats {
@@ -381,6 +382,7 @@ message DeleteTemplateResponse {
 
 message BulkUpdateTemplatesRequest {
   repeated CreateTemplateRequest templates = 1;
+  string classification = 2;
 }
 
 message BulkUpdateTemplatesResponse {

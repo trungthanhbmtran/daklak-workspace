@@ -15,10 +15,11 @@ export function useOrganizationTreeQuery(q?: string) {
   });
 }
 
-export function useOrganizationFlatListQuery(q?: string) {
+export function useOrganizationFlatListQuery(q?: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...organizationQueryKeys.lists(), { q }],
     queryFn: () => organizationApi.getOrganizations(q),
+    enabled: options?.enabled ?? true,
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
   });

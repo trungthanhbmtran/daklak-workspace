@@ -28,15 +28,28 @@ export function useConfigureRankTasks() {
     const [isSaved, setIsSaved] = useState(false);
 
     const {
-        data: templatesData,
-        isLoading: isLoadingTemplates,
-        refetch: refetchTemplates
-    } = useTaskTemplatesList();
+        data: congChucData,
+        isLoading: isLoadingCongChuc,
+        refetch: refetchCongChuc
+    } = useTaskTemplatesList({ classification: 'CONG_CHUC' });
 
-    const templates: TaskRankTemplateItem[] = useMemo(() => {
-        const raw = (templatesData as any)?.data ?? (Array.isArray(templatesData) ? templatesData : []);
-        return Array.isArray(raw) ? raw : [];
-    }, [templatesData]);
+    const {
+        data: vienChucData,
+        isLoading: isLoadingVienChuc,
+        refetch: refetchVienChuc
+    } = useTaskTemplatesList(
+        { classification: 'VIEN_CHUC' },
+        { enabled: selectedClass === 'VIEN_CHUC' }
+    );
+
+    const {
+        data: dangData,
+        isLoading: isLoadingDang,
+        refetch: refetchDang
+    } = useTaskTemplatesList(
+        { classification: 'DANG' },
+        { enabled: selectedClass === 'DANG' }
+    );
 
     const {
         data: rawUnits = [],
@@ -96,9 +109,20 @@ export function useConfigureRankTasks() {
         );
     }, [partyJobTitles, allJobTitles]);
 
-    const congChucTemplates = useMemo(() => templates.filter(t => t.classification === 'CONG_CHUC'), [templates]);
-    const vienChucTemplates = useMemo(() => templates.filter(t => t.classification === 'VIEN_CHUC'), [templates]);
-    const dangTemplates = useMemo(() => templates.filter(t => t.classification === 'DANG'), [templates]);
+    const congChucTemplates: TaskRankTemplateItem[] = useMemo(() => {
+        const raw = (congChucData as any)?.data ?? (Array.isArray(congChucData) ? congChucData : []);
+        return Array.isArray(raw) ? raw : [];
+    }, [congChucData]);
+
+    const vienChucTemplates: TaskRankTemplateItem[] = useMemo(() => {
+        const raw = (vienChucData as any)?.data ?? (Array.isArray(vienChucData) ? vienChucData : []);
+        return Array.isArray(raw) ? raw : [];
+    }, [vienChucData]);
+
+    const dangTemplates: TaskRankTemplateItem[] = useMemo(() => {
+        const raw = (dangData as any)?.data ?? (Array.isArray(dangData) ? dangData : []);
+        return Array.isArray(raw) ? raw : [];
+    }, [dangData]);
 
     // Thống kê tổng hợp theo từng khối
     const statsByClass = useMemo(() => {
@@ -122,16 +146,28 @@ export function useConfigureRankTasks() {
         };
     }, [congChucRanks, congChucTemplates, vienChucRanks, vienChucTemplates, dangRanks, dangTemplates]);
 
+    const isLoadingTemplates =
+        (selectedClass === 'CONG_CHUC' && isLoadingCongChuc) ||
+        (selectedClass === 'VIEN_CHUC' && isLoadingVienChuc) ||
+        (selectedClass === 'DANG' && isLoadingDang);
+
     const isLoading = isLoadingTemplates || isLoadingUnits || isLoadingJobTitles;
 
     const [isSaving, setIsSaving] = useState(false);
 
+    const currentClassTemplates = useMemo(() => {
+        if (selectedClass === 'CONG_CHUC') return congChucTemplates;
+        if (selectedClass === 'VIEN_CHUC') return vienChucTemplates;
+        return dangTemplates;
+    }, [selectedClass, congChucTemplates, vienChucTemplates, dangTemplates]);
+
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await hrmTaskTemplatesApi.bulkUpdate([...congChucTemplates, ...vienChucTemplates, ...dangTemplates]);
+            await hrmTaskTemplatesApi.bulkUpdate(currentClassTemplates, selectedClass);
             setIsSaved(true);
-            toast.success("Đồng bộ thư viện vị trí việc làm thành công!");
+            const classNameVN = selectedClass === 'CONG_CHUC' ? 'Công chức' : selectedClass === 'VIEN_CHUC' ? 'Viên chức' : 'Đảng';
+            toast.success(`Đồng bộ thư viện khối ${classNameVN} thành công!`);
             setTimeout(() => setIsSaved(false), 2000);
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi đồng bộ thư viện.");
@@ -141,7 +177,7 @@ export function useConfigureRankTasks() {
     };
 
     const refetchAll = async () => {
-        await Promise.all([refetchTemplates(), refetchUnits(), refetchJobTitles()]);
+        await Promise.all([refetchCongChuc(), refetchVienChuc(), refetchDang(), refetchUnits(), refetchJobTitles()]);
         toast.success("Đã làm mới dữ liệu thư viện VTVL");
     };
 

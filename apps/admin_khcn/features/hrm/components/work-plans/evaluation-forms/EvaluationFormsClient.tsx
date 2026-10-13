@@ -515,17 +515,17 @@ export function EvaluationFormsClient() {
   const getFormBadgeColor = (code: string) => {
     switch (code) {
       case 'MAU_01':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+        return 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800';
       case 'MAU_02':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
+        return 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800';
       case 'MAU_03':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        return 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800';
       case 'MAU_04':
-        return 'bg-amber-100 text-amber-800 border-amber-300';
+        return 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800';
       case 'MAU_05':
-        return 'bg-rose-100 text-rose-800 border-rose-300';
+        return 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800';
       default:
-        return 'bg-slate-100 text-slate-800 border-slate-300';
+        return 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800';
     }
   };
 
@@ -538,23 +538,28 @@ export function EvaluationFormsClient() {
         </div>
         <CardHeader className="p-6 relative z-10 min-w-0">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
-            <div className="space-y-2 min-w-0">
+            <div className="space-y-2.5 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30 text-xs">
+                <Badge variant="outline" className="bg-blue-500/20 text-blue-200 border-blue-400/30 text-xs gap-1.5 font-normal py-0.5">
+                  <Layers className="w-3 h-3 text-blue-300 shrink-0" />
                   Cơ quan: Ban Tổ chức Tỉnh ủy Đắk Lắk
                 </Badge>
-                <Badge variant="outline" className="bg-emerald-500/20 text-emerald-200 border-emerald-400/30 text-xs">
+                <Badge variant="outline" className="bg-emerald-500/20 text-emerald-200 border-emerald-400/30 text-xs gap-1.5 font-normal py-0.5">
+                  <Code2 className="w-3 h-3 text-emerald-300 shrink-0" />
                   Chuẩn hóa XML Schema v1.0
                 </Badge>
-                <Badge variant="outline" className="bg-amber-500/20 text-amber-200 border-amber-400/30 text-xs">
+                <Badge variant="outline" className="bg-amber-500/20 text-amber-200 border-amber-400/30 text-xs gap-1.5 font-normal py-0.5">
+                  <Shield className="w-3 h-3 text-amber-300 shrink-0" />
                   ATTT Cấp độ 3 (NĐ 85/2016)
                 </Badge>
               </div>
-              <CardTitle className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3">
-                <FileSpreadsheet className="w-8 h-8 text-blue-300 shrink-0" />
-                Nơi Chứa Mẫu Đánh Giá & Quản Lý File Mẫu XML
+              <CardTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/20 text-blue-200 shrink-0 flex items-center justify-center">
+                  <FileSpreadsheet className="w-6 h-6" />
+                </div>
+                <span>Nơi Chứa Mẫu Đánh Giá &amp; Quản Lý File Mẫu XML</span>
               </CardTitle>
-              <CardDescription className="text-slate-300 text-sm max-w-3xl leading-relaxed">
+              <CardDescription className="text-slate-200/90 text-sm max-w-3xl leading-relaxed font-normal">
                 Kho mẫu XML động cho nhiều đơn vị và quy trình. Tạo mẫu, kiểm tra XML, phát hành và gán vào đúng bước xử lý.
               </CardDescription>
             </div>
@@ -565,13 +570,13 @@ export function EvaluationFormsClient() {
                 size="sm"
                 onClick={() => refetch()}
                 disabled={isRefetching}
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 gap-2 h-10 px-4"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20 gap-2 h-9 px-3.5 font-medium"
               >
-                <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
                 Làm mới
               </Button>
-              <Button size="sm" onClick={() => setCreateSheetOpen(true)} className="h-10 gap-2 bg-white text-blue-900 hover:bg-blue-50">
-                <Plus className="h-4 w-4" /> Tạo mẫu
+              <Button size="sm" onClick={() => setCreateSheetOpen(true)} className="h-9 gap-2 bg-white text-blue-900 hover:bg-blue-50 font-semibold shadow-xs">
+                <Plus className="w-4 h-4" /> Tạo mẫu
               </Button>
             </div>
           </div>
@@ -580,46 +585,46 @@ export function EvaluationFormsClient() {
 
       {/* 2. Thống kê nhanh */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-        <Card className="p-4 border shadow-xs bg-card flex items-center gap-4 min-w-0">
-          <div className="p-3 bg-blue-100 text-blue-700 rounded-xl shrink-0">
-            <Layers className="w-6 h-6" />
+        <Card className="p-4 border shadow-xs bg-card flex items-center gap-3.5 min-w-0">
+          <div className="h-11 w-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center justify-center shrink-0">
+            <Layers className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Tổng số Biểu mẫu</p>
-            <h4 className="text-2xl font-black text-foreground mt-0.5">{forms.length} Mẫu</h4>
+            <p className="text-xs font-semibold text-muted-foreground">Tổng số biểu mẫu</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-foreground mt-0.5">{forms.length} Mẫu</h4>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">Danh sách mở rộng theo nhu cầu đơn vị</p>
           </div>
         </Card>
 
-        <Card className="p-4 border shadow-xs bg-card flex items-center gap-4 min-w-0">
-          <div className="p-3 bg-emerald-100 text-emerald-700 rounded-xl shrink-0">
-            <CheckCircle2 className="w-6 h-6" />
+        <Card className="p-4 border shadow-xs bg-card flex items-center gap-3.5 min-w-0">
+          <div className="h-11 w-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">File XML Mẫu</p>
-            <h4 className="text-2xl font-black text-emerald-700 mt-0.5">100% Sẵn sàng</h4>
+            <p className="text-xs font-semibold text-muted-foreground">File XML mẫu</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">100% Sẵn sàng</h4>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">Có đầy đủ file XML trên máy chủ</p>
           </div>
         </Card>
 
-        <Card className="p-4 border shadow-xs bg-card flex items-center gap-4 min-w-0">
-          <div className="p-3 bg-purple-100 text-purple-700 rounded-xl shrink-0">
-            <Sparkles className="w-6 h-6" />
+        <Card className="p-4 border shadow-xs bg-card flex items-center gap-3.5 min-w-0">
+          <div className="h-11 w-11 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/40 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Đối tượng áp dụng</p>
-            <h4 className="text-2xl font-black text-foreground mt-0.5">Theo quy trình</h4>
+            <p className="text-xs font-semibold text-muted-foreground">Đối tượng áp dụng</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-foreground mt-0.5">Theo quy trình</h4>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">Đơn vị sở hữu được cấu hình trên quy trình</p>
           </div>
         </Card>
 
-        <Card className="p-4 border shadow-xs bg-card flex items-center gap-4 min-w-0">
-          <div className="p-3 bg-amber-100 text-amber-700 rounded-xl shrink-0">
-            <Shield className="w-6 h-6" />
+        <Card className="p-4 border shadow-xs bg-card flex items-center gap-3.5 min-w-0">
+          <div className="h-11 w-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40 flex items-center justify-center shrink-0">
+            <Shield className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Kiểm soát Chất lượng</p>
-            <h4 className="text-2xl font-black text-amber-800 mt-0.5">Trần 20% & 3 Mức lỗi</h4>
+            <p className="text-xs font-semibold text-muted-foreground">Kiểm soát chất lượng</p>
+            <h4 className="text-xl sm:text-2xl font-bold text-amber-800 dark:text-amber-400 mt-0.5">Trần 20% &amp; 3 Mức lỗi</h4>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">Trừ -5%, -15%, -35%</p>
           </div>
         </Card>
@@ -673,64 +678,80 @@ export function EvaluationFormsClient() {
                 className="flex flex-col border shadow-xs hover:shadow-md transition-all duration-200 bg-card rounded-2xl overflow-hidden min-w-0"
               >
                 <CardHeader className="p-5 pb-3 border-b bg-muted/20 min-w-0">
-                  <div className="flex items-start justify-between gap-3 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-black border ${getFormBadgeColor(item.formCode)} shrink-0`}>
+                  <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                      <span className={`px-2.5 py-0.5 rounded-md text-xs font-mono font-bold border ${getFormBadgeColor(item.formCode)} shrink-0`}>
                         {item.formCode}
                       </span>
-                      <Badge variant="secondary" className="text-xs truncate max-w-[180px]">
+                      <Badge variant="outline" className="text-xs font-normal truncate max-w-[150px] bg-background">
                         {item.category}
+                      </Badge>
+                      <Badge
+                        variant={item.status === 'PUBLISHED' ? 'default' : 'secondary'}
+                        className="text-[10px] px-2 py-0 h-4.5 font-normal shrink-0 gap-1.5"
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'PUBLISHED' ? 'bg-emerald-400' : 'bg-amber-400'} shrink-0`} />
+                        {item.status === 'PUBLISHED' ? 'Đã phát hành' : 'Bản nháp'}
                       </Badge>
                     </div>
 
-                    <span className="text-xs text-muted-foreground font-mono shrink-0">
+                    <span className="text-[11px] text-muted-foreground font-mono shrink-0">
                       v{item.schemaVersion}
                     </span>
                   </div>
-                  <Badge variant={item.status === 'PUBLISHED' ? 'default' : 'secondary'} className="mt-2 w-fit text-[10px]">
-                    {item.status === 'PUBLISHED' ? 'Đã phát hành' : 'Bản nháp'}
-                  </Badge>
 
-                  <CardTitle className="text-base font-bold text-foreground mt-3 leading-snug break-words">
+                  <CardTitle className="text-base font-bold text-foreground mt-2.5 leading-snug wrap-break-word">
                     {item.name}
                   </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground line-clamp-2 mt-1 break-words">
+                  <CardDescription className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed wrap-break-word">
                     {item.description || 'Chưa có mô tả chi tiết'}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="p-5 flex-1 flex flex-col justify-between gap-4 text-xs min-w-0">
                   <div className="space-y-2.5 min-w-0">
-                    <div className="flex items-center justify-between text-muted-foreground gap-2">
-                      <span className="flex items-center gap-1.5 shrink-0">
-                        <Tag className="w-3.5 h-3.5 text-blue-600" /> Đối tượng:
+                    <div className="flex items-center justify-between text-muted-foreground gap-2 text-xs">
+                      <span className="flex items-center gap-2 shrink-0">
+                        <span className="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                          <Tag className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-muted-foreground">Đối tượng:</span>
                       </span>
                       <span className="font-medium text-foreground text-right truncate">
                         {item.targetRole}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-muted-foreground gap-2">
-                      <span className="flex items-center gap-1.5 shrink-0">
-                        <FileCode2 className="w-3.5 h-3.5 text-indigo-600" /> Tên file mẫu:
+                    <div className="flex items-center justify-between text-muted-foreground gap-2 text-xs">
+                      <span className="flex items-center gap-2 shrink-0">
+                        <span className="w-6 h-6 rounded-md bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                          <FileCode2 className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-muted-foreground">Tên file mẫu:</span>
                       </span>
-                      <span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-[11px] truncate max-w-[200px]">
+                      <code className="font-mono text-foreground bg-muted px-2 py-0.5 rounded text-[11px] truncate max-w-[190px]">
                         {item.templateFileId || `${item.formCode.toLowerCase()}.xml`}
-                      </span>
+                      </code>
                     </div>
 
-                    <div className="flex items-center justify-between text-muted-foreground gap-2">
-                      <span className="flex items-center gap-1.5 shrink-0">
-                        <Layers className="w-3.5 h-3.5 text-emerald-600" /> Dung lượng file XML:
+                    <div className="flex items-center justify-between text-muted-foreground gap-2 text-xs">
+                      <span className="flex items-center gap-2 shrink-0">
+                        <span className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                          <Layers className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-muted-foreground">Dung lượng XML:</span>
                       </span>
-                      <span className="font-mono text-emerald-700 font-semibold">
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
                         {(item.xmlSize / 1024).toFixed(1)} KB
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-muted-foreground gap-2">
-                      <span className="flex items-center gap-1.5 shrink-0">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-600" /> Tài liệu đã tạo:
+                    <div className="flex items-center justify-between text-muted-foreground gap-2 text-xs">
+                      <span className="flex items-center gap-2 shrink-0">
+                        <span className="w-6 h-6 rounded-md bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </span>
+                        <span className="text-muted-foreground">Tài liệu đã tạo:</span>
                       </span>
                       <span className="font-bold text-foreground">
                         {item.documentCount} văn bản
@@ -739,46 +760,22 @@ export function EvaluationFormsClient() {
                   </div>
 
                   <div className="pt-2 border-t flex items-center justify-between text-[11px] text-muted-foreground min-w-0">
-                    <span className="truncate">Căn cứ: 05-HD/TU & 01-QĐ/BTCTU</span>
+                    <span className="truncate">Căn cứ: 05-HD/TU &amp; 01-QĐ/BTCTU</span>
                     <span className="font-mono shrink-0">XML 1.0 UTF-8</span>
                   </div>
                 </CardContent>
 
-                <CardFooter className="p-4 pt-0 bg-muted/10 border-t flex flex-wrap gap-2 justify-between items-center min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <Button variant="outline" size="sm" onClick={() => {
-                      setAssignForm(item);
-                      setAssignUnitCode('');
-                      setAssignWorkflowId('');
-                    }} className="h-8 px-2.5 text-xs gap-1.5">
-                      <GitBranch className="w-3.5 h-3.5" /> Gán quy trình
-                    </Button>
-                    {item.status !== 'PUBLISHED' && <Button variant="outline" size="sm" onClick={() => void handlePublishTemplate(item)} className="h-8 px-2.5 text-xs gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Phát hành
-                    </Button>}
+                <CardFooter className="p-4 border-t bg-muted/10 flex flex-col gap-2 min-w-0">
+                  {/* Hàng 1: Thao tác xem trước & xuất tài liệu */}
+                  <div className="flex items-center gap-2 w-full min-w-0">
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="sm"
                       onClick={() => handleOpenPreview(item.formCode)}
-                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-blue-600 hover:border-blue-300"
+                      className="flex-1 h-8 px-3 text-xs gap-1.5 font-medium shadow-xs"
                     >
-                      <Eye className="w-3.5 h-3.5" /> Xem trước
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void handleDownloadXml(item)}
-                      disabled={exportingXmlCode === item.formCode}
-                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-emerald-600 hover:border-emerald-300 min-w-0"
-                      title="Xuất file XML chuẩn UTF-8"
-                    >
-                      {exportingXmlCode === item.formCode ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Download className="w-3.5 h-3.5" />
-                      )}
-                      <span>Xuất XML</span>
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <span>Xem trước</span>
                     </Button>
 
                     <Button
@@ -786,13 +783,13 @@ export function EvaluationFormsClient() {
                       size="sm"
                       onClick={() => void handleExportDocx(item)}
                       disabled={exportingDocxCode === item.formCode}
-                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-blue-600 hover:border-blue-300 min-w-0"
+                      className="h-8 px-2.5 text-xs gap-1.5 font-medium text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-950/50 min-w-0"
                       title="Xuất văn bản DOCX (Word) theo chuẩn hành chính"
                     >
                       {exportingDocxCode === item.formCode ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
                       ) : (
-                        <FileText className="w-3.5 h-3.5" />
+                        <FileText className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                       )}
                       <span>Xuất DOCX</span>
                     </Button>
@@ -801,35 +798,84 @@ export function EvaluationFormsClient() {
                       variant="outline"
                       size="sm"
                       onClick={() => void handlePrintPdf(item)}
-                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-amber-600 hover:border-amber-300 min-w-0"
+                      className="h-8 px-2.5 text-xs gap-1.5 font-medium text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900 hover:bg-amber-50 dark:hover:bg-amber-950/50 min-w-0"
                       title="In hoặc lưu file PDF theo thể thức văn bản hành chính chuẩn A4"
                     >
-                      <Printer className="w-3.5 h-3.5" />
+                      <Printer className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                       <span>In / PDF</span>
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={item.organizationId === 'DEFAULT'}
-                      onClick={() => handleOpenEditXml(item)}
-                      title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Sửa XML'}
-                      className="h-8 px-2.5 text-xs gap-1.5 hover:text-indigo-600 hover:border-indigo-300"
-                    >
-                      <Code2 className="w-3.5 h-3.5" /> Sửa XML
                     </Button>
                   </div>
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={item.organizationId === 'DEFAULT'}
-                    onClick={() => handleOpenEditMeta(item)}
-                    title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Chỉnh sửa thông tin biểu mẫu'}
-                    className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                  </Button>
+                  {/* Hàng 2: Thao tác cấu hình, quy trình & quản trị */}
+                  <div className="flex items-center gap-1.5 w-full justify-between min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={item.organizationId === 'DEFAULT'}
+                        onClick={() => handleOpenEditXml(item)}
+                        title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Sửa mã nguồn XML'}
+                        className="h-7.5 px-2.5 text-xs gap-1.5 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-medium"
+                      >
+                        <Code2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                        <span>Sửa XML</span>
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void handleDownloadXml(item)}
+                        disabled={exportingXmlCode === item.formCode}
+                        className="h-7.5 px-2.5 text-xs gap-1.5 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 font-medium min-w-0"
+                        title="Xuất file XML chuẩn UTF-8"
+                      >
+                        {exportingXmlCode === item.formCode ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        )}
+                        <span>XML</span>
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setAssignForm(item);
+                          setAssignUnitCode('');
+                          setAssignWorkflowId('');
+                        }}
+                        className="h-7.5 px-2.5 text-xs gap-1.5 font-medium hover:bg-muted"
+                        title="Gán mẫu đánh giá vào quy trình xử lý"
+                      >
+                        <GitBranch className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                        <span>Gán quy trình</span>
+                      </Button>
+
+                      {item.status !== 'PUBLISHED' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void handlePublishTemplate(item)}
+                          className="h-7.5 px-2 text-xs gap-1 text-emerald-700 border-emerald-300 hover:bg-emerald-50 font-medium"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>Phát hành</span>
+                        </Button>
+                      )}
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={item.organizationId === 'DEFAULT'}
+                      onClick={() => handleOpenEditMeta(item)}
+                      title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Chỉnh sửa thông tin biểu mẫu'}
+                      className="h-7.5 w-7.5 text-muted-foreground hover:text-foreground shrink-0"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
@@ -851,10 +897,10 @@ export function EvaluationFormsClient() {
                 {previewDetail?.templateFileId || ''}
               </span>
             </div>
-            <SheetTitle className="text-xl font-bold mt-2 text-foreground break-words">
+            <SheetTitle className="text-xl font-bold mt-2 text-foreground wrap-break-word">
               {previewDetail?.name || 'Đang tải thông tin biểu mẫu...'}
             </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground mt-1 break-words">
+            <SheetDescription className="text-xs text-muted-foreground mt-1 wrap-break-word">
               {previewDetail?.description || 'Xem trước cấu trúc file XML chuẩn của Ban Tổ chức Tỉnh ủy.'}
             </SheetDescription>
           </SheetHeader>
@@ -904,7 +950,7 @@ export function EvaluationFormsClient() {
 
                   {previewDetail?.xmlContent ? (
                     <div className="relative flex-1 min-h-[350px] max-h-[500px] overflow-auto bg-slate-950 text-slate-100 rounded-xl p-4 font-mono text-xs border border-slate-800 leading-relaxed shadow-inner">
-                      <pre className="whitespace-pre break-words">
+                      <pre className="whitespace-pre-wrap wrap-break-word">
                         <code>{previewDetail.xmlContent}</code>
                       </pre>
                     </div>
@@ -1078,10 +1124,10 @@ export function EvaluationFormsClient() {
                 Chỉnh sửa file XML mẫu
               </span>
             </div>
-            <SheetTitle className="text-xl font-bold mt-2 text-foreground break-words">
+            <SheetTitle className="text-xl font-bold mt-2 text-foreground wrap-break-word">
               Chỉnh Sửa Mã Nguồn File Mẫu XML
             </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground mt-1">
+            <SheetDescription className="text-xs text-muted-foreground mt-1 wrap-break-word">
               Sửa đổi nội dung cấu trúc XML. Hãy bấm &quot;Kiểm tra cú pháp (Validate)&quot; trước khi bấm Lưu để đảm bảo file XML không bị lỗi đóng mở thẻ.
             </SheetDescription>
           </SheetHeader>
@@ -1096,7 +1142,7 @@ export function EvaluationFormsClient() {
                   variant="outline"
                   size="sm"
                   onClick={() => void handleExportDocxFromEditor()}
-                  className="h-8 text-xs gap-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                  className="h-8 text-xs gap-1.5 bg-blue-50/80 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60 border-blue-200"
                   title="Xuất văn bản Word DOCX theo chuẩn Nghị định 30 từ nội dung XML đang chỉnh sửa"
                 >
                   <FileText className="w-3.5 h-3.5" />
@@ -1106,7 +1152,7 @@ export function EvaluationFormsClient() {
                   variant="outline"
                   size="sm"
                   onClick={handlePrintPdfFromEditor}
-                  className="h-8 text-xs gap-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200"
+                  className="h-8 text-xs gap-1.5 bg-amber-50/80 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 border-amber-200"
                   title="In hoặc xem trước PDF chuẩn hành chính từ nội dung XML đang chỉnh sửa"
                 >
                   <Printer className="w-3.5 h-3.5" />
@@ -1117,7 +1163,7 @@ export function EvaluationFormsClient() {
                   size="sm"
                   onClick={handleValidateXml}
                   disabled={validateXmlMutation.isPending}
-                  className="h-8 text-xs gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+                  className="h-8 text-xs gap-1.5 bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/60 border-indigo-200"
                 >
                   {validateXmlMutation.isPending ? (
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -1145,19 +1191,19 @@ export function EvaluationFormsClient() {
               <div
                 className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 transition-all ${
                   validationResult.isValid
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60'
+                    : 'bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60'
                 }`}
               >
                 {validationResult.isValid ? (
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="font-bold">{validationResult.message}</p>
                   {validationResult.placeholders && validationResult.placeholders.length > 0 && (
-                    <p className="text-[11px] text-emerald-700 mt-1">
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-300 mt-1">
                       Nhận diện {validationResult.placeholders.length} biến số động: {validationResult.placeholders.slice(0, 6).join(', ')}...
                     </p>
                   )}
@@ -1292,7 +1338,7 @@ export function EvaluationFormsClient() {
         <SheetContent className="w-full sm:max-w-xl flex flex-col gap-0 p-0 min-w-0">
           <SheetHeader className="border-b bg-muted/20 p-6">
             <SheetTitle>Gán mẫu vào quy trình</SheetTitle>
-            <SheetDescription className="break-words">{assignForm?.name} · chọn đơn vị sở hữu và quy trình tương ứng.</SheetDescription>
+            <SheetDescription className="wrap-break-word">{assignForm?.name} · chọn đơn vị sở hữu và quy trình tương ứng.</SheetDescription>
           </SheetHeader>
           <div className="flex-1 min-h-0 space-y-5 overflow-y-auto p-6">
             <div className="space-y-2"><Label>Đơn vị</Label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={assignUnitCode} onChange={(event) => { setAssignUnitCode(event.target.value); setAssignWorkflowId(''); }}><option value="">Chọn đơn vị</option>{units.map((unit) => <option key={unit.code} value={unit.code}>{unit.name} · {unit.code}</option>)}</select>{unitsQuery.isError && <p className="text-xs text-destructive">Không tải được danh sách đơn vị.</p>}</div>
@@ -1300,7 +1346,7 @@ export function EvaluationFormsClient() {
             <div className="space-y-2"><Label>Mã bước xử lý (tùy chọn)</Label><Input value={assignNodeCode} onChange={(event) => setAssignNodeCode(event.target.value)} placeholder="Ví dụ: review_department" /><p className="text-xs text-muted-foreground">Để trống nếu mẫu áp dụng cho toàn bộ quy trình.</p></div>
             <div className="space-y-2"><Label>Giai đoạn KPI (tùy chọn)</Label><select className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={assignPhase} onChange={(event) => setAssignPhase(event.target.value)}><option value="">Tất cả giai đoạn</option><option value="REGISTRATION">Đăng ký đầu kỳ</option><option value="SELF_EVAL">Tự đánh giá</option><option value="COLLECTIVE_EVAL">Đánh giá tập thể</option><option value="FINAL">Tổng hợp cuối kỳ</option></select></div>
             <div className="grid gap-3 sm:grid-cols-2"><div className="space-y-2"><Label>Hiệu lực từ</Label><Input type="date" value={assignFrom} onChange={(event) => setAssignFrom(event.target.value)} /></div><div className="space-y-2"><Label>Hiệu lực đến</Label><Input type="date" value={assignTo} onChange={(event) => setAssignTo(event.target.value)} /></div></div>
-            <div className="space-y-2"><Label>Cấu hình đang gán</Label>{bindingsQuery.isPending ? <p className="text-sm text-muted-foreground">Đang tải…</p> : (bindingsQuery.data ?? []).filter((binding: any) => binding.isActive).length === 0 ? <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">Chưa có quy trình nào được gán mẫu.</p> : <div className="space-y-2">{(bindingsQuery.data ?? []).filter((binding: any) => binding.isActive).map((binding: any) => <div key={binding.id} className="flex min-w-0 items-center justify-between gap-3 rounded-md border p-3"><div className="min-w-0"><p className="break-words text-sm font-medium">{binding.processCode} · {binding.unitCode}</p><p className="break-words text-xs text-muted-foreground">{binding.nodeCode || 'Toàn quy trình'}{binding.phase ? ` · ${binding.phase}` : ''}</p></div><Button variant="outline" size="sm" onClick={() => void handleDeactivateBinding(binding.id)}>Gỡ</Button></div>)}</div>}</div>
+            <div className="space-y-2"><Label>Cấu hình đang gán</Label>{bindingsQuery.isPending ? <p className="text-sm text-muted-foreground">Đang tải…</p> : (bindingsQuery.data ?? []).filter((binding: any) => binding.isActive).length === 0 ? <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">Chưa có quy trình nào được gán mẫu.</p> : <div className="space-y-2">{(bindingsQuery.data ?? []).filter((binding: any) => binding.isActive).map((binding: any) => <div key={binding.id} className="flex min-w-0 items-center justify-between gap-3 rounded-md border p-3"><div className="min-w-0"><p className="wrap-break-word text-sm font-medium">{binding.processCode} · {binding.unitCode}</p><p className="wrap-break-word text-xs text-muted-foreground">{binding.nodeCode || 'Toàn quy trình'}{binding.phase ? ` · ${binding.phase}` : ''}</p></div><Button variant="outline" size="sm" onClick={() => void handleDeactivateBinding(binding.id)}>Gỡ</Button></div>)}</div>}</div>
           </div>
           <SheetFooter className="border-t bg-muted/20 p-4">
             <Button variant="outline" onClick={() => setAssignForm(null)}>Đóng</Button>

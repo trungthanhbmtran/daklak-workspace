@@ -11,8 +11,8 @@ export const hrmTaskTemplatesApi = {
     return apiClient.post('/hrm/task-templates', payload) as any;
   },
 
-  bulkUpdate(templates: any[]): Promise<ApiResponse<any>> {
-    return apiClient.post('/hrm/task-templates/bulk', { templates }) as any;
+  bulkUpdate(templates: any[], classification?: string): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/task-templates/bulk', { templates, classification }) as any;
   },
 
   delete(id: string): Promise<ApiResponse<void>> {

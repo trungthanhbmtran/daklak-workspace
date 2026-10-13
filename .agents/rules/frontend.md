@@ -56,11 +56,11 @@ Ví dụ envelope JSON thường gặp:
 - **Accordion/Collapsible async:** Chọn controlled state khi cần đồng bộ danh sách mục mở với dữ liệu tải/cập nhật bất đồng bộ. defaultValue phù hợp nếu component chỉ mount sau khi có dữ liệu và trạng thái khởi tạo không cần đổi. Không ép mở tất cả nhóm trừ khi thiết kế yêu cầu; giữ lựa chọn mở/đóng của người dùng.
 - **Sheet và Dialog:** Sheet thường phù hợp với form dài hoặc nội dung cần đối chiếu; Dialog phù hợp với xác nhận và tác vụ ngắn. Chọn theo luồng người dùng, thiết bị, accessibility và pattern hiện có; mọi phương án phải giữ keyboard/focus behavior đúng.
 - **Chất lượng thị giác:** Bám design system và các màn hình cùng khu vực; giữ phân cấp thị giác, khoảng cách, typography và mật độ thông tin nhất quán. Kiểm tra trạng thái loading/empty/error và viewport thực tế thay vì chỉ thêm utility class theo checklist.
+
 ### Kiểm chứng trực quan và khả năng truy cập
 - Với thay đổi UI, chạy route thật ở viewport nhỏ và lớn phù hợp; đối chiếu components/design system hiện có và kiểm tra tràn, chồng lấn, nội dung dài cùng trạng thái loading/empty/error liên quan.
 - Kiểm tra điều khiển bằng bàn phím, focus nhìn thấy được, nhãn/tên accessible và hành vi focus của Dialog/Sheet; ưu tiên phần tử semantic thay cho click handler trên phần tử không tương tác.
 - Nếu không có browser/runtime phù hợp, ghi phần kiểm chứng UI là `UNVERIFIED`; không kết luận giao diện đạt chỉ từ build hoặc lint.
-
 
 ## 7. BaseURL & API Endpoint Routing
 - **Tại `admin_khcn`**: `apiClient` và `serverFetch` đã có `baseURL = "/api/v1/admin"`. TUYỆT ĐỐI KHÔNG thêm tiền tố `/admin` hoặc `/api/v1/admin` vào chuỗi URL khi gọi API (ví dụ: dùng `apiClient.get('/integration/routes')`, KHÔNG ĐƯỢC dùng `apiClient.get('/admin/integration/routes')` hay `apiClient.get('/api/v1/admin/integration/routes')` sẽ dẫn tới URL đúp `.../admin/admin/...` gây 404).
@@ -91,5 +91,4 @@ Ví dụ envelope JSON thường gặp:
   - Tại API Gateway và Controller NestJS, mọi route param số nguyên BẮT BUỘC phải dùng `ParseIntPipe`:
     `@Get(':id') getById(@Param('id', ParseIntPipe) id: number)`
   - Gateway sẽ tự động chặn đứng và trả về `400 Bad Request` nếu client gửi các chuỗi rác như `"NaN"`, `"undefined"`, bảo vệ toàn diện các Microservices phía sau khỏi lỗi cú pháp CSDL (như Prisma P2022).
-
 

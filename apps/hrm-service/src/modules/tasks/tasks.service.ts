@@ -341,9 +341,10 @@ export class TasksService {
     const { tasks, paginatedMeta } = await this.applyPostDbFiltersAndPaginate(where, query);
 
     const enriched = await this.shared.enrichTasks(tasks);
-    const batchActions = await this.shared.computeAllowedActionsBatch(enriched, query);
+    const isSummary = query.summary === true || query.summary === 'true';
+    const batchActions = isSummary ? {} : await this.shared.computeAllowedActionsBatch(enriched, query);
     const mapped = enriched.map((t: any) => ({
-      ...this.shared.toTaskResponse(t),
+      ...(isSummary ? this.shared.toTaskResponseSummary(t) : this.shared.toTaskResponse(t)),
       allowedActions: batchActions[t.id] || [],
       children: [],
     }));

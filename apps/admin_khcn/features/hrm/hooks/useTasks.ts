@@ -21,9 +21,10 @@ const DETAIL_GC_TIME = 2 * 60_000;   // 2 phút
  * - refetchOnWindowFocus: refetch ngầm khi user quay lại tab
  */
 export function useTasksList(params: any = {}) {
+  const queryParams = { summary: true, ...params };
   return useQuery({
-    queryKey: hrmKeys.tasksList(params),
-    queryFn: () => hrmTasksApi.list(params),
+    queryKey: hrmKeys.tasksList(queryParams),
+    queryFn: () => hrmTasksApi.list(queryParams),
     staleTime: TASKS_STALE_TIME,
     gcTime: TASKS_GC_TIME,
     placeholderData: keepPreviousData,
@@ -42,10 +43,12 @@ export function useTaskStats(params: any = {}) {
   });
 }
 
-export function useTaskDetail(taskId: number | undefined) {
+export function useTaskDetail(taskId: number | undefined, options?: { enabled?: boolean }) {
+  const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
   return useQuery({
     queryKey: [...hrmKeys.tasks(), 'detail', taskId],
-    queryFn: taskId ? () => hrmTasksApi.getTask(taskId) : skipToken,
+    queryFn: isEnabled && taskId ? () => hrmTasksApi.getTask(taskId) : skipToken,
+    enabled: isEnabled,
     staleTime: TASKS_STALE_TIME,
   });
 }
@@ -55,10 +58,12 @@ export function useTaskDetail(taskId: number | undefined) {
  * - enabled: chỉ fetch khi taskId có giá trị
  * - staleTime ngắn hơn vì comments thay đổi thường xuyên
  */
-export function useTaskComments(conversationId: string | undefined) {
+export function useTaskComments(conversationId: string | undefined, options?: { enabled?: boolean }) {
+  const isEnabled = (options?.enabled ?? true) && Boolean(conversationId);
   return useQuery({
     queryKey: conversationId ? hrmKeys.taskComments(conversationId as any) : [...hrmKeys.tasks(), 'comments', 'none'],
-    queryFn: conversationId ? () => hrmTasksApi.getComments(conversationId) : skipToken,
+    queryFn: isEnabled && conversationId ? () => hrmTasksApi.getComments(conversationId) : skipToken,
+    enabled: isEnabled,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false, // chat không cần refetch khi focus lại tab
@@ -91,6 +96,21 @@ export function useCreateTask() {
     mutationFn: (payload: any) => hrmTasksApi.create(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+    },
+  });
+}
+
+export function useUpdateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmTasksApi.update(id, payload),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: [...hrmKeys.tasks(), 'detail', variables.id] });
+      qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
+      toast.success("Cập nhật thông tin công việc thành công");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Cập nhật công việc thất bại");
     },
   });
 }

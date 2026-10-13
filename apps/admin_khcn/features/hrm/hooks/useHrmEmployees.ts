@@ -10,11 +10,12 @@ import { toast } from "sonner";
 /**
  * Danh sách nhân viên có phân trang (trang HRM).
  */
-export function useHrmEmployeesList(params: HrmEmployeesListParams = {}) {
+export function useHrmEmployeesList(params: HrmEmployeesListParams = {}, options?: { enabled?: boolean }) {
   const { page = 1, pageSize = 10, keyword, departmentId, jobTitleId, status, assignableOnly, crossDepartment } = params;
   return useQuery({
     queryKey: hrmKeys.list({ page, pageSize, keyword, departmentId, jobTitleId, status, assignableOnly, crossDepartment }),
     queryFn: () => hrmApi.list({ page, pageSize, keyword, departmentId, jobTitleId, status, assignableOnly, crossDepartment }),
+    enabled: options?.enabled ?? true,
   });
 }
 

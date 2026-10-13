@@ -79,5 +79,5 @@ export class TaskCatalogController {
       data.currentUserId = user.id;
       data.currentUserDept = user.unitId;
       data.currentUserPermissions = user.permissionsFlatten;
-    } return this.service.bulkUpdateTaskTemplates(data.templates); }
+    } return this.service.bulkUpdateTaskTemplates(data.templates, data.classification); }
 }

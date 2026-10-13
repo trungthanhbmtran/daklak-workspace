@@ -85,6 +85,7 @@ export class TasksController {
     @Query('type') type: string,
     @Query('viewMode') viewMode: string,
     @Query('referenceDate') referenceDate: string,
+    @Query('summary') summary?: string,
   ) {
     return this.tasksService.list(
       req,
@@ -104,6 +105,7 @@ export class TasksController {
       type,
       viewMode,
       referenceDate,
+      summary,
     );
   }
 

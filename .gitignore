@@ -65,9 +65,16 @@ logs/
 !.agents/commands/analyze.md
 !.agents/commands/plan.md
 !.agents/commands/review.md
+!.agents/commands/test.md
+!.agents/commands/audit.md
+!.agents/commands/fix.md
+!.agents/commands/kpi-answer.md
 !.agents/checklists/
 .agents/checklists/*
 !.agents/checklists/agent-acceptance.md
+!.agents/checklists/pre-implementation.md
+!.agents/checklists/architecture-review.md
+!.agents/checklists/code-audit.md
 !.agents/roles/
 .agents/roles/*
 !.agents/roles/agent-operations.md
@@ -101,3 +108,4 @@ docs/*
 !.agents/skills/code2/*
 !.agents/skills/code3/
 !.agents/skills/code3/*
+!.agents/skills/performance-optimization.md

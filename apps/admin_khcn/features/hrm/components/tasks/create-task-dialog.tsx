@@ -150,13 +150,13 @@ export function CreateTaskDialog({
   const { data: employeesData } = useHrmEmployeesList({
     pageSize: 200,
     assignableOnly: true,
-  });
+  }, { enabled: open });
   const employees = (employeesData as any)?.data ?? [];
 
-  const { data: orgData } = useOrganizationFlatListQuery();
+  const { data: orgData } = useOrganizationFlatListQuery(undefined, { enabled: open });
   const departments = orgData?.data ?? [];
 
-  const { data: templatesData } = useTaskTemplatesList();
+  const { data: templatesData } = useTaskTemplatesList(undefined, { enabled: open && showTemplateModal });
   const rawTemplates = (templatesData as any)?.data ?? [];
   const templates = Array.isArray(rawTemplates) ? rawTemplates : [];
 

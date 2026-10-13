@@ -535,3 +535,87 @@
   * Zero Scroll Trap: Bỏ hoàn toàn `overflow-hidden` và chiều cao cố định tại container.
   * gRPC Contracts: Đồng bộ `shared/protos/hrm/task.proto`, serialize an toàn `metadataJson`.
   * Dọn rác 100%: 0 `console.log`, 0 `debugger`, mã hóa UTF-8 không BOM.
+
+---
+
+## [2026-10-13] Tối ưu hóa & Bóc tách các Gói tin API trong Task (Lightweight List, Lazy Load & Fine-grained Templates)
+
+### 1. Phân tích Hiện trạng & Mục tiêu Tối ưu
+- **Hiện trạng:**
+  * Gói tin `GET /hrm/tasks` tải về danh sách công việc chứa toàn bộ chi tiết (`description` dài, mảng `participants` phức tạp, `metadataJson` nặng, và chạy batch tính toán `allowedActions` cho toàn bộ các task).
+  * Trong `CreateTaskDialog`: Ngay khi trang task tải hoặc component mount, 3 query nặng chạy ngầm (`useHrmEmployeesList` 200 nhân sự, `useOrganizationFlatListQuery` toàn bộ phòng ban, `useTaskTemplatesList` toàn bộ thư viện mẫu).
+  * Trong `TaskDetailDrawer`: Query `useTaskComments` tải toàn bộ lịch sử tin nhắn chat ngay khi mở drawer chỉ để lấy số lượng badge trên tab trigger.
+  * Trong `ConfigureRankTasksClient` (Thư viện VTVL): `useTaskTemplatesList()` tải và lưu toàn bộ 3 khối (Công chức, Viên chức, Đảng) trong 1 payload lớn.
+- **Mục tiêu:**
+  * Tách nhỏ và tối ưu hóa gói tin: Màn danh sách (`TaskList`, `Calendar`) chỉ tải các trường tóm tắt cần thiết (`summary: true`). Chi tiết đầy đủ tải qua `GET /hrm/tasks/:id` khi mở Drawer.
+  * Lazy loading có điều kiện (`enabled: open`): Ngăn chặn 100% các cuộc gọi API ngầm khi modal/sheet đóng.
+  * Tách nhỏ thư viện VTVL theo từng khối `classification`: Tải và lưu độc lập từng khối thay vì tải/lưu gộp toàn hệ thống.
+
+### 2. Các Thay đổi Kỹ thuật Đã Triển khai
+1. **Giao thức gRPC & Protobuf (`shared/protos/hrm/task.proto`):**
+   - Bổ sung `bool summary = 25;` vào `ListTasksRequest`.
+   - Bổ sung `string classification = 2;` vào `BulkUpdateTemplatesRequest`.
+2. **Microservice HRM (`apps/hrm-service`):**
+   - `tasks.service.ts`: Trong `listTasks`, khi `query.summary` là true, bỏ qua batch workflow `computeAllowedActionsBatch`, áp dụng `toTaskResponseSummary` để loại bỏ các trường nặng không dùng cho bảng danh sách (`description`, `participants` lồng, `metadata` chi tiết).
+   - `task-shared.service.ts`: Thêm helper `toTaskResponseSummary` trả về đầy đủ các trường hiển thị bảng (`id, title, status, statusLabel, priority, priorityLabel, dueDate, progress, assigneeName, coassigneeNames, sourceDocumentRef, planId...`).
+   - `task-catalog.service.ts`: Hỗ trợ `classification` trong `bulkUpdateTaskTemplates` để chỉ cập nhật khối được chỉ định thay vì xóa sạch toàn bộ CSDL.
+   - `task-catalog.controller.ts`: Truyền `data.classification` vào service.
+3. **API Gateway (`apps/api-gateway`):**
+   - `tasks.controller.ts`: Tiếp nhận query param `@Query('summary') summary?: string`.
+   - `tasks.service.ts`: Chuyển tiếp `summary: summary === 'true'` xuống gRPC `ListTasks`.
+   - `task-templates.controller.ts`: Chuyển tiếp `classification` trong `bulkUpdate` xuống gRPC `BulkUpdateTaskTemplates`.
+4. **Giao diện Quản trị (`apps/admin_khcn`):**
+   - `features/hrm/hooks/useTasks.ts`: Mặc định `summary: true` trong `useTasksList`; hỗ trợ `{ enabled?: boolean }` cho `useTaskDetail` và `useTaskComments`.
+   - `features/hrm/hooks/useTaskTemplates.ts`: Hỗ trợ lọc theo `classification` và `{ enabled?: boolean }` trong `useTaskTemplatesList`.
+   - `features/hrm/hooks/useHrmEmployees.ts`: Bổ sung `{ enabled?: boolean }` cho `useHrmEmployeesList`.
+   - `features/system-admin/organization/hooks/useOrganizationQueries.ts`: Bổ sung `{ enabled?: boolean }` cho `useOrganizationFlatListQuery`.
+   - `features/hrm/components/tasks/create-task-dialog.tsx`: Gate các queries với `{ enabled: open }` và `{ enabled: open && showTemplateModal }`. Triệt tiêu hoàn toàn API calls ngầm khi trang tải.
+   - `features/hrm/components/tasks/task-detail-drawer.tsx`: Bỏ gọi `useTaskComments` ở cấp root drawer; gán `{ enabled: open }` cho `useTaskDetail`.
+   - `features/hrm/components/work-plans/master-plans/hooks/useConfigureRankTasks.ts`: Tách tải và lưu nhiệm vụ mẫu độc lập theo từng khối (`CONG_CHUC`, `VIEN_CHUC`, `DANG`).
+
+### 3. Kiểm chứng Máy Thực tế & Kết quả
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass).
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> Exit code 0 (Pass).
+- 100% sạch debug logs, tuân thủ 7 Bộ ràng buộc kỹ thuật.
+
+---
+
+## [2026-10-13] Bóc tách Endpoint Chi tiết Công việc, Tinh giản Trùng lặp Đánh giá & Bổ sung Chức năng Chỉnh sửa Nhiệm vụ
+
+### 1. Phân tích Yêu cầu & Vấn đề Cần Xử lý
+- **Yêu cầu 1: Tinh giản trùng lặp mục "Đánh giá công việc" ở 3 nơi:**
+  * *Chỗ 1 - Bảng danh sách (`task-list.tsx`):* Nút "Đánh giá" hiển thị tràn lan cho tất cả các task bất kể mới giao hay đang làm. Đã chuẩn hóa: CHỈ hiển thị nút Đánh giá khi task ở trạng thái cần thẩm định/hoàn thành (`REVIEWING`, `PENDING_REVIEW`, `COMPLETED`, `DONE`).
+  * *Chỗ 2 - Header của Drawer (`task-detail-drawer.tsx`):* Nút "Đánh giá công việc" chiếm không gian trên Header trong khi bên dưới đã có Tab 4 "Đánh giá & KPI" chuyên trách. Đã LOẠI BỎ hoàn toàn nút này ở Header để tránh trùng lặp.
+  * *Chỗ 3 - Tab "Đánh giá & KPI" (`task-detail-drawer.tsx`):* Giữ nguyên làm vị trí duy nhất và chuẩn mực trong Drawer để xem kết quả thẩm định và mở `TaskEvaluationApprovalSheet`.
+- **Yêu cầu 2: Bóc tách phần Chi tiết thành endpoint riêng, không gộp chung vào list:**
+  * Bảng `task-list.tsx` chuyển sang lưu `selectedTaskId: number | null` thay vì mang vác cả object `selectedTask` từ danh sách.
+  * `task-detail-drawer.tsx` nhận `taskId` và fetch độc lập qua `useTaskDetail(taskId, { enabled: open && !!taskId })`.
+  * Hiển thị trạng thái Skeleton Loading mượt mà khi dữ liệu chi tiết đang được tải từ server.
+- **Yêu cầu 3: Chức năng Chỉnh sửa Chi tiết Công việc:**
+  * Bổ sung nút "Chỉnh sửa" trên Header của `task-detail-drawer.tsx` (thay thế vị trí nút Đánh giá đã loại bỏ).
+  * Xây dựng component `EditTaskDialog` (`apps/admin_khcn/features/hrm/components/tasks/edit-task-dialog.tsx`) cho phép sửa Tiêu đề, Mô tả, Mức độ ưu tiên, Ngày bắt đầu, Hạn hoàn thành.
+  * Bổ sung hook `useUpdateTask` trong `useTasks.ts` gọi trực tiếp API `PUT /api/v1/admin/hrm/tasks/:id` đã có sẵn ở Gateway/Service.
+
+### 2. Danh sách File Tác động
+1. `apps/admin_khcn/features/hrm/hooks/useTasks.ts`:
+   - Thêm mutation hook `useUpdateTask` tự động invalidate cache chi tiết và danh sách task.
+2. `apps/admin_khcn/features/hrm/components/tasks/edit-task-dialog.tsx` (Tạo mới):
+   - Form modal chỉnh sửa chi tiết nhiệm vụ với validation, ngày giờ, mức độ ưu tiên và loading state.
+3. `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`:
+   - Nhận `taskId` độc lập, lazy fetch data chi tiết với `{ enabled: open && Boolean(activeTaskId) }`.
+   - Hiển thị Skeleton loading khi dữ liệu chi tiết đang tải.
+   - Loại bỏ nút "Đánh giá công việc" trùng lặp trên Header; thay bằng nút "Chỉnh sửa" mở `EditTaskDialog`.
+   - Tinh giản truyền `activeTaskId` chuẩn kiểu `number` cho các component con.
+4. `apps/admin_khcn/features/hrm/components/tasks/task-list.tsx`:
+   - Dùng `selectedTaskId: number | null` thay cho `selectedTask: HrmTask | null`.
+   - Bỏ eager fetch `useTaskDetail` tại list view; URL param `taskId` tự động kích hoạt `selectedTaskId`.
+   - Cột Thao tác: Giới hạn nút "Đánh giá" chỉ hiển thị khi task ở trạng thái `REVIEWING` / `PENDING_REVIEW` / `COMPLETED` / `DONE`.
+
+### 3. Kiểm chứng Máy Thực tế & Kết quả
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> Exit code 0 (Pass 100%).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- Soi diff & Vệ sinh mã nguồn: 100% sạch debug logs, mã hóa chuẩn UTF-8 không BOM.
+
+

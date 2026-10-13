@@ -41,21 +41,21 @@ export function ConfigureRankTasksClient() {
     return (
         <div className="w-full flex-1 min-h-0 flex flex-col gap-4 min-w-0">
             {/* Top Enterprise Page Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl border bg-card/80 shadow-xs backdrop-blur-xs min-w-0 shrink-0">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-2xl border bg-card/80 shadow-xs backdrop-blur-xs min-w-0 shrink-0">
                 <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0 ring-1 ring-primary/20">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
                         <Library className="w-6 h-6" />
                     </div>
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap min-w-0">
-                            <h1 className="text-lg sm:text-xl font-black tracking-tight text-foreground truncate">
+                            <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
                                 Thư viện Nhiệm vụ theo Vị trí việc làm (VTVL)
                             </h1>
-                            <Badge variant="outline" className="text-[11px] font-bold bg-primary/5 text-primary border-primary/20">
+                            <Badge variant="outline" className="text-[11px] font-semibold bg-primary/5 text-primary border-primary/20">
                                 <Sparkles className="w-3 h-3 mr-1" /> Chuẩn hóa Nhà nước
                             </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5 max-w-4xl leading-relaxed break-words">
+                        <p className="text-xs text-muted-foreground mt-0.5 max-w-4xl leading-relaxed wrap-break-word">
                             Hệ thống hóa danh mục công việc định mức theo phân hạng VTVL (Nghị định 62/2020/NĐ-CP, Nghị định 106/2020/NĐ-CP và Quy định 137-QĐ/TW của Ban Bí thư).
                         </p>
                     </div>
@@ -68,7 +68,7 @@ export function ConfigureRankTasksClient() {
                         size="sm"
                         onClick={refetchAll}
                         disabled={isLoading}
-                        className="h-9 px-3 gap-1.5 text-xs font-semibold rounded-xl"
+                        className="h-9 px-3 gap-1.5 text-xs font-semibold rounded-xl hover:bg-muted"
                         title="Tải lại toàn bộ dữ liệu VTVL và Thư viện"
                     >
                         <RotateCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -108,7 +108,7 @@ export function ConfigureRankTasksClient() {
                         value="CONG_CHUC"
                         className="rounded-xl text-xs font-bold gap-2 flex items-center justify-center min-w-0 transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xs"
                     >
-                        <Building2 className="w-4 h-4 shrink-0 text-blue-600" />
+                        <Building2 className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
                         <span className="truncate">Khối Công chức (NĐ 62)</span>
                         <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-mono py-0 px-1.5 h-4 ml-1">
                             {congChucTemplates.length}
@@ -119,7 +119,7 @@ export function ConfigureRankTasksClient() {
                         value="VIEN_CHUC"
                         className="rounded-xl text-xs font-bold gap-2 flex items-center justify-center min-w-0 transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xs"
                     >
-                        <Briefcase className="w-4 h-4 shrink-0 text-amber-600" />
+                        <Briefcase className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
                         <span className="truncate">Khối Viên chức (NĐ 106)</span>
                         <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-mono py-0 px-1.5 h-4 ml-1">
                             {vienChucTemplates.length}
@@ -130,7 +130,7 @@ export function ConfigureRankTasksClient() {
                         value="DANG"
                         className="rounded-xl text-xs font-bold gap-2 flex items-center justify-center min-w-0 transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xs"
                     >
-                        <ShieldCheck className="w-4 h-4 shrink-0 text-red-600" />
+                        <ShieldCheck className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                         <span className="truncate">Cơ quan Đảng (QĐ 137)</span>
                         <Badge variant="secondary" className="hidden sm:inline-flex text-[10px] font-mono py-0 px-1.5 h-4 ml-1">
                             {dangTemplates.length}

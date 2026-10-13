@@ -17,6 +17,7 @@ import {
     Briefcase,
     Building2,
     Percent,
+    Tag,
     PanelLeftClose,
     PanelLeftOpen
 } from 'lucide-react';
@@ -259,48 +260,48 @@ export function RankTaskCatalogManager({
             {/* Top Metric Strip - Enterprise Overview */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl border bg-card/80 shadow-xs min-w-0">
-                    <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 shrink-0">
-                        <Briefcase className="w-4 h-4" />
+                    <div className="w-11 h-11 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 ring-1 ring-blue-500/20">
+                        <Briefcase className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium text-muted-foreground truncate">Tổng VTVL trong khối</p>
-                        <p className="text-base sm:text-lg font-black tracking-tight text-foreground truncate mt-0.5">
+                        <p className="text-[11px] font-semibold text-muted-foreground truncate">Tổng VTVL trong khối</p>
+                        <p className="text-base sm:text-lg font-bold text-foreground truncate mt-0.5">
                             {isLoading ? <Skeleton className="h-5 w-12" /> : `${totalRanksCount} vị trí`}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl border bg-card/80 shadow-xs min-w-0">
-                    <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
-                        <CheckCircle2 className="w-4 h-4" />
+                    <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 ring-1 ring-emerald-500/20">
+                        <CheckCircle2 className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium text-muted-foreground truncate">Đã thiết lập mẫu</p>
-                        <p className="text-base sm:text-lg font-black tracking-tight text-emerald-600 truncate mt-0.5">
+                        <p className="text-[11px] font-semibold text-muted-foreground truncate">Đã thiết lập mẫu</p>
+                        <p className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 truncate mt-0.5">
                             {isLoading ? <Skeleton className="h-5 w-12" /> : `${configuredRanksCount} / ${totalRanksCount}`}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl border bg-card/80 shadow-xs min-w-0">
-                    <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 shrink-0">
-                        <ListChecks className="w-4 h-4" />
+                    <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 ring-1 ring-indigo-500/20">
+                        <ListChecks className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium text-muted-foreground truncate">Tổng nhiệm vụ mẫu</p>
-                        <p className="text-base sm:text-lg font-black tracking-tight text-foreground truncate mt-0.5">
+                        <p className="text-[11px] font-semibold text-muted-foreground truncate">Tổng nhiệm vụ mẫu</p>
+                        <p className="text-base sm:text-lg font-bold text-foreground truncate mt-0.5">
                             {isLoading ? <Skeleton className="h-5 w-12" /> : `${templates.length} nhiệm vụ`}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3.5 rounded-2xl border bg-card/80 shadow-xs min-w-0">
-                    <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
-                        <Percent className="w-4 h-4" />
+                    <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 ring-1 ring-amber-500/20">
+                        <Percent className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium text-muted-foreground truncate">Tỷ lệ bao phủ VTVL</p>
-                        <p className="text-base sm:text-lg font-black tracking-tight text-foreground truncate mt-0.5">
+                        <p className="text-[11px] font-semibold text-muted-foreground truncate">Tỷ lệ bao phủ VTVL</p>
+                        <p className="text-base sm:text-lg font-bold text-foreground truncate mt-0.5">
                             {isLoading ? <Skeleton className="h-5 w-12" /> : `${coveragePercent}%`}
                         </p>
                     </div>
@@ -315,12 +316,12 @@ export function RankTaskCatalogManager({
                         {/* Sidebar Header */}
                         <div className="p-4 bg-muted/20 border-b shrink-0 space-y-3">
                             <div className="flex items-center justify-between gap-2 min-w-0">
-                                <div className="flex items-center gap-2 min-w-0">
-                                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
                                         {icon || <Building2 className="w-4 h-4" />}
                                     </div>
                                     <div className="min-w-0">
-                                        <h3 className="text-xs font-bold uppercase tracking-wider text-foreground truncate">
+                                        <h3 className="text-xs font-bold text-foreground truncate">
                                             {classificationTitle}
                                         </h3>
                                         <p className="text-[10px] text-muted-foreground truncate">
@@ -427,7 +428,7 @@ export function RankTaskCatalogManager({
                                         if (gRanks.length === 0) return null;
                                         return (
                                             <AccordionItem value={groupName} key={groupName} className="border-b last:border-b-0">
-                                                <AccordionTrigger className="px-3.5 py-2.5 bg-muted/10 hover:bg-muted/30 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:no-underline">
+                                                <AccordionTrigger className="px-3.5 py-2.5 bg-muted/15 hover:bg-muted/30 text-xs font-bold text-muted-foreground hover:no-underline">
                                                     <div className="flex items-center gap-1.5 min-w-0">
                                                         <span className="truncate">{groupName}</span>
                                                         <Badge variant="outline" className="text-[9px] font-normal py-0 px-1.5 h-4">
@@ -506,34 +507,39 @@ export function RankTaskCatalogManager({
                 {/* Right Main Area: Task Catalog for Selected Rank */}
                 <div className="flex-1 min-w-0 w-full flex flex-col border rounded-2xl bg-card shadow-xs overflow-hidden">
                     {/* Active Rank Header */}
-                    <div className="p-4 sm:p-5 bg-muted/20 border-b shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
-                        <div className="min-w-0 flex-1 space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                {!isSidebarOpen && (
-                                    <Button
-                                        variant="outline"
-                                        size="xs"
-                                        onClick={() => setIsSidebarOpen(true)}
-                                        className="h-6 gap-1 text-[11px] rounded-md lg:hidden"
-                                    >
-                                        <PanelLeftOpen className="w-3 h-3" /> Đổi VTVL
-                                    </Button>
-                                )}
-                                <h2 className="text-base sm:text-lg font-bold text-foreground wrap-break-word min-w-0">
-                                    {currentSelectedRankInfo?.name || selectedRank}
-                                </h2>
-                                <Badge variant="outline" className="font-mono text-xs uppercase bg-background shrink-0">
-                                    Mã: {selectedRank}
-                                </Badge>
-                                {currentSelectedRankInfo?.category && (
-                                    <Badge variant="secondary" className="text-[11px] shrink-0">
-                                        {currentSelectedRankInfo.category}
-                                    </Badge>
-                                )}
+                    <div className="p-4 sm:p-5 bg-muted/20 border-b shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 min-w-0">
+                        <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
+                                {icon || <Briefcase className="w-5 h-5" />}
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed wrap-break-word">
-                                Danh mục công việc định mức chuẩn hóa theo phân hạng VTVL.
-                            </p>
+                            <div className="min-w-0 flex-1 space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                    {!isSidebarOpen && (
+                                        <Button
+                                            variant="outline"
+                                            size="xs"
+                                            onClick={() => setIsSidebarOpen(true)}
+                                            className="h-6 gap-1 text-[11px] rounded-md lg:hidden"
+                                        >
+                                            <PanelLeftOpen className="w-3 h-3" /> Đổi VTVL
+                                        </Button>
+                                    )}
+                                    <h2 className="text-base sm:text-lg font-bold text-foreground wrap-break-word min-w-0">
+                                        {currentSelectedRankInfo?.name || selectedRank}
+                                    </h2>
+                                    <Badge variant="outline" className="font-mono text-xs bg-background shrink-0">
+                                        Mã: {selectedRank}
+                                    </Badge>
+                                    {currentSelectedRankInfo?.category && (
+                                        <Badge variant="secondary" className="text-[11px] shrink-0">
+                                            {currentSelectedRankInfo.category}
+                                        </Badge>
+                                    )}
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-relaxed wrap-break-word">
+                                    Danh mục công việc định mức chuẩn hóa theo phân hạng VTVL.
+                                </p>
+                            </div>
                         </div>
 
                         {/* Top Action Button */}
@@ -550,17 +556,19 @@ export function RankTaskCatalogManager({
                                 <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
                                     <SheetHeader className="pb-4 border-b">
                                         <SheetTitle className="text-base font-bold flex items-center gap-2">
-                                            <Sparkles className="w-4 h-4 text-primary" />
+                                            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                                <Sparkles className="w-4 h-4" />
+                                            </div>
                                             Thêm nhiệm vụ mẫu cho VTVL
                                         </SheetTitle>
-                                        <SheetDescription className="text-xs">
+                                        <SheetDescription className="text-xs wrap-break-word">
                                             Vị trí áp dụng: <span className="font-semibold text-foreground">{currentSelectedRankInfo?.name || selectedRank}</span>
                                         </SheetDescription>
                                     </SheetHeader>
 
                                     <div className="py-6 space-y-5">
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-foreground uppercase tracking-wider">
+                                            <label className="text-xs font-semibold text-foreground">
                                                 Nội dung nhiệm vụ mẫu <span className="text-destructive">*</span>
                                             </label>
                                             <textarea
@@ -573,7 +581,7 @@ export function RankTaskCatalogManager({
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-xs font-bold text-foreground uppercase tracking-wider">
+                                            <label className="text-xs font-semibold text-foreground">
                                                 Đơn vị tính (ĐVT) <span className="text-destructive">*</span>
                                             </label>
                                             <Select value={newUnit || undefined} onValueChange={setNewUnit}>
@@ -611,7 +619,7 @@ export function RankTaskCatalogManager({
 
                                         <div className="space-y-1.5">
                                             <div className="flex items-center justify-between">
-                                                <label className="text-xs font-bold text-foreground uppercase tracking-wider">
+                                                <label className="text-xs font-semibold text-foreground">
                                                     Trọng số KPI mặc định (%)
                                                 </label>
                                                 <span className="text-[10px] text-muted-foreground">Tùy chọn (0 - 100%)</span>
@@ -658,7 +666,7 @@ export function RankTaskCatalogManager({
                     <div className="p-3 sm:p-4 bg-muted/10 border-b shrink-0">
                         <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
                             <div className="sm:col-span-12 md:col-span-5 space-y-1 min-w-0">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase">Nội dung nhiệm vụ mẫu</label>
+                                <label className="text-xs font-semibold text-muted-foreground">Nội dung nhiệm vụ mẫu</label>
                                 <Input
                                     placeholder="Nhập tên nhiệm vụ mẫu..."
                                     value={newTaskName}
@@ -673,7 +681,7 @@ export function RankTaskCatalogManager({
                             </div>
 
                             <div className="sm:col-span-6 md:col-span-3 space-y-1 min-w-0">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase">Đơn vị tính</label>
+                                <label className="text-xs font-semibold text-muted-foreground">Đơn vị tính</label>
                                 <Select value={newUnit || undefined} onValueChange={setNewUnit}>
                                     <SelectTrigger className="w-full h-9 text-xs bg-background rounded-lg">
                                         <SelectValue placeholder="Chọn ĐVT" />
@@ -689,7 +697,7 @@ export function RankTaskCatalogManager({
                             </div>
 
                             <div className="sm:col-span-6 md:col-span-2 space-y-1 min-w-0">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase">Trọng số %</label>
+                                <label className="text-xs font-semibold text-muted-foreground">Trọng số %</label>
                                 <Input
                                     type="number"
                                     min="0"
@@ -717,7 +725,9 @@ export function RankTaskCatalogManager({
 
                         {/* Quick pick chips */}
                         <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                            <span className="text-[10px] text-muted-foreground mr-1">ĐVT nhanh:</span>
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1 mr-1">
+                                <Tag className="w-3 h-3 text-muted-foreground" /> Gợi ý ĐVT:
+                            </span>
                             {POPULAR_UNITS.map(chip => (
                                 <button
                                     key={chip}
@@ -820,7 +830,7 @@ export function RankTaskCatalogManager({
                                                 /* Edit Inline Mode - Stacked Grid */
                                                 <div className="flex flex-col gap-2.5 p-3 rounded-xl border bg-card">
                                                     <div className="space-y-1">
-                                                        <label className="text-[10px] font-bold text-muted-foreground uppercase">Nội dung nhiệm vụ</label>
+                                                        <label className="text-xs font-semibold text-muted-foreground">Nội dung nhiệm vụ</label>
                                                         <Input
                                                             value={editTaskName}
                                                             onChange={e => setEditTaskName(e.target.value)}
@@ -830,7 +840,7 @@ export function RankTaskCatalogManager({
                                                     </div>
                                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Đơn vị tính</label>
+                                                            <label className="text-xs font-semibold text-muted-foreground">Đơn vị tính</label>
                                                             <Select value={editUnit || undefined} onValueChange={setEditUnit}>
                                                                 <SelectTrigger className="w-full h-8 text-xs bg-background">
                                                                     <SelectValue placeholder="ĐVT" />
@@ -845,7 +855,7 @@ export function RankTaskCatalogManager({
                                                             </Select>
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Trọng số %</label>
+                                                            <label className="text-xs font-semibold text-muted-foreground">Trọng số %</label>
                                                             <Input
                                                                 type="number"
                                                                 placeholder="Trọng số %"
@@ -878,7 +888,7 @@ export function RankTaskCatalogManager({
                                                 /* View Mode - Spacious layout */
                                                 <div className="flex items-start justify-between gap-3 min-w-0">
                                                     <div className="flex items-start gap-3 min-w-0 flex-1">
-                                                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted/60 text-muted-foreground text-[10px] font-bold shrink-0 mt-0.5">
+                                                        <span className="flex items-center justify-center w-6 h-6 rounded-md bg-muted/80 text-muted-foreground text-xs font-semibold shrink-0 mt-0.5 border border-border/50">
                                                             {index + 1}
                                                         </span>
                                                         <div className="min-w-0 flex-1 space-y-1.5">
@@ -886,11 +896,11 @@ export function RankTaskCatalogManager({
                                                                 {item.taskName}
                                                             </p>
                                                             <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
-                                                                <Badge variant="outline" className="text-[10px] font-mono py-0 px-2 h-5 bg-background border-slate-200">
+                                                                <Badge variant="outline" className="text-[10px] font-mono py-0 px-2 h-5 bg-background border-slate-200 dark:border-slate-800">
                                                                     ĐVT: <span className="font-bold text-foreground ml-1">{item.defaultUnit}</span>
                                                                 </Badge>
                                                                 {item.defaultWeight != null && (
-                                                                    <Badge variant="secondary" className="text-[10px] font-mono py-0 px-2 h-5 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                                                                    <Badge variant="secondary" className="text-[10px] font-mono py-0 px-2 h-5 bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-900/50">
                                                                         Trọng số: <span className="font-bold ml-1">{item.defaultWeight}%</span>
                                                                     </Badge>
                                                                 )}
@@ -934,7 +944,9 @@ export function RankTaskCatalogManager({
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle className="text-base font-bold flex items-center gap-2 text-destructive">
-                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            <div className="w-7 h-7 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                                <AlertCircle className="w-4 h-4" />
+                            </div>
                             Xác nhận xóa nhiệm vụ mẫu
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">

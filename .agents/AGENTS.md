@@ -1,6 +1,6 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 / Code 3 hoặc gọi trực tiếp) đều là code chung, bám sát các bước thực hiện của riêng từng yêu cầu và tuân thủ nghiêm ngặt 7 bộ ràng buộc kỹ thuật dưới đây.
+File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 / Code 3 hoặc gọi trực tiếp) tuân thủ quy trình điều phối và 7 bộ ràng buộc kỹ thuật dưới đây.
 
 ---
 
@@ -10,7 +10,9 @@ File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhấ
 - `rules/`: Quy tắc bất biến bắt buộc phải tuân thủ (kiến trúc, boundaries, security, UI/UX, service sovereignty).
 - `skills/`: Hướng dẫn công nghệ chuyên sâu và kỹ năng thực thi (`code1`, `code2`, `code3`, `critical-review`, v.v.).
 - `architecture/`: Bản đồ các services, dependencies, workflow flow và source of truth.
-- `execution_logs/`: Nhật ký thực thi theo từng lane (`code1.md`, `code2.md`, `code3.md`).
+- execution_logs/: Nhật ký riêng theo từng lane (code1.md, code2.md, code3.md).
+- roles/: Vai trò điều phối Codex.
+- agents/: Profile Antigravity nếu repo có lưu; profile chỉ mô tả vai trò, không chứa thông tin xác thực hay khởi chạy account.
 
 ---
 
@@ -69,7 +71,6 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 - **Sheet và Dialog:** Sheet thường phù hợp với form dài hoặc nội dung cần đối chiếu; Dialog phù hợp với xác nhận và tác vụ ngắn. Chọn theo luồng người dùng, thiết bị, accessibility và pattern hiện có; mọi phương án phải giữ keyboard/focus behavior đúng.
 - **Chất lượng thị giác:** Bám design system và các màn hình cùng khu vực; giữ phân cấp thị giác, khoảng cách, typography và mật độ thông tin nhất quán. Kiểm tra trạng thái loading/empty/error và viewport thực tế thay vì chỉ thêm utility class theo checklist.
 
-
 ### Frontend State Ownership, Rendering, and Modal/Sheet Loading
 - **State ownership:** Đặt state ở component nhỏ nhất sở hữu hành vi; chỉ lift state lên cha khi nhiều component thực sự dùng chung hoặc state thuộc URL. Không đưa state UI cục bộ vào global store.
 - **Single source of truth:** Không lưu lại state có thể suy ra từ props/data; giữ state cần thiết tối thiểu và tránh hai state phải đồng bộ cùng một giá trị.
@@ -81,7 +82,7 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 ### 2. Ràng buộc BaseURL & Routing Frontend (`admin_khcn`)
 - Instance `apiClient` và `serverFetch` đã cấu hình sẵn `baseURL = "/api/v1/admin"`.
 - **CẤM TUYỆT ĐỐI thêm tiền tố `/admin` vào string path gọi API:** Ví dụ gọi `/integration/routes`, CẤM gọi `/admin/integration/routes` vì sẽ bị double prefix thành `/api/v1/admin/admin/...` gây lỗi 404!
-- **Response/envelope handling:** apiClient currently returns the Axios response body without globally removing the Gateway envelope. Use unwrapData or the feature typed helper once at the API/query boundary when the endpoint contract requires it; inspect file/stream exceptions and avoid double-unwrapping.
+- **Response/envelope handling:** apiClient hiện trả response body sau lớp Axios nhưng không gỡ Gateway envelope toàn cục. Dùng unwrapData hoặc typed helper của feature một lần tại API/query boundary khi contract yêu cầu; kiểm tra ngoại lệ file/stream và tránh unwrap hai lần.
 
 ### 3. Ràng buộc Next.js App Router theo phiên bản khai báo trong package & Server Components
 - Dùng đúng APIs của phiên bản Next.js khai báo trong package bị ảnh hưởng. Với route params/searchParams được khai báo là Promise, phải await trước khi đọc; xác minh kiểu từ code/config hiện có.

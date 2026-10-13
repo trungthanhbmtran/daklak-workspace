@@ -6,10 +6,17 @@ import { hrmTaskTemplatesApi } from "../api";
 import { hrmKeys } from "../keys";
 import { toast } from "sonner";
 
-export function useTaskTemplatesList(rank?: string) {
+export function useTaskTemplatesList(
+  params?: string | { rank?: string; classification?: string },
+  options?: { enabled?: boolean }
+) {
+  const rank = typeof params === 'string' ? params : params?.rank;
+  const classification = typeof params === 'object' ? params?.classification : undefined;
   return useQuery({
-    queryKey: hrmKeys.taskTemplatesList(rank),
-    queryFn: () => hrmTaskTemplatesApi.list({ rank }),
+    queryKey: [...hrmKeys.taskTemplates(), { rank, classification }],
+    queryFn: () => hrmTaskTemplatesApi.list({ rank, classification }),
+    enabled: options?.enabled ?? true,
+    staleTime: 60_000,
   });
 }
 

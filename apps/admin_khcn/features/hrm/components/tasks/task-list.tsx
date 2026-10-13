@@ -14,7 +14,7 @@ import { TaskDetailDrawer } from "./task-detail-drawer";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
 import { Progress } from "@/components/ui/progress";
-import { useTasksList, useTaskDetail } from "../../hooks/useTasks";
+import { useTasksList } from "../../hooks/useTasks";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -160,12 +160,12 @@ export function TaskList() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const [selectedTask, setSelectedTask] = useState<HrmTask | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [evaluatingTask, setEvaluatingTask] = useState<HrmTask | null>(null);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
-  // ── API: danh sách task ──
+  // ── API: danh sách task tóm tắt ──
   const { data, isLoading, isError, refetch } = useTasksList({
     status: statusFilter === "ALL" ? undefined : statusFilter,
     search: debouncedSearch || undefined,
@@ -177,16 +177,12 @@ export function TaskList() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const taskIdParam = searchParams?.get("taskId");
-  const { data: detailData } = useTaskDetail(taskIdParam ? Number(taskIdParam) : undefined);
-
-  const lastOpenedTaskId = React.useRef<string | null>(null);
 
   React.useEffect(() => {
-    if (taskIdParam && detailData?.data && !selectedTask && lastOpenedTaskId.current !== taskIdParam) {
-      setSelectedTask(detailData.data);
-      lastOpenedTaskId.current = taskIdParam;
+    if (taskIdParam && !selectedTaskId) {
+      setSelectedTaskId(Number(taskIdParam));
     }
-  }, [taskIdParam, detailData, selectedTask]);
+  }, [taskIdParam, selectedTaskId]);
 
   const toggleExpand = (taskId: string) => {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
@@ -364,24 +360,39 @@ export function TaskList() {
             {
               header: "Thao tác",
               className: "text-right",
-              cell: (task: any) => (
-                <div className="flex items-center justify-end gap-1.5 shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEvaluatingTask(task)}
-                    className="h-8 px-2 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 font-medium shadow-2xs"
-                    title="Mở màn hình Thẩm định & Đánh giá công việc"
-                  >
-                    <Award className="w-3.5 h-3.5 mr-1 text-indigo-600" />
-                    Đánh giá
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedTask(task)} className="h-8 px-2 text-xs">
-                    <Eye className="w-3.5 h-3.5 mr-1" />
-                    Chi tiết
-                  </Button>
-                </div>
-              )
+              cell: (task: any) => {
+                const canEvaluate =
+                  task.status === "REVIEWING" ||
+                  task.status === "PENDING_REVIEW" ||
+                  task.status === "COMPLETED" ||
+                  task.status === "DONE";
+
+                return (
+                  <div className="flex items-center justify-end gap-1.5 shrink-0">
+                    {canEvaluate && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEvaluatingTask(task)}
+                        className="h-8 px-2 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 font-medium shadow-2xs"
+                        title="Mở màn hình Thẩm định & Đánh giá công việc"
+                      >
+                        <Award className="w-3.5 h-3.5 mr-1 text-indigo-600" />
+                        Đánh giá
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedTaskId(Number(task.id))}
+                      className="h-8 px-2 text-xs"
+                    >
+                      <Eye className="w-3.5 h-3.5 mr-1" />
+                      Chi tiết
+                    </Button>
+                  </div>
+                );
+              }
             }
           ]}
         />
@@ -392,22 +403,20 @@ export function TaskList() {
         </div>
       </div>
 
-      {
-        selectedTask && (
-          <TaskDetailDrawer
-            open={!!selectedTask}
-            onOpenChange={(open) => {
-              if (!open) {
-                setSelectedTask(null);
-                if (taskIdParam) {
-                  router.replace("/services/hrm/work-plans/tasks");
-                }
+      {selectedTaskId && (
+        <TaskDetailDrawer
+          taskId={selectedTaskId}
+          open={!!selectedTaskId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedTaskId(null);
+              if (taskIdParam) {
+                router.replace("/services/hrm/work-plans/tasks");
               }
-            }}
-            task={selectedTask as HrmTask}
-          />
-        )
-      }
+            }
+          }}
+        />
+      )}
 
       {isCreateTaskOpen && (
         <CreateTaskDialog
