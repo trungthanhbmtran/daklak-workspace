@@ -84,7 +84,38 @@ export function EvaluationFormsClient() {
   const [createDescription, setCreateDescription] = useState('');
   const [createCategory, setCreateCategory] = useState('');
   const [createTargetRole, setCreateTargetRole] = useState('');
-  const [createXml, setCreateXml] = useState('<?xml version="1.0" encoding="UTF-8"?>\n<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="NEW_TEMPLATE" schemaVersion="1.0">\n  <Header><DocumentTitle>{{documentTitle}}</DocumentTitle></Header>\n  <Body>{{content}}</Body>\n</KpiFormDocument>');
+  const [createXml, setCreateXml] = useState(`<?xml version="1.0" encoding="UTF-8"?>
+<KpiFormDocument xmlns="http://btctu.daklak.gov.vn/kpi/v1" formCode="NEW_TEMPLATE" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>{{documentTitle}}</DocumentTitle>
+    <EvaluationPeriod>{{periodName}}</EvaluationPeriod>
+  </Header>
+
+  <OfficerProfile>
+    <EmployeeCode>{{employeeCode}}</EmployeeCode>
+    <FullName>{{fullName}}</FullName>
+    <DepartmentName>{{departmentName}}</DepartmentName>
+    <JobTitle>{{jobTitle}}</JobTitle>
+  </OfficerProfile>
+
+  <RegisteredTasks>
+    {{#each tasks}}
+    <TaskItem orderNumber="{{@number}}">
+      <TaskName>{{this.taskName}}</TaskName>
+      <TargetDeadline>{{this.targetDeadline}}</TargetDeadline>
+    </TaskItem>
+    {{/each}}
+  </RegisteredTasks>
+
+  <WorkflowSignatures>
+    <OfficerSignature>
+      <SignerName>{{fullName}}</SignerName>
+      <SignedAt>{{signedAt}}</SignedAt>
+    </OfficerSignature>
+  </WorkflowSignatures>
+</KpiFormDocument>`);
   const [assignForm, setAssignForm] = useState<KpiFormTemplateItem | null>(null);
   const [assignUnitCode, setAssignUnitCode] = useState('');
   const [assignWorkflowId, setAssignWorkflowId] = useState('');
@@ -183,34 +214,95 @@ export function EvaluationFormsClient() {
     }
   };
 
-  // In / Xuất PDF trực tiếp theo chuẩn văn bản hành chính
-  const handlePrintPdf = async (item: KpiFormTemplateItem) => {
-    try {
-      const res: any = await kpiFormsApi.getXml(item.formCode);
-      const xml = res?.data?.xmlContent || res?.xmlContent || '';
-      if (!xml) {
-        toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
-        return;
-      }
-      printKpiXmlDocument(xml, item.name);
-    } catch (err: any) {
-      toast.error(err?.message || 'Không thể mở bản in PDF');
-    }
+  // In trực tiếp tài liệu từ server API printer endpoint thông qua iframe ẩn chuyên dụng
+  const printViaIframeUrl = (url: string) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.src = url;
+    document.body.appendChild(iframe);
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } finally {
+          setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+          }, 3000);
+        }
+      }, 400);
+    };
   };
 
-  // In / Xuất PDF từ Sheet Xem trước
+  // In / Xuất PDF trực tiếp sử dụng server API printer endpoint
+  const handlePrintPdf = (item: KpiFormTemplateItem) => {
+    const printUrl = kpiFormsApi.getPrintUrl(item.formCode);
+    printViaIframeUrl(printUrl);
+  };
+
+  // In / Xuất PDF từ Sheet Xem trước thông qua server API printer endpoint
   const handlePrintPdfFromPreview = () => {
-    if (!previewDetail?.xmlContent) return;
-    printKpiXmlDocument(previewDetail.xmlContent, previewDetail.name);
+    if (!previewDetail?.formCode) return;
+    const printUrl = kpiFormsApi.getPrintUrl(previewDetail.formCode);
+    printViaIframeUrl(printUrl);
   };
 
-  // In / Xuất PDF từ Sheet Sửa XML
-  const handlePrintPdfFromEditor = () => {
+  // In / Xuất PDF từ Sheet Sửa XML thông qua server API printer endpoint
+  const handlePrintPdfFromEditor = async () => {
     if (!editingXmlText.trim()) {
       toast.error('Nội dung XML đang trống');
       return;
     }
-    printKpiXmlDocument(editingXmlText, 'VĂN BẢN ĐÁNH GIÁ CHUẨN HÀNH CHÍNH');
+    try {
+      const html = await kpiFormsApi.printCustomXml(
+        editingXmlText,
+        editMetaForm?.name || 'VĂN BẢN ĐÁNH GIÁ CHUẨN HÀNH CHÍNH'
+      );
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      iframe.style.visibility = 'hidden';
+      iframe.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentWindow?.document || iframe.contentDocument;
+      if (iframeDoc && iframe.contentWindow) {
+        iframeDoc.open();
+        iframeDoc.write(typeof html === 'string' ? html : String(html));
+        iframeDoc.close();
+        setTimeout(() => {
+          try {
+            iframe.contentWindow?.focus();
+            iframe.contentWindow?.print();
+          } finally {
+            setTimeout(() => {
+              if (document.body.contains(iframe)) {
+                document.body.removeChild(iframe);
+              }
+            }, 3000);
+          }
+        }, 400);
+      } else {
+        printKpiXmlDocument(editingXmlText, 'VĂN BẢN ĐÁNH GIÁ CHUẨN HÀNH CHÍNH');
+      }
+    } catch {
+      // Fallback in trực tiếp nếu server bận
+      printKpiXmlDocument(editingXmlText, 'VĂN BẢN ĐÁNH GIÁ CHUẨN HÀNH CHÍNH');
+    }
   };
 
   const unitsQuery = useQuery({
@@ -787,11 +879,19 @@ export function EvaluationFormsClient() {
                 {/* TAB 1: XML CODE */}
                 <TabsContent value="xml" className="flex-1 flex flex-col gap-3 min-h-0 m-0">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>Định dạng: XML 1.0 (UTF-8 không BOM)</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground">Định dạng: XML 1.0 (UTF-8)</span>
+                      {previewDetail?.xmlContent && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-emerald-50 text-emerald-700 border-emerald-300 font-mono">
+                          {previewDetail.xmlContent.split('\n').length} dòng • {(new Blob([previewDetail.xmlContent]).size / 1024).toFixed(1)} KB
+                        </Badge>
+                      )}
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleCopyXml(previewDetail?.xmlContent || '')}
+                      disabled={!previewDetail?.xmlContent}
                       className="h-7 text-xs gap-1"
                     >
                       {hasCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -799,11 +899,40 @@ export function EvaluationFormsClient() {
                     </Button>
                   </div>
 
-                  <div className="relative flex-1 min-h-[350px] max-h-[500px] overflow-auto bg-slate-950 text-slate-100 rounded-xl p-4 font-mono text-xs border border-slate-800 leading-relaxed shadow-inner">
-                    <pre className="whitespace-pre break-words">
-                      <code>{previewDetail?.xmlContent}</code>
-                    </pre>
-                  </div>
+                  {previewDetail?.xmlContent ? (
+                    <div className="relative flex-1 min-h-[350px] max-h-[500px] overflow-auto bg-slate-950 text-slate-100 rounded-xl p-4 font-mono text-xs border border-slate-800 leading-relaxed shadow-inner">
+                      <pre className="whitespace-pre break-words">
+                        <code>{previewDetail.xmlContent}</code>
+                      </pre>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center min-h-[300px] p-8 border border-dashed rounded-xl bg-muted/20 text-center">
+                      <AlertTriangle className="w-8 h-8 text-amber-500 mb-2" />
+                      <p className="font-bold text-sm text-foreground">Chưa có nội dung ruột XML</p>
+                      <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                        Biểu mẫu này chưa có nội dung XML hoàn chỉnh hoặc đang được đồng bộ từ hệ thống mẫu chuẩn.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const res: any = await kpiFormsApi.getXml(previewFormCode || '');
+                            if (res?.xmlContent || res?.data?.xmlContent) {
+                              toast.success('Đã nạp thành công ruột XML chuẩn!');
+                              refetch();
+                            }
+                          } catch {
+                            toast.error('Không thể nạp ruột XML');
+                          }
+                        }}
+                        className="mt-3 text-xs gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        Đồng bộ lại từ máy chủ
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
 
                 {/* TAB 2: PLACEHOLDERS */}

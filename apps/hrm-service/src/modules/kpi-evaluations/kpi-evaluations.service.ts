@@ -12,6 +12,7 @@ import {
   extractPlaceholders,
   validateXmlSyntax,
   isPlaceholderXml,
+  hasValidFormContent,
 } from './kpi-template-xml.util';
 
 @Injectable()
@@ -367,6 +368,7 @@ export class KpiEvaluationsService implements OnModuleInit {
           select: { documents: true },
         },
         bindings: { where: { organizationId, isActive: true } },
+        versions: { orderBy: { version: 'desc' } },
       },
       orderBy: { formCode: 'asc' },
     });
@@ -374,8 +376,12 @@ export class KpiEvaluationsService implements OnModuleInit {
     let needRefresh = false;
     for (const def of DEFAULT_KPI_FORM_TEMPLATES) {
       const found = dbTemplates.find((t) => t.formCode === def.formCode);
-      if (!found) {
+      const isContentValid = found && hasValidFormContent(def.formCode, found.xmlContent);
+
+      if (!found || !isContentValid) {
         const xml = getTemplateXmlContent(def.formCode);
+        const version = found?.version || 1;
+
         await this.prisma.kpiFormTemplate.upsert({
           where: { formCode: def.formCode },
           update: {
@@ -386,6 +392,8 @@ export class KpiEvaluationsService implements OnModuleInit {
             schemaVersion: def.schemaVersion,
             templateFileId: def.fileName,
             xmlContent: xml,
+            status: 'PUBLISHED',
+            version,
             organizationId: 'DEFAULT',
           },
           create: {
@@ -397,24 +405,30 @@ export class KpiEvaluationsService implements OnModuleInit {
             schemaVersion: def.schemaVersion,
             templateFileId: def.fileName,
             xmlContent: xml,
+            status: 'PUBLISHED',
+            version: 1,
             organizationId: 'DEFAULT',
           },
         });
-        needRefresh = true;
-      } else if (isPlaceholderXml(found.xmlContent)) {
-        const xml = getTemplateXmlContent(def.formCode);
-        await this.prisma.kpiFormTemplate.update({
-          where: { formCode: def.formCode },
-          data: {
-            name: def.name,
-            description: def.description,
-            category: def.category,
-            targetRole: def.targetRole,
-            schemaVersion: def.schemaVersion,
-            templateFileId: def.fileName,
+
+        // Đảm bảo bảng version cũng có bản ghi đã phát hành kèm đầy đủ ruột XML
+        await this.prisma.kpiFormTemplateVersion.upsert({
+          where: { formCode_version: { formCode: def.formCode, version } },
+          update: {
             xmlContent: xml,
+            status: 'PUBLISHED',
+            publishedAt: new Date(),
           },
-        });
+          create: {
+            formCode: def.formCode,
+            version,
+            xmlContent: xml,
+            status: 'PUBLISHED',
+            createdBy: 'SYSTEM',
+            publishedAt: new Date(),
+          },
+        }).catch(() => undefined);
+
         needRefresh = true;
       }
     }
@@ -427,6 +441,7 @@ export class KpiEvaluationsService implements OnModuleInit {
             select: { documents: true },
           },
           bindings: { where: { organizationId, isActive: true } },
+          versions: { orderBy: { version: 'desc' } },
         },
         orderBy: { formCode: 'asc' },
       });
@@ -434,7 +449,9 @@ export class KpiEvaluationsService implements OnModuleInit {
 
     const data = dbTemplates.map((item) => {
       const def = DEFAULT_KPI_FORM_TEMPLATES.find((t) => t.formCode === item.formCode);
-      const xml = (!isPlaceholderXml(item.xmlContent) ? item.xmlContent : null) || getTemplateXmlContent(item.formCode);
+      const xml = hasValidFormContent(item.formCode, item.xmlContent)
+        ? (item.xmlContent as string)
+        : getTemplateXmlContent(item.formCode);
       const xmlSize = Buffer.byteLength(xml, 'utf8');
 
       return {
@@ -472,22 +489,41 @@ export class KpiEvaluationsService implements OnModuleInit {
         _count: {
           select: { documents: true },
         },
+        versions: { orderBy: { version: 'desc' } },
       },
     });
 
     const def = DEFAULT_KPI_FORM_TEMPLATES.find((t) => t.formCode === formCode);
     if (!item && def) {
+      const defaultXml = getTemplateXmlContent(def.formCode);
       item = await this.prisma.kpiFormTemplate.create({
         data: {
           formCode: def.formCode,
           name: def.name,
           description: def.description,
           templateFileId: def.fileName,
+          category: def.category,
+          targetRole: def.targetRole,
+          schemaVersion: def.schemaVersion,
+          status: 'PUBLISHED',
+          version: 1,
+          xmlContent: defaultXml,
+          organizationId: 'DEFAULT',
+          versions: {
+            create: {
+              version: 1,
+              xmlContent: defaultXml,
+              status: 'PUBLISHED',
+              createdBy: 'SYSTEM',
+              publishedAt: new Date(),
+            },
+          },
         },
         include: {
           _count: {
             select: { documents: true },
           },
+          versions: { orderBy: { version: 'desc' } },
         },
       });
     }
@@ -497,20 +533,47 @@ export class KpiEvaluationsService implements OnModuleInit {
     }
 
     let xmlContent = item.xmlContent || '';
-    if (isPlaceholderXml(xmlContent)) {
-      xmlContent = getTemplateXmlContent(formCode);
-      if (def) {
+    if (!hasValidFormContent(formCode, xmlContent)) {
+      // 1. Kiểm tra xem trong versions có bản ghi PUBLISHED nào có XML hợp lệ không
+      const publishedVersion = (item as any).versions?.find(
+        (v: any) => v.status === 'PUBLISHED' && hasValidFormContent(formCode, v.xmlContent),
+      );
+      if (publishedVersion) {
+        xmlContent = publishedVersion.xmlContent;
+      } else {
+        xmlContent = getTemplateXmlContent(formCode);
+      }
+
+      // 2. Tự phục hồi (Self-heal) vào CSDL nếu nội dung chuẩn đã sẵn sàng
+      if (hasValidFormContent(formCode, xmlContent)) {
         await this.prisma.kpiFormTemplate.updateMany({
           where: { formCode },
           data: {
             xmlContent,
-            category: def.category,
-            targetRole: def.targetRole,
-            templateFileId: def.fileName,
+            ...(def ? {
+              category: def.category,
+              targetRole: def.targetRole,
+              templateFileId: def.fileName,
+              status: 'PUBLISHED',
+            } : {}),
+          },
+        }).catch(() => undefined);
+
+        await this.prisma.kpiFormTemplateVersion.upsert({
+          where: { formCode_version: { formCode, version: item.version || 1 } },
+          update: { xmlContent, status: item.status || 'PUBLISHED' },
+          create: {
+            formCode,
+            version: item.version || 1,
+            xmlContent,
+            status: item.status || 'PUBLISHED',
+            createdBy: 'SYSTEM',
+            publishedAt: new Date(),
           },
         }).catch(() => undefined);
       }
     }
+
     const placeholders = extractPlaceholders(xmlContent);
     const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
 
@@ -591,25 +654,53 @@ export class KpiEvaluationsService implements OnModuleInit {
   async getFormTemplateXml(formCode: string, organizationId = 'DEFAULT') {
     const item = await this.prisma.kpiFormTemplate.findFirst({
       where: { formCode, OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
-      select: { xmlContent: true },
+      include: {
+        versions: { orderBy: { version: 'desc' } },
+      },
     });
     if (!item) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu ${formCode}` });
+
     let xmlContent = item.xmlContent || '';
-    if (isPlaceholderXml(xmlContent)) {
-      xmlContent = getTemplateXmlContent(formCode);
+    if (!hasValidFormContent(formCode, xmlContent)) {
+      const publishedVersion = item.versions?.find(
+        (v: any) => v.status === 'PUBLISHED' && hasValidFormContent(formCode, v.xmlContent),
+      );
+      if (publishedVersion) {
+        xmlContent = publishedVersion.xmlContent;
+      } else {
+        xmlContent = getTemplateXmlContent(formCode);
+      }
+
       const def = DEFAULT_KPI_FORM_TEMPLATES.find((t) => t.formCode === formCode);
-      if (def) {
+      if (hasValidFormContent(formCode, xmlContent)) {
         await this.prisma.kpiFormTemplate.updateMany({
           where: { formCode },
           data: {
             xmlContent,
-            category: def.category,
-            targetRole: def.targetRole,
-            templateFileId: def.fileName,
+            ...(def ? {
+              category: def.category,
+              targetRole: def.targetRole,
+              templateFileId: def.fileName,
+              status: 'PUBLISHED',
+            } : {}),
+          },
+        }).catch(() => undefined);
+
+        await this.prisma.kpiFormTemplateVersion.upsert({
+          where: { formCode_version: { formCode, version: item.version || 1 } },
+          update: { xmlContent, status: item.status || 'PUBLISHED' },
+          create: {
+            formCode,
+            version: item.version || 1,
+            xmlContent,
+            status: item.status || 'PUBLISHED',
+            createdBy: 'SYSTEM',
+            publishedAt: new Date(),
           },
         }).catch(() => undefined);
       }
     }
+
     const placeholders = extractPlaceholders(xmlContent);
     const xmlSize = Buffer.byteLength(xmlContent, 'utf8');
 
@@ -769,19 +860,30 @@ export class KpiEvaluationsService implements OnModuleInit {
 
   async publishFormTemplate(formCode: string, organizationId = 'DEFAULT', publishedBy?: string) {
     const template = await this.prisma.kpiFormTemplate.findFirst({
-      where: { formCode, organizationId },
+      where: { formCode, OR: [{ organizationId }, { organizationId: 'DEFAULT' }] },
       select: { xmlContent: true, version: true },
     });
     if (!template) throw new RpcException({ code: 5, message: `Không tìm thấy biểu mẫu ${formCode}` });
-    const xmlContent = template.xmlContent || getTemplateXmlContent(formCode);
+
+    let xmlContent = template.xmlContent || '';
+    if (!hasValidFormContent(formCode, xmlContent)) {
+      xmlContent = getTemplateXmlContent(formCode);
+    }
+
     const validation = validateXmlSyntax(xmlContent);
     if (!validation.isValid) throw new RpcException({ code: 3, message: `XML không hợp lệ: ${validation.error}` });
+
     const revision = await this.prisma.kpiFormTemplateVersion.findFirst({ where: { formCode, version: template.version } });
     await this.prisma.$transaction(async (tx) => {
       if (revision) {
         await tx.kpiFormTemplateVersion.update({
           where: { id: revision.id },
-          data: { status: 'PUBLISHED', publishedBy: publishedBy || null, publishedAt: new Date() },
+          data: {
+            xmlContent,
+            status: 'PUBLISHED',
+            publishedBy: publishedBy || null,
+            publishedAt: new Date(),
+          },
         });
       } else {
         await tx.kpiFormTemplateVersion.create({
@@ -796,7 +898,10 @@ export class KpiEvaluationsService implements OnModuleInit {
           },
         });
       }
-      await tx.kpiFormTemplate.updateMany({ where: { formCode, organizationId }, data: { status: 'PUBLISHED' } });
+      await tx.kpiFormTemplate.updateMany({
+        where: { formCode },
+        data: { status: 'PUBLISHED', xmlContent },
+      });
     });
     return this.getFormTemplateDetail(formCode, organizationId);
   }
@@ -825,6 +930,14 @@ export class KpiEvaluationsService implements OnModuleInit {
     if (published[1] && Boolean(published[1].nodeCode) === Boolean(selected.nodeCode) && Boolean(published[1].phase) === Boolean(selected.phase)) {
       throw new RpcException({ code: 6, message: 'Có nhiều biểu mẫu cùng độ ưu tiên phù hợp với bước quy trình' });
     }
+
+    const candidateXml =
+      selected.template.versions.find((version) => version.version === selected.templateVersion)?.xmlContent ||
+      selected.template.xmlContent;
+    const finalXml = hasValidFormContent(selected.formCode, candidateXml)
+      ? (candidateXml as string)
+      : getTemplateXmlContent(selected.formCode);
+
     return {
       success: true,
       message: 'Đã tìm thấy biểu mẫu áp dụng',
@@ -837,7 +950,7 @@ export class KpiEvaluationsService implements OnModuleInit {
         nodeCode: selected.nodeCode || '',
         phase: selected.phase || '',
         templateVersion: selected.templateVersion,
-        xmlContent: selected.template.versions.find((version) => version.version === selected.templateVersion)?.xmlContent || selected.template.xmlContent || getTemplateXmlContent(selected.formCode),
+        xmlContent: finalXml,
       },
     };
   }

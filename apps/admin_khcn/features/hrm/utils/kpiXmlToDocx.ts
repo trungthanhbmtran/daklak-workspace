@@ -1,7 +1,13 @@
 /**
- * Utility: Chuyển đổi file mẫu XML KPI thành tài liệu Microsoft Word (.docx) và PDF in ấn
- * Dựa 100% vào dữ liệu và cấu trúc thực tế của file XML gốc (KHÔNG GÁN CỨNG / NO HARDCODED MOCK DATA)
- * Tuân thủ chuẩn thể thức văn bản hành chính Việt Nam (Nghị định 30/2020/NĐ-CP & Thể thức văn bản của Đảng)
+ * Utility: Chuyển đổi và xuất các biểu mẫu XML thành tài liệu Microsoft Word (.docx), XML UTF-8 và Bản in PDF
+ * Tuân thủ 100% Thể thức và Kỹ thuật trình bày văn bản hành chính theo Nghị định 30/2020/NĐ-CP (Phụ lục I)
+ * và Thể thức văn bản của cơ quan Đảng (Hướng dẫn 36-HD/VPTW & Quy định 01-QĐ/BTCTU)
+ *
+ * KHẮC PHỤC TRIỆT ĐỂ LỖI FONT CHỮ:
+ * 1. Khai báo đồng bộ thuộc tính font Times New Roman (ascii, hAnsi, cs, eastAsia) cho mọi TextRun và Document Styles,
+ *    loại trừ triệt để hiện tượng Word tự động fallback sang Calibri/SimSun cho các ký tự tiếng Việt có dấu.
+ * 2. Xuất file XML chuẩn mã hóa UTF-8 có Byte Order Mark (BOM \uFEFF) giúp Windows Notepad, Word, Excel hiển thị chính xác.
+ * 3. Bản in / PDF sử dụng Times New Roman nhúng, căn lề chuẩn A4 (20mm, 20mm, 30mm, 15mm), đường kẻ ngang liền thanh mảnh.
  */
 import {
   Document,
@@ -19,7 +25,42 @@ import {
   Header,
   Footer,
   PageNumber,
+  UnderlineType,
 } from 'docx';
+
+/**
+ * Định nghĩa font Times New Roman chuẩn Unicode TCVN 6909:2001 theo Nghị định 30/2020/NĐ-CP
+ * Khai báo đầy đủ cho cả ASCII, High-ANSI, Complex Script và East Asian để tránh lỗi font chữ tiếng Việt
+ */
+export const FONT_TIMES_NEW_ROMAN = {
+  name: 'Times New Roman',
+  ascii: 'Times New Roman',
+  hAnsi: 'Times New Roman',
+  cs: 'Times New Roman',
+  eastAsia: 'Times New Roman',
+};
+
+/**
+ * Helper tạo TextRun chuẩn Times New Roman không bị lỗi font tiếng Việt
+ */
+export function createTrTextRun(options: {
+  text: string;
+  size?: number; // Đơn vị: half-points (26 = 13 pt, 28 = 14 pt, 24 = 12 pt, 30 = 15 pt)
+  bold?: boolean;
+  italics?: boolean;
+  underline?: { type?: (typeof UnderlineType)[keyof typeof UnderlineType]; color?: string };
+  color?: string;
+}): TextRun {
+  return new TextRun({
+    text: options.text,
+    font: FONT_TIMES_NEW_ROMAN,
+    size: options.size ?? 26, // Mặc định 13 pt theo NĐ 30/2020
+    bold: options.bold ?? false,
+    italics: options.italics ?? false,
+    underline: options.underline,
+    color: options.color ?? '000000',
+  });
+}
 
 // Cấu trúc một cột trong bảng động
 export interface DynamicTableColumn {
@@ -58,6 +99,7 @@ export interface ParsedXmlDocumentData {
   decisionDate?: string;
   periodName?: string;
   datePlaceString?: string;
+  isPartyAgency: boolean; // Cơ quan Đảng hay cơ quan Nhà nước
   // Khối thông tin đối tượng (Profile / Officer / Department)
   profileFields: Array<{ label: string; value: string }>;
   // Căn cứ pháp lý
@@ -67,7 +109,7 @@ export interface ParsedXmlDocumentData {
   // Các khối nội dung điều khoản / cam kết / nhận xét
   textBlocks: DynamicTextBlock[];
   // Chữ ký
-  signatureType: 'TWO_COLUMN' | 'DECISION' | 'NONE';
+  signatureType: 'TWO_COLUMN' | 'DECISION' | 'DEPARTMENT' | 'NONE';
   signers: {
     leftTitle?: string;
     leftSubtitle?: string;
@@ -85,7 +127,6 @@ export interface ParsedXmlDocumentData {
 function sanitizeText(val: string | null | undefined, placeholderReplacement = ''): string {
   if (!val) return '';
   const trimmed = val.trim();
-  // Nếu là placeholder dạng {{xxx}} hoặc {xxx}
   if (/^\{\{.*\}\}$/.test(trimmed) || /^\{.*\}$/.test(trimmed)) {
     return placeholderReplacement;
   }
@@ -108,13 +149,17 @@ function getDirectTagText(parent: Element | null, tagName: string): string {
 const TAG_LABEL_MAP: Record<string, string> = {
   FullName: 'Họ và tên cán bộ',
   fullName: 'Họ và tên cán bộ',
+  EmployeeName: 'Họ và tên cán bộ',
   EmployeeCode: 'Mã số công chức',
   employeeCode: 'Mã số công chức',
+  CitizenID: 'Số CCCD / Mã định danh',
   DepartmentName: 'Đơn vị / Phòng ban',
   departmentName: 'Đơn vị / Phòng ban',
   DepartmentCode: 'Mã phòng ban',
   JobTitle: 'Chức vụ / Chức danh',
   jobTitle: 'Chức vụ / Chức danh',
+  PartyPosition: 'Chức vụ Đảng',
+  GovernmentPosition: 'Chức vụ chính quyền',
   JobPositionCode: 'Vị trí việc làm',
   StaffingSlotId: 'Mã định biên biên chế',
   RankCode: 'Mã ngạch công chức',
@@ -123,6 +168,7 @@ const TAG_LABEL_MAP: Record<string, string> = {
   SelfScore: 'Điểm tự chấm',
   TotalScore: 'Tổng điểm đánh giá',
   OfficialRank: 'Xếp loại chính thức',
+  ProposedRank: 'Xếp loại đề xuất',
   EvaluationPeriod: 'Kỳ đánh giá',
   PeriodYear: 'Năm công tác',
   PeriodQuarter: 'Quý đánh giá',
@@ -139,6 +185,7 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
     agencyName: 'TỈNH ỦY ĐẮK LẮK',
     organizationName: 'BAN TỔ CHỨC TỈNH ỦY',
     documentTitle: templateTitleFallback || 'BIỂU MẪU ĐÁNH GIÁ, XẾP LOẠI CHẤT LƯỢNG',
+    isPartyAgency: true,
     profileFields: [],
     legalBasis: [],
     tables: [],
@@ -158,17 +205,31 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
   if (!xmlContent || !xmlContent.trim()) return result;
 
   try {
-    const parser = new DOMParser();
+    const DOMParserConstructor: any =
+      typeof DOMParser !== 'undefined'
+        ? DOMParser
+        : typeof require !== 'undefined'
+          ? (() => {
+              try {
+                return require('@xmldom/xmldom').DOMParser;
+              } catch {
+                return null;
+              }
+            })()
+          : null;
+
+    if (!DOMParserConstructor) return result;
+    const parser = new DOMParserConstructor();
     const doc = parser.parseFromString(xmlContent, 'application/xml');
 
     const root = doc.documentElement;
     if (root) {
-      result.formCode = root.getAttribute('formCode') || result.formCode;
+      result.formCode = root.getAttribute('formCode') || root.getAttribute('id') || result.formCode;
       result.schemaVersion = root.getAttribute('schemaVersion') || undefined;
     }
 
     // 1. Trích xuất Header
-    const headerEl = doc.getElementsByTagName('Header')[0];
+    const headerEl = doc.getElementsByTagName('Header')[0] || doc.getElementsByTagName('Form01_SubmissionHeader')[0];
     if (headerEl) {
       const agency = sanitizeText(getDirectTagText(headerEl, 'AgencyName'));
       if (agency) result.agencyName = agency;
@@ -182,12 +243,16 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       const period = sanitizeText(getDirectTagText(headerEl, 'EvaluationPeriod'));
       if (period) result.periodName = period;
 
-      const decisionNum = sanitizeText(getDirectTagText(headerEl, 'DecisionNumber'));
+      const decisionNum = sanitizeText(getDirectTagText(headerEl, 'DecisionNumber') || getDirectTagText(headerEl, 'SubmissionNumber'));
       if (decisionNum) result.decisionNumber = decisionNum;
 
-      const decisionDate = sanitizeText(getDirectTagText(headerEl, 'DecisionDate'));
+      const decisionDate = sanitizeText(getDirectTagText(headerEl, 'DecisionDate') || getDirectTagText(headerEl, 'SubmissionDate'));
       if (decisionDate) result.decisionDate = decisionDate;
     }
+
+    // Xác định cơ quan Đảng hay cơ quan Nhà nước
+    const fullOrgText = `${result.agencyName} ${result.organizationName}`.toUpperCase();
+    result.isPartyAgency = fullOrgText.includes('TỈNH ỦY') || fullOrgText.includes('ĐẢNG') || fullOrgText.includes('CHI BỘ') || fullOrgText.includes('BTCTU');
 
     // 2. Trích xuất Căn cứ pháp lý (LegalBasis)
     const legalEl = doc.getElementsByTagName('LegalBasis')[0];
@@ -201,10 +266,11 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
-    // 3. Trích xuất Thông tin đối tượng / Cán bộ (OfficerProfile, EvaluatedOfficer, Profile)
+    // 3. Trích xuất Thông tin đối tượng / Cán bộ (OfficerProfile, PersonalInformation, Profile)
     const profileEl =
       doc.getElementsByTagName('OfficerProfile')[0] ||
       doc.getElementsByTagName('EvaluatedOfficer')[0] ||
+      doc.getElementsByTagName('PersonalInformation')[0] ||
       doc.getElementsByTagName('Profile')[0];
 
     if (profileEl) {
@@ -225,14 +291,15 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
     const isMau01 = result.formCode === 'MAU_01' || doc.getElementsByTagName('RegisteredTasks').length > 0;
     const isMau02 = result.formCode === 'MAU_02' || doc.getElementsByTagName('SectionA_GeneralCriteria').length > 0;
     const isMau03 = result.formCode === 'MAU_03' || doc.getElementsByTagName('CollectiveFeedback').length > 0;
+    const isMau04 = result.formCode === 'MAU_04' || doc.getElementsByTagName('StaffSummaryTable').length > 0;
     const isMau05 = result.formCode === 'MAU_05' || doc.getElementsByTagName('IndividualFinalRankings').length > 0;
 
     // --- MẪU 01: KHUNG DANH MỤC CÔNG VIỆC ĐĂNG KÝ ĐẦU KỲ ---
     if (isMau01) {
-      const taskNodes = doc.querySelectorAll('RegisteredTasks > TaskItem, RegisteredTasks > Task, TaskItem');
+      const taskNodes = Array.from(doc.querySelectorAll('RegisteredTasks > TaskItem, RegisteredTasks > Task, TaskItem')) as Element[];
       if (taskNodes.length > 0) {
         const rows: Array<Record<string, string>> = [];
-        taskNodes.forEach((node, idx) => {
+        taskNodes.forEach((node: Element, idx: number) => {
           rows.push({
             stt: node.getAttribute('orderNumber') || String(idx + 1),
             taskName: sanitizeText(getDirectTagText(node, 'TaskName'), `Nhiệm vụ chuyên môn ${idx + 1}`),
@@ -281,16 +348,16 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
     // --- MẪU 02: TỰ ĐÁNH GIÁ, CHẤM ĐIỂM KPI CÁ NHÂN ---
     if (isMau02) {
       // 1. Tiêu chí chung
-      const criteriaNodes = doc.querySelectorAll('SectionA_GeneralCriteria > Criterion, Criterion');
+      const criteriaNodes = Array.from(doc.querySelectorAll('SectionA_GeneralCriteria > Criterion, Criterion')) as Element[];
       if (criteriaNodes.length > 0) {
         const rows: Array<Record<string, string>> = [];
-        criteriaNodes.forEach((node, idx) => {
+        criteriaNodes.forEach((node: Element, idx: number) => {
           rows.push({
             stt: String(idx + 1),
-            name: sanitizeText(getDirectTagText(node, 'Name'), `Tiêu chí ${idx + 1}`),
+            name: sanitizeText(getDirectTagText(node, 'Name') || node.getAttribute('name'), `Tiêu chí ${idx + 1}`),
             desc: sanitizeText(getDirectTagText(node, 'Description')),
-            maxScore: node.getAttribute('maxScore') || sanitizeText(getDirectTagText(node, 'MaxScore'), '10.0'),
-            selfScore: sanitizeText(getDirectTagText(node, 'SelfScore'), '-'),
+            maxScore: node.getAttribute('maxScore') || node.getAttribute('max') || sanitizeText(getDirectTagText(node, 'MaxScore'), '10.0'),
+            selfScore: sanitizeText(getDirectTagText(node, 'SelfScore') || node.getAttribute('score'), '-'),
             reviewerScore: sanitizeText(getDirectTagText(node, 'ReviewerScore'), '-'),
           });
         });
@@ -299,8 +366,8 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
           title: 'I. ĐÁNH GIÁ CÁC TIÊU CHÍ CHUNG (Tối đa 30 điểm)',
           columns: [
             { key: 'stt', label: 'STT', widthPct: 6, align: AlignmentType.CENTER },
-            { key: 'name', label: 'Nội dung tiêu chí chung', widthPct: 40, bold: true },
-            { key: 'desc', label: 'Mô tả tiêu chuẩn', widthPct: 30 },
+            { key: 'name', label: 'Nội dung tiêu chí chung', widthPct: 38, bold: true },
+            { key: 'desc', label: 'Mô tả tiêu chuẩn', widthPct: 32 },
             { key: 'maxScore', label: 'Điểm tối đa', widthPct: 8, align: AlignmentType.CENTER },
             { key: 'selfScore', label: 'Tự chấm', widthPct: 8, align: AlignmentType.CENTER },
             { key: 'reviewerScore', label: 'Lãnh đạo chấm', widthPct: 8, align: AlignmentType.CENTER },
@@ -310,10 +377,10 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
 
       // 2. Nhiệm vụ chuyên môn
-      const taskDetailNodes = doc.querySelectorAll('SectionB_TaskPerformance TaskDetail, EvaluatedTasks > TaskDetail');
+      const taskDetailNodes = Array.from(doc.querySelectorAll('SectionB_TaskPerformance TaskDetail, EvaluatedTasks > TaskDetail, SectionB_TaskKPI TaskItem')) as Element[];
       if (taskDetailNodes.length > 0) {
         const rows: Array<Record<string, string>> = [];
-        taskDetailNodes.forEach((node, idx) => {
+        taskDetailNodes.forEach((node: Element, idx: number) => {
           const volEl = node.getElementsByTagName('VolumeFactorA')[0];
           const qualEl = node.getElementsByTagName('QualityFactorB')[0];
           const progEl = node.getElementsByTagName('ProgressFactorC')[0];
@@ -322,9 +389,9 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
           rows.push({
             stt: String(idx + 1),
             taskName: sanitizeText(getDirectTagText(node, 'TaskName'), `Nhiệm vụ ${idx + 1}`),
-            vol: volEl ? `${volEl.getAttribute('actualQty') || '-'}/${volEl.getAttribute('plannedQty') || '-'}` : '-',
-            qual: qualEl ? `${qualEl.getAttribute('qualityPct') || '-'}%` : '-',
-            prog: progEl ? `${progEl.getAttribute('progressPct') || '-'}%` : '-',
+            vol: volEl ? `${volEl.getAttribute('actualQty') || '-'}/${volEl.getAttribute('plannedQty') || '-'}` : sanitizeText(getDirectTagText(node, 'CompletedQuantity'), '-'),
+            qual: qualEl ? `${qualEl.getAttribute('qualityPct') || '-'}%` : sanitizeText(getDirectTagText(node, 'QualityFactor'), '-'),
+            prog: progEl ? `${progEl.getAttribute('progressPct') || '-'}%` : sanitizeText(getDirectTagText(node, 'SLAFactor'), '-'),
             att: attEl ? `${attEl.getAttribute('score') || '-'}` : '-',
             score: sanitizeText(getDirectTagText(node, 'TaskKpiScore'), '-'),
           });
@@ -401,10 +468,10 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
         });
       }
 
-      const reviewerCommentNodes = doc.querySelectorAll('ReviewerComments > Comment');
+      const reviewerCommentNodes = Array.from(doc.querySelectorAll('ReviewerComments > Comment')) as Element[];
       if (reviewerCommentNodes.length > 0) {
         const rows: Array<Record<string, string>> = [];
-        reviewerCommentNodes.forEach((node, idx) => {
+        reviewerCommentNodes.forEach((node: Element, idx: number) => {
           rows.push({
             stt: String(idx + 1),
             reviewerName: sanitizeText(getDirectTagText(node, 'ReviewerName'), `Thành viên ${idx + 1}`),
@@ -423,6 +490,116 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
           ],
           rows,
         });
+      }
+    }
+
+    // --- MẪU 04: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ TẬP THỂ PHÒNG & VIỆC NỔI TRỘI ---
+    if (isMau04) {
+      result.signatureType = 'DEPARTMENT';
+      result.signers.leftTitle = 'NGƯỜI TỔNG HỢP';
+      result.signers.leftSubtitle = '(Ký, ghi rõ họ và tên)';
+      result.signers.rightTitle = 'TRƯỞNG PHÒNG CHUYÊN MÔN';
+      result.signers.rightSubtitle = '(Ký, ghi rõ họ và tên)';
+
+      // 1. Thống kê xếp loại phòng
+      const deptStatEl = doc.getElementsByTagName('DepartmentStatistics')[0];
+      if (deptStatEl) {
+        const totalStaff = deptStatEl.getAttribute('totalStaff') || '-';
+        const evaluatedStaff = deptStatEl.getAttribute('evaluatedStaff') || '-';
+        const distEl = deptStatEl.getElementsByTagName('StaffRankDistribution')[0];
+        const excEl = distEl?.getElementsByTagName('ExcellentCount')[0];
+
+        result.tables.push({
+          title: 'I. THỐNG KÊ PHÂN BỔ XẾP LOẠI CỦA PHÒNG (Khống chế trần xuất sắc <= 20%)',
+          columns: [
+            { key: 'metric', label: 'Chỉ tiêu thống kê', widthPct: 60, bold: true },
+            { key: 'value', label: 'Số lượng / Tỷ lệ thực tế', widthPct: 40, align: AlignmentType.CENTER },
+          ],
+          rows: [
+            { metric: 'Tổng số cán bộ, công chức thuộc phòng', value: `${totalStaff} người` },
+            { metric: 'Số cán bộ, công chức được đánh giá, xếp loại', value: `${evaluatedStaff} người` },
+            { metric: 'Đề xuất Hoàn thành xuất sắc nhiệm vụ (Tối đa 20%)', value: `${excEl?.getAttribute('proposed') || '-'} / ${excEl?.getAttribute('maxAllowed') || '-'} người (${excEl?.getAttribute('quotaPercent') || '20'}%)` },
+            { metric: 'Đề xuất Hoàn thành tốt nhiệm vụ', value: `${sanitizeText(getDirectTagText(distEl, 'GoodCount'), '0')} người` },
+            { metric: 'Đề xuất Hoàn thành nhiệm vụ', value: `${sanitizeText(getDirectTagText(distEl, 'FairCount'), '0')} người` },
+            { metric: 'Đề xuất Không hoàn thành nhiệm vụ', value: `${sanitizeText(getDirectTagText(distEl, 'PoorCount'), '0')} người` },
+          ],
+        });
+      }
+
+      // 2. Bảng tổng hợp chi tiết cán bộ phòng
+      const staffRows = Array.from(doc.querySelectorAll('StaffSummaryTable > StaffRow')) as Element[];
+      if (staffRows.length > 0) {
+        const rows: Array<Record<string, string>> = [];
+        staffRows.forEach((node: Element, idx: number) => {
+          rows.push({
+            stt: node.getAttribute('orderNumber') || String(idx + 1),
+            empCode: sanitizeText(getDirectTagText(node, 'EmployeeCode'), '-'),
+            fullName: sanitizeText(getDirectTagText(node, 'FullName'), `Cán bộ ${idx + 1}`),
+            jobTitle: sanitizeText(getDirectTagText(node, 'JobTitle'), 'Chuyên viên'),
+            genScore: sanitizeText(getDirectTagText(node, 'GeneralScore'), '-'),
+            taskScore: sanitizeText(getDirectTagText(node, 'TaskScore'), '-'),
+            totalScore: sanitizeText(getDirectTagText(node, 'TotalScore'), '-'),
+            proposedRank: sanitizeText(getDirectTagText(node, 'ProposedRank'), 'Hoàn thành tốt nhiệm vụ'),
+          });
+        });
+
+        result.tables.push({
+          title: 'II. BẢNG TỔNG HỢP ĐÁNH GIÁ, XẾP LOẠI TỪNG CÁN BỘ, CÔNG CHỨC',
+          columns: [
+            { key: 'stt', label: 'STT', widthPct: 6, align: AlignmentType.CENTER },
+            { key: 'fullName', label: 'Họ và tên cán bộ', widthPct: 26, bold: true },
+            { key: 'jobTitle', label: 'Chức danh', widthPct: 16, align: AlignmentType.CENTER },
+            { key: 'genScore', label: 'Tiêu chí chung (30đ)', widthPct: 12, align: AlignmentType.CENTER },
+            { key: 'taskScore', label: 'Nhiệm vụ (70đ)', widthPct: 12, align: AlignmentType.CENTER },
+            { key: 'totalScore', label: 'Tổng điểm', widthPct: 10, align: AlignmentType.CENTER, bold: true },
+            { key: 'proposedRank', label: 'Xếp loại đề xuất', widthPct: 18, align: AlignmentType.CENTER },
+          ],
+          rows,
+        });
+      }
+
+      // 3. Kê khai nhiệm vụ nổi trội
+      const outstandingNodes = Array.from(doc.querySelectorAll('OutstandingTasksRegistry > RegistryItem')) as Element[];
+      if (outstandingNodes.length > 0) {
+        const rows: Array<Record<string, string>> = [];
+        outstandingNodes.forEach((node: Element, idx: number) => {
+          rows.push({
+            stt: node.getAttribute('orderNumber') || String(idx + 1),
+            empName: sanitizeText(getDirectTagText(node, 'EmployeeName'), `Cán bộ ${idx + 1}`),
+            taskTitle: sanitizeText(getDirectTagText(node, 'TaskTitle'), '-'),
+            achieve: sanitizeText(getDirectTagText(node, 'AchievementsSummary'), '-'),
+            bonus: `+${sanitizeText(getDirectTagText(node, 'BonusScoreAdded'), '10')}%`,
+          });
+        });
+
+        result.tables.push({
+          title: 'III. KÊ KHAI SẢN PHẨM / NHIỆM VỤ NỔI TRỘI, VƯỢT MỨC ĐƯỢC THƯỞNG ĐIỂM (+10%)',
+          columns: [
+            { key: 'stt', label: 'STT', widthPct: 6, align: AlignmentType.CENTER },
+            { key: 'empName', label: 'Họ và tên cán bộ', widthPct: 22, bold: true },
+            { key: 'taskTitle', label: 'Nhiệm vụ nổi trội', widthPct: 32 },
+            { key: 'achieve', label: 'Thành tích vượt mức', widthPct: 30 },
+            { key: 'bonus', label: 'Điểm thưởng', widthPct: 10, align: AlignmentType.CENTER, bold: true },
+          ],
+          rows,
+        });
+      }
+
+      // Chữ ký Mẫu 04
+      const deptSigEl = doc.getElementsByTagName('DepartmentSignatures')[0];
+      if (deptSigEl) {
+        const compEl = deptSigEl.getElementsByTagName('Compiler')[0];
+        if (compEl) {
+          result.signers.leftName = sanitizeText(getDirectTagText(compEl, 'Name'), '');
+          const compTitle = sanitizeText(getDirectTagText(compEl, 'Title'));
+          if (compTitle) result.signers.leftTitle = compTitle.toUpperCase();
+        }
+        const headEl = deptSigEl.getElementsByTagName('DepartmentHead')[0];
+        if (headEl) {
+          result.signers.rightName = sanitizeText(getDirectTagText(headEl, 'Name'), '');
+          const headTitle = sanitizeText(getDirectTagText(headEl, 'Title'));
+          if (headTitle) result.signers.rightTitle = headTitle.toUpperCase();
+        }
       }
     }
 
@@ -452,10 +629,10 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
 
       // 2. Bảng xếp loại cá nhân toàn cơ quan
-      const rankingNodes = doc.querySelectorAll('IndividualFinalRankings > OfficerRankingItem');
+      const rankingNodes = Array.from(doc.querySelectorAll('IndividualFinalRankings > OfficerRankingItem')) as Element[];
       if (rankingNodes.length > 0) {
         const rows: Array<Record<string, string>> = [];
-        rankingNodes.forEach((node, idx) => {
+        rankingNodes.forEach((node: Element, idx: number) => {
           rows.push({
             stt: node.getAttribute('orderNumber') || String(idx + 1),
             empCode: sanitizeText(getDirectTagText(node, 'EmployeeCode'), '-'),
@@ -512,8 +689,7 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
     }
 
     // --- GENERIC XML: Nếu không khớp mẫu chuẩn nào, tự động quét cây XML ---
-    if (!isMau01 && !isMau02 && !isMau03 && !isMau05) {
-      // Tìm các node container có danh sách lặp (Ví dụ Items/Item, Records/Record...)
+    if (!isMau01 && !isMau02 && !isMau03 && !isMau04 && !isMau05) {
       const allElements = doc.getElementsByTagName('*');
       const processedContainers = new Set<Element>();
 
@@ -523,7 +699,6 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
 
         const children = el.children;
         if (children.length >= 2) {
-          // Kiểm tra xem các con có cùng tagName không
           const firstChildTag = children[0].tagName;
           let isHomogeneous = true;
           for (let c = 1; c < children.length; c++) {
@@ -535,20 +710,17 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
 
           if (isHomogeneous && children.length > 0) {
             processedContainers.add(el);
-            // Bóc tách thành bảng động
             const fieldKeys = new Set<string>();
             const rowList: Array<Record<string, string>> = [];
 
             for (let c = 0; c < children.length; c++) {
               const item = children[c];
               const rowObj: Record<string, string> = { stt: String(c + 1) };
-              // Thêm các thuộc tính
               for (let a = 0; a < item.attributes.length; a++) {
                 const attr = item.attributes[a];
                 fieldKeys.add(attr.name);
                 rowObj[attr.name] = attr.value;
               }
-              // Thêm các tag con
               for (let sub = 0; sub < item.children.length; sub++) {
                 const subNode = item.children[sub];
                 fieldKeys.add(subNode.tagName);
@@ -561,10 +733,10 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
               { key: 'stt', label: 'STT', widthPct: 8, align: AlignmentType.CENTER },
             ];
             const remainingPct = 92;
-            const keyArray = Array.from(fieldKeys).slice(0, 5); // Tối đa 5 cột
+            const keyArray = Array.from(fieldKeys).slice(0, 5);
             const colWidth = Math.floor(remainingPct / (keyArray.length || 1));
 
-            keyArray.forEach((k) => {
+            keyArray.forEach((k: string) => {
               columns.push({
                 key: k,
                 label: TAG_LABEL_MAP[k] || k,
@@ -582,8 +754,8 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
-    // 5. Trích xuất chữ ký chung (WorkflowSignatures) nếu không phải Mẫu 05
-    if (result.signatureType !== 'DECISION') {
+    // 5. Trích xuất chữ ký chung (WorkflowSignatures) nếu chưa có chữ ký đặc thù
+    if (result.signatureType !== 'DECISION' && result.signatureType !== 'DEPARTMENT') {
       const sigsEl = doc.getElementsByTagName('WorkflowSignatures')[0];
       if (sigsEl) {
         const offSign = sigsEl.getElementsByTagName('OfficerConfirmation')[0] || sigsEl.getElementsByTagName('OfficerSignature')[0];
@@ -595,7 +767,7 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
         if (deptSign) {
           result.signers.rightName = sanitizeText(getDirectTagText(deptSign, 'ApproverName') || getDirectTagText(deptSign, 'ReviewerName'), '');
           const title = sanitizeText(getDirectTagText(deptSign, 'ApproverTitle') || getDirectTagText(deptSign, 'ReviewerTitle'));
-          if (title) result.signers.rightTitle = title;
+          if (title) result.signers.rightTitle = title.toUpperCase();
         }
       }
     }
@@ -607,12 +779,12 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
 }
 
 /**
- * Kiểu viền bảng mỏng đơn sắc chuẩn văn bản hành chính Việt Nam (0.5 pt)
+ * Kiểu viền bảng mỏng đơn sắc chuẩn văn bản hành chính Việt Nam (0.5 pt, màu đen)
  */
 const TABLE_BORDER_THIN = {
   style: BorderStyle.SINGLE,
-  size: 4,
-  color: '64748B',
+  size: 4, // 0.5 pt
+  color: '000000',
 };
 
 const NO_BORDER = {
@@ -623,28 +795,29 @@ const NO_BORDER = {
 
 /**
  * Sinh file DOCX (Microsoft Word) dựa 100% vào dữ liệu thực tế từ cây XML
+ * Chuẩn hóa 100% thể thức văn bản hành chính Việt Nam theo Nghị định 30/2020/NĐ-CP
  */
 export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: string): Promise<Blob> {
   const data = parseKpiXml(xmlContent, templateTitle);
 
   // Tạo tài liệu Document docx
   const doc = new Document({
-    creator: 'daklak-workspace - Hệ thống Quản trị Ban Tổ chức Tỉnh ủy',
+    creator: 'Hệ thống Quản trị DakLak Workspace - Nghị định 30/2020/NĐ-CP',
     title: data.documentTitle,
-    description: `Biểu mẫu chuẩn hóa XML ${data.formCode} theo Hướng dẫn 05-HD/TU`,
+    description: `Biểu mẫu chuẩn hóa XML ${data.formCode} theo Hướng dẫn 05-HD/TU & Nghị định 30/2020/NĐ-CP`,
     styles: {
       default: {
         document: {
           run: {
-            font: 'Times New Roman',
-            size: 26, // 13 pt (half-points)
+            font: FONT_TIMES_NEW_ROMAN,
+            size: 26, // 13 pt
             color: '000000',
           },
           paragraph: {
             spacing: {
-              line: 276, // 1.15 line spacing
-              before: 60,
-              after: 60,
+              line: 276, // 1.15 line spacing theo chuẩn NĐ 30/2020
+              before: 60, // 3 pt
+              after: 60, // 3 pt
             },
           },
         },
@@ -654,11 +827,15 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
       {
         properties: {
           page: {
+            size: {
+              width: 11906, // Khổ A4 chuẩn: 210 mm
+              height: 16838, // Khổ A4 chuẩn: 297 mm
+            },
             margin: {
-              top: 1134, // 20 mm
-              bottom: 1134, // 20 mm
-              left: 1701, // 30 mm
-              right: 850, // 15 mm
+              top: 1134, // 20 mm (Nghị định 30: 20-25 mm)
+              bottom: 1134, // 20 mm (Nghị định 30: 20-25 mm)
+              left: 1701, // 30 mm (Nghị định 30: 30-35 mm)
+              right: 850, // 15 mm (Nghị định 30: 15-20 mm)
             },
           },
         },
@@ -668,12 +845,11 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
-                  new TextRun({
+                  createTrTextRun({
                     text: `Mã biểu mẫu: ${data.formCode}`,
-                    font: 'Times New Roman',
                     size: 18,
                     italics: true,
-                    color: '64748B',
+                    color: '475569',
                   }),
                 ],
               }),
@@ -686,17 +862,17 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: [
-                  new TextRun({ text: 'Trang ', font: 'Times New Roman', size: 20 }),
-                  new TextRun({ children: [PageNumber.CURRENT], font: 'Times New Roman', size: 20 }),
-                  new TextRun({ text: ' / ', font: 'Times New Roman', size: 20 }),
-                  new TextRun({ children: [PageNumber.TOTAL_PAGES], font: 'Times New Roman', size: 20 }),
+                  createTrTextRun({ text: 'Trang ', size: 22 }),
+                  new TextRun({ children: [PageNumber.CURRENT], font: FONT_TIMES_NEW_ROMAN, size: 22 }),
+                  createTrTextRun({ text: ' / ', size: 22 }),
+                  new TextRun({ children: [PageNumber.TOTAL_PAGES], font: FONT_TIMES_NEW_ROMAN, size: 22 }),
                 ],
               }),
             ],
           }),
         },
         children: [
-          // 1. HEADER 2 CỘT (Cơ quan & Quốc hiệu)
+          // 1. HEADER 2 CỘT CHUẨN NGHỊ ĐỊNH 30/2020 & THỂ THỨC ĐẢNG
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: {
@@ -710,111 +886,172 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
             rows: [
               new TableRow({
                 children: [
-                  // Cột trái
+                  // CỘT TRÁI: Tên cơ quan, tổ chức ban hành văn bản
                   new TableCell({
                     width: { size: 45, type: WidthType.PERCENTAGE },
+                    verticalAlign: VerticalAlign.TOP,
                     children: [
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 20 },
                         children: [
-                          new TextRun({
+                          createTrTextRun({
                             text: data.agencyName.toUpperCase(),
-                            font: 'Times New Roman',
-                            size: 24,
+                            size: 24, // 12 pt, in hoa, đứng
                           }),
                         ],
                       }),
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 20 },
                         children: [
-                          new TextRun({
+                          createTrTextRun({
                             text: data.organizationName.toUpperCase(),
-                            font: 'Times New Roman',
                             bold: true,
-                            size: 24,
+                            size: 24, // 12 pt, in hoa, đứng, đậm
                           }),
                         ],
                       }),
+                      // Đường kẻ ngang nét liền thanh mảnh dưới tên cơ quan ban hành (bằng 1/3 - 1/2 dòng chữ)
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 40 },
                         children: [
-                          new TextRun({
-                            text: '-----------------------',
-                            font: 'Times New Roman',
+                          createTrTextRun({
+                            text: '\u00A0'.repeat(12),
+                            underline: {
+                              type: UnderlineType.SINGLE,
+                              color: '000000',
+                            },
                             size: 20,
-                            color: '64748B',
                           }),
                         ],
                       }),
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 0 },
                         children: [
-                          new TextRun({
+                          createTrTextRun({
                             text: data.decisionNumber ? `Số: ${data.decisionNumber}` : `Mẫu số: ${data.formCode}`,
-                            font: 'Times New Roman',
-                            size: 22,
-                            italics: true,
+                            size: 24, // 12 pt, đứng
                           }),
                         ],
                       }),
                     ],
                   }),
-                  // Cột phải
+
+                  // CỘT PHẢI: Quốc hiệu và Tiêu ngữ (hoặc Thể thức Đảng)
                   new TableCell({
                     width: { size: 55, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({
-                        alignment: AlignmentType.CENTER,
-                        children: [
-                          new TextRun({
-                            text: 'ĐẢNG CỘNG SẢN VIỆT NAM',
-                            font: 'Times New Roman',
-                            bold: true,
-                            size: 26,
+                    verticalAlign: VerticalAlign.TOP,
+                    children: data.isPartyAgency
+                      ? [
+                          // Thể thức văn bản của Đảng
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 0, after: 20 },
+                            children: [
+                              createTrTextRun({
+                                text: 'ĐẢNG CỘNG SẢN VIỆT NAM',
+                                bold: true,
+                                size: 26, // 13 pt, in hoa, đậm
+                              }),
+                            ],
+                          }),
+                          // Đường kẻ ngang nét liền dưới tiêu đề Đảng
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 0, after: 40 },
+                            children: [
+                              createTrTextRun({
+                                text: '\u00A0'.repeat(16),
+                                underline: {
+                                  type: UnderlineType.SINGLE,
+                                  color: '000000',
+                                },
+                                size: 20,
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 40, after: 0 },
+                            children: [
+                              createTrTextRun({
+                                text: data.signers.rightDate || `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`,
+                                italics: true,
+                                size: 26, // 13 pt, nghiêng
+                              }),
+                            ],
+                          }),
+                        ]
+                      : [
+                          // Thể thức Quốc hiệu Nhà nước theo Nghị định 30/2020
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 0, after: 20 },
+                            children: [
+                              createTrTextRun({
+                                text: 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM',
+                                bold: true,
+                                size: 24, // 12 pt, in hoa, đứng, đậm
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 0, after: 20 },
+                            children: [
+                              createTrTextRun({
+                                text: 'Độc lập - Tự do - Hạnh phúc',
+                                bold: true,
+                                size: 26, // 13 pt, in thường, đứng, đậm
+                              }),
+                            ],
+                          }),
+                          // Đường kẻ ngang nét liền bằng độ dài dòng chữ
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 0, after: 40 },
+                            children: [
+                              createTrTextRun({
+                                text: '\u00A0'.repeat(20),
+                                underline: {
+                                  type: UnderlineType.SINGLE,
+                                  color: '000000',
+                                },
+                                size: 20,
+                              }),
+                            ],
+                          }),
+                          new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 40, after: 0 },
+                            children: [
+                              createTrTextRun({
+                                text: data.signers.rightDate || `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`,
+                                italics: true,
+                                size: 26, // 13 pt, nghiêng
+                              }),
+                            ],
                           }),
                         ],
-                      }),
-                      new Paragraph({
-                        alignment: AlignmentType.CENTER,
-                        children: [
-                          new TextRun({
-                            text: '-----------------------',
-                            font: 'Times New Roman',
-                            size: 20,
-                            color: '64748B',
-                          }),
-                        ],
-                      }),
-                      new Paragraph({
-                        alignment: AlignmentType.CENTER,
-                        spacing: { before: 80 },
-                        children: [
-                          new TextRun({
-                            text: data.signers.rightDate || `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`,
-                            font: 'Times New Roman',
-                            italics: true,
-                            size: 24,
-                          }),
-                        ],
-                      }),
-                    ],
                   }),
                 ],
               }),
             ],
           }),
 
-          // 2. TIÊU ĐỀ BIỂU MẪU
+          // 2. TIÊU ĐỀ BIỂU MẪU (In hoa, cỡ 14-15 pt, đứng, đậm, căn giữa)
           new Paragraph({
-            spacing: { before: 260, after: 80 },
+            spacing: { before: 280, after: 60 },
             alignment: AlignmentType.CENTER,
             children: [
-              new TextRun({
+              createTrTextRun({
                 text: data.documentTitle.toUpperCase(),
-                font: 'Times New Roman',
                 bold: true,
                 size: 30, // 15 pt
-                color: '0F172A',
+                color: '000000',
               }),
             ],
           }),
@@ -823,15 +1060,14 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
           ...(data.periodName
             ? [
                 new Paragraph({
-                  spacing: { after: 180 },
+                  spacing: { before: 0, after: 180 },
                   alignment: AlignmentType.CENTER,
                   children: [
-                    new TextRun({
-                      text: `Áp dụng: ${data.periodName}`,
-                      font: 'Times New Roman',
-                      italics: true,
+                    createTrTextRun({
+                      text: `(Kỳ đánh giá: ${data.periodName})`,
                       bold: true,
-                      size: 24,
+                      italics: true,
+                      size: 26, // 13 pt
                     }),
                   ],
                 }),
@@ -844,60 +1080,60 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
                 ...data.profileFields.map(
                   (field) =>
                     new Paragraph({
-                      spacing: { before: 30, after: 30 },
+                      spacing: { before: 40, after: 40 },
+                      indent: { firstLine: 720 }, // Thụt đầu dòng 1.27 cm
+                      alignment: AlignmentType.LEFT,
                       children: [
-                        new TextRun({
+                        createTrTextRun({
                           text: `${field.label}: `,
-                          font: 'Times New Roman',
                           bold: true,
-                          size: 24,
+                          size: 26, // 13 pt
                         }),
-                        new TextRun({
+                        createTrTextRun({
                           text: field.value,
-                          font: 'Times New Roman',
-                          size: 24,
+                          size: 26,
                         }),
                       ],
                     }),
                 ),
-                new Paragraph({ spacing: { after: 100 }, children: [] }),
+                new Paragraph({ spacing: { before: 40, after: 80 }, children: [] }),
               ]
             : []),
 
-          // 4. CĂN CỨ PHÁP LÝ (CHỈ HIỂN THỊ NẾU XML GỐC CÓ THẺ LEGALBASIS)
+          // 4. CĂN CỨ PHÁP LÝ (Cỡ 13-14 pt, nghiêng, thụt đầu dòng 1.27 cm)
           ...(data.legalBasis.length > 0
             ? [
                 ...data.legalBasis.map(
-                  (basis) =>
+                  (basis: string, bIdx: number) =>
                     new Paragraph({
-                      spacing: { before: 20, after: 20 },
-                      indent: { left: 360 },
+                      spacing: { before: 30, after: 30 },
+                      indent: { firstLine: 720 },
+                      alignment: AlignmentType.JUSTIFIED,
                       children: [
-                        new TextRun({
-                          text: `• ${basis}`,
-                          font: 'Times New Roman',
+                        createTrTextRun({
+                          text: `${basis}${bIdx === data.legalBasis.length - 1 ? '.' : ';'}`,
                           italics: true,
-                          size: 22,
+                          size: 26, // 13 pt
                         }),
                       ],
                     }),
                 ),
-                new Paragraph({ spacing: { after: 100 }, children: [] }),
+                new Paragraph({ spacing: { before: 40, after: 80 }, children: [] }),
               ]
             : []),
 
           // 5. CÁC BẢNG DỮ LIỆU ĐỘNG (Render từng bảng theo cấu trúc XML)
-          ...data.tables.flatMap((table) => [
+          ...data.tables.flatMap((table: DynamicXmlTable) => [
             ...(table.title
               ? [
                   new Paragraph({
-                    spacing: { before: 180, after: 80 },
+                    spacing: { before: 200, after: 80 },
+                    alignment: AlignmentType.LEFT,
                     children: [
-                      new TextRun({
+                      createTrTextRun({
                         text: table.title,
-                        font: 'Times New Roman',
                         bold: true,
-                        size: 26,
+                        size: 26, // 13 pt, đậm
                       }),
                     ],
                   }),
@@ -917,21 +1153,22 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
                 // Header Table
                 new TableRow({
                   tableHeader: true,
+                  cantSplit: true,
                   children: table.columns.map(
-                    (col) =>
+                    (col: DynamicTableColumn) =>
                       new TableCell({
                         width: { size: col.widthPct, type: WidthType.PERCENTAGE },
-                        shading: { fill: 'E2E8F0', type: ShadingType.CLEAR },
+                        shading: { fill: 'F1F5F9', type: ShadingType.CLEAR },
                         verticalAlign: VerticalAlign.CENTER,
                         children: [
                           new Paragraph({
                             alignment: AlignmentType.CENTER,
+                            spacing: { before: 60, after: 60 },
                             children: [
-                              new TextRun({
+                              createTrTextRun({
                                 text: col.label,
                                 bold: true,
-                                size: 22,
-                                font: 'Times New Roman',
+                                size: 24, // 12 pt trong bảng
                               }),
                             ],
                           }),
@@ -941,21 +1178,22 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
                 }),
                 // Data Rows
                 ...table.rows.map(
-                  (row) =>
+                  (row: Record<string, string>) =>
                     new TableRow({
+                      cantSplit: true,
                       children: table.columns.map(
-                        (col) =>
+                        (col: DynamicTableColumn) =>
                           new TableCell({
                             verticalAlign: VerticalAlign.CENTER,
                             children: [
                               new Paragraph({
                                 alignment: col.align || AlignmentType.LEFT,
+                                spacing: { before: 40, after: 40 },
                                 children: [
-                                  new TextRun({
+                                  createTrTextRun({
                                     text: row[col.key] || '',
                                     bold: col.bold || false,
-                                    size: 22,
-                                    font: 'Times New Roman',
+                                    size: 24, // 12 pt
                                   }),
                                 ],
                               }),
@@ -969,13 +1207,13 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
           ]),
 
           // 6. CÁC KHỐI VĂN BẢN ĐIỀU KHOẢN / CAM KẾT / NHẬN XÉT
-          ...data.textBlocks.flatMap((block) => [
+          ...data.textBlocks.flatMap((block: DynamicTextBlock) => [
             new Paragraph({
-              spacing: { before: 180, after: 80 },
+              spacing: { before: 200, after: 80 },
+              alignment: AlignmentType.LEFT,
               children: [
-                new TextRun({
+                createTrTextRun({
                   text: block.title,
-                  font: 'Times New Roman',
                   bold: true,
                   size: 26,
                 }),
@@ -985,29 +1223,29 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
               (item) =>
                 new Paragraph({
                   spacing: { before: 40, after: 40 },
+                  indent: { firstLine: 720 },
+                  alignment: AlignmentType.JUSTIFIED,
                   children: [
                     ...(item.prefix
                       ? [
-                          new TextRun({
+                          createTrTextRun({
                             text: item.prefix,
-                            font: 'Times New Roman',
                             bold: true,
-                            size: 24,
+                            size: 26,
                           }),
                         ]
                       : []),
-                    new TextRun({
+                    createTrTextRun({
                       text: item.content,
-                      font: 'Times New Roman',
-                      size: 24,
+                      size: 26,
                     }),
                   ],
                 }),
             ),
           ]),
 
-          // 7. KHUNG CHỮ KÝ THEO CHUẨN THỂ THỨC ĐẢNG & NGHỊ ĐỊNH 30
-          new Paragraph({ spacing: { before: 240, after: 60 }, children: [] }),
+          // 7. KHUNG CHỮ KÝ THEO CHUẨN THỂ THỨC ĐẢNG & NGHỊ ĐỊNH 30/2020
+          new Paragraph({ spacing: { before: 260, after: 60 }, children: [] }),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             borders: {
@@ -1020,83 +1258,116 @@ export async function generateKpiDocxBlob(xmlContent: string, templateTitle?: st
             },
             rows: [
               new TableRow({
+                cantSplit: true,
                 children: [
-                  // Cột trái
+                  // CỘT TRÁI (Nơi nhận hoặc Người tự đánh giá / Người lập)
                   new TableCell({
                     width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({
-                        alignment: data.signatureType === 'DECISION' ? AlignmentType.LEFT : AlignmentType.CENTER,
-                        children: [
-                          new TextRun({
-                            text: (data.signers.leftTitle || 'NGƯỜI TỰ ĐÁNH GIÁ').toUpperCase(),
-                            font: 'Times New Roman',
-                            bold: true,
-                            size: 24,
-                          }),
-                        ],
-                      }),
-                      new Paragraph({
-                        alignment: data.signatureType === 'DECISION' ? AlignmentType.LEFT : AlignmentType.CENTER,
-                        children: [
-                          new TextRun({
-                            text: data.signers.leftSubtitle || '(Ký, ghi rõ họ và tên)',
-                            font: 'Times New Roman',
-                            italics: data.signatureType !== 'DECISION',
-                            size: 22,
-                          }),
-                        ],
-                      }),
-                      new Paragraph({ spacing: { before: 500, after: 100 }, children: [] }),
-                      new Paragraph({
-                        alignment: AlignmentType.CENTER,
-                        children: [
-                          new TextRun({
-                            text: data.signers.leftName || '',
-                            font: 'Times New Roman',
-                            bold: true,
-                            size: 24,
-                          }),
-                        ],
-                      }),
-                    ],
+                    verticalAlign: VerticalAlign.TOP,
+                    children:
+                      data.signatureType === 'DECISION'
+                        ? [
+                            // Nơi nhận trong văn bản Quyết định
+                            new Paragraph({
+                              alignment: AlignmentType.LEFT,
+                              spacing: { before: 0, after: 20 },
+                              children: [
+                                createTrTextRun({
+                                  text: 'Nơi nhận:',
+                                  bold: true,
+                                  italics: true,
+                                  size: 24, // 12 pt
+                                }),
+                              ],
+                            }),
+                            new Paragraph({
+                              alignment: AlignmentType.LEFT,
+                              spacing: { before: 0, after: 20 },
+                              children: [
+                                createTrTextRun({
+                                  text: data.signers.leftSubtitle || '- Như Điều 3;\n- Ban Thường vụ Tỉnh ủy (b/c);\n- Lãnh đạo Ban;\n- Lưu: VT, TC-CB.',
+                                  size: 22, // 11 pt
+                                }),
+                              ],
+                            }),
+                          ]
+                        : [
+                            // Người tự đánh giá / Người lập biểu
+                            new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              spacing: { before: 0, after: 20 },
+                              children: [
+                                createTrTextRun({
+                                  text: (data.signers.leftTitle || 'NGƯỜI TỰ ĐÁNH GIÁ').toUpperCase(),
+                                  bold: true,
+                                  size: 26, // 13 pt, in hoa, đậm
+                                }),
+                              ],
+                            }),
+                            new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              spacing: { before: 0, after: 20 },
+                              children: [
+                                createTrTextRun({
+                                  text: data.signers.leftSubtitle || '(Ký, ghi rõ họ và tên)',
+                                  italics: true,
+                                  size: 24, // 12 pt, nghiêng
+                                }),
+                              ],
+                            }),
+                            // Khoảng trống 4 dòng để ký tên
+                            new Paragraph({ spacing: { before: 800, after: 0 }, children: [] }),
+                            new Paragraph({
+                              alignment: AlignmentType.CENTER,
+                              spacing: { before: 0, after: 0 },
+                              children: [
+                                createTrTextRun({
+                                  text: data.signers.leftName || '',
+                                  bold: true,
+                                  size: 26, // 13 pt, đậm
+                                }),
+                              ],
+                            }),
+                          ],
                   }),
 
-                  // Cột phải
+                  // CỘT PHẢI (Lãnh đạo phê duyệt / Trưởng phòng / Trưởng ban)
                   new TableCell({
                     width: { size: 50, type: WidthType.PERCENTAGE },
+                    verticalAlign: VerticalAlign.TOP,
                     children: [
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 20 },
                         children: [
-                          new TextRun({
+                          createTrTextRun({
                             text: (data.signers.rightTitle || 'TRƯỞNG PHÒNG CHUYÊN MÔN').toUpperCase(),
-                            font: 'Times New Roman',
                             bold: true,
-                            size: 24,
+                            size: 26, // 13 pt, in hoa, đậm
                           }),
                         ],
                       }),
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 20 },
                         children: [
-                          new TextRun({
+                          createTrTextRun({
                             text: data.signers.rightSubtitle || '(Ký, ghi rõ họ và tên)',
-                            font: 'Times New Roman',
                             italics: true,
-                            size: 22,
+                            size: 24, // 12 pt, nghiêng
                           }),
                         ],
                       }),
-                      new Paragraph({ spacing: { before: 500, after: 100 }, children: [] }),
+                      // Khoảng trống 4 dòng để ký tên
+                      new Paragraph({ spacing: { before: 800, after: 0 }, children: [] }),
                       new Paragraph({
                         alignment: AlignmentType.CENTER,
+                        spacing: { before: 0, after: 0 },
                         children: [
-                          new TextRun({
+                          createTrTextRun({
                             text: data.signers.rightName || '',
-                            font: 'Times New Roman',
                             bold: true,
-                            size: 24,
+                            size: 26, // 13 pt, đậm
                           }),
                         ],
                       }),
@@ -1129,15 +1400,17 @@ export function downloadBlob(blob: Blob, fileName: string) {
 }
 
 /**
- * Tải file XML chuẩn UTF-8 về máy
+ * Tải file XML chuẩn UTF-8 có Byte Order Mark (BOM \uFEFF)
+ * Ngăn chặn triệt để lỗi font chữ tiếng Việt khi mở trên Windows Notepad, Excel, Word
  */
 export function exportKpiXmlFile(xmlContent: string, fileName: string) {
-  const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
+  const contentWithBom = xmlContent.startsWith('\uFEFF') ? xmlContent : `\uFEFF${xmlContent}`;
+  const blob = new Blob([contentWithBom], { type: 'application/xml;charset=utf-8' });
   downloadBlob(blob, fileName.endsWith('.xml') ? fileName : `${fileName}.xml`);
 }
 
 /**
- * Xuất file Word DOCX chuẩn thể thức hành chính từ nội dung XML
+ * Xuất file Word DOCX chuẩn thể thức hành chính theo Nghị định 30/2020 từ nội dung XML
  */
 export async function exportKpiDocxFile(xmlContent: string, fileName: string, templateTitle?: string) {
   const blob = await generateKpiDocxBlob(xmlContent, templateTitle);
@@ -1145,155 +1418,205 @@ export async function exportKpiDocxFile(xmlContent: string, fileName: string, te
 }
 
 /**
- * In / Xuất PDF trực tiếp từ trình duyệt theo chuẩn văn bản hành chính
- * Mở cửa sổ in ấn khổ A4, căn lề chuẩn 20-30-15-20 mm, cho phép lưu PDF ngay lập tức
+ * Tạo nội dung HTML văn bản hành chính thuần túy chuẩn Nghị định 30/2020/NĐ-CP
+ * Chỉ bao gồm 100% nội dung văn bản, không có bất kỳ nút bấm, banner hay điều khiển dư thừa nào
  */
-export function printKpiXmlDocument(xmlContent: string, templateTitleFallback?: string) {
-  const data = parseKpiXml(xmlContent, templateTitleFallback);
-
-  const printWindow = window.open('', '_blank', 'width=900,height=1200');
-  if (!printWindow) {
-    alert('Trình duyệt đã chặn cửa sổ pop-up. Vui lòng cho phép pop-up để in/xuất PDF.');
-    return;
-  }
-
-  // Render HTML in ấn chuẩn thể thức
-  const htmlContent = `
-<!DOCTYPE html>
+export function generatePrintDocumentHtml(data: ParsedXmlDocumentData): string {
+  return `<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>${data.documentTitle} - ${data.formCode}</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
     @page {
       size: A4 portrait;
-      margin: 20mm 15mm 20mm 30mm; /* Chuẩn NĐ 30: trên 20, dưới 20, trái 30, phải 15 */
+      margin: 20mm 15mm 20mm 30mm; /* Chuẩn NĐ 30/2020: trên 20mm, dưới 20mm, trái 30mm, phải 15mm */
     }
-    body {
-      font-family: 'Times New Roman', Times, serif;
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+      color: #000000 !important;
+      font-family: 'Times New Roman', 'Tinos', Times, serif !important;
       font-size: 13pt;
-      line-height: 1.3;
-      color: #000;
-      background: #fff;
+      line-height: 1.35;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .document-container {
+      width: 100%;
+      max-width: 100%;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     .header-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     .header-table td {
       border: none;
       vertical-align: top;
       text-align: center;
-      padding: 0 4px;
+      padding: 0 6px;
     }
     .agency-name {
       font-size: 12pt;
+      text-transform: uppercase;
     }
     .org-name {
       font-size: 12pt;
       font-weight: bold;
+      text-transform: uppercase;
     }
     .party-title {
       font-size: 13pt;
       font-weight: bold;
+      text-transform: uppercase;
     }
-    .divider {
-      width: 120px;
-      margin: 3px auto;
-      border-top: 1px solid #000;
+    .state-title {
+      font-size: 12pt;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .motto {
+      font-size: 13pt;
+      font-weight: bold;
+    }
+    .divider-solid {
+      height: 1px;
+      background-color: #000;
+      margin: 4px auto 6px auto;
     }
     .date-str {
-      font-size: 12pt;
+      font-size: 13pt;
       font-style: italic;
-      margin-top: 5px;
+      margin-top: 6px;
+    }
+    .doc-num {
+      font-size: 12pt;
+      margin-top: 4px;
     }
     .doc-title {
       font-size: 15pt;
       font-weight: bold;
       text-align: center;
-      margin: 20px 0 8px 0;
+      margin: 24px 0 6px 0;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .doc-period {
-      font-size: 12pt;
+      font-size: 13pt;
       font-style: italic;
       font-weight: bold;
       text-align: center;
-      margin-bottom: 15px;
+      margin-bottom: 18px;
     }
     .profile-list {
-      margin-bottom: 12px;
-      font-size: 12.5pt;
+      margin-bottom: 16px;
+      font-size: 13pt;
     }
     .profile-item {
-      margin: 4px 0;
+      margin: 5px 0;
+      text-indent: 1.27cm;
     }
     .profile-label {
       font-weight: bold;
     }
     .legal-basis {
       font-style: italic;
-      font-size: 11.5pt;
-      margin-bottom: 15px;
+      font-size: 13pt;
+      margin-bottom: 16px;
+      text-align: justify;
+    }
+    .legal-basis div {
+      margin: 4px 0;
+      text-indent: 1.27cm;
     }
     .section-title {
       font-size: 13pt;
       font-weight: bold;
-      margin: 16px 0 8px 0;
+      margin: 18px 0 8px 0;
     }
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 10px 0 18px 0;
+      margin: 12px 0 20px 0;
+      page-break-inside: auto;
     }
     .data-table th, .data-table td {
-      border: 1px solid #475569;
+      border: 1px solid #000;
       padding: 6px 8px;
-      font-size: 11pt;
+      font-size: 11.5pt;
+      line-height: 1.25;
     }
     .data-table th {
       background-color: #f1f5f9;
       font-weight: bold;
       text-align: center;
     }
+    .data-table tr {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
     .text-block-item {
       margin: 6px 0;
-      font-size: 12pt;
+      font-size: 13pt;
+      text-align: justify;
+      text-indent: 1.27cm;
     }
     .sig-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 25px;
+      margin-top: 30px;
       page-break-inside: avoid;
     }
     .sig-table td {
       border: none;
       vertical-align: top;
-      text-align: center;
       width: 50%;
     }
     .sig-title {
       font-weight: bold;
-      font-size: 12.5pt;
+      font-size: 13pt;
       text-transform: uppercase;
     }
     .sig-sub {
       font-style: italic;
-      font-size: 11pt;
+      font-size: 12pt;
     }
     .sig-space {
-      height: 75px;
+      height: 80px;
     }
     .sig-name {
       font-weight: bold;
-      font-size: 12.5pt;
+      font-size: 13pt;
+    }
+    .recipients-title {
+      font-weight: bold;
+      font-style: italic;
+      font-size: 12pt;
+      text-align: left;
+    }
+    .recipients-content {
+      font-size: 11pt;
+      text-align: left;
+      line-height: 1.3;
+      white-space: pre-line;
     }
     @media print {
-      body {
-        padding: 0;
+      @page {
+        size: A4 portrait;
+        margin: 20mm 15mm 20mm 30mm;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
       }
       .no-print {
         display: none !important;
@@ -1302,95 +1625,149 @@ export function printKpiXmlDocument(xmlContent: string, templateTitleFallback?: 
   </style>
 </head>
 <body>
-  <div class="no-print" style="margin-bottom: 20px; padding: 10px; background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-    <div><strong>Bản in mẫu văn bản hành chính:</strong> ${data.formCode} (${data.documentTitle})</div>
-    <button onclick="window.print()" style="padding: 6px 16px; background: #0284c7; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Bấm để In / Lưu PDF</button>
-  </div>
-
-  <table class="header-table">
-    <tr>
-      <td style="width: 45%;">
-        <div class="agency-name">${data.agencyName.toUpperCase()}</div>
-        <div class="org-name">${data.organizationName.toUpperCase()}</div>
-        <div class="divider"></div>
-        <div style="font-size: 11pt; font-style: italic; margin-top: 4px;">${data.decisionNumber ? `Số: ${data.decisionNumber}` : `Mẫu số: ${data.formCode}`}</div>
-      </td>
-      <td style="width: 55%;">
-        <div class="party-title">ĐẢNG CỘNG SẢN VIỆT NAM</div>
-        <div class="divider"></div>
-        <div class="date-str">${data.signers.rightDate || `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`}</div>
-      </td>
-    </tr>
-  </table>
-
-  <div class="doc-title">${data.documentTitle}</div>
-  ${data.periodName ? `<div class="doc-period">Áp dụng: ${data.periodName}</div>` : ''}
-
-  ${data.profileFields.length > 0 ? `
-    <div class="profile-list">
-      ${data.profileFields.map((f) => `<div class="profile-item"><span class="profile-label">${f.label}:</span> ${f.value}</div>`).join('')}
-    </div>
-  ` : ''}
-
-  ${data.legalBasis.length > 0 ? `
-    <div class="legal-basis">
-      ${data.legalBasis.map((b) => `<div>• ${b}</div>`).join('')}
-    </div>
-  ` : ''}
-
-  ${data.tables.map((t) => `
-    ${t.title ? `<div class="section-title">${t.title}</div>` : ''}
-    <table class="data-table">
-      <thead>
-        <tr>
-          ${t.columns.map((c) => `<th style="width: ${c.widthPct}%; text-align: center;">${c.label}</th>`).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${t.rows.map((r) => `
-          <tr>
-            ${t.columns.map((c) => `<td style="text-align: ${c.align === AlignmentType.CENTER ? 'center' : c.align === AlignmentType.RIGHT ? 'right' : 'left'}; font-weight: ${c.bold ? 'bold' : 'normal'};">${r[c.key] || ''}</td>`).join('')}
-          </tr>
-        `).join('')}
-      </tbody>
+  <div class="document-container">
+    <table class="header-table">
+      <tr>
+        <td style="width: 45%;">
+          <div class="agency-name">${data.agencyName}</div>
+          <div class="org-name">${data.organizationName}</div>
+          <div class="divider-solid" style="width: 110px;"></div>
+          <div class="doc-num">${data.decisionNumber ? `Số: ${data.decisionNumber}` : `Mẫu số: ${data.formCode}`}</div>
+        </td>
+        <td style="width: 55%;">
+          ${data.isPartyAgency ? `
+            <div class="party-title">ĐẢNG CỘNG SẢN VIỆT NAM</div>
+            <div class="divider-solid" style="width: 130px;"></div>
+          ` : `
+            <div class="state-title">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div class="motto">Độc lập - Tự do - Hạnh phúc</div>
+            <div class="divider-solid" style="width: 160px;"></div>
+          `}
+          <div class="date-str">${data.signers.rightDate || `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`}</div>
+        </td>
+      </tr>
     </table>
-  `).join('')}
 
-  ${data.textBlocks.map((b) => `
-    <div class="section-title">${b.title}</div>
-    ${b.items.map((it) => `<div class="text-block-item"><strong>${it.prefix || ''}</strong>${it.content}</div>`).join('')}
-  `).join('')}
+    <div class="doc-title">${data.documentTitle}</div>
+    ${data.periodName ? `<div class="doc-period">(Kỳ đánh giá: ${data.periodName})</div>` : ''}
 
-  <table class="sig-table">
-    <tr>
-      <td style="text-align: ${data.signatureType === 'DECISION' ? 'left' : 'center'};">
-        <div class="sig-title">${(data.signers.leftTitle || 'NGƯỜI TỰ ĐÁNH GIÁ').toUpperCase()}</div>
-        <div class="sig-sub">${data.signers.leftSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
-        <div class="sig-space"></div>
-        <div class="sig-name">${data.signers.leftName || ''}</div>
-      </td>
-      <td style="text-align: center;">
-        <div class="sig-title">${(data.signers.rightTitle || 'TRƯỞNG PHÒNG CHUYÊN MÔN').toUpperCase()}</div>
-        <div class="sig-sub">${data.signers.rightSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
-        <div class="sig-space"></div>
-        <div class="sig-name">${data.signers.rightName || ''}</div>
-      </td>
-    </tr>
-  </table>
+    ${data.profileFields.length > 0 ? `
+      <div class="profile-list">
+        ${data.profileFields.map((f: { label: string; value: string }) => `<div class="profile-item"><span class="profile-label">${f.label}:</span> ${f.value}</div>`).join('')}
+      </div>
+    ` : ''}
 
-  <script>
-    window.onload = function() {
-      // Tự động mở hộp thoại in sau khi render
-      setTimeout(function() {
-        window.print();
-      }, 500);
-    };
-  </script>
+    ${data.legalBasis.length > 0 ? `
+      <div class="legal-basis">
+        ${data.legalBasis.map((b: string, idx: number) => `<div>${b}${idx === data.legalBasis.length - 1 ? '.' : ';'}</div>`).join('')}
+      </div>
+    ` : ''}
+
+    ${data.tables.map((t: DynamicXmlTable) => `
+      ${t.title ? `<div class="section-title">${t.title}</div>` : ''}
+      <table class="data-table">
+        <thead>
+          <tr>
+            ${t.columns.map((c: DynamicTableColumn) => `<th style="width: ${c.widthPct}%;">${c.label}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${t.rows.map((r: Record<string, string>) => `
+            <tr>
+              ${t.columns.map((c: DynamicTableColumn) => `<td style="text-align: ${c.align === AlignmentType.CENTER ? 'center' : c.align === AlignmentType.RIGHT ? 'right' : 'left'}; font-weight: ${c.bold ? 'bold' : 'normal'};">${r[c.key] || ''}</td>`).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `).join('')}
+
+    ${data.textBlocks.map((b: DynamicTextBlock) => `
+      <div class="section-title">${b.title}</div>
+      ${b.items.map((it) => `<div class="text-block-item"><strong>${it.prefix || ''}</strong>${it.content}</div>`).join('')}
+    `).join('')}
+
+    <table class="sig-table">
+      <tr>
+        <td style="text-align: ${data.signatureType === 'DECISION' ? 'left' : 'center'};">
+          ${data.signatureType === 'DECISION' ? `
+            <div class="recipients-title">Nơi nhận:</div>
+            <div class="recipients-content">${data.signers.leftSubtitle || '- Như Điều 3;\n- Ban Thường vụ Tỉnh ủy (b/c);\n- Lãnh đạo Ban;\n- Lưu: VT, TC-CB.'}</div>
+          ` : `
+            <div class="sig-title">${(data.signers.leftTitle || 'NGƯỜI TỰ ĐÁNH GIÁ').toUpperCase()}</div>
+            <div class="sig-sub">${data.signers.leftSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
+            <div class="sig-space"></div>
+            <div class="sig-name">${data.signers.leftName || ''}</div>
+          `}
+        </td>
+        <td style="text-align: center;">
+          <div class="sig-title">${(data.signers.rightTitle || 'TRƯỞNG PHÒNG CHUYÊN MÔN').toUpperCase()}</div>
+          <div class="sig-sub">${data.signers.rightSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
+          <div class="sig-space"></div>
+          <div class="sig-name">${data.signers.rightName || ''}</div>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
-</html>
-  `;
+</html>`;
+}
 
-  printWindow.document.open();
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
+/**
+ * In / Xuất PDF trực tiếp từ trình duyệt theo chuẩn văn bản hành chính Nghị định 30/2020/NĐ-CP
+ * In trực tiếp qua iframe ẩn chuyên dụng: CHỈ IN NỘI DUNG VĂN BẢN, KHÔNG IN NỘI DUNG DƯ THỪA XUNG QUANH
+ */
+export function printKpiXmlDocument(xmlContent: string, templateTitleFallback?: string) {
+  if (typeof window === 'undefined') return;
+
+  const data = parseKpiXml(xmlContent, templateTitleFallback);
+  const htmlContent = generatePrintDocumentHtml(data);
+
+  // Tạo một iframe ẩn chuyên dụng để kích hoạt in trực tiếp
+  // Không mở cửa sổ pop-up thừa, không có banner, nút bấm hay các viền điều khiển xung quanh
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  iframe.style.visibility = 'hidden';
+  iframe.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentWindow?.document || iframe.contentDocument;
+  if (!iframeDoc || !iframe.contentWindow) {
+    // Fallback an toàn nếu trình duyệt chặn tạo context iframe
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    }
+    return;
+  }
+
+  iframeDoc.open();
+  iframeDoc.write(htmlContent);
+  iframeDoc.close();
+
+  // Đợi nạp font và DOM hoàn tất rồi kích hoạt hộp thoại in ngay lập tức
+  setTimeout(() => {
+    try {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    } finally {
+      // Tự động dọn dẹp iframe sau khi đóng hộp thoại in
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 3000);
+    }
+  }, 400);
 }

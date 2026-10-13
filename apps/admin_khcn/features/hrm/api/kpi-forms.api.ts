@@ -138,4 +138,14 @@ export const kpiFormsApi = {
   getDownloadUrl(formCode: string): string {
     return `/api/v1/admin/hrm/kpi-forms/${formCode}/download`;
   },
+
+  // Đường dẫn in / PDF trực tiếp HTML chuẩn Nghị định 30/2020 từ server API printer
+  getPrintUrl(formCode: string): string {
+    return `/api/v1/admin/hrm/kpi-forms/${encodeURIComponent(formCode)}/print`;
+  },
+
+  // Gọi API printer xuất HTML từ nội dung XML tùy biến
+  printCustomXml(xmlContent: string, templateTitle?: string): Promise<string> {
+    return apiClient.post('/hrm/kpi-forms/print', { xmlContent, templateTitle }, { responseType: 'text' }) as any;
+  },
 };

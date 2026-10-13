@@ -28,6 +28,7 @@ import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 import { clientIp } from '../../core/client-ip';
 import { randomUUID } from 'crypto';
 import { Metadata } from '@grpc/grpc-js';
+import { renderKpiXmlToPrintHtml } from './kpi-xml-printer.util';
 
 @ApiTags('HRM - KPI Form Templates')
 @Controller('admin/hrm/kpi-forms')
@@ -212,6 +213,45 @@ export class KpiFormsController implements OnModuleInit {
     } catch (e) {
       this.handleRpcError(e);
     }
+  }
+
+  @Get(':formCode/print')
+  @ApiOperation({ summary: 'Xuất bản in HTML chuẩn thể thức Nghị định 30/2020 của biểu mẫu XML' })
+  async printDocument(
+    @Req() req: any,
+    @Param('formCode') formCode: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const response = await firstValueFrom(
+        this.kpiService.GetFormTemplateXml(
+          { formCode, organizationId: this.getOrganizationId(req) },
+          this.getGrpcMetadata(req),
+        ),
+      );
+
+      const xmlContent = (response as any)?.xmlContent || (response as any)?.data?.xmlContent || '';
+      const html = renderKpiXmlToPrintHtml(xmlContent, (response as any)?.name || formCode);
+
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+    } catch (e) {
+      this.handleRpcError(e);
+    }
+  }
+
+  @Post('print')
+  @ApiOperation({ summary: 'Xuất bản in HTML chuẩn thể thức Nghị định 30/2020 từ nội dung XML gửi lên' })
+  async printCustomXml(
+    @Body() body: { xmlContent: string; templateTitle?: string },
+    @Res() res: Response,
+  ) {
+    if (!body?.xmlContent) {
+      throw new BadRequestException('Nội dung XML không được để trống');
+    }
+    const html = renderKpiXmlToPrintHtml(body.xmlContent, body.templateTitle);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
   }
 
   @Post()

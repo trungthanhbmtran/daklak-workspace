@@ -184,13 +184,67 @@ const CANDIDATE_TEMPLATE_DIRS = [
 ];
 
 export function isPlaceholderXml(xmlContent?: string | null): boolean {
-  if (!xmlContent || typeof xmlContent !== 'string' || !xmlContent.trim()) return true;
-  return (
-    xmlContent.includes('<Placeholder>Nội dung đang được cập nhật</Placeholder>') ||
-    xmlContent.includes('<Body>{{content}}</Body>') ||
-    xmlContent.includes('formCode="NEW_TEMPLATE"')
-  );
+  if (!xmlContent || typeof xmlContent !== 'string') return true;
+  const trimmed = xmlContent.trim();
+  if (!trimmed || trimmed.length < 350) return true;
+
+  // Kiểm tra các mẫu placeholder hoặc thẻ rỗng
+  if (
+    trimmed.includes('<Placeholder>') ||
+    trimmed.includes('<Placeholder ') ||
+    trimmed.includes('Nội dung đang được cập nhật') ||
+    trimmed.includes('<Body>{{content}}</Body>') ||
+    trimmed.includes('<Body></Body>') ||
+    trimmed.includes('<Body/>') ||
+    trimmed.includes('formCode="NEW_TEMPLATE"')
+  ) {
+    return true;
+  }
+
+  return false;
 }
+
+/**
+ * Kiểm tra xem nội dung XML có đầy đủ "ruột" biểu mẫu thực tế hay không
+ */
+export function hasValidFormContent(formCode: string, xmlContent?: string | null): boolean {
+  if (!xmlContent || isPlaceholderXml(xmlContent)) return false;
+
+  const trimmed = xmlContent.trim();
+  // Một mẫu chuẩn thực tế luôn có tối thiểu 450 ký tự và chứa các thẻ nghiệp vụ
+  if (trimmed.length < 450) return false;
+
+  // Nếu là một trong các mẫu chuẩn hệ thống, đối chiếu các thẻ nghiệp vụ cốt lõi
+  const isDefaultTemplate = DEFAULT_KPI_FORM_TEMPLATES.some((t) => t.formCode === formCode);
+  if (isDefaultTemplate) {
+    const hasBusinessTags =
+      trimmed.includes('<RegisteredTasks') ||
+      trimmed.includes('<SectionA') ||
+      trimmed.includes('<SectionB') ||
+      trimmed.includes('<CollectiveFeedback') ||
+      trimmed.includes('<StaffRankDistribution') ||
+      trimmed.includes('<IndividualFinalRankings') ||
+      trimmed.includes('<Form01_') ||
+      trimmed.includes('<Form02_') ||
+      trimmed.includes('<Form03_') ||
+      trimmed.includes('<Form04_') ||
+      trimmed.includes('<Form05_') ||
+      trimmed.includes('<OfficialEvaluationSystem') ||
+      trimmed.includes('<PartyDataIntegrationSystem') ||
+      trimmed.includes('<SummaryContent>') ||
+      trimmed.includes('<PersonalInformation>') ||
+      trimmed.includes('<SectionA_GeneralCriteria') ||
+      trimmed.includes('<SummaryList>') ||
+      trimmed.includes('<FinalApprovalResults>') ||
+      trimmed.includes('<RequestingAgency>') ||
+      trimmed.includes('<ApprovedAPIServices>');
+
+    if (!hasBusinessTags) return false;
+  }
+
+  return true;
+}
+
 
 /**
  * Đọc nội dung file XML mẫu từ ổ đĩa hoặc bộ nhúng sẵn

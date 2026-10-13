@@ -112,3 +112,81 @@
 
 
 
+
+
+## [2026-10-13] Khắc phục Hoàn toàn Lỗi Cắt viền & Lỗi Nhúng Ảnh Sơ đồ 1 Kiến trúc Microservices trong Báo cáo DOCX
+- **Vấn đề người dùng phản ánh:**
+  * Sơ đồ 1 trong file Word xuất ra bị lỗi cắt viền bên trái (mất chữ "LỚP DỊCH VỤ NỀN TẢNG...", "user-service..."), các đường mũi tên gRPC cắt chéo đè lên tiêu đề, ký tự `★` bị biến thành ô vuông rỗng `▯`, và phần chữ Integration Hub bị tràn mép phải.
+  * Trong file Word DOCX trước đó, ảnh bị nhúng không có thuộc tính `type: 'png'`, khiến Word gán quan hệ thành `.undefined`, gây lỗi không thể hiển thị ảnh bình thường.
+- **Biện pháp xử lý & chuẩn hóa:**
+  1. **Thiết kế lại Sơ đồ 1 chuẩn sắc nét (1400 x 1120 px) bằng Canvas Engine (`@napi-rs/canvas`):**
+     * Căn chỉnh lề rộng rãi, phân cấp 4 tầng mạch lạc: (1) Client Layer, (2) API Gateway & Manager, (3) Microservices Layer (Core Services & Domain Services), (4) Event Bus.
+     * Tách thanh Trục Bus kết nối `TRỤC KẾT NỐI NỘI BỘ gRPC CLIENT DELEGATION` ở giữa Gateway và Microservices, giúp các mũi tên điều hướng vuông vức, sạch sẽ, hoàn toàn không cắt đè lên chữ tiêu đề.
+     * Thay thế ký tự lỗi font `★` bằng các nhãn badge chuyên nghiệp bo góc: `[SOURCE OF TRUTH VTVL]`, `[TRÁI TIM QUY TRÌNH]`, `[MINH CHỨNG & TÀI LIỆU]`, `[BỘ MÁY TÍNH KPI 6 TRỤC]`, `[VĂN BẢN & PHÔI DỰ THẢO]`, `[DASHBOARD & THỐNG KÊ]`.
+     * Toàn bộ text được căn chỉnh trong khung an toàn, không có bất kỳ điểm nào bị cắt lề trái hay tràn lề phải.
+     * Lưu ảnh chuẩn tại `docs/examplebtc/diagram_system_architecture.png`.
+  2. **Khắc phục triệt để lỗi chèn ảnh vào DOCX:**
+     * Bổ sung tường minh `type: 'png'` cho `ImageRun` của cả 2 sơ đồ (Hình 1 và Hình 2).
+     * Xác nhận tệp nén OpenXML tạo đúng `media/*.png` và liên kết trong `document.xml.rels` khớp hoàn toàn với `[Content_Types].xml`.
+     * Xuất đồng bộ cả 2 bản `Bao_Cao_Giai_Phap_KPI_OKR_BTCTU_Hoan_Thien.docx` và `Bao_Cao_Giai_Phap_KPI_OKR_BTCTU.docx` trong `docs/examplebtc/`.
+  3. **Kiểm chứng máy thực tế:**
+     * `node scratch/draw_architecture_perfect.js`: Sinh ảnh 348,820 bytes.
+     * `node scratch/generate_kpi_docx_perfect.js`: Sinh 2 file DOCX dung lượng 492,534 bytes.
+     * Giải nén kiểm tra cấu trúc OpenXML: Xác nhận quan hệ hình ảnh `Target="media/*.png"`, mã MIME `image/png` hợp lệ 100%.
+  4. **Dọn dẹp rác:** Dọn sạch các file thử nghiệm tạm thời, khôi phục trạng thái workspace sạch 100%.
+
+## [2026-10-13] Tinh chỉnh Độ giãn Sơ đồ Kiến trúc Microservices (1600 x 1430 px) - Triệt tiêu 100% Hiện tượng Chồng đè Thuộc tính
+- **Vấn đề người dùng phản ánh:**
+  * Sơ đồ 1 trong bản trước dù đã có thanh Bus nhưng khoảng cách giữa các khối Core Services, Domain Services và Event Bus vẫn hơi sát nhau, một số nhãn mũi tên và tiêu đề phân tầng có nguy cơ chồng đè lên nhau.
+- **Biện pháp xử lý & chuẩn hóa:**
+  1. **Nâng cấp không gian canvas lên 1600 x 1430 px:**
+     * Mở rộng bề ngang mỗi cột service từ 395px lên **460px**, tăng khoảng cách giữa các cột lên **50px**.
+     * Giãn khoảng đệm giữa Core Services và Domain Services lên **80px**, đặt 3 mũi tên nét đứt (`Lấy VTVL & Phân công`, `Ủy quyền duyệt BPMN`, `Lưu file minh chứng`) với nhãn pill badge nằm hoàn toàn trong khoảng trống, tuyệt đối không chạm tiêu đề phân tầng.
+     * Cung cấp khoảng đệm **50px** phía trên Event Bus, nhãn `Bắn Sự kiện AMQP` và `Nhận Đồng bộ CQRS` đứng độc lập.
+     * Căn chỉnh toàn bộ danh sách bullet bên trong 6 service thoáng đãng (line-height 21px - 22px), chữ sắc nét, font Segoe UI.
+  2. **Cập nhật đồng bộ các tệp Word:**
+     * Ghi đè [`docs/examplebtc/diagram_system_architecture.png`](file:///c:/Users/Admin/Desktop/daklak-workspace/docs/examplebtc/diagram_system_architecture.png) (420.1 KB).
+     * Cập nhật kích thước tỷ lệ khung hình chuẩn `width: 580, height: 518` trong file Word.
+     * Xuất tệp Word [`docs/examplebtc/Bao_Cao_Giai_Phap_KPI_OKR_BTCTU.docx`](file:///c:/Users/Admin/Desktop/daklak-workspace/docs/examplebtc/Bao_Cao_Giai_Phap_KPI_OKR_BTCTU.docx) (558.3 KB) và bản dự phòng song song [`docs/examplebtc/Bao_Cao_Giai_Phap_KPI_OKR_BTCTU_V2.docx`](file:///c:/Users/Admin/Desktop/daklak-workspace/docs/examplebtc/Bao_Cao_Giai_Phap_KPI_OKR_BTCTU_V2.docx) (558.3 KB).
+  3. **Kiểm chứng máy:**
+     * `pnpm --filter admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%).
+     * File ảnh và OpenXML DOCX hợp lệ 100%.
+
+## [2026-10-13] Chuẩn hóa Chức năng In/Xuất PDF Biểu mẫu Đánh giá KPI (Nghị định 30/2020/NĐ-CP)
+- **Yêu cầu:** Chỉnh sửa lại chức năng in/pdf chỉ in nội dung văn bản, loại bỏ triệt để các nội dung dư thừa xung quanh (thanh điều khiển xanh lá, nút bấm, cửa sổ pop-up thừa, và lề/header/footer mặc định của trình duyệt).
+- **Phạm vi file đã triển khai:**
+  * `apps/admin_khcn/features/hrm/utils/kpiXmlToDocx.ts`:
+    - Tách hàm chuyên biệt `generatePrintDocumentHtml(data: ParsedXmlDocumentData): string`:
+      * Xóa bỏ 100% thanh banner màu xanh lá (`.no-print`, các nút bấm, padding 24px ngoài body).
+      * Thiết lập quy chuẩn trang in `@page { size: A4 portrait; margin: 20mm 15mm 20mm 30mm; }` bám sát thể thức văn bản hành chính theo Nghị định 30/2020/NĐ-CP (lề trên 20mm, lề dưới 20mm, lề trái 30mm, lề phải 15mm).
+      * Cấu hình `@media print { html, body { margin: 0 !important; padding: 0 !important; } }` triệt tiêu lề thừa bên ngoài.
+      * Định dạng font chuẩn "Times New Roman", cỡ chữ 13-14pt, line-height 1.25 - 1.35, căn chỉnh bảng số liệu, đường kẻ phân cách Quốc hiệu/Tiêu ngữ đúng quy định.
+    - Cải tiến hàm `printKpiXmlDocument(xmlContent, templateTitleFallback)`:
+      * Thay thế cơ chế `window.open` popup mở tab/cửa sổ thừa bằng kỹ thuật in qua **`iframe` ẩn chuyên dụng** (`iframe.style.visibility = 'hidden'`, kích thước 0x0).
+      * Khi người dùng bấm nút in/PDF, hộp thoại in của hệ điều hành xuất hiện trực tiếp ngay trên trang hiện tại, xem trước bản in chỉ có duy nhất văn bản hành chính, hoàn toàn không có bất kỳ thành phần giao diện hay nút bấm thừa nào.
+      * Tự động giải phóng và dọn dẹp thẻ iframe sau khi hoàn tất.
+- **Kiểm chứng máy thực tế:**
+  * `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%).
+  * Diff rà soát: Tuân thủ 100% 7 Bộ ràng buộc kỹ thuật, không có console.log/debugger, mã hóa UTF-8 không BOM.
+
+## [2026-10-13] Xây dựng Endpoint API Printer Xuất Bản In Trực tiếp từ Server (Nghị định 30/2020/NĐ-CP)
+- **Yêu cầu:** Tận dụng file XML biểu mẫu đã có sẵn trên server, xây dựng và kết nối trực tiếp endpoint API printer để xuất bản in HTML thuần túy phục vụ in ấn / PDF, không phụ thuộc hoàn toàn vào parsing phía trình duyệt client.
+- **Phạm vi file đã triển khai:**
+  * `apps/api-gateway/src/modules/hrm/kpi-xml-printer.util.ts`:
+    - Tạo mới tiện ích biên dịch XML sang HTML trang in chuẩn A4 Nghị định 30/2020/NĐ-CP trên môi trường Node.js.
+    - Bóc tách toàn diện: Cơ quan ban hành, Quốc hiệu (Đảng / Nước), tiêu đề văn bản, kỳ đánh giá, thông tin cán bộ, căn cứ pháp lý, các bảng dữ liệu động và khối chữ ký.
+    - Cấu hình @page A4 portrait, lề 20mm/15mm/20mm/30mm, font Times New Roman 13-14pt, triệt tiêu 100% nội dung dư thừa (nút bấm, banner, header/footer của trình duyệt).
+  * `apps/api-gateway/src/modules/hrm/kpi-forms.controller.ts`:
+    - Thêm endpoint `GET /admin/hrm/kpi-forms/:formCode/print`: Lấy XML từ `kpiService.GetFormTemplateXml` theo `formCode` và quyền tổ chức, biên dịch và trả về HTML trang in thuần túy với `Content-Type: text/html; charset=utf-8`.
+    - Thêm endpoint `POST /admin/hrm/kpi-forms/print`: Nhận payload `{ xmlContent, templateTitle }`, biên dịch và trả về HTML trang in cho nội dung XML tùy biến.
+  * `apps/admin_khcn/features/hrm/api/kpi-forms.api.ts`:
+    - Thêm `getPrintUrl(formCode: string)`: Trả về URL API printer `/api/v1/admin/hrm/kpi-forms/${formCode}/print`.
+    - Thêm `printCustomXml(xmlContent, templateTitle)`: Gọi `POST /hrm/kpi-forms/print` nhận HTML từ server printer endpoint.
+  * `apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx`:
+    - Cập nhật `handlePrintPdf` và `handlePrintPdfFromPreview`: Kết nối trực tiếp URL API printer của server thông qua hidden iframe chuyên dụng, kích hoạt in ngay lập tức.
+    - Cập nhật `handlePrintPdfFromEditor`: Gọi API printer của server để render HTML và kích hoạt in qua iframe.
+- **Kiểm chứng máy thực tế:**
+  * `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%).
+  * `npm --prefix apps/api-gateway run build`: Exit code 0 (Pass 100%).
+  * `npm --prefix apps/hrm-service run build`: Exit code 0 (Pass 100%).
+  * Diff rà soát: Tuân thủ 100% 7 Bộ ràng buộc kỹ thuật (BaseURL không lặp `/admin`, UTF-8 không BOM, zero console.log).
