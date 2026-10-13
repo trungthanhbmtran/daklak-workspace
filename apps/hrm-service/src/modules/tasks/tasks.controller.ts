@@ -35,11 +35,17 @@ export class TasksController {
   getTask(data: any, @CurrentUser() user: any) {
     data = data || {};
     if (user) {
-      data.currentEmployeeCode = user.employeeCode;
-      data.currentUserId = user.id;
-      data.currentUserDept = user.unitId;
-      data.currentUserPermissions = user.permissionsFlatten;
-    } return this.tasksService.getTask(data.id, data); }
+      data.currentEmployeeCode = user.employeeCode || data.currentEmployeeCode;
+      data.currentUserId = user.id || data.currentUserId;
+      data.currentUserDept = user.unitId || data.currentUserDept;
+      data.currentUserPermissions = user.permissionsFlatten || data.currentUserPermissions || [];
+      const perms = data.currentUserPermissions;
+      if (Array.isArray(perms) && (perms.includes('TASK:MANAGE') || perms.includes('TASK.*') || perms.includes('SYSTEM:*') || perms.some((p) => p.startsWith('SYSTEM')))) {
+        data.isAdmin = true;
+      }
+    }
+    return this.tasksService.getTask(data.id, data);
+  }
 
   @GrpcMethod('TaskService', 'UpdateTask')
   updateTask(data: any, @CurrentUser() user: any) {

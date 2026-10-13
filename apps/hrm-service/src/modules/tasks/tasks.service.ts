@@ -70,13 +70,12 @@ export class TasksService {
       }
     },
     plan: { select: { id: true, title: true, createdByCode: true, departmentId: true } },
-    kpiSettings: true,
   } as const;
 
   /** Load task hoặc throw */
   private async findTaskOrFail(id: number) {
     const t = await this.prisma.task.findUnique({ where: { id }, include: this.taskInclude });
-    if (!t) throw new RpcException('Nhiệm vụ không tồn tại');
+    if (!t) throw new RpcException({ code: 5, message: 'Nhiệm vụ không tồn tại' });
     return t;
   }
 
@@ -376,7 +375,7 @@ export class TasksService {
     const t = await this.findTaskOrFail(id);
     const [enriched] = await this.shared.enrichTasks([t]);
     const access = await this.shared.checkTaskAccess(enriched, query);
-    if (!access.hasAccess) throw new RpcException('Bạn không có quyền xem nhiệm vụ này.');
+    if (!access.hasAccess) throw new RpcException({ code: 7, message: 'Bạn không có quyền xem nhiệm vụ này.' });
     enriched.allowedActions = await this.shared.computeAllowedActions(enriched, query);
     return this.shared.toTaskResponse(enriched);
   }
@@ -1526,10 +1525,7 @@ export class TasksService {
     };
   }
 
-  // ─── Aliases ──────────────────────────────────────────────────────────────
-
-  /** @deprecated Use listTasks instead */
-  async getTasks(query: any) { return this.listTasks(query); }
+  // ─── Aliases & Stubs ───────────────────────────────────────────────────────
 
   /** Stub – import not yet implemented */
   async importTasks(_data: any[]): Promise<{ success: boolean }> { return { success: true }; }

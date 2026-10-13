@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { HrmTask } from "../../types/task";
-import { useEvaluateTask, useTaskHistory, useTaskSteps, useTaskSubtasks } from "../../hooks/useTasks";
+import { useEvaluateTask, useTaskDetail, useTaskHistory, useTaskSteps, useTaskSubtasks } from "../../hooks/useTasks";
 import { useUser } from "@/hooks/useUser";
 import {
   Dialog,
@@ -71,22 +71,27 @@ export function TaskEvaluationApprovalSheet({
   const { user } = useUser();
   const taskId = Number(task.id);
 
-  // ── Queries lấy dữ liệu đối chiếu (Chỉ fetch khi Sheet thực sự mở - Lazy Gating) ──
+  // ── Queries lấy dữ liệu đối chiếu & chi tiết đầy đủ (Lazy Gating khi Sheet mở) ──
+  const { data: detailData, isLoading: isLoadingDetail } = useTaskDetail(taskId, { enabled: open });
+  const currentTask: HrmTask = useMemo(() => {
+    return (detailData as any)?.data ?? task;
+  }, [detailData, task]);
+
   const { data: historyData } = useTaskHistory(taskId, { enabled: open });
   const { data: stepsData } = useTaskSteps(taskId, { enabled: open });
   const { data: subtasksData } = useTaskSubtasks(taskId, { enabled: open });
 
   const historyList: any[] = (historyData as any)?.data ?? [];
-  const stepsList: any[] = (stepsData as any)?.data ?? task.steps ?? [];
-  const subtasksList: any[] = (subtasksData as any)?.data ?? task.subTasks ?? [];
+  const stepsList: any[] = (stepsData as any)?.data ?? currentTask.steps ?? [];
+  const subtasksList: any[] = (subtasksData as any)?.data ?? currentTask.subTasks ?? [];
 
   // ── Thống kê Dữ liệu Hệ thống (System Metrics) ──
   const systemMetrics = useMemo(() => {
-    const dueDate = task.dueDate ? new Date(task.dueDate) : null;
-    const completedDate = task.completedAt
-      ? new Date(task.completedAt)
-      : task.updatedAt
-      ? new Date(task.updatedAt)
+    const dueDate = currentTask.dueDate ? new Date(currentTask.dueDate) : null;
+    const completedDate = currentTask.completedAt
+      ? new Date(currentTask.completedAt)
+      : currentTask.updatedAt
+      ? new Date(currentTask.updatedAt)
       : new Date();
 
     let diffDays = 0;
@@ -135,13 +140,13 @@ export function TaskEvaluationApprovalSheet({
       extensionCount: extensions.length,
       extensions,
     };
-  }, [task, stepsList, subtasksList, historyList]);
+  }, [currentTask, stepsList, subtasksList, historyList]);
 
   // ── Trích xuất Nguồn Tự báo cáo của Chuyên viên (Assignee Self-Report) ──
   const selfReport = useMemo(() => {
     // 1. Kiểm tra trong metadata của task
-    const metaEval = task.metadata?.evaluation;
-    const metaSelf = task.metadata?.selfReport;
+    const metaEval = currentTask.metadata?.evaluation;
+    const metaSelf = currentTask.metadata?.selfReport;
 
     // 2. Tìm evidence báo cáo gần nhất trong lịch sử
     const evidenceLogs = historyList
@@ -153,7 +158,7 @@ export function TaskEvaluationApprovalSheet({
       metaSelf?.summary ||
       latestEvidenceLog?.newValue?.evidence ||
       latestEvidenceLog?.note ||
-      task.description ||
+      currentTask.description ||
       "Đã hoàn thành toàn bộ các hạng mục công việc được phân công.";
 
     // Trích xuất danh sách file minh chứng
@@ -161,8 +166,8 @@ export function TaskEvaluationApprovalSheet({
     if (metaSelf?.files && Array.isArray(metaSelf.files)) {
       files.push(...metaSelf.files);
     }
-    if (task.attachments && Array.isArray(task.attachments)) {
-      task.attachments.forEach((att) => {
+    if (currentTask.attachments && Array.isArray(currentTask.attachments)) {
+      currentTask.attachments.forEach((att) => {
         files.push({ name: att.fileName || "Tài liệu minh chứng", url: att.fileUrl || "#" });
       });
     }
@@ -170,10 +175,10 @@ export function TaskEvaluationApprovalSheet({
     return {
       summary: evidenceText,
       files,
-      submittedAt: metaSelf?.submittedAt || latestEvidenceLog?.createdAt || task.updatedAt,
+      submittedAt: metaSelf?.submittedAt || latestEvidenceLog?.createdAt || currentTask.updatedAt,
       deliverable: metaSelf?.outputProduct || "Bản thảo kết quả / Báo cáo hoàn thành",
     };
-  }, [task, historyList]);
+  }, [currentTask, historyList]);
 
   // ── State Chấm điểm của Lãnh đạo (Leader Evaluation Matrix) ──
   const [volumePct, setVolumePct] = useState<number>(100);
@@ -324,11 +329,14 @@ export function TaskEvaluationApprovalSheet({
                       Thẩm định & Phê duyệt Lãnh đạo
                     </Badge>
                     <span className="text-xs text-muted-foreground shrink-0 font-mono">
-                      Mã #{task.id}
+                      Mã #{currentTask.id}
                     </span>
+                    {isLoadingDetail && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground shrink-0" />
+                    )}
                   </div>
                   <SheetTitle className="text-lg sm:text-xl font-bold leading-tight wrap-break-word min-w-0 text-foreground pt-1">
-                    {task.title}
+                    {currentTask.title}
                   </SheetTitle>
                   <SheetDescription className="text-xs text-muted-foreground leading-relaxed wrap-break-word">
                     Đối chiếu song song dữ liệu tự động từ hệ thống và báo cáo kết quả của chuyên viên để chốt điểm KPI.
@@ -340,15 +348,15 @@ export function TaskEvaluationApprovalSheet({
               <div className="flex flex-wrap items-center gap-2 pt-3 text-xs min-w-0">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted border text-foreground font-medium min-w-0 max-w-full">
                   <UserCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span className="truncate">Người xử lý: {task.assigneeName || "Chưa xác định"}</span>
+                  <span className="truncate">Người xử lý: {currentTask.assigneeName || "Chưa xác định"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted border text-foreground font-medium min-w-0 max-w-full">
                   <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span>Hạn chót: {safeFormatDate(task.dueDate, "dd/MM/yyyy HH:mm")}</span>
+                  <span>Hạn chót: {safeFormatDate(currentTask.dueDate, "dd/MM/yyyy HH:mm")}</span>
                 </span>
-                {task.sourceDocumentRef && (
+                {currentTask.sourceDocumentRef && (
                   <Badge variant="outline" className="font-mono text-[11px] py-1 bg-background shrink-0">
-                    Căn cứ: {task.sourceDocumentRef}
+                    Căn cứ: {currentTask.sourceDocumentRef}
                   </Badge>
                 )}
               </div>
@@ -446,7 +454,7 @@ export function TaskEvaluationApprovalSheet({
                     <div className="flex items-center justify-between py-1 min-w-0">
                       <span className="text-slate-600">Điểm cơ sở VTVL:</span>
                       <span className="font-bold text-indigo-700">
-                        +{task.baseScore || 0} điểm (Trọng số: {task.weight || 1.0})
+                        +{currentTask.baseScore || 0} điểm (Trọng số: {currentTask.weight || 1.0})
                       </span>
                     </div>
                   </div>

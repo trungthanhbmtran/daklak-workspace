@@ -193,7 +193,7 @@ export class TaskSharedService {
         },
       }).subscribe();
     } catch (e) {
-      console.error(`Failed to send notification "${title}"`, e);
+      this.logger.error(`Failed to send notification "${title}"`, e);
     }
   }
 
@@ -899,11 +899,11 @@ export class TaskSharedService {
       startDate: startDateStr,
       createdAt: createdAtStr,
       updatedAt: updatedAtStr,
-      baseScore: t.kpiSettings?.baseScore ?? 0,
-      weight: t.kpiSettings?.weight ?? 0,
-      scoringMethod: t.kpiSettings?.scoringMethod ?? '',
-      bonusPerDay: t.kpiSettings?.bonusPerDay ?? 0,
-      penaltyPerDay: t.kpiSettings?.penaltyPerDay ?? 0,
+      baseScore: Number((t.metadata as any)?.baseScore ?? 0),
+      weight: Number((t.metadata as any)?.weight ?? 0),
+      scoringMethod: String((t.metadata as any)?.scoringMethod ?? ''),
+      bonusPerDay: Number((t.metadata as any)?.bonusPerDay ?? 0),
+      penaltyPerDay: Number((t.metadata as any)?.penaltyPerDay ?? 0),
       supervisorCode: t.supervisorCode ?? '',
       planId: t.planId ?? 0,
       assigneeName: t.assigneeName ?? '',
@@ -956,11 +956,11 @@ export class TaskSharedService {
       startDate: startDateStr,
       createdAt: createdAtStr,
       updatedAt: updatedAtStr,
-      baseScore: t.kpiSettings?.baseScore ?? 0,
-      weight: t.kpiSettings?.weight ?? 0,
-      scoringMethod: t.kpiSettings?.scoringMethod ?? '',
-      bonusPerDay: t.kpiSettings?.bonusPerDay ?? 0,
-      penaltyPerDay: t.kpiSettings?.penaltyPerDay ?? 0,
+      baseScore: Number((t.metadata as any)?.baseScore ?? 0),
+      weight: Number((t.metadata as any)?.weight ?? 0),
+      scoringMethod: String((t.metadata as any)?.scoringMethod ?? ''),
+      bonusPerDay: Number((t.metadata as any)?.bonusPerDay ?? 0),
+      penaltyPerDay: Number((t.metadata as any)?.penaltyPerDay ?? 0),
       supervisorCode: t.supervisorCode ?? '',
       planId: t.planId ?? 0,
       assigneeName: t.assigneeName ?? '',

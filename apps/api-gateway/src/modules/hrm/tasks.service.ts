@@ -27,6 +27,10 @@ export class TasksService implements OnModuleInit {
     if (code === 5) throw new NotFoundException(message);
     if (code === 6) throw new ConflictException(message);
     if (code === 3) throw new BadRequestException(message);
+    if (typeof message === 'string') {
+      if (message.toLowerCase().includes('không có quyền')) throw new ForbiddenException(message);
+      if (message.toLowerCase().includes('không tồn tại')) throw new NotFoundException(message);
+    }
     throw new InternalServerErrorException(message);
   }
 
@@ -506,67 +510,6 @@ export class TasksService implements OnModuleInit {
     return response;
   }
 
-  async recommendAssignees(
-    req: any,
-    rankCode: string,
-    strategy: string,
-    domainId: string,
-    jobTitleId: string,
-  ) {
-    const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
-    let res: any;
-    try {
-      res = await firstValueFrom(
-        this.taskService.RecommendAssignees(
-          {
-            rankCode: rankCode || 'ALL',
-            strategy: strategy || 'LOW_PERFORMANCE',
-            domainId,
-            jobTitleId,
-            currentUserId: user?.id ? parseInt(user.id, 10) : undefined,
-            currentEmployeeCode: user?.employeeCode,
-            currentUserPermissions: user?.permissionsFlatten || [],
-          },
-          this.getGrpcMetadata(req),
-        ),
-      );
-    } catch (e) {
-      console.error('Failed to call recommendAssignees from taskService:', e);
-      res = { data: { topEmployees: [], topDepartments: [] } };
-    }
-
-    let topEmployees = Array.isArray(res?.data)
-      ? res.data
-      : res?.data?.topEmployees || [];
-    let topDepartments = Array.isArray(res?.data)
-      ? []
-      : res?.data?.topDepartments || [];
-
-    topEmployees = topEmployees.map((emp: any, idx: number) => {
-      return {
-        ...emp,
-        employeeName:
-          emp.fullName || emp.employeeName || emp.username || emp.employeeCode,
-        departmentName: emp.departmentName || '',
-        currentLoad:
-          emp.currentLoad !== undefined ? emp.currentLoad : emp.taskCount || 0,
-        performanceScore:
-          emp.performanceScore !== undefined
-            ? emp.performanceScore
-            : emp.kpiScore || Math.max(50, 100 - idx * 5),
-      };
-    });
-
-    topDepartments = topDepartments.map((d: any) => {
-      return {
-        ...d,
-        departmentName: d.departmentName || d.name || '',
-      };
-    });
-
-    return { data: { topEmployees, topDepartments } };
-  }
 
   async assignTask(req: any, id: number, body: any) {
     if (body.assignee) {
@@ -657,55 +600,6 @@ export class TasksService implements OnModuleInit {
     return breakdownResponse;
   }
 
-  async getComments(req: any, id: number) {
-    const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
-    const isLeader =
-      isAdmin ||
-      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
-      user?.permissionsFlatten?.includes('TASK.*');
-
-    return firstValueFrom(
-      this.taskService.GetComments(
-        {
-          taskId: id,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin,
-          isLeader,
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    ).catch((e) => this.handleRpcError(e));
-  }
-
-  async addComment(
-    req: any,
-    id: number,
-    body: { content: string; isSystemMessage?: boolean },
-  ) {
-    const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
-    const isLeader =
-      isAdmin ||
-      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
-      user?.permissionsFlatten?.includes('TASK.*');
-    return firstValueFrom(
-      this.taskService.AddComment(
-        {
-          taskId: id,
-          authorCode: req.user?.employeeCode || '',
-          content: body.content,
-          isSystemMessage: body.isSystemMessage || false,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin,
-          isLeader,
-          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        },
-        this.getGrpcMetadata(req),
-      ),
-    ).catch((e) => this.handleRpcError(e));
-  }
 
   async requestCoordination(req: any, id: number, body: any) {
     const message = body.message;
@@ -790,32 +684,31 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async upsertTaskKpiSetting(req: any, id: number, body: any) {
-    return firstValueFrom(
-      this.taskService.UpsertTaskKpiSetting(
-        { taskId: id, ...body },
-        this.getGrpcMetadata(req),
-      ),
-    ).catch((e) => this.handleRpcError(e));
-  }
-
-  async getTaskKpiSetting(req: any, id: number) {
-    return firstValueFrom(
-      this.taskService.GetTaskKpiSetting(
-        { taskId: id },
-        this.getGrpcMetadata(req),
-      ),
-    ).catch((e) => this.handleRpcError(e));
-  }
 
   async getTask(req: any, id: number) {
     const user = req.user;
+    const perms = user?.permissionsFlatten || [];
+    const isAdmin =
+      perms.includes('TASK:MANAGE') ||
+      perms.includes('TASK.*') ||
+      perms.includes('SYSTEM:*') ||
+      perms.some((p: string) => p.startsWith('SYSTEM')) ||
+      false;
+    const isLeader =
+      isAdmin ||
+      perms.includes('TASK.ASSIGN') ||
+      perms.includes('TASK.*');
+
     const response = (await firstValueFrom(
       this.taskService.GetTask(
         {
           id,
-          currentEmployeeCode: user?.employeeCode,
-          isAdmin: user?.permissionsFlatten?.includes('TASK:MANAGE') || false,
+          currentUserId: user?.id,
+          currentEmployeeCode: user?.employeeCode || user?.username,
+          currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+          currentUserPermissions: perms,
+          isAdmin,
+          isLeader,
         },
         this.getGrpcMetadata(req),
       ),

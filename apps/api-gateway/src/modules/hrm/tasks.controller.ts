@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -216,6 +217,15 @@ export class TasksController {
     @Body() body: any,
   ) {
     return this.tasksService.updateStep(req, id, stepId, body);
+  }
+
+  @Delete(':id/steps/:stepId')
+  async deleteStep(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('stepId', ParseIntPipe) stepId: number,
+  ) {
+    return this.tasksService.deleteStep(req, id, stepId);
   }
 
   @Post(':id/attend')

@@ -1,5 +1,35 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Rà soát Toàn bộ Luồng Quản lý Công việc & Dọn dẹp Mã nguồn / Dead Code
+
+### 1. Phạm vi & Mục tiêu
+- Rà soát toàn bộ luồng quản lý công việc từ CSDL -> Proto -> Backend (`hrm-service`) -> API Gateway (`api-gateway`) -> Frontend (`admin_khcn`).
+- Phát hiện và triệt tiêu toàn bộ mã nguồn thừa, dead code, alias deprecated, debug logs (`console.error`).
+- Đảm bảo tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật.
+
+### 2. Các Thay đổi Thực thi Chuẩn xác
+1. **Triệt tiêu Dead Code tại API Gateway (`apps/api-gateway/src/modules/hrm/tasks.service.ts`):**
+   - Xóa bỏ `recommendAssignees` (chứa `console.error` vi phạm ràng buộc số 7, controller không có route).
+   - Xóa bỏ `getComments` và `addComment` (chức năng thảo luận đã chuyển sang Chat Service).
+   - Xóa bỏ `upsertTaskKpiSetting` và `getTaskKpiSetting` (cấu hình KPI đã chuyển sang global-settings).
+2. **Bổ sung Route Thiếu tại API Gateway (`apps/api-gateway/src/modules/hrm/tasks.controller.ts`):**
+   - Thêm decorator `@Delete(':id/steps/:stepId')` kết nối `this.tasksService.deleteStep(req, id, stepId)` để hoàn thiện trọn vẹn CRUD Checklist các bước thực hiện.
+3. **Triệt tiêu Alias & Dọn rác Logging tại Backend (`apps/hrm-service`):**
+   - `tasks.service.ts`: Xóa bỏ alias `@deprecated Use listTasks instead` (`async getTasks(query: any)`).
+   - `task-shared.service.ts`: Thay thế `console.error` bằng `this.logger.error` tại khối gửi thông báo, triệt tiêu 100% console logging rác.
+4. **Tối ưu Hóa Giao diện Thẩm định Lãnh đạo (`TaskEvaluationApprovalSheet.tsx`):**
+   - Tích hợp lazy query `useTaskDetail(taskId, { enabled: open })` kết hợp fallback an toàn `currentTask = detailData?.data ?? task`.
+   - Đảm bảo khi mở Sheet thẩm định, dữ liệu minh chứng, mô tả, tệp đính kèm và điểm cơ sở VTVL luôn là bản chi tiết và cập nhật mới nhất từ server.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/admin_khcn`: `npm run typecheck` -> Exit code 0 (Pass 100%).
+- `git grep -n "console\."`: Exit code 1 (Không còn bất kỳ dòng `console.*` nào trong các module liên quan đến task).
+- Soi diff dòng-theo-dòng: 100% gọn gàng, UTF-8 chuẩn không BOM.
+
+---
+
 ## [2026-10-13] Rà soát Toàn diện Luồng Xử lý Công việc & Nâng cấp Khâu Giao việc (Task Assignment Sheet Enterprise)
 
 ### 1. Đánh giá Luồng Xử lý Công việc (Task Workflow Lifecycle)
@@ -617,5 +647,36 @@
 - `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
 - `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
 - Soi diff & Vệ sinh mã nguồn: 100% sạch debug logs, mã hóa chuẩn UTF-8 không BOM.
+
+---
+
+## [2026-10-13] Sửa Lỗi 500 Internal Server Error Khi Nhấn Xem Chi Tiết Công Việc (GetTask Endpoint Fix)
+
+### 1. Nguyên nhân Gốc rễ (Root Cause Analysis)
+- **Lỗi 1 (Prisma Query Crash):** Trong `apps/hrm-service/src/modules/tasks/tasks.service.ts`, định nghĩa `taskInclude` có dòng `kpiSettings: true`. Tuy nhiên trong Prisma schema của `hrm-service`, model `Task` không hề có relation `kpiSettings`. Do đó, khi gọi `findTaskOrFail(id)` để lấy chi tiết nhiệm vụ, Prisma ném lỗi runtime `Unknown field 'kpiSettings' for include statement on model 'Task'`, khiến microservice crash và API Gateway trả về 500.
+- **Lỗi 2 (PBAC Context Drop ở API Gateway):** Trong `apps/api-gateway/src/modules/hrm/tasks.service.ts`, method `getTask` chỉ gửi `id`, `currentEmployeeCode: user?.employeeCode`, và `isAdmin: user?.permissionsFlatten?.includes('TASK:MANAGE')`. Khi tài khoản đăng nhập là Admin hệ thống (`SYSTEM:*`, `TASK.*`) hoặc user chưa gắn `employeeCode`, Gateway không gửi `currentUserId`, `currentUserDept`, `currentUserPermissions`, `isLeader`, và biến `isAdmin` bị false. Khi đó `checkTaskAccess` từ chối quyền truy cập và ném lỗi chuỗi.
+- **Lỗi 3 (gRPC Error Status Code Mapping):** Microservice `hrm-service` trước đây ném `new RpcException('...')` bằng chuỗi (string) thay vì object có mã gRPC status code (`{ code: 5, message: ... }`, `{ code: 7, message: ... }`). Khiến API Gateway nhận mã lỗi UNKNOWN (code 2) và `handleRpcError` chuyển thành `InternalServerErrorException` (500) thay vì 404/403.
+- **Lỗi 4 (Thiếu trường trong Proto):** `shared/protos/hrm/task.proto` thiếu `bool isAdmin = 6;` và `bool isLeader = 7;` trong message `GetTaskRequest`.
+
+### 2. Các File Đã Xử lý
+1. `apps/hrm-service/src/modules/tasks/tasks.service.ts`:
+   - Xóa bỏ trường không tồn tại `kpiSettings: true` trong `taskInclude`.
+   - Chuẩn hóa `RpcException` trong `findTaskOrFail` (`code: 5` - NOT_FOUND) và `getTask` (`code: 7` - PERMISSION_DENIED).
+2. `apps/hrm-service/src/modules/task-shared/task-shared.service.ts`:
+   - Bổ sung fallback an toàn đọc `baseScore`, `weight`, `scoringMethod` từ `metadata` của Task (`(t.metadata as any)?.baseScore`).
+3. `apps/hrm-service/src/modules/tasks/tasks.controller.ts`:
+   - Bảo toàn dữ liệu từ payload nếu user token không có `employeeCode`, đồng thời tự động nhận diện `isAdmin = true` khi quyền chứa `SYSTEM:*`, `TASK:MANAGE`, `TASK.*`.
+4. `apps/api-gateway/src/modules/hrm/tasks.service.ts`:
+   - Bổ sung đầy đủ context PBAC trong `getTask`: `currentUserId`, `currentEmployeeCode` (fallback `user?.username`), `currentUserDept`, `currentUserPermissions`, `isAdmin` (kiểm tra đầy đủ `SYSTEM:*`, `TASK:*`), và `isLeader`.
+   - Cải thiện `handleRpcError` phát hiện lỗi quyền và lỗi không tồn tại theo message string.
+5. `shared/protos/hrm/task.proto`:
+   - Bổ sung `bool isAdmin = 6;` và `bool isLeader = 7;` vào `GetTaskRequest`.
+
+### 3. Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> Exit code 0 (Pass 100%).
+- 100% tuân thủ 7 Bộ ràng buộc kỹ thuật, mã hóa UTF-8 không BOM, dọn sạch rác.
+
 
 
