@@ -1,5 +1,31 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Khắc phục Triệt để Lỗi Chức năng Giao việc Mới (Create Task Sheet)
+
+### 1. Phạm vi & Mục tiêu
+- Điều tra và xử lý triệt để lỗi khi bấm "+ Giao việc mới" trên trang Quản lý công việc (`http://113.184.220.82/admin/services/hrm/work-plans/tasks`).
+- Xác định nguyên nhân gốc (Root Cause) gây crash giao diện (Client-side exception) và các rủi ro ngoại lệ Database liên quan đến toàn vẹn dữ liệu người tham gia (Task Participants).
+
+### 2. Nguyên nhân Gốc & Giải pháp Kỹ thuật
+1. **Lỗi Crash UI (Radix UI Select Exception):**
+   - Tại `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`: Trường chọn Lãnh đạo thẩm định sử dụng `<SelectItem value="">-- Mặc định người giao việc --</SelectItem>`.
+   - Theo cơ chế của `@radix-ui/react-select`, prop `value` của `SelectItem` tuyệt đối không được là chuỗi rỗng (`""`), dẫn đến khi click mở form Giao việc mới, Radix UI văng ngay `Error: A <Select.Item /> must have a value prop that is not an empty string...` gây lỗi ứng dụng phía client (`Application error: a client-side exception has occurred`).
+   - Khắc phục: Chuyển giá trị mặc định của `supervisorCode` và SelectItem thành `"DEFAULT"`, lọc bỏ trùng lặp mã khi `autoDetectedSupervisor` hiển thị, và chuẩn hóa mapping trước khi gửi payload.
+2. **Phòng ngừa Foreign Key Violation tại `hrm-service` (`executeCreateTaskTransaction`):**
+   - Tại `apps/hrm-service/src/modules/tasks/tasks.service.ts`: Khi `tx.taskParticipant.createMany` chạy, nếu `creatorCode` (ví dụ `admin`), `assigneeCode` (`UNASSIGNED`), hoặc người phối hợp không nằm trong bảng `employees`, MariaDB sẽ trả lỗi Error 1452 vi phạm ràng buộc khóa ngoại `task_participants_employee_code_fkey`.
+   - Khắc phục: Lọc danh sách participant theo danh sách `employeeCode` thực sự tồn tại trong `tx.employee`. Tự động khởi tạo bản ghi `UNASSIGNED` trong `employees` nếu hệ thống chưa có.
+3. **Chuẩn hóa Người tạo / Người giao việc tại API Gateway:**
+   - Tại `apps/api-gateway/src/modules/hrm/tasks.service.ts`: Ưu tiên phân giải `effectiveEmpCode` từ `userCacheMap` theo `req.user.id` khi tài khoản đăng nhập không chứa sẵn `employeeCode` trên token JWT.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/admin_khcn`: `npm run typecheck` -> Exit code 0 (Pass 100%).
+- `apps/hrm-service`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (Pass 100%).
+- Kiểm tra debug logs: 0 console.log / debugger.
+- File encoding: UTF-8 không BOM.
+
+---
+
 ## [2026-10-13] Rà soát Tính Toàn vẹn của Workflow Quản lý Công việc & KPI (BPMN vs Runtime)
 
 ### 1. Phạm vi & Mục tiêu

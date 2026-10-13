@@ -79,7 +79,7 @@ export function CreateTaskDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [sourceDocumentRef, setSourceDocumentRef] = useState("");
-  const [supervisorCode, setSupervisorCode] = useState("");
+  const [supervisorCode, setSupervisorCode] = useState("DEFAULT");
   const [autoDetectedSupervisor, setAutoDetectedSupervisor] = useState<{
     code: string;
     name: string;
@@ -203,8 +203,8 @@ export function CreateTaskDialog({
               reason: sup.reason || "Phân công theo dõi đơn vị trong định biên tổ chức",
             };
             setAutoDetectedSupervisor(detected);
-            // Tự động điền nếu chưa chọn hoặc đang trùng với mã tự động trước đó
-            setSupervisorCode((prev) => (!prev || prev === autoDetectedSupervisor?.code ? sup.supervisorCode : prev));
+            // Tự động điền nếu chưa chọn hoặc đang trùng với mã tự động trước đó hoặc đang mặc định
+            setSupervisorCode((prev) => (!prev || prev === "DEFAULT" || prev === autoDetectedSupervisor?.code ? sup.supervisorCode : prev));
           } else {
             setAutoDetectedSupervisor(null);
           }
@@ -323,7 +323,7 @@ export function CreateTaskDialog({
     setTitle("");
     setDescription("");
     setSourceDocumentRef("");
-    setSupervisorCode("");
+    setSupervisorCode("DEFAULT");
     setAutoDetectedSupervisor(null);
     setPriority("NORMAL");
     setAssignee("");
@@ -364,7 +364,7 @@ export function CreateTaskDialog({
       title: title.trim(),
       description: description.trim() || undefined,
       sourceDocumentRef: sourceDocumentRef.trim() || undefined,
-      supervisorCode: supervisorCode || undefined,
+      supervisorCode: supervisorCode && supervisorCode !== "DEFAULT" ? supervisorCode : undefined,
       priority,
       dueDate,
       assignee,
@@ -749,7 +749,7 @@ export function CreateTaskDialog({
                       <SelectValue placeholder="Chọn lãnh đạo phụ trách..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
-                      <SelectItem value="">-- Mặc định người giao việc --</SelectItem>
+                      <SelectItem value="DEFAULT">-- Mặc định người giao việc --</SelectItem>
                       {autoDetectedSupervisor && (
                         <SelectItem value={autoDetectedSupervisor.code}>
                           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-medium">
@@ -758,15 +758,17 @@ export function CreateTaskDialog({
                           </div>
                         </SelectItem>
                       )}
-                      {employees.map((emp: any) => (
-                        <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                          <div className="flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                            <span>{emp.fullName}</span>
-                            <span className="text-xs text-slate-400">({emp.jobTitleName || emp.employeeCode})</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {employees
+                        .filter((emp: any) => emp.employeeCode !== autoDetectedSupervisor?.code)
+                        .map((emp: any) => (
+                          <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                            <div className="flex items-center gap-2">
+                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                              <span>{emp.fullName}</span>
+                              <span className="text-xs text-slate-400">({emp.jobTitleName || emp.employeeCode})</span>
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
 
@@ -1258,7 +1260,7 @@ export function CreateTaskDialog({
                   </strong>
                 </span>
               )}
-              {supervisorCode && (
+              {supervisorCode && supervisorCode !== "DEFAULT" && (
                 <span className="ml-2">
                   • Phê duyệt:{" "}
                   <strong className="text-emerald-700 dark:text-emerald-400">

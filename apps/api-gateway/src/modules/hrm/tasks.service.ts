@@ -204,8 +204,10 @@ export class TasksService implements OnModuleInit {
     }
 
     if (req.user) {
-      body.assignerCode = req.user.employeeCode || req.user.username;
-      body.currentEmployeeCode = req.user.employeeCode;
+      const cachedUser = req.user.id ? this.userCacheMap.get(String(req.user.id)) : null;
+      const effectiveEmpCode = req.user.employeeCode || cachedUser?.employeeCode;
+      body.assignerCode = effectiveEmpCode || req.user.employeeCode || req.user.username;
+      body.currentEmployeeCode = effectiveEmpCode || req.user.employeeCode;
       body.currentUserId = req.user.id ? parseInt(req.user.id, 10) : undefined;
       body.currentUserPermissions = req.user.permissionsFlatten || [];
     }

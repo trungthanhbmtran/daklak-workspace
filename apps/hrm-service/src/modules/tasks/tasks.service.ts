@@ -523,7 +523,35 @@ export class TasksService {
 
       const participantsData = this.shared.buildParticipantsData(task.id, data);
       if (participantsData.length > 0) {
-        await tx.taskParticipant.createMany({ data: participantsData, skipDuplicates: true });
+        const participantCodes = [...new Set(participantsData.map((p: any) => p.employeeCode).filter(Boolean))];
+        const existingEmployees = await tx.employee.findMany({
+          where: { employeeCode: { in: participantCodes } },
+          select: { employeeCode: true }
+        });
+        const validCodeSet = new Set(existingEmployees.map((e: any) => e.employeeCode));
+
+        if (participantCodes.includes('UNASSIGNED') && !validCodeSet.has('UNASSIGNED')) {
+          try {
+            await tx.employee.create({
+              data: {
+                employeeCode: 'UNASSIGNED',
+                firstname: 'Chưa',
+                lastname: 'phân công',
+                fullName: 'Chưa phân công',
+                email: 'unassigned@system.local',
+                employmentStatus: 'inactive',
+                startDate: new Date(),
+                userId: '0'
+              }
+            });
+            validCodeSet.add('UNASSIGNED');
+          } catch {}
+        }
+
+        const validParticipants = participantsData.filter((p: any) => validCodeSet.has(p.employeeCode));
+        if (validParticipants.length > 0) {
+          await tx.taskParticipant.createMany({ data: validParticipants, skipDuplicates: true });
+        }
       }
 
       await tx.taskClosure.create({ data: { ancestorId: task.id, descendantId: task.id, depth: 0 } });
