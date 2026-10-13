@@ -938,7 +938,17 @@ export class TasksService {
           await tx.taskParticipant.createMany({ data: participantsToCreate, skipDuplicates: true });
         }
         if (participantsToUpdate.length > 0) {
-          await Promise.all(participantsToUpdate.map(u => tx.taskParticipant.update({ where: u.where, data: u.data })));
+          const codesToUpdate = participantsToUpdate.map(
+            (u: any) => u.where.taskId_employeeCode_participantRole.employeeCode
+          );
+          await tx.taskParticipant.updateMany({
+            where: {
+              taskId: id,
+              participantRole: 'COORDINATOR',
+              employeeCode: { in: codesToUpdate },
+            },
+            data: { status: 'PENDING_ACCEPTANCE', reason: null },
+          });
         }
 
       if (resetTaskStatus) {

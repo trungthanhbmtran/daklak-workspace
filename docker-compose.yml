@@ -117,7 +117,7 @@ services:
     env_file:
       - apps/document-service/.env
     environment:
-      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_document
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_document?connection_limit=10&pool_timeout=15
 
   translate-service:
     build:
@@ -165,7 +165,7 @@ services:
     env_file:
       - apps/notification_service/.env
     environment:
-      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_notification
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_notification?connection_limit=10&pool_timeout=15
 
   chat-service:
     build:
@@ -192,7 +192,7 @@ services:
     env_file:
       - apps/chat-service/.env
     environment:
-      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_chat
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_chat?connection_limit=10&pool_timeout=15
       - GRPC_URL=0.0.0.0:50061
       - PORT=3004
 
@@ -222,7 +222,7 @@ services:
     environment:
       - GRPC_URL=0.0.0.0:50062
       - PORT=3011
-      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_report?allowPublicKeyRetrieval=true
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_report?allowPublicKeyRetrieval=true&connection_limit=10&pool_timeout=15
 
 volumes:
   mysql_data:

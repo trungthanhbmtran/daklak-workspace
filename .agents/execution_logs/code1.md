@@ -1,5 +1,24 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-13] Rà soát Tính Toàn vẹn của Workflow Quản lý Công việc & KPI (BPMN vs Runtime)
+
+### 1. Phạm vi & Mục tiêu
+- Đối chiếu toàn diện giữa Workflow Engine (`workflow-service`), Microservice HRM (`hrm-service`), API Gateway (`api-gateway`) và Frontend (`admin_khcn`).
+- Xác minh tính đầy đủ của các định nghĩa quy trình BPMN, triggers, transitions, state machines cho phân hệ Công việc & KPI.
+- Rà soát các điểm nghẽn kỹ thuật, đứt gãy luồng thực thi runtime (Outbox/Inbox, TaskWorkflowService stub, thất thoát dữ liệu đánh giá).
+
+### 2. Kết quả Khảo sát & Phát hiện Trọng yếu
+1. **Về Định nghĩa Quy trình (BPMN Definitions trong `workflow-service`):**
+   - ĐÃ CÓ: `TASK_PROCESSING_ID` (Giao việc -> Tiếp nhận -> Xử lý -> Nghiệm thu KPI -> Hoàn thành) và `UNEXPECTED_TASK_PROCESSING` (Đề xuất việc phát sinh -> Duyệt -> Xử lý -> Nghiệm thu).
+   - THIẾU: Quy trình Macro KPI định kỳ (Mẫu 01-05 theo QĐ 39-QĐ/TU & HD 05-HD/TU) chưa có Process Definition trên Workflow Engine.
+   - THIẾU: Luồng phê duyệt Xin gia hạn thời hạn hoàn thành công việc (`POST /admin/hrm/tasks/:id/extend`).
+2. **Về Đứt gãy Thực thi Runtime (Execution Gaps):**
+   - Đứt gãy Outbox: `updateTaskStatus`, `assignTask`, `respondTask` chỉ tạo `outboxEvent` nhưng `TaskOutboxWorker` không forward event, dẫn đến trạng thái `Task` không cập nhật trong DB.
+   - `TaskWorkflowService` ở `hrm-service` là stub rỗng (`{ allowed: true }`), chưa liên kết thực tế với `workflow-service`.
+   - Mất dữ liệu chấm điểm: `evidenceData` loại `'evaluation'` bị ghi đè thành `undefined` tại API Gateway `tasks.service.ts:503`.
+
+---
+
 ## [2026-10-13] Tối ưu Hóa Request & Response Payload Luồng Công việc (Least Data & Zero Bloat)
 
 ### 1. Phạm vi & Mục tiêu

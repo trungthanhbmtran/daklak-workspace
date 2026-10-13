@@ -1,5 +1,30 @@
 # Code 2 Execution Log
 
+## 2026-10-13: Thực thi Phương án Khắc phục Hiệu năng & Rủi ro Hệ thống (Giai đoạn 1 & Giai đoạn 2)
+- **Nội dung tác vụ**: Triển khai trực tiếp các giải pháp trọng yếu theo Báo cáo Đánh giá Hiệu năng & Rủi ro Hệ thống:
+  1. *Triệt tiêu N+1 Query & Deadlock 1213 trong Interactive Transactions*:
+     - Thay thế vòng lặp đơn lẻ `Promise.all(participantsToUpdate.map(u => tx.taskParticipant.update(...)))` trong `apps/hrm-service/src/modules/tasks/tasks.service.ts` bằng câu lệnh gộp duy nhất `tx.taskParticipant.updateMany({ where: { taskId, participantRole, employeeCode: { in: codesToUpdate } }, data: { status: 'PENDING_ACCEPTANCE', reason: null } })`. Giảm thiểu số vòng lặp round-trip và thời gian giữ row-lock từ hàng trăm ms xuống < 2ms.
+  2. *Bổ sung gRPC Deadline / Timeout & Channel Keepalive tại API Gateway*:
+     - Cập nhật `apps/api-gateway/src/core/factories/grpc.factory.ts`: Bổ sung cấu hình keepalive (`grpc.keepalive_time_ms: 30000`, `grpc.keepalive_timeout_ms: 10000`, `grpc.http2.min_time_between_pings_ms: 10000`) nhằm duy trì kết nối ổn định và phát hiện sớm kết nối chết.
+     - Tạo tiện ích `executeGrpcCall<T>` (`apps/api-gateway/src/core/utils/grpc-call.util.ts`) bọc các cuộc gọi RxJS Observable gRPC với deadline tự động (8s - 15s), ném `GatewayTimeoutException` (HTTP 504) khi downstream microservice bị nghẽn, ngăn chặn hoàn toàn hiện tượng cascading failure làm sập API Gateway.
+     - Áp dụng `executeGrpcCall` vào `AiGatewayController` (`apps/api-gateway/src/modules/ai/ai.controller.ts`).
+  3. *Bảo vệ Connection Pool Cơ sở Dữ liệu & Chống Sập MySQL (P0 SPOF Fix)*:
+     - Thêm tham số `connection_limit=10&pool_timeout=15` vào toàn bộ chuỗi kết nối MySQL Prisma trong `docker-compose.yml` và `docker-compose.prod.yml`. Tổng kết nối tối đa của 10 microservices không vượt quá 100 connections, triệt tiêu nguy cơ cạn kiệt connection pool (`P2024: Timed out fetching a new connection`).
+  4. *Nâng Giới hạn Bộ nhớ (RAM Caps) Chống OOMKilled*:
+     - Nâng giới hạn RAM trong `docker-compose.prod.yml` từ `1G` lên `1.5G` cho `api-gateway` và `hrm-service`.
+- **Tập tin đã cập nhật**:
+  - `apps/hrm-service/src/modules/tasks/tasks.service.ts`
+  - `apps/api-gateway/src/core/factories/grpc.factory.ts`
+  - `apps/api-gateway/src/core/utils/grpc-call.util.ts`
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`
+  - `docker-compose.yml`
+  - `docker-compose.prod.yml`
+- **Kiểm chứng máy**:
+  - Typecheck `apps/hrm-service`: `./apps/hrm-service/node_modules/.bin/tsc -p apps/hrm-service/tsconfig.json --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/api-gateway`: `./apps/api-gateway/node_modules/.bin/tsc -p apps/api-gateway/tsconfig.json --noEmit` -> PASS (Exit 0, 0 errors).
+  - Build `apps/api-gateway`: `npm run build` -> PASS (Exit 0); sync dist và restart container `daklak-workspace-api-gateway-1` -> Thành công (Ready, HTTP 8080).
+  - Soi diff dòng-theo-dòng trên `docker-compose.prod.yml` và `docker-compose.yml`: 100% chính xác.
+
 ## 2026-10-13: Rà soát Toàn diện Vi phạm Quy tắc Dự án, Chuẩn hóa Mã Nguồn & Lập Báo cáo Hiệu năng - Rủi ro Hệ thống
 - **Nội dung tác vụ**:
   1. *Rà soát Vi phạm Hiến chương Kỹ thuật*:

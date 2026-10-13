@@ -12,13 +12,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { firstValueFrom } from 'rxjs';
 import { Metadata } from '@grpc/grpc-js';
 import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 import { clientIp } from '../../core/client-ip';
+import { executeGrpcCall } from '../../core/utils/grpc-call.util';
 
 @ApiTags('AI')
 @Controller('admin/ai')
@@ -67,7 +67,7 @@ export class AiGatewayController implements OnModuleInit {
   @UseGuards(JwtAuthGuard)
   async generateText(@Req() req: any, @Body() body: { prompt: string }) {
     try {
-      const response = (await firstValueFrom(
+      const response = (await executeGrpcCall(
         this.aiService.GenerateText(
           {
             prompt: body.prompt,
@@ -75,10 +75,13 @@ export class AiGatewayController implements OnModuleInit {
           },
           this.getGrpcMetadata(req),
         ),
+        10000,
+        'AI GenerateText',
       )) as any;
       return this.safeParseJson(response.result);
     } catch (e: any) {
       this.logger.error(`GenerateText failed: ${e.message}`);
+      if (e.status) throw e;
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }
   }
@@ -90,7 +93,7 @@ export class AiGatewayController implements OnModuleInit {
     @Body() body: { action: string; payload: any },
   ) {
     try {
-      const response = (await firstValueFrom(
+      const response = (await executeGrpcCall(
         this.aiService.ExecuteAiFeature(
           {
             action: body.action,
@@ -101,10 +104,13 @@ export class AiGatewayController implements OnModuleInit {
           },
           this.getGrpcMetadata(req),
         ),
+        15000,
+        'AI ExecuteFeature',
       )) as any;
       return this.safeParseJson(response.result);
     } catch (e: any) {
       this.logger.error(`ExecuteAiFeature failed: ${e.message}`);
+      if (e.status) throw e;
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }
   }
@@ -113,15 +119,18 @@ export class AiGatewayController implements OnModuleInit {
   @UseGuards(JwtAuthGuard)
   async getJobStatus(@Req() req: any, @Param('jobId') jobId: string) {
     try {
-      const response = (await firstValueFrom(
+      const response = (await executeGrpcCall(
         this.aiService.GetJobStatus(
           { jobId },
           this.getGrpcMetadata(req),
         ),
+        5000,
+        'AI GetJobStatus',
       )) as any;
       return this.safeParseJson(response.status);
     } catch (e: any) {
       this.logger.error(`GetJobStatus failed: ${e.message}`);
+      if (e.status) throw e;
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }
   }
@@ -134,7 +143,7 @@ export class AiGatewayController implements OnModuleInit {
     }
 
     try {
-      const response = (await firstValueFrom(
+      const response = (await executeGrpcCall(
         this.aiService.ListModels(
           {
             provider: body.provider,
@@ -142,10 +151,13 @@ export class AiGatewayController implements OnModuleInit {
           },
           this.getGrpcMetadata(req),
         ),
+        8000,
+        'AI ListModels',
       )) as any;
       return { data: response.data || [] };
     } catch (e: any) {
       this.logger.error(`ListModels failed: ${e.message}`);
+      if (e.status) throw e;
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     }
   }
