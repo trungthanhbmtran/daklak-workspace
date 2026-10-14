@@ -129,6 +129,43 @@ export const usePublicComments = (consultationId?: string, status?: string) => {
   });
 };
 
+/** Lấy cấu hình trạng thái kết nối LGSP */
+export const useLgspConfig = () => {
+  return useQuery({
+    queryKey: ['lgsp-config'],
+    queryFn: async (): Promise<any> => {
+      const res = await apiClient.get(`${API_BASE}/lgsp/config`) as any;
+      return res?.data ?? res;
+    },
+  });
+};
+
+/** Lấy danh sách cơ quan đơn vị liên thông LGSP */
+export const useLgspAgencies = (params?: { limit?: number; offset?: number }) => {
+  return useQuery({
+    queryKey: ['lgsp-agencies', params],
+    queryFn: async (): Promise<any[]> => {
+      const res = await apiClient.get(`${API_BASE}/lgsp/agencies`, { params }) as any;
+      return res?.data ?? [];
+    },
+  });
+};
+
+/** Tra cứu trạng thái gửi văn bản qua LGSP */
+export const useLgspSentStatus = (documentId: string, lgspDocId?: string) => {
+  return useQuery({
+    queryKey: ['lgsp-sent-status', documentId, lgspDocId],
+    queryFn: async (): Promise<any> => {
+      if (!documentId) return null;
+      const res = await apiClient.get(`${API_BASE}/${documentId}/lgsp-status`, {
+        params: { lgspDocId },
+      }) as any;
+      return res?.data ?? res;
+    },
+    enabled: !!documentId,
+  });
+};
+
 // ─── Helper: bóc array từ ApiResponse (cho backward-compat) ──────────────────
 /** @deprecated Dùng trực tiếp res.data thay vì hàm này */
 export const extractDataArray = (res: ApiResponse<any[]> | null | undefined): any[] => {
@@ -220,6 +257,40 @@ export function useDocuments() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-minutes'] }); toast.success('Đã lưu biên bản cuộc họp!'); },
   });
 
+  const syncLgspMutation = useMutation({
+    mutationFn: () => apiClient.post(`${API_BASE}/lgsp/sync`),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success(res?.message || 'Đồng bộ văn bản từ trục LGSP thành công!');
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || error?.message || 'Lỗi đồng bộ văn bản từ trục LGSP');
+    },
+  });
+
+  const sendLgspDocumentMutation = useMutation({
+    mutationFn: ({ id, receiverCode }: { id: string; receiverCode: string }) =>
+      apiClient.post(`${API_BASE}/${id}/send-lgsp`, { receiverCode }),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success(res?.message || 'Văn bản đã được gửi lên trục liên thông LGSP!');
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || error?.message || 'Lỗi gửi văn bản lên trục LGSP');
+    },
+  });
+
+  const updateLgspConfigMutation = useMutation({
+    mutationFn: (config: any) => apiClient.post(`${API_BASE}/lgsp/config`, config),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lgsp-config'] });
+      toast.success('Cập nhật cấu hình kết nối LGSP thành công!');
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || error?.message || 'Lỗi cập nhật cấu hình LGSP');
+    },
+  });
+
   return {
     // Query hooks (re-exported từ top-level)
     useCategories,
@@ -232,27 +303,38 @@ export function useDocuments() {
     useDocumentStats,
     useDocumentLogs,
     usePublicComments,
+    useLgspConfig,
+    useLgspAgencies,
+    useLgspSentStatus,
     // Mutations
     createDocument: createDocumentMutation.mutateAsync,
     createConsultation: createConsultationMutation.mutateAsync,
     updateDocument: updateDocumentMutation.mutateAsync,
     deleteDocument: deleteDocumentMutation.mutateAsync,
     extractMetadata: extractMetadataMutation.mutateAsync,
-            moderateComment: moderateCommentMutation.mutateAsync,
+    moderateComment: moderateCommentMutation.mutateAsync,
     createCategory: createCategoryMutation.mutateAsync,
     updateCategory: updateCategoryMutation.mutateAsync,
     deleteCategory: deleteCategoryMutation.mutateAsync,
     createMinutes: createMinutesMutation.mutateAsync,
+    syncLgsp: syncLgspMutation.mutateAsync,
+    sendLgspDocument: sendLgspDocumentMutation.mutateAsync,
+    updateLgspConfig: updateLgspConfigMutation.mutateAsync,
+    isSyncingLgsp: syncLgspMutation.isPending,
+    isSendingLgsp: sendLgspDocumentMutation.isPending,
     isLoading:
       createDocumentMutation.isPending ||
       createConsultationMutation.isPending ||
       updateDocumentMutation.isPending ||
       deleteDocumentMutation.isPending ||
       extractMetadataMutation.isPending ||
-                  moderateCommentMutation.isPending ||
+      moderateCommentMutation.isPending ||
       createCategoryMutation.isPending ||
       updateCategoryMutation.isPending ||
       deleteCategoryMutation.isPending ||
-      createMinutesMutation.isPending,
+      createMinutesMutation.isPending ||
+      syncLgspMutation.isPending ||
+      sendLgspDocumentMutation.isPending ||
+      updateLgspConfigMutation.isPending,
   };
 }

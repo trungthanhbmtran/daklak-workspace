@@ -268,6 +268,7 @@ export class AuthService implements OnModuleInit {
       !grant ||
       !Number.isFinite(grant.expiresIn) ||
       Math.floor(grant.expiresIn) < 1 ||
+      grant.expiresIn > 31_536_000 ||
       !Number.isSafeInteger(grant.userId) ||
       grant.userId < 1 ||
       !Number.isSafeInteger(grant.authVersion) ||
@@ -472,7 +473,7 @@ export class AuthService implements OnModuleInit {
         });
       }
     }
-    return { };
+    return { success: true };
   }
 
   /* ----------------------------------- me ---------------------------------- */

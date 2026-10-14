@@ -16,6 +16,14 @@ service DocumentService {
   rpc GetLogs(GetLogsRequest) returns (GetLogsResponse) {}
   rpc FetchLgspStatistics(FetchLgspStatisticsRequest) returns (FetchLgspStatisticsResponse) {}
   
+  // LGSP Interoperability methods
+  rpc SyncLgsp(LgspSyncRequest) returns (LgspSyncResponse) {}
+  rpc SendLgspDocument(SendLgspDocumentRequest) returns (SendLgspDocumentResponse) {}
+  rpc GetLgspAgencies(GetLgspAgenciesRequest) returns (GetLgspAgenciesResponse) {}
+  rpc GetLgspSentStatus(GetLgspSentStatusRequest) returns (GetLgspSentStatusResponse) {}
+  rpc GetLgspConfig(common.Empty) returns (LgspConfigResponse) {}
+  rpc UpdateLgspConfig(UpdateLgspConfigRequest) returns (LgspConfigResponse) {}
+  
   // Workflow methods
   rpc ReceiveDocument(WorkflowRequest) returns (DocumentResponse) {}
   rpc ProcessDocument(WorkflowRequest) returns (DocumentResponse) {}
@@ -361,5 +369,75 @@ message UpdateDossierRequest {
 
 message DeleteDossierRequest {
   string id = 1;
+}
+
+// --- LGSP Interoperability Messages ---
+message LgspSyncRequest {
+  optional string actorId = 1;
+  optional string actorName = 2;
+}
+
+message LgspSyncResponse {
+  bool success = 1;
+  int32 syncedCount = 2;
+  string message = 3;
+  string data = 4;
+}
+
+message SendLgspDocumentRequest {
+  string documentId = 1;
+  string receiverCode = 2;
+  optional string actorId = 3;
+  optional string actorName = 4;
+}
+
+message SendLgspDocumentResponse {
+  bool success = 1;
+  string docId = 2;
+  string message = 3;
+  string rawResponse = 4;
+}
+
+message GetLgspAgenciesRequest {
+  optional int32 limit = 1;
+  optional int32 offset = 2;
+}
+
+message GetLgspAgenciesResponse {
+  bool success = 1;
+  string data = 2;
+  string message = 3;
+}
+
+message GetLgspSentStatusRequest {
+  string documentId = 1;
+  optional string lgspDocId = 2;
+}
+
+message GetLgspSentStatusResponse {
+  bool success = 1;
+  string data = 2;
+  string message = 3;
+}
+
+message LgspConfigResponse {
+  string systemCode = 1;
+  string ssoUrl = 2;
+  string baseUrl = 3;
+  bool hasClientId = 4;
+  bool hasClientSecret = 5;
+  bool hasUsername = 6;
+  bool hasPassword = 7;
+  bool isConfigured = 8;
+}
+
+message UpdateLgspConfigRequest {
+  optional string systemCode = 1;
+  optional string clientId = 2;
+  optional string clientSecret = 3;
+  optional string username = 4;
+  optional string password = 5;
+  optional string ssoUrl = 6;
+  optional string baseUrl = 7;
 }
 

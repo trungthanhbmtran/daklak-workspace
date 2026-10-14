@@ -7,6 +7,7 @@ import { CabinetModule } from './cabinet/cabinet.module';
 import { DossiersModule } from './dossiers/dossiers.module';
 import { PrismaModule } from './database/prisma.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { LgspModule } from './modules/lgsp/lgsp.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     ConsultationModule,
     CabinetModule,
     DossiersModule,
+    LgspModule,
   ],
 })
 export class AppModule { }

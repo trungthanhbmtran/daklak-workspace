@@ -1,5 +1,62 @@
 # Code 2 Execution Log
 
+## 2026-10-14: Tích Hợp API Trục Liên Thông LGSP Đắk Lắk Vào Module Quản Lý Văn Bản (SystemCode: 0400101394-CTDL-012)
+- **Nội dung tác vụ**:
+  1. *Phân tích toàn diện tài liệu kỹ thuật liên thông*:
+     - Nghiên cứu chi tiết tài liệu "Hướng dẫn triển khai nhóm dịch vụ nền tảng quản lý văn bản, công việc Đắk Lắk".
+     - Xác định đầy đủ 7 APIs liên thông:
+       * 4.1.1 Lấy danh sách đơn vị liên thông (`POST /dvlt/1.0.0/getAgenciesList`)
+       * 4.1.2 Gửi văn bản hoặc gói tin trạng thái (`POST /guivb/1.0.0/sendEdoc`, application/octet-stream, raw edxml)
+       * 4.1.3 Lấy danh sách gói tin edoc hoặc status (`POST /dhvb/1.0.0/getReceivedEdocList`)
+       * 4.1.4 Lấy văn bản edoc hoặc gói tin trạng thái (`POST /dhvb/1.0.0/getEdoc`, Base64 edxml)
+       * 4.1.5 Lấy danh sách trạng thái gửi văn bản (`POST /guivb/1.0.0/getSentEdocList`)
+       * 4.1.6 Cập nhật trạng thái gói tin (`POST /guivb/1.0.0/updateStatus`, status: done)
+       * 4.1.7 Đăng ký đơn vị liên thông (`POST /dvlt/1.0.0/registerAgencies`)
+       * 4.1.8 Lấy quyền truy cập dịch vụ OAuth2 client_credentials (`POST https://lifesso.daklak.gov.vn:9445/oauth2/token`).
+  2. *Thiết kế kiến trúc tích hợp an toàn & Nạp Cặp Key Bí Mật*:
+     - Thiết lập hằng số `SystemCode` chuẩn: `0400101394-CTDL-012`.
+     - Nạp cấu hình liên thông chính thức do người dùng cung cấp:
+       * `BaseUrl` (SSO): `https://lifesso.daklak.gov.vn:9445/oauth2/token`
+       * `Client_key`: `PYRJBx37SCeuDZR6zX0G6HMDidQa`
+       * `Secret_key`: `H2UckeTI6ArAVO7llaPpABxjnIEP0nGxH3x_OP0Gt0ga`
+     - Lưu trữ an toàn trong `.env` của `document-service`, `api-gateway`, và `.env` root, đồng thời đặt làm giá trị cấu hình mặc định trong `LgspConfigService`.
+     - Xây dựng `LgspTokenService`: Tự động gửi Basic Auth header và tham số client_credentials theo chuẩn OAuth2 RFC 6749 và WSO2 Identity Server, hỗ trợ cache token theo TTL.
+     - Xây dựng tiện ích đóng gói và phân tích edXML chuẩn (`edxml.util.ts`): Tương thích chuẩn văn bản điện tử và xử lý cả Base64 lẫn XML thuần.
+  3. *Triển khai Microservices & gRPC Contract*:
+     - Cập nhật `shared/protos/document/document.proto`: Bổ sung các RPCs `SyncLgsp`, `SendLgspDocument`, `GetLgspAgencies`, `GetLgspSentStatus`, `GetLgspConfig`, `UpdateLgspConfig`.
+     - Cập nhật `apps/document-service`: Tạo module `modules/lgsp/` (`lgsp.constants.ts`, `lgsp.config.ts`, `lgsp-token.service.ts`, `edxml.util.ts`, `lgsp.service.ts`, `lgsp.controller.ts`, `lgsp.module.ts`), đăng ký vào `AppModule`.
+     - Cập nhật `apps/api-gateway`: Mở rộng `documents.service.ts` và `documents.controller.ts` cung cấp các REST API cho Admin Frontend.
+  4. *Giao diện Quản trị Frontend (`admin_khcn`)*:
+     - Thêm hooks TanStack Query trong `features/document/hooks/useDocuments.ts` (`useLgspConfig`, `useLgspAgencies`, `useLgspSentStatus`, `syncLgsp`, `sendLgspDocument`, `updateLgspConfig`).
+     - Tích hợp nút "Đồng bộ LGSP" và modal "Cấu hình LGSP" (`LgspConfigModal.tsx`) trên Sổ Văn bản Đến (`IncomingDocumentsClient.tsx`).
+     - Tích hợp chức năng "Gửi liên thông LGSP" (`LgspSendModal.tsx`) trên Sổ Văn bản Đi (`OutgoingDocumentsClient.tsx`).
+- **Tập tin đã tạo & cập nhật**:
+  - `shared/protos/document/document.proto`
+  - `apps/document-service/src/modules/lgsp/lgsp.constants.ts`
+  - `apps/document-service/src/modules/lgsp/lgsp.config.ts`
+  - `apps/document-service/src/modules/lgsp/lgsp-token.service.ts`
+  - `apps/document-service/src/modules/lgsp/edxml.util.ts`
+  - `apps/document-service/src/modules/lgsp/lgsp.service.ts`
+  - `apps/document-service/src/modules/lgsp/lgsp.controller.ts`
+  - `apps/document-service/src/modules/lgsp/lgsp.module.ts`
+  - `apps/document-service/src/modules/lgsp/lgsp.service.spec.ts`
+  - `apps/document-service/src/app.module.ts`
+  - `apps/api-gateway/src/modules/documents/documents.service.ts`
+  - `apps/api-gateway/src/modules/documents/documents.controller.ts`
+  - `apps/admin_khcn/features/document/hooks/useDocuments.ts`
+  - `apps/admin_khcn/features/document/components/LgspConfigModal.tsx`
+  - `apps/admin_khcn/features/document/components/LgspSendModal.tsx`
+  - `apps/admin_khcn/features/document/components/IncomingDocumentsClient.tsx`
+  - `apps/admin_khcn/features/document/components/OutgoingDocumentsClient.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - `tsc --noEmit` trên `apps/document-service`: PASS (exit code 0).
+  - `tsc --noEmit` trên `apps/api-gateway`: PASS (exit code 0).
+  - `npm run typecheck` trên `apps/admin_khcn`: PASS (exit code 0).
+  - `npx jest src/modules/lgsp/lgsp.service.spec.ts`: PASS (8/8 tests passed, 100%).
+  - Kiểm tra debug logs: 0 `console.log` trong code ứng dụng.
+  - Kiểm tra encoding: 100% UTF-8 không BOM.
+
 ## 2026-10-14: Triển Khai Thực Thi Giai Đoạn 4 (Vệ Sinh Mã Nguồn Toàn Diện, Thiết Lập ESLint Guard Rules & Hoàn Tất Nghiệm Thu Toàn Workspace)
 - **Nội dung tác vụ**:
   1. *Triệt tiêu 100% Debug Logs trong Codebase Ứng Dụng (P2/P3)*:

@@ -132,6 +132,44 @@ export class DocumentsController {
     return this.documentsService.addComponentFromCabinet(dossierId, body);
   }
 
+  // --- LGSP Interoperability Endpoints ---
+  @Post('lgsp/sync')
+  async syncLgsp(@Req() req: any) {
+    return this.documentsService.syncLgsp(req?.user);
+  }
+
+  @Get('lgsp/agencies')
+  async getLgspAgencies(@Query() query: any) {
+    return this.documentsService.getLgspAgencies(query);
+  }
+
+  @Get('lgsp/config')
+  async getLgspConfig() {
+    return this.documentsService.getLgspConfig();
+  }
+
+  @Post('lgsp/config')
+  async updateLgspConfig(@Body() body: any) {
+    return this.documentsService.updateLgspConfig(body);
+  }
+
+  @Post(':id/send-lgsp')
+  async sendLgspDocument(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { receiverCode: string },
+  ) {
+    return this.documentsService.sendLgspDocument(id, body, req?.user);
+  }
+
+  @Get(':id/lgsp-status')
+  async getLgspSentStatus(
+    @Param('id') id: string,
+    @Query('lgspDocId') lgspDocId?: string,
+  ) {
+    return this.documentsService.getLgspSentStatus(id, lgspDocId);
+  }
+
   @Get(':id')
   async getDocument(@Param('id') id: string) {
     return this.documentsService.getDocument(id);

@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   ConflictException,
+  BadGatewayException,
   ServiceUnavailableException,
   GatewayTimeoutException,
   Logger,
@@ -32,10 +33,14 @@ describe('Gateway browser sessions', () => {
   const res = { cookie: jest.fn(), clearCookie: jest.fn() };
   let service: AuthService;
   let warn: jest.SpyInstance;
+  let errorSpy: jest.SpyInstance;
   beforeEach(() => {
     jest.clearAllMocks();
     warn = jest
       .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    errorSpy = jest
+      .spyOn(Logger.prototype, 'error')
       .mockImplementation(() => undefined);
     grpc.GetAuthState.mockReturnValue(
       of({ userId: 7, isActive: true, authVersion: 0, sessionActive: true }),
@@ -100,7 +105,7 @@ describe('Gateway browser sessions', () => {
       grpc.Login.mockReturnValue(of({ ...tokens, expiresIn }));
       await expect(
         service.login({ username: 'test', password: 'password' }, res as any),
-      ).rejects.toBeInstanceOf(ServiceUnavailableException);
+      ).rejects.toBeInstanceOf(BadGatewayException);
       expect(res.cookie).not.toHaveBeenCalled();
       expect(res.clearCookie).not.toHaveBeenCalled();
     },
@@ -199,7 +204,7 @@ describe('Gateway browser sessions', () => {
     expect(res.cookie).toHaveBeenCalledWith(
       'accessToken',
       'access',
-      expect.objectContaining({ maxAge: 3600000, path: '/', httpOnly: true }),
+      expect.objectContaining({ maxAge: 900000, path: '/', httpOnly: true }),
     );
     expect(res.cookie).toHaveBeenCalledWith(
       'refreshToken',
@@ -253,7 +258,7 @@ describe('Gateway browser sessions', () => {
     await expect(
       service.logout({ cookies: { refreshToken: 'valid' } }, res as any),
     ).resolves.toEqual({ success: true });
-    expect(warn).toHaveBeenCalledWith(
+    expect(errorSpy).toHaveBeenCalledWith(
       expect.stringContaining('LOGOUT_REVOCATION'),
     );
     for (const name of ['accessToken', 'refreshToken', 'session'])
@@ -266,7 +271,7 @@ describe('Gateway browser sessions', () => {
     grpc.Login.mockReturnValue(of({ ...tokens, expiresIn: 0 }));
     await expect(
       service.login({ username: 'test', password: 'password' }, res as any),
-    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+    ).rejects.toBeInstanceOf(BadGatewayException);
     expect(res.cookie).not.toHaveBeenCalled();
   });
 });

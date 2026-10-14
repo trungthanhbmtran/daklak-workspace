@@ -340,7 +340,8 @@ export function TaskList() {
             {
               header: "Thời hạn",
               cell: (task: any) => {
-                const isOverdue = new Date(task.dueDate) < new Date() && task.status?.toUpperCase() !== "HOÀN THÀNH";
+                const isCompleted = task.isCompleted || task.status?.toUpperCase() === "COMPLETED" || task.status?.toUpperCase() === "DONE";
+                const isOverdue = !isCompleted && task.dueDate && new Date(task.dueDate) < new Date();
                 return (
                   <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
                     {safeFormatDate(task.dueDate, "dd/MM/yyyy")}

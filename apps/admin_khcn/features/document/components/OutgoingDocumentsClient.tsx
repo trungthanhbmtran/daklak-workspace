@@ -27,6 +27,10 @@ const DocumentUploadModal = dynamic(() => import("@/features/document/components
   ssr: false,
 });
 
+const LgspSendModal = dynamic(() => import("@/features/document/components/LgspSendModal").then(mod => mod.LgspSendModal), {
+  ssr: false,
+});
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDate(dateString: string | null | undefined): string {
@@ -87,9 +91,10 @@ const DeleteDialog = React.memo(function DeleteDialog({ itemId, onClose }: Delet
 interface DocumentRowProps {
   doc: any;
   onDelete: (id: string) => void;
+  onSendLgsp: (doc: any) => void;
 }
 
-const DocumentRow = React.memo(function DocumentRow({ doc, onDelete }: DocumentRowProps) {
+const DocumentRow = React.memo(function DocumentRow({ doc, onDelete, onSendLgsp }: DocumentRowProps) {
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -140,14 +145,27 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDelete }: DocumentR
           <Button
             variant="secondary"
             size="icon"
+            className="h-9 w-9 rounded-xl shadow-sm hover:bg-blue-600 hover:text-white transition-colors"
+            title="Gửi liên thông LGSP"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSendLgsp(doc);
+            }}
+            iconStart={<Send className="h-4 w-4" />}
+          />
+          <Button
+            variant="secondary"
+            size="icon"
             className="h-9 w-9 rounded-xl shadow-sm hover:bg-emerald-600 hover:text-white transition-colors"
-           iconStart={<Eye className="h-4 w-4" />}></Button>
+            iconStart={<Eye className="h-4 w-4" />}
+          />
           <Button
             variant="secondary"
             size="icon"
             className="h-9 w-9 rounded-xl shadow-sm hover:bg-rose-600 hover:text-white transition-colors"
             onClick={handleDelete}
-           iconStart={<Trash2 className="h-4 w-4" />}></Button>
+            iconStart={<Trash2 className="h-4 w-4" />}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -161,10 +179,11 @@ interface DocumentsTableProps {
   isLoading: boolean;
   error: unknown;
   onDelete: (id: string) => void;
+  onSendLgsp: (doc: any) => void;
 }
 
 const DocumentsTable = React.memo(function DocumentsTable({
-  documents, isLoading, error, onDelete,
+  documents, isLoading, error, onDelete, onSendLgsp,
 }: DocumentsTableProps) {
   return (
     <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
@@ -209,7 +228,7 @@ const DocumentsTable = React.memo(function DocumentsTable({
                 </TableRow>
               ) : (
                 documents.map((doc: any) => (
-                  <DocumentRow key={doc.id} doc={doc} onDelete={onDelete} />
+                  <DocumentRow key={doc.id} doc={doc} onDelete={onDelete} onSendLgsp={onSendLgsp} />
                 ))
               )}
             </TableBody>
@@ -233,10 +252,10 @@ const DocumentsTable = React.memo(function DocumentsTable({
 export function OutgoingDocumentsClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [lgspDocToSend, setLgspDocToSend] = useState<any>(null);
 
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
-
 
   const { data: response, isLoading, error } = useListDocuments({
     search: searchTerm,
@@ -249,6 +268,8 @@ export function OutgoingDocumentsClient() {
   const handleCloseDelete = useCallback(() => setItemToDelete(null), []);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
+  const handleOpenLgspSend = useCallback((doc: any) => setLgspDocToSend(doc), []);
+  const handleCloseLgspSend = useCallback(() => setLgspDocToSend(null), []);
 
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
@@ -277,6 +298,7 @@ export function OutgoingDocumentsClient() {
         isLoading={isLoading}
         error={error}
         onDelete={handleDelete}
+        onSendLgsp={handleOpenLgspSend}
       />
 
       {/* Upload modal */}
@@ -290,6 +312,18 @@ export function OutgoingDocumentsClient() {
 
       {/* Delete dialog — tự quản lý deleteDocument call */}
       <DeleteDialog itemId={itemToDelete} onClose={handleCloseDelete} />
+
+      {/* LGSP Interoperability Send Modal */}
+      <LgspSendModal
+        open={Boolean(lgspDocToSend)}
+        onOpenChange={(open) => {
+          if (!open) handleCloseLgspSend();
+        }}
+        documentId={lgspDocToSend?.id || null}
+        documentNumber={lgspDocToSend?.documentNumber || lgspDocToSend?.notation}
+        documentTitle={lgspDocToSend?.abstract || lgspDocToSend?.title}
+      />
     </div>
   );
 }
+

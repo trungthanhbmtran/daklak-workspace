@@ -104,8 +104,8 @@ export function installSessionRecovery(
             if (recoveryVersion === version) version++;
             return replay();
           } catch (meError) {
-            const meStatus = (meError as AxiosError).response?.status;
-            if (meStatus === 401) await expire(recoveryVersion);
+            // Do not expire on conflict: another tab rotated the cookie
+            effects.onError(refreshError as AxiosError);
           }
         } else if (status === 401) await expire(recoveryVersion);
         else effects.onError(refreshError as AxiosError);

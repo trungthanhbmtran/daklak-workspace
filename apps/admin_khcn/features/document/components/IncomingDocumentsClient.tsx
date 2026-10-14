@@ -4,7 +4,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import {
-  Inbox, Plus, FileText, Calendar, Building2, User, Filter, RefreshCw,
+  Inbox, Plus, FileText, Calendar, Building2, User, Filter, RefreshCw, CloudDownload, Settings,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useSearchParams } from "next/navigation";
-import { useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useListDocuments, useDocuments } from "@/features/document/hooks/useDocuments";
 
 // Lazy load heavy modals
 const DocumentUploadModal = dynamic(
@@ -26,6 +26,11 @@ const DocumentUploadModal = dynamic(
 
 const DocumentDetailModal = dynamic(
   () => import("@/features/document/components/DocumentDetailModal").then((m) => m.DocumentDetailModal),
+  { ssr: false },
+);
+
+const LgspConfigModal = dynamic(
+  () => import("@/features/document/components/LgspConfigModal").then((m) => m.LgspConfigModal),
   { ssr: false },
 );
 
@@ -129,11 +134,13 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
 export function IncomingDocumentsClient() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isLgspConfigOpen, setIsLgspConfigOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
+  const { syncLgsp, isSyncingLgsp } = useDocuments();
 
   const { data: response, isLoading, isFetching, refetch } = useListDocuments({
     isIncoming: true,
@@ -152,10 +159,18 @@ export function IncomingDocumentsClient() {
     void refetch();
   }, [refetch]);
 
+  const handleSyncLgsp = useCallback(async () => {
+    try {
+      await syncLgsp();
+      void refetch();
+    } catch {
+      // Handled by toast
+    }
+  }, [syncLgsp, refetch]);
+
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleCloseDetail = useCallback(() => setIsDetailOpen(false), []);
-
 
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
@@ -175,17 +190,34 @@ export function IncomingDocumentsClient() {
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <Button
             variant="outline"
+            onClick={() => setIsLgspConfigOpen(true)}
+            className="rounded-xl border-slate-200 text-slate-700 font-bold px-4 h-12 hover:bg-slate-50 active:scale-95"
+            iconStart={<Settings className="h-4 w-4" />}
+          >
+            Cấu hình LGSP
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleSyncLgsp}
+            disabled={isSyncingLgsp || isFetching}
+            className="rounded-xl border-emerald-200 text-emerald-700 bg-emerald-50/40 hover:bg-emerald-100/50 font-bold px-5 h-12 active:scale-95"
+            iconStart={<CloudDownload className={`h-4 w-4 ${isSyncingLgsp ? "animate-bounce text-emerald-600" : ""}`} />}
+          >
+            {isSyncingLgsp ? "Đang đồng bộ..." : "Đồng bộ LGSP"}
+          </Button>
+          <Button
+            variant="outline"
             onClick={handleRefresh}
             disabled={isFetching}
-            className="rounded-xl border-blue-200 text-blue-600 font-bold px-6 h-12 hover:bg-blue-50 active:scale-95"
+            className="rounded-xl border-blue-200 text-blue-600 font-bold px-5 h-12 hover:bg-blue-50 active:scale-95"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-            {isFetching ? "Đang tải lại..." : "Tải lại danh sách"}
+            {isFetching ? "Đang tải..." : "Tải lại"}
           </Button>
           <Button
             onClick={handleOpenModal}
             className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 active:scale-95"
-           iconStart={<Plus className="h-4 w-4" />}>Vào sổ văn bản đến</Button>
+            iconStart={<Plus className="h-4 w-4" />}>Vào sổ văn bản đến</Button>
         </div>
       </div>
 
@@ -252,6 +284,10 @@ export function IncomingDocumentsClient() {
           documentId={selectedDocId}
         />
       )}
+      <LgspConfigModal
+        open={isLgspConfigOpen}
+        onOpenChange={setIsLgspConfigOpen}
+      />
     </div>
   );
 }

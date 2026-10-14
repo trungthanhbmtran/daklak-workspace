@@ -290,4 +290,85 @@ export class DocumentsService implements OnModuleInit {
       'DocumentService.DeleteDocument',
     );
   }
+
+  // --- LGSP Interoperability Methods ---
+  async syncLgsp(user?: any) {
+    const res: any = await this.callGrpc(
+      this.documentService.SyncLgsp({
+        actorId: user?.id ? String(user.id) : undefined,
+        actorName: user?.fullname || user?.username || undefined,
+      }),
+      'DocumentService.SyncLgsp',
+    );
+    try {
+      if (res?.data && typeof res.data === 'string') {
+        res.documents = JSON.parse(res.data);
+      }
+    } catch {
+      res.documents = [];
+    }
+    return res;
+  }
+
+  async sendLgspDocument(id: string, body: { receiverCode: string }, user?: any) {
+    return this.callGrpc(
+      this.documentService.SendLgspDocument({
+        documentId: id,
+        receiverCode: body.receiverCode,
+        actorId: user?.id ? String(user.id) : undefined,
+        actorName: user?.fullname || user?.username || undefined,
+      }),
+      'DocumentService.SendLgspDocument',
+    );
+  }
+
+  async getLgspAgencies(query: any) {
+    const res: any = await this.callGrpc(
+      this.documentService.GetLgspAgencies({
+        limit: query?.limit ? parseInt(query.limit) : undefined,
+        offset: query?.offset ? parseInt(query.offset) : undefined,
+      }),
+      'DocumentService.GetLgspAgencies',
+    );
+    try {
+      if (res?.data && typeof res.data === 'string') {
+        res.data = JSON.parse(res.data);
+      }
+    } catch {
+      // Keep res.data
+    }
+    return res;
+  }
+
+  async getLgspSentStatus(id: string, lgspDocId?: string) {
+    const res: any = await this.callGrpc(
+      this.documentService.GetLgspSentStatus({
+        documentId: id,
+        lgspDocId: lgspDocId,
+      }),
+      'DocumentService.GetLgspSentStatus',
+    );
+    try {
+      if (res?.data && typeof res.data === 'string') {
+        res.data = JSON.parse(res.data);
+      }
+    } catch {
+      // Keep res.data
+    }
+    return res;
+  }
+
+  async getLgspConfig() {
+    return this.callGrpc(
+      this.documentService.GetLgspConfig({}),
+      'DocumentService.GetLgspConfig',
+    );
+  }
+
+  async updateLgspConfig(body: any) {
+    return this.callGrpc(
+      this.documentService.UpdateLgspConfig(body),
+      'DocumentService.UpdateLgspConfig',
+    );
+  }
 }
