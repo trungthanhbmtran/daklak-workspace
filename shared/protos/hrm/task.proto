@@ -74,6 +74,7 @@ message RecommendAssigneesRequest {
   string currentEmployeeCode = 11;
   int32 currentUserDept = 12;
   repeated string currentUserPermissions = 13;
+  int32 departmentId = 14;
 }
 
 message AssigneeRecommendation {
@@ -84,6 +85,10 @@ message AssigneeRecommendation {
   float matchScore = 5;
   int32 departmentId = 6;
   int32 jobTitleId = 7;
+  string avatar = 8;
+  string jobTitleName = 9;
+  string departmentName = 10;
+  string reason = 11;
 }
 
 message DepartmentRecommendation {
@@ -92,6 +97,10 @@ message DepartmentRecommendation {
   float performanceScore = 3;
   float matchScore = 4;
   int32 employeeCount = 5;
+  string departmentName = 6;
+  int32 lightLoadCount = 7;
+  int32 mediumLoadCount = 8;
+  int32 heavyLoadCount = 9;
 }
 
 message RecommendAssigneesData {

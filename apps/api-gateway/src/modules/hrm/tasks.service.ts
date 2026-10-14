@@ -345,6 +345,49 @@ export class TasksService implements OnModuleInit {
     return { success: true, data: null };
   }
 
+  async recommendAssignees(
+    req: any,
+    query: {
+      departmentId?: number;
+      domainId?: number;
+      jobTitleId?: number;
+      strategy?: string;
+    },
+  ) {
+    const payload: any = {
+      ...query,
+    };
+    if (req.user) {
+      payload.currentUserId = req.user.id ? parseInt(req.user.id, 10) : undefined;
+      payload.currentEmployeeCode = req.user.employeeCode;
+      payload.currentUserDept = req.user.unitId ? parseInt(req.user.unitId, 10) : undefined;
+      payload.currentUserPermissions = req.user.permissionsFlatten || [];
+    }
+
+    const response: any = await executeGrpcCall(
+      this.taskService.RecommendAssignees(payload, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.RecommendAssignees',
+    ).catch((e) => this.handleRpcError(e));
+
+    if (response?.data?.topEmployees?.length) {
+      for (const emp of response.data.topEmployees) {
+        const u = this.userCacheMap.get(emp.employeeCode);
+        if (u) {
+          if (!emp.employeeName || emp.employeeName === emp.employeeCode) {
+            emp.employeeName = u.fullName || u.username;
+            emp.fullName = u.fullName || u.username;
+          }
+          if (!emp.jobTitleName && u.jobTitleName) emp.jobTitleName = u.jobTitleName;
+          if (!emp.departmentName && u.unitName) emp.departmentName = u.unitName;
+          if (!emp.avatar && u.avatar) emp.avatar = u.avatar;
+        }
+      }
+    }
+
+    return response;
+  }
+
   async list(
     req: any,
     role: string,

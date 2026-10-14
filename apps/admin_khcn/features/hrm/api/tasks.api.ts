@@ -23,6 +23,41 @@ export const hrmTasksApi = {
     return apiClient.get('/hrm/tasks/supervisor-by-scope', { params }) as any;
   },
 
+  getRecommendations(params: {
+    departmentId?: number;
+    domainId?: number;
+    jobTitleId?: number;
+    strategy?: string;
+  }): Promise<ApiResponse<{
+    topEmployees: Array<{
+      id?: number;
+      employeeCode: string;
+      employeeName: string;
+      fullName?: string;
+      departmentId?: number;
+      jobTitleId?: number;
+      jobTitleName?: string;
+      departmentName?: string;
+      avatar?: string;
+      currentLoad: number;
+      performanceScore: number;
+      matchScore: number;
+      reason?: string;
+    }>;
+    topDepartments: Array<{
+      departmentId: number;
+      departmentName?: string;
+      employeeCount: number;
+      currentLoad: number;
+      performanceScore: number;
+      lightLoadCount?: number;
+      mediumLoadCount?: number;
+      heavyLoadCount?: number;
+    }>;
+  }>> {
+    return apiClient.get('/hrm/tasks/recommendations', { params }) as any;
+  },
+
   /** Tạo nhiệm vụ con dưới task được giao. planId tự động propagate từ task cha phía backend. */
   createSubTask(parentId: string | number, payload: {
     title: string;

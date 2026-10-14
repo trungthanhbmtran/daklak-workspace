@@ -1,5 +1,100 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Tích Hợp Thông Tin Tải Công Việc Phòng Ban & Đề Xuất Phân Công Thông Minh Theo Công Thức Cân Bằng Tải & KPI
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu từ người dùng**:
+  - Khi giao việc (tại `http://113.184.220.82/admin/services/hrm/work-plans/tasks`), phần phân công / mô tả nên thể hiện thông tin tải công việc của phòng ban.
+  - Thể hiện rõ ai đang nhiều việc (quá tải), ai đang ít việc (sẵn sàng nhận việc).
+  - Đề xuất giao việc cho ai theo công thức: Việc đang ít (cân bằng tải) là tiêu chí chính, chất lượng công việc phù hợp (điểm đánh giá KPI / SLA / VTVL) là tiêu chí phụ để nâng cao hiệu quả giao việc cho người phụ trách.
+- **Giải pháp kỹ thuật đã triển khai**:
+  - **Shared Proto (`shared/protos/hrm/task.proto`)**:
+    + Mở rộng `RecommendAssigneesRequest`: Thêm `departmentId = 14`.
+    + Mở rộng `AssigneeRecommendation`: Thêm `avatar = 8`, `jobTitleName = 9`, `departmentName = 10`, `reason = 11`.
+    + Mở rộng `DepartmentRecommendation`: Thêm `departmentName = 6`, `lightLoadCount = 7`, `mediumLoadCount = 8`, `heavyLoadCount = 9`.
+  - **HRM Service (`apps/hrm-service`)**:
+    + `tasks.service.ts`:
+      * `getAssigneeScopeWhere`: Tích hợp bộ lọc `departmentId`, `allowedDepartmentIds`, và `isDeleted: false`.
+      * `fetchEmployeeMetrics`: Đếm tải theo `participantRole: 'ASSIGNEE'`, lọc `task: { isCompleted: false, isDeleted: false }`.
+      * `scoreAndSortEmployees`: Chuẩn hóa thuật toán xếp hạng ưu tiên người có ít việc nhất (`a.currentLoad - b.currentLoad`), khi số việc bằng nhau ưu tiên người có KPI cao hơn (`b.performanceScore - a.performanceScore`).
+      * Tính toán thống kê phòng ban `departmentStats` (tổng nhân sự, số cán bộ tải nhẹ <=2 việc, tải vừa 3-5 việc, tải cao >5 việc).
+  - **API Gateway (`apps/api-gateway`)**:
+    + `tasks.controller.ts`: Thêm endpoint REST `@Get('recommendations')` đặt trước các dynamic param.
+    + `tasks.service.ts`: Thêm method `recommendAssignees(req, query)` gọi gRPC `TaskService.RecommendAssignees`, làm giàu thông tin nhân sự từ directory cache.
+  - **Frontend (`apps/admin_khcn`)**:
+    + `tasks.api.ts`: Thêm method `hrmTasksApi.getRecommendations`.
+    + `useTasks.ts`: Thêm hook `useTaskRecommendations`.
+    + Tạo component mới `department-workload-recommendation.tsx`:
+      * Giao diện hiện đại (Rich Aesthetics) với gradient và bo góc sang trọng.
+      * Thống kê snapshot tải phòng ban: Tải nhẹ, Tải vừa, Nhiều việc (cảnh báo quá tải).
+      * Thẻ đề xuất nổi bật (Top Recommendation) với avatar, chức danh, số việc đang làm, KPI và lý do đề xuất.
+      * Thao tác 1-chạm: Nút "⚡ Phân công người này" tự động chọn `assignee`, Nút "📋 Chèn vào mô tả" tự động sinh và chèn căn cứ phân công vào ô mô tả công việc.
+      * Bảng theo dõi chi tiết tất cả cán bộ trong phòng (Collapsible) với nhãn tải trực quan và nút chọn nhanh.
+      * 100% flex/grid items đều có `min-w-0` chống tràn layout.
+    + Tích hợp vào `create-task-dialog.tsx` và `task-assign-dialog.tsx`.
+
+### 2. Danh mục File Đã Chỉnh Sửa & Tạo Mới
+- `shared/protos/hrm/task.proto`
+- `apps/hrm-service/src/modules/tasks/tasks.service.ts`
+- `apps/api-gateway/src/modules/hrm/tasks.controller.ts`
+- `apps/api-gateway/src/modules/hrm/tasks.service.ts`
+- `apps/admin_khcn/features/hrm/api/tasks.api.ts`
+- `apps/admin_khcn/features/hrm/hooks/useTasks.ts`
+- `apps/admin_khcn/features/hrm/components/tasks/department-workload-recommendation.tsx` (Tạo mới)
+- `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`
+- `apps/admin_khcn/features/hrm/components/tasks/task-assign-dialog.tsx`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- Rà soát mã nguồn: 0 `console.log` / `debugger`, UTF-8 không BOM, tuân thủ 7 Bộ Ràng Buộc Kỹ Thuật Bất Biến.
+
+---
+
+## [2026-10-14] Khắc Phục Lỗi Tràn Khung Nội Dung "Hệ Số Độ Khó (k)" Trong Modal Giao Việc Mới & Bổ Sung Ràng Buộc Vào Blacklist
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu từ người dùng**:
+  - Tại `http://113.184.220.82/admin/services/hrm/work-plans/tasks` (Giao việc mới):
+  - Phần "Tính điểm KPI & Chuẩn hóa Vị trí việc làm", nội dung trường "Hệ số độ khó (k)" đang bị tràn ra khỏi khung nội dung chứa.
+  - Kiểm tra lại, đối chiếu các ràng buộc trong agents. Nếu chưa có thì bổ sung vào Blacklist để tránh tái phát.
+- **Nguyên nhân cốt lõi phát hiện từ khảo sát thực tế**:
+  1. Trong `create-task-dialog.tsx`: Lưới 4 cột `grid grid-cols-2 sm:grid-cols-4 gap-3` chứa các thẻ con `div` thiếu `min-w-0`. Mặc định trong CSS Grid, thẻ con có `min-width: auto`, không thể co nhỏ hơn kích thước nội dung tối thiểu của con.
+  2. Thẻ `<SelectTrigger>` thiếu `w-full` và `min-w-0`, kế thừa `w-fit` và `whitespace-nowrap` từ thư viện.
+  3. Giá trị hiển thị của option khi được chọn là `"k = 2.0 (Bình thường - Tiêu chuẩn)"` (~35 ký tự), khiến độ rộng tối thiểu của Trigger lên tới ~280px trong khi mỗi cột chỉ rộng ~130px - 160px.
+  4. Thiếu `[&>span]:truncate` khiến phần tử đâm xuyên qua viền card container Nhóm 5.
+  5. Đối chiếu `.agents/rules/blacklist.md`: hoàn toàn chưa có mục nào quy định về Anti-Pattern tràn khung giao diện do Form Control / Select trong Grid/Flex.
+- **Giải pháp kỹ thuật đã triển khai**:
+  - `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`:
+    + Thêm `min-w-0` và `overflow-hidden` vào card container Nhóm 5 (Tính điểm KPI & Chuẩn hóa VTVL).
+    + Thêm `min-w-0` vào lưới `grid grid-cols-2 sm:grid-cols-4 gap-3` và toàn bộ 4 cột con.
+    + Thêm `truncate block` vào nhãn span.
+    + Cấu hình `<SelectTrigger>`: `className="w-full min-w-0 bg-white dark:bg-slate-950 h-8 text-xs truncate [&>span]:truncate"` và `title="Hệ số độ khó k (theo định mức VTVL/KPI)"`.
+    + Chuẩn hóa text option: `k = 1.0 (Dễ - Thường xuyên)`, `k = 2.0 (Tiêu chuẩn)`, `k = 3.0 (Khó - Độc lập)`, `k = 4.0 (Rất khó - Khẩn)`, `k = 5.0 (Đặc biệt phức tạp)`.
+    + Rà soát và thêm `w-full min-w-0 [&>span]:truncate` cho các SelectTrigger khác (bước thực hiện, tần suất, mức độ ưu tiên).
+  - `.agents/rules/blacklist.md`:
+    + Bổ sung **Mục 5: Lỗi Giao diện UI/UX & CSS Layout (Overflow & Tràn Khung)**.
+    + Quy định chi tiết vi phạm Form Control / Select trong CSS Grid / Flexbox làm tràn khung chứa, nguyên nhân kỹ thuật và 4 nguyên tắc giải pháp bắt buộc.
+  - `.agents/rules/frontend.md`:
+    + Cập nhật Mục 6 (UI/UX & CSS Layout) với quy tắc bắt buộc dùng `w-full min-w-0` và `[&>span]:truncate` cho Form Controls / SelectTrigger trong Grid/Flex, tham chiếu Blacklist mục 5.
+
+### 2. Danh mục File Đã Chỉnh Sửa
+- `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`
+- `.agents/rules/blacklist.md`
+- `.agents/rules/frontend.md`
+- `.agents/current_plan.md`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (PASS 100%, 0 lỗi TypeScript)**.
+- Rà soát mã nguồn: **0 câu lệnh `console.log` / `debugger`**.
+- File mã hóa: 100% file thuần UTF-8 không BOM (`hasBOM: false`).
+- Layout CSS: Card container, grid row và các thẻ con đều được trang bị `min-w-0`, `w-full` và `truncate` chống vỡ layout trên mọi kích thước màn hình.
+
+---
+
 ## [2026-10-14] Điều Chỉnh Toàn Diện Phân Quyền PBAC Theo Nghiệp Vụ Thực Tế & Khóa Phạm Vi Nhân Sự Theo Cây Đơn Vị
 
 ### 1. Phạm vi & Mục tiêu

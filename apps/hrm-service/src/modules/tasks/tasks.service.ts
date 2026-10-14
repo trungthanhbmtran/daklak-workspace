@@ -1703,8 +1703,14 @@ export class TasksService {
   // ─── Misc ─────────────────────────────────────────────────────────────────
 
   private async getAssigneeScopeWhere(query: any, isAdmin: boolean) {
-    const where: any = { employmentStatus: 'active' };
+    const where: any = { employmentStatus: 'active', isDeleted: false };
     if (query.excludeEmployeeCode) where.employeeCode = { not: query.excludeEmployeeCode };
+
+    if (query.departmentId) {
+      where.departmentId = parseInt(query.departmentId, 10);
+    } else if (query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0) {
+      where.departmentId = { in: query.allowedDepartmentIds.map((id: any) => parseInt(id, 10)) };
+    }
 
     if (!isAdmin && query.currentUserId) {
       try {
@@ -1717,8 +1723,7 @@ export class TasksService {
       const allowed: string[] = query.allowedEmployeeCodes || [];
       if (allowed.length > 0) {
         where.employeeCode = { in: allowed };
-      } else if (query.currentEmployeeCode) {
-        // Tránh if-else tách rời dễ gây bug khi refactor
+      } else if (query.currentEmployeeCode && !query.departmentId && (!query.allowedDepartmentIds || query.allowedDepartmentIds.length === 0)) {
         where.employeeCode = query.currentEmployeeCode;
       }
     }
@@ -1727,8 +1732,22 @@ export class TasksService {
 
   private async fetchEmployeeMetrics(where: any) {
     const [employees, loadCounts, evaluations] = await Promise.all([
-      this.prisma.employee.findMany({ where }),
-      this.prisma.taskParticipant.groupBy({ by: ['employeeCode'], where: { participantRole: 'ASSIGNEE', task: { isCompleted: false } }, _count: { taskId: true } }),
+      this.prisma.employee.findMany({
+        where,
+        select: {
+          id: true,
+          employeeCode: true,
+          fullName: true,
+          departmentId: true,
+          jobTitleId: true,
+          avatar: true,
+        }
+      }),
+      this.prisma.taskParticipant.groupBy({
+        by: ['employeeCode'],
+        where: { participantRole: 'ASSIGNEE', task: { isCompleted: false, isDeleted: false } },
+        _count: { taskId: true }
+      }),
       // P5-FIX: Dùng distinct để chỉ lấy record mới nhất per employeeCode thay vì load tất cả
       this.prisma.kpiEvaluation.findMany({ orderBy: { createdAt: 'desc' }, select: { employeeCode: true, totalScore: true }, distinct: ['employeeCode'] }),
     ]);
@@ -1750,18 +1769,81 @@ export class TasksService {
       } catch { /* ignore */ }
     }
 
-    const strategy = query.strategy || 'LOW_PERFORMANCE';
-    return employees.map((emp: any) => ({
-      id: emp.id, employeeCode: emp.employeeCode, fullName: emp.fullName, departmentId: emp.departmentId, jobTitleId: emp.jobTitleId,
-      currentLoad: loadMap.get(emp.employeeCode) || 0,
-      performanceScore: kpiMap.get(emp.employeeCode) || 75,
-      matchScore: (targetJobTitleId && emp.jobTitleId === targetJobTitleId ? 50 : 0) + (scopeCodes.includes(emp.employeeCode) ? 30 : 0),
-    })).sort((a: any, b: any) => {
-      if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
-      if (strategy === 'HIGH_PERFORMANCE') return b.performanceScore - a.performanceScore || a.currentLoad - b.currentLoad;
-      if (strategy === 'UNDER_QUOTA') return a.currentLoad - b.currentLoad || b.performanceScore - a.performanceScore;
-      return a.performanceScore - b.performanceScore || a.currentLoad - b.currentLoad;
+    const strategy = query.strategy || 'BALANCED_WORKLOAD';
+
+    // 1. Map & đánh giá từng cán bộ
+    const scoredEmployees = employees.map((emp: any) => {
+      const currentLoad = loadMap.get(emp.employeeCode) || 0;
+      const performanceScore = kpiMap.get(emp.employeeCode) || 75;
+      const matchScore = (targetJobTitleId && emp.jobTitleId === targetJobTitleId ? 50 : 0) + (scopeCodes.includes(emp.employeeCode) ? 30 : 0);
+
+      let loadStatus = 'Tải nhẹ';
+      if (currentLoad > 5) loadStatus = 'Tải cao (quá tải)';
+      else if (currentLoad >= 3) loadStatus = 'Tải vừa';
+      else if (currentLoad === 0) loadStatus = 'Đang rảnh (0 việc)';
+      else loadStatus = `Đang xử lý ${currentLoad} việc`;
+
+      const reason = `${loadStatus} • KPI: ${performanceScore}đ${matchScore > 0 ? ' • Phù hợp VTVL' : ''}`;
+
+      return {
+        id: emp.id,
+        employeeCode: emp.employeeCode,
+        employeeName: emp.fullName || emp.employeeCode,
+        fullName: emp.fullName || emp.employeeCode,
+        departmentId: emp.departmentId || 0,
+        jobTitleId: emp.jobTitleId || 0,
+        avatar: emp.avatar || '',
+        currentLoad,
+        performanceScore,
+        matchScore,
+        reason,
+        jobTitleName: '',
+        departmentName: '',
+      };
+    }).sort((a: any, b: any) => {
+      // Tiêu chuẩn cốt lõi: Việc đang ít là tiêu chí chính, chất lượng công việc (KPI) là tiêu chí phụ
+      if (strategy === 'HIGH_PERFORMANCE') {
+        return b.performanceScore - a.performanceScore || a.currentLoad - b.currentLoad;
+      }
+      // Mặc định hoặc BALANCED_WORKLOAD / UNDER_QUOTA
+      if (a.currentLoad !== b.currentLoad) {
+        return a.currentLoad - b.currentLoad;
+      }
+      if (b.performanceScore !== a.performanceScore) {
+        return b.performanceScore - a.performanceScore;
+      }
+      return b.matchScore - a.matchScore;
     });
+
+    // 2. Thống kê tải phòng ban (Department Load Overview)
+    const deptMap = new Map<number, { count: number; totalLoad: number; totalKpi: number; light: number; medium: number; heavy: number }>();
+    employees.forEach((emp: any) => {
+      const deptId = emp.departmentId || 0;
+      const load = loadMap.get(emp.employeeCode) || 0;
+      const kpi = kpiMap.get(emp.employeeCode) || 75;
+      const stat = deptMap.get(deptId) || { count: 0, totalLoad: 0, totalKpi: 0, light: 0, medium: 0, heavy: 0 };
+      stat.count += 1;
+      stat.totalLoad += load;
+      stat.totalKpi += kpi;
+      if (load <= 2) stat.light += 1;
+      else if (load <= 5) stat.medium += 1;
+      else stat.heavy += 1;
+      deptMap.set(deptId, stat);
+    });
+
+    const departmentStats = Array.from(deptMap.entries()).map(([departmentId, stat]) => ({
+      departmentId,
+      employeeCount: stat.count,
+      currentLoad: stat.count > 0 ? Math.round((stat.totalLoad / stat.count) * 10) / 10 : 0,
+      performanceScore: stat.count > 0 ? Math.round(stat.totalKpi / stat.count) : 75,
+      matchScore: 0,
+      lightLoadCount: stat.light,
+      mediumLoadCount: stat.medium,
+      heavyLoadCount: stat.heavy,
+      departmentName: '',
+    }));
+
+    return { scoredEmployees, departmentStats };
   }
 
   async recommendAssignees(query: any) {
@@ -1770,9 +1852,15 @@ export class TasksService {
 
     const where = await this.getAssigneeScopeWhere(query, isAdmin);
     const { employees, loadMap, kpiMap } = await this.fetchEmployeeMetrics(where);
-    const scored = await this.scoreAndSortEmployees(employees, loadMap, kpiMap, query);
+    const { scoredEmployees, departmentStats } = await this.scoreAndSortEmployees(employees, loadMap, kpiMap, query);
 
-    return { success: true, data: { topEmployees: scored } };
+    return {
+      success: true,
+      data: {
+        topEmployees: scoredEmployees,
+        topDepartments: departmentStats,
+      }
+    };
   }
 
   private async validateCoordinationAccess(id: number, data: any) {

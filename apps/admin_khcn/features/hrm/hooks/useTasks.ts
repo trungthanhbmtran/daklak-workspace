@@ -484,3 +484,21 @@ export function useAttendanceStats(taskId: number | undefined) {
     gcTime: DETAIL_GC_TIME,
   });
 }
+
+/** Gợi ý cán bộ thông minh theo tải công việc phòng ban và KPI */
+export function useTaskRecommendations(params: {
+  departmentId?: number;
+  domainId?: number;
+  jobTitleId?: number;
+  strategy?: string;
+  enabled?: boolean;
+}) {
+  const { enabled = true, ...rest } = params;
+  return useQuery({
+    queryKey: [...hrmKeys.tasks(), 'recommendations', rest],
+    queryFn: () => hrmTasksApi.getRecommendations(rest),
+    enabled,
+    staleTime: 15_000,
+    gcTime: 2 * 60_000,
+  });
+}

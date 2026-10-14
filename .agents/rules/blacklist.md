@@ -66,5 +66,20 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
 - **Hậu quả:** Khóa Database, làm chậm toàn hệ thống.
 - **Giải pháp:** Dùng `updateMany` với mệnh đề `in: [...]`.
 
+## 5. Lỗi Giao diện UI/UX & CSS Layout (Overflow & Tràn Khung)
+### ❌ Vi phạm: Form Control hoặc Select trong CSS Grid / Flexbox làm tràn khung chứa (Container Overflow)
+- **Mô tả:** Trong các modal, drawer, sheet hoặc card container (điển hình như modal "Giao việc mới", phần "Tính điểm KPI & Chuẩn hóa Vị trí việc làm", trường "Hệ số độ khó (k)"), đặt `<Select>`, `<SelectTrigger>` hoặc input bên trong lưới `grid` / `flex` mà:
+  1. Thẻ cha trực tiếp của cột grid hoặc flex item thiếu `min-w-0` (mặc định trong CSS Grid/Flexbox là `min-width: auto`, không thể co nhỏ hơn kích thước nội dung tối thiểu của phần tử con).
+  2. `<SelectTrigger>` thiếu `w-full` và `min-w-0` (mặc định của component thư viện có thể là `w-fit` và `whitespace-nowrap`).
+  3. Label của option được chọn dài (ví dụ: `k = 2.0 (Bình thường - Tiêu chuẩn)` dài ~35 ký tự), khiến Trigger nở rộng ra tới ~280px trong khi bề rộng cột chỉ khoảng ~130px - 160px.
+  4. Thiếu `truncate` và `[&>span]:truncate`, khiến text tràn thủng viền nút, xé toạc layout cột và đâm xuyên qua viền khung chứa (card container/dialog).
+- **Hậu quả:** Giao diện bị vỡ nát trên cả desktop lẫn thiết bị di động, phần tử đâm xuyên ra ngoài đường viền card, sinh ra thanh cuộn ngang ngoài ý muốn hoặc che khuất các nút hành động lân cận.
+- **Giải pháp BẮT BUỘC:**
+  1. Mọi cột con trong `grid` và mọi item trong `flex` chứa form controls/text động BẮT BUỘC phải có `min-w-0`.
+  2. Mọi `<SelectTrigger>` dùng trong form BẮT BUỘC phải khai báo: `className="w-full min-w-0 ... truncate [&>span]:truncate"` và bổ sung thuộc tính `title` để hiển thị tooltip giải nghĩa khi hover.
+  3. Cắt ngắn và chuẩn hóa nhãn hiển thị trong Select: Sử dụng nhãn súc tích cho trigger (ví dụ: `k = 2.0 (Tiêu chuẩn)`), đẩy phần diễn giải chi tiết vào option dropdown hoặc tooltip.
+  4. Toàn bộ card / container bọc ngoài BẮT BUỘC phải có `min-w-0` (và `overflow-hidden` khi cần giới hạn đường biên).
+
 ---
 *(AI Agent lưu ý: Thường xuyên bổ sung các case thực tế vào file này trong quá trình làm việc)*
+

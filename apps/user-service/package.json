@@ -13,6 +13,7 @@
     "prisma:migrate:prod": "prisma migrate deploy --schema=./prisma/schema",
     "prisma:seed": "prisma db seed --schema=./prisma/schema",
     "prisma:seed:menus": "ts-node prisma/seed-menus.ts",
+    "prisma:seed:ai": "ts-node prisma/seed-ai-providers.ts",
     "prisma:studio": "prisma studio --schema=./prisma/schema",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

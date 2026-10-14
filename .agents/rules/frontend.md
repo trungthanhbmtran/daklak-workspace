@@ -48,7 +48,7 @@ Ví dụ envelope JSON thường gặp:
 
 ## 6. UI/UX & CSS Layout
 ### Nguyên tắc layout theo ngữ cảnh
-- **Co giãn và chữ dài:** Dùng min-w-0 trên flex/grid item khi nội dung động cần co lại; chọn wrap-break-word cho văn bản thường và break-all chỉ khi chuỗi định danh không thể xuống dòng hợp lý.
+- **Co giãn và chữ dài:** Dùng min-w-0 trên flex/grid item khi nội dung động cần co lại; chọn wrap-break-word cho văn bản thường và break-all chỉ khi chuỗi định danh không thể xuống dòng hợp lý. Với các Form Controls (nhất là Shadcn `<Select>` / `<SelectTrigger>`), BẮT BUỘC dùng `w-full min-w-0` và `[&>span]:truncate` (kèm `title` hover) trên trigger, đồng thời đặt `min-w-0` trên cột grid cha để chống lỗi vỡ layout/tràn khung chứa (tham chiếu Blacklist mục 5).
 - **Rút gọn có chủ đích:** Chỉ dùng truncate/line-clamp khi giao diện thực sự cần giới hạn dòng; bảo đảm người dùng vẫn xem hoặc truy cập được nội dung đầy đủ, kể cả bằng keyboard/screen reader khi phù hợp.
 - **Luồng cuộn:** Không để nội dung người dùng cần xem bị cắt hoặc mất đường cuộn. overflow-hidden, h-full, chiều cao giới hạn được phép cho canvas, chart, animation hoặc panel có bounds rõ ràng; với vùng cuộn lồng nhau, xác định parent có chiều cao và min-h-0 phù hợp rồi kiểm tra trên route thật.
 - **Layout responsive:** Chọn breakpoint theo chiều rộng khả dụng của container và độ rộng tối thiểu để điều khiển nội dung; tính cả navigation/sidebar. md và lg chỉ là lựa chọn, không phải quy tắc cố định. Ưu tiên layout/grid/container query thích ứng; chọn xếp dọc, thu gọn sidebar hoặc cuộn ngang có kiểm soát khi phù hợp.

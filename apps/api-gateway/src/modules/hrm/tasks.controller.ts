@@ -42,6 +42,22 @@ export class TasksController {
     });
   }
 
+  @Get('recommendations')
+  async recommendAssignees(
+    @Req() req: any,
+    @Query('departmentId') departmentId?: string,
+    @Query('domainId') domainId?: string,
+    @Query('jobTitleId') jobTitleId?: string,
+    @Query('strategy') strategy?: string,
+  ) {
+    return this.tasksService.recommendAssignees(req, {
+      departmentId: departmentId ? parseInt(departmentId, 10) : undefined,
+      domainId: domainId ? parseInt(domainId, 10) : undefined,
+      jobTitleId: jobTitleId ? parseInt(jobTitleId, 10) : undefined,
+      strategy,
+    });
+  }
+
   @Get('kpi/variables')
   async getKpiSystemVariables(@Req() req: any) {
     return this.tasksService.getKpiSystemVariables(req);

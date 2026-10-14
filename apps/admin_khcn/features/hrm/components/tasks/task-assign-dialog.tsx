@@ -12,6 +12,7 @@ import { UserCircle2, UserIcon, UsersIcon, X, Loader2, BriefcaseIcon } from "luc
 import { useAssignTask } from "../../hooks/useTasks";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
+import { DepartmentWorkloadRecommendation } from "./department-workload-recommendation";
 
 interface TaskAssignDialogProps {
   open: boolean;
@@ -287,6 +288,16 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
               </Select>
             </div>
           </div>
+
+          {/* TÌNH HÌNH TẢI CÔNG VIỆC PHÒNG BAN & ĐỀ XUẤT PHÂN CÔNG THÔNG MINH */}
+          {selectedDepartmentId && (
+            <DepartmentWorkloadRecommendation
+              departmentId={selectedDepartmentId}
+              departmentName={selectedDepartment?.name}
+              currentAssigneeCode={assignee}
+              onSelectAssignee={(code) => setAssignee(code)}
+            />
+          )}
 
           {/* Phối hợp thực hiện */}
           <div className="space-y-3 min-w-0">

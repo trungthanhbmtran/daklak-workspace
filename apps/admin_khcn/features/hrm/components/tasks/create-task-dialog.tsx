@@ -57,6 +57,7 @@ import { useTaskTemplatesList } from "../../hooks/useTaskTemplates";
 import { useUser } from "@/hooks/useUser";
 import { hrmTasksApi } from "../../api";
 import { toast } from "sonner";
+import { DepartmentWorkloadRecommendation } from "./department-workload-recommendation";
 
 interface CoordinatorItem {
   id: string;
@@ -1032,6 +1033,19 @@ export function CreateTaskDialog({
                 </div>
               </div>
 
+              {/* TÌNH HÌNH TẢI CÔNG VIỆC PHÒNG BAN & ĐỀ XUẤT PHÂN CÔNG THÔNG MINH */}
+              {selectedDepartmentId && (
+                <DepartmentWorkloadRecommendation
+                  departmentId={selectedDepartmentId}
+                  departmentName={selectedDepartment?.name}
+                  currentAssigneeCode={assignee}
+                  onSelectAssignee={(code) => setAssignee(code)}
+                  onInsertToDescription={(textToInsert) =>
+                    setDescription((prev) => (prev ? prev + textToInsert : textToInsert.trimStart()))
+                  }
+                />
+              )}
+
               {/* LÃNH ĐẠO THẨM ĐỊNH & PHÊ DUYỆT (TaskRole.APPROVER) */}
               <div className="space-y-2 min-w-0 pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
                 <div className="flex items-center justify-between">
@@ -1352,7 +1366,7 @@ export function CreateTaskDialog({
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-9 text-xs">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-9 text-xs min-w-0 [&>span]:truncate">
                       <SelectValue placeholder="Chọn tần suất..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -1403,7 +1417,7 @@ export function CreateTaskDialog({
                   <FlagIcon className="w-3.5 h-3.5 text-slate-400" /> Mức độ ưu tiên
                 </Label>
                 <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm">
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0 [&>span]:truncate">
                     <SelectValue placeholder="Chọn mức độ" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1477,12 +1491,12 @@ export function CreateTaskDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
                   {/* Chọn người phụ trách bước */}
-                  <div className="space-y-1">
+                  <div className="space-y-1 min-w-0">
                     <Label className="text-[11px] font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1">
                       <UserIcon className="w-3 h-3 text-blue-500" /> Người phụ trách bước:
                     </Label>
                     <Select value={stepAssignee} onValueChange={setStepAssignee}>
-                      <SelectTrigger className="h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 min-w-0">
+                      <SelectTrigger className="w-full h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 min-w-0 [&>span]:truncate">
                         <SelectValue placeholder="Chọn người phụ trách bước..." />
                       </SelectTrigger>
                       <SelectContent className="max-h-[250px]">
@@ -1583,89 +1597,107 @@ export function CreateTaskDialog({
             </div>
 
             {/* NHÓM 5: THIẾT LẬP VTVL & CHỈ TIÊU KPI NÂNG CAO (TỰ ĐỘNG CHUẨN HÓA) */}
-            <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 space-y-3.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+            <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 space-y-3.5 min-w-0 overflow-hidden">
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center space-x-2 min-w-0">
                   <input
                     type="checkbox"
                     id="isKpiTarget"
                     checked={isKpiTarget}
                     onChange={(e) => setIsKpiTarget(e.target.checked)}
-                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
                   />
                   <Label
                     htmlFor="isKpiTarget"
-                    className="font-bold text-xs text-blue-900 dark:text-blue-200 cursor-pointer flex items-center gap-1.5"
+                    className="font-bold text-xs text-blue-900 dark:text-blue-200 cursor-pointer flex items-center gap-1.5 min-w-0 truncate"
                   >
-                    <Award className="w-4 h-4 text-blue-600" />
-                    Tính điểm KPI & Chuẩn hóa Vị trí việc làm
+                    <Award className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span className="truncate">Tính điểm KPI & Chuẩn hóa Vị trí việc làm</span>
                   </Label>
                 </div>
-                <Badge className="text-[10px] bg-blue-600 text-white font-normal flex items-center gap-1">
+                <Badge className="text-[10px] bg-blue-600 text-white font-normal flex items-center gap-1 shrink-0">
                   <Sparkles className="w-3 h-3" /> Tự động tính theo VTVL
                 </Badge>
               </div>
 
               {isKpiTarget && (
-                <div className="space-y-3 pt-1 border-t border-blue-200/60 dark:border-blue-800/60 text-xs">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="space-y-1">
-                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Trọng số việc:</span>
+                <div className="space-y-3 pt-1 border-t border-blue-200/60 dark:border-blue-800/60 text-xs min-w-0">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 min-w-0">
+                    <div className="space-y-1 min-w-0">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium truncate block">Trọng số việc:</span>
                       <Input
                         type="number"
                         step={0.1}
                         min={0.1}
                         value={weight}
                         onChange={(e) => setWeight(Number(e.target.value))}
-                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2"
+                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2 w-full min-w-0"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Điểm cơ sở (VTVL):</span>
+                    <div className="space-y-1 min-w-0">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium truncate block">Điểm cơ sở (VTVL):</span>
                       <Input
                         type="number"
                         min={0}
                         value={baseScore}
                         onChange={(e) => setBaseScore(Number(e.target.value))}
-                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2 font-semibold text-blue-600"
+                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2 font-semibold text-blue-600 w-full min-w-0"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Số lượng chỉ tiêu:</span>
+                    <div className="space-y-1 min-w-0">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium truncate block">Số lượng chỉ tiêu:</span>
                       <Input
                         type="number"
                         min={1}
                         value={plannedQty}
                         onChange={(e) => setPlannedQty(Number(e.target.value))}
-                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2"
+                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2 w-full min-w-0"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Hệ số độ khó (k):</span>
+                    <div className="space-y-1 min-w-0">
+                      <span
+                        className="text-slate-600 dark:text-slate-400 text-[11px] font-medium truncate block"
+                        title="Hệ số độ khó (k)"
+                      >
+                        Hệ số độ khó (k):
+                      </span>
                       <Select
                         value={difficultyK.toString()}
                         onValueChange={(val) => setDifficultyK(Number(val))}
                       >
-                        <SelectTrigger className="bg-white dark:bg-slate-950 h-8 text-xs">
+                        <SelectTrigger
+                          className="w-full min-w-0 bg-white dark:bg-slate-950 h-8 text-xs truncate [&>span]:truncate"
+                          title="Hệ số độ khó k (theo định mức VTVL/KPI)"
+                        >
                           <SelectValue placeholder="Chọn độ khó" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">k = 1.0 (Dễ - Thường xuyên)</SelectItem>
-                          <SelectItem value="2">k = 2.0 (Bình thường - Tiêu chuẩn)</SelectItem>
-                          <SelectItem value="3">k = 3.0 (Khó - Đòi hỏi độc lập)</SelectItem>
-                          <SelectItem value="4">k = 4.0 (Rất khó - Khẩn / Trọng yếu)</SelectItem>
-                          <SelectItem value="5">k = 5.0 (Đặc biệt phức tạp)</SelectItem>
+                        <SelectContent className="max-w-[280px]">
+                          <SelectItem value="1" title="k = 1.0 (Dễ - Thường xuyên)">
+                            <span className="truncate">k = 1.0 (Dễ - Thường xuyên)</span>
+                          </SelectItem>
+                          <SelectItem value="2" title="k = 2.0 (Bình thường - Tiêu chuẩn)">
+                            <span className="truncate">k = 2.0 (Tiêu chuẩn)</span>
+                          </SelectItem>
+                          <SelectItem value="3" title="k = 3.0 (Khó - Đòi hỏi độc lập)">
+                            <span className="truncate">k = 3.0 (Khó - Độc lập)</span>
+                          </SelectItem>
+                          <SelectItem value="4" title="k = 4.0 (Rất khó - Khẩn / Trọng yếu)">
+                            <span className="truncate">k = 4.0 (Rất khó - Khẩn)</span>
+                          </SelectItem>
+                          <SelectItem value="5" title="k = 5.0 (Đặc biệt phức tạp)">
+                            <span className="truncate">k = 5.0 (Đặc biệt phức tạp)</span>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <Label className="text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate">
                         Mã nhóm công thức VTVL (Định biên Đề án 01-ĐA/TU)
                       </Label>
-                      <span className="text-[10px] text-blue-600 dark:text-blue-400">
+                      <span className="text-[10px] text-blue-600 dark:text-blue-400 shrink-0">
                         Gợi ý tự động theo phòng ban nhân sự
                       </span>
                     </div>
@@ -1677,7 +1709,7 @@ export function CreateTaskDialog({
                         )
                       }
                       placeholder="VD: THAM_DINH_TCCB, BVCTNB, TCD_DV, VAN_PHONG..."
-                      className="bg-white font-mono dark:bg-slate-950 h-8 text-xs uppercase"
+                      className="bg-white font-mono dark:bg-slate-950 h-8 text-xs uppercase w-full min-w-0"
                     />
                   </div>
                 </div>

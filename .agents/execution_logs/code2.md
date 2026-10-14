@@ -1,6 +1,35 @@
 # Code 2 Execution Log
 
-## 2026-10-14: Tối Ưu Hóa Render List & Triệt Tiêu Giật Lag Bằng Thuật Toán Cursor Phân Trang (/services/reports)
+## 2026-10-14: Cấu Hình Seed API Key Cho AI Router (Google Gemini & OpenAI ChatGPT)
+- **Nội dung tác vụ**:
+  1. *Khảo sát Source of Truth & Cấu trúc Smart AI Router*:
+     - `user-service` là Source of Truth duy nhất quản lý hệ thống cấu hình `SystemConfig` (`sys_configs`), `UserConfig` (`user_configs`) và mô-đun AI (`AiService`, `AiFeatureService`).
+     - Key cấu hình định tuyến thông minh: `AI_PROVIDERS`.
+     - Smart Router hỗ trợ cơ chế Failover: Ưu tiên gọi provider có `priority` thấp nhất (Priority 1: Gemini `gemini-1.5-pro`), nếu lỗi tự động chuyển sang Priority 2 (OpenAI `gpt-4o-mini`).
+  2. *Triển khai Seed API Key chuẩn xác*:
+     - Tạo file seed chuyên trách `apps/user-service/prisma/seeds/11-ai-providers.seed.ts` chứa cấu hình provider với 2 API key được cung cấp:
+       * Google Gemini: `id: 'ai_gemini_primary'`, `model: 'gemini-1.5-pro'`, `apiKey: 'AIzaSy***'`, `priority: 1`, `enabled: true`.
+       * ChatGPT (OpenAI): `id: 'ai_openai_fallback'`, `model: 'gpt-4o-mini'`, `apiKey: 'sk-proj-***'`, `priority: 2`, `enabled: true`.
+     - Tích hợp `seedAiProviders(prisma)` vào `runSeeds` trong `apps/user-service/prisma/seeds/index.ts` để tự động chạy khi chạy seed toàn hệ thống.
+     - Cung cấp script chạy độc lập `apps/user-service/prisma/seed-ai-providers.ts` và lệnh `pnpm prisma:seed:ai` trong `package.json`.
+     - Bổ sung `GEMINI_API_KEY` và `OPENAI_API_KEY` vào `apps/user-service/.env`.
+  3. *Bảo mật & Cam kết riêng tư*:
+     - Giữ hoàn toàn cục bộ trong repo/máy chủ của người dùng, không truyền ra ngoài hoặc đưa vào dữ liệu huấn luyện.
+- **Tập tin đã tạo & cập nhật**:
+  - `apps/user-service/prisma/seeds/11-ai-providers.seed.ts` (Tạo mới)
+  - `apps/user-service/prisma/seed-ai-providers.ts` (Tạo mới)
+  - `apps/user-service/prisma/seeds/index.ts` (Cập nhật)
+  - `apps/user-service/package.json` (Cập nhật)
+  - `apps/user-service/.env` (Cập nhật)
+  - `.agents/execution_logs/code2.md`
+  - `.agents/current_plan.md`
+- **Kiểm chứng máy**:
+  - Chạy `npx ts-node prisma/seed-ai-providers.ts` thành công: Nạp thành công vào `sys_configs` và `user_configs` của các tài khoản quản trị viên (`superadmin`, `admin`).
+  - Kiểm chứng truy vấn trực tiếp CSDL: Xác nhận bản ghi `AI_PROVIDERS` tồn tại, parse JSON hợp lệ, cả 2 provider Gemini và OpenAI sẵn sàng hoạt động.
+  - Typecheck `apps/user-service`: `npx tsc --noEmit` -> PASS (Exit code 0, 0 errors).
+  - Vệ sinh mã nguồn: 0 debug log, 0 file tạm, mã hóa UTF-8 không BOM.
+
+
 - **Nội dung tác vụ**:
   1. *Khắc phục hiện tượng giật khi mở Popover/List*:
      - Trước đây, khi click mở danh sách, toàn bộ DOM nodes của toàn bộ cây tổ chức (hàng chục đơn vị và phòng ban) được render đồng loạt trong 1 frame duy nhất, gây block main thread và drop frame animation của Radix Popover.
