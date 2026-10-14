@@ -37,7 +37,7 @@ export function GatewayClient() {
           <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground mb-3">
             Enterprise API Management
           </h1>
-          <p className="text-muted-foreground text-base leading-relaxed max-w-xl break-words">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-xl wrap-break-word">
             Quản trị luồng dữ liệu (Traffic), cấu hình định tuyến (Routing) và giám sát quyền truy cập thông qua Gateway tập trung chuyên dụng.
           </p>
         </div>

@@ -27,9 +27,12 @@ export const useUpdateConnection = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ApiConnection> & { expectedVersion?: number } }) => apiManagementApi.updateConnection(id, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Cập nhật kết nối thành công");
       qc.invalidateQueries({ queryKey: ['api-connections'] });
+      if (variables?.id) {
+        qc.invalidateQueries({ queryKey: ['api-connections', variables.id] });
+      }
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Lỗi khi cập nhật");
@@ -47,6 +50,22 @@ export const useDeleteConnection = () => {
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Lỗi khi xóa kết nối");
+    }
+  });
+};
+
+export const useTestConnection = () => {
+  return useMutation({
+    mutationFn: (id: string) => apiManagementApi.testConnection(id),
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(`Kiểm tra liên thông thành công (${data.latencyMs}ms): ${data.message}`);
+      } else {
+        toast.error(`Kiểm tra liên thông thất bại (HTTP ${data.statusCode}): ${data.message}`);
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || "Không thể thực hiện kiểm tra kết nối tới Gateway");
     }
   });
 };

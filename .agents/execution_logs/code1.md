@@ -1,5 +1,106 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Cấu Hình Đúng Chuẩn Liên Thông (LGSP/NDXP, OAuth2, API Key) & Mô Hình Hóa Kiến Trúc Chứng Thực Thực Tế (Eliminate Mock Buttons)
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu từ người dùng**:
+  - "cấu hình đúng chuẩn liên thông cho tôi để đừng chỉ tạo nút mô phỏng . mô hình hóa chứng thực lên tránh phải check nhiều lần từng trường hợp một"
+- **Phân tích bối cảnh & Hiện trạng**:
+  1. Trước đây, cấu hình xác thực chỉ có các ô nhập liệu cơ bản, thiếu hoàn toàn chuẩn Trục liên thông Chính quyền số (LGSP / NDXP Quốc gia).
+  2. Phần thực thi xác thực ở `ExecutorService` (API Gateway) viết chắp vá bằng switch-case; OAuth2 là mock code bị lỗi parse JSON và không có cơ chế cache token theo thời hạn hiệu lực (TTL).
+  3. Thiếu cơ chế kiểm tra kết nối và thẩm định chứng thực thực tế (Test Connection / Upstream Probe) khiến người quản trị phải đoán mò hoặc check thủ công từng trường hợp.
+- **Giải pháp kỹ thuật đã triển khai**:
+  - **Shared Proto (`shared/protos/integration/api-management.proto`)**:
+    + Mở rộng `AuthBinding`: bổ sung `optional string headerName = 6;`, `optional string headerPrefix = 7;`, `optional string scope = 8;`.
+  - **User Service (`apps/user-service`)**:
+    + `api-management.controller.ts`: Map đầy đủ các trường `headerName`, `headerPrefix`, `scope` trong `mapConnectionResponse` và `getSnapshot`.
+    + `api-management.service.ts`: Lưu trữ và bảo tồn toàn vẹn các thuộc tính mô hình chứng thực mới trong `conn.auth`.
+  - **API Gateway (`apps/api-gateway`)**:
+    + `executor.service.ts`:
+      * Xây dựng **Auth Strategy Engine** chuẩn mực hỗ trợ đầy đủ: `lgsp` (Trục liên thông LGSP/NDXP), `oauth2` (OAuth 2.0 Client Credentials), `apiKey` (tùy biến header/prefix), `bearer`, `basic`, `none`.
+      * Tích hợp **In-Memory OAuth2 / LGSP Token Cache** theo TTL (`expires_in`) với buffer an toàn 60 giây và cơ chế **Single-Flight Mutex Promise** (ngăn chặn dog-pile storm khi nhiều request đồng thời).
+      * Bổ sung phương thức `testConnection(id: string)`: Gửi HTTP probe thực tế qua mạng SSRF-guarded agent đến Upstream, đo lường độ trễ mạng thực tế (`latencyMs`), trả về mã HTTP và thông điệp giải thích chi tiết.
+    + `api-management.controller.ts`:
+      * Thêm endpoint REST `@Post(':id/test-connection')` được bảo vệ bằng PBAC `@RequirePermissions('API_GATEWAY:VIEW')`.
+  - **Frontend (`apps/admin_khcn`)**:
+    + `api/index.ts`: Mở rộng interface `AuthBinding` và thêm phương thức `apiManagementApi.testConnection`.
+    + `useApiManagement.ts`: Thêm hook `useTestConnection`.
+    + `ApiConnectionAuthDialog.tsx`:
+      * Nâng cấp lên `<Sheet>` rộng rãi, thoáng đãng, bo góc mềm mại, phân cấp thị giác tinh tế theo chuẩn Rich Aesthetics.
+      * Tích hợp **Sơ đồ mô hình hóa luồng chứng thực trực quan (Visual Auth Flow)**: `Client -> Gateway (SSRF Guard) -> Auth Engine (TTL Cache & Sign) -> Upstream Target`.
+      * Cung cấp các Presets chuẩn liên thông: Trục liên thông LGSP/NDXP (Chính phủ số), OAuth 2.0 Client Credentials, API Key / Custom Header, Bearer Token, Basic Auth.
+      * Nút **"Thẩm định & Kiểm tra liên thông thực tế (Test Connection)"**: Thử nghiệm kết nối thật, hiển thị huy hiệu HTTP Status, Latency (ms), thông báo thành công/thất bại chi tiết.
+
+### 2. Danh mục File Đã Chỉnh Sửa
+- `shared/protos/integration/api-management.proto`
+- `apps/user-service/src/modules/api-management/api-management.controller.ts`
+- `apps/user-service/src/modules/api-management/api-management.service.ts`
+- `apps/api-gateway/src/modules/api-management/executor.service.ts`
+- `apps/api-gateway/src/modules/api-management/api-management.controller.ts`
+- `apps/admin_khcn/features/api-management/api/index.ts`
+- `apps/admin_khcn/features/api-management/hooks/useApiManagement.ts`
+- `apps/admin_khcn/features/api-management/components/ApiConnectionAuthDialog.tsx`
+- `.agents/execution_logs/code1.md`
+- `.agents/current_plan.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/user-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (PASS 100%)**.
+- Kiểm tra mã hóa file: 100% file UTF-8 không BOM.
+- Quét debug log: 0 `console.log` / `debugger`.
+- Tuân thủ 7 Bộ Ràng Buộc Kỹ Thuật Bất Biến (Service Data Sovereignty, Additive Migration/Contract, Dumb Client, Zero Assumption).
+
+---
+
+## [2026-10-14] Khắc Phục Lỗi Cấu Hình Xác Thực API (Auth Binding & Secrets) Không Lưu Vào CSDL Tại API Manager
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu từ người dùng**:
+  - Tại `http://113.184.220.82/admin/services/api-manager/apis`: khi cấu hình xác thực lưu kết nối API (API Connection Auth Dialog), dữ liệu xác thực không được lưu vào CSDL.
+- **Phân tích nguyên nhân gốc (Root Cause Analysis)**:
+  1. `shared/protos/integration/api-management.proto`: Contract gRPC `AuthBinding` chỉ khai báo 2 trường `kind = 1` và `secretRef = 2`. Khi Gateway gửi qua gRPC sang `user-service`, các trường `secret`, `clientId`, `tokenUrl` bị loại bỏ (strip).
+  2. `apps/user-service`: Hàm `bindCredential` nhận được `auth` chỉ có `kind` mà không có `secret`, dẫn tới điều kiện `if (auth.secret)` không chạy, không mã hóa và không tạo bản ghi nào trong bảng `api_credential_bindings`.
+  3. Cột `auth` trong bảng `api_connections` chỉ lưu `{"kind": "apiKey"}` mà không có `secretRef`.
+  4. Khi update kết nối, nếu người dùng không nhập lại secret (đã được lưu trước đó), `updateConnection` không truyền `existingAuth` khiến `secretRef` bị mất.
+- **Giải pháp kỹ thuật đã triển khai**:
+  - **Shared Proto (`shared/protos/integration/api-management.proto`)**:
+    + Bổ sung các trường tùy chọn vào `AuthBinding`: `optional string secret = 3;`, `optional string clientId = 4;`, `optional string tokenUrl = 5;`.
+  - **User Service (`apps/user-service`)**:
+    + `api-management.service.ts`:
+      * Nâng cấp `bindCredential(tx, auth, existingAuth)`:
+        - Nếu `auth.kind === 'none'`: reset sạch về `{ kind: 'none' }`.
+        - Nếu có `rawSecret` mới: mã hóa AES-256-GCM, tạo bản ghi `credentialBinding` với `opaqueRef` duy nhất, lưu vào CSDL, gán `secretRef`, xóa `secret` thô.
+        - Nếu không nhập lại secret: bảo tồn `secretRef` từ `existingAuth.secretRef` để không làm mất secret cũ.
+      * Cập nhật `updateConnection`: query `conn = await this.getConnection(id)` trước để truyền `conn.auth` sang `bindCredential`.
+    + `api-management.controller.ts`:
+      * `mapConnectionResponse` & `getSnapshot`: Map đầy đủ các trường `kind`, `secretRef`, `clientId`, `tokenUrl` từ DB JSON sang gRPC contract `AuthBinding`.
+  - **Frontend (`apps/admin_khcn`)**:
+    + `useApiManagement.ts`:
+      * Trong `useUpdateConnection`, bổ sung invalidate query key `['api-connections', variables.id]` bên cạnh `['api-connections']` để đảm bảo dialog nhận ngay dữ liệu mới nhất.
+    + `ApiConnectionAuthDialog.tsx`:
+      * Trim `authSecret` trước khi gửi.
+      * Thêm nhãn trực quan "✓ Đã lưu bảo mật trong CSDL" khi connection đã có `secretRef`.
+      * Thêm hướng dẫn rõ ràng: khóa đã được mã hóa AES-256 an toàn, người dùng không cần nhập lại nếu muốn giữ nguyên.
+
+### 2. Danh mục File Đã Chỉnh Sửa
+- `shared/protos/integration/api-management.proto`
+- `apps/user-service/src/modules/api-management/api-management.service.ts`
+- `apps/user-service/src/modules/api-management/api-management.controller.ts`
+- `apps/admin_khcn/features/api-management/hooks/useApiManagement.ts`
+- `apps/admin_khcn/features/api-management/components/ApiConnectionAuthDialog.tsx`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/user-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (PASS 100%)**.
+- Kiểm tra mã hóa file: 100% file UTF-8 không BOM.
+- Quét debug log: 0 `console.log` / `debugger`.
+- Tuân thủ 7 Bộ Ràng Buộc Kỹ Thuật Bất Biến (Service Data Sovereignty, Additive Migration/Contract, Zero Assumption).
+
+---
+
 ## [2026-10-14] Tích Hợp Thông Tin Tải Công Việc Phòng Ban & Đề Xuất Phân Công Thông Minh Theo Công Thức Cân Bằng Tải & KPI
 
 ### 1. Phạm vi & Mục tiêu

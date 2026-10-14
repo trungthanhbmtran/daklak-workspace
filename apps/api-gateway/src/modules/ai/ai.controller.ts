@@ -142,7 +142,7 @@ export class AiGatewayController implements OnModuleInit {
     @Body() body: { text: string; tone?: string },
   ) {
     if (!body.text?.trim()) {
-      return { success: true, data: { text: '' } };
+      return { text: '' };
     }
     this.checkSecurityLevel(null, body.text);
     const tone = body.tone || 'professional';
@@ -165,15 +165,12 @@ export class AiGatewayController implements OnModuleInit {
         typeof parsed === 'string'
           ? parsed
           : parsed?.result || parsed?.text || body.text;
-      return { success: true, data: { text: resultText } };
+      return { text: resultText };
     } catch (e: any) {
       this.logger.warn(`AI Rewrite fallback triggered: ${e.message}`);
       return {
-        success: true,
-        data: {
-          text: `[Hiệu đính]: ${body.text.trim()}`,
-          _isFallback: true,
-        },
+        text: `[Hiệu đính]: ${body.text.trim()}`,
+        _isFallback: true,
       };
     }
   }
@@ -185,7 +182,7 @@ export class AiGatewayController implements OnModuleInit {
     @Body() body: { text: string; targetLanguage: string },
   ) {
     if (!body.text?.trim()) {
-      return { success: true, data: { translatedText: '' } };
+      return { translatedText: '' };
     }
     this.checkSecurityLevel(null, body.text);
     const lang = body.targetLanguage || 'English';
@@ -208,15 +205,12 @@ export class AiGatewayController implements OnModuleInit {
         typeof parsed === 'string'
           ? parsed
           : parsed?.result || parsed?.translatedText || body.text;
-      return { success: true, data: { translatedText } };
+      return { translatedText };
     } catch (e: any) {
       this.logger.warn(`AI Translate fallback triggered: ${e.message}`);
       return {
-        success: true,
-        data: {
-          translatedText: `[Bản dịch (${lang})]: ${body.text.trim()}`,
-          _isFallback: true,
-        },
+        translatedText: `[Bản dịch (${lang})]: ${body.text.trim()}`,
+        _isFallback: true,
       };
     }
   }
@@ -228,7 +222,7 @@ export class AiGatewayController implements OnModuleInit {
     @Body() body: { text: string; maxSentences?: number },
   ) {
     if (!body.text?.trim()) {
-      return { success: true, data: { summary: '' } };
+      return { summary: '' };
     }
     this.checkSecurityLevel(null, body.text);
     const maxSentences = body.maxSentences || 3;
@@ -251,7 +245,7 @@ export class AiGatewayController implements OnModuleInit {
         typeof parsed === 'string'
           ? parsed
           : parsed?.result || parsed?.summary || body.text;
-      return { success: true, data: { summary } };
+      return { summary };
     } catch (e: any) {
       this.logger.warn(`AI Summarize fallback triggered: ${e.message}`);
       const cleanText = body.text.replace(/<[^>]*>/g, '');
@@ -260,11 +254,8 @@ export class AiGatewayController implements OnModuleInit {
         .filter((s) => s.trim().length > 0);
       const summary = sentences.slice(0, maxSentences).join('. ') + '.';
       return {
-        success: true,
-        data: {
-          summary: summary || body.text.slice(0, 200),
-          _isFallback: true,
-        },
+        summary: summary || body.text.slice(0, 200),
+        _isFallback: true,
       };
     }
   }
@@ -314,19 +305,16 @@ export class AiGatewayController implements OnModuleInit {
           keywords: `${pageTitle}, ban to chuc tinh uy, dak lak, cong tac can bo`,
         };
       }
-      return { success: true, data: { seo } };
+      return { seo };
     } catch (e: any) {
       this.logger.warn(`AI SEO fallback triggered: ${e.message}`);
       return {
-        success: true,
-        data: {
-          seo: {
-            title: `${pageTitle} - Ban Tổ chức Tỉnh ủy Đắk Lắk`,
-            description: content.slice(0, 150).replace(/<[^>]*>/g, ''),
-            keywords: `${pageTitle}, ban to chuc tinh uy, dak lak, cong tac can bo`,
-          },
-          _isFallback: true,
+        seo: {
+          title: `${pageTitle} - Ban Tổ chức Tỉnh ủy Đắk Lắk`,
+          description: content.slice(0, 150).replace(/<[^>]*>/g, ''),
+          keywords: `${pageTitle}, ban to chuc tinh uy, dak lak, cong tac can bo`,
         },
+        _isFallback: true,
       };
     }
   }

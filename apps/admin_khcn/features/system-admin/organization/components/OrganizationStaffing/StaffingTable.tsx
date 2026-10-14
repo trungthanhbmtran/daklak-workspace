@@ -54,7 +54,7 @@ export function StaffingTable({ report, domainsForUnit, unitDomainIds, subordina
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm max-w-[300px] whitespace-normal align-top">
-                    <div className="max-h-[120px] overflow-y-auto pr-2 break-words">{row.jobTitleDomainName || "—"}</div>
+                    <div className="max-h-[120px] overflow-y-auto pr-2 wrap-break-word">{row.jobTitleDomainName || "—"}</div>
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{row.quantity}</TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">{row.currentCount}</TableCell>

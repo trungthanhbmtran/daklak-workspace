@@ -128,7 +128,7 @@ export function ApiKeysTab() {
                     <div className="flex justify-between items-start gap-4">
                       <div className="pr-4 flex-1 min-w-0">
                         <CardTitle className="text-lg text-foreground font-semibold leading-tight truncate">{k.name}</CardTitle>
-                        <CardDescription className="mt-1.5 text-sm text-muted-foreground line-clamp-2 break-words" title={k.description || ''}>
+                        <CardDescription className="mt-1.5 text-sm text-muted-foreground line-clamp-2 wrap-break-word" title={k.description || ''}>
                           {k.description || 'Không có mô tả'}
                         </CardDescription>
                       </div>

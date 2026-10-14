@@ -372,7 +372,7 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({
                   </div>
                 </div>
 
-                <h4 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors leading-tight mb-1 min-w-0 break-words">
+                <h4 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors leading-tight mb-1 min-w-0 wrap-break-word">
                   {item.name}
                 </h4>
 
@@ -459,7 +459,7 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({
                 {previewState && (
                   <div className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50/80 p-2 text-xs min-w-0 animate-in fade-in duration-200">
                     {previewState.error && (
-                      <p className="text-red-600 text-[11px] break-words">
+                      <p className="text-red-600 text-[11px] wrap-break-word">
                         {previewState.error}
                       </p>
                     )}

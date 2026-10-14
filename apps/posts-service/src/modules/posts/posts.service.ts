@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, OnModuleInit, Logger } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { WorkflowService, PostStatus } from '../workflow/workflow.service';
@@ -9,6 +9,7 @@ import { generateSlug } from '../../utils/slug.util';
 
 @Injectable()
 export class PostsService implements OnModuleInit {
+  private readonly logger = new Logger(PostsService.name);
   private categoryService: any;
 
   constructor(
@@ -18,15 +19,15 @@ export class PostsService implements OnModuleInit {
     @Inject('TRANSLATE_MQ_CLIENT') private mqClient: ClientProxy,
     @Inject('CATEGORY_PACKAGE') private client: ClientGrpc,
   ) {
-    console.log('[PostsService] Constructor called');
+
   }
 
   onModuleInit() {
     this.categoryService = this.client.getService<any>('CategoryService');
     const methods = Object.keys(this.categoryService || {});
-    console.log('[PostsService] CategoryService initialized. Available methods:', methods);
+    this.logger.log(`[PostsService] CategoryService initialized. Available methods: ${methods.join(', ')}`);
     if (!this.categoryService.getByGroup) {
-      console.error('[PostsService] CRITICAL: getByGroup method NOT FOUND in CategoryService. This might be a gRPC naming collision!');
+      this.logger.error('[PostsService] CRITICAL: getByGroup method NOT FOUND in CategoryService. This might be a gRPC naming collision!');
     }
   }
 
@@ -196,7 +197,7 @@ export class PostsService implements OnModuleInit {
         title: post.title,
         description: post.description,
       });
-      console.log(`[PostsService] Pushed translation request for post ${post.id} to ${langCode}`);
+      this.logger.log(`[PostsService] Pushed translation request for post ${post.id} to ${langCode}`);
     }
   }
 
@@ -640,7 +641,7 @@ export class PostsService implements OnModuleInit {
         where: { id },
         data: { contentHtml: this.lexicalToHtml(post.content || '') }
       });
-      console.log(`[PostsService] Generated HTML for approved post ${id}`);
+      this.logger.log(`[PostsService] Generated HTML for approved post ${id}`);
     }
 
     return result;
@@ -716,7 +717,7 @@ export class PostsService implements OnModuleInit {
         where: { id: existingTrans.id },
         data: updateData
       });
-      console.log(`[PostsService] Updated existing translation for post ${postId} (${langCode}) in-place`);
+      this.logger.log(`[PostsService] Updated existing translation for post ${postId} (${langCode}) in-place`);
       return updated;
     } else {
       // Nếu chưa có bản dịch cho phiên bản hiện tại, lấy bản dịch gần nhất trước đó để kế thừa các trường khác
@@ -741,7 +742,7 @@ export class PostsService implements OnModuleInit {
           isPublished: post.status === PostStatus.PUBLISHED
         }
       });
-      console.log(`[PostsService] Created new translation version ${nextTransVersion} for post ${postId} (${langCode})`);
+      this.logger.log(`[PostsService] Created new translation version ${nextTransVersion} for post ${postId} (${langCode})`);
       return newTrans;
     }
   }

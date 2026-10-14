@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -57,9 +57,8 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen();
-  console.log(
-    'User Service (gRPC) listening on',
-    process.env.GRPC_URL ?? '0.0.0.0:50051',
+  new Logger('Bootstrap').log(
+    `User Service (gRPC) listening on ${process.env.GRPC_URL ?? '0.0.0.0:50051'}`,
   );
 }
 void bootstrap();

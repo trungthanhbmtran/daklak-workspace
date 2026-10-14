@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { GrpcMethod, MessagePattern, Payload, RpcException, Ctx, RmqContext } from '@nestjs/microservices';
 import { CreatePostGrpcDto, IdGrpcDto, SlugGrpcDto, ActionPostGrpcDto, ReviewPostGrpcDto, ListPostsGrpcDto, UpdatePostGrpcDto, GetPostStatsGrpcDto } from './dto/posts.grpc.dto';
 import { PostsService } from './posts.service';
@@ -17,6 +17,8 @@ function sanitizePost(post: any): any {
 
 @Controller()
 export class PostsController {
+  private readonly logger = new Logger(PostsController.name);
+
   constructor(private readonly postsService: PostsService) { }
 
   @GrpcMethod('PostService', 'CreatePost')
@@ -143,12 +145,12 @@ export class PostsController {
       const { postId, targetLang, translatedText, field } = data;
 
       if (!postId || !targetLang || !translatedText) {
-        console.warn(`[PostsController] Invalid translation response data:`, data);
+        this.logger.warn(`[PostsController] Invalid translation response data: ${JSON.stringify(data)}`);
         channel.ack(originalMsg); // Ack even if invalid to drop it
         return;
       }
 
-      console.log(`[PostsController] Processing translation for post ${postId}, lang ${targetLang}`);
+      this.logger.log(`[PostsController] Processing translation for post ${postId}, lang ${targetLang}`);
 
       const updateData: any = {};
       
@@ -160,8 +162,8 @@ export class PostsController {
 
       await this.postsService.updateTranslation(postId, targetLang, updateData);
       channel.ack(originalMsg);
-    } catch (error) {
-      console.error(`[PostsController] Error handling translation response:`, error);
+    } catch (error: any) {
+      this.logger.error(`[PostsController] Error handling translation response: ${error?.message || error}`);
       channel.nack(originalMsg, false, false); // Nack and do not requeue -> send to DLX
     }
   }

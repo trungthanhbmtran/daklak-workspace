@@ -1,7 +1,7 @@
 import { TransformInterceptor } from '@core/interceptors/transform.interceptor';
 import { AllExceptionsFilter } from '@core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
@@ -62,6 +62,8 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.init();
-  console.log('HRM Service (gRPC + Redis) listening on', process.env.GRPC_URL ?? '0.0.0.0:50052');
+  new Logger('Bootstrap').log(
+    `HRM Service (gRPC + Redis) listening on ${process.env.GRPC_URL ?? '0.0.0.0:50052'}`,
+  );
 }
 bootstrap();

@@ -58,7 +58,6 @@ export default async function CatchAllCMSPage({ params }: PageProps) {
 
   // 2. Home Page Route: /vi or /en
   if (!content || content.length === 0) {
-    console.log(`[CMS Root] Fetching Home Page Data for lang: ${lang}`)
     const [portalMenus, posts, banners] = await Promise.all([
       serverFetch("public/portal-menus?lang=" + lang),
       serverFetch("public/posts?lang=" + lang),

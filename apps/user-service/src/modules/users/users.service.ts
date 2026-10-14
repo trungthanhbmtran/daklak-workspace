@@ -220,7 +220,7 @@ export class UsersService implements OnModuleInit {
       jobTitleId: newPosition.jobTitleId,
       timestamp: new Date(),
     });
-    console.log(`📡 Đã bắn event bổ nhiệm cho User ${newPosition.userId}`);
+    this.logger.log(`📡 Đã bắn event bổ nhiệm cho User ${newPosition.userId}`);
   }
 
   private async clearUserProfileCache(userId: number) {
@@ -437,13 +437,12 @@ export class UsersService implements OnModuleInit {
         body: `Chào bạn,\n\nTài khoản đăng nhập hệ thống đã được tạo cho bạn.\n\nTên đăng nhập: ${user.username ?? user.email}\n${tempPassword ? `Mật khẩu tạm: ${tempPassword}\n\nVui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.` : 'Vui lòng sử dụng chức năng "Quên mật khẩu" hoặc liên hệ quản trị để được cấp mật khẩu.'}\n\nTrân trọng.`,
         metadata: { type: 'user_created', newUserId: user.id },
       });
-      console.log(
+      this.logger.log(
         `📡 Đã gửi thông báo tới phụ trách và email đăng nhập cho ${user.email}.`,
       );
     } catch (err) {
-      console.warn(
-        'Gửi thông báo email thất bại (RabbitMQ/notification service có thể chưa chạy):',
-        (err as Error)?.message ?? err,
+      this.logger.warn(
+        `Gửi thông báo email thất bại (RabbitMQ/notification service có thể chưa chạy): ${(err as Error)?.message ?? err}`,
       );
     }
   }

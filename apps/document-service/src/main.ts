@@ -1,7 +1,7 @@
 import { TransformInterceptor } from '@core/interceptors/transform.interceptor';
 import { AllExceptionsFilter } from '@core/filters/all-exceptions.filter';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { AppModule } from './app.module';
@@ -55,7 +55,9 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.init();
-  console.log('Document Service (gRPC + RMQ) listening on', process.env.GRPC_URL ?? '0.0.0.0:50056');
+  new Logger('Bootstrap').log(
+    `Document Service (gRPC + RMQ) listening on ${process.env.GRPC_URL ?? '0.0.0.0:50056'}`,
+  );
 }
 bootstrap();
 

@@ -318,6 +318,28 @@ exports.Prisma.PostTranslationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.OutboxEventScalarFieldEnum = {
+  id: 'id',
+  workflowInstanceId: 'workflowInstanceId',
+  processVersion: 'processVersion',
+  nodeId: 'nodeId',
+  commandType: 'commandType',
+  payload: 'payload',
+  status: 'status',
+  retryCount: 'retryCount',
+  createdAt: 'createdAt',
+  processedAt: 'processedAt',
+  errorReason: 'errorReason'
+};
+
+exports.Prisma.ProcessedCommandScalarFieldEnum = {
+  commandId: 'commandId',
+  workflowInstanceId: 'workflowInstanceId',
+  processedAt: 'processedAt',
+  action: 'action',
+  status: 'status'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -325,6 +347,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -491,6 +517,22 @@ exports.Prisma.PostTranslationOrderByRelevanceFieldEnum = {
   contentHtml: 'contentHtml'
 };
 
+exports.Prisma.OutboxEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  workflowInstanceId: 'workflowInstanceId',
+  nodeId: 'nodeId',
+  commandType: 'commandType',
+  status: 'status',
+  errorReason: 'errorReason'
+};
+
+exports.Prisma.ProcessedCommandOrderByRelevanceFieldEnum = {
+  commandId: 'commandId',
+  workflowInstanceId: 'workflowInstanceId',
+  action: 'action',
+  status: 'status'
+};
+
 
 exports.Prisma.ModelName = {
   Banner: 'Banner',
@@ -505,7 +547,9 @@ exports.Prisma.ModelName = {
   PostVersion: 'PostVersion',
   ModerationLog: 'ModerationLog',
   AuditLog: 'AuditLog',
-  PostTranslation: 'PostTranslation'
+  PostTranslation: 'PostTranslation',
+  OutboxEvent: 'OutboxEvent',
+  ProcessedCommand: 'ProcessedCommand'
 };
 
 /**

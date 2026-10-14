@@ -49,7 +49,8 @@ export class MenusController {
 
   @GrpcMethod('MenuService', 'GetOne')
   async getOne(data: { id: number }) {
-    const menu = await this.menusService.getById(data.id);
+    data = data || ({} as any);
+    const menu = await this.menusService.getById(Number(data.id));
     if (!menu) {
       throw new RpcException({
         code: GrpcStatus.NOT_FOUND,
@@ -61,6 +62,7 @@ export class MenusController {
 
   @GrpcMethod('MenuService', 'Create')
   async create(@Payload() data: Record<string, any>) {
+    data = data || {};
     try {
       const menu = await this.menusService.create({
         code: data.code,
@@ -88,9 +90,10 @@ export class MenusController {
 
   @GrpcMethod('MenuService', 'Update')
   async update(data: { id: number; [k: string]: any }) {
+    data = data || ({} as any);
     try {
       const { id, ...rest } = data;
-      const menu = await this.menusService.update(id, {
+      const menu = await this.menusService.update(Number(id), {
         code: rest.code,
         name: rest.name,
         route: rest.route,
@@ -122,8 +125,9 @@ export class MenusController {
 
   @GrpcMethod('MenuService', 'Delete')
   async delete(data: { id: number }) {
+    data = data || ({} as any);
     try {
-      const ok = await this.menusService.delete(data.id);
+      const ok = await this.menusService.delete(Number(data.id));
       return { success: ok, message: 'Đã xóa menu' };
     } catch (e: any) {
       if (e.message?.includes('menu con')) {

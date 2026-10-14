@@ -23,8 +23,8 @@ export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Get()
-  async listDocuments(@Query() query: any) {
-    return this.documentsService.listDocuments(query);
+  async listDocuments(@Req() req: any, @Query() query: any) {
+    return this.documentsService.listDocuments(query, req?.user);
   }
 
   // --- Administrative Procedures CRUD ---

@@ -89,7 +89,7 @@ const OptionItem = memo(function OptionItem({
       <div className="flex flex-col flex-1 min-w-0">
         <span
           className={cn(
-            "text-sm font-medium whitespace-normal break-words",
+            "text-sm font-medium whitespace-normal wrap-break-word",
             isSelected ? "text-primary" : "text-foreground",
           )}
         >

@@ -1,10 +1,14 @@
 import apiClient from "@/lib/axiosInstance";
 
 export interface AuthBinding {
-  kind: 'none' | 'basic' | 'apiKey' | 'bearer' | 'oauth2' | 'mtls';
+  kind: 'none' | 'basic' | 'apiKey' | 'bearer' | 'oauth2' | 'lgsp' | 'mtls';
   secretRef?: string;
+  secret?: string;
   clientId?: string;
   tokenUrl?: string;
+  headerName?: string;
+  headerPrefix?: string;
+  scope?: string;
 }
 
 export interface ApiConnection {
@@ -100,5 +104,16 @@ export const apiManagementApi = {
   commitImport: async (sessionId: string, resolutions: { method: string, path: string, action: 'OVERWRITE' | 'SKIP' }[]) => {
     const res = await apiClient.post('/api-management/connections/import/commit', { sessionId, resolutions }) as any;
     return res?.data;
-  }
+  },
+
+  testConnection: async (id: string): Promise<{
+    success: boolean;
+    statusCode: number;
+    latencyMs: number;
+    message: string;
+    authModel: string;
+  }> => {
+    const res = (await apiClient.post(`/api-management/connections/${id}/test-connection`)) as any;
+    return res?.data?.data || res?.data;
+  },
 };

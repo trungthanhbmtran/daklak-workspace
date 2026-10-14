@@ -390,7 +390,7 @@ function ResultRow({
       }
       <div className="flex-1 min-w-0">
         <span className={cn(
-          "text-sm leading-snug whitespace-normal break-words block",
+          "text-sm leading-snug whitespace-normal wrap-break-word block",
           checked ? "font-medium text-primary" : "text-foreground",
         )}>
           {item.name}

@@ -1,5 +1,5 @@
-import { Controller } from '@nestjs/common';
-import {  GrpcMethod , Payload } from '@nestjs/microservices';
+import { Controller, Logger } from '@nestjs/common';
+import { GrpcMethod, Payload } from '@nestjs/microservices';
 import { CategoriesService } from './categories.service';
 
 function sanitizeCategory(cat: any): any {
@@ -61,6 +61,8 @@ function sanitizeCategory(cat: any): any {
 
 @Controller()
 export class CategoriesController {
+  private readonly logger = new Logger(CategoriesController.name);
+
   constructor(private readonly categoriesService: CategoriesService) { }
 
   @GrpcMethod('CategoryService', 'CreateCategory')
@@ -78,7 +80,7 @@ export class CategoriesController {
   @GrpcMethod('CategoryService', 'ListCategories')
   async listCategories(@Payload() data: Record<string, any>) {
     const mode = data?.mode || 'flat';
-    console.log(`CategoryService.ListCategories called with mode: ${mode}`);
+    this.logger.log(`CategoryService.ListCategories called with mode: ${mode}`);
     try {
       if (mode === 'tree') {
         const result = await this.categoriesService.getTree();

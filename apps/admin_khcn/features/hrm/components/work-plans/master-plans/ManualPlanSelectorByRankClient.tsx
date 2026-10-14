@@ -539,7 +539,7 @@ export function ManualPlanSelectorByRankClient() {
                             {/* STAT 1: VTVL */}
                             <div className="p-3 rounded-xl bg-background/70 border border-border/60 min-w-0 shadow-2xs">
                                 <span className="text-[10px] font-medium text-muted-foreground block truncate">Vị trí việc làm</span>
-                                <span className="font-bold text-foreground text-xs block mt-0.5 break-words line-clamp-1" title={activeRankObj?.name || activeRankFilter}>
+                                <span className="font-bold text-foreground text-xs block mt-0.5 wrap-break-word line-clamp-1" title={activeRankObj?.name || activeRankFilter}>
                                     {activeRankObj?.name || activeRankFilter || 'Chưa chọn VTVL'}
                                 </span>
                             </div>
@@ -630,7 +630,7 @@ export function ManualPlanSelectorByRankClient() {
                                 <div className="w-2 h-7 bg-primary rounded-full shrink-0" />
                                 <div className="min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                        <Heading level="h4" className="font-extrabold text-foreground break-words text-base min-w-0">
+                                        <Heading level="h4" className="font-extrabold text-foreground wrap-break-word text-base min-w-0">
                                             {activeRankObj?.name || activeRankFilter || 'Chưa chọn VTVL'}
                                         </Heading>
                                         {activeRankObj?.quantity != null && (
@@ -639,7 +639,7 @@ export function ManualPlanSelectorByRankClient() {
                                             </Badge>
                                         )}
                                     </div>
-                                    <Text variant="small" className="text-xs text-muted-foreground mt-0.5 font-normal break-words block min-w-0">
+                                    <Text variant="small" className="text-xs text-muted-foreground mt-0.5 font-normal wrap-break-word block min-w-0">
                                         Mã VTVL: <code className="font-mono font-medium">{activeRankFilter || '---'}</code>
                                         {selectedUnit ? ` • Thuộc: ${selectedUnit.name}` : ' • Áp dụng dùng chung'}
                                     </Text>
@@ -973,7 +973,7 @@ export function ManualPlanSelectorByRankClient() {
                                             </td>
                                             <td className="py-3 px-3 min-w-0 border-r border-border/30">
                                                 <div className="min-w-0">
-                                                    <p className="text-xs sm:text-sm font-semibold text-foreground leading-relaxed break-words">
+                                                    <p className="text-xs sm:text-sm font-semibold text-foreground leading-relaxed wrap-break-word">
                                                         {plan.title}
                                                     </p>
                                                     <span className="text-[11px] text-muted-foreground font-mono mt-0.5 block">
@@ -1277,7 +1277,7 @@ export function ManualPlanSelectorByRankClient() {
                                             >
                                                 <div className="flex items-start justify-between gap-2 min-w-0">
                                                     <h4 className={cn(
-                                                        "text-xs sm:text-sm font-semibold leading-relaxed break-words min-w-0",
+                                                        "text-xs sm:text-sm font-semibold leading-relaxed wrap-break-word min-w-0",
                                                         isSelected ? "text-primary" : "text-foreground"
                                                     )}
                                                     title={rank.name}
@@ -1317,7 +1317,7 @@ export function ManualPlanSelectorByRankClient() {
                 <Card className="rounded-2xl border shadow-md bg-card shrink-0 min-w-0 sticky bottom-2 z-30">
                     <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-3 px-6 py-3.5 min-w-0">
                         <div className="text-xs text-muted-foreground flex items-center gap-3 flex-wrap min-w-0">
-                            <span className="break-words">
+                            <span className="wrap-break-word">
                                 Đang chọn: <strong className="text-foreground">{activeRankObj?.name || activeRankFilter}</strong>
                             </span>
                             <span>•</span>

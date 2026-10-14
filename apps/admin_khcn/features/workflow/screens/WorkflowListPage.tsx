@@ -118,7 +118,7 @@ export function WorkflowListPage() {
                       <h2 className="truncate font-semibold text-foreground">
                         {workflow.name}
                       </h2>
-                      <p className="mt-1 break-words text-xs text-muted-foreground">
+                      <p className="mt-1 wrap-break-word text-xs text-muted-foreground">
                         {workflow.code} · v{workflow.version ?? 1}
                       </p>
                     </div>

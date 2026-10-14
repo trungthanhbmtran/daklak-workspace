@@ -1,7 +1,9 @@
-"use client";
-
 import Link from "next/link";
 import { MessageSquare, HelpCircle, FileEdit, ArrowRight, ShieldCheck, Network } from "lucide-react";
+
+export const metadata = {
+  title: "Tương tác Công dân & Hệ thống | daklak-workspace",
+};
 
 const interactionModules = [
   {
@@ -57,7 +59,6 @@ const integrationModules = [
 export default function InteractionsDashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-10">
-
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-2">Tương tác công dân & Hệ thống</h1>
         <p className="text-muted-foreground text-lg max-w-3xl">
@@ -110,7 +111,6 @@ export default function InteractionsDashboard() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

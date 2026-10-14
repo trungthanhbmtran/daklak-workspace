@@ -1,19 +1,14 @@
-"use client";
+import DocumentProcessingClient from "./DocumentProcessingClient";
 
-import React from "react";
-import { useParams } from "next/navigation";
-import DocumentProcessingWorkspace from "@/features/document/components/DocumentProcessingWorkspace";
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+export const metadata = {
+  title: "Xử lý Văn bản | daklak-workspace",
+};
 
-export default function DocumentProcessingPage() {
-  const params = useParams<{ id: string }>();
-  const id = params?.id || "";
-  const { useGetDocument } = useDocuments();
-  const { data: document } = useGetDocument(id);
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  return (
-    <div className="h-full w-full">
-      <DocumentProcessingWorkspace document={document} />
-    </div>
-  );
+export default async function DocumentProcessingPage({ params }: PageProps) {
+  const { id } = await params;
+  return <DocumentProcessingClient id={id} />;
 }

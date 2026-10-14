@@ -98,13 +98,13 @@ export const WorkflowNodeCard = memo(function WorkflowNodeCard({
       </div>
 
       {/* ===================== TIÊU ĐỀ BƯỚC ===================== */}
-      <p className="mt-1.5 min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] text-xs font-semibold leading-snug text-foreground">
+      <p className="mt-1.5 min-w-0 whitespace-normal wrap-break-word [overflow-wrap:anywhere] text-xs font-semibold leading-snug text-foreground">
         {data.label || NODE_LABELS[type ?? ""] || "Bước mới"}
       </p>
 
       {/* ===================== MÔ TẢ TÓM TẮT ===================== */}
       {typeof data.description === "string" && data.description.trim() && (
-        <p className="mt-1 min-w-0 line-clamp-2 text-[10px] leading-tight text-muted-foreground break-words">
+        <p className="mt-1 min-w-0 line-clamp-2 text-[10px] leading-tight text-muted-foreground wrap-break-word">
           {data.description}
         </p>
       )}

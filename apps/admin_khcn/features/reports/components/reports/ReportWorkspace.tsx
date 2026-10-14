@@ -155,7 +155,7 @@ export const ReportWorkspace = () => {
                     <CardTitle className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
                       {report.name}
                     </CardTitle>
-                    <CardDescription className="mt-1.5 text-xs text-slate-500 line-clamp-2 min-h-[34px] break-words">
+                    <CardDescription className="mt-1.5 text-xs text-slate-500 line-clamp-2 min-h-[34px] wrap-break-word">
                       {report.description ||
                         'Báo cáo động trực quan, liên kết dữ liệu theo thời gian thực từ các phân hệ quản lý.'}
                     </CardDescription>

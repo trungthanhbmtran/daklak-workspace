@@ -718,18 +718,28 @@ export class OrganizationsService {
         });
 
         // Cập nhật currentCount cho các staffing bị ảnh hưởng
-        const staffingIds = [...new Set(currentSlots.map((s: any) => s.staffingId))];
-        for (const sId of staffingIds) {
-          const c = await tx.staffingSlot.count({
+        const staffingIds = [...new Set(currentSlots.map((s: any) => s.staffingId))].filter(Boolean) as number[];
+        if (staffingIds.length > 0) {
+          const counts = await tx.staffingSlot.groupBy({
+            by: ['staffingId'],
             where: {
-              staffingId: sId as number,
+              staffingId: { in: staffingIds },
               assignedEmployeeCode: { not: null },
             },
+            _count: { id: true },
           });
-          await tx.organizationStaffing.update({
-            where: { id: sId as number },
-            data: { currentCount: c },
-          });
+          const countMap = new Map<number, number>();
+          for (const item of counts) {
+            countMap.set(item.staffingId, item._count.id);
+          }
+          await Promise.all(
+            staffingIds.map((sId) =>
+              tx.organizationStaffing.update({
+                where: { id: sId },
+                data: { currentCount: countMap.get(sId) || 0 },
+              }),
+            ),
+          );
         }
       }
 

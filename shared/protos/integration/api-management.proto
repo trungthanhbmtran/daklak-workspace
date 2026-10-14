@@ -69,6 +69,12 @@ message EndpointConfig {
 message AuthBinding {
   string kind = 1;
   optional string secretRef = 2;
+  optional string secret = 3;
+  optional string clientId = 4;
+  optional string tokenUrl = 5;
+  optional string headerName = 6;
+  optional string headerPrefix = 7;
+  optional string scope = 8;
 }
 
 message GetResourceRequest {

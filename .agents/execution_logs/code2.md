@@ -1,5 +1,168 @@
 # Code 2 Execution Log
 
+## 2026-10-14: Triển Khai Thực Thi Giai Đoạn 4 (Vệ Sinh Mã Nguồn Toàn Diện, Thiết Lập ESLint Guard Rules & Hoàn Tất Nghiệm Thu Toàn Workspace)
+- **Nội dung tác vụ**:
+  1. *Triệt tiêu 100% Debug Logs trong Codebase Ứng Dụng (P2/P3)*:
+     - Dọn sạch toàn bộ `console.log` trong `apps/portal-goverment/app/[lang]/[[...content]]/page.tsx` và `apps/portal-goverment/lib/serverFetch.ts`.
+     - Thay thế toàn bộ `console.log` trong các microservices sang NestJS `Logger` chính quy:
+       * `apps/user-service/src/modules/users/users.service.ts`
+       * `apps/user-service/src/main.ts`
+       * `apps/hrm-service/src/main.ts`
+       * `apps/document-service/src/main.ts`
+       * `apps/media-service/src/main.ts`
+       * `apps/posts-service/src/modules/categories/categories.controller.ts`
+       * `apps/posts-service/src/modules/posts/posts.controller.ts`
+       * `apps/posts-service/src/modules/posts/posts.service.ts`
+     - Quét tự động toàn bộ codebase `apps/` xác nhận 0 `console.log` sót lại trong mã nguồn ứng dụng (chỉ duy trì trong các CLI scripts standalone của Prisma seed/sync).
+  2. *Thiết lập Rào Chắn Tự Động ESLint Guard Rules (P2/P3)*:
+     - Cập nhật `apps/admin_khcn/eslint.config.mjs`:
+       * Thêm rule `no-restricted-syntax` chặn đứng việc sử dụng CSS class `break-words` ở cấp compiler, bắt buộc sử dụng `wrap-break-word` theo chuẩn dự án.
+       * Cấu hình rule `no-console` cảnh báo `console.log`, chỉ cho phép `warn` và `error`.
+       * Kích hoạt rule `unused-imports/no-unused-imports: error`.
+  3. *Chuẩn hóa Triệt để Kiểu Dữ Liệu & React Lifecycle trong Next.js 16 (P2)*:
+     - Khắc phục vi phạm `react-hooks/set-state-in-effect` tại `OrganizationDetailClient.tsx`: Gán `key={code}` trên Server Component cha (`page.tsx`) giúp tự động reset state sạch sẽ khi chuyển đổi đơn vị mà không cần effect `setActiveTab("info")`.
+     - Loại bỏ hoàn toàn kiểu `any` tại `CreateReportClient.tsx`: Sử dụng strict type guards `(result as { id?: string })?.id` và `err instanceof Error ? err.message : ...`.
+  4. *Dọn Dẹp Rác Toàn Diện (Cleanup Gate)*:
+     - Dọn dẹp 100% các script quét mã tạm thời trong `scratch/` (`audit_scanner.mjs`, `check_pages.mjs`, `check_params.mjs`, `check_prisma.mjs`, `scan_console.mjs`, `summarize-findings.mjs`).
+     - Lưu trữ tệp kết quả rà soát `scratch/audit-findings.json` làm minh chứng nghiệm thu.
+- **Tập tin đã tạo & cập nhật**:
+  - `apps/admin_khcn/eslint.config.mjs`
+  - `apps/admin_khcn/app/services/admin/organization/[code]/page.tsx`
+  - `apps/admin_khcn/app/services/admin/organization/[code]/OrganizationDetailClient.tsx`
+  - `apps/admin_khcn/app/services/reports/new/CreateReportClient.tsx`
+  - `apps/portal-goverment/app/[lang]/[[...content]]/page.tsx`
+  - `apps/portal-goverment/lib/serverFetch.ts`
+  - `apps/user-service/src/main.ts`
+  - `apps/user-service/src/modules/users/users.service.ts`
+  - `apps/hrm-service/src/main.ts`
+  - `apps/document-service/src/main.ts`
+  - `apps/media-service/src/main.ts`
+  - `apps/posts-service/src/main.ts`
+  - `apps/posts-service/src/modules/categories/categories.controller.ts`
+  - `apps/posts-service/src/modules/posts/posts.controller.ts`
+  - `apps/posts-service/src/modules/posts/posts.service.ts`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - `pnpm --filter admin_khcn run lint -- ...`: PASS (exit code 0, 0 error, 0 warning).
+  - `pnpm --filter admin_khcn run typecheck`: PASS (exit code 0).
+  - `pnpm --filter api-gateway run build`: PASS (exit code 0).
+  - `pnpm --filter posts-service run build`: PASS (exit code 0).
+  - `pnpm --filter user-service run build`: PASS (exit code 0).
+  - `pnpm --filter document-service run build`: PASS (exit code 0).
+  - `pnpm --filter report-service run build`: PASS (exit code 0).
+  - `pnpm --filter hrm-service run build`: PASS (exit code 0).
+  - `pnpm --filter media-service run build`: PASS (exit code 0).
+  - Kiểm tra debug logs: 0 `console.log` trong toàn bộ code ứng dụng runtime.
+  - Kiểm tra encoding: 100% UTF-8 không BOM.
+
+- **Nội dung tác vụ**:
+  1. *Chuẩn hóa `<SelectTrigger>` & CSS Layout (P2)*:
+     - Bổ sung `min-w-0` và `[&>span]:truncate` vào component chuẩn `apps/admin_khcn/components/ui/select.tsx`, đảm bảo 100% dropdown select trong toàn bộ ứng dụng tự động co giãn và chống tràn layout flex/grid khi nhãn dài.
+     - Khai báo `@utility wrap-break-word` trong `apps/admin_khcn/app/globals.css` (Tailwind v4).
+     - Thay thế toàn bộ 35 vị trí dùng `break-words` sang `wrap-break-word` trên 18 files UI, ngăn chặn vỡ chữ tiếng Việt hoặc bẻ gãy từ vô tội vạ.
+  2. *Triển khai Lazy Loading cho Modals & Sheets (P2)*:
+     - Rà soát toàn bộ các component popup, modal, dialog có sử dụng TanStack Query (`ConsultationCreateModal.tsx`, `EditMenuModal.tsx`, `ReportShareModal.tsx`, `UnitTypeJobTemplateModal.tsx`, `AssignUserGroupsModal.tsx`).
+     - Xác nhận 100% các query được bảo vệ bởi `enabled: isOpen` / `enabled: open`, triệt tiêu việc gọi API ngầm khi modal/dialog đang đóng.
+  3. *Tái cấu trúc 7 file `page.tsx` sang Server Component (P2)*:
+     - Chuyển đổi toàn bộ 7 file `page.tsx` vi phạm `'use client'` sang cấu trúc Server Component chuẩn mực của Next.js 16:
+       * `apps/admin_khcn/app/services/admin/organization/[code]/page.tsx` (tách `OrganizationDetailClient.tsx`, await `params: Promise<{ code: string }>`).
+       * `apps/admin_khcn/app/services/documents/processing/[id]/page.tsx` (tách `DocumentProcessingClient.tsx`, await `params: Promise<{ id: string }>`).
+       * `apps/admin_khcn/app/services/documents/publish/page.tsx` (loại bỏ `'use client'` thừa, chuyển sang Server Component).
+       * `apps/admin_khcn/app/services/posts/interactions/page.tsx` (loại bỏ `'use client'` thừa, chuyển sang Server Component tĩnh).
+       * `apps/admin_khcn/app/services/posts/interactions/lgsp/page.tsx` (loại bỏ `'use client'` thừa, render `LgspClient`).
+       * `apps/admin_khcn/app/services/reports/new/page.tsx` (tách `CreateReportClient.tsx`, chuyển `page.tsx` sang Server Component).
+       * `apps/admin_khcn/app/session/refresh/page.tsx` (tách `RestoreSessionClient.tsx`, bọc `<Suspense>` trên Server Component).
+  4. *Kiểm soát Ràng buộc BaseURL (P1)*:
+     - Quét toàn bộ `apps/admin_khcn`, xác nhận 0 vi phạm double prefix `/admin` trong các lời gọi `apiClient`.
+- **Tập tin đã tạo & cập nhật**:
+  - `apps/admin_khcn/components/ui/select.tsx`
+  - `apps/admin_khcn/app/globals.css`
+  - `apps/admin_khcn/app/services/admin/organization/[code]/page.tsx`
+  - `apps/admin_khcn/app/services/admin/organization/[code]/OrganizationDetailClient.tsx`
+  - `apps/admin_khcn/app/services/documents/processing/[id]/page.tsx`
+  - `apps/admin_khcn/app/services/documents/processing/[id]/DocumentProcessingClient.tsx`
+  - `apps/admin_khcn/app/services/documents/publish/page.tsx`
+  - `apps/admin_khcn/app/services/posts/interactions/page.tsx`
+  - `apps/admin_khcn/app/services/posts/interactions/lgsp/page.tsx`
+  - `apps/admin_khcn/app/services/reports/new/page.tsx`
+  - `apps/admin_khcn/app/services/reports/new/CreateReportClient.tsx`
+  - `apps/admin_khcn/app/session/refresh/page.tsx`
+  - `apps/admin_khcn/app/session/refresh/RestoreSessionClient.tsx`
+  - 18 files UI thay thế `break-words` sang `wrap-break-word`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - `pnpm --filter admin_khcn run typecheck`: PASS (exit code 0, 0 error).
+  - `pnpm --filter admin_khcn run build`: PASS (exit code 0, 83/83 static/dynamic routes compiled).
+  - Quét `page.tsx` chứa `'use client'`: 0 kết quả (100% tuân thủ Server Component).
+  - Quét `break-words`: 0 kết quả (100% tuân thủ `wrap-break-word`).
+  - Quét debug log trong file mới: 0 `console.*`.
+  - Kiểm tra encoding: 100% UTF-8 không BOM.
+
+## 2026-10-14: Triển Khai Thực Thi Giai Đoạn 2 (Hiệu Năng, gRPC Resilience, Tối Ưu CSDL & PBAC Context Scoping)
+- **Nội dung tác vụ**:
+  1. *Khắc phục Nguy cơ Treo gRPC Cascading Failure (P1)*:
+     - Tích hợp `executeGrpcCall(...)` kèm timeout/deadline 8000ms cho toàn bộ cuộc gọi gRPC tại:
+       * `apps/api-gateway/src/modules/documents/documents.service.ts`: Toàn bộ 24 RPC calls (`ListDocuments`, `ListProcedures`, `GetProcedure`, `CreateProcedure`, `UpdateProcedure`, `DeleteProcedure`, `ListDossiers`, `GetDossier`, `CreateDossier`, `UpdateDossier`, `DeleteDossier`, `ListFiles`, `AddFile`, `DeleteFile`, `GetComponents`, `UpdateComponent`, `CreateDossierFromTemplate`, `CreateBlankDossier`, `AddComponentFromCabinet`, `GetDocument`, `CreateDocument`, `UpdateDocument`, `ExtractMetadata`, `GetLogs`, `DeleteDocument`).
+       * `apps/api-gateway/src/modules/hrm/master-plans.service.ts`: Toàn bộ un-timed calls (`ListUsers`, `GetFullTree`, `FindAll`, `FindById`, `Create`, `Update`).
+       * `apps/api-gateway/src/modules/posts/posts.service.ts`: Toàn bộ 11 un-timed calls (`createPost`, `listPosts`, `getPost`, `updatePost`, `deletePost`, `submitPost`, `reviewPost`, `approvePost`, `rejectPost`, `publishPost`, `unpublishPost`, `getPostHistory`).
+     - Quét sạch 100% `console.error` và `console.warn` trong các service này, thay thế hoàn toàn bằng NestJS `Logger`.
+  2. *Triệt tiêu N+1 Query & Tối ưu CSDL (P2)*:
+     - `apps/user-service/src/modules/organizations/organizations.service.ts`: Thay thế vòng lặp N+1 đếm `tx.staffingSlot.count` tuần tự bằng 1 truy vấn `tx.staffingSlot.groupBy({ by: ['staffingId'] })` duy nhất kết hợp `Promise.all` cập nhật song song `organizationStaffing`.
+     - `apps/report-service/src/modules/reports/reports.service.ts`: Thay thế vòng lặp tuần tự `for (...) await this.prisma.datasetSnapshot.create(...)` bằng 1 thao tác bulk insert `this.prisma.datasetSnapshot.createMany(...)`, giảm tối đa round-trips kết nối MySQL.
+  3. *Củng cố Phân phối Tài nguyên theo Ngữ cảnh Quyền (PBAC Context Scoping) (P1)*:
+     - `apps/api-gateway/src/modules/documents/documents.controller.ts`: Tiếp nhận `@Req() req: any` và truyền context user xuống `documentsService.listDocuments(query, req?.user)`.
+     - `apps/api-gateway/src/modules/documents/documents.service.ts`: Kiểm tra thẩm quyền PBAC (`DOCUMENT:MANAGE`, `DOCUMENT:VIEW_ALL`, `admin`, `system`). Đối với người dùng thông thường, tự động ép phạm vi hiển thị chỉ trả về văn bản công khai (`req.isPublic = true`), ngăn chặn rò rỉ văn bản mật/nội bộ trái thẩm quyền.
+- **Tập tin đã tạo & cập nhật**:
+  - `apps/api-gateway/src/modules/documents/documents.controller.ts`
+  - `apps/api-gateway/src/modules/documents/documents.service.ts`
+  - `apps/api-gateway/src/modules/hrm/master-plans.service.ts`
+  - `apps/api-gateway/src/modules/posts/posts.service.ts`
+  - `apps/user-service/src/modules/organizations/organizations.service.ts`
+  - `apps/report-service/src/modules/reports/reports.service.ts`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - `pnpm --filter document-service run build`: PASS (exit code 0).
+  - `pnpm --filter api-gateway run build`: PASS (exit code 0).
+  - `pnpm --filter user-service run build`: PASS (exit code 0).
+  - `pnpm --filter report-service run build`: PASS (exit code 0).
+  - Kiểm tra debug logs: 0 `console.*` trong các file đã xử lý.
+  - Kiểm tra encoding: 100% UTF-8 không BOM.
+
+- **Nội dung tác vụ**:
+  1. *Khảo sát & Quét Toàn Bộ Codebase (Anti-Hallucination & Zero Assumptions)*:
+     - Thực hiện rà soát 13 ứng dụng và dịch vụ (`admin_khcn`, `portal-goverment`, `api-gateway`, 10 microservices, hạ tầng Docker).
+     - Phát hiện **352 vi phạm kỹ thuật thực tế** (5 Critical P0, 99 High P1, 134 Medium P2, 114 Low P3).
+     - Xuất bản Báo cáo Kỹ thuật Toàn diện `bao_cao_ra_soat_vi_pham_va_phuong_an_xu_ly_toan_dien.md` kèm 4 sơ đồ trực quan Mermaid và lộ trình 4 giai đoạn.
+  2. *Triển khai Thực thi Giai đoạn 1 (Hotfix Ngay Lập Tức - P0/P1)*:
+     - **Triệt tiêu 5 điểm nghẽn gRPC Crash (P0)**: Thêm phòng thủ `data = data || {}` tại `apps/user-service/src/modules/menus/menus.controller.ts` (GetOne, Create, Update, Delete), `apps/user-service/src/modules/ai-assistant/ai-assistant.controller.ts` (GetAssistant, CreateAssistant, UpdateAssistant, DeleteAssistant, AddKnowledgeSource) và `apps/workflow-service/src/grpc/grpc.controller.ts` (CreateProcessBinding, UpdateProcessBinding, GetProcessBinding, ListProcessBindings, DeactivateProcessBinding, ResolveBinding, StartWorkflow).
+     - **Khắc phục Lỗi Bọc Response Đúp tại API Gateway (P1)**: Tái cấu trúc 8 endpoints trong `apps/api-gateway/src/modules/ai/ai.controller.ts` (rewrite, translate, summarize, seo-generate) trả về trực tiếp raw data, loại bỏ thủ công `{ success: true, data: ... }` để `TransformInterceptor` tự động bọc envelope chuẩn xác, triệt tiêu lỗi lồng `data.data`.
+     - **Triệt tiêu Lỗi Nuốt Exception gRPC (P1)**: Chuyển toàn bộ 8 catch blocks trong `apps/report-service/src/modules/reports/reports.service.ts` sang `throw new RpcException(...)`, đảm bảo API Gateway bắt được lỗi và trả về HTTP 400/500 tương ứng thay vì nuốt lỗi trả HTTP 200.
+     - **Chuẩn hóa Kết nối CSDL & Connection Pool (P1)**:
+       * Sửa `apps/chat-service/.env` trỏ đúng CSDL `admin_chat` (thay vì trỏ nhầm `admin_workflow`).
+       * Bổ sung `connection_limit=10&pool_timeout=15` vào toàn bộ file `.env` local (`api-gateway`, `document-service`, `media-service`, `posts-service`, `notification_service`, `chat-service`).
+     - **Dọn dẹp Thư mục Rác Sinh mã Schema (P3)**: Xóa sạch `apps/report-service/prisma/src/generated` và `apps/notification_service/prisma/generated`.
+- **Tập tin đã tạo & cập nhật**:
+  - `bao_cao_ra_soat_vi_pham_va_phuong_an_xu_ly_toan_dien.md` (Artifact Báo cáo Kỹ thuật)
+  - `apps/user-service/src/modules/menus/menus.controller.ts`
+  - `apps/user-service/src/modules/ai-assistant/ai-assistant.controller.ts`
+  - `apps/workflow-service/src/grpc/grpc.controller.ts`
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`
+  - `apps/report-service/src/modules/reports/reports.service.ts`
+  - `apps/chat-service/.env`
+  - `apps/api-gateway/.env`
+  - `apps/document-service/.env`
+  - `apps/media-service/.env`
+  - `apps/posts-service/.env`
+  - `apps/notification_service/.env`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - `pnpm --filter user-service run build`: PASS (exit code 0).
+  - `pnpm --filter api-gateway run build`: PASS (exit code 0).
+  - `pnpm --filter report-service run build`: PASS (exit code 0).
+  - `pnpm --filter workflow-service run build`: PASS (exit code 0).
+  - `pnpm --filter hrm-service run build`: PASS (exit code 0).
+  - `git diff` sạch sẽ, 100% UTF-8 không BOM, 0 debug log.
+
 ## 2026-10-14: Cấu Hình Seed API Key Cho AI Router (Google Gemini & OpenAI ChatGPT)
 - **Nội dung tác vụ**:
   1. *Khảo sát Source of Truth & Cấu trúc Smart AI Router*:

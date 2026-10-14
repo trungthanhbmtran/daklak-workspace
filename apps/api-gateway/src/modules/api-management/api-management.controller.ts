@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -29,6 +29,7 @@ import { Metadata } from '@grpc/grpc-js';
 import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 import { clientIp } from '../../core/client-ip';
 import { randomUUID } from 'crypto';
+import { ExecutorService } from './executor.service';
 
 @Controller('admin/api-management/connections')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -38,6 +39,7 @@ export class ApiManagementController implements OnModuleInit {
   constructor(
     private readonly importParserService: ImportParserService,
     private readonly issuer: TokenIssuerService,
+    private readonly executorService: ExecutorService,
 
     @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
@@ -85,6 +87,13 @@ export class ApiManagementController implements OnModuleInit {
       this.grpcService.GetConnection({ id }, this.getGrpcMetadata(req)),
     );
     return { data: res };
+  }
+
+  @Post(':id/test-connection')
+  @RequirePermissions('API_GATEWAY:VIEW')
+  async testConnection(@Param('id') id: string) {
+    const result = await this.executorService.testConnection(id);
+    return { data: result };
   }
 
   @Post()

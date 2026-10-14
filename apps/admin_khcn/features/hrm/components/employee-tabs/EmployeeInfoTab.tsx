@@ -26,7 +26,7 @@ export function EmployeeInfoTab({ employee }: EmployeeInfoTabProps) {
             </div>
             <div className="flex flex-col space-y-1.5 min-w-0">
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Email</Text>
-              <Text as="span" weight="semibold" className="text-foreground break-words">{employee.email || "—"}</Text>
+              <Text as="span" weight="semibold" className="text-foreground wrap-break-word">{employee.email || "—"}</Text>
             </div>
             <div className="flex flex-col space-y-1.5 min-w-0">
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Số điện thoại</Text>
@@ -34,7 +34,7 @@ export function EmployeeInfoTab({ employee }: EmployeeInfoTabProps) {
             </div>
             <div className="flex flex-col space-y-1.5 min-w-0">
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Đơn vị</Text>
-              <Text as="span" weight="semibold" className="text-foreground break-words">{unitName}</Text>
+              <Text as="span" weight="semibold" className="text-foreground wrap-break-word">{unitName}</Text>
             </div>
             <div className="flex flex-col space-y-1.5 min-w-0">
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Chức danh / Ngạch</Text>
@@ -48,7 +48,7 @@ export function EmployeeInfoTab({ employee }: EmployeeInfoTabProps) {
 
             <div className="flex flex-col space-y-1.5 min-w-0">
               <Text as="span" variant="small" className="text-muted-foreground font-normal">Vị trí chức danh định biên</Text>
-              <Text as="span" weight="semibold" className="text-blue-700 break-words">
+              <Text as="span" weight="semibold" className="text-blue-700 wrap-break-word">
                 {assignedSlot ? (assignedSlot.description || `Vị trí ${assignedSlot.slotOrder} (${assignedSlot.jobTitleName || ''})`) : "Chưa phân công"}
               </Text>
             </div>

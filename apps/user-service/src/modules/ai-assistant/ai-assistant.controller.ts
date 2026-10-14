@@ -64,7 +64,8 @@ export class AiAssistantController implements OnModuleInit {
 
   @GrpcMethod('AiAssistantService', 'GetAssistant')
   async getAssistant(data: { id: string }) {
-    const a = await this.assistantService.getAssistant(data.id);
+    data = data || ({} as any);
+    const a = await this.assistantService.getAssistant(data.id || '');
     return {
       assistant: {
         id: a.id,
@@ -95,6 +96,7 @@ export class AiAssistantController implements OnModuleInit {
 
   @GrpcMethod('AiAssistantService', 'CreateAssistant')
   async createAssistant(data: any) {
+    data = data || {};
     const a = await this.assistantService.createAssistant({
       userId: data.user_id,
       name: data.name,
@@ -107,6 +109,7 @@ export class AiAssistantController implements OnModuleInit {
 
   @GrpcMethod('AiAssistantService', 'UpdateAssistant')
   async updateAssistant(data: any) {
+    data = data || {};
     const a = await this.assistantService.updateAssistant({
       id: data.id,
       name: data.name,
@@ -119,12 +122,14 @@ export class AiAssistantController implements OnModuleInit {
 
   @GrpcMethod('AiAssistantService', 'DeleteAssistant')
   async deleteAssistant(data: { id: string }) {
-    await this.assistantService.deleteAssistant(data.id);
+    data = data || ({} as any);
+    await this.assistantService.deleteAssistant(data.id || '');
     return { success: true };
   }
 
   @GrpcMethod('AiAssistantService', 'AddKnowledgeSource')
   async addKnowledgeSource(data: any) {
+    data = data || {};
     this.queueClient.emit('knowledge_source_uploaded', data);
     return { success: true };
   }

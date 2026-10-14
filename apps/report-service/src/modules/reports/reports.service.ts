@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, timeout, type Observable } from 'rxjs';
 import { executeTable } from './table-engine';
@@ -123,7 +124,7 @@ export class ReportsService implements OnModuleInit {
       };
     } catch (error: any) {
       this.logger.error('Error creating report definition', error?.stack);
-      return { success: false, data: '{}', message: error?.message || 'Lỗi tạo cấu hình báo cáo' };
+      throw new RpcException(error?.message || 'Lỗi tạo cấu hình báo cáo');
     }
   }
 
@@ -163,7 +164,7 @@ export class ReportsService implements OnModuleInit {
       };
     } catch (error: any) {
       this.logger.error('Error fetching report definitions', error?.stack);
-      return { success: false, data: '[]', message: 'Lỗi lấy danh sách cấu hình báo cáo' };
+      throw new RpcException('Lỗi lấy danh sách cấu hình báo cáo');
     }
   }
 
@@ -172,7 +173,7 @@ export class ReportsService implements OnModuleInit {
       const { id } = JSON.parse(payloadStr);
       const numId = Number(id);
       if (!numId || isNaN(numId)) {
-        return { success: false, data: '{}', message: 'ID báo cáo không hợp lệ' };
+        throw new RpcException('ID báo cáo không hợp lệ');
       }
       const definition = await this.prisma.reportDefinition.findUnique({
         where: { id: numId },
@@ -184,7 +185,7 @@ export class ReportsService implements OnModuleInit {
         },
       });
       if (!definition) {
-        return { success: false, data: '{}', message: 'Không tìm thấy cấu hình báo cáo' };
+        throw new RpcException('Không tìm thấy cấu hình báo cáo');
       }
       return {
         success: true,
@@ -192,8 +193,9 @@ export class ReportsService implements OnModuleInit {
         message: 'Lấy chi tiết cấu hình báo cáo thành công',
       };
     } catch (error: any) {
+      if (error instanceof RpcException) throw error;
       this.logger.error('Error fetching report definition by id', error?.stack);
-      return { success: false, data: '{}', message: 'Lỗi lấy chi tiết cấu hình báo cáo' };
+      throw new RpcException('Lỗi lấy chi tiết cấu hình báo cáo');
     }
   }
 
@@ -232,11 +234,7 @@ export class ReportsService implements OnModuleInit {
       };
     } catch (error: any) {
       this.logger.error('Error fetching report dashboard stats', error?.stack);
-      return {
-        success: false,
-        data: '{}',
-        message: 'Lỗi lấy thống kê báo cáo',
-      };
+      throw new RpcException('Lỗi lấy thống kê báo cáo');
     }
   }
 
@@ -328,24 +326,26 @@ export class ReportsService implements OnModuleInit {
       const CHUNK_SIZE = 500;
       if (sourceRows.length > CHUNK_SIZE) {
         const totalChunks = Math.ceil(sourceRows.length / CHUNK_SIZE);
+        const snapshotRecords = [];
         for (let i = 0; i < totalChunks; i++) {
           const chunkData = sourceRows.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-          await this.prisma.datasetSnapshot.create({
-            data: {
-              runId: run.id,
-              chunkIndex: i,
-              schema: i === 0 ? schema : undefined,
-              data: chunkData,
-            },
+          snapshotRecords.push({
+            runId: run.id,
+            chunkIndex: i,
+            schema: (i === 0 ? schema : undefined) as any,
+            data: chunkData as any,
           });
         }
+        await this.prisma.datasetSnapshot.createMany({
+          data: snapshotRecords,
+        });
       } else {
         await this.prisma.datasetSnapshot.create({
           data: {
             runId: run.id,
             chunkIndex: 0,
-            schema,
-            data: sourceRows,
+            schema: schema as any,
+            data: sourceRows as any,
           },
         });
       }
@@ -368,7 +368,7 @@ export class ReportsService implements OnModuleInit {
       };
     } catch (error: any) {
       this.logger.error('Error running report', error?.stack);
-      return { success: false, data: '{}', message: error?.message || 'Lỗi chạy báo cáo' };
+      throw new RpcException(error?.message || 'Lỗi chạy báo cáo');
     }
   }
 
@@ -380,7 +380,7 @@ export class ReportsService implements OnModuleInit {
         where: { id: runId },
       });
       if (!run) {
-        return { success: false, data: '{}', message: 'Không tìm thấy lượt chạy' };
+        throw new RpcException('Không tìm thấy lượt chạy');
       }
       return {
         success: true,
@@ -396,8 +396,9 @@ export class ReportsService implements OnModuleInit {
         message: 'Lấy trạng thái chạy thành công',
       };
     } catch (error: any) {
+      if (error instanceof RpcException) throw error;
       this.logger.error('Error fetching report run status', error?.stack);
-      return { success: false, data: '{}', message: 'Lỗi lấy trạng thái chạy báo cáo' };
+      throw new RpcException('Lỗi lấy trạng thái chạy báo cáo');
     }
   }
 
@@ -459,11 +460,7 @@ export class ReportsService implements OnModuleInit {
       };
     } catch (error: any) {
       this.logger.error('Error fetching dataset snapshot', error?.stack);
-      return {
-        success: false,
-        data: JSON.stringify({ schema: [], data: [], total: 0, filteredTotal: 0 }),
-        message: 'Lỗi lấy kết quả báo cáo',
-      };
+      throw new RpcException('Lỗi lấy kết quả báo cáo');
     }
   }
 
@@ -512,11 +509,7 @@ export class ReportsService implements OnModuleInit {
       return this.catalogResponse(catalog);
     } catch (error: any) {
       this.logger.error('Error fetching report catalog', error?.stack);
-      return {
-        success: false,
-        message: 'Lỗi lấy danh mục dữ liệu',
-        data: JSON.stringify([]),
-      };
+      throw new RpcException('Lỗi lấy danh mục dữ liệu');
     }
   }
 

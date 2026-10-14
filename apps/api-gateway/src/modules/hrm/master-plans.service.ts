@@ -8,13 +8,15 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
-
+import { executeGrpcCall } from '../../core/utils/grpc-call.util';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
 export class MasterPlansService implements OnModuleInit {
+  private readonly logger = new Logger(MasterPlansService.name);
+
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
     const code = e?.code;
     const message = e?.details || e?.message || defaultMsg;
@@ -87,8 +89,10 @@ export class MasterPlansService implements OnModuleInit {
     if (empCodes.size === 0 && userIds.size === 0) return plans;
 
     try {
-      const usersRes: any = await firstValueFrom(
+      const usersRes: any = await executeGrpcCall(
         this.userService.ListUsers({ take: 500 }),
+        6000,
+        'UserService.ListUsers',
       );
       const users = usersRes?.data || [];
       const usersMap = new Map<string, any>();
@@ -128,8 +132,8 @@ export class MasterPlansService implements OnModuleInit {
         }
       };
       plans.forEach(mapUsers);
-    } catch (e) {
-      console.error('Failed to populate users for master plans:', e);
+    } catch (e: any) {
+      this.logger.error(`Failed to populate users for master plans: ${e.message}`);
     }
     return plans;
   }
@@ -139,8 +143,10 @@ export class MasterPlansService implements OnModuleInit {
       return this.unitMapCache.data;
     }
     try {
-      const treeRes: any = await firstValueFrom(
+      const treeRes: any = await executeGrpcCall(
         this.orgService.GetFullTree({}),
+        6000,
+        'OrgService.GetFullTree',
       );
       const unitMap: Record<number, any> = {};
       const flatten = (nodes: any[]) => {
@@ -178,7 +184,7 @@ export class MasterPlansService implements OnModuleInit {
     }
     while (current?.parentId) {
       if (visited.has(current.parentId)) {
-        console.warn(
+        this.logger.warn(
           `[MasterPlansService] Cycle detected at unitId: ${current.parentId}`,
         );
         break;
@@ -212,7 +218,7 @@ export class MasterPlansService implements OnModuleInit {
       );
     }
 
-    const res: any = await firstValueFrom(
+    const res: any = await executeGrpcCall(
       this.masterPlanService.FindAll({
         type,
         status,
@@ -225,7 +231,10 @@ export class MasterPlansService implements OnModuleInit {
         callerAncestorUnitIds,
         isLeader,
       }),
+      8000,
+      'MasterPlanService.FindAll',
     ).catch((e) => this.handleRpcError(e));
+
     if (res?.data) {
       if (Array.isArray(res.data)) {
         await this.populateUsers(res.data);
@@ -253,7 +262,7 @@ export class MasterPlansService implements OnModuleInit {
       );
     }
 
-    const res: any = await firstValueFrom(
+    const res: any = await executeGrpcCall(
       this.masterPlanService.FindById({
         id: parseInt(id, 10),
         currentEmployeeCode: user?.employeeCode,
@@ -262,7 +271,10 @@ export class MasterPlansService implements OnModuleInit {
         callerAncestorUnitIds,
         isLeader,
       }),
+      8000,
+      'MasterPlanService.FindById',
     ).catch((e) => this.handleRpcError(e));
+
     if (res) {
       await this.populateUsers([res]);
     }
@@ -274,15 +286,19 @@ export class MasterPlansService implements OnModuleInit {
     if (user?.unitId) {
       body.departmentId = parseInt(user.unitId, 10);
     }
-    return firstValueFrom(this.masterPlanService.Create(body)).catch((e) =>
-      this.handleRpcError(e),
-    );
+    return executeGrpcCall(
+      this.masterPlanService.Create(body),
+      8000,
+      'MasterPlanService.Create',
+    ).catch((e) => this.handleRpcError(e));
   }
 
   async update(user: any, id: string, body: any) {
     body.updatedByCode = user?.employeeCode || 'system';
-    return firstValueFrom(
+    return executeGrpcCall(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
+      8000,
+      'MasterPlanService.Update',
     ).catch((e) => this.handleRpcError(e));
   }
 }

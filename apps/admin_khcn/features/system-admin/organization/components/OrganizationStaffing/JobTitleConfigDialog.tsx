@@ -23,7 +23,7 @@ export function JobTitleConfigDialog({ open, onOpenChange, jobTitle, domainId, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[500px] max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden shadow-lg border-primary/20">
         <DialogHeader className="px-6 pt-6 pb-4 shrink-0 bg-muted/10 border-b">
-          <DialogTitle className="text-lg flex items-center gap-2 text-primary min-w-0 break-words">
+          <DialogTitle className="text-lg flex items-center gap-2 text-primary min-w-0 wrap-break-word">
             <Settings2 className="h-5 w-5 shrink-0" />
             <span className="truncate">Tiêu chuẩn chức danh {jobTitle ? `— ${jobTitle.name}` : ""}</span>
           </DialogTitle>

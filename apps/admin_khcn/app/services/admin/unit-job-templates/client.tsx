@@ -114,7 +114,7 @@ export default function UnitJobTemplatesClient() {
           </div>
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground truncate">Khung Danh mục Vị trí việc làm theo Đơn vị</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 wrap-break-word">
               Căn cứ pháp lý: Nghị định 62/2020/NĐ-CP (Khối Hành chính nhà nước), Nghị định 106/2020/NĐ-CP (Đơn vị sự nghiệp công lập) và Quy định 137-QĐ/TW (Cơ quan Đảng).
             </p>
           </div>

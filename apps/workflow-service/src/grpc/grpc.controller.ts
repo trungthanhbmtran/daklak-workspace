@@ -162,6 +162,7 @@ export class GrpcWorkflowController {
   // =========================================================================
   @GrpcMethod('WorkflowService', 'CreateProcessBinding')
   async createProcessBinding(@Payload() data: any) {
+    data = data || {};
     const result = await this.bindingService.create({
       processTypeCode: data.processTypeCode,
       definitionId: data.definitionId,
@@ -180,6 +181,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'UpdateProcessBinding')
   async updateProcessBinding(@Payload() data: any) {
+    data = data || {};
     // proto3 gửi '' / 0 cho field không set → chuẩn hóa về undefined để không ghi đè dữ liệu.
     if (!data?.updatedBy) {
       throw new RpcException({ code: status.INVALID_ARGUMENT, message: 'updatedBy is required' });
@@ -197,12 +199,14 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'GetProcessBinding')
   async getProcessBinding(@Payload() data: any) {
+    data = data || {};
     const result = await this.bindingService.findById(data.id, data.organizationId);
     return this.mapProcessBindingToResponse(result);
   }
 
   @GrpcMethod('WorkflowService', 'ListProcessBindings')
   async listProcessBindings(@Payload() data: any) {
+    data = data || {};
     const { items, total } = await this.bindingService.list(data);
     return {
       data: items.map(item => this.mapProcessBindingToResponse(item)),
@@ -212,6 +216,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'DeactivateProcessBinding')
   async deactivateProcessBinding(@Payload() data: any) {
+    data = data || {};
     const result = await this.bindingService.deactivate(
       data.id,
       data.actorId,
@@ -223,6 +228,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'ResolveBinding')
   async resolveBinding(@Payload() data: any) {
+    data = data || {};
     return this.bindingService.resolveBinding(data);
   }
 
@@ -231,6 +237,7 @@ export class GrpcWorkflowController {
   // =========================================================================
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(@Payload() data: any) {
+    data = data || {};
     const instance = await this.executionService.startProcess(
       data.businessId || data.workflowId,
       {

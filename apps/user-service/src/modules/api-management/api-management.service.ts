@@ -59,13 +59,20 @@ export class ApiManagementService {
     };
   }
 
-  private async bindCredential(tx: any, auth: any): Promise<any> {
+  private async bindCredential(tx: any, auth: any, existingAuth?: any): Promise<any> {
     if (!auth || typeof auth !== 'object') return auth;
 
-    // If there is a raw secret, encrypt it and create a binding
-    if (auth.secret) {
+    // 1. Nếu chuyển về 'none' -> reset auth sạch sẽ
+    if (auth.kind === 'none') {
+      return { kind: 'none' };
+    }
+
+    const rawSecret = typeof auth.secret === 'string' ? auth.secret.trim() : '';
+
+    // 2. Nếu có secret mới được nhập -> mã hóa AES-256-GCM và lưu vào bảng api_credential_bindings
+    if (rawSecret) {
       const opaqueRef = 'cred_' + crypto.randomBytes(8).toString('hex');
-      const encryptedData = this.encryptSecret(auth.secret);
+      const encryptedData = this.encryptSecret(rawSecret);
 
       await tx.credentialBinding.create({
         data: {
@@ -80,7 +87,15 @@ export class ApiManagementService {
       return boundAuth;
     }
 
-    return auth;
+    // 3. Nếu không nhập secret mới -> giữ lại secretRef cũ nếu trước đó đã có
+    const boundAuth = { ...auth };
+    delete boundAuth.secret;
+
+    if (!boundAuth.secretRef && existingAuth?.secretRef) {
+      boundAuth.secretRef = existingAuth.secretRef;
+    }
+
+    return boundAuth;
   }
 
   async listConnections(organizationId: string, limit = 50, offset = 0) {
@@ -115,8 +130,9 @@ export class ApiManagementService {
   }
 
   async createConnection(data: any, userId: string) {
-    const boundAuth = await this.bindCredential(this.prisma, data.auth);
-    data.auth = boundAuth;
+    if (data.auth) {
+      data.auth = await this.bindCredential(this.prisma, data.auth);
+    }
     return this.prisma.apiConnection.create({
       data: {
         ...data,
@@ -133,13 +149,19 @@ export class ApiManagementService {
     expectedVersion: number,
     userId: string,
   ) {
-    if (data.auth) {
-      data.auth = await this.bindCredential(this.prisma, data.auth);
-    }
     const conn = await this.getConnection(id);
-    if (conn.version !== expectedVersion) {
+    if (
+      expectedVersion !== undefined &&
+      expectedVersion !== null &&
+      conn.version !== expectedVersion
+    ) {
       throw new Error('Version mismatch (OCC)');
     }
+
+    if (data.auth) {
+      data.auth = await this.bindCredential(this.prisma, data.auth, conn.auth);
+    }
+
     return this.prisma.apiConnection.update({
       where: { id },
       data: {

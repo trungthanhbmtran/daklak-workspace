@@ -203,7 +203,7 @@ export function AiQuotaPlanModal({
                     <span className="text-xs font-bold truncate">Vị trí cá nhân</span>
                     {targetScope === 'INDIVIDUAL' && <Check className="w-3.5 h-3.5 shrink-0" />}
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-snug break-words">
+                  <p className="text-[11px] text-muted-foreground leading-snug wrap-break-word">
                     Cho vị trí {rankName}
                   </p>
                 </button>
@@ -221,7 +221,7 @@ export function AiQuotaPlanModal({
                     <span className="text-xs font-bold truncate">Toàn bộ Đơn vị</span>
                     {targetScope === 'UNIT' && <Check className="w-3.5 h-3.5 shrink-0" />}
                   </div>
-                  <p className="text-[11px] text-muted-foreground leading-snug break-words">
+                  <p className="text-[11px] text-muted-foreground leading-snug wrap-break-word">
                     Tổng hợp cấp phòng/ban
                   </p>
                 </button>
@@ -380,11 +380,11 @@ export function AiQuotaPlanModal({
                               {idx + 1}
                             </td>
                             <td className="py-3 px-3 min-w-0">
-                              <p className="font-semibold text-foreground leading-relaxed break-words">
+                              <p className="font-semibold text-foreground leading-relaxed wrap-break-word">
                                 {q.taskName}
                               </p>
                               {q.outputProduct && (
-                                <p className="text-[11px] text-muted-foreground mt-0.5 break-words">
+                                <p className="text-[11px] text-muted-foreground mt-0.5 wrap-break-word">
                                   Sản phẩm: {q.outputProduct}
                                 </p>
                               )}
@@ -418,7 +418,7 @@ export function AiQuotaPlanModal({
                   {aiResult.suggestedPlan && (
                     <div className="space-y-3 min-w-0">
                       <div className="p-4 rounded-xl border bg-card min-w-0 shadow-2xs">
-                        <h4 className="text-xs font-bold text-foreground break-words uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <h4 className="text-xs font-bold text-foreground wrap-break-word uppercase tracking-wider mb-3 flex items-center gap-2">
                           <Calendar className="w-4 h-4 text-primary shrink-0" />
                           {aiResult.suggestedPlan.title}
                         </h4>
@@ -432,7 +432,7 @@ export function AiQuotaPlanModal({
                                 <Badge className="font-bold text-[11px] shrink-0 bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">
                                   {phase.phase}
                                 </Badge>
-                                <p className="text-xs font-medium text-foreground break-words min-w-0">
+                                <p className="text-xs font-medium text-foreground wrap-break-word min-w-0">
                                   {phase.focus}
                                 </p>
                               </div>

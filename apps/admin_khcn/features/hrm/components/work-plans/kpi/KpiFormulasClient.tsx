@@ -933,7 +933,7 @@ export function KpiFormulasClient() {
                           </p>
                         </div>
 
-                        <div className="rounded-lg bg-muted/40 p-2.5 font-mono text-xs text-indigo-950 dark:text-indigo-200 break-words border border-border/50">
+                        <div className="rounded-lg bg-muted/40 p-2.5 font-mono text-xs text-indigo-950 dark:text-indigo-200 wrap-break-word border border-border/50">
                           {rule.formula}
                         </div>
                       </div>
@@ -1040,7 +1040,7 @@ export function KpiFormulasClient() {
                         {activeTestingFormula.type === 'rieng' ? 'Quy tắc ngoại lệ' : 'Chuẩn chung'}
                       </Badge>
                     </div>
-                    <div className="font-mono text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 break-words">
+                    <div className="font-mono text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 wrap-break-word">
                       {activeTestingFormula.formula}
                     </div>
                   </div>

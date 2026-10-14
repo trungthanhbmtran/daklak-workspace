@@ -22,6 +22,15 @@ const eslintConfig = defineConfig([
           argsIgnorePattern: "^_",
         },
       ],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/\\bbreak-words\\b/]",
+          message:
+            "Cấm sử dụng CSS class 'break-words'. Vui lòng dùng 'wrap-break-word' theo quy định dự án.",
+        },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.

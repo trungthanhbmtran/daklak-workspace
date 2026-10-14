@@ -15,9 +15,21 @@ export class ApiManagementController {
   constructor(private readonly service: ApiManagementService) {}
 
   private mapConnectionResponse(conn: any) {
+    const rawAuth =
+      typeof conn.auth === 'object' && conn.auth !== null
+        ? conn.auth
+        : { kind: 'none' };
     return {
       ...conn,
-      auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
+      auth: {
+        kind: rawAuth.kind || 'none',
+        secretRef: rawAuth.secretRef || undefined,
+        clientId: rawAuth.clientId || undefined,
+        tokenUrl: rawAuth.tokenUrl || undefined,
+        headerName: rawAuth.headerName || undefined,
+        headerPrefix: rawAuth.headerPrefix || undefined,
+        scope: rawAuth.scope || undefined,
+      },
       endpoints: Array.isArray(conn.endpoints)
         ? conn.endpoints.map((endpoint: any) => ({
             ...endpoint,
@@ -54,17 +66,31 @@ export class ApiManagementController {
       return {
         version: res.version,
         etag: res.etag,
-        connections: conns.map((conn: any) => ({
-          ...conn,
-          auth: typeof conn.auth === 'object' ? conn.auth : { kind: 'none' },
-          endpoints: Array.isArray(conn.endpoints)
-            ? conn.endpoints.map((ep: any) => ({
-                id: ep.id,
-                method: ep.method,
-                pathTemplate: ep.pathTemplate,
-              }))
-            : [],
-        })),
+        connections: conns.map((conn: any) => {
+          const rawAuth =
+            typeof conn.auth === 'object' && conn.auth !== null
+              ? conn.auth
+              : { kind: 'none' };
+          return {
+            ...conn,
+            auth: {
+              kind: rawAuth.kind || 'none',
+              secretRef: rawAuth.secretRef || undefined,
+              clientId: rawAuth.clientId || undefined,
+              tokenUrl: rawAuth.tokenUrl || undefined,
+              headerName: rawAuth.headerName || undefined,
+              headerPrefix: rawAuth.headerPrefix || undefined,
+              scope: rawAuth.scope || undefined,
+            },
+            endpoints: Array.isArray(conn.endpoints)
+              ? conn.endpoints.map((ep: any) => ({
+                  id: ep.id,
+                  method: ep.method,
+                  pathTemplate: ep.pathTemplate,
+                }))
+              : [],
+          };
+        }),
       };
     } catch (e: any) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });

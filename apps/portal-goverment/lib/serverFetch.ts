@@ -21,7 +21,6 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
   const separator = rawUrl.includes('?') ? '&' : '?';
   const url = `${rawUrl}${separator}lang=${lang}`;
   
-  console.log(`[serverFetch] Fetching from: ${url} (lang: ${lang})`);
   try {
     const res = await fetch(url, {
       cache: "no-store",
@@ -42,7 +41,6 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
       const fallbackRawUrl = `http://localhost:8080/api/v1/${cleanPath}`;
       const fallbackSeparator = fallbackRawUrl.includes('?') ? '&' : '?';
       const fallbackUrl = `${fallbackRawUrl}${fallbackSeparator}lang=${lang}`;
-      console.log(`[serverFetch] Retrying with localhost fallback: ${fallbackUrl}`);
       try {
         const res = await fetch(fallbackUrl, {
           cache: "no-store",

@@ -318,7 +318,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
                           <Text variant="small" className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
                             {isPartyUnit ? "Cơ quan Đảng đã chọn:" : "Đơn vị đã chọn:"}
                           </Text>
-                          <Text weight="bold" className="leading-snug break-words">{selectedUnit.fullPath}</Text>
+                          <Text weight="bold" className="leading-snug wrap-break-word">{selectedUnit.fullPath}</Text>
                           <Text variant="code" className="text-[10px] text-slate-400 italic font-normal bg-transparent p-0">Mã: {selectedUnit.code || 'None'}</Text>
                         </div>
                       </div>
@@ -599,7 +599,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
                                 </div>
 
                                 {slotData?.description && (
-                                  <div className="text-[11px] text-slate-600 leading-snug break-words">
+                                  <div className="text-[11px] text-slate-600 leading-snug wrap-break-word">
                                     {slotData.description}
                                   </div>
                                 )}
