@@ -1,5 +1,35 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Tái Thiết Kế UX/UI Vị Trí Nút Thẩm Định & Đánh Giá Của Lãnh Đạo Theo Chuẩn Enterprise
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu người dùng**:
+  - Tại `http://113.184.220.82/admin/services/hrm/work-plans/tasks`, vị trí của nút mở màn thẩm định và đánh giá của lãnh đạo trước đó bị đưa sâu vào trong tab "Đánh giá & KPI", chưa hợp lý theo chuẩn UX/UI.
+  - Thiết kế lại vị trí phù hợp, dễ nhận diện, thao tác 1-chạm theo chuẩn Enterprise.
+- **Giải pháp UX/UI thực thi**:
+  - **Header Action Bar (Truy cập toàn cục)**:
+    - Bổ sung nút CTA chính **"Thẩm định & Đánh giá"** (hoặc "Cập nhật đánh giá") ngay trên Header của `TaskDetailDrawer` (kế bên nút Gia hạn, Giao lại, Chỉnh sửa).
+    - Lãnh đạo có thể mở form thẩm định tức thì từ bất kỳ Tab nào mà không cần lướt tìm.
+  - **Top Action Banner (Nhắc nhở theo ngữ cảnh)**:
+    - Khi công việc ở trạng thái `REVIEWING` (hoặc `PENDING_REVIEW` / tiến độ 100%), hiển thị Banner nổi bật màu gradient Indigo-Blue ngay dưới Header với nút CTA "Mở thẩm định & duyệt ngay".
+  - **Bottom CTA Card ở Tab Xử lý (TaskProcessingTab)**:
+    - Đặt card thẩm định nhanh ở cuối Tab Xử lý, ngay sau phần Danh sách sản phẩm & Checklist kết quả, giúp Lãnh đạo sau khi thẩm định xong sản phẩm thực tế có thể mở form đánh giá điểm số và kết luận phê duyệt mà không cần chuyển màn hình.
+  - **Chuẩn hóa Tab "Đánh giá & KPI"**:
+    - Trở về đúng chức năng là Bảng tổng hợp Hồ sơ Đánh giá & Tiêu chuẩn Tính điểm KPI VTVL.
+    - Hiển thị 4 thành tố khoa học (Khối lượng A, Chất lượng B, Tiến độ C, Trách nhiệm D) kèm thẻ tổng điểm KPI lớn và ý kiến chỉ đạo nếu đã đánh giá; hoặc bảng tiêu chuẩn KPI Đề án 01 - BTCTU nếu đang chờ đánh giá.
+
+### 2. Danh mục File Đã Chỉnh Sửa
+- `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`
+- `apps/admin_khcn/features/hrm/components/tasks/task-detail-processing-tab.tsx`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%, 0 lỗi TypeScript)**.
+- Rà soát mã nguồn: **0 câu lệnh `console.log` / `debugger`**, file UTF-8 không BOM.
+- Tuân thủ nghiêm ngặt 7 Bộ Ràng Buộc Kỹ Thuật (min-w-0, responsive layout, dumb client, controlled state).
+
+---
+
 ## [2026-10-14] Phân Công Phối Hợp Theo Phòng Ban (Sinh Nhánh SubTask) & Đồng Bộ Nhân Sự Cho Bước Thực Hiện (Checklist)
 
 ### 1. Phạm vi & Mục tiêu

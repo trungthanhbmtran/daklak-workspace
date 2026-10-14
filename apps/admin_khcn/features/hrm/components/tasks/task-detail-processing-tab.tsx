@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Heading, Text } from "@/components/ui/typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Clock, Loader2, X } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, X, Award } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -28,12 +28,14 @@ export function TaskProcessingTab({
   taskId,
   currentTask,
   isCompleted,
-  isAssigned
+  isAssigned,
+  onOpenEvaluation,
 }: {
   taskId: number;
   currentTask: any;
   isCompleted: boolean;
   isAssigned: boolean;
+  onOpenEvaluation?: () => void;
 }) {
   const { user } = useUser();
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
@@ -303,6 +305,33 @@ export function TaskProcessingTab({
         <Heading level="h4" className="font-medium text-slate-500">Tài liệu đính kèm</Heading>
         <Text variant="small" className="text-slate-500 italic font-normal">Chưa có tài liệu nào</Text>
       </div>
+
+      {/* Hành động Thẩm định & Đánh giá thuận tiện ngay cuối quy trình xử lý */}
+      {onOpenEvaluation && (currentTask.status === "REVIEWING" || currentTask.status === "PENDING_REVIEW" || isCompleted || (currentTask.progress ?? 0) >= 100) && (
+        <div className="p-4 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/80 to-blue-50/80 dark:from-indigo-950/30 dark:to-blue-950/30 flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-xl bg-indigo-600 text-white shrink-0 shadow-2xs">
+              <Award className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-indigo-950 dark:text-indigo-100 truncate">
+                {isCompleted ? "Nhiệm vụ đã hoàn thành & Đánh giá KPI" : "Sẵn sàng Thẩm định chất lượng & Đánh giá KPI"}
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                {isCompleted ? "Bấm để xem lại hoặc điều chỉnh điểm số 4 thành tố" : "Lãnh đạo đối chiếu sản phẩm hoàn thành và chốt điểm số công vụ"}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={onOpenEvaluation}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold h-8 px-3.5 shrink-0 shadow-xs"
+          >
+            <Award className="w-3.5 h-3.5 mr-1" />
+            {isCompleted ? "Xem / Đánh giá lại" : "Thẩm định ngay"}
+          </Button>
+        </div>
+      )}
 
       {isCreateSubTaskOpen && (
           <CreateTaskDialog

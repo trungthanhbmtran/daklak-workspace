@@ -77,6 +77,24 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
         user?.isAdmin ||
         user?.permissionsFlatten?.includes("TASK:MANAGE")));
 
+  const isPendingReview =
+    currentTask?.status === "REVIEWING" ||
+    currentTask?.status === "PENDING_REVIEW" ||
+    ((currentTask?.progress ?? 0) >= 100 && !isCompleted);
+
+  const hasEvaluation = Boolean(currentTask?.kpi || currentTask?.metadata?.evaluation);
+
+  const canEvaluate =
+    currentTask?.allowedActions?.includes("EVALUATE_APPROVE") ||
+    currentTask?.allowedActions?.includes("APPROVE") ||
+    currentTask?.allowedActions?.includes("REVIEW") ||
+    isPendingReview ||
+    isCompleted ||
+    user?.employeeCode === currentTask?.supervisorCode ||
+    user?.employeeCode === currentTask?.assignerCode ||
+    user?.isAdmin ||
+    user?.permissionsFlatten?.includes("TASK:EVALUATE");
+
   // ── Mutations ──
   const respondTask = useRespondTask(activeTaskId || undefined);
   const updateTaskStatus = useUpdateTaskStatus();
@@ -183,6 +201,17 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                       {currentTask.statusLabel || translateTaskStatus(currentTask.status || "")}
                     </Badge>
                     <div className="flex gap-2 flex-wrap justify-end">
+                      {canEvaluate && (
+                        <Button
+                          size="sm"
+                          onClick={() => setIsEvaluationOpen(true)}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs text-xs h-8 px-3 transition-all"
+                          title="Mở màn hình Thẩm định & Đánh giá của Lãnh đạo"
+                        >
+                          <Award className="w-3.5 h-3.5 mr-1" />
+                          {hasEvaluation ? "Cập nhật đánh giá" : "Thẩm định & Đánh giá"}
+                        </Button>
+                      )}
                       {!isCompleted && (
                         <Button
                           variant="outline"
@@ -363,6 +392,36 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
           </div>
         )}
 
+        {/* Top Action Banner: Thẩm định & Đánh giá KPI khi công việc chờ duyệt */}
+        {isPendingReview && !isPendingIncidentalApproval && (
+          <div className="bg-gradient-to-r from-indigo-50/90 to-blue-50/90 dark:from-indigo-950/40 dark:to-blue-950/40 p-4 border-b border-indigo-200 dark:border-indigo-800 flex-shrink-0 animate-in fade-in duration-200">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="p-2 rounded-xl bg-indigo-600 text-white shrink-0 mt-0.5 shadow-2xs">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div className="space-y-1 min-w-0">
+                  <Heading level="h4" className="font-semibold text-indigo-950 dark:text-indigo-100 text-sm flex items-center gap-2">
+                    <span>Yêu cầu Thẩm định chất lượng & Đánh giá KPI</span>
+                    <Badge className="bg-indigo-600 text-white text-[10px] h-4 font-normal">Cần thẩm định</Badge>
+                  </Heading>
+                  <Text variant="small" className="text-indigo-900/80 dark:text-indigo-300 font-normal leading-relaxed text-xs">
+                    Sản phẩm công việc đã được nộp. Lãnh đạo phụ trách ({currentTask.supervisorCode || "chưa phân công"}) tiến hành đối chiếu, thẩm định 4 thành tố để chốt điểm KPI công vụ.
+                  </Text>
+                </div>
+              </div>
+              <Button
+                onClick={() => setIsEvaluationOpen(true)}
+                size="sm"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs h-8 px-3 shrink-0 shadow-sm"
+              >
+                <Award className="w-3.5 h-3.5 mr-1" />
+                Thẩm định ngay
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Tabs - Controlled ActiveTab để Lazy Mount nội dung */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="px-6 py-4 bg-white border-b shrink-0">
@@ -391,6 +450,7 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                       currentTask={currentTask}
                       isCompleted={isCompleted}
                       isAssigned={isAssigned}
+                      onOpenEvaluation={() => setIsEvaluationOpen(true)}
                     />
                   </div>
                 </ScrollArea>
@@ -437,96 +497,157 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                         const rank = evalData.rankGrade ?? kpiData.qualityGrade ?? "HOÀN THÀNH";
 
                         return (
-                          <div className="space-y-4 bg-white p-5 rounded-xl border shadow-xs min-w-0">
-                            <div className="flex items-center justify-between border-b pb-3">
-                              <Heading level="h4" className="font-bold flex items-center gap-1.5 text-indigo-700">
-                                <Award className="w-4 h-4 text-indigo-600" />
-                                Kết quả Thẩm định & Đánh giá của Lãnh đạo
-                              </Heading>
-                              <Badge className="bg-emerald-600 text-white font-bold">
-                                {rank}
-                              </Badge>
+                          <div className="space-y-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs min-w-0">
+                            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
+                                  <Award className="w-4 h-4" />
+                                </div>
+                                <div>
+                                  <Heading level="h4" className="font-bold text-sm text-indigo-950">
+                                    Phiếu Thẩm định & Điểm số KPI Công vụ
+                                  </Heading>
+                                  <span className="text-[11px] text-slate-400">Quy định thẩm định 4 thành tố BTCTU</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-emerald-600 text-white font-bold text-xs px-2.5 py-0.5">
+                                  {rank}
+                                </Badge>
+                                {canEvaluate && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setIsEvaluationOpen(true)}
+                                    className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs font-semibold h-7 px-2"
+                                  >
+                                    <Award className="w-3 h-3 mr-1" />
+                                    Đánh giá lại
+                                  </Button>
+                                )}
+                              </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 text-xs">
-                              <div className="p-3 bg-slate-50 rounded-lg border">
+                              <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
                                 <Text variant="small" className="text-slate-500 mb-1 font-normal">Tổng điểm nhiệm vụ</Text>
-                                <Text variant="large" weight="bold" className="text-2xl text-foreground font-mono">
-                                  {total} <span className="text-xs font-normal text-slate-500">/ 100đ</span>
+                                <Text variant="large" weight="bold" className="text-2xl text-foreground font-mono text-indigo-700">
+                                  {total} <span className="text-xs font-normal text-slate-400">/ 100đ</span>
                                 </Text>
                               </div>
-                              <div className="p-3 bg-slate-50 rounded-lg border">
+                              <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100">
                                 <Text variant="small" className="text-slate-500 mb-1 font-normal">Thời điểm phê duyệt</Text>
-                                <p className="font-semibold text-slate-800">
+                                <p className="font-semibold text-slate-800 text-xs">
                                   {safeFormatDate(evalData.evaluatedAt || kpiData.evaluatedAt || currentTask.updatedAt, "dd/MM/yyyy HH:mm")}
                                 </p>
-                                <span className="text-[11px] text-slate-500">Bởi Lãnh đạo phụ trách</span>
+                                <span className="text-[11px] text-slate-400">
+                                  Người duyệt: {currentTask.supervisorCode || "Lãnh đạo phụ trách"}
+                                </span>
                               </div>
 
-                              <div className="p-2.5 bg-blue-50/50 rounded-lg border border-blue-100">
-                                <span className="text-slate-500 block">Khối lượng (A):</span>
-                                <strong className="text-blue-700">{evalData.volumePct ?? 100}% (K={evalData.difficultyK ?? 1.0})</strong>
+                              <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100">
+                                <span className="text-blue-900/70 block text-[11px] font-medium">Khối lượng (A):</span>
+                                <strong className="text-blue-700 text-sm">{evalData.volumePct ?? 100}% (K={evalData.difficultyK ?? 1.0})</strong>
                               </div>
-                              <div className="p-2.5 bg-emerald-50/50 rounded-lg border border-emerald-100">
-                                <span className="text-slate-500 block">Chất lượng (B):</span>
-                                <strong className="text-emerald-700">{evalData.qualityScore ?? kpiData.qualityScore ?? 100}đ</strong>
+                              <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100">
+                                <span className="text-emerald-900/70 block text-[11px] font-medium">Chất lượng (B):</span>
+                                <strong className="text-emerald-700 text-sm">{evalData.qualityScore ?? kpiData.qualityScore ?? 100} điểm</strong>
                               </div>
-                              <div className="p-2.5 bg-purple-50/50 rounded-lg border border-purple-100">
-                                <span className="text-slate-500 block">Tiến độ (C):</span>
-                                <strong className="text-purple-700">{evalData.timelinessScore ?? kpiData.timelinessScore ?? 100}đ</strong>
+                              <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-100">
+                                <span className="text-purple-900/70 block text-[11px] font-medium">Tiến độ (C):</span>
+                                <strong className="text-purple-700 text-sm">{evalData.timelinessScore ?? kpiData.timelinessScore ?? 100} điểm</strong>
                               </div>
-                              <div className="p-2.5 bg-amber-50/50 rounded-lg border border-amber-100">
-                                <span className="text-slate-500 block">Trách nhiệm (D):</span>
-                                <strong className="text-amber-700">{evalData.attitudeScore ?? 10}/10đ</strong>
+                              <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100">
+                                <span className="text-amber-900/70 block text-[11px] font-medium">Trách nhiệm (D):</span>
+                                <strong className="text-amber-700 text-sm">{evalData.attitudeScore ?? 10}/10 điểm</strong>
                               </div>
 
                               {(evalData.feedback || kpiData.note) && (
-                                <div className="col-span-2 p-3 bg-indigo-50/30 rounded-lg border border-indigo-100">
-                                  <Text variant="small" className="text-indigo-900 font-semibold mb-1">
+                                <div className="col-span-2 p-3 bg-indigo-50/40 rounded-xl border border-indigo-100">
+                                  <Text variant="small" className="text-indigo-950 font-semibold mb-1 text-xs">
                                     Ý kiến chỉ đạo & Nhận xét của Lãnh đạo:
                                   </Text>
                                   <p className="text-slate-700 italic wrap-break-word leading-relaxed text-xs">
-                                    "{evalData.feedback || kpiData.note}"
+                                    &ldquo;{evalData.feedback || kpiData.note}&rdquo;
                                   </p>
                                 </div>
                               )}
-                            </div>
-
-                            <div className="pt-2 flex justify-end">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setIsEvaluationOpen(true)}
-                                className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs font-semibold"
-                              >
-                                <Award className="w-3.5 h-3.5 mr-1.5" />
-                                Cập nhật / Đánh giá lại
-                              </Button>
                             </div>
                           </div>
                         );
                       })()
                     ) : (
-                      <div className="p-6 bg-white rounded-xl border text-center space-y-4 shadow-xs">
-                        <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
-                          <Award className="w-6 h-6" />
+                      <div className="space-y-4">
+                        {/* Bảng Tiêu chuẩn KPI Dự kiến theo VTVL */}
+                        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3.5 min-w-0">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
+                                <Award className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <Heading level="h4" className="font-bold text-sm text-slate-900">
+                                  Cấu hình & Tiêu chuẩn Tính điểm KPI
+                                </Heading>
+                                <span className="text-[11px] text-slate-400">Cơ chế định biên VTVL Đề án 01 - BTCTU</span>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="text-indigo-700 bg-indigo-50 border-indigo-200 text-[10px]">
+                              Chờ thẩm định
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                              <span className="text-slate-400 block text-[11px]">Thang điểm cơ sở:</span>
+                              <strong className="text-slate-800 text-sm font-mono">100 điểm</strong>
+                            </div>
+                            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                              <span className="text-slate-400 block text-[11px]">Trọng số nhiệm vụ:</span>
+                              <strong className="text-slate-800 text-sm font-mono">x{currentTask.weight || 1}</strong>
+                            </div>
+                            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                              <span className="text-slate-400 block text-[11px]">Độ phức tạp (K):</span>
+                              <strong className="text-slate-800 text-sm font-mono">
+                                K = {currentTask.metadata?.difficultyK || 1.0}
+                              </strong>
+                            </div>
+                            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                              <span className="text-slate-400 block text-[11px]">Lãnh đạo thẩm định:</span>
+                              <strong className="text-slate-800 text-xs truncate block">
+                                {currentTask.supervisorCode || "Theo phân công VTVL"}
+                              </strong>
+                            </div>
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <Heading level="h4" className="font-bold text-foreground">
-                            Công việc chưa được thẩm định & đánh giá
-                          </Heading>
-                          <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-                            Luồng sau khi hoàn thành công việc yêu cầu Lãnh đạo / Người phụ trách đối chiếu nguồn dữ liệu hệ thống với báo cáo của chuyên viên để chốt điểm KPI.
-                          </p>
+
+                        {/* Banner hướng dẫn thẩm định thanh lịch */}
+                        <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                              <Award className="w-4 h-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-slate-800 truncate">
+                                Chưa có kết quả thẩm định chính thức
+                              </p>
+                              <p className="text-[11px] text-slate-400 truncate">
+                                Điểm KPI sẽ được chốt sau khi Lãnh đạo thẩm định 4 thành tố
+                              </p>
+                            </div>
+                          </div>
+
+                          {canEvaluate && (
+                            <Button
+                              size="sm"
+                              onClick={() => setIsEvaluationOpen(true)}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs h-8 px-3 shrink-0 shadow-xs"
+                            >
+                              <Award className="w-3.5 h-3.5 mr-1" />
+                              Mở Thẩm định
+                            </Button>
+                          )}
                         </div>
-                        <Button
-                          size="sm"
-                          onClick={() => setIsEvaluationOpen(true)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm"
-                        >
-                          <Award className="w-4 h-4 mr-1.5" />
-                          Mở màn hình Thẩm định & Đánh giá của Lãnh đạo
-                        </Button>
                       </div>
                     )}
                   </div>
