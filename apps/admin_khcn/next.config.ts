@@ -17,7 +17,15 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
     useCache: true,
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: [
+      "lucide-react",
+      "date-fns",
+      "lodash",
+      "recharts",
+      "@xyflow/react",
+      "@dnd-kit/core",
+      "@dnd-kit/utilities",
+    ],
   },
 };
 

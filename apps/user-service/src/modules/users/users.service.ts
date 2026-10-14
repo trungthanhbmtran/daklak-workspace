@@ -1471,17 +1471,97 @@ export class UsersService implements OnModuleInit {
     return [];
   }
 
-  async getEmployeesByScope(domainId?: number, monitoredUnitId?: number) {
+  async getEmployeesByScope(
+    domainId?: number,
+    monitoredUnitId?: number,
+    assigneeCode?: string,
+  ) {
     const employeeCodes = new Set<string>();
 
-    if (!domainId && !monitoredUnitId) {
+    let resolvedUnitId = monitoredUnitId;
+    let reportsToJobTitleId: number | null = null;
+
+    // 0. Nếu có assigneeCode, tra cứu VTVL và tuyến báo cáo (reportsToJobTitleId) của nhân sự
+    if (assigneeCode) {
+      const assigneeSlot = await this.prisma.staffingSlot.findFirst({
+        where: { assignedEmployeeCode: assigneeCode },
+        include: {
+          staffing: {
+            include: {
+              jobTitle: true,
+              unit: true,
+            },
+          },
+        },
+      });
+
+      if (assigneeSlot?.staffing) {
+        if (!resolvedUnitId) {
+          resolvedUnitId = assigneeSlot.staffing.unitId;
+        }
+        reportsToJobTitleId = assigneeSlot.staffing.jobTitle.reportsToJobTitleId;
+      } else {
+        // Fallback: Tìm qua User và JobPosition
+        const user = await this.prisma.user.findFirst({
+          where: { employeeCode: assigneeCode },
+          include: {
+            jobPositions: {
+              where: { isPrimary: true },
+              include: { jobTitle: true },
+            },
+          },
+        });
+        const primaryPos = user?.jobPositions?.[0];
+        if (primaryPos) {
+          if (!resolvedUnitId) {
+            resolvedUnitId = primaryPos.unitId;
+          }
+          reportsToJobTitleId = primaryPos.jobTitle.reportsToJobTitleId;
+        }
+      }
+
+      // Nếu có tuyến báo cáo trực tiếp (reportsToJobTitleId), tìm nhân sự đảm nhiệm chức danh cấp trên
+      if (reportsToJobTitleId) {
+        // Ưu tiên tìm trong cùng đơn vị
+        const supervisorSlotInUnit = await this.prisma.staffingSlot.findFirst({
+          where: {
+            staffing: {
+              jobTitleId: reportsToJobTitleId,
+              ...(resolvedUnitId ? { unitId: resolvedUnitId } : {}),
+            },
+            assignedEmployeeCode: { not: null },
+          },
+          select: { assignedEmployeeCode: true },
+        });
+
+        if (supervisorSlotInUnit?.assignedEmployeeCode) {
+          employeeCodes.add(supervisorSlotInUnit.assignedEmployeeCode);
+        } else {
+          // Nếu không tìm thấy trong đơn vị, tìm ở cấp Ban/toàn cơ quan
+          const supervisorSlotAny = await this.prisma.staffingSlot.findFirst({
+            where: {
+              staffing: {
+                jobTitleId: reportsToJobTitleId,
+              },
+              assignedEmployeeCode: { not: null },
+            },
+            select: { assignedEmployeeCode: true },
+          });
+          if (supervisorSlotAny?.assignedEmployeeCode) {
+            employeeCodes.add(supervisorSlotAny.assignedEmployeeCode);
+          }
+        }
+      }
+    }
+
+    if (!domainId && !resolvedUnitId && employeeCodes.size === 0) {
       return { employeeCodes: [] };
     }
 
     // 1. Tìm các StaffingSlot có phân công theo dõi đơn vị (monitoredUnits)
-    if (monitoredUnitId) {
+    if (resolvedUnitId) {
       const unitSlots = await this.prisma.staffingSlot.findMany({
-        where: { monitoredUnits: { some: { unitId: monitoredUnitId } } },
+        where: { monitoredUnits: { some: { unitId: resolvedUnitId } } },
         select: { assignedEmployeeCode: true },
       });
       for (const slot of unitSlots) {
@@ -1505,10 +1585,10 @@ export class UsersService implements OnModuleInit {
     }
 
     // 3. Fallback: Nếu chưa có lãnh đạo phân công theo dõi đơn vị, tìm lãnh đạo trực tiếp của chính đơn vị đó
-    if (employeeCodes.size === 0 && monitoredUnitId) {
+    if (employeeCodes.size === 0 && resolvedUnitId) {
       const directLeaderSlots = await this.prisma.staffingSlot.findMany({
         where: {
-          staffing: { unitId: monitoredUnitId },
+          staffing: { unitId: resolvedUnitId },
           assignedEmployeeCode: { not: null },
         },
         include: { staffing: { include: { jobTitle: true } } },

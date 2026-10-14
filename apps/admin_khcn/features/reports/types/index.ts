@@ -90,3 +90,17 @@ export interface DatasetSnapshot {
   schema: any;
   data: any[];
 }
+
+export type ReportPermission = "VIEW" | "EDIT" | "ADMIN";
+export type ReportAssigneeType = "UNIT" | "USER" | "ROLE";
+
+export interface ReportAssignment {
+  id?: number;
+  templateId: number;
+  assigneeType: ReportAssigneeType | string;
+  assigneeId: string;
+  permissions: ReportPermission | string;
+  createdAt?: string;
+  assigneeName?: string;
+  assigneeDetail?: string;
+}

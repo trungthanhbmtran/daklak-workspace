@@ -302,19 +302,25 @@ export function AiQuotaPlanModal({
           {/* KHỐI 2: HIỂN THỊ KẾT QUẢ AI */}
           {aiResult && (
             <div className="space-y-4 pt-2 min-w-0 animate-in fade-in-50 duration-300">
+              {/* CẢNH BÁO HUMAN-IN-THE-LOOP */}
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300 text-xs shadow-xs">
+                <Scale className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <span><strong>Bản nháp đề xuất (Human-in-the-Loop):</strong> Toàn bộ định mức và phân kỳ dưới đây mang tính tham khảo. Cán bộ có thẩm quyền vui lòng kiểm tra, điều chỉnh và bấm &quot;Áp dụng vào bảng định biên&quot; để lưu vào hệ thống.</span>
+              </div>
+
               {/* TÓM TẮT CHIẾN LƯỢC TỪ AI */}
               <Card className="border-primary/20 bg-primary/5 rounded-2xl overflow-hidden shadow-xs min-w-0">
                 <CardHeader className="pb-2 pt-4 px-5 min-w-0">
-                  <CardTitle className="text-sm font-black flex items-center gap-2 text-primary min-w-0">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary min-w-0">
                     <Sparkles className="w-4 h-4 shrink-0 text-amber-500" />
                     <span className="truncate">Định hướng Chiến lược & Mục tiêu SMART</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-5 pb-4 space-y-2 text-xs leading-relaxed min-w-0">
-                  <p className="font-semibold text-foreground break-words min-w-0">
+                  <p className="font-semibold text-foreground wrap-break-word min-w-0">
                     {aiResult.strategicGoal}
                   </p>
-                  <p className="text-muted-foreground italic text-[11px] break-words min-w-0">
+                  <p className="text-muted-foreground italic text-[11px] wrap-break-word min-w-0">
                     * Căn cứ: {aiResult.rationale}
                   </p>
                 </CardContent>

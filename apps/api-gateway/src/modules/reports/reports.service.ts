@@ -105,6 +105,34 @@ export class ReportsService implements OnModuleInit {
     return this.parseResponse(await this.callGrpc('GetAllWidgets', query));
   }
 
+  // Report Assignments
+  async getReportAssignments(
+    templateId: number | string,
+    user: any,
+    authHeader: string,
+  ) {
+    return this.parseResponse(
+      await this.callGrpc(
+        'GetReportAssignments',
+        { templateId: Number(templateId) },
+        user,
+        authHeader,
+      ),
+    );
+  }
+
+  async assignReport(body: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('AssignReport', body, user, authHeader),
+    );
+  }
+
+  async unassignReport(body: any, user: any, authHeader: string) {
+    return this.parseResponse(
+      await this.callGrpc('UnassignReport', body, user, authHeader),
+    );
+  }
+
   // Stats
   async getTaskStats(query: any, user: any, authHeader: string) {
     return this.parseResponse(

@@ -118,11 +118,12 @@ export class UsersController {
 
   @GrpcMethod('UserService', 'GetEmployeesByScope')
   getEmployeesByScope(
-    @Payload() data: { domain_id?: number; monitored_unit_id?: number },
+    @Payload() data: { domain_id?: number; monitored_unit_id?: number; assignee_code?: string },
   ) {
     return this.usersService.getEmployeesByScope(
       data.domain_id,
       data.monitored_unit_id,
+      data.assignee_code,
     );
   }
 

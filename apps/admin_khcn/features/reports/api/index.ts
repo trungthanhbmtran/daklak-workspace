@@ -6,6 +6,7 @@ import {
   ReportRun,
   DatasetSnapshot,
   ReportSourceDef,
+  ReportAssignment,
 } from "../types";
 
 export const reportKeys = {
@@ -15,6 +16,8 @@ export const reportKeys = {
   catalog: () => [...reportKeys.all, "catalog"] as const,
   details: () => [...reportKeys.all, "detail"] as const,
   detail: (id: number | string) => [...reportKeys.details(), Number(id)] as const,
+  assignments: (id: number | string) =>
+    [...reportKeys.detail(id), "assignments"] as const,
   runs: (id: number | string) => [...reportKeys.detail(id), "runs"] as const,
   runStatus: (runId: number | string) =>
     [...reportKeys.all, "runStatus", Number(runId)] as const,
@@ -174,6 +177,23 @@ export const useGetDatasetSnapshot = (
   });
 };
 
+export const useGetReportAssignments = (templateId?: number | string | null) => {
+  const numericId = Number(templateId);
+  const isValid = Number.isInteger(numericId) && numericId > 0;
+
+  return useQuery({
+    queryKey: reportKeys.assignments(isValid ? numericId : 0),
+    queryFn: async () => {
+      const res: any = await axiosInstance.get(
+        `/reports/templates/${numericId}/assignments`,
+      );
+      const list = unwrapData<ReportAssignment[]>(res, []);
+      return Array.isArray(list) ? list : [];
+    },
+    enabled: isValid,
+  });
+};
+
 export const useAssignReport = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -193,7 +213,38 @@ export const useAssignReport = () => {
       );
       return unwrapData(res, res);
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: reportKeys.assignments(variables.templateId),
+      });
+      queryClient.invalidateQueries({ queryKey: reportKeys.dashboardStats() });
+    },
+  });
+};
+
+export const useRemoveReportAssignment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      templateId: number;
+      assigneeType: string;
+      assigneeId: string;
+    }) => {
+      const res: any = await axiosInstance.delete(
+        `/reports/templates/${payload.templateId}/assignments`,
+        {
+          params: {
+            assigneeType: payload.assigneeType,
+            assigneeId: payload.assigneeId,
+          },
+        },
+      );
+      return unwrapData(res, res);
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: reportKeys.assignments(variables.templateId),
+      });
       queryClient.invalidateQueries({ queryKey: reportKeys.dashboardStats() });
     },
   });

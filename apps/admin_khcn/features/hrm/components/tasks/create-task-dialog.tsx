@@ -48,11 +48,13 @@ import {
   CheckSquare,
   Search,
   Scale,
+  AlertCircle,
 } from "lucide-react";
 import { useCreateTask, useCreateSubTask } from "../../hooks/useTasks";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { useTaskTemplatesList } from "../../hooks/useTaskTemplates";
+import { useUser } from "@/hooks/useUser";
 import { hrmTasksApi } from "../../api";
 import { toast } from "sonner";
 
@@ -60,6 +62,13 @@ interface CoordinatorItem {
   id: string;
   name: string;
   percentage: number;
+}
+
+export interface TaskInitialStep {
+  title: string;
+  assigneeCode?: string;
+  assigneeName?: string;
+  baseScore?: number;
 }
 
 interface CreateTaskDialogProps {
@@ -75,6 +84,8 @@ export function CreateTaskDialog({
   parentId,
   initialDate,
 }: CreateTaskDialogProps) {
+  const { user: currentUser } = useUser();
+
   // ── Form State ──
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -98,18 +109,20 @@ export function CreateTaskDialog({
   const [meetingLink, setMeetingLink] = useState("");
 
   // VTVL & Trọng số
-  const [baseScore, setBaseScore] = useState<number>(0);
+  const [baseScore, setBaseScore] = useState<number>(100);
   const [weight, setWeight] = useState<number>(1);
 
-  // KPI Targets fields
-  const [isKpiTarget, setIsKpiTarget] = useState(false);
+  // KPI Targets fields (Tự động bật và tính điểm theo VTVL)
+  const [isKpiTarget, setIsKpiTarget] = useState(true);
   const [plannedQty, setPlannedQty] = useState<number>(1);
-  const [difficultyK, setDifficultyK] = useState<number>(1);
-  const [formulaDomainCode, setFormulaDomainCode] = useState("");
+  const [difficultyK, setDifficultyK] = useState<number>(2);
+  const [formulaDomainCode, setFormulaDomainCode] = useState("VTVL_CHUNG");
 
-  // Checklist các bước ban đầu
-  const [initialSteps, setInitialSteps] = useState<string[]>([]);
+  // Checklist các bước ban đầu (gắn với cá nhân khác hoặc bản thân người tạo)
+  const [initialSteps, setInitialSteps] = useState<TaskInitialStep[]>([]);
   const [stepInput, setStepInput] = useState("");
+  const [stepAssignee, setStepAssignee] = useState<string>("SELF");
+  const [stepScore, setStepScore] = useState<number | "">("");
 
   // Template selector
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -171,7 +184,7 @@ export function CreateTaskDialog({
     );
   }, [templates, templateSearch]);
 
-  // ── Tự động nhận diện Lãnh đạo thẩm định theo Định biên tổ chức ──
+  // ── Tự động nhận diện Lãnh đạo thẩm định theo VTVL và phân công ──
   useEffect(() => {
     if (!assignee) {
       setAutoDetectedSupervisor(null);
@@ -200,11 +213,11 @@ export function CreateTaskDialog({
               name: sup.supervisorName || sup.supervisorCode,
               jobTitle: sup.supervisorJobTitle,
               unitName: sup.supervisorUnitName,
-              reason: sup.reason || "Phân công theo dõi đơn vị trong định biên tổ chức",
+              reason: sup.reason || "Lãnh đạo thẩm định theo VTVL tuyến báo cáo & phân công quản lý",
             };
             setAutoDetectedSupervisor(detected);
-            // Tự động điền nếu chưa chọn hoặc đang trùng với mã tự động trước đó hoặc đang mặc định
-            setSupervisorCode((prev) => (!prev || prev === "DEFAULT" || prev === autoDetectedSupervisor?.code ? sup.supervisorCode : prev));
+            // Tự động gán ngay lãnh đạo thẩm định chuẩn VTVL
+            setSupervisorCode(sup.supervisorCode);
           } else {
             setAutoDetectedSupervisor(null);
           }
@@ -213,8 +226,46 @@ export function CreateTaskDialog({
           setAutoDetectedSupervisor(null);
         });
     }
+
+    // Tự động chuẩn hóa mã nhóm công thức VTVL theo phòng ban của nhân sự
+    let deptName = "";
+    if (assignee.startsWith("DEPT_")) {
+      const d = departments.find((x: any) => x.id === deptId);
+      deptName = d?.name || "";
+    } else {
+      const emp = employees.find((e: any) => e.employeeCode === assignee);
+      const d = departments.find((x: any) => x.id === emp?.departmentId);
+      deptName = d?.name || emp?.unitName || emp?.jobTitleName || "";
+    }
+
+    const upper = deptName.toUpperCase();
+    if (upper.includes("TỔ CHỨC") || upper.includes("CÁN BỘ") || upper.includes("TCCB")) {
+      setFormulaDomainCode("THAM_DINH_TCCB");
+    } else if (upper.includes("BẢO VỆ CHÍNH TRỊ") || upper.includes("BVCTNB")) {
+      setFormulaDomainCode("BVCTNB");
+    } else if (upper.includes("TIẾP CÔNG DÂN") || upper.includes("ĐƠN THƯ")) {
+      setFormulaDomainCode("TCD_DV");
+    } else if (upper.includes("VĂN PHÒNG")) {
+      setFormulaDomainCode("VAN_PHONG");
+    } else {
+      setFormulaDomainCode("VTVL_CHUNG");
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignee, employees]);
+  }, [assignee, employees, departments]);
+
+  // ── Tự động tính điểm cơ sở và độ khó KPI theo mức độ ưu tiên ──
+  useEffect(() => {
+    const scoreMap: Record<string, { base: number; diff: number }> = {
+      LOW: { base: 50, diff: 1 },
+      NORMAL: { base: 100, diff: 2 },
+      HIGH: { base: 150, diff: 3 },
+      URGENT: { base: 200, diff: 4 },
+    };
+    const target = scoreMap[priority] || scoreMap.NORMAL;
+    setBaseScore(target.base);
+    setDifficultyK(target.diff);
+    setIsKpiTarget(true);
+  }, [priority]);
 
   // ── Coordinators & Percentages ──
   const handleAddCoordinator = (value: string) => {
@@ -277,11 +328,36 @@ export function CreateTaskDialog({
     return (Number(assigneePercentage) || 0) + coorsSum;
   }, [assigneePercentage, coordinators]);
 
-  // ── Step management ──
+  // ── Step management (Gắn với cá nhân khác hoặc bản thân người tạo) ──
   const handleAddStep = () => {
     if (!stepInput.trim()) return;
-    setInitialSteps([...initialSteps, stepInput.trim()]);
+
+    let assignedCode = stepAssignee;
+    let assignedName = "Bản thân tôi phụ trách";
+
+    if (assignedCode === "SELF") {
+      assignedCode = currentUser?.employeeCode || "";
+      assignedName = currentUser?.fullName ? `${currentUser.fullName} (Tôi)` : "Bản thân tôi phụ trách";
+    } else if (assignedCode === "ASSIGNEE") {
+      assignedCode = assignee;
+      const emp = employees.find((e: any) => e.employeeCode === assignee);
+      assignedName = emp?.fullName ? `${emp.fullName} (Chủ trì)` : `Chủ trì (${assignee})`;
+    } else {
+      const emp = employees.find((e: any) => e.employeeCode === assignedCode);
+      assignedName = emp?.fullName ? `${emp.fullName}` : assignedCode;
+    }
+
+    setInitialSteps([
+      ...initialSteps,
+      {
+        title: stepInput.trim(),
+        assigneeCode: assignedCode || undefined,
+        assigneeName: assignedName,
+        baseScore: stepScore === "" ? undefined : Number(stepScore),
+      },
+    ]);
     setStepInput("");
+    setStepScore("");
   };
 
   const handleRemoveStep = (index: number) => {
@@ -334,14 +410,16 @@ export function CreateTaskDialog({
     setRecurrence("MONTHLY");
     setType("TASK");
     setMeetingLink("");
-    setBaseScore(0);
+    setBaseScore(100);
     setWeight(1);
-    setIsKpiTarget(false);
+    setIsKpiTarget(true);
     setPlannedQty(1);
-    setDifficultyK(1);
-    setFormulaDomainCode("");
+    setDifficultyK(2);
+    setFormulaDomainCode("VTVL_CHUNG");
     setInitialSteps([]);
     setStepInput("");
+    setStepAssignee("SELF");
+    setStepScore("");
     setShowTemplateModal(false);
   };
 
@@ -383,13 +461,22 @@ export function CreateTaskDialog({
       recurrence: taskType === "PERIODIC" ? recurrence : undefined,
       baseScore: Number(baseScore) || 0,
       weight: Number(weight) || 1,
-      initialSteps: initialSteps.length > 0 ? initialSteps : undefined,
+      initialSteps:
+        initialSteps.length > 0
+          ? initialSteps.map((s) => ({
+              title: s.title,
+              assigneeCode: s.assigneeCode || undefined,
+              baseScore: s.baseScore || 0,
+            }))
+          : undefined,
       metadata: {
         taskType,
+        isIncidental: taskType === "UNPLANNED",
         sourceDocumentRef: sourceDocumentRef.trim() || undefined,
         ...(isKpiTarget
           ? {
-              isKpiTarget: true,
+              isKpiTarget: taskType !== "UNPLANNED", // Bắt buộc Lãnh đạo thẩm định duyệt mới tính KPI
+              isKpiTargetPendingApproval: taskType === "UNPLANNED",
               plannedQty,
               difficultyK,
               ...(formulaDomainCode.trim()
@@ -773,21 +860,37 @@ export function CreateTaskDialog({
                   </Select>
 
                   {/* Thẻ hiển thị căn cứ Định biên tổ chức */}
+                  {/* Thẻ hiển thị căn cứ VTVL & Thẩm quyền PBAC */}
                   {autoDetectedSupervisor && (
-                    <div className="flex items-start gap-2 p-2 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <div className="min-w-0 flex-1">
-                        <span className="font-semibold">Căn cứ Định biên tổ chức:</span>{" "}
-                        <span>{autoDetectedSupervisor.reason} ({autoDetectedSupervisor.name})</span>
-                        {supervisorCode !== autoDetectedSupervisor.code && (
-                          <button
-                            type="button"
-                            onClick={() => setSupervisorCode(autoDetectedSupervisor.code)}
-                            className="ml-1 text-emerald-700 underline font-medium hover:text-emerald-900 cursor-pointer"
-                          >
-                            (Đặt lại theo định biên)
-                          </button>
-                        )}
+                    <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 shadow-sm">
+                      <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-emerald-900 dark:text-emerald-200">
+                            Tự động xác định theo VTVL & Thẩm quyền:
+                          </span>
+                          {supervisorCode !== autoDetectedSupervisor.code ? (
+                            <button
+                              type="button"
+                              onClick={() => setSupervisorCode(autoDetectedSupervisor.code)}
+                              className="text-emerald-700 dark:text-emerald-400 underline font-medium hover:text-emerald-900 cursor-pointer"
+                            >
+                              (Đặt lại theo chuẩn VTVL)
+                            </button>
+                          ) : (
+                            <Badge className="text-[10px] h-4 bg-emerald-600 text-white font-normal">
+                              Chuẩn VTVL Đề án 01
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-slate-700 dark:text-slate-300 font-medium">
+                          {autoDetectedSupervisor.name}
+                          {autoDetectedSupervisor.jobTitle ? ` - ${autoDetectedSupervisor.jobTitle}` : ""}
+                          {autoDetectedSupervisor.unitName ? ` (${autoDetectedSupervisor.unitName})` : ""}
+                        </div>
+                        <div className="text-[10.5px] text-emerald-700/90 dark:text-emerald-400/90">
+                          {autoDetectedSupervisor.reason}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -959,11 +1062,11 @@ export function CreateTaskDialog({
               </div>
 
               {/* Tính chất */}
-              <div className="space-y-2">
+              <div className="space-y-2 col-span-2">
                 <Label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                   <BriefcaseIcon className="w-3.5 h-3.5 text-slate-500" /> Tính chất nhiệm vụ
                 </Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <div
                     onClick={() => setTaskType("ONE_TIME")}
                     className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${
@@ -972,7 +1075,7 @@ export function CreateTaskDialog({
                         : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                     }`}
                   >
-                    Đột xuất
+                    Trong kế hoạch
                   </div>
                   <div
                     onClick={() => {
@@ -987,7 +1090,31 @@ export function CreateTaskDialog({
                   >
                     Định kỳ
                   </div>
+                  <div
+                    onClick={() => setTaskType("UNPLANNED")}
+                    className={`cursor-pointer text-center px-2 py-2 text-xs font-medium rounded-md border transition-all ${
+                      taskType === "UNPLANNED"
+                        ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm font-semibold"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    ⚡ Việc phát sinh
+                  </div>
                 </div>
+
+                {taskType === "UNPLANNED" && (
+                  <div className="p-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/70 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-2 mt-2 animate-in fade-in duration-200">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-semibold text-amber-800 dark:text-amber-300">
+                        Quy định phê duyệt việc phát sinh:
+                      </p>
+                      <p className="leading-relaxed">
+                        Nhiệm vụ phát sinh ngoài kế hoạch khi tạo mới sẽ ở trạng thái <strong>Chờ lãnh đạo duyệt</strong>. Phải có sự đồng ý của <strong>Lãnh đạo phụ trách thẩm định</strong> duyệt thì mới chính thức tính là việc phát sinh và tính điểm KPI.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Tần suất lặp lại nếu định kỳ */}
@@ -1087,63 +1214,141 @@ export function CreateTaskDialog({
               </div>
             </div>
 
-            {/* NHÓM 4: CHECKLIST CÁC BƯỚC THỰC HIỆN BAN ĐẦU */}
+            {/* NHÓM 4: CHECKLIST CÁC BƯỚC THỰC HIỆN BAN ĐẦU (Gắn người phụ trách) */}
             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 space-y-3">
               <div className="flex items-center justify-between pb-1 border-b">
-                <Label className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <div className="flex items-center gap-2">
                   <CheckSquare className="w-4 h-4 text-blue-600" />
-                  Checklist các mốc / bước thực hiện ban đầu
-                </Label>
-                <span className="text-[11px] text-slate-500">
-                  {initialSteps.length} bước được giao
-                </span>
+                  <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Checklist các mốc / bước thực hiện ban đầu
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 font-normal">
+                    {initialSteps.length} bước được giao
+                  </Badge>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Input
-                  placeholder="Thêm bước thực hiện (VD: Bước 1: Soạn dự thảo tờ trình)..."
-                  value={stepInput}
-                  onChange={(e) => setStepInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddStep();
-                    }
-                  }}
-                  className="h-9 text-xs bg-white dark:bg-slate-950"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddStep}
-                  className="h-9 px-3 text-xs gap-1 shrink-0"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Thêm
-                </Button>
+              {/* Form thêm bước mới với người phụ trách cụ thể */}
+              <div className="space-y-2 p-3 rounded-lg bg-white dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Tên bước thực hiện (VD: Soạn dự thảo, Thẩm định hồ sơ...)..."
+                    value={stepInput}
+                    onChange={(e) => setStepInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddStep();
+                      }
+                    }}
+                    className="h-9 text-xs bg-white dark:bg-slate-950 flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddStep}
+                    disabled={!stepInput.trim()}
+                    className="h-9 px-3 text-xs gap-1 shrink-0 bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Thêm bước
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                  {/* Chọn người phụ trách bước */}
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      <UserIcon className="w-3 h-3 text-blue-500" /> Người phụ trách bước:
+                    </Label>
+                    <Select value={stepAssignee} onValueChange={setStepAssignee}>
+                      <SelectTrigger className="h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200">
+                        <SelectValue placeholder="Chọn người phụ trách bước..." />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[250px]">
+                        <SelectItem value="SELF">
+                          <div className="flex items-center gap-1.5 font-medium text-purple-700 dark:text-purple-300">
+                            <span>👤 Bản thân tôi phụ trách</span>
+                            {currentUser?.fullName && <span className="text-[11px] text-slate-400">({currentUser.fullName})</span>}
+                          </div>
+                        </SelectItem>
+                        {assignee && (
+                          <SelectItem value="ASSIGNEE">
+                            <div className="flex items-center gap-1.5 font-medium text-blue-700 dark:text-blue-300">
+                              <span>🎯 Người chủ trì nhận việc</span>
+                              <span className="text-[11px] text-slate-400">({assignee})</span>
+                            </div>
+                          </SelectItem>
+                        )}
+                        <SelectGroup>
+                          <SelectLabel className="text-[10px] text-slate-400 uppercase">Cá nhân khác</SelectLabel>
+                          {employees
+                            .filter((emp: any) => emp.employeeCode !== currentUser?.employeeCode)
+                            .map((emp: any) => (
+                              <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                                <span>👤 {emp.fullName}</span>
+                                <span className="text-[10px] text-slate-400 ml-1">({emp.jobTitleName || emp.employeeCode})</span>
+                              </SelectItem>
+                            ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Điểm KPI của bước */}
+                  <div className="space-y-1">
+                    <Label className="text-[11px] font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      <Award className="w-3 h-3 text-amber-500" /> Điểm cơ sở bước (tùy chọn):
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="VD: 20 điểm"
+                      min={0}
+                      value={stepScore}
+                      onChange={(e) => setStepScore(e.target.value === "" ? "" : Number(e.target.value))}
+                      className="h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200"
+                    />
+                  </div>
+                </div>
               </div>
 
+              {/* Danh sách các bước đã thêm */}
               {initialSteps.length > 0 && (
                 <div className="space-y-1.5 pt-1">
                   {initialSteps.map((s, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between gap-2 p-2 rounded-md bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs"
+                      className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs shadow-sm hover:border-blue-200 transition-colors"
                     >
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Badge variant="outline" className="text-[10px] h-5 w-5 p-0 flex items-center justify-center shrink-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <Badge variant="outline" className="text-[10px] h-5 w-5 p-0 flex items-center justify-center shrink-0 font-bold bg-slate-100 dark:bg-slate-800">
                           {idx + 1}
                         </Badge>
-                        <span className="truncate text-slate-700 dark:text-slate-300">{s}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate text-slate-800 dark:text-slate-200">{s.title}</p>
+                          <div className="flex items-center gap-2 pt-0.5 text-[11px] text-slate-500">
+                            <span className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                              <UserIcon className="w-3 h-3 text-blue-500" />
+                              {s.assigneeName || "Người phụ trách chưa gán"}
+                            </span>
+                            {s.baseScore !== undefined && s.baseScore > 0 && (
+                              <Badge variant="secondary" className="text-[10px] h-4 bg-amber-50 text-amber-700 border border-amber-200">
+                                +{s.baseScore} điểm
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
                       </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveStep(idx)}
-                        className="h-6 w-6 p-0 text-slate-400 hover:text-red-500 shrink-0"
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 shrink-0"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
                   ))}
@@ -1151,8 +1356,8 @@ export function CreateTaskDialog({
               )}
             </div>
 
-            {/* NHÓM 5: THIẾT LẬP VTVL & CHỈ TIÊU KPI NÂNG CAO */}
-            <div className="p-4 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/40 dark:bg-blue-950/20 space-y-4">
+            {/* NHÓM 5: THIẾT LẬP VTVL & CHỈ TIÊU KPI NÂNG CAO (TỰ ĐỘNG CHUẨN HÓA) */}
+            <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <input
@@ -1164,75 +1369,80 @@ export function CreateTaskDialog({
                   />
                   <Label
                     htmlFor="isKpiTarget"
-                    className="font-bold text-xs text-blue-800 dark:text-blue-300 cursor-pointer flex items-center gap-1.5"
+                    className="font-bold text-xs text-blue-900 dark:text-blue-200 cursor-pointer flex items-center gap-1.5"
                   >
                     <Award className="w-4 h-4 text-blue-600" />
                     Tính điểm KPI & Chuẩn hóa Vị trí việc làm
                   </Label>
                 </div>
-                <div className="flex items-center gap-3 text-xs">
-                  <div className="flex items-center gap-1">
-                    <span className="text-slate-500 text-[11px]">Trọng số:</span>
-                    <Input
-                      type="number"
-                      step={0.1}
-                      min={0.1}
-                      value={weight}
-                      onChange={(e) => setWeight(Number(e.target.value))}
-                      className="w-16 h-7 text-xs bg-white dark:bg-slate-950 text-right pr-2"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-slate-500 text-[11px]">Điểm cơ sở:</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={baseScore}
-                      onChange={(e) => setBaseScore(Number(e.target.value))}
-                      className="w-16 h-7 text-xs bg-white dark:bg-slate-950 text-right pr-2"
-                    />
-                  </div>
-                </div>
+                <Badge className="text-[10px] bg-blue-600 text-white font-normal flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Tự động tính theo VTVL
+                </Badge>
               </div>
 
               {isKpiTarget && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-blue-200/60 dark:border-blue-800/60 animate-in fade-in duration-200 text-xs">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Khối lượng / Số lượng cần đạt (Mẫu 01)
-                    </Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={plannedQty}
-                      onChange={(e) => setPlannedQty(Number(e.target.value))}
-                      className="bg-white dark:bg-slate-950 h-8 text-xs"
-                    />
+                <div className="space-y-3 pt-1 border-t border-blue-200/60 dark:border-blue-800/60 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="space-y-1">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Trọng số việc:</span>
+                      <Input
+                        type="number"
+                        step={0.1}
+                        min={0.1}
+                        value={weight}
+                        onChange={(e) => setWeight(Number(e.target.value))}
+                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Điểm cơ sở (VTVL):</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={baseScore}
+                        onChange={(e) => setBaseScore(Number(e.target.value))}
+                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2 font-semibold text-blue-600"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Số lượng chỉ tiêu:</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={plannedQty}
+                        onChange={(e) => setPlannedQty(Number(e.target.value))}
+                        className="h-8 text-xs bg-white dark:bg-slate-950 text-right pr-2"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">Hệ số độ khó (k):</span>
+                      <Select
+                        value={difficultyK.toString()}
+                        onValueChange={(val) => setDifficultyK(Number(val))}
+                      >
+                        <SelectTrigger className="bg-white dark:bg-slate-950 h-8 text-xs">
+                          <SelectValue placeholder="Chọn độ khó" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">k = 1.0 (Dễ - Thường xuyên)</SelectItem>
+                          <SelectItem value="2">k = 2.0 (Bình thường - Tiêu chuẩn)</SelectItem>
+                          <SelectItem value="3">k = 3.0 (Khó - Đòi hỏi độc lập)</SelectItem>
+                          <SelectItem value="4">k = 4.0 (Rất khó - Khẩn / Trọng yếu)</SelectItem>
+                          <SelectItem value="5">k = 5.0 (Đặc biệt phức tạp)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Hệ số độ khó công việc (k = 1.0 - 5.0)
-                    </Label>
-                    <Select
-                      value={difficultyK.toString()}
-                      onValueChange={(val) => setDifficultyK(Number(val))}
-                    >
-                      <SelectTrigger className="bg-white dark:bg-slate-950 h-8 text-xs">
-                        <SelectValue placeholder="Chọn độ khó" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1.0 (Dễ - Nghiệp vụ thường xuyên)</SelectItem>
-                        <SelectItem value="2">2.0 (Hơi khó - Cần xử lý dữ liệu)</SelectItem>
-                        <SelectItem value="3">3.0 (Khó - Đòi hỏi tham mưu độc lập)</SelectItem>
-                        <SelectItem value="4">4.0 (Rất khó - Tác động liên cơ quan)</SelectItem>
-                        <SelectItem value="5">5.0 (Đặc biệt phức tạp - Trọng yếu)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="sm:col-span-2 space-y-1">
-                    <Label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                      Mã nhóm công thức VTVL (không bắt buộc)
-                    </Label>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[11px] font-medium text-slate-700 dark:text-slate-300">
+                        Mã nhóm công thức VTVL (Định biên Đề án 01-ĐA/TU)
+                      </Label>
+                      <span className="text-[10px] text-blue-600 dark:text-blue-400">
+                        Gợi ý tự động theo phòng ban nhân sự
+                      </span>
+                    </div>
                     <Input
                       value={formulaDomainCode}
                       onChange={(e) =>
@@ -1240,8 +1450,8 @@ export function CreateTaskDialog({
                           e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "")
                         )
                       }
-                      placeholder="Để trống dùng công thức chung; ví dụ THAM_DINH, TO_CHUC"
-                      className="bg-white font-mono dark:bg-slate-950 h-8 text-xs"
+                      placeholder="VD: THAM_DINH_TCCB, BVCTNB, TCD_DV, VAN_PHONG..."
+                      className="bg-white font-mono dark:bg-slate-950 h-8 text-xs uppercase"
                     />
                   </div>
                 </div>

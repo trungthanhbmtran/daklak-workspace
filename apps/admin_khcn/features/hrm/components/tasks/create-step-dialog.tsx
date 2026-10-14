@@ -9,9 +9,10 @@ import { Text } from "@/components/ui/typography";
 import { Label } from "@/components/ui/label";
 import { ListChecksIcon, CheckCircle2, Loader2 } from "lucide-react";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useCreateStep } from "../../hooks/useTasks";
+import { useUser } from "@/hooks/useUser";
 
 interface CreateStepDialogProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface CreateStepDialogProps {
 }
 
 export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogProps) {
+  const { user } = useUser();
   const [title, setTitle] = useState("");
   const [baseScore, setBaseScore] = useState<number | "">("");
   const [assigneeCode, setAssigneeCode] = useState<string>("");
@@ -40,7 +42,7 @@ export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogP
       await createStep.mutateAsync({ 
         title: title.trim(),
         baseScore,
-        assignee: assigneeCode
+        assigneeCode: assigneeCode && assigneeCode !== "UNASSIGNED" ? assigneeCode : undefined,
       });
       resetForm();
       onOpenChange(false);
@@ -104,17 +106,34 @@ export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogP
               <SelectTrigger className="w-full bg-white h-11 focus:ring-indigo-500">
                 <SelectValue placeholder="Chọn người thực hiện bước này..." />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="UNASSIGNED" className="text-slate-500 italic">-- Chưa phân công --</SelectItem>
-                {employees.map((emp: any) => (
-                  <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                    👤 {emp.fullName}
+              <SelectContent className="max-h-[280px]">
+                {user?.employeeCode && (
+                  <SelectItem value={user.employeeCode} className="font-medium text-purple-700 dark:text-purple-300">
+                    👤 Bản thân tôi phụ trách ({user.fullName || user.employeeCode})
                   </SelectItem>
-                ))}
+                )}
+                {task?.assigneeCode && task.assigneeCode !== user?.employeeCode && (
+                  <SelectItem value={task.assigneeCode} className="font-medium text-blue-700 dark:text-blue-300">
+                    🎯 Người chủ trì công việc ({task.assigneeName || task.assigneeCode})
+                  </SelectItem>
+                )}
+                <SelectItem value="UNASSIGNED" className="text-slate-500 italic">
+                  -- Chưa phân công cụ thể --
+                </SelectItem>
+                <SelectGroup>
+                  <SelectLabel className="text-xs text-slate-400 uppercase font-semibold">Cá nhân khác</SelectLabel>
+                  {employees
+                    .filter((emp: any) => emp.employeeCode !== user?.employeeCode && emp.employeeCode !== task?.assigneeCode)
+                    .map((emp: any) => (
+                      <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                        👤 {emp.fullName} ({emp.jobTitleName || emp.employeeCode})
+                      </SelectItem>
+                    ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
             <Text variant="small" className="text-slate-500 font-normal">
-              Bạn có thể phân bước này cho một người phối hợp trong công việc.
+              Bạn có thể tự phụ trách, giao cho người chủ trì hoặc phân công cho cá nhân khác.
             </Text>
           </div>
           

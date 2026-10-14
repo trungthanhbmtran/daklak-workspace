@@ -16,10 +16,13 @@ interface TaskRespondDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   taskId: number;
-  action: "REJECT" | "REQUEST_COORDINATION" | null;
+  action: "REJECT" | "REQUEST_COORDINATION" | "REJECT_INCIDENTAL" | null;
+  customTitle?: string;
+  customDescription?: string;
+  onConfirm?: (reason: string) => Promise<void>;
 }
 
-export function TaskRespondDialog({ open, onOpenChange, taskId, action }: TaskRespondDialogProps) {
+export function TaskRespondDialog({ open, onOpenChange, taskId, action, customTitle, customDescription, onConfirm }: TaskRespondDialogProps) {
   const [reason, setReason] = useState("");
   const [leadCode, setLeadCode] = useState("");
   const [coordinators, setCoordinators] = useState<{id: string, name: string}[]>([]);
@@ -46,14 +49,15 @@ export function TaskRespondDialog({ open, onOpenChange, taskId, action }: TaskRe
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!reason.trim()) return;
     try {
-      if (action === "REJECT") {
-        if (!reason.trim()) return;
-        await respondTask.mutateAsync({ action: "REJECT", rejectReason: reason });
+      if (onConfirm) {
+        await onConfirm(reason.trim());
+      } else if (action === "REJECT" || action === "REJECT_INCIDENTAL") {
+        await respondTask.mutateAsync({ action: "REJECT", rejectReason: reason.trim() });
       } else if (action === "REQUEST_COORDINATION") {
-        if (!reason.trim()) return;
         await requestCoordination.mutateAsync({
-          message: reason,
+          message: reason.trim(),
           coordinatorCodes: coordinators.map(c => c.id),
           ...(leadCode ? { leadCode } : {}),
         });
@@ -68,7 +72,8 @@ export function TaskRespondDialog({ open, onOpenChange, taskId, action }: TaskRe
   };
 
   if (!action) return null;
-  const isReject = action === "REJECT";
+  const isRejectIncidental = action === "REJECT_INCIDENTAL";
+  const isReject = action === "REJECT" || isRejectIncidental;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isPending) onOpenChange(v); }}>
@@ -76,23 +81,23 @@ export function TaskRespondDialog({ open, onOpenChange, taskId, action }: TaskRe
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isReject ? <MessageSquareX className="w-5 h-5 text-red-500" /> : <UsersIcon className="w-5 h-5 text-blue-500" />}
-            {isReject ? "Từ chối nhận việc" : "Xin phối hợp xử lý"}
+            {customTitle || (isRejectIncidental ? "Từ chối duyệt việc phát sinh" : isReject ? "Từ chối nhận việc" : "Xin phối hợp xử lý")}
           </DialogTitle>
           <DialogDescription>
-            {isReject ? "Vui lòng nhập lý do từ chối công việc này để cấp trên xem xét." : "Vui lòng nhập lý do và chọn những cá nhân cần phối hợp để thực hiện công việc này."}
+            {customDescription || (isRejectIncidental ? "Vui lòng nhập lý do từ chối việc phát sinh này để thông báo cho người lập và lưu vết kiểm toán." : isReject ? "Vui lòng nhập lý do từ chối công việc này để cấp trên xem xét." : "Vui lòng nhập lý do và chọn những cá nhân cần phối hợp để thực hiện công việc này.")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-2">
           <div className="space-y-3">
             <Label>
-              {isReject ? "Lý do từ chối" : "Lý do / Nội dung xin phối hợp"} <span className="text-red-500">*</span>
+              {isRejectIncidental ? "Lý do từ chối phê duyệt việc phát sinh" : isReject ? "Lý do từ chối" : "Lý do / Nội dung xin phối hợp"} <span className="text-red-500">*</span>
             </Label>
             <Textarea
               required
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Nhập nội dung chi tiết..."
+              placeholder={isRejectIncidental ? "VD: Nhiệm vụ thuộc mảng công tác khác hoặc chưa đủ căn cứ pháp lý..." : "Nhập nội dung chi tiết..."}
               className="min-h-[100px]"
             />
           </div>

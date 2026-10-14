@@ -408,6 +408,7 @@ model Task {
   @@index([dueDate])
   @@index([status, dueDate])
   @@index([isCompleted, dueDate])
+  @@index([isDeleted, isCompleted, dueDate])
   @@index([parentId])
   @@index([planId])
   @@index([createdAt])

@@ -6,6 +6,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   Req,
   UseGuards,
   ParseIntPipe,
@@ -86,6 +87,48 @@ export class ReportsController {
   @Delete('templates/:id')
   async deleteTemplate(@Param('id', ParseIntPipe) id: number) {
     return this.reportsService.deleteTemplate(String(id));
+  }
+
+  @Get('templates/:id/assignments')
+  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  async getReportAssignments(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any,
+  ) {
+    return this.reportsService.getReportAssignments(
+      id,
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Post('templates/:id/assignments')
+  @RequirePermissions('REPORT:MANAGE')
+  async assignReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
+    return this.reportsService.assignReport(
+      { templateId: id, ...body },
+      req.user,
+      req.headers.authorization,
+    );
+  }
+
+  @Delete('templates/:id/assignments')
+  @RequirePermissions('REPORT:MANAGE')
+  async unassignReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('assigneeType') assigneeType: string,
+    @Query('assigneeId') assigneeId: string,
+    @Req() req: any,
+  ) {
+    return this.reportsService.unassignReport(
+      { templateId: id, assigneeType, assigneeId },
+      req.user,
+      req.headers.authorization,
+    );
   }
 
   @Get('tasks')

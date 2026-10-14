@@ -207,20 +207,33 @@ export class TasksService {
       skip = limit > 0 ? (page - 1) * limitNum : undefined;
       take = limit > 0 ? limitNum : undefined;
     } else {
-      // C1-FIX: Dùng $queryRaw tagged template thay vì $queryRawUnsafe
-      // C2-FIX: Thêm WHERE isCompleted = 1 – chỉ lấy task đã hoàn thành
+      // C1-FIX: Sử dụng tên bảng vật lý `tasks` và các cột `is_completed`, `due_date`, `completed_at`
+      // C2-FIX: Thêm điều kiện is_deleted = 0 để loại trừ các bản ghi đã xóa mềm
       const lateIds = await this.prisma.$queryRaw<{ id: number }[]>`
-        SELECT id FROM Task
-        WHERE isCompleted = 1
-          AND dueDate IS NOT NULL
-          AND completedAt > dueDate
+        SELECT id FROM tasks
+        WHERE is_completed = 1
+          AND is_deleted = 0
+          AND due_date IS NOT NULL
+          AND completed_at > due_date
       `;
-      // C3-FIX: Bỏ biến `operator` không dùng – logic rõ ràng qua if/else
-      const ids = lateIds.map(x => x.id);
+      const ids = lateIds.map((x) => Number(x.id));
       if (query.statsFilter === 'doneOverdue') {
+        if (ids.length === 0) {
+          return {
+            tasks: [],
+            paginatedMeta: {
+              total: 0,
+              page,
+              limit: limitNum,
+              totalPages: 0,
+            },
+          };
+        }
         where = { ...where, id: { in: ids } };
       } else {
-        where = { ...where, id: { notIn: ids } };
+        if (ids.length > 0) {
+          where = { ...where, id: { notIn: ids } };
+        }
       }
 
       totalCount = await this.prisma.task.count({ where });
@@ -458,12 +471,24 @@ export class TasksService {
         parsedMetadata = data.metadata;
       }
 
+      const isIncidentalTask =
+        data.taskType === 'UNPLANNED' ||
+        data.taskType === 'INCIDENTAL' ||
+        data.taskType === 'ADHOC' ||
+        data.isIncidental === true ||
+        parsedMetadata.taskType === 'UNPLANNED' ||
+        parsedMetadata.isIncidental === true;
+
+      const initialStatus = isIncidentalTask
+        ? 'PENDING_APPROVAL'
+        : (data.status || (data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? 'PENDING_ACCEPTANCE' : 'TODO'));
+
       const task = await tx.task.create({
         data: {
           parentId,
           title: data.title || data.taskName || 'Nhiệm vụ không tên',
           description: data.description,
-          status: data.status || (data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? 'PENDING_ACCEPTANCE' : 'TODO'),
+          status: initialStatus,
           priority: data.priority || 'MEDIUM',
           type: data.type || 'TASK',
           meetingLink: data.meetingLink || null,
@@ -475,7 +500,15 @@ export class TasksService {
           monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
           metadata: {
             ...parsedMetadata,
-            taskType: data.taskType || parsedMetadata?.taskType || 'ONE_TIME',
+            taskType: data.taskType || parsedMetadata?.taskType || (isIncidentalTask ? 'UNPLANNED' : 'ONE_TIME'),
+            ...(isIncidentalTask
+              ? {
+                  isIncidental: true,
+                  incidentalStatus: 'PENDING_APPROVAL',
+                  isKpiTarget: false, // Bắt buộc Lãnh đạo phụ trách duyệt mới tính điểm KPI
+                  isKpiTargetPendingApproval: true,
+                }
+              : {}),
             ...(data.sourceDocumentRef ? { sourceDocumentRef: data.sourceDocumentRef } : (parsedMetadata.sourceDocumentRef ? { sourceDocumentRef: parsedMetadata.sourceDocumentRef } : {})),
             ...(data.baseScore !== undefined ? { baseScore: data.baseScore } : (parsedMetadata.baseScore !== undefined ? { baseScore: parsedMetadata.baseScore } : {})),
             ...(data.weight !== undefined ? { weight: data.weight } : (parsedMetadata.weight !== undefined ? { weight: parsedMetadata.weight } : {})),
@@ -495,6 +528,7 @@ export class TasksService {
             title: typeof s === 'string' ? s.trim() : s.title.trim(),
             order: idx + 1,
             baseScore: typeof s === 'object' && typeof s.baseScore === 'number' ? s.baseScore : 0,
+            assigneeCode: typeof s === 'object' && s.assigneeCode ? s.assigneeCode : (creatorCode || data.assigneeCode || null),
             status: 'TODO'
           }));
         if (stepsData.length > 0) {
@@ -565,9 +599,16 @@ export class TasksService {
       await tx.taskHistory.create({
         data: {
           taskId: task.id,
-          action: 'Khởi tạo công việc',
+          action: isIncidentalTask
+            ? 'Khởi tạo công việc phát sinh (chờ Lãnh đạo thẩm định phê duyệt để tính KPI)'
+            : 'Khởi tạo công việc',
           actorCode: creatorCode,
-          newValue: { title: task.title, assigneeCode: data.assigneeCode || 'UNASSIGNED' }
+          newValue: {
+            title: task.title,
+            assigneeCode: data.assigneeCode || 'UNASSIGNED',
+            status: task.status,
+            ...(isIncidentalTask ? { isIncidental: true, incidentalStatus: 'PENDING_APPROVAL' } : {})
+          }
         }
       });
 
@@ -623,6 +664,17 @@ export class TasksService {
     }
 
     const createdTask = await this.toResponse(newTask, { currentEmployeeCode: creatorCode, currentUserPermissions: data.currentUserPermissions || [] });
+    
+    // Gửi thông báo đến Lãnh đạo thẩm định phụ trách nếu là việc phát sinh cần duyệt
+    if (newTask.status === 'PENDING_APPROVAL' && (newTask.metadata as any)?.isIncidental && data.supervisorCode) {
+      this.shared.sendTaskNotification(
+        [data.supervisorCode],
+        'Phê duyệt công việc phát sinh mới',
+        `Nhiệm vụ phát sinh ngoài kế hoạch "${newTask.title}" đang chờ Lãnh đạo thẩm định phê duyệt để tính điểm KPI.`,
+        newTask
+      );
+    }
+
     await this.notif.notifyNewTask(createdTask, { assigneeCode: data.assigneeCode, coassigneeCodes: data.coassigneeCodes, monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : undefined }, { sendNotify: true, nodeLabel: 'Giao việc' });
     return createdTask;
   }
@@ -630,21 +682,23 @@ export class TasksService {
   private async resolveSupervisorByScope(data: any): Promise<string | undefined> {
     try {
       let targetUnitId = data.departmentId ? parseInt(data.departmentId, 10) : (data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null);
-      if (!targetUnitId && data.assigneeCode && data.assigneeCode !== 'UNASSIGNED') {
+      const assigneeCode = data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? data.assigneeCode : undefined;
+      if (!targetUnitId && assigneeCode) {
         const emp = await this.prisma.employee.findUnique({
-          where: { employeeCode: data.assigneeCode },
+          where: { employeeCode: assigneeCode },
           select: { departmentId: true },
         });
         if (emp?.departmentId) targetUnitId = emp.departmentId;
       }
 
       const targetDomainId = data.domainId ? parseInt(data.domainId, 10) : 0;
-      if (targetUnitId || targetDomainId) {
+      if (targetUnitId || targetDomainId || assigneeCode) {
         if (this.shared?.userService) {
           const res: any = await firstValueFrom(
             this.shared.userService.GetEmployeesByScope({
               domain_id: targetDomainId || 0,
               monitored_unit_id: targetUnitId || 0,
+              assignee_code: assigneeCode || '',
             })
           );
           const codes = res?.employee_codes || res?.employeeCodes || [];
@@ -711,6 +765,40 @@ export class TasksService {
   }
 
   private async recordTaskStatusHistory(id: number, rawTask: any, updateData: any, transition: any, action: string, actorCode?: string, rejectReason?: string, context?: any, evidenceData?: any) {
+    if (action === 'APPROVE_INCIDENTAL' || action === 'APPROVE_TASK_INCIDENTAL') {
+      await this.prisma.taskHistory.create({
+        data: {
+          taskId: id,
+          action: 'Lãnh đạo phê duyệt việc phát sinh (Chính thức tính điểm KPI)',
+          actorCode,
+          newValue: {
+            status: updateData.status,
+            isKpiTarget: true,
+            incidentalStatus: 'APPROVED',
+            note: context?.evidence || 'Lãnh đạo phụ trách đã duyệt đồng ý việc phát sinh.',
+          } as any,
+        },
+      });
+      return;
+    }
+
+    if (action === 'REJECT_INCIDENTAL' || action === 'REJECT_TASK_INCIDENTAL') {
+      await this.prisma.taskHistory.create({
+        data: {
+          taskId: id,
+          action: 'Lãnh đạo từ chối duyệt việc phát sinh',
+          actorCode,
+          newValue: {
+            status: 'REJECTED',
+            isKpiTarget: false,
+            incidentalStatus: 'REJECTED',
+            reason: rejectReason || context?.evidence || 'Lãnh đạo phụ trách từ chối việc phát sinh.',
+          } as any,
+        },
+      });
+      return;
+    }
+
     const isReject = rejectReason && (updateData.status === 'RETURNED' || transition.nextNodeData?.sideEffects?.includes('RETURN_TASK') || updateData.status === 'REJECTED');
     if (isReject) {
       await this.prisma.taskHistory.create({
@@ -926,6 +1014,30 @@ export class TasksService {
 
     if (transition.nextNodeId) {
       updateData.metadata = { ...((rawTask.metadata as any) || {}), currentNodeId: transition.nextNodeId };
+    }
+
+    if (action === 'APPROVE_INCIDENTAL' || action === 'APPROVE_TASK_INCIDENTAL') {
+      updateData.status = transition.targetStatus || (enriched.assigneeCode && enriched.assigneeCode !== rawTask.creatorEmployeeCode ? 'PENDING_ACCEPTANCE' : 'IN_PROGRESS');
+      updateData.metadata = {
+        ...((rawTask.metadata as any) || {}),
+        ...(updateData.metadata || {}),
+        isKpiTarget: true, // Kích hoạt tính điểm KPI sau khi Lãnh đạo thẩm định phê duyệt
+        incidentalStatus: 'APPROVED',
+        approvedIncidentalBy: actor,
+        approvedIncidentalAt: new Date().toISOString(),
+      };
+    } else if (action === 'REJECT_INCIDENTAL' || action === 'REJECT_TASK_INCIDENTAL') {
+      updateData.status = 'REJECTED';
+      updateData.isCompleted = false;
+      updateData.rejectReason = rejectReason || 'Lãnh đạo phụ trách từ chối duyệt việc phát sinh';
+      updateData.metadata = {
+        ...((rawTask.metadata as any) || {}),
+        ...(updateData.metadata || {}),
+        isKpiTarget: false, // 100% không tính điểm KPI
+        incidentalStatus: 'REJECTED',
+        rejectedIncidentalBy: actor,
+        rejectedIncidentalAt: new Date().toISOString(),
+      };
     }
 
     // Parse và lưu thông tin thẩm định đánh giá nếu có (EVALUATE_APPROVE)
@@ -1371,12 +1483,13 @@ export class TasksService {
   // ─── Steps (Checklist) ────────────────────────────────────────────────────
 
   async createStep(taskId: number, data: any) {
+    const assigneeCode = data.assigneeCode || data.currentEmployeeCode || null;
     const step = await this.prisma.taskStep.create({
       data: {
         taskId,
         title: data.title,
         order: data.order || 0,
-        assigneeCode: data.assigneeCode,
+        assigneeCode,
         baseScore: data.baseScore !== undefined ? parseFloat(data.baseScore) : 0
       }
     });
@@ -1427,7 +1540,7 @@ export class TasksService {
   }
 
   async listSteps(taskId: number) {
-    const steps = await this.prisma.taskStep.findMany({ where: { taskId }, orderBy: [{ order: 'asc' }, { createdAt: 'asc' }] });
+    const steps = await this.prisma.taskStep.findMany({ where: { taskId, isDeleted: false }, orderBy: [{ order: 'asc' }, { createdAt: 'asc' }] });
     return { success: true, data: steps };
   }
 

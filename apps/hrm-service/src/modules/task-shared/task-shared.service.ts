@@ -1,6 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { TaskRole } from '../../../src/generated/prisma/client'
 import { AppCacheService } from '../../core/cache/app-cache.service';
@@ -114,6 +114,43 @@ export class TaskSharedService {
       } else {
         this.logger.error(`Failed to fetch workflow id for code ${trigger}`, e);
       }
+    }
+    return null;
+  }
+
+  /**
+   * Phân giải và cache mã quy trình (Process Binding) từ workflow-service.
+   * Giảm thiểu overhead network latency gRPC qua Redis Cache 24h.
+   */
+  public async getProcessBinding(
+    processTypeCode: string,
+    trigger: string,
+    organizationId: string = 'BTCTU_DAKLAK',
+  ): Promise<string | null> {
+    const cacheKey = `workflow:binding:${processTypeCode}:${trigger}:${organizationId}`;
+    const cachedCode = await this.cache.get<string>(cacheKey);
+    if (cachedCode === 'NOT_FOUND') return null;
+    if (cachedCode) return cachedCode;
+
+    try {
+      if (this.workflowService?.ResolveBinding) {
+        const res = await firstValueFrom<any>(
+          this.workflowService.ResolveBinding({
+            processTypeCode,
+            trigger,
+            organizationId,
+            context: this.toProtoStruct({ processTypeCode, trigger, organizationId }),
+          }).pipe(timeout(3000))
+        );
+        if (res && res.found && (res.code || res.definitionId)) {
+          const bindingCode = res.code || res.definitionId;
+          await this.cache.set(cacheKey, bindingCode, 3600 * 1000 * 24); // Cache 24h
+          return bindingCode;
+        }
+      }
+    } catch (e: any) {
+      this.logger.debug(`ResolveBinding failed for ${processTypeCode}/${trigger}: ${e?.message}`);
+      await this.cache.set(cacheKey, 'NOT_FOUND', 300 * 1000); // 5m fallback cache
     }
     return null;
   }
@@ -845,8 +882,21 @@ export class TaskSharedService {
       actions.push('CHAT');
     }
 
+    const isIncidentalPending =
+      t.status === 'PENDING_APPROVAL' &&
+      (metadata.isIncidental === true ||
+        metadata.taskType === 'UNPLANNED' ||
+        metadata.incidentalStatus === 'PENDING_APPROVAL');
+
+    if (isIncidentalPending) {
+      if (access.isSupervisor || access.isDeptLeader || access.isAdmin) {
+        actions.push('APPROVE_INCIDENTAL');
+        actions.push('REJECT_INCIDENTAL');
+      }
+    }
+
     // Natively inject actions for the assignee when the task is in progress or TODO
-    const isTaskActive = !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'PENDING_ACCEPTANCE';
+    const isTaskActive = !isIncidentalPending && !t.isCompleted && t.status !== 'DRAFT' && t.status !== 'ASSIGNED' && t.status !== 'PENDING_ACCEPTANCE' && t.status !== 'PENDING_APPROVAL';
     
     if (access.isAssignee && isTaskActive) {
       actions.push('CREATE_SUBTASK');
@@ -858,7 +908,7 @@ export class TaskSharedService {
     const currentParticipant = t.participants?.find((p: any) => p.employeeCode === query.currentEmployeeCode);
     const participantStatus = currentParticipant?.status || 'PENDING_ACCEPTANCE';
 
-    if ((access.isAssignee || access.isCoordinator) && (participantStatus === 'PENDING_ACCEPTANCE' || participantStatus === 'PENDING_COORDINATION')) {
+    if (!isIncidentalPending && (access.isAssignee || access.isCoordinator) && (participantStatus === 'PENDING_ACCEPTANCE' || participantStatus === 'PENDING_COORDINATION')) {
       actions.push('ACCEPT');
       actions.push('RECEIVE');
       actions.push('IN_PROGRESS');

@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
   BellRing, MessageSquare, CheckCircle2,
-  ArrowRightCircle, Repeat, Briefcase, Calendar, Award, Edit3
+  ArrowRightCircle, Repeat, Briefcase, Calendar, Award, Edit3, AlertCircle
 } from "lucide-react";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -21,7 +21,7 @@ const safeFormatDate = (date: any, fmt: string) => {
   return format(d, fmt);
 };
 
-import { useTaskDetail, useRespondTask } from "../../hooks/useTasks";
+import { useTaskDetail, useRespondTask, useUpdateTaskStatus } from "../../hooks/useTasks";
 import { toast } from "sonner";
 import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
@@ -51,7 +51,8 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("processing");
-  const [respondAction, setRespondAction] = useState<"REJECT" | "REQUEST_COORDINATION" | null>(null);
+  const [respondAction, setRespondAction] = useState<"REJECT" | "REQUEST_COORDINATION" | "REJECT_INCIDENTAL" | null>(null);
+  const [isApprovingIncidental, setIsApprovingIncidental] = useState(false);
 
   // ── Queries: Tách riêng endpoint chi tiết, chỉ load khi drawer mở ──
   const { data: detailData, isLoading: isLoadingDetail } = useTaskDetail(activeTaskId ? activeTaskId : undefined, {
@@ -63,8 +64,39 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
   const isAssigner = user?.employeeCode === currentTask?.creatorEmployeeCode || user?.employeeCode === currentTask?.assignerCode;
   const canReassign = currentTask?.allowedActions?.includes('ASSIGN') || currentTask?.allowedActions?.includes('REASSIGN');
 
+  const isPendingIncidentalApproval =
+    currentTask?.status === "PENDING_APPROVAL" &&
+    (currentTask?.metadata?.isIncidental === true ||
+      currentTask?.metadata?.taskType === "UNPLANNED" ||
+      currentTask?.metadata?.incidentalStatus === "PENDING_APPROVAL");
+
+  const canApproveIncidental =
+    currentTask?.allowedActions?.includes("APPROVE_INCIDENTAL") ||
+    (isPendingIncidentalApproval &&
+      (user?.employeeCode === currentTask?.supervisorCode ||
+        user?.isAdmin ||
+        user?.permissionsFlatten?.includes("TASK:MANAGE")));
+
   // ── Mutations ──
   const respondTask = useRespondTask(activeTaskId || undefined);
+  const updateTaskStatus = useUpdateTaskStatus();
+
+  const handleApproveIncidental = async () => {
+    setIsApprovingIncidental(true);
+    try {
+      await updateTaskStatus.mutateAsync({
+        id: Number(activeTaskId || currentTask.id),
+        payload: { status: "IN_PROGRESS", actionName: "APPROVE_INCIDENTAL" },
+      });
+      toast.success("Đã phê duyệt việc phát sinh. Nhiệm vụ chính thức được đưa vào danh mục và tính điểm KPI.");
+    } catch {
+      // handled
+    } finally {
+      setIsApprovingIncidental(false);
+    }
+  };
+
+  const handleRejectIncidental = () => setRespondAction("REJECT_INCIDENTAL");
 
   const handleAcceptTask = async () => {
     try {
@@ -121,6 +153,11 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                     )}
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                       <SheetTitle className="text-xl font-bold">{currentTask.title}</SheetTitle>
+                      {(currentTask.metadata?.taskType === "UNPLANNED" || currentTask.metadata?.isIncidental) && (
+                        <Badge variant="outline" className="text-amber-700 bg-amber-50 border-amber-300 font-semibold">
+                          ⚡ Việc phát sinh
+                        </Badge>
+                      )}
                       {currentTask.metadata?.taskType === "REGULAR" && (
                         <Badge variant="outline" className="text-amber-700 bg-amber-50 border-amber-200">
                           <Briefcase className="w-3 h-3 mr-1" /> Thường xuyên
@@ -259,6 +296,50 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
             )}
           </div>
         </div>
+
+        {/* Box phê duyệt nhiệm vụ phát sinh của Lãnh đạo thẩm định */}
+        {isPendingIncidentalApproval && (
+          <div className="bg-amber-50/90 dark:bg-amber-950/40 p-4 border-b border-amber-300 dark:border-amber-800 flex-shrink-0 animate-in fade-in duration-200">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-1">
+                <Heading level="h4" className="font-semibold text-amber-900 dark:text-amber-100 text-sm">
+                  Yêu cầu phê duyệt nhiệm vụ phát sinh ngoài kế hoạch
+                </Heading>
+                <Text variant="small" className="text-amber-800 dark:text-amber-300 font-normal leading-relaxed text-xs">
+                  Theo quy định, công việc phát sinh bắt buộc phải có sự đồng ý của <strong>Lãnh đạo phụ trách thẩm định</strong> ({currentTask.supervisorCode || "chưa phân công"}) phê duyệt thì mới được tính là việc phát sinh hợp lệ và kích hoạt tính điểm KPI.
+                </Text>
+                
+                {canApproveIncidental ? (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Button
+                      onClick={handleApproveIncidental}
+                      size="sm"
+                      disabled={isApprovingIncidental}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-medium text-xs h-8"
+                      iconStart={isApprovingIncidental ? undefined : <CheckCircle2 className="w-3.5 h-3.5" />}
+                    >
+                      {isApprovingIncidental ? "Đang phê duyệt..." : "Phê duyệt đồng ý (Tính điểm KPI)"}
+                    </Button>
+                    <Button
+                      onClick={handleRejectIncidental}
+                      size="sm"
+                      variant="outline"
+                      disabled={isApprovingIncidental}
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 bg-white font-medium text-xs h-8"
+                    >
+                      Từ chối việc phát sinh
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="pt-1.5 text-xs text-amber-700 dark:text-amber-400 font-medium italic">
+                    ⏳ Đang chờ Lãnh đạo thẩm định phụ trách ({currentTask.supervisorCode}) xem xét phê duyệt.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Box tiếp nhận công việc - Đưa lên trên cùng */}
         {isAssigned && (
@@ -475,6 +556,17 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
             onOpenChange={(open) => !open && setRespondAction(null)}
             taskId={activeTaskId}
             action={respondAction}
+            onConfirm={
+              respondAction === "REJECT_INCIDENTAL"
+                ? async (rejectReason) => {
+                    await updateTaskStatus.mutateAsync({
+                      id: activeTaskId,
+                      payload: { status: "REJECTED", actionName: "REJECT_INCIDENTAL", rejectReason },
+                    });
+                    toast.success("Đã từ chối duyệt việc phát sinh.");
+                  }
+                : undefined
+            }
           />
         )}
         {isExtendOpen && activeTaskId && currentTask && (

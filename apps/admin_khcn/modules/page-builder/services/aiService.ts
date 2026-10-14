@@ -6,20 +6,24 @@ export interface AiServiceConfig {
 }
 
 class AiServiceClass {
-  private apiUrl = "/ai-assist"; // Standard relative AI assistant endpoint
+  private apiUrl = "/ai"; // BaseURL "/api/v1/admin" + "/ai" -> "/api/v1/admin/ai"
 
   /**
    * Rewrites page content with options for professional, informative or engaging tones.
    */
-  public async rewriteText(text: string, tone: "professional" | "informative" | "engaging" = "professional"): Promise<string> {
+  public async rewriteText(
+    text: string,
+    tone: "professional" | "informative" | "engaging" = "professional",
+  ): Promise<string> {
     try {
       const response: any = await apiClient.post(`${this.apiUrl}/rewrite`, { text, tone });
-      if (response?.data?.text) {
-        return response.data.text;
+      const resultText =
+        response?.data?.text || response?.data?.data?.text || response?.text;
+      if (resultText) {
+        return resultText;
       }
       throw new Error("Empty AI response");
-    } catch (e) {
-      console.warn("[AiService] Fallback to client-side mock for rewrite:", e);
+    } catch {
       return this.mockRewrite(text, tone);
     }
   }
@@ -29,13 +33,19 @@ class AiServiceClass {
    */
   public async translateText(text: string, targetLanguage: string): Promise<string> {
     try {
-      const response: any = await apiClient.post(`${this.apiUrl}/translate`, { text, targetLanguage });
-      if (response?.data?.translatedText) {
-        return response.data.translatedText;
+      const response: any = await apiClient.post(`${this.apiUrl}/translate`, {
+        text,
+        targetLanguage,
+      });
+      const translated =
+        response?.data?.translatedText ||
+        response?.data?.data?.translatedText ||
+        response?.translatedText;
+      if (translated) {
+        return translated;
       }
       throw new Error("Translation failed");
-    } catch (e) {
-      console.warn("[AiService] Fallback to client-side mock for translation:", e);
+    } catch {
       return this.mockTranslate(text, targetLanguage);
     }
   }
@@ -45,13 +55,19 @@ class AiServiceClass {
    */
   public async summarizeText(text: string, maxSentences = 3): Promise<string> {
     try {
-      const response: any = await apiClient.post(`${this.apiUrl}/summarize`, { text, maxSentences });
-      if (response?.data?.summary) {
-        return response.data.summary;
+      const response: any = await apiClient.post(`${this.apiUrl}/summarize`, {
+        text,
+        maxSentences,
+      });
+      const summary =
+        response?.data?.summary ||
+        response?.data?.data?.summary ||
+        response?.summary;
+      if (summary) {
+        return summary;
       }
       throw new Error("Summarization failed");
-    } catch (e) {
-      console.warn("[AiService] Fallback to client-side mock for summarization:", e);
+    } catch {
       return this.mockSummarize(text, maxSentences);
     }
   }
@@ -59,15 +75,24 @@ class AiServiceClass {
   /**
    * Generates optimized SEO Title, Description, and Keywords based on visual content.
    */
-  public async generateSeoMetadata(pageTitle: string, content: string): Promise<{ title: string; description: string; keywords: string }> {
+  public async generateSeoMetadata(
+    pageTitle: string,
+    content: string,
+  ): Promise<{ title: string; description: string; keywords: string }> {
     try {
-      const response: any = await apiClient.post(`${this.apiUrl}/seo-generate`, { pageTitle, content });
-      if (response?.data?.seo) {
-        return response.data.seo;
+      const response: any = await apiClient.post(`${this.apiUrl}/seo-generate`, {
+        pageTitle,
+        content,
+      });
+      const seo =
+        response?.data?.seo ||
+        response?.data?.data?.seo ||
+        response?.seo;
+      if (seo?.title) {
+        return seo;
       }
       throw new Error("SEO generation failed");
-    } catch (e) {
-      console.warn("[AiService] Fallback to client-side mock for SEO:", e);
+    } catch {
       return this.mockSeoGenerate(pageTitle, content);
     }
   }
@@ -75,13 +100,13 @@ class AiServiceClass {
   // --- MOCK FALLBACKS FOR LOCAL TESTING & STABILITY ---
 
   private async mockRewrite(text: string, tone: string): Promise<string> {
-    await new Promise((r) => setTimeout(r, 1000)); // Simulate network latency
+    await new Promise((r) => setTimeout(r, 600));
     if (!text.trim()) return "";
     return `[Bản sửa đổi AI - Giọng điệu ${tone}]: ${text} (Đã tối ưu hóa tính mạch lạc và độ chuẩn xác hành chính).`;
   }
 
   private async mockTranslate(text: string, targetLanguage: string): Promise<string> {
-    await new Promise((r) => setTimeout(r, 1200));
+    await new Promise((r) => setTimeout(r, 800));
     if (!text.trim()) return "";
     const isEn = targetLanguage.toLowerCase().includes("en");
     if (isEn) {
@@ -91,20 +116,23 @@ class AiServiceClass {
   }
 
   private async mockSummarize(text: string, maxSentences: number): Promise<string> {
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 500));
     if (!text.trim()) return "";
-    const cleanText = text.replace(/<[^>]*>/g, ""); // Strip HTML tags
-    const sentences = cleanText.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const cleanText = text.replace(/<[^>]*>/g, "");
+    const sentences = cleanText.split(/[.!?]+/).filter((s) => s.trim().length > 0);
     const summary = sentences.slice(0, maxSentences).join(". ") + ".";
     return `[Tóm tắt AI]: ${summary}`;
   }
 
-  private async mockSeoGenerate(pageTitle: string, content: string): Promise<{ title: string; description: string; keywords: string }> {
-    await new Promise((r) => setTimeout(r, 1500));
-    const title = `${pageTitle} - Cổng thông tin KH&CN Tỉnh Đắk Lắk`;
+  private async mockSeoGenerate(
+    pageTitle: string,
+    content: string,
+  ): Promise<{ title: string; description: string; keywords: string }> {
+    await new Promise((r) => setTimeout(r, 800));
+    const title = `${pageTitle} - Ban Tổ chức Tỉnh ủy Đắk Lắk`;
     const cleanContent = content.replace(/<[^>]*>/g, "").slice(0, 150);
-    const description = `Tìm hiểu về ${pageTitle}. ${cleanContent}... Cập nhật mới nhất trên Cổng thông tin Khoa học và Công nghệ.`;
-    const keywords = `${pageTitle}, khoa hoc cong nghe, dak lak, cong thong tin portal, page builder`;
+    const description = `Thông tin về ${pageTitle}. ${cleanContent}... Hệ thống quản lý công việc và đánh giá cán bộ Ban Tổ chức Tỉnh ủy Đắk Lắk.`;
+    const keywords = `${pageTitle}, ban to chuc tinh uy, dak lak, cong tac can bo, cai cach hanh chinh`;
     return { title, description, keywords };
   }
 }

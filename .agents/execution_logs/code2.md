@@ -1,5 +1,66 @@
 # Code 2 Execution Log
 
+## 2026-10-14: Tối Ưu Hóa Hiệu Năng, Chống Nghẽn gRPC & Hoàn Thiện Quy Trình Phê Duyệt Việc Phát Sinh (Theo Rà Soát Độc Lập)
+- **Nội dung tác vụ**:
+  1. *Triệt tiêu Network Latency với Redis Cache (TaskSharedService & TaskWorkflowService)*:
+     - Bổ sung caching 24h (`ttl: 86400`) trên Redis với key `workflow:binding:${processTypeCode}:${trigger}:${orgId}` cho RPC `ResolveBinding` giữa `hrm-service` và `workflow-service`.
+     - Giảm thiểu hoàn toàn overhead gọi gRPC lặp lại khi khởi tạo hoặc chuyển trạng thái nhiệm vụ.
+  2. *Chống Treo Microservice với gRPC Timeout (RxJS)*:
+     - Bọc toàn bộ các lời gọi gRPC từ `hrm-service` sang `workflow-service` (`ResolveBinding`, `ValidateAction`, `StartByProcessType`) với RxJS `pipe(timeout(3000))`.
+     - Ném `RequestTimeoutException` hoặc fallback graceful khi downstream `workflow-service` phản hồi chậm hoặc nghẽn mạng, bảo vệ connection pool và thread worker của `hrm-service`.
+  3. *Củng cố Phân quyền & Khóa Trạng thái Nhiệm vụ Phát sinh (PENDING_APPROVAL)*:
+     - Tại `TaskWorkflowService.validateAndTransition`: Chặn tuyệt đối các thao tác xử lý nghiệp vụ (`ASSIGN`, `RECEIVE`, `SUBMIT_FOR_REVIEW`, `EVALUATE_APPROVE`, v.v.) khi nhiệm vụ phát sinh đang ở trạng thái `PENDING_APPROVAL`.
+     - Chỉ mở các hành động kiểm soát: `APPROVE_INCIDENTAL`, `REJECT_INCIDENTAL`, `CHAT`, `VIEW`, `DELETE`, `CANCEL`.
+  4. *Nâng Cấp Giao Diện Phê Duyệt / Từ Chối Việc Phát Sinh (Frontend Dumb Client)*:
+     - Mở rộng `TaskRespondDialog` hỗ trợ mode `REJECT_INCIDENTAL`: Cho phép Lãnh đạo nhập lý do từ chối rõ ràng ("Lý do từ chối phê duyệt công việc phát sinh") và gửi payload chuẩn `actionName: 'REJECT_INCIDENTAL'`.
+     - Cập nhật `TaskDetailDrawer`: Tích hợp nút "Từ chối việc phát sinh" bên cạnh nút "Duyệt việc phát sinh", điều khiển `respondAction: "REJECT_INCIDENTAL"` với dialog xác nhận.
+- **Tập tin đã cập nhật**:
+  - `apps/hrm-service/src/modules/task-shared/task-shared.service.ts`
+  - `apps/hrm-service/src/modules/task-workflow/task-workflow.service.ts`
+  - `apps/admin_khcn/features/hrm/components/tasks/task-respond-dialog.tsx`
+  - `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Typecheck `apps/hrm-service`: `npx tsc --noEmit` -> PASS (Exit code 0, 0 errors).
+  - Jest Unit Tests `apps/hrm-service`: `npx jest src/modules/tasks/tasks.service.spec.ts` -> PASS 27/27 tests (100%).
+  - Typecheck `apps/admin_khcn`: `npx tsc --noEmit` -> PASS (Exit code 0, 0 errors).
+  - Vệ sinh mã nguồn: 0 debug log, 0 console.log, UTF-8 sạch.
+
+
+## 2026-10-14: Thiết Kế Lại Toàn Diện Tính Năng Chia Sẻ Báo Cáo Theo Chuẩn UX/UI Enterprise Cho /services/reports
+- **Nội dung tác vụ**:
+  1. *Khảo sát hiện trạng & Xác định khiếm khuyết UX*:
+     - Trang `/services/reports` thuộc `apps/admin_khcn` trước đó có tính năng chia sẻ thô sơ: Chỉ gồm 1 modal đơn giản yêu cầu người dùng tự gõ ID bằng tay ("Ví dụ: 2 hoặc NV_001") vào ô Input text, không có tìm kiếm, không xem được ai đã có quyền, không có đổi quyền hay thu hồi quyền, và dùng lệnh `alert()` bật popup trình duyệt.
+     - Phía Backend API Gateway chưa có routes cho `/reports/templates/:id/assignments` dẫn đến lỗi gọi API.
+  2. *Triển khai giải pháp UX/UI Enterprise*:
+     - **Component `ReportShareModal.tsx`**: Xây dựng modal chia sẻ báo cáo chuẩn Enterprise (tương tự Google Workspace, Looker, Power BI) gồm 3 tabs:
+       * **Tab 1 - Phân quyền trực tiếp**: Hỗ trợ 3 đối tượng (Đơn vị 🏢, Cán bộ 👤, Vai trò 🛡️) với live search thông minh tích hợp dữ liệu thật từ `organizationApi`, `userApi`, và `policyApi`. Phân cấp 3 mức quyền: Chỉ xem (`VIEW`), Chỉnh sửa (`EDIT`), Toàn quyền quản trị (`ADMIN`). Danh sách active collaborators hiển thị Avatar, Tên, Mã, Đơn vị, Ngày cấp, và Dropdown đổi quyền trực tiếp hoặc Thu hồi quyền (Revoke).
+       * **Tab 2 - Liên kết nội bộ**: Quản lý chia sẻ qua link với 2 chế độ: Hạn chế (chỉ người được mời) và Nội bộ cơ quan (toàn bộ cán bộ có tài khoản). Ô đường dẫn kèm nút "Sao chép liên kết" 1-chạm và cài đặt thời hạn hiệu lực.
+       * **Tab 3 - Tuân thủ & Nhật ký PBAC**: Ghi chú tuân thủ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương và Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân số liệu công vụ; hiển thị mã định danh và scope kiểm toán.
+       * **Thay thế 100% `alert()`**: Sử dụng `toast.success` và `toast.error` từ thư viện `sonner` với thông điệp rõ ràng, thẩm mỹ cao.
+     - **Tích hợp vào `ReportWorkspace.tsx`**: Nhúng `ReportShareModal` cho cả Grid view (3-dots menu) và List view (nút chia sẻ nhanh). Loại bỏ toàn bộ state gõ ID thủ công cũ.
+     - **Bổ sung Frontend API Hooks**: Cung cấp `useGetReportAssignments`, `useAssignReport`, `useRemoveReportAssignment` trong `apps/admin_khcn/features/reports/api/index.ts` và types trong `types/index.ts`.
+  3. *Đồng bộ Backend Microservices & API Gateway*:
+     - `shared/protos/reports/report.proto`: Bổ sung RPC `GetReportAssignments` và `UnassignReport`.
+     - `apps/report-service`: Cập nhật `templates.service.ts` hỗ trợ tự động tìm/tạo liên kết `ReportTemplate` cho `ReportDefinition` để chống lỗi vi phạm foreign key; bổ sung handler `getReportAssignments` và `unassignReport`.
+     - `apps/api-gateway`: Khai báo methods trong `reports.service.ts` và expose các route RESTful `GET`, `POST`, `DELETE` tại `apps/api-gateway/src/modules/reports/reports.controller.ts`.
+- **Tập tin đã cập nhật & tạo mới**:
+  - `apps/admin_khcn/features/reports/components/reports/ReportShareModal.tsx` (Tạo mới)
+  - `apps/admin_khcn/features/reports/components/reports/ReportWorkspace.tsx`
+  - `apps/admin_khcn/features/reports/api/index.ts`
+  - `apps/admin_khcn/features/reports/types/index.ts`
+  - `shared/protos/reports/report.proto`
+  - `apps/report-service/src/modules/templates/templates.service.ts`
+  - `apps/report-service/src/modules/templates/templates.controller.ts`
+  - `apps/api-gateway/src/modules/reports/reports.service.ts`
+  - `apps/api-gateway/src/modules/reports/reports.controller.ts`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Typecheck `apps/admin_khcn`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/api-gateway`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/report-service`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
+  - Rà soát diff & quét sạch 100% debug logs (`console.log`, `debugger`).
+
 ## 2026-10-13: Thực thi Phương án Khắc phục Hiệu năng & Rủi ro Hệ thống (Giai đoạn 1 & Giai đoạn 2)
 - **Nội dung tác vụ**: Triển khai trực tiếp các giải pháp trọng yếu theo Báo cáo Đánh giá Hiệu năng & Rủi ro Hệ thống:
   1. *Triệt tiêu N+1 Query & Deadlock 1213 trong Interactive Transactions*:
@@ -437,3 +498,106 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Kiểm tra tệp tài liệu: 493 dòng, 48,446 bytes, mã hóa UTF-8 không BOM sạch sẽ.
   - Sơ đồ trực quan Mermaid syntax kiểm tra chuẩn xác (flowchart, stateDiagram, graph TD, sequenceDiagram).
   - Đối chiếu 100% khớp dữ liệu thực tế: 05 mã phòng ban, 22 mã VTVL, 23 mã cán bộ, 09 mã quy trình và công thức tính điểm KPI.
+
+
+## 2026-10-14: Rà Soát Toàn Diện Các Chức Năng Ứng Dụng AI Hỗ Trợ Công Việc, Đánh Giá Tác Động & Đề Xuất Điều Chỉnh Cho BTCTU
+- **Nội dung tác vụ**:
+  1. *Khảo sát mã nguồn thực tế*:
+     - Rà soát toàn bộ hợp đồng gRPC tại `shared/protos/users/ai.proto` và `ai_assistant.proto`.
+     - Phân tích kiến trúc điều phối AI tại `apps/user-service` (`ai.service.ts`, `ai-feature.service.ts`, `ai.controller.ts`, `ai-assistant.service.ts`): Nhận diện cơ chế định tuyến đa nhà cung cấp (OpenAI, Gemini, Claude), Circuit Breaker (2 failures, 60s cooldown), hàng đợi RabbitMQ (`ai_generate_task`), bộ nhớ đệm kết quả `ai_job_${jobId}`, và 6 hành động AI chuyên biệt (`SUBTASK_ASSIGNMENT`, `MASTER_PLAN_TASKS`, `PROJECT_TASKS`, `EVALUATE_FEASIBILITY`, `TASK_ASSIGNMENT`, `CALENDAR_SCHEDULE_REUSE`).
+     - Phân tích tầng API Gateway (`apps/api-gateway`): `ai.controller.ts` (REST endpoints, deadline timeout 5s-15s, token delegation), `rank-quotas.controller.ts` (kết hợp AI gợi ý định mức và cơ chế dự phòng xác định `buildRuleBasedSuggestion`).
+     - Rà soát giao diện người dùng (`apps/admin_khcn`): `CalendarAiModal.tsx` (tạo/tái sử dụng lịch họp), `AiQuotaPlanModal.tsx` (gợi ý định mức VTVL), cấu hình prompt hệ thống `AiPromptConfig.tsx`, quản lý nhà cung cấp `AiProviderCard.tsx`, trợ lý cá nhân `PersonalAiAssistants.tsx`, và module `page-builder/services/aiService.ts`.
+  2. *Phát hiện bất cập & Lỗ hổng kỹ thuật*:
+     - **Nguy cơ lộ lọt dữ liệu nội bộ BTCTU**: Các hành động phân rã việc và gợi ý phân công gửi trực tiếp danh sách cán bộ thật và nội dung công tác nhạy cảm lên Cloud LLM công cộng mà không qua tầng khử định danh (PII Masking).
+     - **Lệch endpoint tại `page-builder`**: `aiService.ts` gọi sai đường dẫn `/ai-assist/*` (Gateway không có route này), dẫn đến 100% cuộc gọi bị lỗi 404 và luôn rơi vào mock client, đồng thời sót `console.warn`.
+     - **Thiếu cơ chế Local LLM On-Premise**: Toàn bộ hệ thống phụ thuộc vào API Cloud bên ngoài (OpenAI, Gemini, Claude), chưa tương thích tối đa với tiêu chuẩn an toàn thông tin Cấp độ 3 (NĐ 85/2016/NĐ-CP) và bảo vệ Bí mật Nhà nước (NĐ 63/2026/NĐ-CP).
+  3. *Đề xuất giải pháp kiến trúc*:
+     - Mô hình Hybrid AI: Tích hợp Local LLM On-Premise (Ollama/vLLM) cho dữ liệu Đảng, Cloud LLM cho dữ liệu thông tin công cộng.
+     - Thiết lập tầng Data Sanitizer / PII Masking: Tự động mã hóa tên cán bộ, số định danh trước khi gửi prompt và giải mã khi nhận kết quả.
+     - Phân loại cấp độ bảo mật: Tự động khóa tính năng AI đối với các công việc mang tính chất MẬT, TỐI MẬT, TUYỆT MẬT.
+     - Nhân rộng mô hình Fallback 2 lớp như `rank-quotas` cho toàn bộ các chức năng AI còn lại.
+- **Tập tin đã khảo sát**:
+  - `shared/protos/users/ai.proto`
+  - `shared/protos/users/ai_assistant.proto`
+  - `apps/user-service/src/modules/ai/ai.service.ts`
+  - `apps/user-service/src/modules/ai/ai-feature.service.ts`
+  - `apps/user-service/src/modules/ai/ai.controller.ts`
+  - `apps/user-service/src/modules/ai-assistant/ai-assistant.service.ts`
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`
+  - `apps/api-gateway/src/modules/hrm/rank-quotas.controller.ts`
+  - `apps/admin_khcn/features/hrm/api/ai.api.ts`
+  - `apps/admin_khcn/features/hrm/components/calendar/components/CalendarAiModal.tsx`
+  - `apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx`
+  - `apps/admin_khcn/features/system-admin/users/components/settings/AiPromptConfig.tsx`
+  - `apps/admin_khcn/features/system-admin/users/components/settings/AiProviderCard.tsx`
+  - `apps/admin_khcn/features/system-admin/users/components/settings/PersonalAiAssistants.tsx`
+  - `apps/admin_khcn/modules/page-builder/services/aiService.ts`
+  - `.agents/current_plan.md`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Đối chiếu 100% khớp mã nguồn thực tế (Zero AI Hallucination).
+  - Tệp nhật ký mã hóa UTF-8 không BOM sạch sẽ.
+
+## 2026-10-14: Triển Khai Toàn Diện 5 Nhóm Điều Chỉnh AI (Khử Định Danh PII, Chặn Bí Mật Nhà Nước, Fallback Dự Phòng & Sửa Endpoint)
+- **Nội dung tác vụ**:
+  1. *Triển khai Cửa ải Khử định danh PII Sanitizer & De-masking (`apps/user-service`)*:
+     - Thêm phương thức `sanitizePii` tự động nhận diện và ẩn danh số điện thoại, số CCCD 12 số, email thành các token an danh (`[SDT_AN_DANH_x]`, `[CCCD_AN_DANH_x]`, `[EMAIL_AN_DANH_x]`).
+     - Tự động mã hóa toàn bộ danh sách cán bộ trong các hành động `SUBTASK_ASSIGNMENT` và `TASK_ASSIGNMENT` thành các token an danh `[CAN_BO_1]`, `[CAN_BO_2]` kèm chức danh VTVL, tách biệt hoàn toàn họ tên thật và mã nhân sự khỏi prompt gửi ra ngoài.
+     - Triển khai phương thức `deMaskResult` đệ quy tại worker RabbitMQ (`handleAiGenerateTask`), phục hồi lại chính xác danh tính cán bộ sau khi nhận phản hồi từ AI.
+  2. *Triển khai Cửa ải An ninh Chặn Dữ liệu Mật (State Secret Security Gate)*:
+     - Bổ sung kiểm tra an ninh tại cả API Gateway (`AiGatewayController.checkSecurityLevel`) và Microservice (`AiFeatureService`).
+     - Tự động chặn và từ chối xử lý (`BadRequestException`) đối với bất kỳ nhiệm vụ, hồ sơ hoặc prompt nào mang cấp độ `MAT`, `TOI_MAT`, `TUYET_MAT` hoặc chứa từ khóa mật theo quy định Nghị định 63/2026/NĐ-CP và Quy định 348-QĐ/BTCTW.
+  3. *Xây dựng Mô hình Dự phòng 2 Lớp (Deterministic Rule-based Fallback Engine)*:
+     - Thêm phương thức `generateFallback` và `rollOverSchedule` trong `AiFeatureService`.
+     - Khi các nhà cung cấp AI bên ngoài lỗi/quá tải/hết quota, hệ thống tự động sinh kết quả dự phòng xác định theo quy chuẩn nghiệp vụ của BTCTU cho các hành động `CALENDAR_SCHEDULE_REUSE`, `SUBTASK_ASSIGNMENT`, `EVALUATE_FEASIBILITY`, `MASTER_PLAN_TASKS`, `TASK_ASSIGNMENT`.
+  4. *Chuẩn hóa Nguyên tắc Con người Giữ Quyền Quyết định Tối cao (Human-in-the-Loop & Draft Mode)*:
+     - Tự động đánh dấu mọi kết quả AI là `isDraft: true` và `requiresHumanReview: true`.
+     - Tích hợp banner cảnh báo bản nháp và thông báo chế độ dự phòng trực quan trên `CalendarAiModal.tsx` và `AiQuotaPlanModal.tsx`.
+     - Khắc phục lỗi vi phạm typography `font-black` -> `font-bold` và `break-words` -> `wrap-break-word`.
+  5. *Khắc phục Lỗi Kỹ thuật Endpoint & Dọn sạch Debug Logs (`page-builder` & Gateway)*:
+     - Bổ sung 4 REST endpoints tại `apps/api-gateway` (`/admin/ai/rewrite`, `/admin/ai/translate`, `/admin/ai/summarize`, `/admin/ai/seo-generate`) có sẵn cơ chế fallback xác định.
+     - Căn chỉnh đường dẫn `apiUrl = "/ai"` trong `apps/admin_khcn/modules/page-builder/services/aiService.ts`, xử lý an toàn response envelopes và quét sạch 100% `console.warn`.
+- **Tập tin đã cập nhật**:
+  - `apps/user-service/src/modules/ai/ai-feature.service.ts`
+  - `apps/user-service/src/modules/ai/ai.controller.ts`
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`
+  - `apps/admin_khcn/modules/page-builder/services/aiService.ts`
+  - `apps/admin_khcn/features/hrm/components/calendar/components/CalendarAiModal.tsx`
+  - `apps/admin_khcn/features/hrm/components/work-plans/master-plans/AiQuotaPlanModal.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Typecheck `apps/user-service`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/api-gateway`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> PASS (Exit 0, 0 errors).
+  - Rà soát diff dòng-theo-dòng & quét sạch 100% debug logs (`console.log`, `debugger`, `console.warn`).
+
+## 2026-10-14: Rà Soát Toàn Diện Cấu Trúc Code & Đánh Giá Hiệu Năng Hệ Thống (Architecture & Performance Audit)
+- **Nội dung tác vụ**:
+  1. *Khảo sát cấu trúc hệ thống Microservices & Source of Truth*:
+     - Kiểm tra ranh giới dữ liệu giữa 10+ Microservices (`api-gateway`, `user-service`, `hrm-service`, `workflow-service`, `report-service`, `document-service`, `media-service`, `posts-service`, `chat-service`, `notification-service`).
+     - Xác nhận tuân thủ Source of Truth: VTVL định biên (`JobTitle`, `StaffingSlot`) thuộc `user-service`; quy trình (`ProcessDefinition`, `ProcessInstance`) thuộc `workflow-service`; báo cáo thống kê qua RabbitMQ thuộc `report-service`.
+  2. *Phát hiện các điểm nghẽn hiệu năng trọng yếu (Performance Bottlenecks)*:
+     - **Database SPOF**: Toàn bộ 10 databases logic chạy chung trên 1 container MySQL duy nhất. Một truy vấn nặng từ `report-service` hay `hrm-service` có thể làm nghẽn I/O và CPU của toàn bộ hệ thống.
+     - **Nguy cơ Cascading Failure do thiếu gRPC Timeout**: Tiện ích `executeGrpcCall` mới chỉ được áp dụng tại `ai.controller.ts`; phần lớn các controller khác trong `api-gateway` (`tasks.service.ts`, `users.controller.ts`, `reports.service.ts`) vẫn gọi `firstValueFrom` không có timeout, dễ gây treo sockets khi downstream microservice quá tải.
+     - **Lỗi truy vấn Case-Sensitive & In-memory filtering**: Trong `apps/hrm-service/src/modules/tasks/tasks.service.ts` (dòng 212-217), câu lệnh `$queryRaw` dùng `SELECT id FROM Task` (bảng thực tế là `tasks` do `@@map("tasks")`), có nguy cơ crash trên môi trường Linux/Docker; đồng thời truy vấn nạp toàn bộ danh sách ID quá hạn vào RAM rồi dùng `id: { in: ids }` thay vì lọc trực tiếp trong CSDL.
+     - **Connection Pool Exhaustion**: Các file `.env` môi trường cục bộ chưa có tham số `connection_limit` và `pool_timeout`.
+     - **Bundle Size Frontend**: `next.config.ts` của `admin_khcn` mới chỉ tối ưu `optimizePackageImports` cho `lucide-react`, chưa khai báo cho `lodash`, `date-fns`, `recharts`.
+  3. *Xây dựng Phương án Xử lý & Lộ trình Tối ưu hóa 3 Giai đoạn*:
+     - Giai đoạn 1 (Ngay lập tức / P0-P1): Sửa truy vấn `$queryRaw` chuẩn hóa bảng `tasks`, mở rộng `executeGrpcCall` có deadline timeout cho toàn bộ Gateway, bổ sung `connection_limit=10&pool_timeout=15` vào chuỗi kết nối, mở rộng `optimizePackageImports`.
+     - Giai đoạn 2 (Tối ưu CSDL & Chỉ mục / P2): Bổ sung Composite Index cho các bảng có lưu lượng truy vấn lớn (`tasks`, `task_participants`, `kpi_evaluations`), chuyển đổi `report-service` sang CQRS thuần qua RabbitMQ.
+     - Giai đoạn 3 (Kiến trúc Bền vững / P3): Tách CSDL vật lý riêng cho các service tải cao, thiết lập hệ thống giám sát hiệu năng APM (Prometheus/Grafana).
+- **Tập tin đã khảo sát**:
+  - `docker-compose.yml`, `docker-compose.prod.yml`
+  - `apps/api-gateway/src/core/utils/grpc-call.util.ts`
+  - `apps/api-gateway/src/modules/hrm/tasks.service.ts`
+  - `apps/hrm-service/src/modules/tasks/tasks.service.ts`
+  - `apps/hrm-service/src/modules/task-shared/task-shared.service.ts`
+  - `apps/hrm-service/prisma/schema/task.prisma`
+  - `apps/workflow-service/prisma/schema/main.prisma`
+  - `apps/report-service/prisma/schema/main.prisma`
+  - `apps/admin_khcn/next.config.ts`, `apps/admin_khcn/package.json`
+  - `.agents/current_plan.md`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Đối chiếu 100% dòng mã nguồn thực tế trong repo (Zero Assumptions).
+  - Tệp nhật ký mã hóa UTF-8 không BOM.

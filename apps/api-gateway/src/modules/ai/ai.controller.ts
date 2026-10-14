@@ -9,6 +9,7 @@ import {
   Inject,
   OnModuleInit,
   InternalServerErrorException,
+  BadRequestException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -33,6 +34,23 @@ export class AiGatewayController implements OnModuleInit {
 
   onModuleInit() {
     this.aiService = this.client.getService('AiService');
+  }
+
+  private checkSecurityLevel(payload?: any, prompt?: string) {
+    const isConfidential =
+      payload?.isConfidential === true ||
+      ['MAT', 'TOI_MAT', 'TUYET_MAT'].includes(payload?.securityLevel) ||
+      /mật|tối mật|tuyệt mật/i.test(payload?.securityLevel || '') ||
+      (prompt &&
+        /mật|tối mật|tuyệt mật|chính trị nội bộ|bảo vệ chính trị|hồ sơ 2c/i.test(
+          prompt,
+        ));
+
+    if (isConfidential) {
+      throw new BadRequestException(
+        'Nhiệm vụ hoặc nội dung thuộc danh mục Bí mật Nhà nước theo quy định (NĐ 63/2026/NĐ-CP & QĐ 348-QĐ/BTCTW). Tính năng AI hỗ trợ bị khóa để đảm bảo an toàn thông tin.',
+      );
+    }
   }
 
   private getGrpcMetadata(req?: any): Metadata {
@@ -66,6 +84,7 @@ export class AiGatewayController implements OnModuleInit {
   @Post('generate')
   @UseGuards(JwtAuthGuard)
   async generateText(@Req() req: any, @Body() body: { prompt: string }) {
+    this.checkSecurityLevel(null, body.prompt);
     try {
       const response = (await executeGrpcCall(
         this.aiService.GenerateText(
@@ -92,6 +111,7 @@ export class AiGatewayController implements OnModuleInit {
     @Req() req: any,
     @Body() body: { action: string; payload: any },
   ) {
+    this.checkSecurityLevel(body.payload);
     try {
       const response = (await executeGrpcCall(
         this.aiService.ExecuteAiFeature(
@@ -112,6 +132,202 @@ export class AiGatewayController implements OnModuleInit {
       this.logger.error(`ExecuteAiFeature failed: ${e.message}`);
       if (e.status) throw e;
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    }
+  }
+
+  @Post('rewrite')
+  @UseGuards(JwtAuthGuard)
+  async rewriteText(
+    @Req() req: any,
+    @Body() body: { text: string; tone?: string },
+  ) {
+    if (!body.text?.trim()) {
+      return { success: true, data: { text: '' } };
+    }
+    this.checkSecurityLevel(null, body.text);
+    const tone = body.tone || 'professional';
+    const prompt = `Bạn là trợ lý biên tập văn bản hành chính công vụ của Ban Tổ chức Tỉnh ủy. Hãy viết lại đoạn văn bản sau theo giọng điệu ${tone}, chuẩn mực, súc tích, mạch lạc và không thay đổi ý nghĩa gốc:\n\n"${body.text}"\n\nChỉ trả về nội dung đã viết lại, không thêm bất kỳ lời chào, ghi chú hay markdown fence.`;
+
+    try {
+      const response = (await executeGrpcCall(
+        this.aiService.GenerateText(
+          {
+            prompt,
+            userId: req.user?.id || 0,
+          },
+          this.getGrpcMetadata(req),
+        ),
+        12000,
+        'AI Rewrite',
+      )) as any;
+      const parsed = this.safeParseJson(response.result);
+      const resultText =
+        typeof parsed === 'string'
+          ? parsed
+          : parsed?.result || parsed?.text || body.text;
+      return { success: true, data: { text: resultText } };
+    } catch (e: any) {
+      this.logger.warn(`AI Rewrite fallback triggered: ${e.message}`);
+      return {
+        success: true,
+        data: {
+          text: `[Hiệu đính]: ${body.text.trim()}`,
+          _isFallback: true,
+        },
+      };
+    }
+  }
+
+  @Post('translate')
+  @UseGuards(JwtAuthGuard)
+  async translateText(
+    @Req() req: any,
+    @Body() body: { text: string; targetLanguage: string },
+  ) {
+    if (!body.text?.trim()) {
+      return { success: true, data: { translatedText: '' } };
+    }
+    this.checkSecurityLevel(null, body.text);
+    const lang = body.targetLanguage || 'English';
+    const prompt = `Bạn là trợ lý dịch thuật công vụ. Hãy dịch chính xác đoạn văn bản sau sang ngôn ngữ ${lang}:\n\n"${body.text}"\n\nChỉ trả về bản dịch, không giải thích hay thêm định dạng markdown.`;
+
+    try {
+      const response = (await executeGrpcCall(
+        this.aiService.GenerateText(
+          {
+            prompt,
+            userId: req.user?.id || 0,
+          },
+          this.getGrpcMetadata(req),
+        ),
+        12000,
+        'AI Translate',
+      )) as any;
+      const parsed = this.safeParseJson(response.result);
+      const translatedText =
+        typeof parsed === 'string'
+          ? parsed
+          : parsed?.result || parsed?.translatedText || body.text;
+      return { success: true, data: { translatedText } };
+    } catch (e: any) {
+      this.logger.warn(`AI Translate fallback triggered: ${e.message}`);
+      return {
+        success: true,
+        data: {
+          translatedText: `[Bản dịch (${lang})]: ${body.text.trim()}`,
+          _isFallback: true,
+        },
+      };
+    }
+  }
+
+  @Post('summarize')
+  @UseGuards(JwtAuthGuard)
+  async summarizeText(
+    @Req() req: any,
+    @Body() body: { text: string; maxSentences?: number },
+  ) {
+    if (!body.text?.trim()) {
+      return { success: true, data: { summary: '' } };
+    }
+    this.checkSecurityLevel(null, body.text);
+    const maxSentences = body.maxSentences || 3;
+    const prompt = `Bạn là trợ lý tóm lược văn kiện công vụ. Hãy tóm tắt văn bản sau thành tối đa ${maxSentences} câu trọng tâm nhất:\n\n"${body.text}"\n\nChỉ trả về các câu tóm tắt ngắn gọn.`;
+
+    try {
+      const response = (await executeGrpcCall(
+        this.aiService.GenerateText(
+          {
+            prompt,
+            userId: req.user?.id || 0,
+          },
+          this.getGrpcMetadata(req),
+        ),
+        12000,
+        'AI Summarize',
+      )) as any;
+      const parsed = this.safeParseJson(response.result);
+      const summary =
+        typeof parsed === 'string'
+          ? parsed
+          : parsed?.result || parsed?.summary || body.text;
+      return { success: true, data: { summary } };
+    } catch (e: any) {
+      this.logger.warn(`AI Summarize fallback triggered: ${e.message}`);
+      const cleanText = body.text.replace(/<[^>]*>/g, '');
+      const sentences = cleanText
+        .split(/[.!?]+/)
+        .filter((s) => s.trim().length > 0);
+      const summary = sentences.slice(0, maxSentences).join('. ') + '.';
+      return {
+        success: true,
+        data: {
+          summary: summary || body.text.slice(0, 200),
+          _isFallback: true,
+        },
+      };
+    }
+  }
+
+  @Post('seo-generate')
+  @UseGuards(JwtAuthGuard)
+  async generateSeo(
+    @Req() req: any,
+    @Body() body: { pageTitle: string; content: string },
+  ) {
+    const pageTitle = body.pageTitle || 'Trang thông tin';
+    const content = body.content || '';
+    this.checkSecurityLevel(null, `${pageTitle} ${content}`);
+    const prompt = `Dựa trên tiêu đề trang "${pageTitle}" và nội dung sau:\n"${content.slice(
+      0,
+      1000,
+    )}"\n\nHãy tạo metadata SEO dạng JSON: {"title": "Tiêu đề SEO", "description": "Mô tả SEO", "keywords": "từ khóa 1, từ khóa 2"}. Chỉ trả về JSON không bọc markdown fence.`;
+
+    try {
+      const response = (await executeGrpcCall(
+        this.aiService.GenerateText(
+          {
+            prompt,
+            userId: req.user?.id || 0,
+          },
+          this.getGrpcMetadata(req),
+        ),
+        12000,
+        'AI SEO Generate',
+      )) as any;
+      let seo = this.safeParseJson(response.result);
+      if (typeof seo === 'string') {
+        try {
+          const cleanJson = seo
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
+          seo = JSON.parse(cleanJson);
+        } catch {
+          seo = null;
+        }
+      }
+      if (!seo?.title) {
+        seo = {
+          title: `${pageTitle} - Ban Tổ chức Tỉnh ủy Đắk Lắk`,
+          description: content.slice(0, 150).replace(/<[^>]*>/g, ''),
+          keywords: `${pageTitle}, ban to chuc tinh uy, dak lak, cong tac can bo`,
+        };
+      }
+      return { success: true, data: { seo } };
+    } catch (e: any) {
+      this.logger.warn(`AI SEO fallback triggered: ${e.message}`);
+      return {
+        success: true,
+        data: {
+          seo: {
+            title: `${pageTitle} - Ban Tổ chức Tỉnh ủy Đắk Lắk`,
+            description: content.slice(0, 150).replace(/<[^>]*>/g, ''),
+            keywords: `${pageTitle}, ban to chuc tinh uy, dak lak, cong tac can bo`,
+          },
+          _isFallback: true,
+        },
+      };
     }
   }
 

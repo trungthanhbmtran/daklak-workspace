@@ -8,8 +8,9 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
+  GatewayTimeoutException,
 } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
+import { executeGrpcCall } from '../../core/utils/grpc-call.util';
 import { MICROSERVICES } from '../../core/constants/services';
 import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 import { clientIp } from '../../core/client-ip';
@@ -20,6 +21,9 @@ import { normalizeTask } from '../../common/utils/language-normalization.util';
 @Injectable()
 export class TasksService implements OnModuleInit {
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
+    if (e instanceof GatewayTimeoutException || e?.name === 'GatewayTimeoutException' || e?.status === 504) {
+      throw e;
+    }
     const code = e?.code;
     const message = e?.details || e?.message || defaultMsg;
     if (code === 16) throw new UnauthorizedException(message);
@@ -107,8 +111,10 @@ export class TasksService implements OnModuleInit {
     // Chỉ fetch từ user-service khi cache trống hoặc hết hạn TTL 10 phút
     if (this.userCacheMap.size === 0 || now > this.userCacheExpiresAt) {
       try {
-        const usersRes: any = await firstValueFrom(
+        const usersRes: any = await executeGrpcCall(
           this.userService.ListUsers({ take: 500 }),
+          8000,
+          'TasksService.populateUsers',
         );
         const users = usersRes?.data || [];
         const newMap = new Map<string, any>();
@@ -254,8 +260,10 @@ export class TasksService implements OnModuleInit {
       } catch {}
     }
 
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.CreateTask(body, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.CreateTask',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -264,32 +272,36 @@ export class TasksService implements OnModuleInit {
   async getSupervisorByScope(req: any, query: { departmentId?: number; domainId?: number; assigneeCode?: string }) {
     let targetUnitId = query.departmentId;
     const targetDomainId = query.domainId || 0;
+    const assigneeCode = query.assigneeCode && query.assigneeCode !== 'UNASSIGNED' ? query.assigneeCode : undefined;
 
-    if (!targetUnitId && query.assigneeCode && query.assigneeCode !== 'UNASSIGNED') {
-      const u = this.userCacheMap.get(query.assigneeCode);
+    if (!targetUnitId && assigneeCode) {
+      const u = this.userCacheMap.get(assigneeCode);
       if (u?.departmentId) {
         targetUnitId = u.departmentId;
       }
     }
 
-    if (!targetUnitId && !targetDomainId) {
+    if (!targetUnitId && !targetDomainId && !assigneeCode) {
       return { success: true, data: null };
     }
 
     try {
-      const res: any = await firstValueFrom(
+      const res: any = await executeGrpcCall(
         this.userService.GetEmployeesByScope(
           {
             domain_id: targetDomainId,
             monitored_unit_id: targetUnitId || 0,
+            assignee_code: assigneeCode || '',
           },
           this.getGrpcMetadata(req),
         ),
+        8000,
+        'TasksService.GetEmployeesByScope',
       );
       const codes: string[] = res?.employee_codes || res?.employeeCodes || [];
       if (codes.length > 0) {
         const supervisorCode = codes[0];
-        if (this.userCacheMap.size === 0) {
+        if (this.userCacheMap.size === 0 || !this.userCacheMap.has(supervisorCode)) {
           await this.populateUsers([{ supervisorCode }]);
         }
         const u = this.userCacheMap.get(supervisorCode);
@@ -300,7 +312,9 @@ export class TasksService implements OnModuleInit {
             supervisorName: u ? u.fullName || u.username : supervisorCode,
             supervisorJobTitle: u?.jobTitleName || undefined,
             supervisorUnitName: u?.unitName || undefined,
-            reason: targetUnitId
+            reason: assigneeCode
+              ? 'Lãnh đạo thẩm định theo VTVL tuyến báo cáo trực tiếp & phân công quản lý'
+              : targetUnitId
               ? 'Lãnh đạo được phân công theo dõi đơn vị trong định biên tổ chức'
               : 'Lãnh đạo được phân công theo dõi lĩnh vực trong định biên tổ chức',
             allMatchedCodes: codes,
@@ -380,8 +394,10 @@ export class TasksService implements OnModuleInit {
     if (viewMode && viewMode !== 'undefined') requestPayload.viewMode = viewMode;
     if (referenceDate && referenceDate !== 'undefined') requestPayload.referenceDate = referenceDate;
 
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.ListTasks',
     ).catch((e) => this.handleRpcError(e));
 
     if (response?.data) {
@@ -448,7 +464,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async update(req: any, id: number, body: any) {
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.UpdateTask(
         {
           id,
@@ -462,6 +478,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.UpdateTask',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -472,7 +490,7 @@ export class TasksService implements OnModuleInit {
       body.dueDate = new Date(body.dueDate).toISOString();
     }
     const user = req.user;
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.ExtendTask(
         {
           id,
@@ -485,6 +503,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.ExtendTask',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -512,7 +532,7 @@ export class TasksService implements OnModuleInit {
     }
 
     const user = req.user;
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.UpdateTaskStatus(
         {
           id,
@@ -528,6 +548,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.UpdateTaskStatus',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -540,7 +562,7 @@ export class TasksService implements OnModuleInit {
     message?: string,
   ) {
     const user = req.user;
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.RespondTask(
         {
           taskId: id,
@@ -554,6 +576,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.RespondTask',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -581,7 +605,7 @@ export class TasksService implements OnModuleInit {
     const user = req.user;
     const assignerCode = user?.employeeCode;
 
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.AssignTask(
         {
           id,
@@ -595,6 +619,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.AssignTask',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
@@ -605,7 +631,7 @@ export class TasksService implements OnModuleInit {
     const assignerCode = user?.employeeCode;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
-    const taskResponse: any = await firstValueFrom(
+    const taskResponse: any = await executeGrpcCall(
       this.taskService.GetTask(
         {
           id: id,
@@ -619,6 +645,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.GetTask',
     ).catch((e) => this.handleRpcError(e));
     if (!taskResponse) {
       throw new Error('Nhiệm vụ không tồn tại');
@@ -630,7 +658,7 @@ export class TasksService implements OnModuleInit {
       ...(body.initialSteps ? { initialSteps: body.initialSteps } : {}),
     };
 
-    const breakdownResponse: any = await firstValueFrom(
+    const breakdownResponse: any = await executeGrpcCall(
       this.taskService.BreakdownTask(
         {
           ...body,
@@ -644,6 +672,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.BreakdownTask',
     ).catch((e) => this.handleRpcError(e));
     if (breakdownResponse?.data) this.translateTaskData(breakdownResponse.data);
     return breakdownResponse;
@@ -659,7 +689,7 @@ export class TasksService implements OnModuleInit {
     const requesterCode = user?.employeeCode;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
 
-    const taskResponse: any = await firstValueFrom(
+    const taskResponse: any = await executeGrpcCall(
       this.taskService.GetTask(
         {
           id: id,
@@ -673,10 +703,12 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.GetTask',
     ).catch((e) => this.handleRpcError(e));
     if (!taskResponse) throw new Error('Task not found.');
 
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.RequestCoordination(
         {
           taskId: id,
@@ -689,6 +721,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.RequestCoordination',
     ).catch((e) => this.handleRpcError(e));
   }
 
@@ -700,7 +734,7 @@ export class TasksService implements OnModuleInit {
       user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
       user?.permissionsFlatten?.includes('TASK.*');
 
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.GetSubTasks(
         {
           taskId: id,
@@ -711,6 +745,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.GetSubTasks',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       if (Array.isArray(response.data)) {
@@ -725,11 +761,13 @@ export class TasksService implements OnModuleInit {
   }
 
   async getTaskHistory(req: any, id: number) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.GetTaskHistory(
         { taskId: id },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.GetTaskHistory',
     ).catch((e) => this.handleRpcError(e));
   }
 
@@ -748,7 +786,7 @@ export class TasksService implements OnModuleInit {
       perms.includes('TASK.ASSIGN') ||
       perms.includes('TASK.*');
 
-    const response = (await firstValueFrom(
+    const response = (await executeGrpcCall(
       this.taskService.GetTask(
         {
           id,
@@ -761,6 +799,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.GetTask',
     ).catch((e) => this.handleRpcError(e))) as any;
     const target = response?.data ? response.data : response;
     if (target) this.translateTaskData(target);
@@ -768,8 +808,10 @@ export class TasksService implements OnModuleInit {
   }
 
   async listSteps(req: any, id: number) {
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.ListSteps({ taskId: id }, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.ListSteps',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       if (Array.isArray(response.data)) {
@@ -788,11 +830,13 @@ export class TasksService implements OnModuleInit {
       delete body.assignee;
     }
 
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.CreateStep(
         { taskId: id, ...body },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.CreateStep',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       await this.populateUsers([response.data]);
@@ -814,7 +858,7 @@ export class TasksService implements OnModuleInit {
       delete body.evidenceData;
     }
 
-    const response: any = await firstValueFrom(
+    const response: any = await executeGrpcCall(
       this.taskService.UpdateStep(
         {
           taskId: id,
@@ -824,6 +868,8 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.UpdateStep',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       await this.populateUsers([response.data]);
@@ -832,17 +878,19 @@ export class TasksService implements OnModuleInit {
   }
 
   async deleteStep(req: any, id: number, stepId: number) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.DeleteStep(
         { taskId: id, stepId },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.DeleteStep',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async recordAttendance(req: any, id: number) {
     const user = req.user;
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.RecordAttendance(
         {
           taskId: id,
@@ -853,12 +901,14 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.RecordAttendance',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async getAttendanceStats(req: any, id: number) {
     const user = req.user;
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.GetAttendanceStats(
         {
           taskId: id,
@@ -869,29 +919,37 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.GetAttendanceStats',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async getKpiSystemVariables(req: any) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.GetKpiSystemVariables({}, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.GetKpiSystemVariables',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async getGlobalKpiSettings(req: any) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.GetGlobalKpiSettings({}, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.GetGlobalKpiSettings',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async saveGlobalKpiSettings(req: any, body: any) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.SaveGlobalKpiSettings(body, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.SaveGlobalKpiSettings',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async previewGlobalKpiSettings(req: any, body: any) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.PreviewGlobalKpiSettings(
         {
           settingsJson: JSON.stringify(body.settings || {}),
@@ -904,12 +962,16 @@ export class TasksService implements OnModuleInit {
         },
         this.getGrpcMetadata(req),
       ),
+      10000,
+      'TasksService.PreviewGlobalKpiSettings',
     ).catch((e) => this.handleRpcError(e));
   }
 
   async getGlobalKpiSettingVersions(req: any) {
-    return firstValueFrom(
+    return executeGrpcCall(
       this.taskService.ListGlobalKpiSettingVersions({}, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.ListGlobalKpiSettingVersions',
     ).catch((e) => this.handleRpcError(e));
   }
 }

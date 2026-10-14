@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import {
   useGetReportDefinitions,
-  useAssignReport,
   useGetReportDashboardStats,
 } from '../../api';
 import {
@@ -13,22 +12,8 @@ import {
   CardDescription,
 } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '../../../../components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../../components/ui/select';
+import { ReportShareModal } from './ReportShareModal';
 import { Input } from '../../../../components/ui/input';
-import { Label } from '../../../../components/ui/label';
 import {
   Tabs,
   TabsContent,
@@ -77,15 +62,13 @@ export const ReportWorkspace = () => {
     refetch: refetchStats,
     isRefetching: isRefetchingStats,
   } = useGetReportDashboardStats();
-  const assignMutation = useAssignReport();
 
   const [sharingReport, setSharingReport] = useState<number | null>(null);
-  const [assigneeType, setAssigneeType] = useState('UNIT');
-  const [assigneeId, setAssigneeId] = useState('2');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
 
   const allReports = reports || [];
+  const currentSharingReport = allReports.find((r) => r.id === sharingReport) || null;
   const filteredReports = allReports.filter((r) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -246,7 +229,16 @@ export const ReportWorkspace = () => {
               }`}
             >
               {viewMode === 'list' ? (
-                <div className="flex items-center justify-end gap-3 w-64 shrink-0">
+                <div className="flex items-center justify-end gap-2 w-72 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50"
+                    title="Chia sẻ phân quyền"
+                    onClick={() => setSharingReport(report.id)}
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -536,101 +528,16 @@ export const ReportWorkspace = () => {
         </div>
       </div>
 
-      {/* Share Dialog */}
-      <Dialog
+      {/* Enterprise Report Share Modal */}
+      <ReportShareModal
+        report={currentSharingReport}
         open={sharingReport !== null}
         onOpenChange={(open) => {
           if (!open) {
             setSharingReport(null);
-            setAssigneeId('');
           }
         }}
-      >
-        <DialogContent className="sm:max-w-md border-0 shadow-2xl rounded-2xl overflow-hidden">
-          <DialogHeader className="bg-slate-50 px-6 py-4 border-b border-slate-100">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-800">
-              <Share2 className="w-5 h-5 text-indigo-600" />
-              Chia sẻ Báo cáo
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-5 p-6">
-            <div className="space-y-2">
-              <Label
-                htmlFor="assigneeType"
-                className="text-slate-700 font-medium"
-              >
-                Đối tượng chia sẻ
-              </Label>
-              <Select value={assigneeType} onValueChange={setAssigneeType}>
-                <SelectTrigger id="assigneeType" className="w-full">
-                  <SelectValue placeholder="Chọn loại đối tượng" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="UNIT">Đơn vị (Phòng ban/Tổ chức)</SelectItem>
-                  <SelectItem value="USER">Cá nhân (Cán bộ nhân sự)</SelectItem>
-                  <SelectItem value="ROLE">Vai trò (Role/Nhóm quyền)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="assigneeId" className="text-slate-700 font-medium">
-                Mã phòng ban / Cán bộ (ID)
-              </Label>
-              <Input
-                id="assigneeId"
-                placeholder="Ví dụ: 2 (Phòng QL Khoa học) hoặc NV_001..."
-                value={assigneeId}
-                onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-3">
-              <div className="mt-0.5 text-blue-600">
-                <Activity className="w-4 h-4" />
-              </div>
-              <p className="text-xs text-blue-800 leading-relaxed">
-                Người dùng/Đơn vị được chia sẻ sẽ có quyền{' '}
-                <strong>Xem (View)</strong> báo cáo này. Họ có thể xem snapshot và
-                kết quả phân tích nhưng không thể xóa thiết kế gốc.
-              </p>
-            </div>
-          </div>
-          <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 sm:justify-between">
-            <Button
-              variant="outline"
-              className="border-slate-200"
-              onClick={() => {
-                setSharingReport(null);
-                setAssigneeId('');
-              }}
-            >
-              Hủy bỏ
-            </Button>
-            <Button
-              disabled={assignMutation.isPending || !assigneeId}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={async () => {
-                if (!sharingReport) return;
-                try {
-                  await assignMutation.mutateAsync({
-                    templateId: sharingReport,
-                    assigneeType,
-                    assigneeId,
-                    permissions: 'VIEW',
-                  });
-                  alert('Chia sẻ báo cáo thành công!');
-                  setSharingReport(null);
-                  setAssigneeId('');
-                } catch {
-                  alert('Có lỗi xảy ra khi gán báo cáo.');
-                }
-              }}
-            >
-              {assignMutation.isPending ? 'Đang xử lý...' : 'Xác nhận Chia sẻ'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      />
     </div>
   );
 };

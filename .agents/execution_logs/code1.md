@@ -1,5 +1,121 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Phê Duyệt Việc Phát Sinh Cần Lãnh Đạo Phụ Trách Thẩm Định Để Tính KPI & Loại Bỏ Hardcode Quy Trình, Ủy Quyền Cho workflow-service
+
+### 1. Phạm vi & Mục tiêu
+- **Ràng buộc Việc phát sinh (Incidental Task)**:
+  - Khi khởi tạo nhiệm vụ phát sinh ngoài kế hoạch (`taskType === 'UNPLANNED'` hoặc `isIncidental === true`):
+    - Trạng thái ban đầu bắt buộc là `PENDING_APPROVAL` (Chờ lãnh đạo duyệt).
+    - Tạm khóa tính điểm KPI: `metadata.isKpiTarget = false`, cờ `metadata.incidentalStatus = 'PENDING_APPROVAL'`, `metadata.isKpiTargetPendingApproval = true`.
+    - Phân công Lãnh đạo thẩm định `supervisorCode` làm `APPROVER` (đã nhận diện tự động theo VTVL tuyến báo cáo trực tiếp).
+    - Bắn notification thông báo tới Lãnh đạo thẩm định phụ trách.
+  - Xử lý hành động Phê duyệt / Từ chối việc phát sinh:
+    - Action `APPROVE_INCIDENTAL`: Chỉ Lãnh đạo phụ trách (`supervisorCode`), Lãnh đạo đơn vị (`isSupervisor || isDeptLeader`), hoặc Admin (`TASK:MANAGE`) mới có quyền duyệt.
+      - Chuyển `status` sang `IN_PROGRESS` (hoặc `PENDING_ACCEPTANCE`).
+      - Kích hoạt tính điểm KPI: `metadata.isKpiTarget = true`, `metadata.incidentalStatus = 'APPROVED'`, `approvedIncidentalBy = actor`, `approvedIncidentalAt = now`.
+      - Ghi nhận lịch sử kiểm toán: "Lãnh đạo phê duyệt việc phát sinh (Chính thức tính điểm KPI)".
+    - Action `REJECT_INCIDENTAL`: Yêu cầu bắt buộc có lý do từ chối `rejectReason`.
+      - Chuyển `status` sang `REJECTED`, `isCompleted = false`.
+      - `metadata.isKpiTarget = false`, `metadata.incidentalStatus = 'REJECTED'`. Hoàn toàn không được tính điểm KPI.
+      - Ghi nhận lịch sử kiểm toán: "Lãnh đạo từ chối duyệt việc phát sinh".
+- **Ủy quyền toàn diện quy trình cho `workflow-service` (Loại bỏ dummy hardcode)**:
+  - Xóa bỏ hoàn toàn phiên bản dummy và các giá trị hardcode (`return null`, `return { allowed: true }`) trong `TaskWorkflowService`.
+  - `resolveWorkflowCode`: Kết nối gRPC `WorkflowService.ResolveBinding` với `processTypeCode = 'BTCTU_TASK_MANAGEMENT'`, trigger `TASK_INCIDENTAL_CREATED` / `TASK_CREATED`, fallback định nghĩa `WF_BTCTU_QUAN_LY_CONG_VIEC`.
+  - `getLocalInitialNodeId` & `getCurrentNodeData`: Đọc node từ `getWorkflowDefinition` thông qua gRPC `FindOneWorkflow`.
+  - `validateAndTransition`: Gọi gRPC `WorkflowService.ValidateAction` và kiểm tra thẩm quyền nghiệp vụ theo PBAC.
+
+### 2. Danh sách File Thay Đổi
+- `apps/hrm-service/src/modules/task-workflow/task-workflow.service.ts`:
+  - Triển khai `resolveWorkflowCode` gọi `WorkflowService.ResolveBinding`.
+  - Triển khai `initWorkflow` gọi `WorkflowService.StartByProcessType`.
+  - Triển khai `getLocalInitialNodeId` & `getCurrentNodeData` lấy BPMN node từ gRPC `FindOneWorkflow`.
+  - Triển khai `validateAndTransition` gọi gRPC `WorkflowService.ValidateAction`, xử lý bảo mật cho `APPROVE_INCIDENTAL` và `REJECT_INCIDENTAL`.
+- `apps/hrm-service/src/modules/task-shared/task-shared.service.ts`:
+  - `computeAllowedActions`: Bổ sung inject `APPROVE_INCIDENTAL` và `REJECT_INCIDENTAL` cho Lãnh đạo khi task phát sinh ở `PENDING_APPROVAL`; chặn các hành động thực hiện việc khi chưa được duyệt.
+- `apps/hrm-service/src/modules/tasks/tasks.service.ts`:
+  - `executeCreateTaskTransaction`: Khởi tạo việc phát sinh ở `PENDING_APPROVAL`, khóa `isKpiTarget = false`, ghi lịch sử chi tiết.
+  - `handlePostCreateWorkflow`: Gửi thông báo đến Lãnh đạo thẩm định phụ trách khi có việc phát sinh cần duyệt.
+  - `recordTaskStatusHistory`: Ghi nhận lịch sử khi Lãnh đạo duyệt/từ chối việc phát sinh.
+  - `updateTaskStatus`: Xử lý kích hoạt KPI khi duyệt `APPROVE_INCIDENTAL` và khóa KPI khi `REJECT_INCIDENTAL`.
+- `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`:
+  - Thêm lựa chọn "⚡ Việc phát sinh" (`UNPLANNED`) vào nhóm Tính chất nhiệm vụ, hiển thị thông báo quy định bắt buộc Lãnh đạo phụ trách duyệt mới tính KPI.
+  - Cập nhật payload metadata gửi cờ `isIncidental` và tạm khóa `isKpiTarget`.
+- `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`:
+  - Thêm Box phê duyệt việc phát sinh nổi bật dành cho Lãnh đạo phụ trách kèm 2 nút "Phê duyệt đồng ý (Tính điểm KPI)" và "Từ chối việc phát sinh".
+  - Thêm Badge "⚡ Việc phát sinh" ở header công việc.
+- `apps/hrm-service/src/modules/tasks/tasks.service.spec.ts`:
+  - Thêm 3 test cases Nhóm 9 kiểm chứng toàn diện quy trình khởi tạo, phê duyệt và từ chối việc phát sinh.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/hrm-service` unit tests: `npx jest src/modules/tasks/tasks.service.spec.ts` -> **27/27 tests PASSED (100%)**.
+- `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- Vệ sinh mã nguồn: Quét sạch 100% `console.log`, không import dư thừa, file mã hóa UTF-8 không BOM.
+
+---
+
+## [2026-10-14] Tự Động Hóa Lãnh Đạo Thẩm Định Theo VTVL, Điểm KPI Chuẩn Hóa & Phân Công Người Phụ Trách Bước Thực Hiện
+
+### 1. Phạm vi & Mục tiêu
+- Nâng cấp chức năng Giao việc mới tại `http://113.184.220.82/admin/services/hrm/work-plans/tasks` theo 3 yêu cầu cốt lõi:
+  1. Cột Lãnh đạo thẩm định & phê duyệt (`supervisorCode`) tự động lấy từ hệ thống ứng với phạm vi quyền hạn và vị trí việc làm (VTVL) của nhân sự nhận việc (`JobTitle.reportsToJobTitleId` và `StaffingSlot.monitoredUnits`).
+  2. Tự động tính điểm KPI cơ sở (`baseScore`), hệ số độ khó (`difficultyK`), trọng số (`weight`), tự động bật `isKpiTarget` và tự động gợi ý mã nhóm công thức VTVL (`formulaDomainCode`) theo phòng ban.
+  3. Checklist các bước thực hiện (`initialSteps`) hỗ trợ gắn người phụ trách cụ thể: Bản thân tôi phụ trách (`user.employeeCode`), Người chủ trì công việc (`assignee`), hoặc cán bộ khác trong danh sách nhân viên.
+- Tuân thủ 7 Bộ Ràng Buộc Kỹ Thuật (Anti-AI hallucination, Service Data Sovereignty, Least Data, zero console.log, UTF-8 không BOM).
+
+### 2. Danh sách File Thay Đổi
+- `shared/protos/users/user.proto`: Bổ sung `optional string assignee_code = 3;` vào `GetEmployeesByScopeRequest`.
+- `apps/user-service/src/modules/users/users.controller.ts`: Nhận `assignee_code` trong gRPC method `GetEmployeesByScope`.
+- `apps/user-service/src/modules/users/users.service.ts`: Nâng cấp `getEmployeesByScope` tra cứu VTVL tuyến báo cáo `JobTitle.reportsToJobTitleId` và đơn vị công tác để phân giải lãnh đạo thẩm định chuẩn xác.
+- `apps/api-gateway/src/modules/hrm/tasks.service.ts`: Truyền `assignee_code` sang `user-service` gRPC, giải trình lý do rõ nét theo VTVL tuyến báo cáo trực tiếp.
+- `apps/hrm-service/src/modules/tasks/tasks.service.ts`:
+  - `resolveSupervisorByScope`: Truyền `assignee_code` vào `GetEmployeesByScope`.
+  - `executeCreateTaskTransaction`: Lưu trường `assigneeCode` cho từng `TaskStep` trong `initialSteps`.
+  - `createStep`: Tự động fallback người tạo phụ trách nếu không truyền `assigneeCode`.
+  - `listSteps`: Bổ sung điều kiện `isDeleted: false`.
+- `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`:
+  - Tự động lấy và chọn Lãnh đạo thẩm định khi chọn `assignee`, hiển thị thẻ căn cứ VTVL & Thẩm quyền PBAC chuyên nghiệp (kèm chức danh và đơn vị).
+  - Tự động bật và tính điểm KPI/Độ khó theo mức độ ưu tiên, tự động gợi ý `formulaDomainCode` theo phòng ban.
+  - Tái cấu trúc `initialSteps` thành mảng đối tượng `{ title, assigneeCode, assigneeName, baseScore }`, cho phép chọn Bản thân tôi phụ trách, Người chủ trì hoặc cán bộ khác.
+- `apps/admin_khcn/features/hrm/components/tasks/create-step-dialog.tsx`:
+  - Bổ sung tùy chọn phân công nhanh: Bản thân tôi phụ trách, Người chủ trì công việc và cán bộ khác.
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/user-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/hrm-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/hrm-service` unit tests: `npx jest tasks.service.spec.ts` -> **24/24 tests PASSED (100%)**.
+- Vệ sinh mã nguồn: Quét sạch 100% `console.log`, không import dư thừa, file chuẩn UTF-8 không BOM.
+
+---
+
+## [2026-10-14] Kiểm Thử Toàn Diện Chức Năng Quản Lý Công Việc Ban Tổ Chức Tỉnh Ủy (BTCTU) & Lập Bảng Rà Soát
+
+### 1. Phạm vi & Mục tiêu
+- Xây dựng và thực thi bộ kiểm thử tự động toàn diện (automated test suite) cho toàn bộ chức năng của hệ thống Quản lý Công việc Ban Tổ chức Tỉnh ủy Đắk Lắk (`hrm-service`, `workflow-service`, `api-gateway`).
+- Bao phủ đầy đủ 100% tất cả các trường hợp phần mềm có thể cung cấp theo các văn bản quy định: QĐ 01-QĐ/BTCTU, Hướng dẫn 05-HD/TU, QĐ 39-QĐ/TU, QĐ 348-QĐ/BTCTW, NĐ 85/2016/NĐ-CP và NĐ 63/2026/NĐ-CP.
+- Lập Bảng Rà Soát Tính Năng chi tiết đối chiếu hiện trạng mã nguồn, schema CSDL, DTO/gRPC contract, API controller và UI components.
+
+### 2. Danh mục Test Suites & Kết quả Kiểm chứng Thực tế
+- `src/modules/tasks/tasks.service.spec.ts`: 17 test cases bao phủ toàn bộ vòng đời công việc, phân loại nhiệm vụ, phân công đa tỷ lệ, phân rã cây hierarchy (TaskClosure), checklist steps, gia hạn dueDate, xử lý 3 mức lỗi thẩm định (5%/15%/35%), phê duyệt chấm điểm 4 thành tố, điểm danh họp và xóa an toàn.
+- `src/modules/tasks/tasks.controller.spec.ts`: 8 test cases bao phủ tiêm ngữ cảnh PBAC (`currentEmployeeCode`, `currentUserId`, `currentUserDept`, `currentUserPermissions`, `isAdmin`), phân phối RPC methods và xử lý sự kiện liên service `WORKFLOW_UPDATED`.
+- `src/modules/task-kpi/kpi-calculator.engine.spec.ts`: 11 test cases bao phủ công thức tính điểm KPI mảng việc BTCTU (`DOM_THAM_DINH`, `DOM_VAN_THU`, `DOM_IT_ATTT`), trừ phạt trễ hạn theo ngày và kiểm tra lỗi cú pháp.
+- `src/modules/tasks/tasks-cron.spec.ts`: 3 test cases quét nhiệm vụ trễ hạn, cảnh báo DEADLINE/OVERDUE, tối ưu hóa O(1) batch query tránh N+1.
+- Toàn bộ các test suite khác trong package: `kpi-evaluations.service.spec.ts`, `kpi-evaluations.controller.spec.ts`, `master-plans.service.spec.ts`, `master-plans.controller.spec.ts`.
+- **Kết quả:** `Test Suites: 8 passed, 8 total` | `Tests: 54 passed, 54 total` | `Time: 11.488 s`.
+- **Typecheck:** `npx tsc --noEmit` -> Exit code 0, 0 errors.
+
+### 3. File Thay đổi
+- `apps/hrm-service/src/modules/tasks/tasks.service.spec.ts`
+- `apps/hrm-service/src/modules/tasks/tasks.controller.spec.ts`
+- `apps/hrm-service/src/modules/task-kpi/kpi-calculator.engine.spec.ts`
+- `apps/hrm-service/src/modules/tasks/tasks-cron.spec.ts`
+- `.agents/current_plan.md`
+- `.agents/execution_logs/code1.md`
+
+---
+
 ## [2026-10-13] Kiểm thử Toàn diện 12 Trường hợp Quản lý Công việc Ban Tổ chức Tỉnh ủy (BTCTU)
 
 ### 1. Phạm vi & Mục tiêu

@@ -96,7 +96,26 @@ export class TemplatesService {
 
   async assignReport(templateId: number, assigneeType: string, assigneeId: string, permissions: string = 'VIEW') {
     // Check if template exists
-    const template = await this.prisma.reportTemplate.findUnique({ where: { id: templateId } });
+    let template = await this.prisma.reportTemplate.findUnique({ where: { id: templateId } });
+    if (!template) {
+      // Check if it exists as ReportDefinition
+      const def = await this.prisma.reportDefinition.findUnique({ where: { id: templateId } });
+      if (def) {
+        template = await this.prisma.reportTemplate.upsert({
+          where: { id: templateId },
+          create: {
+            id: templateId,
+            title: def.name,
+            description: def.description,
+            layout: {},
+          },
+          update: {
+            title: def.name,
+            description: def.description,
+          },
+        });
+      }
+    }
     if (!template) throw new RpcException({ code: 5, message: 'Template not found' });
     
     // Upsert assignment
@@ -115,6 +134,23 @@ export class TemplatesService {
         assigneeId,
         permissions,
       }
+    });
+  }
+
+  async getReportAssignments(templateId: number) {
+    return this.prisma.reportAssignment.findMany({
+      where: { templateId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async unassignReport(templateId: number, assigneeType: string, assigneeId: string) {
+    return this.prisma.reportAssignment.deleteMany({
+      where: {
+        templateId,
+        assigneeType,
+        assigneeId,
+      },
     });
   }
 

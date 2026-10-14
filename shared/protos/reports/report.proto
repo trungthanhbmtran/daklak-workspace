@@ -37,6 +37,8 @@ service ReportService {
   // Assignment methods
   rpc AssignReport (GenericRequest) returns (GenericResponse);
   rpc GetMyAssignedReports (GenericRequest) returns (GenericResponse);
+  rpc GetReportAssignments (GenericRequest) returns (GenericResponse);
+  rpc UnassignReport (GenericRequest) returns (GenericResponse);
 }
 
 message GenericRequest {

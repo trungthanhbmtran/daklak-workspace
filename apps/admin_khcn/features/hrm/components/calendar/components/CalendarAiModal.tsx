@@ -39,6 +39,15 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
+
+    // CỬA ẢI BẢO MẬT: Chặn nội dung mật theo NĐ 63/2026/NĐ-CP & QĐ 348-QĐ/BTCTW
+    if (/mật|tối mật|tuyệt mật|chính trị nội bộ|bảo vệ chính trị|hồ sơ 2c/i.test(prompt)) {
+      toast.error(
+        'Nội dung thuộc danh mục Bí mật Nhà nước theo quy định (NĐ 63/2026/NĐ-CP & QĐ 348-QĐ/BTCTW). Tính năng AI hỗ trợ bị khóa để đảm bảo an toàn thông tin.',
+      );
+      return;
+    }
+
     setIsGenerating(true);
     setGeneratedResult(null);
     
@@ -70,7 +79,8 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
       ).join('\n');
 
       const res = await aiApi.requestAiExecution('CALENDAR_SCHEDULE_REUSE', { 
-        historyContext, 
+        historyContext,
+        historyEvents: currentEvents, 
         userInput: prompt || "Giữ nguyên lịch cũ, chỉ điều chỉnh ngày cho phù hợp với tuần mới." 
       });
       if (res && res.jobId) {
@@ -148,7 +158,21 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
           )}
 
           {generatedResult && (
-            <div className="space-y-5 animate-in fade-in zoom-in-95 duration-500">
+            <div className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
+              {/* CẢNH BÁO HUMAN-IN-THE-LOOP */}
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-medium flex items-center gap-2.5 shadow-xs">
+                <span className="text-base shrink-0">⚠️</span>
+                <span><strong>Bản nháp đề xuất (Human-in-the-Loop):</strong> Vui lòng rà soát kỹ nội dung và thời gian sự kiện bên dưới trước khi bấm &quot;Thêm vào Lịch&quot;.</span>
+              </div>
+
+              {/* THÔNG BÁO DỰ PHÒNG NẾU CÓ */}
+              {(generatedResult.isFallback || generatedResult._isFallback) && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-xl text-xs text-blue-800 dark:text-blue-300 font-medium flex items-center gap-2 shadow-xs">
+                  <span className="text-base shrink-0">🛡️</span>
+                  <span>{generatedResult.fallbackNotice || "Lịch đã được tạo tự động bởi Giải thuật Quy tắc Dự phòng (Rule-based Fallback)."}</span>
+                </div>
+              )}
+
               <div className="p-3.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl text-sm text-emerald-800 dark:text-emerald-300 font-medium flex items-start gap-3 shadow-sm">
                 <Sparkles className="w-5 h-5 shrink-0 mt-0.5" />
                 {generatedResult.message}
@@ -161,8 +185,8 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
                       <div className="bg-violet-50 dark:bg-violet-900/30 p-2 rounded-lg group-hover:bg-violet-100 dark:group-hover:bg-violet-900/50 transition-colors">
                         <CalendarPlus className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
                       </div>
-                      <div className="flex flex-col pt-0.5">
-                        <p className="font-semibold text-[13px] text-foreground">{evt.title}</p>
+                      <div className="flex flex-col pt-0.5 min-w-0 flex-1">
+                        <p className="font-semibold text-[13px] text-foreground wrap-break-word">{evt.title}</p>
                         <p className="text-[12px] text-muted-foreground mt-1 font-medium">{evt.time}</p>
                       </div>
                     </div>

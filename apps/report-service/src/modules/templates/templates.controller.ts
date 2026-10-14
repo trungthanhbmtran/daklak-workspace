@@ -56,6 +56,24 @@ export class TemplatesController {
     return { success: true, data: JSON.stringify(res) };
   }
 
+  @GrpcMethod('ReportService', 'GetReportAssignments')
+  async getReportAssignments(data: { payload: string }) {
+    const body = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.templatesService.getReportAssignments(+body.templateId);
+    return { success: true, data: JSON.stringify(res) };
+  }
+
+  @GrpcMethod('ReportService', 'UnassignReport')
+  async unassignReport(data: { payload: string }) {
+    const body = data.payload ? JSON.parse(data.payload) : {};
+    const res = await this.templatesService.unassignReport(
+      +body.templateId,
+      body.assigneeType,
+      body.assigneeId,
+    );
+    return { success: true, data: JSON.stringify(res) };
+  }
+
   @GrpcMethod('ReportService', 'GetMyAssignedReports')
   async getMyAssignedReports(data: { userData: string }) {
     const userData = data.userData ? JSON.parse(data.userData) : {};

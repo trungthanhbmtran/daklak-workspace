@@ -71,6 +71,9 @@ export class AiController {
     prompt: string;
     systemPrompt?: string;
     userId?: number;
+    maskingMap?: Record<string, string>;
+    fallbackAction?: string;
+    fallbackPayload?: any;
   }) {
     this.logger.log(`Worker received AI task: ${data.jobId}`);
     try {
@@ -100,11 +103,75 @@ export class AiController {
         }
       }
 
+      // CỬA ẢI GIẢI MÃ ĐỊNH DANH (DE-MASKING): Phục hồi họ tên cán bộ thật từ mã token an danh
+      if (data.maskingMap && Object.keys(data.maskingMap).length > 0) {
+        parsedResult = this.deMaskResult(parsedResult, data.maskingMap);
+      }
+
+      // GẮN NHÃN BẢN NHÁP (HUMAN-IN-THE-LOOP):
+      // Đảm bảo AI chỉ đề xuất bản nháp để người có thẩm quyền phê duyệt
+      if (typeof parsedResult === 'object' && parsedResult !== null) {
+        if (!Array.isArray(parsedResult)) {
+          (parsedResult as any).isDraft = true;
+          (parsedResult as any).requiresHumanReview = true;
+        }
+      }
+
       await this.aiFeatureService.setJobCompleted(data.jobId, parsedResult);
       this.logger.log(`Worker completed AI task: ${data.jobId}`);
     } catch (err: any) {
+      this.logger.warn(
+        `Worker AI call failed for task ${data.jobId}: ${err.message}. Kiểm tra giải thuật dự phòng...`,
+      );
+
+      // MÔ HÌNH DỰ PHÒNG 2 LỚP (RULE-BASED FALLBACK):
+      if (data.fallbackAction) {
+        try {
+          const fallbackData = this.aiFeatureService.generateFallback(
+            data.fallbackAction,
+            data.fallbackPayload,
+          );
+          const fallbackResult = {
+            ...(typeof fallbackData === 'object' && !Array.isArray(fallbackData)
+              ? fallbackData
+              : { data: fallbackData }),
+            isDraft: true,
+            isFallback: true,
+            fallbackNotice:
+              'Kết quả được xử lý tự động bởi Giải thuật Quy tắc Dự phòng (Rule-based Fallback) do dịch vụ AI bận.',
+          };
+          await this.aiFeatureService.setJobCompleted(data.jobId, fallbackResult);
+          this.logger.log(`Worker served fallback for AI task: ${data.jobId}`);
+          return;
+        } catch (fallbackErr: any) {
+          this.logger.error(`Fallback failed: ${fallbackErr.message}`);
+        }
+      }
+
       this.logger.error(`Worker failed AI task: ${data.jobId}`, err);
       await this.aiFeatureService.setJobFailed(data.jobId, err.message);
     }
+  }
+
+  private deMaskResult(result: any, maskingMap: Record<string, string>): any {
+    if (!result || !maskingMap) return result;
+    if (typeof result === 'string') {
+      let text = result;
+      for (const [token, realVal] of Object.entries(maskingMap)) {
+        text = text.split(token).join(realVal);
+      }
+      return text;
+    }
+    if (Array.isArray(result)) {
+      return result.map((item) => this.deMaskResult(item, maskingMap));
+    }
+    if (typeof result === 'object' && result !== null) {
+      const updated: any = {};
+      for (const [key, val] of Object.entries(result)) {
+        updated[key] = this.deMaskResult(val, maskingMap);
+      }
+      return updated;
+    }
+    return result;
   }
 }
