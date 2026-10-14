@@ -446,6 +446,38 @@ export class TasksService {
         parsedMetadata = data.metadata;
       }
 
+      // Trích xuất danh sách phòng ban phối hợp (DEPT_xxx)
+      const rawCoassigneeCodes: string[] = Array.isArray(data.coassigneeCodes) ? data.coassigneeCodes : [];
+      const coordinatingDeptIds: number[] = [];
+      const cleanCoassigneeCodes: string[] = [];
+      for (const code of rawCoassigneeCodes) {
+        if (typeof code === 'string' && code.startsWith('DEPT_')) {
+          const dId = parseInt(code.replace('DEPT_', ''), 10);
+          if (!isNaN(dId) && dId > 0 && !coordinatingDeptIds.includes(dId)) {
+            coordinatingDeptIds.push(dId);
+          }
+        } else if (code) {
+          cleanCoassigneeCodes.push(code);
+        }
+      }
+      if (Array.isArray(parsedMetadata?.coordinatingDepartmentIds)) {
+        for (const dId of parsedMetadata.coordinatingDepartmentIds) {
+          const n = Number(dId);
+          if (!isNaN(n) && n > 0 && !coordinatingDeptIds.includes(n)) {
+            coordinatingDeptIds.push(n);
+          }
+        }
+      }
+      if (Array.isArray(data.coordinatingDepartmentIds)) {
+        for (const dId of data.coordinatingDepartmentIds) {
+          const n = Number(dId);
+          if (!isNaN(n) && n > 0 && !coordinatingDeptIds.includes(n)) {
+            coordinatingDeptIds.push(n);
+          }
+        }
+      }
+      data.coassigneeCodes = cleanCoassigneeCodes;
+
       const isIncidentalTask =
         data.taskType === 'UNPLANNED' ||
         data.taskType === 'INCIDENTAL' ||
@@ -472,9 +504,10 @@ export class TasksService {
           creatorEmployeeCode: creatorCode,
           planId,
           domainId: data.domainId ? parseInt(data.domainId, 10) : null,
-          monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : null,
+          monitoredUnitId: data.monitoredUnitId ? parseInt(data.monitoredUnitId, 10) : (data.departmentId ? parseInt(data.departmentId, 10) : null),
           metadata: {
             ...parsedMetadata,
+            ...(coordinatingDeptIds.length > 0 ? { coordinatingDepartmentIds: coordinatingDeptIds } : {}),
             taskType: data.taskType || parsedMetadata?.taskType || (isIncidentalTask ? 'UNPLANNED' : 'ONE_TIME'),
             ...(isIncidentalTask
               ? {
@@ -568,6 +601,44 @@ export class TasksService {
         const ancestors = await tx.taskClosure.findMany({ where: { descendantId: parentId } });
         if (ancestors.length > 0) {
           await tx.taskClosure.createMany({ data: ancestors.map(a => ({ ancestorId: a.ancestorId, descendantId: task.id, depth: a.depth + 1 })) });
+        }
+      }
+
+      // Tự động sinh nhánh SubTask theo phòng ban phối hợp khi cấp trên giao phối hợp
+      if (coordinatingDeptIds.length > 0 && !parentId) {
+        for (const deptId of coordinatingDeptIds) {
+          const deptSubtask = await tx.task.create({
+            data: {
+              parentId: task.id,
+              title: `[Phối hợp] ${task.title}`,
+              description: `Nhiệm vụ phối hợp thực hiện theo phân công cho công việc: "${task.title}". Lãnh đạo phòng ban vui lòng phân công nhân sự trong đơn vị tham gia thực hiện.`,
+              status: 'PENDING_ACCEPTANCE',
+              priority: task.priority,
+              type: 'TASK',
+              startDate: task.startDate,
+              dueDate: task.dueDate,
+              monitoredUnitId: deptId,
+              creatorEmployeeCode: creatorCode,
+              organizationId: task.organizationId || 'DEFAULT',
+              metadata: {
+                isCoordinationBranch: true,
+                parentTaskId: task.id,
+                coordinatingDepartmentId: deptId,
+              }
+            }
+          });
+
+          await tx.taskClosure.create({ data: { ancestorId: deptSubtask.id, descendantId: deptSubtask.id, depth: 0 } });
+          await tx.taskClosure.create({ data: { ancestorId: task.id, descendantId: deptSubtask.id, depth: 1 } });
+
+          await tx.taskHistory.create({
+            data: {
+              taskId: deptSubtask.id,
+              action: 'Khởi tạo nhánh phối hợp phòng ban',
+              actorCode: creatorCode,
+              newValue: { parentTaskId: task.id, coordinatingDepartmentId: deptId }
+            }
+          });
         }
       }
 
@@ -1088,10 +1159,23 @@ export class TasksService {
       }
 
       // 3. Coordinators
-      const newCoordCodes = data.coAssigneeCodes || data.coassigneeCodes || [];
+      const rawCoordCodes: string[] = data.coAssigneeCodes || data.coassigneeCodes || [];
+      const coordDeptIds: number[] = [];
+      const cleanCoordCodes: string[] = [];
+      for (const code of rawCoordCodes) {
+        if (typeof code === 'string' && code.startsWith('DEPT_')) {
+          const dId = parseInt(code.replace('DEPT_', ''), 10);
+          if (!isNaN(dId) && dId > 0 && !coordDeptIds.includes(dId)) {
+            coordDeptIds.push(dId);
+          }
+        } else if (code) {
+          cleanCoordCodes.push(code);
+        }
+      }
+
       const existingCoordMap = new Map<string, any>(existingCoordinators.map((c: any) => [c.employeeCode, c]));
 
-      for (const code of newCoordCodes) {
+      for (const code of cleanCoordCodes) {
         const existing = existingCoordMap.get(code);
         if (!existing) {
           participantsToCreate.push({ taskId: id, employeeCode: code, participantRole: 'COORDINATOR', status: 'PENDING_ACCEPTANCE' });
@@ -1133,6 +1217,97 @@ export class TasksService {
             data: { status: 'PENDING_ACCEPTANCE', reason: null },
           });
         }
+
+      // 5. Nếu có phòng ban phối hợp (DEPT_xxx), sinh nhánh subtask phối hợp nếu chưa tồn tại
+      if (coordDeptIds.length > 0) {
+        const currentMeta: any = (rawTask.metadata as any) || {};
+        const mergedCoordDeptIds = Array.from(new Set([...(currentMeta.coordinatingDepartmentIds || []), ...coordDeptIds]));
+        await tx.task.update({
+          where: { id },
+          data: {
+            metadata: {
+              ...currentMeta,
+              coordinatingDepartmentIds: mergedCoordDeptIds,
+            }
+          }
+        });
+
+        for (const deptId of coordDeptIds) {
+          const existingSubtask = await tx.task.findFirst({
+            where: { parentId: id, monitoredUnitId: deptId, isDeleted: false }
+          });
+          if (!existingSubtask) {
+            const deptSubtask = await tx.task.create({
+              data: {
+                parentId: id,
+                title: `[Phối hợp] ${rawTask.title}`,
+                description: `Nhiệm vụ phối hợp của phòng ban theo phân công cho công việc: "${rawTask.title}". Lãnh đạo phòng ban vui lòng phân công nhân sự trong đơn vị tham gia thực hiện.`,
+                status: 'PENDING_ACCEPTANCE',
+                priority: rawTask.priority,
+                type: 'TASK',
+                startDate: rawTask.startDate,
+                dueDate: rawTask.dueDate,
+                monitoredUnitId: deptId,
+                creatorEmployeeCode: data.assignerCode || data.currentEmployeeCode || null,
+                organizationId: rawTask.organizationId || 'DEFAULT',
+                metadata: {
+                  isCoordinationBranch: true,
+                  parentTaskId: id,
+                  coordinatingDepartmentId: deptId,
+                }
+              }
+            });
+            await tx.taskClosure.create({ data: { ancestorId: deptSubtask.id, descendantId: deptSubtask.id, depth: 0 } });
+            await tx.taskClosure.create({ data: { ancestorId: id, descendantId: deptSubtask.id, depth: 1 } });
+            if (rawTask.parentId) {
+              const ancestors = await tx.taskClosure.findMany({ where: { descendantId: rawTask.parentId } });
+              if (ancestors.length > 0) {
+                await tx.taskClosure.createMany({
+                  data: ancestors.map(a => ({ ancestorId: a.ancestorId, descendantId: deptSubtask.id, depth: a.depth + 2 }))
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // 6. ĐỒNG BỘ TỪ NHÁNH PHỐI HỢP LÊN TASK CHA
+      const isCoordBranch = Boolean((rawTask.metadata as any)?.isCoordinationBranch || rawTask.title?.startsWith('[Phối hợp]'));
+      if (isCoordBranch && rawTask.parentId) {
+        const personnelToSync = [newAssigneeCode, ...cleanCoordCodes].filter((c): c is string => Boolean(c && c !== 'UNASSIGNED'));
+        for (const empCode of personnelToSync) {
+          const existsInParent = await tx.taskParticipant.findUnique({
+            where: {
+              taskId_employeeCode_participantRole: {
+                taskId: rawTask.parentId,
+                employeeCode: empCode,
+                participantRole: 'COORDINATOR'
+              }
+            }
+          });
+          if (!existsInParent) {
+            await tx.taskParticipant.create({
+              data: {
+                taskId: rawTask.parentId,
+                employeeCode: empCode,
+                participantRole: 'COORDINATOR',
+                status: 'ACCEPTED'
+              }
+            });
+          } else if (existsInParent.status !== 'ACCEPTED') {
+            await tx.taskParticipant.update({
+              where: {
+                taskId_employeeCode_participantRole: {
+                  taskId: rawTask.parentId,
+                  employeeCode: empCode,
+                  participantRole: 'COORDINATOR'
+                }
+              },
+              data: { status: 'ACCEPTED', reason: null }
+            });
+          }
+        }
+      }
 
       if (resetTaskStatus) {
         await tx.task.update({ where: { id }, data: { status: 'PENDING_ACCEPTANCE' } });

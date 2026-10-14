@@ -120,6 +120,37 @@ export function CreateStepDialog({ open, onOpenChange, task }: CreateStepDialogP
       });
     }
 
+    // 5. Từ các nhánh phối hợp con (subTasks / children có isCoordinationBranch)
+    const childTasks = Array.isArray(task?.children)
+      ? task.children
+      : Array.isArray(task?.subTasks)
+      ? task.subTasks
+      : [];
+    childTasks.forEach((child: any) => {
+      const isCoordChild = child?.metadata?.isCoordinationBranch || child?.title?.startsWith("[Phối hợp]");
+      if (isCoordChild) {
+        if (child.assigneeCode && child.assigneeCode !== "UNASSIGNED" && !seenCodes.has(child.assigneeCode)) {
+          seenCodes.add(child.assigneeCode);
+          const emp = employees.find((e: any) => e.employeeCode === child.assigneeCode);
+          const name = child.assigneeName || emp?.fullName || child.assigneeCode;
+          const subtitle = emp?.jobTitleName || "Chủ trì phối hợp đơn vị";
+          list.push({ code: child.assigneeCode, name, subtitle, roleLabel: "Chủ trì phối hợp đơn vị" });
+        }
+        if (Array.isArray(child.participants)) {
+          child.participants.forEach((p: any) => {
+            const code = p.employeeCode || p.code;
+            if (code && !seenCodes.has(code) && code !== "UNASSIGNED") {
+              seenCodes.add(code);
+              const emp = employees.find((e: any) => e.employeeCode === code);
+              const name = p.fullName || emp?.fullName || code;
+              const subtitle = emp?.jobTitleName || "Nhân sự phối hợp đơn vị";
+              list.push({ code, name, subtitle, roleLabel: "Nhân sự phối hợp đơn vị" });
+            }
+          });
+        }
+      }
+    });
+
     if (list.length > 0) {
       return {
         groupTitle: `Nhân sự phối hợp trong việc này (${list.length})`,

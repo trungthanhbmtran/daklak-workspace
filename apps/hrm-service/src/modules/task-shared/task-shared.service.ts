@@ -523,6 +523,14 @@ export class TaskSharedService {
           }
         }
       }
+
+      // Kiểm tra xem phòng ban của lãnh đạo có được giao phối hợp trong công việc này không
+      const coordDeptIds: number[] = Array.isArray((t.metadata as any)?.coordinatingDepartmentIds)
+        ? (t.metadata as any).coordinatingDepartmentIds.map(Number)
+        : [];
+      if (coordDeptIds.some(d => allowedDepts.includes(d))) {
+        isDeptLeader = true;
+      }
     }
     const allowedCodesForLowestLevel = query.allowedEmployeeCodes || [];
     const allowedDeptsForLowestLevel = query.allowedDepartmentIds || [];
@@ -751,7 +759,7 @@ export class TaskSharedService {
       }
 
       const hasRejectedCoordinator = t.participants?.some((p: any) => p.participantRole === 'COORDINATOR' && p.status === 'REJECTED');
-      if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION' || hasRejectedCoordinator)) {
+      if ((access.isOwner || access.isDeptLeader) && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION' || hasRejectedCoordinator)) {
         actions.push('ASSIGN');
         actions.push('REASSIGN');
       }
@@ -924,7 +932,7 @@ export class TaskSharedService {
     
     // Natively inject REASSIGN for the owner when task is new, rejected, pending coordination, or has rejected coordinators
     const hasRejectedCoordinator = t.participants?.some((p: any) => p.participantRole === 'COORDINATOR' && p.status === 'REJECTED');
-    if (access.isOwner && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION' || hasRejectedCoordinator)) {
+    if ((access.isOwner || access.isDeptLeader) && (t.status === 'ASSIGNED' || t.status === 'TODO' || t.status === 'PENDING_ACCEPTANCE' || t.status === 'REJECTED' || t.status === 'PENDING_COORDINATION' || hasRejectedCoordinator)) {
       actions.push('ASSIGN');
       actions.push('REASSIGN');
     }

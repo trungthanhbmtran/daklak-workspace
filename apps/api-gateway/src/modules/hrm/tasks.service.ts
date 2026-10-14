@@ -194,8 +194,24 @@ export class TasksService implements OnModuleInit {
       delete body.assignee;
     }
 
+    let coordinatingDepartmentIds: number[] = [];
     if (body.coordinators) {
-      body.coassigneeCodes = body.coordinators;
+      const rawCoordinators: string[] = Array.isArray(body.coordinators) ? body.coordinators : [];
+      const deptIds: number[] = [];
+      const empCodes: string[] = [];
+      for (const c of rawCoordinators) {
+        if (typeof c === 'string' && c.startsWith('DEPT_')) {
+          const dId = parseInt(c.replace('DEPT_', ''), 10);
+          if (!isNaN(dId) && dId > 0 && !deptIds.includes(dId)) {
+            deptIds.push(dId);
+          }
+          empCodes.push(String(c)); // Giữ DEPT_xxx trong coassigneeCodes để hrm-service sinh nhánh phối hợp
+        } else if (c) {
+          empCodes.push(String(c));
+        }
+      }
+      coordinatingDepartmentIds = deptIds;
+      body.coassigneeCodes = empCodes;
       delete body.coordinators;
     }
 
@@ -241,6 +257,7 @@ export class TasksService implements OnModuleInit {
 
     const metadataObj = {
       ...(body.metadata || {}),
+      ...(coordinatingDepartmentIds.length > 0 ? { coordinatingDepartmentIds } : {}),
       ...(body.sourceDocumentRef ? { sourceDocumentRef: body.sourceDocumentRef } : {}),
       ...(body.initialSteps ? { initialSteps: body.initialSteps } : {}),
     };

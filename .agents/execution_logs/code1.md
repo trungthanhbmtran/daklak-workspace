@@ -1,5 +1,48 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Phân Công Phối Hợp Theo Phòng Ban (Sinh Nhánh SubTask) & Đồng Bộ Nhân Sự Cho Bước Thực Hiện (Checklist)
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu người dùng**:
+  - Khi công việc được cấp trên giao phối hợp cho phòng ban (`DEPT_xxx`):
+    1. Sẽ có 1 nhánh theo phòng ban phối hợp đó.
+    2. Lãnh đạo của phòng ban phối hợp đó sẽ chọn/phân công danh sách người phối hợp thực hiện.
+    3. Ở bên người nhân viên nhận chủ trì phối hợp lúc tạo bước (checklist) sẽ thấy những nhân viên phối hợp được giao đấy.
+- **Giải pháp kỹ thuật chuẩn xác**:
+  - **API Gateway (`apps/api-gateway/src/modules/hrm/tasks.service.ts`)**:
+    - Trích xuất `coordinatingDepartmentIds: number[]` từ `coordinators` (chứa `DEPT_${deptId}`).
+    - Đóng gói an toàn vào `metadataJson` (`metadata.coordinatingDepartmentIds`) và giữ danh sách `coassigneeCodes` truyền sang `hrm-service`.
+  - **HRM Service (`apps/hrm-service/src/modules/tasks/tasks.service.ts` & `task-shared.service.ts`)**:
+    - Khi tạo task (`executeCreateTaskTransaction`):
+      + Trích xuất `coordinatingDeptIds` và cập nhật vào `metadata.coordinatingDepartmentIds`.
+      + Tự động sinh nhánh công việc con (SubTask) phối hợp: `title = [Phối hợp] ${task.title}`, `monitoredUnitId = deptId`, `status = PENDING_ACCEPTANCE`, `metadata = { isCoordinationBranch: true, parentTaskId: task.id, coordinatingDepartmentId: deptId }`.
+      + Tạo quan hệ phân cấp `taskClosure` và ghi lịch sử `taskHistory`.
+    - Khi Lãnh đạo phòng ban phối hợp thực hiện phân công (`executeAssignTaskTransaction`):
+      + Hỗ trợ giao việc trên nhánh phối hợp (hoặc task có phối hợp).
+      + **ĐỒNG BỘ TỰ ĐỘNG LÊN TASK CHA**: Khi phân công nhân sự trên nhánh phối hợp, hệ thống tự động upsert các cán bộ này vào bảng `TaskParticipant` của Task cha với vai trò `COORDINATOR` và `status = 'ACCEPTED'`.
+    - Quyền truy cập (`_checkTaskAccessInternal` & `computeAllowedActions`):
+      + Nhận diện Lãnh đạo của phòng ban phối hợp dựa trên `t.metadata.coordinatingDepartmentIds` giao với `allowedDepts` của user, cấp quyền `isDeptLeader = true`, `hasAccess = true` và quyền hành động `ASSIGN` / `REASSIGN`.
+  - **Frontend (`apps/admin_khcn/features/hrm/components/tasks/create-step-dialog.tsx`)**:
+    - Dropdown phân công bước (Checklist):
+      + Đọc từ `task.participants` (role `COORDINATOR`), `task.coordinators` và quét sâu thêm từ các nhánh subtask phối hợp con (`children` / `subTasks` có `isCoordinationBranch`).
+      + Hiển thị đầy đủ Họ tên, Chức danh VTVL của các nhân viên phối hợp đã được giao bởi Lãnh đạo phòng ban.
+
+### 2. Danh mục File Đã Chỉnh Sửa
+- `apps/api-gateway/src/modules/hrm/tasks.service.ts`
+- `apps/hrm-service/src/modules/tasks/tasks.service.ts`
+- `apps/hrm-service/src/modules/task-shared/task-shared.service.ts`
+- `apps/admin_khcn/features/hrm/components/tasks/create-step-dialog.tsx`
+- `.agents/current_plan.md`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npm run build` -> **Exit code 0 (PASS 100%)**.
+- `apps/api-gateway`: `npm run build` -> **Exit code 0 (PASS 100%)**.
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (PASS 100%, 0 lỗi TypeScript)**.
+- Rà soát mã nguồn: **0 câu lệnh `console.log` / `debugger`**, file UTF-8 không BOM.
+
+---
+
 ## [2026-10-14] Khắc Phục Tràn Sheet Giao Việc, Tối Ưu UX Phân Cấp Phòng Ban Chủ Trì & Giới Hạn Nhân Sự Bước Theo Nhóm Phối Hợp
 
 ### 1. Phạm vi & Mục tiêu
