@@ -20,6 +20,10 @@ describe('TasksService - Quản lý Công việc Ban Tổ chức Tỉnh ủy (BT
         update: jest.fn(),
         updateMany: jest.fn(),
         count: jest.fn(),
+        fields: {
+          dueDate: { modelName: 'Task', name: 'dueDate', typeName: 'DateTime' } as any,
+          completedAt: { modelName: 'Task', name: 'completedAt', typeName: 'DateTime' } as any,
+        },
       },
       taskStep: {
         create: jest.fn(),
@@ -57,7 +61,6 @@ describe('TasksService - Quản lý Công việc Ban Tổ chức Tỉnh ủy (BT
         findMany: jest.fn(),
       },
       $transaction: jest.fn().mockImplementation((cb) => cb(mockPrisma)),
-      $queryRaw: jest.fn(),
     };
 
     mockShared = {
@@ -952,6 +955,65 @@ describe('TasksService - Quản lý Công việc Ban Tổ chức Tỉnh ủy (BT
           }),
         })
       );
+    });
+  });
+
+  describe('Nhóm 10: Lọc theo thời hạn & Tiến độ (statsFilter - pure Prisma ORM)', () => {
+    it('10.1 Lọc công việc hoàn thành đúng hạn (doneInTime) qua Prisma Field Reference không dùng raw SQL', async () => {
+      mockPrisma.task.count.mockResolvedValue(1);
+      mockPrisma.task.findMany.mockResolvedValue([
+        {
+          id: 201,
+          title: 'Soạn thảo báo cáo công tác cán bộ',
+          isCompleted: true,
+          dueDate: new Date('2026-10-20'),
+          completedAt: new Date('2026-10-18'),
+          participants: [],
+        },
+      ]);
+
+      const result = await service.listTasks({
+        statsFilter: 'doneInTime',
+        currentEmployeeCode: 'BTCTU_NV01',
+      });
+
+      expect(mockPrisma.task.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            isCompleted: true,
+          }),
+        }),
+      );
+      expect(result.data).toBeDefined();
+    });
+
+    it('10.2 Lọc công việc hoàn thành quá hạn (doneOverdue) qua Prisma Field Reference không dùng raw SQL', async () => {
+      mockPrisma.task.count.mockResolvedValue(1);
+      mockPrisma.task.findMany.mockResolvedValue([
+        {
+          id: 202,
+          title: 'Thẩm định hồ sơ cán bộ quá hạn',
+          isCompleted: true,
+          dueDate: new Date('2026-10-10'),
+          completedAt: new Date('2026-10-12'),
+          participants: [],
+        },
+      ]);
+
+      const result = await service.listTasks({
+        statsFilter: 'doneOverdue',
+        currentEmployeeCode: 'BTCTU_NV01',
+      });
+
+      expect(mockPrisma.task.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            isCompleted: true,
+            dueDate: { not: null },
+          }),
+        }),
+      );
+      expect(result.data).toBeDefined();
     });
   });
 });

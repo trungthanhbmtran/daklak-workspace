@@ -172,8 +172,26 @@ export class TasksService {
       now.setHours(0, 0, 0, 0);
       switch (query.statsFilter) {
         case 'doneInTime':
+          return {
+            ...baseWhere,
+            isCompleted: true,
+            AND: [
+              ...(baseWhere.AND || []),
+              {
+                OR: [
+                  { dueDate: null },
+                  { completedAt: { lte: this.prisma.task.fields.dueDate } },
+                ],
+              },
+            ],
+          };
         case 'doneOverdue':
-          return { ...baseWhere, isCompleted: true };
+          return {
+            ...baseWhere,
+            isCompleted: true,
+            dueDate: { not: null },
+            completedAt: { gt: this.prisma.task.fields.dueDate },
+          };
         case 'overdue':
           return { ...baseWhere, isCompleted: false, dueDate: { lt: now } };
         case 'warning': {
@@ -193,54 +211,11 @@ export class TasksService {
   private async applyPostDbFiltersAndPaginate(where: any, query: any): Promise<{ tasks: any[]; paginatedMeta: PaginatedMeta }> {
     const page = parseInt(query.page, 10) || 1;
     const limit = parseInt(query.limit, 10) || 20;
-    // H8-FIX: Đổi tên biến cho rõ nghĩa hơn
-    const isDoneTimingFilter = query.statsFilter === 'doneInTime' || query.statsFilter === 'doneOverdue';
 
-    let skip: number | undefined;
-    let take: number | undefined;
-    let totalCount = 0;
-    let limitNum = limit;
-
-    if (!isDoneTimingFilter) {
-      totalCount = await this.prisma.task.count({ where });
-      limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
-      skip = limit > 0 ? (page - 1) * limitNum : undefined;
-      take = limit > 0 ? limitNum : undefined;
-    } else {
-      // C1-FIX: Sử dụng tên bảng vật lý `tasks` và các cột `is_completed`, `due_date`, `completed_at`
-      // C2-FIX: Thêm điều kiện is_deleted = 0 để loại trừ các bản ghi đã xóa mềm
-      const lateIds = await this.prisma.$queryRaw<{ id: number }[]>`
-        SELECT id FROM tasks
-        WHERE is_completed = 1
-          AND is_deleted = 0
-          AND due_date IS NOT NULL
-          AND completed_at > due_date
-      `;
-      const ids = lateIds.map((x) => Number(x.id));
-      if (query.statsFilter === 'doneOverdue') {
-        if (ids.length === 0) {
-          return {
-            tasks: [],
-            paginatedMeta: {
-              total: 0,
-              page,
-              limit: limitNum,
-              totalPages: 0,
-            },
-          };
-        }
-        where = { ...where, id: { in: ids } };
-      } else {
-        if (ids.length > 0) {
-          where = { ...where, id: { notIn: ids } };
-        }
-      }
-
-      totalCount = await this.prisma.task.count({ where });
-      limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
-      skip = limit > 0 ? (page - 1) * limitNum : undefined;
-      take = limit > 0 ? limitNum : undefined;
-    }
+    const totalCount = await this.prisma.task.count({ where });
+    const limitNum = limit > 0 ? limit : (totalCount > 0 ? totalCount : 20);
+    const skip = limit > 0 ? (page - 1) * limitNum : undefined;
+    const take = limit > 0 ? limitNum : undefined;
 
     const tasks = await this.prisma.task.findMany({
       where,

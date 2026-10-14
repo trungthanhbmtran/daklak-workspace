@@ -1,5 +1,40 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Loại Bỏ Triệt Để Raw SQL ($queryRaw) — Chuyển Sang 100% Pure Prisma ORM Type-Safe
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu người dùng**: Loại bỏ hoàn toàn câu lệnh raw SQL (`$queryRaw`) trong mã nguồn của hệ thống theo chỉ đạo của người dùng.
+- **Giải pháp chuyển đổi**:
+  - Tại `apps/hrm-service/src/modules/tasks/tasks.service.ts`:
+    - Thay thế toàn bộ đoạn code sử dụng `$queryRaw` lấy `lateIds` bằng pure Prisma ORM `where` filter thông qua **Prisma Field Reference** (`this.prisma.task.fields.dueDate`).
+    - Logic lọc `doneOverdue` tích hợp trực tiếp vào Prisma query:
+      `{ isCompleted: true, dueDate: { not: null }, completedAt: { gt: this.prisma.task.fields.dueDate } }`
+    - Logic lọc `doneInTime` tích hợp trực tiếp vào Prisma query:
+      `{ isCompleted: true, AND: [...(baseWhere.AND || []), { OR: [{ dueDate: null }, { completedAt: { lte: this.prisma.task.fields.dueDate } }] }] }`
+    - Đơn giản hóa toàn diện `applyPostDbFiltersAndPaginate`: Xóa bỏ hoàn toàn nhánh rẽ xử lý riêng và toàn bộ raw SQL; đếm `count` và phân trang `skip/take` 100% native trong CSDL qua Prisma.
+  - Tại `apps/hrm-service/src/modules/tasks/tasks.service.spec.ts`:
+    - Bổ sung cấu hình `fields` trong mock Prisma để đồng bộ đầy đủ với `@prisma/client`.
+    - Xóa bỏ mock `$queryRaw: jest.fn()`.
+    - Thêm 2 test cases mới thuộc `Nhóm 10: Lọc theo thời hạn & Tiến độ (statsFilter - pure Prisma ORM)`:
+      - `10.1 Lọc công việc hoàn thành đúng hạn (doneInTime) qua Prisma Field Reference không dùng raw SQL`
+      - `10.2 Lọc công việc hoàn thành quá hạn (doneOverdue) qua Prisma Field Reference không dùng raw SQL`
+
+### 2. Danh mục File Thay Đổi
+- `apps/hrm-service/src/modules/tasks/tasks.service.ts`
+- `apps/hrm-service/src/modules/tasks/tasks.service.spec.ts`
+- `.agents/current_plan.md`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%, 0 lỗi)**.
+- `apps/hrm-service`: `npx jest tasks.service.spec` -> **PASS (29/29 test cases PASSED 100%)**.
+- `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%, 0 lỗi)**.
+- `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%, 0 lỗi)**.
+- Quét toàn bộ repo: **0 câu lệnh `$queryRaw` còn sót lại** trong mã nguồn nghiệp vụ `hrm-service`.
+- Vệ sinh mã nguồn: Quét sạch 100% `console.log`, `debugger`, mã hóa UTF-8 không BOM.
+
+---
+
 ## [2026-10-14] Phê Duyệt Việc Phát Sinh Cần Lãnh Đạo Phụ Trách Thẩm Định Để Tính KPI & Loại Bỏ Hardcode Quy Trình, Ủy Quyền Cho workflow-service
 
 ### 1. Phạm vi & Mục tiêu
