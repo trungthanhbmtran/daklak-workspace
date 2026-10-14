@@ -99,6 +99,7 @@ export function CreateTaskDialog({
     reason: string;
   } | null>(null);
   const [priority, setPriority] = useState("NORMAL");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [assignee, setAssignee] = useState("");
   const [assigneePercentage, setAssigneePercentage] = useState<number>(100);
   const [dueDate, setDueDate] = useState("");
@@ -267,6 +268,68 @@ export function CreateTaskDialog({
     setIsKpiTarget(true);
   }, [priority]);
 
+  // ── Phân cấp Đơn vị / Phòng ban & Nhân sự ──
+  // Tự động đồng bộ selectedDepartmentId khi assignee thay đổi từ preset hoặc template
+  useEffect(() => {
+    if (assignee) {
+      if (assignee.startsWith("DEPT_")) {
+        const dId = assignee.replace("DEPT_", "");
+        if (selectedDepartmentId !== dId) {
+          setSelectedDepartmentId(dId);
+        }
+      } else {
+        const emp = employees.find((e: any) => e.employeeCode === assignee);
+        if (emp?.departmentId && selectedDepartmentId !== String(emp.departmentId)) {
+          setSelectedDepartmentId(String(emp.departmentId));
+        }
+      }
+    }
+  }, [assignee, employees, selectedDepartmentId]);
+
+  const selectedDepartment = useMemo(() => {
+    if (!selectedDepartmentId || selectedDepartmentId === "ALL") return null;
+    return departments.find((d: any) => String(d.id) === selectedDepartmentId);
+  }, [departments, selectedDepartmentId]);
+
+  const departmentEmployees = useMemo(() => {
+    if (!selectedDepartmentId || selectedDepartmentId === "ALL") {
+      return employees;
+    }
+    const numId = Number(selectedDepartmentId);
+    return employees.filter(
+      (e: any) => e.departmentId === numId || e.department?.id === numId
+    );
+  }, [employees, selectedDepartmentId]);
+
+  const { deptLeaders, deptStaff } = useMemo(() => {
+    const leaders: any[] = [];
+    const staff: any[] = [];
+    departmentEmployees.forEach((emp: any) => {
+      const title = (emp.jobTitleName || emp.jobTitle?.name || "").toLowerCase();
+      const isLeader =
+        title.includes("trưởng") ||
+        title.includes("phó") ||
+        title.includes("giám đốc") ||
+        title.includes("chi cục trưởng");
+      if (isLeader) {
+        leaders.push(emp);
+      } else {
+        staff.push(emp);
+      }
+    });
+    return { deptLeaders: leaders, deptStaff: staff };
+  }, [departmentEmployees]);
+
+  const handleDepartmentChange = (deptId: string) => {
+    setSelectedDepartmentId(deptId);
+    if (deptId === "ALL") {
+      setAssignee("");
+    } else {
+      // Mặc định giao cho cả phòng ban để Lãnh đạo phòng phân công tiếp
+      setAssignee(`DEPT_${deptId}`);
+    }
+  };
+
   // ── Coordinators & Percentages ──
   const handleAddCoordinator = (value: string) => {
     let name = value;
@@ -276,7 +339,11 @@ export function CreateTaskDialog({
       if (dept) name = `🏢 ${dept.name}`;
     } else {
       const emp = employees.find((e: any) => e.employeeCode === value);
-      if (emp) name = `👤 ${emp.fullName}`;
+      if (emp) {
+        const d = departments.find((x: any) => x.id === emp.departmentId || x.id === emp.department?.id);
+        const deptTag = d?.name ? ` (${d.name})` : emp.unitName ? ` (${emp.unitName})` : "";
+        name = `👤 ${emp.fullName}${deptTag}`;
+      }
     }
 
     if (!coordinators.find((c) => c.id === value)) {
@@ -328,7 +395,62 @@ export function CreateTaskDialog({
     return (Number(assigneePercentage) || 0) + coorsSum;
   }, [assigneePercentage, coordinators]);
 
-  // ── Step management (Gắn với cá nhân khác hoặc bản thân người tạo) ──
+  // ── Step management (Gắn với nhóm người tham gia việc, tránh hiển thị dư thừa) ──
+  const stepAssigneeOptions = useMemo(() => {
+    // 1. Nếu công việc có nhóm người phối hợp cụ thể, CHỈ hiển thị nhóm người này
+    const coordEmps: any[] = [];
+    coordinators.forEach((c) => {
+      if (!c.id.startsWith("DEPT_")) {
+        const emp = employees.find((e: any) => e.employeeCode === c.id);
+        if (emp && !coordEmps.find((x) => x.employeeCode === emp.employeeCode)) {
+          coordEmps.push(emp);
+        }
+      } else {
+        const dId = parseInt(c.id.replace("DEPT_", ""), 10);
+        employees.forEach((emp: any) => {
+          if (
+            (emp.departmentId === dId || emp.department?.id === dId) &&
+            !coordEmps.find((x) => x.employeeCode === emp.employeeCode)
+          ) {
+            coordEmps.push(emp);
+          }
+        });
+      }
+    });
+
+    if (coordEmps.length > 0) {
+      return {
+        label: `Nhân sự phối hợp trong nhiệm vụ (${coordEmps.length})`,
+        list: coordEmps.filter(
+          (e) => e.employeeCode !== currentUser?.employeeCode && e.employeeCode !== assignee
+        ),
+      };
+    }
+
+    // 2. Nếu không có người phối hợp riêng nhưng có phòng ban chủ trì
+    const dId = assignee.startsWith("DEPT_")
+      ? parseInt(assignee.replace("DEPT_", ""), 10)
+      : selectedDepartmentId && selectedDepartmentId !== "ALL"
+      ? Number(selectedDepartmentId)
+      : undefined;
+
+    if (dId) {
+      const dept = departments.find((d: any) => d.id === dId);
+      const deptEmps = employees.filter(
+        (e: any) =>
+          (e.departmentId === dId || e.department?.id === dId) &&
+          e.employeeCode !== currentUser?.employeeCode &&
+          e.employeeCode !== assignee
+      );
+      return {
+        label: `Nhân sự ${dept?.name || "phòng ban"} (${deptEmps.length})`,
+        list: deptEmps,
+      };
+    }
+
+    return { label: "", list: [] };
+  }, [coordinators, employees, currentUser, assignee, selectedDepartmentId, departments]);
+
   const handleAddStep = () => {
     if (!stepInput.trim()) return;
 
@@ -340,8 +462,14 @@ export function CreateTaskDialog({
       assignedName = currentUser?.fullName ? `${currentUser.fullName} (Tôi)` : "Bản thân tôi phụ trách";
     } else if (assignedCode === "ASSIGNEE") {
       assignedCode = assignee;
-      const emp = employees.find((e: any) => e.employeeCode === assignee);
-      assignedName = emp?.fullName ? `${emp.fullName} (Chủ trì)` : `Chủ trì (${assignee})`;
+      if (assignee.startsWith("DEPT_")) {
+        const dId = parseInt(assignee.replace("DEPT_", ""), 10);
+        const dept = departments.find((d: any) => d.id === dId);
+        assignedName = dept ? `🏢 ${dept.name} (Chủ trì)` : "Phòng ban chủ trì";
+      } else {
+        const emp = employees.find((e: any) => e.employeeCode === assignee);
+        assignedName = emp?.fullName ? `${emp.fullName} (Chủ trì)` : `Chủ trì (${assignee})`;
+      }
     } else {
       const emp = employees.find((e: any) => e.employeeCode === assignedCode);
       assignedName = emp?.fullName ? `${emp.fullName}` : assignedCode;
@@ -402,6 +530,7 @@ export function CreateTaskDialog({
     setSupervisorCode("DEFAULT");
     setAutoDetectedSupervisor(null);
     setPriority("NORMAL");
+    setSelectedDepartmentId("");
     setAssignee("");
     setAssigneePercentage(100);
     setDueDate("");
@@ -518,10 +647,10 @@ export function CreateTaskDialog({
     >
       <SheetContent
         side="right"
-        className="sm:max-w-3xl w-full flex flex-col p-0 gap-0 border-l border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-950"
+        className="w-full sm:max-w-3xl max-w-full flex flex-col p-0 gap-0 border-l border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-950 overflow-hidden"
       >
         {/* TẦNG 1: HEADER CỐ ĐỊNH */}
-        <div className="shrink-0 p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm">
+        <div className="shrink-0 p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm max-w-full min-w-0">
           <SheetHeader className="space-y-1">
             <div className="flex items-center gap-2.5">
               <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-500/20">
@@ -770,143 +899,224 @@ export function CreateTaskDialog({
             </div>
 
             {/* NHÓM 2: PHÂN CÔNG NHÂN SỰ & NGƯỜI THẨM ĐỊNH PHÊ DUYỆT */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/30 space-y-4">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/30 space-y-4 min-w-0">
               <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100 pb-1 border-b border-slate-200 dark:border-slate-800">
                 <UsersIcon className="w-4 h-4 text-blue-600" />
                 Phân công Trách nhiệm & Thẩm quyền
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Người chủ trì nhận việc */}
-                <div className="space-y-2">
+              {/* Phân cấp: Chọn phòng ban trước -> Từ phòng ban chọn lãnh đạo/chuyên viên hoặc giao cả phòng */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                {/* 1. Chọn Phòng ban chủ trì */}
+                <div className="space-y-2 min-w-0">
                   <Label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    <UserIcon className="w-3.5 h-3.5 text-blue-600" />
-                    Chủ trì nhận việc <span className="text-red-500">*</span>
+                    <UsersIcon className="w-3.5 h-3.5 text-blue-600" />
+                    Đơn vị / Phòng ban chủ trì <span className="text-red-500">*</span>
                   </Label>
-                  <Select value={assignee} onValueChange={setAssignee} required>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm">
-                      <SelectValue placeholder="Chọn người / đơn vị nhận việc..." />
+                  <Select value={selectedDepartmentId} onValueChange={handleDepartmentChange}>
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0">
+                      <SelectValue placeholder="Chọn phòng ban chủ trì..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
-                      {departments.length > 0 && (
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Phòng ban</SelectLabel>
-                          {departments.map((dept: any) => (
-                            <SelectItem key={`DEPT_${dept.id}`} value={`DEPT_${dept.id}`}>
-                              <div className="flex items-center gap-2">
-                                <UsersIcon className="w-4 h-4 text-orange-500" />
-                                <span>{dept.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      )}
-                      {employees.length > 0 ? (
-                        <SelectGroup>
-                          <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
-                          {employees.map((emp: any) => (
-                            <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4 text-blue-500" />
-                                <span>{emp.fullName} ({emp.employeeCode})</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ) : (
-                        <SelectItem value="loading" disabled>Đang tải danh sách...</SelectItem>
-                      )}
+                      {departments.map((dept: any) => {
+                        const count = employees.filter(
+                          (e: any) => e.departmentId === dept.id || e.department?.id === dept.id
+                        ).length;
+                        return (
+                          <SelectItem key={`DEPT_OPT_${dept.id}`} value={String(dept.id)}>
+                            <div className="flex items-center justify-between gap-2 w-full truncate">
+                              <span className="truncate">🏢 {dept.name}</span>
+                              {count > 0 && (
+                                <span className="text-[10px] text-slate-400 font-normal shrink-0">
+                                  ({count} nhân sự)
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* LÃNH ĐẠO THẨM ĐỊNH & PHÊ DUYỆT (TaskRole.APPROVER) */}
-                <div className="space-y-2">
+                {/* 2. Chủ trì nhận việc (Giao cả phòng hoặc cá nhân trong phòng) */}
+                <div className="space-y-2 min-w-0">
                   <div className="flex items-center justify-between">
                     <Label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      Lãnh đạo thẩm định & Phê duyệt
+                      <UserIcon className="w-3.5 h-3.5 text-blue-600" />
+                      Chủ trì nhận việc <span className="text-red-500">*</span>
                     </Label>
-                    <Badge variant="outline" className="text-[10px] text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800">
-                      Người duyệt kết quả
-                    </Badge>
+                    {selectedDepartment && (
+                      <Badge variant="outline" className="text-[10px] text-blue-700 bg-blue-50 border-blue-200 truncate max-w-[140px] font-normal">
+                        {selectedDepartment.name}
+                      </Badge>
+                    )}
                   </div>
-                  <Select value={supervisorCode} onValueChange={setSupervisorCode}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-emerald-500 shadow-sm border-slate-200">
-                      <SelectValue placeholder="Chọn lãnh đạo phụ trách..." />
+                  <Select
+                    value={assignee}
+                    onValueChange={setAssignee}
+                    required
+                    disabled={!selectedDepartmentId}
+                  >
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0 disabled:opacity-60">
+                      <SelectValue
+                        placeholder={
+                          selectedDepartmentId
+                            ? "Chọn người hoặc giao cả phòng..."
+                            : "← Vui lòng chọn phòng ban trước"
+                        }
+                      />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      <SelectItem value="DEFAULT">-- Mặc định người giao việc --</SelectItem>
-                      {autoDetectedSupervisor && (
-                        <SelectItem value={autoDetectedSupervisor.code}>
-                          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-medium">
-                            <Sparkles className="w-4 h-4 text-emerald-600" />
-                            <span>{autoDetectedSupervisor.name} (Tự động theo Định biên)</span>
-                          </div>
-                        </SelectItem>
-                      )}
-                      {employees
-                        .filter((emp: any) => emp.employeeCode !== autoDetectedSupervisor?.code)
-                        .map((emp: any) => (
-                          <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                            <div className="flex items-center gap-2">
-                              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                              <span>{emp.fullName}</span>
-                              <span className="text-xs text-slate-400">({emp.jobTitleName || emp.employeeCode})</span>
+                    <SelectContent className="max-h-[320px]">
+                      {selectedDepartmentId && (
+                        <SelectGroup>
+                          <SelectLabel className="text-[11px] text-blue-600 uppercase font-bold">
+                            Tập thể phòng ban
+                          </SelectLabel>
+                          <SelectItem value={`DEPT_${selectedDepartmentId}`}>
+                            <div className="flex items-center gap-2 font-semibold text-blue-700 dark:text-blue-300">
+                              <UsersIcon className="w-4 h-4 text-blue-600 shrink-0" />
+                              <span className="truncate">
+                                🏢 Giao cho cả phòng ban (Lãnh đạo phòng sẽ phân công tiếp)
+                              </span>
                             </div>
                           </SelectItem>
-                        ))}
+                        </SelectGroup>
+                      )}
+
+                      {deptLeaders.length > 0 && (
+                        <SelectGroup>
+                          <SelectLabel className="text-[11px] text-amber-600 uppercase font-bold">
+                            Lãnh đạo phòng ban ({deptLeaders.length})
+                          </SelectLabel>
+                          {deptLeaders.map((emp: any) => (
+                            <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                              <div className="flex items-center gap-2 truncate">
+                                <UserCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
+                                <span className="font-medium truncate">{emp.fullName}</span>
+                                <span className="text-xs text-amber-600/80 shrink-0">
+                                  ({emp.jobTitleName || "Lãnh đạo phòng"})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      )}
+
+                      {deptStaff.length > 0 && (
+                        <SelectGroup>
+                          <SelectLabel className="text-[11px] text-slate-500 uppercase font-semibold">
+                            Chuyên viên & Nhân sự ({deptStaff.length})
+                          </SelectLabel>
+                          {deptStaff.map((emp: any) => (
+                            <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                              <div className="flex items-center gap-2 truncate">
+                                <UserIcon className="w-4 h-4 text-slate-500 shrink-0" />
+                                <span className="truncate">{emp.fullName}</span>
+                                <span className="text-xs text-slate-400 shrink-0">
+                                  ({emp.jobTitleName || emp.employeeCode})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      )}
+
+                      {departmentEmployees.length === 0 && selectedDepartmentId && (
+                        <div className="p-3 text-center text-xs text-slate-500">
+                          Chưa có dữ liệu nhân sự thuộc phòng ban này. Bạn có thể giao trực tiếp cho cả phòng.
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
-
-                  {/* Thẻ hiển thị căn cứ Định biên tổ chức */}
-                  {/* Thẻ hiển thị căn cứ VTVL & Thẩm quyền PBAC */}
-                  {autoDetectedSupervisor && (
-                    <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 shadow-sm">
-                      <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-emerald-900 dark:text-emerald-200">
-                            Tự động xác định theo VTVL & Thẩm quyền:
-                          </span>
-                          {supervisorCode !== autoDetectedSupervisor.code ? (
-                            <button
-                              type="button"
-                              onClick={() => setSupervisorCode(autoDetectedSupervisor.code)}
-                              className="text-emerald-700 dark:text-emerald-400 underline font-medium hover:text-emerald-900 cursor-pointer"
-                            >
-                              (Đặt lại theo chuẩn VTVL)
-                            </button>
-                          ) : (
-                            <Badge className="text-[10px] h-4 bg-emerald-600 text-white font-normal">
-                              Chuẩn VTVL Đề án 01
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-slate-700 dark:text-slate-300 font-medium">
-                          {autoDetectedSupervisor.name}
-                          {autoDetectedSupervisor.jobTitle ? ` - ${autoDetectedSupervisor.jobTitle}` : ""}
-                          {autoDetectedSupervisor.unitName ? ` (${autoDetectedSupervisor.unitName})` : ""}
-                        </div>
-                        <div className="text-[10.5px] text-emerald-700/90 dark:text-emerald-400/90">
-                          {autoDetectedSupervisor.reason}
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
 
+              {/* LÃNH ĐẠO THẨM ĐỊNH & PHÊ DUYỆT (TaskRole.APPROVER) */}
+              <div className="space-y-2 min-w-0 pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    Lãnh đạo thẩm định & Phê duyệt
+                  </Label>
+                  <Badge variant="outline" className="text-[10px] text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800">
+                    Người duyệt kết quả
+                  </Badge>
+                </div>
+                <Select value={supervisorCode} onValueChange={setSupervisorCode}>
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-emerald-500 shadow-sm border-slate-200 min-w-0">
+                    <SelectValue placeholder="Chọn lãnh đạo phụ trách..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    <SelectItem value="DEFAULT">-- Mặc định người giao việc --</SelectItem>
+                    {autoDetectedSupervisor && (
+                      <SelectItem value={autoDetectedSupervisor.code}>
+                        <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-medium">
+                          <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span className="truncate">{autoDetectedSupervisor.name} (Tự động theo Định biên)</span>
+                        </div>
+                      </SelectItem>
+                    )}
+                    {employees
+                      .filter((emp: any) => emp.employeeCode !== autoDetectedSupervisor?.code)
+                      .map((emp: any) => (
+                        <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                          <div className="flex items-center gap-2 truncate">
+                            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="truncate">{emp.fullName}</span>
+                            <span className="text-xs text-slate-400 shrink-0">({emp.jobTitleName || emp.employeeCode})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Thẻ hiển thị căn cứ VTVL & Thẩm quyền PBAC */}
+                {autoDetectedSupervisor && (
+                  <div className="flex items-start gap-2.5 p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-800 dark:text-emerald-300 shadow-sm min-w-0">
+                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-emerald-900 dark:text-emerald-200">
+                          Tự động xác định theo VTVL & Thẩm quyền:
+                        </span>
+                        {supervisorCode !== autoDetectedSupervisor.code ? (
+                          <button
+                            type="button"
+                            onClick={() => setSupervisorCode(autoDetectedSupervisor.code)}
+                            className="text-emerald-700 dark:text-emerald-400 underline font-medium hover:text-emerald-900 cursor-pointer"
+                          >
+                            (Đặt lại theo chuẩn VTVL)
+                          </button>
+                        ) : (
+                          <Badge className="text-[10px] h-4 bg-emerald-600 text-white font-normal">
+                            Chuẩn VTVL Đề án 01
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-slate-700 dark:text-slate-300 font-medium truncate">
+                        {autoDetectedSupervisor.name}
+                        {autoDetectedSupervisor.jobTitle ? ` - ${autoDetectedSupervisor.jobTitle}` : ""}
+                        {autoDetectedSupervisor.unitName ? ` (${autoDetectedSupervisor.unitName})` : ""}
+                      </div>
+                      <div className="text-[10.5px] text-emerald-700/90 dark:text-emerald-400/90 wrap-break-word">
+                        {autoDetectedSupervisor.reason}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Phối hợp thực hiện */}
-              <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+              <div className="space-y-2 pt-2 border-t border-slate-200/80 dark:border-slate-800/80 min-w-0">
                 <Label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                   <UsersIcon className="w-3.5 h-3.5 text-slate-500" /> Nhân sự / Đơn vị phối hợp thực hiện
                 </Label>
                 <Select value="" onValueChange={handleAddCoordinator}>
-                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-9 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm text-xs">
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-9 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm text-xs min-w-0">
                     <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {departments.length > 0 && (
                       <SelectGroup>
                         <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Phòng ban</SelectLabel>
@@ -924,11 +1134,19 @@ export function CreateTaskDialog({
                         <SelectLabel className="text-xs text-slate-500 uppercase font-semibold">Nhân viên</SelectLabel>
                         {employees
                           .filter((e: any) => e.employeeCode !== assignee && !coordinators.find((c) => c.id === e.employeeCode))
-                          .map((emp: any) => (
-                            <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                              👤 {emp.fullName} ({emp.employeeCode})
-                            </SelectItem>
-                          ))}
+                          .map((emp: any) => {
+                            const d = departments.find((x: any) => x.id === emp.departmentId || x.id === emp.department?.id);
+                            return (
+                              <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
+                                <div className="flex items-center gap-1.5 truncate">
+                                  <span>👤 {emp.fullName}</span>
+                                  <span className="text-[11px] text-slate-400">
+                                    ({d?.name || emp.unitName || emp.jobTitleName || emp.employeeCode})
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
                       </SelectGroup>
                     )}
                   </SelectContent>
@@ -1264,7 +1482,7 @@ export function CreateTaskDialog({
                       <UserIcon className="w-3 h-3 text-blue-500" /> Người phụ trách bước:
                     </Label>
                     <Select value={stepAssignee} onValueChange={setStepAssignee}>
-                      <SelectTrigger className="h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200">
+                      <SelectTrigger className="h-8 text-xs bg-slate-50 dark:bg-slate-900 border-slate-200 min-w-0">
                         <SelectValue placeholder="Chọn người phụ trách bước..." />
                       </SelectTrigger>
                       <SelectContent className="max-h-[250px]">
@@ -1278,21 +1496,29 @@ export function CreateTaskDialog({
                           <SelectItem value="ASSIGNEE">
                             <div className="flex items-center gap-1.5 font-medium text-blue-700 dark:text-blue-300">
                               <span>🎯 Người chủ trì nhận việc</span>
-                              <span className="text-[11px] text-slate-400">({assignee})</span>
+                              <span className="text-[11px] text-slate-400">
+                                ({assignee.startsWith("DEPT_")
+                                  ? departments.find((d: any) => `DEPT_${d.id}` === assignee)?.name || "Cả phòng ban"
+                                  : employees.find((e: any) => e.employeeCode === assignee)?.fullName || assignee})
+                              </span>
                             </div>
                           </SelectItem>
                         )}
-                        <SelectGroup>
-                          <SelectLabel className="text-[10px] text-slate-400 uppercase">Cá nhân khác</SelectLabel>
-                          {employees
-                            .filter((emp: any) => emp.employeeCode !== currentUser?.employeeCode)
-                            .map((emp: any) => (
+                        {stepAssigneeOptions.list.length > 0 && (
+                          <SelectGroup>
+                            <SelectLabel className="text-[10px] text-blue-600 dark:text-blue-400 uppercase font-semibold">
+                              {stepAssigneeOptions.label}
+                            </SelectLabel>
+                            {stepAssigneeOptions.list.map((emp: any) => (
                               <SelectItem key={emp.employeeCode} value={emp.employeeCode}>
-                                <span>👤 {emp.fullName}</span>
-                                <span className="text-[10px] text-slate-400 ml-1">({emp.jobTitleName || emp.employeeCode})</span>
+                                <div className="flex items-center gap-1.5 truncate">
+                                  <span>👤 {emp.fullName}</span>
+                                  <span className="text-[10px] text-slate-400">({emp.jobTitleName || emp.employeeCode})</span>
+                                </div>
                               </SelectItem>
                             ))}
-                        </SelectGroup>
+                          </SelectGroup>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -1460,13 +1686,15 @@ export function CreateTaskDialog({
           </div>
 
           {/* TẦNG 3: FOOTER CỐ ĐỊNH */}
-          <div className="shrink-0 p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-sm flex items-center justify-between gap-3">
+          <div className="shrink-0 p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-sm flex items-center justify-between gap-3 min-w-0 max-w-full">
             <div className="text-xs text-slate-500 truncate min-w-0 hidden sm:block">
               {assignee && (
                 <span>
                   Chủ trì:{" "}
                   <strong className="text-slate-700 dark:text-slate-300">
-                    {assignee.startsWith("DEPT_") ? "Phòng ban" : assignee}
+                    {assignee.startsWith("DEPT_")
+                      ? `Phòng ban (${departments.find((d: any) => `DEPT_${d.id}` === assignee)?.name || "Đơn vị"})`
+                      : employees.find((e: any) => e.employeeCode === assignee)?.fullName || assignee}
                   </strong>
                 </span>
               )}
@@ -1474,13 +1702,15 @@ export function CreateTaskDialog({
                 <span className="ml-2">
                   • Phê duyệt:{" "}
                   <strong className="text-emerald-700 dark:text-emerald-400">
-                    {supervisorCode}
+                    {autoDetectedSupervisor?.code === supervisorCode
+                      ? autoDetectedSupervisor.name
+                      : employees.find((e: any) => e.employeeCode === supervisorCode)?.fullName || supervisorCode}
                   </strong>
                 </span>
               )}
             </div>
 
-            <SheetFooter className="flex items-center gap-2 p-0 sm:space-x-0 ml-auto">
+            <SheetFooter className="flex items-center gap-2 p-0 sm:space-x-0 ml-auto shrink-0">
               <Button
                 type="button"
                 variant="ghost"

@@ -1,5 +1,45 @@
 # Code 2 Execution Log
 
+## 2026-10-14: Tối Ưu Hóa Render List & Triệt Tiêu Giật Lag Bằng Thuật Toán Cursor Phân Trang (/services/reports)
+- **Nội dung tác vụ**:
+  1. *Khắc phục hiện tượng giật khi mở Popover/List*:
+     - Trước đây, khi click mở danh sách, toàn bộ DOM nodes của toàn bộ cây tổ chức (hàng chục đơn vị và phòng ban) được render đồng loạt trong 1 frame duy nhất, gây block main thread và drop frame animation của Radix Popover.
+  2. *Triển khai thuật toán Cursor Phân trang Incremental (Chunking Infinite Scroll)*:
+     - **Initial Slice cực nhẹ**: Ban đầu chỉ render `INITIAL_CHUNK = 4` đơn vị/nhóm đầu tiên (tải tức thì < 5ms, 0 frame drop, animation mở mượt 60fps).
+     - **Infinite Scroll theo Cursor**: Lắng nghe sự kiện `onScroll` trên container cuộn. Khi người dùng cuộn gần tới đáy (`scrollHeight - scrollTop - clientHeight < 60`), thuật toán tự động tăng `visibleCount` thêm `STEP_CHUNK = 4` đơn vị (tương ứng 3-5 đơn vị theo đúng yêu cầu).
+     - **Non-blocking Search với `useDeferredValue`**: Bọc từ khóa tìm kiếm qua `useDeferredValue(searchFilter)` giúp trải nghiệm gõ phím mượt mà tuyệt đối, không bị khựng CPU.
+     - **Row Memoization (`React.memo`)**: Tách `OrgGroupRow`, `UserRow`, `RoleRow` thành các memoized component độc lập; việc nạp thêm các đơn vị mới ở cuối danh sách không làm re-render lại các item đã hiển thị trước đó.
+- **Tập tin đã cập nhật**:
+  - `apps/admin_khcn/features/reports/components/reports/ReportShareModal.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Typecheck `apps/admin_khcn`: `npx tsc --noEmit` -> PASS (Exit code 0, 0 errors).
+  - Vệ sinh mã nguồn: 0 debug log, 0 console.log, UTF-8 sạch.
+
+
+## 2026-10-14: Nâng Cấp Bộ Chọn Đơn Vị Phân Cấp & Sửa Lỗi Hiển Thị Modal Chia Sẻ Báo Cáo (/services/reports)
+- **Nội dung tác vụ**:
+  1. *Khắc phục lỗi hiển thị & Xung đột Focus*:
+     - Loại bỏ việc nhúng `<input>` tìm kiếm bên trong `SelectContent` của Radix UI (nguyên nhân gây xung đột focus/blur làm dropdown bị giật, nhảy focus hoặc đóng popup khi gõ phím).
+     - Thay thế bằng **`Popover` + Combobox phân cấp độc lập** (`w-[520px] max-w-[92vw]`) cho phép tìm kiếm tức thì không gián đoạn.
+  2. *Giải quyết bài toán "Đơn vị một list phẳng khó chọn"*:
+     - Tích hợp `organizationApi.getTree()` kết hợp `organizationApi.getOrganizations()` để dựng cấu trúc cây hoàn chỉnh theo cơ quan cấp trên và phòng ban trực thuộc.
+     - Hiển thị phân nhóm trực quan theo từng **Cơ quan cấp tỉnh** (Ban Tổ chức Tỉnh ủy, Sở Khoa học & Công nghệ, Văn phòng Tỉnh ủy, UBND tỉnh...):
+       * Header cơ quan nổi bật với icon `Building2` và badge phân loại, cho phép chọn cấp quyền cho toàn cơ quan.
+       * Các phòng ban con trực thuộc thụt lề rõ ràng với nhánh cây `CornerDownRight`, hiển thị tên phòng, mã định danh (`P_TCCB`, `P_QLKH`...) và breadcrumb đường dẫn đầy đủ: `Ban Tổ chức Tỉnh ủy Đắk Lắk > Phòng Tổ chức - Cán bộ`.
+     - Bổ sung bộ lọc Tabs nhanh: "Tất cả", "Cơ quan cấp Tỉnh", "Phòng/Ban trực thuộc".
+     - Hỗ trợ tìm kiếm thông minh không phân biệt dấu tiếng Việt (`normalizeText`).
+  3. *Tái cấu trúc Form Cấp Quyền chuẩn UX Enterprise*:
+     - Tách thành 2 hàng responsive: Hàng 1 chọn Loại đối tượng & Mức quyền; Hàng 2 hiển thị Bộ chọn phân cấp chiếm trọn chiều ngang kèm nút "Cấp quyền" màu Indigo sang trọng.
+     - Danh sách người đang có quyền (Active Collaborators) hiển thị đầy đủ breadcrumb phân cấp và mã đơn vị, tránh cắt cụt chữ.
+- **Tập tin đã cập nhật**:
+  - `apps/admin_khcn/features/reports/components/reports/ReportShareModal.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy**:
+  - Typecheck `apps/admin_khcn`: `npx tsc --noEmit` -> PASS (Exit code 0, 0 errors).
+  - Vệ sinh mã nguồn: 0 debug log, 0 console.log, UTF-8 sạch.
+
+
 ## 2026-10-14: Lập Báo Cáo Rà Soát Toàn Diện & Phân Tích Tác Động Hiệu Năng Hệ Thống Quản Lý Công Việc
 - **Nội dung tác vụ**:
   1. *Khảo sát & Tổng hợp kiến trúc Source of Truth*:

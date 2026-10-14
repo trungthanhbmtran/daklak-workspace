@@ -1,5 +1,52 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Khắc Phục Tràn Sheet Giao Việc, Tối Ưu UX Phân Cấp Phòng Ban Chủ Trì & Giới Hạn Nhân Sự Bước Theo Nhóm Phối Hợp
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu người dùng**:
+  1. Giao diện "Giao việc mới" tại `http://113.184.220.82/admin/services/hrm/work-plans/tasks` bị lỗi hiển thị tràn ngoài sheet.
+  2. Phần danh sách Chủ trì nhận việc đang rất khó dùng và nặng (load flat 200 nhân sự), người dùng không thể xác định được cụ thể thuộc phòng ban nào. Yêu cầu nghiên cứu phân cấp: Chọn phòng ban trước, rồi từ phòng ban Lãnh đạo phòng mới giao việc tiếp (hoặc chọn cá nhân cụ thể thuộc phòng ban đó).
+  3. Trong bước thực hiện (Checklist), nếu công việc được giao cho một nhóm người thì người xây dựng bước chỉ thấy các nhân sự được giao phối hợp trong việc đó, tránh hiển thị dư thừa toàn bộ cán bộ cơ quan.
+- **Giải pháp triển khai**:
+  - **Khắc phục triệt để tràn Sheet**:
+    - `SheetContent`: bổ sung `max-w-full overflow-hidden w-full sm:max-w-3xl`.
+    - Form body: `flex-1 flex flex-col min-h-0 overflow-hidden`, thanh cuộn `overflow-y-auto min-w-0 pr-3 sm:pr-4`.
+    - Thêm `min-w-0` vào 100% các phần tử con trực tiếp của `grid` và `flex`, thanh Quick Presets hỗ trợ `overflow-x-auto min-w-0 scrollbar-thin`.
+    - Footer form có `min-w-0 max-w-full` và `SheetFooter shrink-0` không đẩy tràn layout.
+  - **Phân cấp Chọn Phòng ban trước -> Chọn Lãnh đạo / Chuyên viên hoặc Giao cả phòng**:
+    - Tại `CreateTaskDialog` & `TaskAssignDialog`:
+      - Trường 1: **Đơn vị / Phòng ban chủ trì** (`selectedDepartmentId`) cho phép chọn rõ ràng phòng ban trực thuộc kèm số lượng nhân sự.
+      - Trường 2: **Chủ trì nhận việc** (`assignee`):
+        + Nhóm 1: "🏢 Giao cho cả phòng ban (Lãnh đạo phòng sẽ phân công tiếp)" -> gán `DEPT_${deptId}`.
+        + Nhóm 2: "Lãnh đạo phòng ban" (Trưởng/Phó phòng ban, hiển thị icon & chức danh VTVL).
+        + Nhóm 3: "Chuyên viên & Nhân sự" (hiển thị Họ tên, mã NV, chức danh VTVL).
+      - Đồng bộ hai chiều mượt mà: Khi chọn preset/template có sẵn, tự động truy vết và chọn đúng phòng ban tương ứng.
+      - Phần phối hợp thực hiện: hiển thị rõ tên phòng ban của từng cán bộ phối hợp (`👤 Họ tên (Phòng ban)`).
+  - **Thu gọn nhân sự xây dựng Bước (Checklist) theo đúng nhóm người tham gia việc**:
+    - Tại `CreateTaskDialog` (Initial steps):
+      - Phân tích danh sách `coordinators` đã thêm vào nhiệm vụ.
+      - Nếu nhiệm vụ có người phối hợp: dropdown chỉ hiển thị `Bản thân tôi phụ trách`, `Người chủ trì`, và `Nhân sự phối hợp trong nhiệm vụ (${n})`.
+      - Nếu nhiệm vụ giao cho Phòng ban: chỉ hiển thị nhân sự thuộc phòng ban đó.
+      - Tuyệt đối không hiển thị dư thừa hàng trăm nhân sự ngoài phạm vi công việc.
+    - Tại `CreateStepDialog` (Thêm bước trong chi tiết công việc):
+      - Đọc nhóm nhân sự phối hợp từ `task.participants` (role `COORDINATOR`), `task.coAssignees`, `task.coassigneeCodes` hoặc `task.coordinators`.
+      - Dropdown chỉ hiển thị: Bản thân tôi, Người chủ trì, và danh sách các nhân sự được giao phối hợp trong việc này (hoặc nhân sự cùng phòng ban nhận việc).
+      - Triệt tiêu 100% tình trạng tràn danh sách nhân sự không liên quan.
+
+### 2. Danh mục File Thay Đổi
+- `apps/admin_khcn/features/hrm/components/tasks/create-task-dialog.tsx`
+- `apps/admin_khcn/features/hrm/components/tasks/create-step-dialog.tsx`
+- `apps/admin_khcn/features/hrm/components/tasks/task-assign-dialog.tsx`
+- `.agents/current_plan.md`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (PASS 100%, 0 lỗi TypeScript)**.
+- Quét mã nguồn: **0 câu lệnh `console.log` / `debugger`**.
+- File lưu UTF-8 không BOM, không phá vỡ bất kỳ contract nào.
+
+---
+
 ## [2026-10-14] Loại Bỏ Triệt Để Raw SQL ($queryRaw) — Chuyển Sang 100% Pure Prisma ORM Type-Safe
 
 ### 1. Phạm vi & Mục tiêu
