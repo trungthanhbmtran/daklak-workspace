@@ -1,5 +1,55 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-14] Điều Chỉnh Toàn Diện Phân Quyền PBAC Theo Nghiệp Vụ Thực Tế & Khóa Phạm Vi Nhân Sự Theo Cây Đơn Vị
+
+### 1. Phạm vi & Mục tiêu
+- **Yêu cầu người dùng**:
+  - Điều chỉnh lại phân quyền (PBAC) vì nhiều quyền cấp không đúng thực tế.
+  - Phần nhân sự phải bám theo đơn vị và phạm vi của user đang sử dụng.
+- **Nguyên nhân cốt lõi phát hiện từ khảo sát thực tế**:
+  1. *Lỗi phân quyền ảo:* Trong seed Ban Tổ chức Tỉnh ủy (`10-daklak-party-organizations.seed.ts`), hệ thống gán policy vào các Resource code ảo bằng tiếng Việt (`CAN_BO`, `DANG_VIEN`, `BAO_CAO_THONG_KE`, `TO_CHUC_DANG`...) không tồn tại trong bảng `Resource`. Kết quả: `getResource` trả về `undefined` và bỏ qua 100% policies, khiến các nhóm cán bộ của BTCTU có 0 permissions khi đăng nhập!
+  2. *Quyền hạn thiếu thực tế:* Lãnh đạo đơn vị thiếu quyền `TASK:CREATE`, `TASK:EVALUATE`, `TASK:REASSIGN`, `REPORT:EXPORT`. Chuyên viên thiếu quyền `REPORT:VIEW`, `REPORT:CREATE`, `PLAN:VIEW`, `MEETING:VIEW`.
+  3. *Lỗi rò rỉ nhân sự đa đơn vị:* Trong `hrm-service/src/modules/employees/employees.service.ts`, hàm `list` bỏ quên tham số `departmentPathPrefix` được truyền từ API Gateway; đồng thời thiếu điều kiện `where.isDeleted = false`. Khi truy vấn, hệ thống trả về toàn bộ nhân sự các sở ban ngành khác mà không cô lập theo cây đơn vị của user đang đăng nhập.
+  4. *Lỗi loại trừ chính mình:* Gateway gán cứng `excludeEmployeeCode = callerEmployeeCode` cho mọi request, khiến người dùng truy cập danh sách nhân sự không thể thấy hồ sơ của chính mình.
+- **Giải pháp kỹ thuật chuẩn xác đã thực thi**:
+  - **Phân quyền PBAC (`04-pbac.seed.ts` & `10-daklak-party-organizations.seed.ts` & `sync-pbac.ts`)**:
+    - Chuẩn hóa 100% Resource code theo hệ thống: `TASK`, `HRM_EMPLOYEE`, `REPORT`, `DOCUMENT`, `DOC_INCOMING`, `DOC_OUTGOING`, `DOC_INTERNAL`, `DOC_DRAFT`, `DOC_PUBLISH`, `WORKFLOW`, `PLAN`, `MEETING`, `ORGANIZATION`, `CATEGORY`, `USER`, `ROLE`, `SYSTEM`.
+    - Phân quyền theo đúng thẩm quyền hành chính:
+      + `Lãnh đạo Ban Tổ chức Tỉnh ủy`: Toàn quyền công việc (`TASK:*`), phê duyệt & thẩm định đánh giá KPI, xem toàn bộ nhân sự cơ quan (`HRM_EMPLOYEE:VIEW`), duyệt và phát hành văn bản, duyệt và xuất báo cáo (`REPORT:*`), duyệt kế hoạch, lịch họp.
+      + `Lãnh đạo Phòng`: Giao việc, thẩm định bước và đánh giá kết quả (`TASK:VIEW`, `CREATE`, `UPDATE`, `APPROVE`, `ASSIGN`, `REASSIGN`, `EVALUATE`), xem nhân sự phòng, lập báo cáo phòng, duyệt văn bản phòng.
+      + `Chuyên viên các phòng`: Nhận việc, cập nhật tiến độ, nộp sản phẩm, tạo việc phát sinh (`TASK:VIEW`, `CREATE`, `UPDATE`), tra cứu danh bạ cán bộ (`HRM_EMPLOYEE:VIEW`), lập báo cáo cá nhân (`REPORT:VIEW`, `CREATE`, `UPDATE`, `EXPORT`), soạn dự thảo văn bản (`DOC_DRAFT`), xem kế hoạch, lịch họp.
+      + `Phòng Tổ chức cán bộ`: Bổ sung quyền cập nhật hồ sơ cán bộ, bổ nhiệm (`HRM_EMPLOYEE:VIEW`, `CREATE`, `UPDATE`).
+      + `Văn thư`: Toàn quyền văn thư lưu trữ (`DOCUMENT:*`, `DOC_*`), quản lý lịch họp, báo cáo.
+      + `Quản trị CNTT`: Quản trị hệ thống, người dùng, vai trò, menu, nhân sự (`USER:*`, `ROLE:*`, `RESOURCE:*`, `ORGANIZATION:*`, `HRM_EMPLOYEE:*`).
+  - **Khóa phạm vi Nhân sự theo Đơn vị (`hrm-service` & `api-gateway`)**:
+    - `hrm-service`:
+      + Áp dụng `isDeleted: false`.
+      + Tích hợp `departmentPathPrefix` và `callerUnitId` vào bộ lọc `where.AND`: nhân sự chỉ hiển thị trong phạm vi cây đơn vị (`departmentPath.startsWith(prefix)`) hoặc `departmentId = callerUnitId`.
+      + Nếu có chỉ định `departmentId` con hợp lệ trong cây đơn vị, ưu tiên lọc theo phòng ban con đó.
+    - `api-gateway`:
+      + Chuẩn hóa nhận diện Admin: kết hợp `HRM_EMPLOYEE:MANAGE`, `HRM_EMPLOYEE:*`, `SYSTEM:*`, `Quản trị viên hệ thống`.
+      + Không là Admin: tự động truy vấn `hierarchyPath` từ `callerUnitId` và gán `departmentPathPrefix` sang HRM Service.
+      + Chỉ loại trừ `callerEmployeeCode` khi `assignableOnly: true` (lúc giao việc), giữ nguyên cán bộ trong danh sách nhân sự cơ quan.
+      + Trong `user.service.ts`: mở rộng kiểm tra `isAdmin` và fallback `unitCodeStartsWith` chuẩn xác.
+
+### 2. Danh mục File Đã Chỉnh Sửa
+- `apps/hrm-service/src/modules/employees/employees.service.ts`
+- `apps/api-gateway/src/modules/hrm/employee.service.ts`
+- `apps/api-gateway/src/modules/users/user.service.ts`
+- `apps/user-service/prisma/seeds/04-pbac.seed.ts`
+- `apps/user-service/prisma/seeds/10-daklak-party-organizations.seed.ts`
+- `apps/user-service/prisma/sync-pbac.ts`
+- `.agents/execution_logs/code1.md`
+
+### 3. Bằng chứng Kiểm chứng Máy Thực tế
+- `apps/hrm-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/user-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS 100%)**.
+- Rà soát mã nguồn: 0 `console.log` / `debugger` mới, tuân thủ PBAC Context Scoping và Service Sovereignty.
+
+---
+
 ## [2026-10-14] Tái Thiết Kế UX/UI Vị Trí Nút Thẩm Định & Đánh Giá Của Lãnh Đạo Theo Chuẩn Enterprise
 
 ### 1. Phạm vi & Mục tiêu

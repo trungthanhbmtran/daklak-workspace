@@ -188,7 +188,12 @@ export class EmployeeService implements OnModuleInit {
     if (req.crossDepartment === 'true' || req.crossDepartment === true)
       req.crossDepartment = true;
 
-    const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
+    const isAdmin =
+      user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE') ||
+      user?.permissionsFlatten?.includes('HRM_EMPLOYEE:*') ||
+      user?.permissionsFlatten?.includes('SYSTEM:*') ||
+      user?.roles?.includes('Quản trị viên hệ thống') ||
+      user?.roles?.includes('Quản trị viên Hệ thống');
 
     if (req.callerUnitId && !isAdmin) {
       const callerUnitId = parseInt(req.callerUnitId, 10);
@@ -202,7 +207,9 @@ export class EmployeeService implements OnModuleInit {
       } catch (e) {
         // Fallback
       }
-      req.excludeEmployeeCode = req.callerEmployeeCode;
+      if (req.assignableOnly) {
+        req.excludeEmployeeCode = req.callerEmployeeCode;
+      }
     }
 
     const res: any = await this.executeWithDicts(

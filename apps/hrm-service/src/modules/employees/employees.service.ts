@@ -305,6 +305,7 @@ export class EmployeesService {
     ids?: number[];
     codes?: string[];
     departmentPathPrefix?: string;
+    callerUnitId?: number;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(params.pageSize) || 20));
@@ -320,18 +321,22 @@ export class EmployeesService {
       where.employeeCode = { in: allowedCodesFromCodesParam };
     }
 
+    const andConditions: Prisma.EmployeeWhereInput[] = [
+      { isDeleted: false },
+    ];
+
     if (params.keyword) {
       const kw = params.keyword.trim();
-      // MySQL: collation mặc định (*_ci) đã case-insensitive sẵn, không cần "mode".
-      // Nếu cột nào dùng collation *_bin thì cần ALTER COLLATION ở DB, không xử lý ở code.
-      where.OR = [
-        { firstname: { contains: kw } },
-        { lastname: { contains: kw } },
-        { fullName: { contains: kw } },
-        { email: { contains: kw } },
-        { employeeCode: { contains: kw } },
-        { identityCard: { contains: kw } },
-      ];
+      andConditions.push({
+        OR: [
+          { firstname: { contains: kw } },
+          { lastname: { contains: kw } },
+          { fullName: { contains: kw } },
+          { email: { contains: kw } },
+          { employeeCode: { contains: kw } },
+          { identityCard: { contains: kw } },
+        ],
+      });
     }
 
     // Proto3 gửi mặc định int32 = 0; chỉ lọc khi client thực sự truyền id > 0
@@ -340,10 +345,36 @@ export class EmployeesService {
     if (params.partyTitleId != null && params.partyTitleId > 0) where.partyTitleId = params.partyTitleId;
     if (params.employmentStatus) where.employmentStatus = params.employmentStatus;
 
-    if (params.descendantUnitIds && params.descendantUnitIds.length > 0) {
-      where.departmentId = { in: params.descendantUnitIds };
+    // Giới hạn phạm vi theo cây đơn vị (departmentPathPrefix) hoặc đơn vị của người dùng
+    if (params.departmentPathPrefix && params.departmentPathPrefix.trim()) {
+      const prefix = params.departmentPathPrefix.trim();
+      const unitIdNum = params.callerUnitId ? Number(params.callerUnitId) : null;
+
+      if (params.departmentId != null && params.departmentId > 0) {
+        andConditions.push({ departmentId: params.departmentId });
+      } else {
+        const scopeOrs: Prisma.EmployeeWhereInput[] = [
+          { departmentPath: { startsWith: prefix } },
+        ];
+        if (unitIdNum) {
+          scopeOrs.push(
+            { departmentPath: { contains: `/${unitIdNum}/` } },
+            { departmentPath: { startsWith: `${unitIdNum}/` } },
+            { departmentId: unitIdNum },
+          );
+        }
+        andConditions.push({ OR: scopeOrs });
+      }
+    } else if (params.descendantUnitIds && params.descendantUnitIds.length > 0) {
+      andConditions.push({ departmentId: { in: params.descendantUnitIds } });
     } else if (params.departmentId != null && params.departmentId > 0) {
-      where.departmentId = params.departmentId;
+      andConditions.push({ departmentId: params.departmentId });
+    } else if (params.callerUnitId && params.callerUnitId > 0) {
+      andConditions.push({ departmentId: params.callerUnitId });
+    }
+
+    if (andConditions.length > 0) {
+      where.AND = andConditions;
     }
 
     if (params.excludeEmployeeCode) {

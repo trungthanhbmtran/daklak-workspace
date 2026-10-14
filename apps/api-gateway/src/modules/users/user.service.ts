@@ -62,14 +62,20 @@ export class UserService implements OnModuleInit {
       : null;
 
     const isAdmin: boolean =
-      !!userInfo?.permissionsFlatten?.includes('USER:MANAGE');
+      !!userInfo?.permissionsFlatten?.includes('USER:MANAGE') ||
+      !!userInfo?.permissionsFlatten?.includes('USER:*') ||
+      !!userInfo?.permissionsFlatten?.includes('SYSTEM:*') ||
+      !!userInfo?.roleNames?.includes('Quản trị viên hệ thống') ||
+      !!user?.roles?.includes('Quản trị viên hệ thống');
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
-      if (!userInfo?.unitCode) {
+      const effUnitCode =
+        userInfo?.unitCode || userInfo?.jobPositions?.[0]?.unit?.code;
+      if (!effUnitCode) {
         return { data: [], meta: { total: 0 } };
       }
-      unitCodeStartsWith = userInfo!.unitCode;
+      unitCodeStartsWith = effUnitCode;
     }
 
     const response = (await firstValueFrom(
