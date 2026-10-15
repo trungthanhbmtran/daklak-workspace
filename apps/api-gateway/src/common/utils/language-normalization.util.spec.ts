@@ -26,6 +26,8 @@ describe('Language Normalization Utility (API Gateway)', () => {
       expect(getTaskStatusLabel('COMPLETED')).toBe('Đã hoàn thành');
       expect(getTaskStatusLabel('OVERDUE')).toBe('Quá hạn');
       expect(getTaskStatusLabel('PENDING_APPROVAL')).toBe('Chờ phê duyệt');
+      expect(getTaskStatusLabel('PENDING_REVIEW')).toBe('Chờ duyệt');
+      expect(getTaskStatusLabel('REVIEWING')).toBe('Chờ duyệt');
     });
 
     it('should map document statuses', () => {

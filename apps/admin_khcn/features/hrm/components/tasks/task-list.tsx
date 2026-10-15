@@ -223,7 +223,7 @@ export function TaskList() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] min-w-0 [&>span]:truncate" title="Lọc theo trạng thái công việc">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
@@ -238,24 +238,25 @@ export function TaskList() {
           </Select>
         </div>
         {canCreateTask && (
-          <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
+          <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm shrink-0">+ Giao việc mới</Button>
         )}
       </div>
 
-      <div className="flex-1 min-h-0 relative bg-white rounded-lg shadow-sm border border-slate-200">
+      <div className="flex-1 min-h-0 relative bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden w-full min-w-0">
         <ResponsiveTable
           loading={isLoading}
           data={visibleTasks}
           keyExtractor={(task) => task.id}
           emptyMessage={isError ? "Không thể tải danh sách công việc." : "Không tìm thấy công việc nào"}
+          tableClassName="w-full table-fixed"
           columns={[
             {
               header: "Tên công việc",
-              className: "w-[400px]",
+              className: "w-auto min-w-[280px] whitespace-normal align-top",
               cell: (task: any) => {
                 const { depth, isLastChild, ancestorsLast, isExpanded, hasSubTasks } = task._treeInfo;
                 return (
-                  <div className="flex relative" style={{ paddingLeft: `${depth * 2}rem` }}>
+                  <div className="flex relative w-full min-w-0" style={{ paddingLeft: `${Math.min(depth, 3) * 1.25}rem` }}>
                     <TreeLines
                       depth={depth}
                       isLastChild={isLastChild}
@@ -263,9 +264,9 @@ export function TaskList() {
                       isExpanded={isExpanded}
                       hasSubTasks={hasSubTasks}
                     />
-                    <div className="flex items-center gap-1.5 relative z-10 w-full pl-6">
+                    <div className="flex items-start gap-1.5 relative z-10 w-full min-w-0 pl-6">
                       {hasSubTasks && (
-                        <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white absolute -left-[2px]">
+                        <div className="flex items-center justify-center w-5 h-5 shrink-0 bg-white absolute -left-[2px] top-1">
                           <Button
                             variant="ghost"
                             onClick={() => toggleExpand(task.id)}
@@ -275,39 +276,45 @@ export function TaskList() {
                           </Button>
                         </div>
                       )}
-                      <div className="flex flex-col py-1">
-                        <span className={`line-clamp-2 ${depth > 0 ? "text-slate-700" : "font-semibold"}`}>
+                      <div className="flex flex-col py-0.5 min-w-0 w-full">
+                        <span
+                          title={task.title}
+                          onClick={() => setSelectedTaskId(Number(task.id))}
+                          className={`whitespace-normal break-words wrap-break-word line-clamp-2 sm:line-clamp-3 text-sm leading-snug cursor-pointer hover:text-blue-600 transition-colors ${
+                            depth > 0 ? "text-slate-700 font-medium" : "font-semibold text-slate-900"
+                          }`}
+                        >
                           {task.title}
                         </span>
-                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 min-w-0">
                           {task.metadata?.taskType === "REGULAR" && (
-                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-amber-50 text-amber-700 font-normal text-[10px] border-amber-200">
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-amber-50 text-amber-700 font-normal text-[10px] border-amber-200 shrink-0">
                               <Briefcase className="w-3 h-3 mr-1" /> Thường xuyên
                             </Badge>
                           )}
                           {task.metadata?.taskType === "PERIODIC" && (
-                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-emerald-50 text-emerald-700 font-normal text-[10px] border-emerald-200">
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-emerald-50 text-emerald-700 font-normal text-[10px] border-emerald-200 shrink-0">
                               <Repeat className="w-3 h-3 mr-1" /> Định kỳ
                             </Badge>
                           )}
                           {task.sourceDocumentRef && depth === 0 && (
-                            <Badge variant="secondary" className="flex items-center px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100">
-                              <Clock className="w-3 h-3 mr-1" />
-                              VB: {task.sourceDocumentRef}
+                            <Badge variant="secondary" className="flex items-center px-1.5 py-0 bg-blue-50 hover:bg-blue-100 text-blue-600 font-normal text-[11px] border border-blue-100 shrink-0 max-w-[200px] truncate" title={`Văn bản: ${task.sourceDocumentRef}`}>
+                              <Clock className="w-3 h-3 mr-1 shrink-0" />
+                              <span className="truncate">VB: {task.sourceDocumentRef}</span>
                             </Badge>
                           )}
                           {task.isOverdueWarned && (
-                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-red-100 text-red-800 font-bold text-[10px] border-red-300">
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-red-100 text-red-800 font-bold text-[10px] border-red-300 shrink-0">
                               <AlertTriangle className="w-3 h-3 mr-1" /> Đã trễ hạn
                             </Badge>
                           )}
                           {task.isDeadlineWarned && !task.isOverdueWarned && (
-                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-red-50 text-red-700 font-normal text-[10px] border-red-200">
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-red-50 text-red-700 font-normal text-[10px] border-red-200 shrink-0">
                               <AlertTriangle className="w-3 h-3 mr-1" /> Sắp tới hạn
                             </Badge>
                           )}
                           {task.isRiskWarned && (
-                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-orange-50 text-orange-700 font-normal text-[10px] border-orange-200">
+                            <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-orange-50 text-orange-700 font-normal text-[10px] border-orange-200 shrink-0">
                               <AlertTriangle className="w-3 h-3 mr-1" /> Chậm tiến độ
                             </Badge>
                           )}
@@ -320,21 +327,32 @@ export function TaskList() {
             },
             {
               header: "Trạng thái",
-              cell: (task: any) => getStatusBadge(task.status, task.statusLabel)
+              className: "w-[125px] whitespace-nowrap text-center align-top",
+              cell: (task: any) => (
+                <div className="flex justify-center">
+                  {getStatusBadge(task.status, task.statusLabel)}
+                </div>
+              )
             },
             {
               header: "Mức độ",
-              cell: (task: any) => getPriorityBadge(task.priority, task.priorityLabel)
+              className: "w-[85px] whitespace-nowrap text-center align-top",
+              cell: (task: any) => (
+                <div className="flex justify-center">
+                  {getPriorityBadge(task.priority, task.priorityLabel)}
+                </div>
+              )
             },
             {
               header: "Người xử lý",
+              className: "w-[150px] whitespace-normal align-top",
               cell: (task: any) => (
-                <div className="flex flex-col">
-                  <Text as="span" variant="small" weight="medium">
+                <div className="flex flex-col min-w-0">
+                  <Text as="span" variant="small" weight="medium" className="whitespace-normal break-words wrap-break-word text-slate-800 text-xs leading-tight">
                     {task.assigneeName || task.assigneeDepartment?.name || task.assignee?.fullName || "Chưa phân công"}
                   </Text>
                   {task.coassigneeNames && task.coassigneeNames.length > 0 && (
-                    <Text as="span" className="text-slate-500 mt-0.5">
+                    <Text as="span" className="text-slate-500 mt-1 text-[11px] whitespace-normal break-words wrap-break-word leading-tight">
                       Phối hợp: {task.coassigneeNames.join(", ")}
                     </Text>
                   )}
@@ -343,11 +361,12 @@ export function TaskList() {
             },
             {
               header: "Thời hạn",
+              className: "w-[95px] whitespace-nowrap text-center align-top",
               cell: (task: any) => {
                 const isCompleted = task.isCompleted || task.status?.toUpperCase() === "COMPLETED" || task.status?.toUpperCase() === "DONE";
                 const isOverdue = !isCompleted && task.dueDate && new Date(task.dueDate) < new Date();
                 return (
-                  <div className={`text-sm ${isOverdue ? 'text-red-500 font-bold' : ''}`}>
+                  <div className={`text-xs ${isOverdue ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
                     {safeFormatDate(task.dueDate, "dd/MM/yyyy")}
                   </div>
                 );
@@ -355,16 +374,17 @@ export function TaskList() {
             },
             {
               header: "Tiến độ",
+              className: "w-[110px] whitespace-nowrap align-top pr-4",
               cell: (task: any) => (
-                <div className="flex flex-col gap-1 w-24">
-                  <Text as="span" className="text-[10px] font-semibold text-slate-600 leading-none">{task.progress}%</Text>
+                <div className="flex flex-col gap-1 w-full max-w-[80px]">
+                  <Text as="span" className="text-[11px] font-semibold text-slate-700 leading-none">{task.progress}%</Text>
                   <Progress value={task.progress} className="h-1.5" />
                 </div>
               )
             },
             {
               header: "Thao tác",
-              className: "text-right",
+              className: "w-[210px] whitespace-nowrap text-right align-top pl-4 pr-3",
               cell: (task: any) => {
                 const isReviewableStatus =
                   task.status === "REVIEWING" ||
@@ -374,16 +394,16 @@ export function TaskList() {
                 const showEvaluateBtn = isReviewableStatus && canEvaluateTask(task);
 
                 return (
-                  <div className="flex items-center justify-end gap-1.5 shrink-0">
+                  <div className="flex items-center justify-end gap-2 shrink-0">
                     {showEvaluateBtn && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setEvaluatingTask(task)}
-                        className="h-8 px-2 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 font-medium shadow-2xs"
+                        className="h-7 px-2.5 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 font-medium shadow-2xs shrink-0"
                         title="Mở màn hình Thẩm định & Đánh giá công việc"
                       >
-                        <Award className="w-3.5 h-3.5 mr-1 text-indigo-600" />
+                        <Award className="w-3.5 h-3.5 mr-1 text-indigo-600 shrink-0" />
                         Đánh giá
                       </Button>
                     )}
@@ -391,9 +411,9 @@ export function TaskList() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedTaskId(Number(task.id))}
-                      className="h-8 px-2 text-xs"
+                      className="h-7 px-2.5 text-xs text-slate-700 hover:text-slate-900 shrink-0"
                     >
-                      <Eye className="w-3.5 h-3.5 mr-1" />
+                      <Eye className="w-3.5 h-3.5 mr-1 shrink-0" />
                       Chi tiết
                     </Button>
                   </div>

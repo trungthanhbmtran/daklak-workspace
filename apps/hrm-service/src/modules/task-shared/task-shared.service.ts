@@ -37,6 +37,7 @@ export class TaskSharedService {
       TODO: 'Chờ thực hiện',
       PENDING_ACCEPTANCE: 'Chờ tiếp nhận',
       PENDING_APPROVAL: 'Chờ phê duyệt',
+      PENDING_REVIEW: 'Chờ duyệt',
       IN_PROGRESS: 'Đang thực hiện',
       PROCESSING: 'Đang thực hiện',
       REVIEWING: 'Chờ duyệt',

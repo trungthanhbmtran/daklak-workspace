@@ -8,12 +8,13 @@ import {
   TableRow,
   TableCaption
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { ResponsiveTableProps } from './types';
 
-export default function DesktopTable<T>({ columns, data, keyExtractor, caption, footer }: ResponsiveTableProps<T>) {
+export default function DesktopTable<T>({ columns, data, keyExtractor, caption, footer, className, tableClassName }: ResponsiveTableProps<T>) {
   return (
-    <div className="w-full">
-      <Table>
+    <div className={cn("w-full min-w-0 overflow-hidden", className)}>
+      <Table className={cn("w-full", tableClassName)}>
         {caption && <TableCaption>{caption}</TableCaption>}
         <TableHeader>
           <TableRow className="bg-muted/30">

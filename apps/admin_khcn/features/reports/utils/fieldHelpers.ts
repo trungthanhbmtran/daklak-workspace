@@ -93,6 +93,8 @@ export const STATUS_LABEL_MAP: Record<string, string> = {
   IN_PROGRESS: 'Đang thực hiện',
   PENDING_ACCEPTANCE: 'Chờ tiếp nhận',
   PENDING_APPROVAL: 'Chờ phê duyệt',
+  PENDING_REVIEW: 'Chờ duyệt',
+  REVIEWING: 'Chờ duyệt',
   COMPLETED: 'Đã hoàn thành',
   DONE: 'Đã hoàn thành',
   CANCELLED: 'Đã hủy',

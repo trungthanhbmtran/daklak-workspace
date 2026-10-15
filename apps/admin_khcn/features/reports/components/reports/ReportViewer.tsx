@@ -209,10 +209,22 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const isBtctuReport = useMemo(() => {
     return (
       definitionId === 5 ||
+      definitionId === 12 ||
       reportDef?.code?.includes('BTCTU') ||
       reportDef?.code?.includes('SOP') ||
       reportName.includes('Ban Tổ chức Tỉnh ủy') ||
       reportName.includes('SOP')
+    );
+  }, [definitionId, reportDef, reportName]);
+
+  // Nhận diện Bàn làm việc Nhiệm vụ Cá nhân & Điều phối HRM
+  const isPersonalWorkbench = useMemo(() => {
+    return (
+      definitionId === 17 ||
+      reportDef?.code === 'REP_PERSONAL_WORKBENCH' ||
+      reportDef?.code?.includes('PERSONAL') ||
+      reportName.includes('Bàn làm việc') ||
+      reportName.includes('Cá nhân')
     );
   }, [definitionId, reportDef, reportName]);
 
@@ -606,6 +618,10 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                   <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] shrink-0 font-semibold">
                     Chuẩn SOP 4 Bước
                   </Badge>
+                ) : isPersonalWorkbench ? (
+                  <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] shrink-0 font-semibold">
+                    Bàn làm việc Cá nhân (HRM)
+                  </Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-slate-100 text-slate-700 text-[11px] shrink-0 font-semibold">
                     {reportDef?.code || 'Báo cáo Hệ thống'}
@@ -619,6 +635,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 {reportDef?.description ||
                   (isBtctuReport
                     ? 'Khung Hướng dẫn 05-HD/TU & Quy định 348-QĐ/BTCTW • Đánh giá 05 Tập thể & 23 Cán bộ công chức'
+                    : isPersonalWorkbench
+                    ? 'Bàn làm việc cá nhân: Theo dõi chỉ số năng suất, xu hướng điểm KPI và tiến độ nhiệm vụ công việc'
                     : 'Báo cáo tổng hợp trích xuất số liệu phân tích thời gian thực')}
               </p>
             </div>
@@ -636,6 +654,20 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 <FileText className="w-4 h-4 text-amber-700 shrink-0" />
                 <span className="hidden md:inline">Dự thảo QĐ (Mẫu 05)</span>
                 <span className="md:hidden">Mẫu 05</span>
+              </Button>
+            )}
+
+            {/* Nút Chuyển nhanh tới Dashboard HRM */}
+            {isPersonalWorkbench && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/services/hrm/work-plans/tasks/dashboard')}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-900 border-blue-300 font-bold flex items-center gap-1.5 text-xs shadow-xs"
+              >
+                <LayoutDashboard className="w-4 h-4 text-blue-700 shrink-0" />
+                <span className="hidden md:inline">Dashboard Công việc HRM</span>
+                <span className="md:hidden">Dashboard HRM</span>
               </Button>
             )}
 
@@ -891,23 +923,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 w-full min-w-0">
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">{isBtctuReport ? 'Cán bộ đánh giá' : 'Tổng số bản ghi'}</span>
+              <span className="truncate">{isPersonalWorkbench ? 'Chỉ số & Nhiệm vụ cá nhân' : isBtctuReport ? 'Cán bộ đánh giá' : 'Tổng số bản ghi'}</span>
               <Users className="w-4 h-4 text-indigo-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-xl sm:text-2xl font-black text-slate-900">
                 {stats.totalCadres}
               </span>
-              <span className="text-xs text-slate-400 font-normal">{isBtctuReport ? 'đồng chí' : 'nhân sự'}</span>
+              <span className="text-xs text-slate-400 font-normal">{isPersonalWorkbench ? 'chỉ số / việc' : isBtctuReport ? 'đồng chí' : 'nhân sự'}</span>
             </div>
             <div className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1 truncate">
-              <CheckCircle2 className="w-3 h-3" /> {isBtctuReport ? '100% hoàn thành B1-B4' : 'Dữ liệu thời gian thực'}
+              <CheckCircle2 className="w-3 h-3" /> {isPersonalWorkbench ? 'Dữ liệu thời gian thực HRM' : isBtctuReport ? '100% hoàn thành B1-B4' : 'Dữ liệu thời gian thực'}
             </div>
           </div>
 
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">{isBtctuReport ? 'Điểm KPI TB Toàn cơ quan' : 'Điểm đánh giá TB'}</span>
+              <span className="truncate">{isPersonalWorkbench ? 'Điểm KPI TB Cá nhân' : isBtctuReport ? 'Điểm KPI TB Toàn cơ quan' : 'Điểm đánh giá TB'}</span>
               <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -917,29 +949,29 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <span className="text-xs text-slate-400 font-normal">/ 100 điểm</span>
             </div>
             <div className="text-[11px] text-slate-500 font-medium mt-1 truncate">
-              {isBtctuReport ? '30đ Chung + 70đ Nhiệm vụ' : 'Thang điểm đánh giá 100'}
+              {isPersonalWorkbench ? 'Xu hướng 6 tháng & nhiệm vụ giao' : isBtctuReport ? '30đ Chung + 70đ Nhiệm vụ' : 'Thang điểm đánh giá 100'}
             </div>
           </div>
 
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">{isBtctuReport ? 'Tỷ lệ Xuất sắc (Trần 20%)' : 'Xếp loại Xuất sắc'}</span>
+              <span className="truncate">{isPersonalWorkbench ? 'Nhiệm vụ Hoàn thành' : isBtctuReport ? 'Tỷ lệ Xuất sắc (Trần 20%)' : 'Xếp loại Xuất sắc'}</span>
               <Award className="w-4 h-4 text-amber-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-xl sm:text-2xl font-black text-indigo-600">
-                {stats.excellentRatio}%
+                {isPersonalWorkbench ? stats.excellentCount : `${stats.excellentRatio}%`}
               </span>
-              <span className="text-xs text-slate-400 font-normal">({stats.excellentCount}/{stats.totalCadres} CB)</span>
+              <span className="text-xs text-slate-400 font-normal">({stats.excellentCount}/{stats.totalCadres} {isPersonalWorkbench ? 'việc' : 'CB'})</span>
             </div>
             <div className="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1 truncate">
-              <ShieldCheck className="w-3 h-3" /> {isBtctuReport ? 'Đạt chuẩn trần ≤ 20%' : `${stats.excellentCount} nhân sự Xuất sắc`}
+              <ShieldCheck className="w-3 h-3" /> {isPersonalWorkbench ? `${stats.excellentCount} mục hoàn thành / xuất sắc` : isBtctuReport ? 'Đạt chuẩn trần ≤ 20%' : `${stats.excellentCount} nhân sự Xuất sắc`}
             </div>
           </div>
 
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">Tập thể Phòng ban</span>
+              <span className="truncate">{isPersonalWorkbench ? 'Đơn vị công tác' : 'Tập thể Phòng ban'}</span>
               <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -949,7 +981,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <span className="text-xs text-slate-400 font-normal">đơn vị</span>
             </div>
             <div className="text-[11px] text-blue-600 font-semibold mt-1 truncate">
-              {isBtctuReport ? '3 Xuất sắc • 2 Tốt' : `${stats.deptCount} phòng ban tham gia`}
+              {isPersonalWorkbench ? `${stats.deptCount} phòng ban theo dõi tải` : isBtctuReport ? '3 Xuất sắc • 2 Tốt' : `${stats.deptCount} phòng ban tham gia`}
             </div>
           </div>
 
@@ -972,16 +1004,16 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           ) : (
             <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
               <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-                <span className="truncate">Trạng thái Báo cáo</span>
+                <span className="truncate">{isPersonalWorkbench ? 'Bàn làm việc Cá nhân' : 'Trạng thái Báo cáo'}</span>
                 <Activity className="w-4 h-4 text-emerald-500 shrink-0" />
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="text-xl sm:text-2xl font-black text-emerald-600">
-                  Hoàn thành
+                  {isPersonalWorkbench ? 'Sẵn sàng' : 'Hoàn thành'}
                 </span>
               </div>
               <div className="text-[11px] text-slate-500 font-medium mt-1 truncate">
-                Phiên bản v{reportDef?.version || 1}
+                {isPersonalWorkbench ? 'Đồng bộ HRM Task Dashboard' : `Phiên bản v${reportDef?.version || 1}`}
               </div>
             </div>
           )}

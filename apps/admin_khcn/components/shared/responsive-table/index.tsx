@@ -24,7 +24,9 @@ export function ResponsiveTable<T>({
   emptyMessage = "Không có dữ liệu",
   loading = false,
   caption,
-  footer
+  footer,
+  className,
+  tableClassName,
 }: ResponsiveTableProps<T>) {
   const isMobile = useIsMobile();
   const [mounted, setMounted] = useState(false);
@@ -58,7 +60,16 @@ export function ResponsiveTable<T>({
       return <MobileTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} />;
     }
 
-    return <DesktopTable columns={columns} data={data} keyExtractor={keyExtractor} caption={caption} />;
+    return (
+      <DesktopTable
+        columns={columns}
+        data={data}
+        keyExtractor={keyExtractor}
+        caption={caption}
+        className={className}
+        tableClassName={tableClassName}
+      />
+    );
   };
 
   return (

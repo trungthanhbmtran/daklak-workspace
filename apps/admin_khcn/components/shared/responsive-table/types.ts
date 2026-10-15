@@ -16,4 +16,6 @@ export interface ResponsiveTableProps<T> {
   loading?: boolean;
   caption?: React.ReactNode;
   footer?: React.ReactNode;
+  className?: string;
+  tableClassName?: string;
 }

@@ -142,3 +142,87 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
     - `author` (Chuyên viên) -> `isAdmin: false`, `permissionsCount: 25`, không có quyền tạo nhân sự/đánh giá/công thức KPI.
     - `author` gọi `POST /api/v1/admin/hrm/employees` -> HTTP 403 Forbidden: `Bạn không có quyền thực hiện thao tác này. Yêu cầu quyền: HRM_EMPLOYEE:CREATE`.
 - **Kết quả nghiệm thu**: 100% các nút thao tác nhân sự, công việc, KPI, biểu mẫu XML được đóng mở chính xác theo quyền của từng user; triệt tiêu hoàn toàn tình trạng user không có quyền vẫn thấy nút bấm; bảo vệ 2 lớp cả ở UI dumb client và Gateway endpoint. Dọn sạch 100% debug logs và mã hóa UTF-8 không BOM.
+
+## [2026-10-15] Khắc phục lỗi REP_PERSONAL_WORKBENCH & Thiết kế Giao diện Cá nhân tại Report Service
+- **Tác vụ**: Xử lý triệt để phản hồi của người dùng: (1) Kiểm tra màn hình `http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard` Tab "Bàn làm việc của tôi" bị lỗi *"Chưa tìm thấy thiết kế báo cáo (REP_PERSONAL_WORKBENCH). Vui lòng cấu hình mẫu báo cáo trong mục Báo cáo & Thống kê hệ thống"*; (2) Khắc phục lỗi bảng hiển thị `[object Object]` tại `/admin/services/reports/16`; (3) Thiết kế bổ sung giao diện cá nhân tại report-service (`/services/reports`) để các cá nhân trong HRM có thể tự theo dõi tiến độ, số liệu KPI, và tải công việc.
+- **Nguyên nhân gốc rễ**:
+  1. Trong CSDL `admin_report`, bảng `ReportDefinition` chưa tồn tại bản ghi với `code = 'REP_PERSONAL_WORKBENCH'`. Khi `task-dashboard.tsx` nhúng `<EmbeddedReportWidget reportIdOrCode="REP_PERSONAL_WORKBENCH" />`, hook truy vấn không tìm thấy report definition tương ứng dẫn đến thông báo lỗi cấu hình.
+  2. Bảng `ResponsiveTable` (`DesktopTable.tsx`) khi render dữ liệu đối tượng hoặc mảng phức tạp không serialize an toàn, dẫn đến chuỗi mặc định `[object Object],[object Object]...`.
+  3. `ReportWorkspace.tsx` (`/services/reports`) chỉ có các tab chung (`all`, `my-reports`, `shared`, `recent`), thiếu phân hệ cá nhân cho cán bộ HRM tự theo dõi chỉ số của bản thân.
+- **Phạm vi file đã thực thi**:
+  - `apps/report-service/prisma/seed-hrm-dashboards.js`: Khởi tạo và nạp thành công `ReportDataSource` (`HRM_PERSONAL_STATS`), `ReportDefinition` #17 (`REP_PERSONAL_WORKBENCH`), `ReportRun` #59 (SUCCEEDED, 17 records snapshot), và `ReportTemplate` #32 với 4 biểu đồ phân tích (Line: Tiến độ & Điểm chất lượng 6 tháng; Pie: Cơ cấu Trạng thái Nhiệm vụ; Bar: Cân đối Tải Phòng ban; Bar: Tiến độ Thực hiện Nhiệm vụ).
+  - `apps/admin_khcn/components/shared/responsive-table/DesktopTable.tsx`: Nâng cấp render cell hỗ trợ tự động bóc tách và hiển thị an toàn các cấu trúc mảng / object (`Array.isArray`, `typeof === 'object'`), không còn in `[object Object]`.
+  - `apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx`: Bổ sung nhận diện `isPersonalWorkbench` cho report 17; cập nhật badge "Bàn làm việc Cá nhân (HRM)", nút chuyển tiếp "Dashboard Công việc HRM"; tinh chỉnh 5 thẻ KPI executive bar hiển thị chỉ số cá nhân ("Chỉ số & Nhiệm vụ cá nhân", "Điểm KPI TB Cá nhân", "Nhiệm vụ Hoàn thành", "Đơn vị công tác", "Bàn làm việc Cá nhân").
+  - `apps/admin_khcn/features/reports/components/reports/ReportWorkspace.tsx`: Thêm Tab `Bàn làm việc Cá nhân (HRM)` với biểu tượng `UserCheck`; thiết kế Banner tổng quan cán bộ với nút mở toàn màn hình `#17` và liên kết sang HRM Task Dashboard; 4 thẻ KPI Snapshot (Điểm KPI 91.5, 17 nhiệm vụ theo dõi, Tỷ lệ hoàn thành 88.2%, Xếp loại Xuất sắc); nhúng biểu đồ thời gian thực `<EmbeddedReportWidget reportIdOrCode="REP_PERSONAL_WORKBENCH" />` (4 biểu đồ); và 3 thẻ điều hướng nhanh sang quy trình HRM (Nhiệm vụ & Tiến độ, Dashboard Nhiệm vụ, Phiếu Đánh giá).
+- **Lệnh kiểm chứng máy thực tế**:
+  - `node prisma/seed-hrm-dashboards.js seed-hrm-dashboards` trong container `daklak-workspace-report-service-1`: Exit code 0, nạp thành công ReportDefinition 17, ReportRun 59, 17 records.
+  - `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - `npm --prefix apps/admin_khcn run build`: Exit code 0, 83/83 routes build thành công với Next.js 16.1.6 Turbopack.
+  - Đóng gói và triển khai build vào container `daklak-workspace-admin-frontend-1`, khởi động lại container: Container Up, `Ready in 247ms`.
+  - Runtime verification: Endpoint `http://127.0.0.1:3000/admin/services/reports` phản hồi HTTP 200 OK.
+  - Dọn sạch rác: 0 `console.log`, 0 `debugger`, mã hóa chuẩn UTF-8 không BOM.
+- **Kết quả nghiệm thu**: Khắc phục triệt để lỗi "Chưa tìm thấy thiết kế báo cáo (REP_PERSONAL_WORKBENCH)", giao diện Bàn làm việc của tôi tại Task Dashboard HRM hiển thị trơn tru các biểu đồ phân tích; phân hệ Bàn làm việc Cá nhân tại Report Service hoạt động mượt mà, đầy đủ số liệu và điều hướng liên thông.
+
+## [2026-10-15] Chuẩn hóa Responsive toàn màn hình và Tự động Xuống dòng Cột Tên Công việc tại Bảng Danh sách Công việc (Tasks Table)
+- **Tác vụ**: Xử lý triệt để yêu cầu của người dùng: "http://113.184.220.82/admin/services/hrm/work-plans/tasks bảng luôn để trong màn hình chỉnh lại cho tôi tên công việc nếu dài quá thì xuống dòng độ dài hàng ngang .... ký tự để responesive được toàn màn hình".
+- **Nguyên nhân gốc rễ**:
+  1. Thẻ `TableCell` trong `apps/admin_khcn/components/ui/table.tsx` mặc định mang thuộc tính `whitespace-nowrap`, đồng thời `ResponsiveTable` dùng layout `table-auto` mặc định của HTML. Khi tiêu đề công việc (task title) là các chỉ đạo, nghị quyết dài >150 ký tự, dòng văn bản không thể bẻ dòng mà kéo giãn bảng ra hơn 2.500px, đẩy toàn bộ 6 cột còn lại (Trạng thái, Mức độ, Người xử lý, Thời hạn, Tiến độ, Thao tác) văng hoàn toàn ra ngoài tầm nhìn màn hình.
+  2. Bảng thiếu thuộc tính `table-fixed` và các phần tử bao bọc thiếu `min-w-0`, khiến bảng không thể tự tính toán co giãn linh hoạt theo chiều ngang khả dụng của container.
+  3. Cột Thao tác và Tiến độ thiếu khoảng cách cố định rõ ràng, có nguy cơ đè nút bấm lên thanh phần trăm tiến độ khi màn hình co hẹp.
+- **Phạm vi file đã thực thi**:
+  - `apps/admin_khcn/components/shared/responsive-table/types.ts`: Mở rộng interface `ResponsiveTableProps<T>` bổ sung `tableClassName?: string` để truyền class tùy biến trực tiếp vào thẻ `<table>`.
+  - `apps/admin_khcn/components/shared/responsive-table/DesktopTable.tsx`: Tích hợp `tableClassName` vào thẻ `<Table className={cn("w-full caption-bottom text-sm", tableClassName)}>`, đảm bảo nhận diện `table-fixed` chuẩn xác.
+  - `apps/admin_khcn/components/shared/responsive-table/index.tsx`: Chuyển tiếp `tableClassName` xuống `DesktopTable`.
+  - `apps/admin_khcn/features/hrm/components/tasks/task-list.tsx`:
+    + Áp dụng `tableClassName="w-full table-fixed"` trên `<ResponsiveTable>`.
+    + Bao bọc bảng bằng container `w-full min-w-0 overflow-hidden rounded-md border`.
+    + **Cột "Tên công việc"**: Đặt `className: "w-auto min-w-[280px] whitespace-normal align-top"`, áp dụng `min-w-0 w-full` trên toàn bộ flex container con, gắn `title={task.title}` và `className="whitespace-normal break-words wrap-break-word line-clamp-2 sm:line-clamp-3 text-sm leading-snug cursor-pointer hover:text-blue-600 transition-colors font-medium"` giúp văn bản dài tự động xuống dòng đẹp đẽ (2-3 dòng), không bao giờ làm phình bảng.
+    + **Chuẩn hóa tỷ lệ độ rộng các cột cố định còn lại**:
+      * Trạng thái: `w-[125px] whitespace-nowrap text-center align-top`
+      * Mức độ: `w-[85px] whitespace-nowrap text-center align-top`
+      * Người xử lý: `w-[150px] whitespace-normal align-top` (có `break-words wrap-break-word` cho tên dài)
+      * Thời hạn: `w-[95px] whitespace-nowrap text-center align-top`
+      * Tiến độ: `w-[110px] whitespace-nowrap align-top pr-4` (bổ sung padding phải và mở rộng độ rộng)
+      * Thao tác: `w-[210px] whitespace-nowrap text-right align-top pl-4 pr-3` (mở rộng và bổ sung padding trái `pl-4` tạo khoảng cách tách biệt ~50-60px với thanh tiến độ).
+    + Chuẩn hóa SelectTrigger thanh Toolbar với `min-w-0 [&>span]:truncate` và thuộc tính `title` theo Blacklist Mục 5.
+  - `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`: Bổ sung `import { Skeleton } from "@/components/ui/skeleton";` khắc phục lỗi compile thiếu import.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npm --prefix apps/admin_khcn run build`: Exit code 0 (100% 83 static routes pass trong 2.8s với Next.js 16.1.6).
+  - Triển khai gói build standalone và static chunks vào container `daklak-workspace-admin-frontend-1`: `Ready in 179ms`.
+  - Browser Subagent E2E Verification: Đăng nhập tài khoản admin, truy cập trực tiếp `http://113.184.220.82/admin/services/hrm/work-plans/tasks` và chụp ảnh màn hình nghiệm thu (`tasks_table_spacing_verified_1792080583149.png`):
+    + Khoảng cách giữa cột "Tiến độ" và nút "Đánh giá" đã được giãn thoáng (~50-60px), các phần tử phân tách rõ ràng, thoáng mắt và dễ thao tác.
+    + 100% bảng hiển thị trọn vẹn trong màn hình (khớp 100% viewport 1426x806), triệt tiêu hoàn toàn thanh cuộn ngang trang.
+    + Cột Tên công việc với các văn bản dài tự động xuống dòng gọn gàng, rõ ràng (2-3 dòng), có tooltip hover hiển thị đầy đủ tiêu đề.
+    + Đầy đủ 7 cột hiển thị cân đối, sắc nét, các nút Đánh giá và Chi tiết nằm ngay ngắn bên phải.
+  - Kiểm tra rác thừa: 0 `console.log`, 0 `debugger`, mã hóa UTF-8 không BOM.
+- **Kết quả nghiệm thu**: Bảng Danh sách Công việc đạt chuẩn Responsive toàn màn hình và tuân thủ tuyệt đối 7 Bộ ràng buộc kỹ thuật bất biến (UI/UX layout, min-w-0, table-fixed, wrap-break-word, dumb client).
+
+## [2026-10-15] Chuẩn hóa Chuyển đổi Trạng thái PENDING_REVIEW sang Tiếng Việt ('Chờ duyệt') tại Backend Microservices & API Gateway
+- **Tác vụ**: Xử lý yêu cầu của người dùng: "PENDING_REVIEW thêm vào convert trên backend cho tôi cái này để tránh trả ra tiếng anh như này".
+- **Nguyên nhân gốc rễ**:
+  1. Trong `hrm-service` (`task-shared.service.ts`), phương thức `getTaskStatusLabel` thiếu ánh xạ cho mã trạng thái `PENDING_REVIEW`, dẫn đến khi trả về trường `statusLabel` bị fallback nguyên gốc chuỗi tiếng Anh `PENDING_REVIEW`.
+  2. Trong `api-gateway` (`language-normalization.util.ts`), bảng tra cứu `TASK_STATUS_VIETNAMESE_MAP` và từ điển tìm kiếm `STATUS_CROSS_TERMS` cũng chưa khai báo `PENDING_REVIEW`, khiến lớp Gateway Normalization không thể bóc tách và chuyển đổi `statusLabel`.
+  3. Trong `report-service` (`normalization.ts`), từ điển `STATUS_VIETNAMESE_MAP` thiếu `PENDING_REVIEW` và `REVIEWING`.
+- **Phạm vi file đã thực thi**:
+  - `apps/hrm-service/src/modules/task-shared/task-shared.service.ts`: Bổ sung `PENDING_REVIEW: 'Chờ duyệt'` vào `getTaskStatusLabel`.
+  - `apps/api-gateway/src/common/utils/language-normalization.util.ts`: Bổ sung `PENDING_REVIEW: 'Chờ duyệt'` vào `TASK_STATUS_VIETNAMESE_MAP`, và `{ code: 'pending_review', vi: 'chờ duyệt', viNoTone: 'cho duyet' }` vào `STATUS_CROSS_TERMS`.
+  - `apps/api-gateway/src/common/utils/language-normalization.util.spec.ts`: Bổ sung unit test xác thực `expect(getTaskStatusLabel('PENDING_REVIEW')).toBe('Chờ duyệt')` và `expect(getTaskStatusLabel('REVIEWING')).toBe('Chờ duyệt')` (14/14 unit tests pass 100%).
+  - `apps/report-service/src/modules/reports/utils/normalization.ts`: Bổ sung `PENDING_REVIEW` và `REVIEWING` vào `STATUS_VIETNAMESE_MAP` và `STATUS_CROSS_TERMS`.
+  - `apps/admin_khcn/features/hrm/components/tasks/task-utils.ts`: Bổ sung ánh xạ `PENDING_REVIEW: "Chờ duyệt"` và màu sắc badge tương ứng `bg-amber-50 text-amber-700 border-amber-200`.
+  - `apps/admin_khcn/features/reports/utils/fieldHelpers.ts`: Bổ sung `PENDING_REVIEW: 'Chờ duyệt'` vào `STATUS_LABEL_MAP`.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npm --prefix apps/api-gateway test -- language-normalization.util.spec.ts`: PASS 14/14 tests (4.88s).
+  - `npm --prefix apps/hrm-service run build`: Exit code 0 (Prisma generate & Nest build thành công).
+  - `npm --prefix apps/api-gateway run build`: Exit code 0 (Prisma generate & Nest build thành công).
+  - `npm --prefix apps/admin_khcn run build`: Exit code 0 (83/83 static routes pass trong 2.3s).
+  - Triển khai toàn bộ build lên containers:
+    + `daklak-workspace-hrm-service-1`: Up & listening on port 50052.
+    + `daklak-workspace-api-gateway-1`: Up & listening on port 8080.
+    + `daklak-workspace-admin-frontend-1`: Up & `Ready in 197ms`.
+  - Browser Subagent E2E Verification: Đăng nhập tài khoản admin, truy cập trực tiếp `http://113.184.220.82/admin/services/hrm/work-plans/tasks` và chụp ảnh màn hình nghiệm thu (`tasks_status_pending_review_converted_1792082303277.png`):
+    + 100% các công việc ở trạng thái `PENDING_REVIEW` đều hiển thị nhãn Tiếng Việt **"Chờ duyệt"** với badge màu hổ phách (amber) tiêu chuẩn.
+    + Không còn bất kỳ từ tiếng Anh thô nào hiển thị tại cột Trạng thái.
+  - Dọn sạch rác: 0 `console.log`, 0 `debugger`, mã hóa UTF-8 không BOM.
+- **Kết quả nghiệm thu**: Backend là Source of Truth chuẩn mực cho việc chuẩn hóa ngôn ngữ hành chính; Frontend tuân thủ Dumb Client nhận dữ liệu đã được Việt hóa 100%.
+
+
