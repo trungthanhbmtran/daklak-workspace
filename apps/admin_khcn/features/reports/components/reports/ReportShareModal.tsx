@@ -637,22 +637,25 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
 
   // Nhóm các đơn vị theo cơ quan cấp trên
   const groupedOrganizations = useMemo(() => {
-    const roots = hierarchicalOrganizations.filter((o) => o.isRoot);
+    const list = Array.isArray(hierarchicalOrganizations) && hierarchicalOrganizations.length > 0
+      ? hierarchicalOrganizations
+      : DAKLAK_GOVT_FALLBACK_TREE;
+    const roots = list.filter((o) => o && o.isRoot);
     const groups: Array<{
       root: HierarchicalOrgUnit;
       children: HierarchicalOrgUnit[];
     }> = [];
 
     roots.forEach((root) => {
-      const children = hierarchicalOrganizations.filter(
-        (c) => c.parentId === root.numericId
+      const children = list.filter(
+        (c) => c && c.parentId === root.numericId
       );
       groups.push({ root, children });
     });
 
-    const knownIds = new Set(hierarchicalOrganizations.map((o) => o.numericId));
-    const orphans = hierarchicalOrganizations.filter(
-      (c) => !c.isRoot && (!c.parentId || !knownIds.has(c.parentId))
+    const knownIds = new Set(list.map((o) => o?.numericId));
+    const orphans = list.filter(
+      (c) => c && !c.isRoot && (!c.parentId || !knownIds.has(c.parentId))
     );
     if (orphans.length > 0) {
       groups.push({
@@ -717,8 +720,8 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
     if (!selectedEntityId) return null;
 
     if (assigneeType === "UNIT") {
-      const match = hierarchicalOrganizations.find(
-        (o) => o.id === selectedEntityId || o.code === selectedEntityId
+      const match = (hierarchicalOrganizations || []).find(
+        (o) => o && (o.id === selectedEntityId || o.code === selectedEntityId)
       );
       if (match) {
         return {
@@ -733,7 +736,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
         };
       }
     } else if (assigneeType === "USER") {
-      const match = userOptions.find((u) => u.id === selectedEntityId);
+      const match = (userOptions || []).find((u) => u && u.id === selectedEntityId);
       if (match) {
         return {
           title: match.name,
@@ -743,7 +746,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
         };
       }
     } else {
-      const match = roleOptions.find((r) => r.id === selectedEntityId || r.code === selectedEntityId);
+      const match = (roleOptions || []).find((r) => r && (r.id === selectedEntityId || r.code === selectedEntityId));
       if (match) {
         return {
           title: match.name,
@@ -952,7 +955,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
   // Hiển thị thông tin thực thể trong danh sách đã cấp quyền
   const getEntityDisplay = (type: string, id: string) => {
     if (type === "UNIT") {
-      const match = hierarchicalOrganizations.find((o) => o.id === id || o.code === id);
+      const match = (hierarchicalOrganizations || []).find((o) => o && (o.id === id || o.code === id));
       return {
         icon: <Building2 className="w-4 h-4 text-emerald-600" />,
         name: match?.name || `Đơn vị #${id}`,
@@ -967,7 +970,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
       };
     }
     if (type === "USER") {
-      const match = userOptions.find((u) => u.id === id);
+      const match = (userOptions || []).find((u) => u && u.id === id);
       return {
         icon: <User className="w-4 h-4 text-indigo-600" />,
         name: match?.name || `Cán bộ #${id}`,
@@ -977,7 +980,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
         badgeClass: "border-indigo-200 text-indigo-700 bg-indigo-50",
       };
     }
-    const match = roleOptions.find((r) => r.id === id || r.code === id);
+    const match = (roleOptions || []).find((r) => r && (r.id === id || r.code === id));
     return {
       icon: <Shield className="w-4 h-4 text-amber-600" />,
       name: match?.name || `Vai trò: ${id}`,

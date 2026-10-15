@@ -101,6 +101,47 @@ export const FIELD_LABEL_VIETNAMESE_MAP: Record<string, string> = {
   publishedDate: 'Ngày xuất bản',
   totalScore: 'Tổng điểm',
   periodId: 'Kỳ đánh giá',
+  // Các trường API Liên thông & Thống kê văn bản (Document Statistics)
+  totalDocuments: 'Tổng số văn bản',
+  incomingDocuments: 'Văn bản đến',
+  outgoingDocuments: 'Văn bản đi',
+  processedDocuments: 'Đã xử lý',
+  pendingDocuments: 'Đang xử lý',
+  completionRate: 'Tỷ lệ hoàn thành (%)',
+  reportPeriod: 'Kỳ báo cáo',
+  // Các trường API IOC Tài chính & Kinh tế xã hội
+  thang_bc: 'Tháng báo cáo',
+  loai_hinh: 'Loại hình xuất nhập khẩu',
+  kim_ngach_usd: 'Kim ngạch (USD)',
+  thue_xnk_vnd: 'Thuế XNK (VNĐ)',
+  dia_ban: 'Địa bàn / Huyện thị',
+  ghi_chu: 'Ghi chú',
+  du_toan_nam: 'Dự toán năm (VNĐ)',
+  so_thuc_thu: 'Số thực thu (VNĐ)',
+  tien_do_dat: 'Tiến độ đạt (%)',
+  linh_vuc_chi: 'Lĩnh vực chi',
+  du_toan_giao: 'Dự toán giao (VNĐ)',
+  so_da_chi: 'Số đã chi (VNĐ)',
+  ty_le_giai_ngan: 'Tỷ lệ giải ngân (%)',
+  ten_du_an: 'Tên dự án',
+  chu_dau_tu: 'Chủ đầu tư',
+  ke_hoach_von: 'Kế hoạch vốn (VNĐ)',
+  da_giai_ngan: 'Đã giải ngân (VNĐ)',
+  ty_le_dat: 'Tỷ lệ đạt (%)',
+  tuan_bao_cao: 'Tuần báo cáo',
+  loai_hinh_dn: 'Loại hình doanh nghiệp',
+  so_thanh_lap_moi: 'Số thành lập mới',
+  so_giai_the: 'Số giải thể',
+  tong_von_dang_ky_ty: 'Tổng vốn đăng ký (Tỷ VNĐ)',
+  thoi_diem: 'Thời điểm',
+  huyen_thi_xa: 'Huyện / Thị xã / TP',
+  so_htx_hoat_dong: 'Số HTX hoạt động',
+  so_thanh_vien: 'Số thành viên',
+  doanh_thu_tb_trieu: 'Doanh thu TB (Triệu VNĐ)',
+  nam: 'Năm',
+  so_du_an_moi: 'Số dự án mới',
+  von_ngoai_ns_ty: 'Vốn ngoài NS (Tỷ VNĐ)',
+  tien_do_trien_khai: 'Tiến độ triển khai',
 };
 
 /**
@@ -151,12 +192,60 @@ export function translatePriority(priority: string | null | undefined): string {
   return PRIORITY_VIETNAMESE_MAP[upper] || raw;
 }
 
+const CP1252_REVERSE_MAP: Record<string, number> = {
+  '\u20AC': 0x80, '\u201A': 0x82, '\u0192': 0x83, '\u201E': 0x84, '\u2026': 0x85, '\u2020': 0x86, '\u2021': 0x87,
+  '\u02C6': 0x88, '\u2030': 0x89, '\u0160': 0x8A, '\u2039': 0x8B, '\u0152': 0x8C, '\u017D': 0x8E,
+  '\u2018': 0x91, '\u2019': 0x92, '\u201C': 0x93, '\u201D': 0x94, '\u2022': 0x95, '\u2013': 0x96, '\u2014': 0x97,
+  '\u02DC': 0x98, '\u2122': 0x99, '\u0161': 0x9A, '\u203A': 0x9B, '\u0153': 0x9C, '\u017E': 0x9E, '\u0178': 0x9F,
+};
+
 /**
- * Chuẩn hóa một dòng dữ liệu (chuyển đổi toàn bộ code tiếng Anh sang tiếng Việt chuẩn)
+ * Tự động khắc phục lỗi font chữ / mojibake UTF-8 bị chuyển mã nhầm qua CP1252/Latin-1
+ */
+export function fixMojibake(str: string): string {
+  if (typeof str !== 'string' || !str) return str;
+  if (!/[\u00C0-\u00FF\u0152\u0153\u0160\u0161\u0178\u017D\u017E\u0192\u02C6\u02DC\u2013\u2014\u2018\u2019\u201A\u201C\u201D\u201E\u2020\u2021\u2022\u2026\u2030\u2039\u203A\u20AC\u2122]/.test(str)) {
+    return str;
+  }
+  const bytes: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (CP1252_REVERSE_MAP[ch] !== undefined) {
+      bytes.push(CP1252_REVERSE_MAP[ch]);
+    } else {
+      const code = str.charCodeAt(i);
+      if (code <= 0xff) {
+        bytes.push(code);
+      } else {
+        return str;
+      }
+    }
+  }
+  try {
+    const decoded = Buffer.from(bytes).toString('utf8');
+    if (!decoded.includes('\uFFFD')) {
+      return decoded;
+    }
+  } catch {
+    // Return original on error
+  }
+  return str;
+}
+
+/**
+ * Chuẩn hóa một dòng dữ liệu (chuyển đổi toàn bộ code tiếng Anh sang tiếng Việt chuẩn và tự động sửa lỗi font chữ)
  */
 export function normalizeRow(row: any): any {
   if (!row || typeof row !== 'object') return row;
-  const out = { ...row };
+  const out: any = {};
+
+  for (const [k, v] of Object.entries(row)) {
+    if (typeof v === 'string') {
+      out[k] = fixMojibake(v);
+    } else {
+      out[k] = v;
+    }
+  }
 
   if (out.status != null) {
     out.status = translateStatus(out.status);

@@ -244,19 +244,20 @@ function createTable(headers, rows, colWidths = []) {
           right: thinBorder,
         },
         margins: { top: 80, bottom: 80, left: 120, right: 120 },
-        children: [
-          new Paragraph({
+        children: String(c).split('\n').map((line, lineIdx) => {
+          return new Paragraph({
             alignment: isFirstCol && row.length > 3 ? AlignmentType.CENTER : AlignmentType.LEFT,
+            spacing: { before: lineIdx === 0 ? 0 : 30, after: 30, line: 240 },
             children: [
               new TextRun({
-                text: String(c),
+                text: line,
                 font: 'Times New Roman',
-                size: 22,
+                size: 21,
                 color: COLOR_TEXT,
               }),
             ],
-          }),
-        ],
+          });
+        }),
       });
     });
     tableRows.push(new TableRow({ children: cells }));

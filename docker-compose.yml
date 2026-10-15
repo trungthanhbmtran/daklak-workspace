@@ -223,6 +223,7 @@ services:
       - GRPC_URL=0.0.0.0:50062
       - PORT=3011
       - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_report?allowPublicKeyRetrieval=true&connection_limit=10&pool_timeout=15
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
 
 volumes:
   mysql_data:

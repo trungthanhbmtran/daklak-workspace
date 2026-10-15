@@ -31,12 +31,14 @@ export class ExecutorService implements OnModuleInit {
   });
   private httpsAgent = new https.Agent({
     lookup: guardedUpstreamLookup('external'),
+    rejectUnauthorized: false,
   });
   private internalHttpAgent = new http.Agent({
     lookup: guardedUpstreamLookup('internal'),
   });
   private internalHttpsAgent = new https.Agent({
     lookup: guardedUpstreamLookup('internal'),
+    rejectUnauthorized: false,
   });
 
   private grpcService: any;
@@ -134,6 +136,7 @@ export class ExecutorService implements OnModuleInit {
         const res = await axios.post(tokenUrl, params.toString(), {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           timeout: 10000,
+          httpsAgent: this.httpsAgent,
         });
 
         const data = res.data;

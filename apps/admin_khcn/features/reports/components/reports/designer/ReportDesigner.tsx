@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { ReportConfigAST, ColumnDef, ReportSourceDef } from '../../../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ReportConfigAST, ColumnDef, ReportSourceDef, ReportDefinition } from '../../../types';
 import { Button } from '../../../../../components/ui/button';
 import { Badge } from '../../../../../components/ui/badge';
 import { SourceExplorer } from './SourceExplorer';
@@ -22,6 +22,7 @@ interface ReportDesignerProps {
 export const ReportDesigner: React.FC<ReportDesignerProps> = ({
   reportId,
   reportName,
+  reportDescription,
   initialConfig,
   onSave,
   onCancel,

@@ -45,6 +45,47 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
   hasMau04: 'Mẫu 04 (Nổi trội)',
   sopStep: 'Tiến trình SOP',
   quarterYear: 'Kỳ đánh giá',
+  // Thống kê văn bản & Liên thông API
+  totalDocuments: 'Tổng số văn bản',
+  incomingDocuments: 'Văn bản đến',
+  outgoingDocuments: 'Văn bản đi',
+  processedDocuments: 'Đã xử lý',
+  pendingDocuments: 'Đang xử lý',
+  completionRate: 'Tỷ lệ hoàn thành (%)',
+  reportPeriod: 'Kỳ báo cáo',
+  // IOC Tài chính & Kinh tế xã hội
+  thang_bc: 'Tháng báo cáo',
+  loai_hinh: 'Loại hình xuất nhập khẩu',
+  kim_ngach_usd: 'Kim ngạch (USD)',
+  thue_xnk_vnd: 'Thuế XNK (VNĐ)',
+  dia_ban: 'Địa bàn / Huyện thị',
+  ghi_chu: 'Ghi chú',
+  du_toan_nam: 'Dự toán năm (VNĐ)',
+  so_thuc_thu: 'Số thực thu (VNĐ)',
+  tien_do_dat: 'Tiến độ đạt (%)',
+  linh_vuc_chi: 'Lĩnh vực chi',
+  du_toan_giao: 'Dự toán giao (VNĐ)',
+  so_da_chi: 'Số đã chi (VNĐ)',
+  ty_le_giai_ngan: 'Tỷ lệ giải ngân (%)',
+  ten_du_an: 'Tên dự án',
+  chu_dau_tu: 'Chủ đầu tư',
+  ke_hoach_von: 'Kế hoạch vốn (VNĐ)',
+  da_giai_ngan: 'Đã giải ngân (VNĐ)',
+  ty_le_dat: 'Tỷ lệ đạt (%)',
+  tuan_bao_cao: 'Tuần báo cáo',
+  loai_hinh_dn: 'Loại hình doanh nghiệp',
+  so_thanh_lap_moi: 'Số thành lập mới',
+  so_giai_the: 'Số giải thể',
+  tong_von_dang_ky_ty: 'Tổng vốn đăng ký (Tỷ VNĐ)',
+  thoi_diem: 'Thời điểm',
+  huyen_thi_xa: 'Huyện / Thị xã / TP',
+  so_htx_hoat_dong: 'Số HTX hoạt động',
+  so_thanh_vien: 'Số thành viên',
+  doanh_thu_tb_trieu: 'Doanh thu TB (Triệu VNĐ)',
+  nam: 'Năm',
+  so_du_an_moi: 'Số dự án mới',
+  von_ngoai_ns_ty: 'Vốn ngoài NS (Tỷ VNĐ)',
+  tien_do_trien_khai: 'Tiến độ triển khai',
 };
 
 export const STATUS_LABEL_MAP: Record<string, string> = {
@@ -160,3 +201,79 @@ export const TYPE_OPTIONS: Array<{ value: ColumnType; label: string }> = [
   { value: 'boolean', label: 'Đúng / Sai (Boolean)' },
   { value: 'mixed', label: 'Đa hình (Mixed)' },
 ];
+
+const CP1252_REVERSE_MAP: Record<string, number> = {
+  '\u20AC': 0x80, '\u201A': 0x82, '\u0192': 0x83, '\u201E': 0x84, '\u2026': 0x85, '\u2020': 0x86, '\u2021': 0x87,
+  '\u02C6': 0x88, '\u2030': 0x89, '\u0160': 0x8A, '\u2039': 0x8B, '\u0152': 0x8C, '\u017D': 0x8E,
+  '\u2018': 0x91, '\u2019': 0x92, '\u201C': 0x93, '\u201D': 0x94, '\u2022': 0x95, '\u2013': 0x96, '\u2014': 0x97,
+  '\u02DC': 0x98, '\u2122': 0x99, '\u0161': 0x9A, '\u203A': 0x9B, '\u0153': 0x9C, '\u017E': 0x9E, '\u0178': 0x9F,
+};
+
+/**
+ * Tự động sửa lỗi font chữ UTF-8 bị chuyển mã nhầm (CP1252/Latin-1 Mojibake)
+ */
+export function fixMojibake(str: string): string {
+  if (typeof str !== 'string' || !str) return str;
+  if (!/[\u00C0-\u00FF\u0152\u0153\u0160\u0161\u0178\u017D\u017E\u0192\u02C6\u02DC\u2013\u2014\u2018\u2019\u201A\u201C\u201D\u201E\u2020\u2021\u2022\u2026\u2030\u2039\u203A\u20AC\u2122]/.test(str)) {
+    return str;
+  }
+  const bytes: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (CP1252_REVERSE_MAP[ch] !== undefined) {
+      bytes.push(CP1252_REVERSE_MAP[ch]);
+    } else {
+      const code = str.charCodeAt(i);
+      if (code <= 0xff) {
+        bytes.push(code);
+      } else {
+        return str;
+      }
+    }
+  }
+  try {
+    const uint8 = new Uint8Array(bytes);
+    const decoded = new TextDecoder('utf-8', { fatal: false }).decode(uint8);
+    if (!decoded.includes('\uFFFD')) {
+      return decoded;
+    }
+  } catch {
+    // Giữ nguyên chuỗi nếu decode lỗi
+  }
+  return str;
+}
+
+const SHORT_CHART_LABELS: Record<string, string> = {
+  'Ban Tổ chức Tỉnh ủy Đắk Lắk': 'Ban Tổ chức TU',
+  'Ban Tuyên giáo Tỉnh ủy Đắk Lắk': 'Ban Tuyên giáo TU',
+  'Cơ quan Ủy ban Kiểm tra Tỉnh ủy': 'UBKT Tỉnh ủy',
+  'Sở Khoa học và Công nghệ Đắk Lắk': 'Sở KH&CN',
+  'Sở Tài chính Đắk Lắk': 'Sở Tài chính',
+  'Văn phòng UBND Tỉnh Đắk Lắk': 'VP UBND Tỉnh',
+  'UBND TP. Buôn Ma Thuột': 'TP. Buôn Ma Thuột',
+  'UBND Huyện Krông Pắc': 'Huyện Krông Pắc',
+  'Phòng Quản lý Công nghệ & Đổi mới sáng tạo': 'Phòng QL Công nghệ',
+  'Phòng Chính sách - Đào tạo cán bộ': 'Phòng CS-ĐT-CB',
+  'Chi cục Tiêu chuẩn Đo lường Chất lượng': 'Chi cục TC-ĐL-CL',
+  'Phòng Lý luận chính trị & Lịch sử Đảng': 'Phòng LLCT & LS Đảng',
+  'Phòng Tài chính Hành chính Sự nghiệp': 'Phòng TCHCSN',
+  'Phòng Quản lý Ngân sách': 'Phòng QL Ngân sách',
+  'Phòng Kinh tế TP. Buôn Ma Thuột': 'Phòng Kinh tế TP',
+  'Phòng Nội vụ TP. Buôn Ma Thuột': 'Phòng Nội vụ TP',
+  'Thường trực UBND Thành phố': 'TT UBND Thành phố',
+  'Thường trực UBKT Tỉnh ủy': 'TT UBKT Tỉnh ủy',
+  'Thường trực UBND Huyện Krông Pắc': 'TT UBND Huyện',
+  'Phòng Tổ chức cán bộ': 'Phòng TCCB',
+  'Phòng Tổ chức đảng - Đảng viên': 'Phòng TCĐ-ĐV',
+  'Văn phòng Ban': 'Văn phòng Ban',
+  'Lãnh đạo Ban': 'Lãnh đạo Ban',
+};
+
+/**
+ * Trả về tên hiển thị ngắn gọn, tối ưu độ hiển thị cho trục tọa độ biểu đồ
+ */
+export function getShortChartLabel(label: string): string {
+  const clean = fixMojibake(label);
+  if (!clean) return '';
+  return SHORT_CHART_LABELS[clean] || clean;
+}

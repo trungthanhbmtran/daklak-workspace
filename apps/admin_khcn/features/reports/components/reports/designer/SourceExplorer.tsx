@@ -165,40 +165,43 @@ export const SourceExplorer: React.FC<SourceExplorerProps> = ({
               type: "string",
             }));
 
-      const columns = targetFields
-        .slice(0, 30)
-        .map((field: any, index: number) => ({
-          key: `field_${index}`,
-          path: typeof field === "string" ? field : field.path,
-          label: typeof field === "string" ? field : field.path,
-          type:
-            typeof field === "object" &&
-            (field.type === "number" || field.type === "boolean")
-              ? field.type
-              : "string",
-          aggregate: "none",
-        }));
+      let rows: any[] = Array.isArray(schema.rows) && schema.rows.length > 0 ? schema.rows : [];
 
-      // 3. Gọi lần 2 để lấy dữ liệu bản ghi thực tế (rows)
-      let rows: any[] = [];
-      try {
-        const result = await axiosInstance.post<ApiResponse<any>>(
-          "/reports/table/preview",
-          {
-            source,
-            config: {
-              ...baseConfig,
-              dataPath: effectivePath,
-              columns,
+      // 3. Nếu lần 1 chưa có rows, gọi lần 2 với columns cụ thể
+      if (rows.length === 0 && targetFields.length > 0) {
+        const columns = targetFields
+          .slice(0, 30)
+          .map((field: any, index: number) => ({
+            key: `field_${index}`,
+            path: typeof field === "string" ? field : field.path,
+            label: typeof field === "string" ? field : field.path,
+            type:
+              typeof field === "object" &&
+              (field.type === "number" || field.type === "boolean")
+                ? field.type
+                : "string",
+            aggregate: "none",
+          }));
+
+        try {
+          const result = await axiosInstance.post<ApiResponse<any>>(
+            "/reports/table/preview",
+            {
+              source,
+              config: {
+                ...baseConfig,
+                dataPath: effectivePath,
+                columns,
+              },
             },
-          },
-        );
-        const preview = (result as unknown as ApiResponse<any>)?.data;
-        if (Array.isArray(preview?.rows) && preview.rows.length > 0) {
-          rows = preview.rows;
+          );
+          const preview = (result as unknown as ApiResponse<any>)?.data;
+          if (Array.isArray(preview?.rows) && preview.rows.length > 0) {
+            rows = preview.rows;
+          }
+        } catch {
+          // Vẫn giữ fields để người dùng xem được cấu trúc schema
         }
-      } catch {
-        // Vẫn giữ fields để người dùng xem được cấu trúc schema
       }
 
       setPreviews((current) => ({

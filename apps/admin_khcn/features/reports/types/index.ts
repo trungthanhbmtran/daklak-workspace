@@ -12,6 +12,8 @@ export interface ReportSourceDef {
   upstream?: string;
   path?: string;
   method?: string;
+  params?: Record<string, string>;
+  body?: any;
 }
 
 export interface JoinDef {
@@ -47,6 +49,25 @@ export interface ChartConfig {
   title?: string;
 }
 
+export interface ReportParameterDef {
+  id: string;
+  name: string;
+  label: string;
+  type: 'text' | 'select' | 'unit' | 'date';
+  defaultValue?: string;
+  options?: Array<{ label: string; value: string }>;
+  required?: boolean;
+  description?: string;
+}
+
+export interface ReportSharingConfig {
+  scope: 'ALL_UNITS' | 'SPECIFIC_UNITS' | 'PRIVATE';
+  unitCodes?: string[];
+  unitNames?: string[];
+  isPublished?: boolean;
+  publishedAt?: string;
+}
+
 export interface ReportConfigAST {
   version: number;
   sources: ReportSourceDef[];
@@ -59,6 +80,8 @@ export interface ReportConfigAST {
     direction: "asc" | "desc";
   };
   charts?: ChartConfig[];
+  parameters?: ReportParameterDef[];
+  sharing?: ReportSharingConfig;
 }
 
 export interface ReportDefinition {

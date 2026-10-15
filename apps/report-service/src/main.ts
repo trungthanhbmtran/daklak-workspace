@@ -40,7 +40,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: [
-        process.env.RABBITMQ_URL || 'amqp://root:mypassword@rabbitmq:5672',
+        process.env.RABBITMQ_URL || 'amqp://admin:admin123@rabbitmq:5672',
       ],
       queue: 'report_queue',
       queueOptions: {

@@ -7,6 +7,8 @@ import {
   JoinType,
   AggregateFunction,
   ColumnType,
+  FilterDef,
+  FilterOperator,
 } from '../../../types';
 import { Button } from '../../../../../components/ui/button';
 import { Badge } from '../../../../../components/ui/badge';
@@ -32,6 +34,12 @@ import {
   AlertCircle,
   Check,
   HelpCircle,
+  Filter,
+  Building2,
+  SlidersHorizontal,
+  X,
+  Sliders,
+  CheckCircle2,
 } from 'lucide-react';
 import {
   getFriendlyFieldLabel,
@@ -40,6 +48,22 @@ import {
   TYPE_OPTIONS,
 } from '@/features/reports/utils/fieldHelpers';
 import { toast } from 'sonner';
+
+export const DAKLAK_UNITS = [
+  { code: 'A15.05', name: 'Ban Tổ chức Tỉnh ủy Đắk Lắk (BTCTU)', group: 'Khối Cơ quan Đảng' },
+  { code: 'A15.01', name: 'Văn phòng Tỉnh ủy Đắk Lắk', group: 'Khối Cơ quan Đảng' },
+  { code: 'A15.02', name: 'Ban Tuyên giáo Tỉnh ủy Đắk Lắk', group: 'Khối Cơ quan Đảng' },
+  { code: 'A15.03', name: 'Ban Dân vận Tỉnh ủy Đắk Lắk', group: 'Khối Cơ quan Đảng' },
+  { code: 'A15.04', name: 'Cơ quan Ủy ban Kiểm tra Tỉnh ủy', group: 'Khối Cơ quan Đảng' },
+  { code: 'A15.06', name: 'Ban Nội chính Tỉnh ủy Đắk Lắk', group: 'Khối Cơ quan Đảng' },
+  { code: 'H15.20', name: 'Sở Khoa học và Công nghệ Đắk Lắk', group: 'Khối Sở Ban Ngành' },
+  { code: 'H15.25', name: 'Văn phòng UBND Tỉnh Đắk Lắk', group: 'Khối Sở Ban Ngành' },
+  { code: 'H15.03', name: 'Sở Tài chính Đắk Lắk', group: 'Khối Sở Ban Ngành' },
+  { code: 'H15.04', name: 'Sở Kế hoạch và Đầu tư Đắk Lắk', group: 'Khối Sở Ban Ngành' },
+  { code: 'H15.01', name: 'UBND Huyện Krông Pắc', group: 'Khối Địa phương' },
+  { code: 'H15.02', name: 'UBND Thị xã Buôn Hồ', group: 'Khối Địa phương' },
+  { code: 'H15.05', name: 'UBND TP. Buôn Ma Thuột', group: 'Khối Địa phương' },
+];
 
 interface CanvasProps {
   config: ReportConfigAST;
@@ -163,6 +187,197 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
     updated.splice(idx, 1);
     setConfig({ ...config, joins: updated });
     toast.success('Đã xóa phép nối dữ liệu.');
+  };
+
+  // ───────────────────────── State: Quản lý Bộ Lọc Dữ Liệu (Filters) & Đơn vị ─────────────────────────
+  const filters = useMemo(() => config.filters || [], [config.filters]);
+
+  const [filterSource, setFilterSource] = useState<string>('');
+  const [filterField, setFilterField] = useState<string>('');
+  const [filterOperator, setFilterOperator] = useState<FilterOperator>('eq');
+  const [filterValue, setFilterValue] = useState<string>('');
+  const [selectedUnitScope, setSelectedUnitScope] = useState<string>('ALL');
+
+  // Quản lý modal tham số API cho từng nguồn
+  const [editingParamsSourceId, setEditingParamsSourceId] = useState<string | null>(null);
+  const [sourceParamsForm, setSourceParamsForm] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (sources.length > 0) {
+      if (!filterSource || !sources.some((s) => s.id === filterSource)) {
+        setFilterSource(sources[0].id);
+      }
+    }
+  }, [sources, filterSource]);
+
+  const activeFilterSourceObj = useMemo(
+    () => sources.find((s) => s.id === filterSource) || sources[0],
+    [sources, filterSource],
+  );
+
+  const activeFilterFields = useMemo(() => {
+    if (!activeFilterSourceObj || !Array.isArray(activeFilterSourceObj.fields)) return [];
+    return activeFilterSourceObj.fields
+      .map((f: any) =>
+        typeof f === 'string' ? f : f?.name || f?.field || f?.key || f?.path || '',
+      )
+      .filter(Boolean);
+  }, [activeFilterSourceObj]);
+
+  useEffect(() => {
+    if (activeFilterFields.length > 0 && (!filterField || !activeFilterFields.includes(filterField))) {
+      const defaultField =
+        activeFilterFields.find((f) =>
+          ['from_organ_id', 'departmentId', 'dia_ban', 'organName', 'departmentName'].includes(f),
+        ) || activeFilterFields[0];
+      setFilterField(defaultField);
+    }
+  }, [activeFilterFields, filterField]);
+
+  // Đồng bộ selectedUnitScope nếu đã có filter đơn vị lưu sẵn
+  useEffect(() => {
+    const existingUnitFilter = filters.find((f) =>
+      ['from_organ_id', 'departmentId', 'dia_ban'].includes(f.field),
+    );
+    if (existingUnitFilter && existingUnitFilter.value) {
+      setSelectedUnitScope(existingUnitFilter.value);
+    }
+  }, [filters]);
+
+  // Áp dụng phạm vi đơn vị nhanh (Unit Scope)
+  const handleApplyUnitScope = (unitCode: string, unitName: string) => {
+    setSelectedUnitScope(unitCode);
+
+    if (unitCode === 'ALL') {
+      const remainingFilters = filters.filter(
+        (f) => !['from_organ_id', 'departmentId', 'dia_ban', 'organName', 'departmentName'].includes(f.field),
+      );
+      const updatedSources = sources.map((s) => {
+        if (!s.params) return s;
+        const nextParams = { ...s.params };
+        delete nextParams.from_organ_id;
+        delete nextParams.organ_id;
+        return { ...s, params: nextParams };
+      });
+
+      setConfig({
+        ...config,
+        sources: updatedSources,
+        filters: remainingFilters,
+      });
+      toast.success('Đã chuyển sang phạm vi: Toàn tỉnh (Không lọc theo đơn vị).');
+      return;
+    }
+
+    const targetSource = sources[0];
+    if (!targetSource) {
+      toast.error('Vui lòng thêm ít nhất một nguồn dữ liệu trước khi chọn đơn vị.');
+      return;
+    }
+
+    const targetFields = (targetSource.fields || []).map((f: any) =>
+      typeof f === 'string' ? f : f?.name || f?.field || f?.key || f?.path || '',
+    );
+
+    let unitField = 'from_organ_id';
+    if (!targetFields.includes('from_organ_id')) {
+      if (targetFields.includes('departmentId')) unitField = 'departmentId';
+      else if (targetFields.includes('dia_ban')) unitField = 'dia_ban';
+      else if (targetFields.includes('organName')) unitField = 'organName';
+    }
+
+    const otherFilters = filters.filter(
+      (f) => !['from_organ_id', 'departmentId', 'dia_ban'].includes(f.field),
+    );
+    const newUnitFilter: FilterDef = {
+      source: targetSource.id,
+      field: unitField,
+      operator: 'eq',
+      value: unitCode,
+    };
+
+    const updatedSources = sources.map((s) => ({
+      ...s,
+      params: {
+        ...(s.params || {}),
+        from_organ_id: unitCode,
+      },
+    }));
+
+    setConfig({
+      ...config,
+      sources: updatedSources,
+      filters: [...otherFilters, newUnitFilter],
+    });
+
+    toast.success(`Đã áp dụng cấu hình báo cáo cho đơn vị: ${unitName} (${unitCode}).`);
+  };
+
+  // Thêm điều kiện lọc tùy biến
+  const handleAddCustomFilter = () => {
+    if (!filterField) {
+      toast.error('Vui lòng chọn trường dữ liệu cần lọc.');
+      return;
+    }
+    if (!filterValue.trim()) {
+      toast.error('Vui lòng nhập giá trị lọc.');
+      return;
+    }
+
+    const newFilter: FilterDef = {
+      source: filterSource || sources[0]?.id || '',
+      field: filterField,
+      operator: filterOperator,
+      value: filterValue.trim(),
+    };
+
+    setConfig({
+      ...config,
+      filters: [...filters, newFilter],
+    });
+
+    setFilterValue('');
+    toast.success(`Đã thêm bộ lọc: ${getFriendlyFieldLabel(filterField)} (${filterField}) ${filterOperator} "${filterValue.trim()}".`);
+  };
+
+  // Xóa điều kiện lọc
+  const handleRemoveFilter = (index: number) => {
+    const updated = [...filters];
+    const removed = updated.splice(index, 1)[0];
+    if (['from_organ_id', 'departmentId', 'dia_ban'].includes(removed?.field)) {
+      setSelectedUnitScope('ALL');
+    }
+    setConfig({
+      ...config,
+      filters: updated,
+    });
+    toast.success('Đã xóa điều kiện lọc.');
+  };
+
+  // Mở modal cấu hình tham số API cho từng nguồn
+  const handleOpenSourceParams = (src: any) => {
+    setEditingParamsSourceId(src.id);
+    setSourceParamsForm(src.params || {});
+  };
+
+  // Lưu tham số API cho nguồn
+  const handleSaveSourceParams = () => {
+    if (!editingParamsSourceId) return;
+    const updatedSources = sources.map((s) => {
+      if (s.id === editingParamsSourceId) {
+        return {
+          ...s,
+          params: sourceParamsForm,
+        };
+      }
+      return s;
+    });
+    setConfig({
+      ...config,
+      sources: updatedSources,
+    });
+    setEditingParamsSourceId(null);
+    toast.success('Đã lưu tham số kết nối API cho nguồn dữ liệu.');
   };
 
   // ───────────────────────── State: Quản lý Cột Kết Quả (Sheet) ─────────────────────────
@@ -401,16 +616,46 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
                       {src.endpoint || src.id}
                     </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0"
-                    onClick={() => handleRemoveSource(src.id)}
-                    title="Xóa nguồn này khỏi báo cáo"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-6 w-6 p-0 rounded-lg shrink-0 transition-colors ${
+                        src.params && Object.keys(src.params).length > 0
+                          ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100'
+                          : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100'
+                      }`}
+                      onClick={() => handleOpenSourceParams(src)}
+                      title="Cấu hình tham số gọi API / Tham số lọc theo đơn vị cho nguồn này"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0"
+                      onClick={() => handleRemoveSource(src.id)}
+                      title="Xóa nguồn này khỏi báo cáo"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
+                {src.params && Object.keys(src.params).length > 0 && (
+                  <div className="mb-2 p-1.5 bg-indigo-50/70 rounded-lg border border-indigo-100 flex flex-wrap gap-1.5 items-center">
+                    <span className="text-[10px] text-indigo-700 font-semibold flex items-center gap-1">
+                      <SlidersHorizontal className="w-2.5 h-2.5" /> Tham số:
+                    </span>
+                    {Object.entries(src.params).map(([k, v]) => (
+                      <span
+                        key={k}
+                        className="text-[10px] font-mono bg-white px-1.5 py-0.5 rounded border border-indigo-200 text-indigo-800 font-medium"
+                      >
+                        {k}={String(v)}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="max-h-36 overflow-y-auto space-y-1 bg-slate-50/80 p-2 rounded-lg border border-slate-100">
                   {Array.isArray(src.fields) && src.fields.length > 0 ? (
                     src.fields.map((field: any, fIdx: number) => {
@@ -626,7 +871,302 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
         </div>
       </div>
 
-      {/* ────────────────── KHỐI 2: CỘT KẾT QUẢ & BIẾN ĐỔI DỮ LIỆU ────────────────── */}
+      {/* ────────────────── KHỐI 2: CẤU HÌNH ĐỊNH HƯỚNG LĂNG KÍNH & BỘ LỌC DỮ LIỆU (SCOPE DIMENSIONS & FILTERS) ────────────────── */}
+      <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 w-full min-w-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3">
+          <div className="flex items-center gap-2">
+            <Sliders className="w-5 h-5 text-indigo-600 shrink-0" />
+            <h3 className="font-bold text-base text-slate-800">
+              Cấu hình Định Hướng Lăng Kính & Bộ Lọc Dữ Liệu
+            </h3>
+            <Badge variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200 font-medium shrink-0 ml-1">
+              {filters.length} điều kiện lọc
+            </Badge>
+          </div>
+          <span className="text-xs text-slate-500 font-medium">
+            Mẫu Báo Cáo Chuẩn Chung (Master Template)
+          </span>
+        </div>
+        <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+          Báo cáo được thiết kế theo cấu trúc biểu đồ chuẩn dùng chung cho toàn hệ thống. Khi hoàn thành và chia sẻ, người dùng sẽ tự động xem được số liệu tương ứng theo thẩm quyền: <strong>Toàn tỉnh</strong>, <strong>Theo Lĩnh vực phụ trách</strong> hoặc <strong>Theo Đơn vị cụ thể</strong>.
+        </p>
+
+        {/* 1. LỰA CHỌN LĂNG KÍNH DỮ LIỆU THỬ NGHIỆM KHI THIẾT KẾ */}
+        <div className="mb-5 p-4 rounded-xl bg-gradient-to-r from-indigo-50/50 via-slate-50 to-white border border-indigo-100/80">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-2.5">
+            <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+              <Building2 className="w-4 h-4 text-indigo-600" />
+              Thử nghiệm lăng kính số liệu hiển thị trên Canvas:
+            </span>
+            <span className="text-[11px] text-slate-500">
+              Đang thử nghiệm: <strong className="text-indigo-700">{selectedUnitScope === 'ALL' ? 'Toàn tỉnh (Tất cả đơn vị)' : `${DAKLAK_UNITS.find(u => u.code === selectedUnitScope)?.name || selectedUnitScope} (${selectedUnitScope})`}</strong>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* Lăng kính Toàn Tỉnh */}
+            <Button
+              type="button"
+              variant={selectedUnitScope === 'ALL' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleApplyUnitScope('ALL', 'Toàn tỉnh')}
+              className={`text-xs h-8 rounded-lg font-medium transition-all ${
+                selectedUnitScope === 'ALL'
+                  ? 'bg-slate-800 hover:bg-slate-900 text-white shadow-xs'
+                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+              }`}
+            >
+              Toàn tỉnh (Tổng hợp cấp Tỉnh)
+            </Button>
+
+            {/* Lăng kính Ban Tổ Chức Tỉnh Ủy */}
+            <Button
+              type="button"
+              variant={selectedUnitScope === 'A15.05' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => handleApplyUnitScope('A15.05', 'Ban Tổ chức Tỉnh ủy Đắk Lắk')}
+              className={`text-xs h-8 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
+                selectedUnitScope === 'A15.05'
+                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md ring-2 ring-indigo-300 ring-offset-1'
+                  : 'bg-indigo-50/80 hover:bg-indigo-100 text-indigo-800 border-indigo-300 font-semibold'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              Ban Tổ chức Tỉnh ủy (A15.05)
+              {selectedUnitScope === 'A15.05' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+            </Button>
+
+            {/* Các đơn vị phổ biến khác */}
+            {DAKLAK_UNITS.filter((u) => u.code !== 'A15.05').slice(0, 4).map((unit) => (
+              <Button
+                key={unit.code}
+                type="button"
+                variant={selectedUnitScope === unit.code ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleApplyUnitScope(unit.code, unit.name)}
+                className={`text-xs h-8 rounded-lg font-medium transition-all ${
+                  selectedUnitScope === unit.code
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                {unit.name.replace(' Đắk Lắk', '').replace(' (BTCTU)', '')} ({unit.code})
+              </Button>
+            ))}
+
+            {/* Dropdown danh sách tất cả đơn vị */}
+            <select
+              value={selectedUnitScope}
+              onChange={(e) => {
+                const val = e.target.value;
+                const unit = DAKLAK_UNITS.find((u) => u.code === val);
+                handleApplyUnitScope(val, unit?.name || val);
+              }}
+              className="text-xs h-8 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+              <option value="ALL">-- Thử nghiệm đơn vị khác --</option>
+              {DAKLAK_UNITS.map((unit) => (
+                <option key={unit.code} value={unit.code}>
+                  [{unit.group}] {unit.name} ({unit.code})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* 2. KHỐI THIẾT LẬP ĐIỀU KIỆN LỌC BÁM SÁT CÁC TRƯỜNG CỦA API / SQL */}
+        <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+            <h4 className="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+              <Filter className="w-4 h-4 text-indigo-600" />
+              Thêm Điều kiện Lọc Bám theo Các Trường của API / Bảng Dữ Liệu
+            </h4>
+            <span className="text-[11px] text-slate-400">
+              Nguồn: <strong className="text-slate-700">{activeFilterSourceObj?.name || 'Chưa chọn'}</strong>
+            </span>
+          </div>
+
+          {/* Quick Field Chips: Nút bấm chọn nhanh các trường thực tế của API */}
+          {activeFilterFields.length > 0 && (
+            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] text-slate-500 font-medium">Trường API trả về:</span>
+              {activeFilterFields.map((field) => (
+                <button
+                  key={field}
+                  type="button"
+                  onClick={() => setFilterField(field)}
+                  className={`text-[11px] px-2 py-0.5 rounded-md font-mono transition-colors flex items-center gap-1 border ${
+                    filterField === field
+                      ? 'bg-indigo-600 text-white border-indigo-600 font-semibold shadow-xs'
+                      : 'bg-white hover:bg-indigo-50 text-slate-700 border-slate-200 hover:border-indigo-200'
+                  }`}
+                  title={`${getFriendlyFieldLabel(field)} (${field})`}
+                >
+                  <span>{getFriendlyFieldLabel(field)}</span>
+                  <span className={`text-[9px] ${filterField === field ? 'text-indigo-200' : 'text-slate-400'}`}>
+                    ({field})
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Form thêm filter */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+            {sources.length > 1 && (
+              <div className="sm:col-span-3">
+                <label className="text-[11px] font-medium text-slate-600 block mb-1">
+                  Nguồn dữ liệu
+                </label>
+                <select
+                  value={filterSource}
+                  onChange={(e) => setFilterSource(e.target.value)}
+                  className="w-full text-xs h-9 px-2.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  {sources.map((src) => (
+                    <option key={src.id} value={src.id}>
+                      {src.name || src.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className={sources.length > 1 ? 'sm:col-span-3' : 'sm:col-span-4'}>
+              <label className="text-[11px] font-medium text-slate-600 block mb-1">
+                Trường dữ liệu lọc
+              </label>
+              <select
+                value={filterField}
+                onChange={(e) => setFilterField(e.target.value)}
+                className="w-full text-xs h-9 px-2.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              >
+                {activeFilterFields.map((f) => (
+                  <option key={f} value={f}>
+                    {getFriendlyFieldLabel(f)} ({f})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-[11px] font-medium text-slate-600 block mb-1">
+                Toán tử so sánh
+              </label>
+              <select
+                value={filterOperator}
+                onChange={(e) => setFilterOperator(e.target.value as FilterOperator)}
+                className="w-full text-xs h-9 px-2.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              >
+                <option value="eq">= (Bằng)</option>
+                <option value="neq">!= (Khác)</option>
+                <option value="contains">Chứa (LIKE)</option>
+                <option value="gt">&gt; (Lớn hơn)</option>
+                <option value="gte">&gt;= (Lớn hơn hoặc bằng)</option>
+                <option value="lt">&lt; (Nhỏ hơn)</option>
+                <option value="lte">&lt;= (Nhỏ hơn hoặc bằng)</option>
+                <option value="in">Thuộc tập hợp (IN)</option>
+              </select>
+            </div>
+
+            <div className={sources.length > 1 ? 'sm:col-span-3' : 'sm:col-span-4'}>
+              <label className="text-[11px] font-medium text-slate-600 block mb-1">
+                Giá trị lọc
+              </label>
+              <input
+                type="text"
+                placeholder="VD: A15.05, Báo cáo..."
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCustomFilter();
+                  }
+                }}
+                className="w-full text-xs h-9 px-3 rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <Button
+                type="button"
+                onClick={handleAddCustomFilter}
+                className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Thêm bộ lọc
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. DANH SÁCH BỘ LỌC ĐANG ÁP DỤNG */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-700">
+              Các điều kiện lọc đang có hiệu lực trong báo cáo:
+            </span>
+            {filters.length > 0 && (
+              <button
+                type="button"
+                onClick={() => handleApplyUnitScope('ALL', 'Toàn tỉnh')}
+                className="text-[11px] text-red-600 hover:text-red-700 font-medium"
+              >
+                Xóa tất cả bộ lọc
+              </button>
+            )}
+          </div>
+
+          {filters.length === 0 ? (
+            <div className="p-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-slate-400 text-xs flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-slate-400 shrink-0" />
+              <span>
+                Chưa có điều kiện lọc nào. Báo cáo đang tổng hợp số liệu <strong>toàn tỉnh (tất cả các đơn vị)</strong>. Hãy nhấp chọn đơn vị ở thanh công cụ phía trên để thiết kế báo cáo cho từng đơn vị cụ thể.
+              </span>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {filters.map((flt, idx) => {
+                const isUnitFilter = ['from_organ_id', 'departmentId', 'dia_ban'].includes(flt.field);
+                const matchedUnit = isUnitFilter ? DAKLAK_UNITS.find((u) => u.code === flt.value) : null;
+                return (
+                  <div
+                    key={idx}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs shadow-xs transition-colors ${
+                      isUnitFilter
+                        ? 'bg-indigo-50/80 border-indigo-200 text-indigo-900 font-medium'
+                        : 'bg-white border-slate-200 text-slate-700'
+                    }`}
+                  >
+                    {isUnitFilter && <Building2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+                    <span className="font-semibold text-slate-800">
+                      {getFriendlyFieldLabel(flt.field)}
+                    </span>
+                    <span className="text-slate-400 font-mono text-[10px]">({flt.field})</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-[10px] font-bold">
+                      {flt.operator}
+                    </span>
+                    <span className="font-bold text-indigo-700 font-mono">
+                      "{matchedUnit ? `${matchedUnit.name} (${flt.value})` : flt.value}"
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFilter(idx)}
+                      className="ml-1 p-0.5 hover:bg-slate-200 rounded text-slate-400 hover:text-red-600 transition-colors"
+                      title="Xóa điều kiện này"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ────────────────── KHỐI 3: CỘT KẾT QUẢ & BIẾN ĐỔI DỮ LIỆU ────────────────── */}
       <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex-1 w-full min-w-0 flex flex-col">
         {/* Header toolbar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-2 w-full min-w-0">
@@ -986,6 +1526,170 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
               className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium"
             >
               {editingIndex === null ? 'Thêm cột vào báo cáo' : 'Lưu thay đổi'}
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
+      {/* ───────────────────────── SHEET: CẤU HÌNH THAM SỐ API NGUỒN ───────────────────────── */}
+      <Sheet
+        open={Boolean(editingParamsSourceId)}
+        onOpenChange={(open) => {
+          if (!open) setEditingParamsSourceId(null);
+        }}
+      >
+        <SheetContent side="right" className="w-[420px] sm:w-[540px] overflow-y-auto">
+          <SheetHeader className="mb-5 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="w-5 h-5 text-indigo-600" />
+              <SheetTitle className="text-base font-bold text-slate-800">
+                Tham Số Gọi API & Lọc Đơn Vị Nguồn
+              </SheetTitle>
+            </div>
+            <SheetDescription className="text-xs text-slate-500">
+              Cấu hình các tham số query parameters hoặc filter mặc định khi gọi API từ nguồn dữ liệu.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-indigo-900">
+                  Phím tắt gán nhanh đơn vị vào tham số API:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSourceParamsForm((prev) => ({
+                      ...prev,
+                      from_organ_id: 'A15.05',
+                    }));
+                    toast.success('Đã gán tham số from_organ_id = A15.05 (Ban Tổ chức Tỉnh ủy).');
+                  }}
+                  className="text-xs h-7 bg-white hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+                >
+                  Gán Ban Tổ chức Tỉnh ủy (A15.05)
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSourceParamsForm((prev) => {
+                      const next = { ...prev };
+                      delete next.from_organ_id;
+                      delete next.organ_id;
+                      return next;
+                    });
+                    toast.success('Đã xóa tham số đơn vị (Lấy toàn tỉnh).');
+                  }}
+                  className="text-xs h-7 bg-white hover:bg-slate-100 text-slate-600 border-slate-200"
+                >
+                  Xóa lọc đơn vị
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
+                from_organ_id (Mã định danh cơ quan/đơn vị)
+              </label>
+              <input
+                type="text"
+                value={sourceParamsForm.from_organ_id || ''}
+                onChange={(e) =>
+                  setSourceParamsForm({
+                    ...sourceParamsForm,
+                    from_organ_id: e.target.value,
+                  })
+                }
+                placeholder="VD: A15.05, H15.20..."
+                className="w-full text-xs h-9 px-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Tham số này sẽ được truyền thẳng vào query string của API để backend chỉ lấy dữ liệu của cơ quan đó.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
+                period (Kỳ báo cáo)
+              </label>
+              <input
+                type="text"
+                value={sourceParamsForm.period || ''}
+                onChange={(e) =>
+                  setSourceParamsForm({
+                    ...sourceParamsForm,
+                    period: e.target.value,
+                  })
+                }
+                placeholder="VD: 2026-Q1, 2026-10..."
+                className="w-full text-xs h-9 px-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
+                Tham số tùy chỉnh khác (Dạng key=value)
+              </label>
+              <div className="space-y-2">
+                {Object.entries(sourceParamsForm)
+                  .filter(([k]) => !['from_organ_id', 'period'].includes(k))
+                  .map(([k, v]) => (
+                    <div key={k} className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-medium text-slate-700 w-28 truncate">
+                        {k}:
+                      </span>
+                      <input
+                        type="text"
+                        value={String(v)}
+                        onChange={(e) =>
+                          setSourceParamsForm({
+                            ...sourceParamsForm,
+                            [k]: e.target.value,
+                          })
+                        }
+                        className="flex-1 text-xs h-8 px-2.5 rounded-lg border border-slate-200 font-mono"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const next = { ...sourceParamsForm };
+                          delete next[k];
+                          setSourceParamsForm(next);
+                        }}
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          <SheetFooter className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingParamsSourceId(null)}
+              className="text-xs"
+            >
+              Hủy bỏ
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveSourceParams}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium"
+            >
+              Lưu tham số
             </Button>
           </SheetFooter>
         </SheetContent>

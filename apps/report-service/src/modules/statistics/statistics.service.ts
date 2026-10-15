@@ -216,7 +216,7 @@ export class StatisticsService implements OnModuleInit {
       const isGenericQuery = !filter || Object.keys(filter).length === 0;
 
       // 1. Check CQRS Read-Model Snapshot
-      let rows: any[] | null = null;
+      let rows: any[] = [];
       if (isGenericQuery) {
         const cached = await this.prisma.statisticsSnapshot.findFirst({
           where: { dataSourceCode: 'HRM_TASK_STATS' },
@@ -232,7 +232,7 @@ export class StatisticsService implements OnModuleInit {
       }
 
       // 2. Fetch via gRPC if no cached flat dataset
-      if (!rows) {
+      if (rows.length === 0) {
         const listReq = this.getSafeListReq(filter);
 
         const res: any = await firstValueFrom(
@@ -300,11 +300,131 @@ export class StatisticsService implements OnModuleInit {
         };
       }
 
-      // 4. Trả về mảng bản ghi phẳng (Flat Dataset) cho ChartRenderer / Dynamic Builder
+      // 4. Tính toán bộ chỉ số tổng hợp cho Biểu đồ & Dashboard
+      const taskRows = rows || [];
+      const totalTasks = taskRows.length;
+      const completedTasks = taskRows.filter(
+        (r) =>
+          r.status === 'Hoàn thành' ||
+          r.isCompleted === 'Hoàn thành' ||
+          Number(r.progress) === 100,
+      ).length;
+      const overdueTasks = taskRows.filter((r) => r.isOverdue === 'Quá hạn').length;
+      const inProgressTasks = Math.max(0, totalTasks - completedTasks - overdueTasks);
+
+      const deptMap = new Map<
+        string,
+        { completed: number; inTime: number; completedOverdue: number; overdue: number }
+      >();
+      for (const r of taskRows) {
+        const dept = r.departmentName || 'Chưa phân công';
+        if (!deptMap.has(dept)) {
+          deptMap.set(dept, {
+            completed: 0,
+            inTime: 0,
+            completedOverdue: 0,
+            overdue: 0,
+          });
+        }
+        const entry = deptMap.get(dept)!;
+        const isDone =
+          r.status === 'Hoàn thành' ||
+          r.isCompleted === 'Hoàn thành' ||
+          Number(r.progress) === 100;
+        const isOverdue = r.isOverdue === 'Quá hạn';
+        if (isDone) {
+          if (isOverdue) entry.completedOverdue++;
+          else entry.completed++;
+        } else {
+          if (isOverdue) entry.overdue++;
+          else entry.inTime++;
+        }
+      }
+      const departmentStats = Array.from(deptMap.entries()).map(([name, val]) => ({
+        name,
+        ...val,
+      }));
+
+      const userMap = new Map<
+        string,
+        { completed: number; inTime: number; completedOverdue: number; overdue: number }
+      >();
+      for (const r of taskRows) {
+        const name = r.assigneeName || r.assigneeCode || 'Chưa giao';
+        if (!userMap.has(name)) {
+          userMap.set(name, {
+            completed: 0,
+            inTime: 0,
+            completedOverdue: 0,
+            overdue: 0,
+          });
+        }
+        const entry = userMap.get(name)!;
+        const isDone =
+          r.status === 'Hoàn thành' ||
+          r.isCompleted === 'Hoàn thành' ||
+          Number(r.progress) === 100;
+        const isOverdue = r.isOverdue === 'Quá hạn';
+        if (isDone) {
+          if (isOverdue) entry.completedOverdue++;
+          else entry.completed++;
+        } else {
+          if (isOverdue) entry.overdue++;
+          else entry.inTime++;
+        }
+      }
+      const individualStats = Array.from(userMap.entries())
+        .slice(0, 12)
+        .map(([name, val]) => ({
+          name,
+          ...val,
+        }));
+
+      let excellent = 0;
+      let good = 0;
+      let fair = 0;
+      let notCompleted = 0;
+      for (const r of taskRows) {
+        const isDone =
+          r.status === 'Hoàn thành' ||
+          r.isCompleted === 'Hoàn thành' ||
+          Number(r.progress) === 100;
+        const isOverdue = r.isOverdue === 'Quá hạn';
+        if (isDone && !isOverdue) {
+          if (Number(r.progress) >= 100) excellent++;
+          else good++;
+        } else if (isDone && isOverdue) {
+          fair++;
+        } else if (isOverdue) {
+          notCompleted++;
+        } else {
+          good++;
+        }
+      }
+      const kpiStats = [
+        { name: 'Hoàn thành xuất sắc', value: excellent },
+        { name: 'Hoàn thành tốt', value: good },
+        { name: 'Hoàn thành', value: fair },
+        { name: 'Quá hạn / Chưa đạt', value: notCompleted },
+      ].filter((item) => item.value > 0);
+
+      const dashboardPayload = {
+        totalTasks,
+        completedTasks,
+        inProgressTasks,
+        overdueTasks,
+        departmentStats,
+        individualStats,
+        kpiStats,
+        rows: taskRows,
+        items: taskRows,
+      };
+
+      // Trả về cấu trúc tổng hợp tương thích cả ChartRenderer, Dynamic Builder và TaskDashboard
       return {
         success: true,
         message: 'Lấy dữ liệu nhiệm vụ động thành công',
-        data: rows,
+        data: dashboardPayload,
       };
     } catch (e) {
       this.logger.error('Lỗi lấy thống kê nhiệm vụ:', e);

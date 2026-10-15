@@ -73,11 +73,14 @@ export const ReportWorkspace = () => {
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const myReports = filteredReports.filter(
-    (r) => !r.ownerId || r.code?.startsWith('REP_'),
-  );
+  const myReports = filteredReports;
   const sharedReports = filteredReports.filter(
-    (r) => r.id === 1 || r.id === 2 || r.code === 'REP_HRM_TASKS',
+    (r) =>
+      r.organizationId != null ||
+      r.code?.includes('BTCTU') ||
+      r.code?.includes('DOC') ||
+      r.configuration?.sharing?.scope === 'ALL_UNITS' ||
+      r.configuration?.sharing?.scope === 'SPECIFIC_UNITS',
   );
   const recentReports = [...filteredReports].slice(0, 3);
 

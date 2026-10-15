@@ -18,21 +18,129 @@ export function TaskDashboard() {
   const { data: statsResponse, isLoading } = useTaskStats({ status: undefined, search: undefined });
   // API trả về chuẩn { success: true, data: { totalTasks: ..., departmentStats: ... } }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stats: any = (statsResponse as any)?.data ?? statsResponse ?? {
-    totalTasks: 0, completedTasks: 0, inProgressTasks: 0, overdueTasks: 0,
-    individualStats: [], departmentStats: [], kpiStats: []
+  const rawData: any = (statsResponse as any)?.data ?? statsResponse ?? {};
+  const rows: any[] = Array.isArray(rawData)
+    ? rawData
+    : (Array.isArray(rawData?.rows)
+      ? rawData.rows
+      : (Array.isArray(rawData?.items) ? rawData.items : []));
+
+  // Extract or derive counts
+  const totalTasks = Number(rawData?.totalTasks ?? rows.length);
+  const completedTasks = Number(
+    rawData?.completedTasks ??
+    rows.filter(
+      (r: any) =>
+        r.status === 'Hoàn thành' ||
+        r.isCompleted === 'Hoàn thành' ||
+        Number(r.progress) === 100
+    ).length
+  );
+  const overdueTasks = Number(
+    rawData?.overdueTasks ??
+    rows.filter((r: any) => r.isOverdue === 'Quá hạn').length
+  );
+  const inProgressTasks = Number(
+    rawData?.inProgressTasks ??
+    Math.max(0, totalTasks - completedTasks - overdueTasks)
+  );
+
+  // Department Stats
+  let departmentStats: any[] =
+    Array.isArray(rawData?.departmentStats) && rawData.departmentStats.length > 0
+      ? rawData.departmentStats
+      : [];
+
+  if (departmentStats.length === 0 && rows.length > 0) {
+    const deptMap = new Map<string, { completed: number; inTime: number; completedOverdue: number; overdue: number }>();
+    for (const r of rows) {
+      const dept = r.departmentName || 'Chưa phân công';
+      if (!deptMap.has(dept)) {
+        deptMap.set(dept, { completed: 0, inTime: 0, completedOverdue: 0, overdue: 0 });
+      }
+      const entry = deptMap.get(dept)!;
+      const isDone = r.status === 'Hoàn thành' || r.isCompleted === 'Hoàn thành' || Number(r.progress) === 100;
+      const isOverdue = r.isOverdue === 'Quá hạn';
+      if (isDone) {
+        if (isOverdue) entry.completedOverdue++;
+        else entry.completed++;
+      } else {
+        if (isOverdue) entry.overdue++;
+        else entry.inTime++;
+      }
+    }
+    departmentStats = Array.from(deptMap.entries()).map(([name, val]) => ({ name, ...val }));
+  }
+
+  // Individual Stats
+  let individualStats: any[] =
+    Array.isArray(rawData?.individualStats) && rawData.individualStats.length > 0
+      ? rawData.individualStats
+      : [];
+
+  if (individualStats.length === 0 && rows.length > 0) {
+    const userMap = new Map<string, { completed: number; inTime: number; completedOverdue: number; overdue: number }>();
+    for (const r of rows) {
+      const name = r.assigneeName || r.assigneeCode || 'Chưa giao';
+      if (!userMap.has(name)) {
+        userMap.set(name, { completed: 0, inTime: 0, completedOverdue: 0, overdue: 0 });
+      }
+      const entry = userMap.get(name)!;
+      const isDone = r.status === 'Hoàn thành' || r.isCompleted === 'Hoàn thành' || Number(r.progress) === 100;
+      const isOverdue = r.isOverdue === 'Quá hạn';
+      if (isDone) {
+        if (isOverdue) entry.completedOverdue++;
+        else entry.completed++;
+      } else {
+        if (isOverdue) entry.overdue++;
+        else entry.inTime++;
+      }
+    }
+    individualStats = Array.from(userMap.entries()).slice(0, 10).map(([name, val]) => ({ name, ...val }));
+  }
+
+  // KPI Stats
+  let kpiStats: any[] =
+    Array.isArray(rawData?.kpiStats) && rawData.kpiStats.length > 0
+      ? rawData.kpiStats
+      : [];
+
+  if (kpiStats.length === 0 && rows.length > 0) {
+    let excellent = 0;
+    let good = 0;
+    let fair = 0;
+    let notCompleted = 0;
+    for (const r of rows) {
+      const isDone = r.status === 'Hoàn thành' || r.isCompleted === 'Hoàn thành' || Number(r.progress) === 100;
+      const isOverdue = r.isOverdue === 'Quá hạn';
+      if (isDone && !isOverdue) {
+        if (Number(r.progress) >= 100) excellent++;
+        else good++;
+      } else if (isDone && isOverdue) {
+        fair++;
+      } else if (isOverdue) {
+        notCompleted++;
+      } else {
+        good++;
+      }
+    }
+    kpiStats = [
+      { name: 'Hoàn thành xuất sắc', value: excellent },
+      { name: 'Hoàn thành tốt', value: good },
+      { name: 'Hoàn thành', value: fair },
+      { name: 'Quá hạn / Chưa đạt', value: notCompleted },
+    ].filter((item) => item.value > 0);
+  }
+
+  const stats = {
+    totalTasks,
+    completedTasks,
+    inProgressTasks,
+    overdueTasks,
+    departmentStats,
+    individualStats,
+    kpiStats,
   };
-
-  const {
-    totalTasks = 0,
-    completedTasks = 0,
-    inProgressTasks = 0,
-    overdueTasks = 0,
-    individualStats = [],
-    kpiStats = []
-  } = stats || {};
-
-  const departmentStats = Array.isArray(stats.departmentStats) ? stats.departmentStats : [];
 
   const [isExporting, setIsExporting] = useState(false);
 

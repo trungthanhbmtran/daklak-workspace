@@ -39,10 +39,25 @@ import {
   Calendar,
   Filter,
   Sparkles,
+  Share2,
+  Compass,
+  Globe,
+  Layers,
 } from 'lucide-react';
+import { ReportShareModal } from './ReportShareModal';
+import { DAKLAK_UNITS } from './designer/Canvas';
+
+export const DAKLAK_DOMAINS = [
+  { code: 'DANG', name: 'Khối Cơ quan Đảng Tỉnh ủy', shortName: 'Khối Đảng', description: 'Ban Tổ chức, Tuyên giáo, Dân vận, Kiểm tra, Nội chính, Văn phòng' },
+  { code: 'SO_NGANH', name: 'Khối Sở, Ban, Ngành Tỉnh', shortName: 'Khối Sở Ngành', description: 'Sở KH&CN, Nội vụ, Tài chính, Kế hoạch & Đầu tư, Văn phòng UBND' },
+  { code: 'DIA_PHUONG', name: 'Khối UBND Quận, Huyện, Thị xã', shortName: 'Khối Địa phương', description: 'TP. Buôn Ma Thuột, Thị xã Buôn Hồ, Huyện Krông Pắc, Ea H\'leo...' },
+];
+
 import {
   getFriendlyFieldLabel,
   getStatusBadgeCls,
+  fixMojibake,
+  getShortChartLabel,
 } from '@/features/reports/utils/fieldHelpers';
 import {
   getMau05DecisionData,
@@ -79,13 +94,30 @@ function aggregateData(
 ): AggregatedItem[] {
   if (!rows || rows.length === 0 || !xAxis) return [];
 
+  // Thích ứng trục X thông minh (Smart Adaptive X-Axis):
+  // 1. Nếu xAxis là 'organName': Nếu active dataset chỉ thuộc 1 đơn vị duy nhất (ví dụ người dùng đang xem Ban Tổ chức Tỉnh ủy),
+  // tự động phân rã theo 'departmentName' để biểu đồ hiển thị các phòng ban nội bộ thay vì chỉ 1 cột đơn điệu!
+  let effectiveXAxis = xAxis;
+  if (xAxis === 'organName') {
+    const uniqueOrgans = new Set(rows.map((r) => r.organName).filter(Boolean));
+    if (uniqueOrgans.size <= 1 && rows.some((r) => r.departmentName)) {
+      effectiveXAxis = 'departmentName';
+    }
+  } else if (xAxis === 'employeeName' && rows.some((r) => r.departmentName || r.organName)) {
+    // 2. Nếu xAxis là 'employeeName': Nếu có nhiều hơn 8 nhân sự, ưu tiên nhóm theo phòng ban để biểu đồ không bị dồn nén!
+    const uniqueEmployees = new Set(rows.map((r) => r.employeeName || r.fullName).filter(Boolean));
+    if (uniqueEmployees.size > 8) {
+      effectiveXAxis = rows.some((r) => r.departmentName) ? 'departmentName' : 'organName';
+    }
+  }
+
   const groups: Record<string, { count: number; sum: number; values: number[] }> =
     {};
 
   for (const row of rows) {
-    const rawX = row[xAxis];
+    const rawX = row[effectiveXAxis] || row[xAxis];
     const key =
-      rawX != null && rawX !== '' ? String(rawX).trim() : 'Chưa phân loại';
+      rawX != null && rawX !== '' ? fixMojibake(String(rawX).trim()) : 'Chưa phân loại';
     if (!groups[key]) {
       groups[key] = { count: 0, sum: 0, values: [] };
     }
@@ -136,6 +168,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const [filterMau04, setFilterMau04] = useState<string>('ALL');
   const [activeSopStep, setActiveSopStep] = useState<string>('ALL');
   const [isMau05Open, setIsMau05Open] = useState(false);
+
+  // State phân quyền chia sẻ và lăng kính dữ liệu đa chiều
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [dataLensMode, setDataLensMode] = useState<'ALL' | 'DOMAIN' | 'UNIT'>('ALL');
+  const [selectedDomain, setSelectedDomain] = useState<string>('DANG');
+  const [selectedUnitScope, setSelectedUnitScope] = useState<string>('A15.05');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('ALL');
 
   // Debounce tìm kiếm
   useEffect(() => {
@@ -209,11 +248,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     };
   }, [definitionId, isDefLoading, reportDef, runId, actualConfig, runMutation]);
 
-  const handleRun = async () => {
+  const handleRun = async (overrideParams?: Record<string, any>) => {
     try {
+      let runParams: Record<string, any> | undefined;
+      if (overrideParams?.params) {
+        runParams = overrideParams.params;
+      } else if (dataLensMode === 'UNIT' && selectedUnitScope !== 'ALL') {
+        runParams = { from_organ_id: selectedUnitScope, scope: 'UNIT' };
+      } else if (dataLensMode === 'DOMAIN' && selectedDomain !== 'ALL_DOMAINS') {
+        runParams = { group: selectedDomain, scope: 'DOMAIN' };
+      } else {
+        runParams = { scope: 'ALL' };
+      }
+
       const result = await runMutation.mutateAsync({
         definitionId,
         config: actualConfig,
+        params: runParams,
       });
       if (result?.runId) {
         setRunId(result.runId);
@@ -223,7 +274,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     }
   };
 
-  const rows = useMemo(() => snapshot?.data || [], [snapshot]);
+  const rows = useMemo(() => {
+    const rawRows = snapshot?.data || [];
+    if (!Array.isArray(rawRows)) return [];
+    return rawRows.map((row: any) => {
+      if (!row || typeof row !== 'object') return row;
+      const cleanRow: any = {};
+      for (const [k, v] of Object.entries(row)) {
+        cleanRow[k] = typeof v === 'string' ? fixMojibake(v) : v;
+      }
+      return cleanRow;
+    });
+  }, [snapshot]);
 
   // Source of Truth duy nhất đồng bộ cho cả bản hiển thị (Sheet) và bản in (Print / PDF)
   const mau05Data = useMemo(() => getMau05DecisionData(rows), [rows]);
@@ -242,9 +304,39 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     return Array.from(set);
   }, [rows]);
 
-  // Bộ lọc đa chiều cho bảng dữ liệu
+  // Bộ lọc đa chiều cho bảng dữ liệu bám sát 3 Lăng kính
   const filteredRows = useMemo(() => {
     return rows.filter((r: any) => {
+      // 0. LỌC THEO LĂNG KÍNH (DATA LENS)
+      if (dataLensMode === 'DOMAIN') {
+        if (selectedDomain !== 'ALL_DOMAINS') {
+          const uCode = String(r.from_organ_id || r.organ_id || r.unitCode || '').toLowerCase();
+          const uName = String(r.organName || r.departmentName || '').toLowerCase();
+          const uGroup = String(r.group || '').toLowerCase();
+
+          if (selectedDomain === 'DANG') {
+            const isDang = uCode.startsWith('a15') || uName.includes('đảng') || uName.includes('tỉnh ủy') || uGroup.includes('đảng');
+            if (!isDang) return false;
+          } else if (selectedDomain === 'SO_NGANH') {
+            const isLocal = uName.includes('huyện') || uName.includes('thị xã') || uName.includes('buôn ma thuột') || uName.includes('tp.');
+            const isSoNganh = (uCode.startsWith('h15') && !isLocal) || uName.includes('sở') || uGroup.includes('sở');
+            if (!isSoNganh) return false;
+          } else if (selectedDomain === 'DIA_PHUONG') {
+            const isLocal = uName.includes('huyện') || uName.includes('thị xã') || uName.includes('buôn ma thuột') || uName.includes('tp.') || uGroup.includes('địa phương');
+            if (!isLocal) return false;
+          }
+        }
+      } else if (dataLensMode === 'UNIT') {
+        if (selectedUnitScope !== 'ALL') {
+          const u = selectedUnitScope.toLowerCase();
+          const rowUnit = String(r.from_organ_id || r.organ_id || r.unitCode || r.departmentId || '').toLowerCase();
+          const rowName = String(r.organName || r.departmentName || '').toLowerCase();
+          if (!rowUnit.includes(u) && !rowName.includes(u)) {
+            return false;
+          }
+        }
+      }
+
       // 1. Lọc theo Phòng ban
       if (filterDept !== 'ALL') {
         const dept = r.departmentName || r.department || '';
@@ -268,11 +360,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       }
       return true;
     });
-  }, [rows, filterDept, filterRank, filterMau04, activeSopStep]);
+  }, [rows, dataLensMode, selectedDomain, selectedUnitScope, filterDept, filterRank, filterMau04, activeSopStep]);
 
-  // Tính toán các chỉ số thống kê điều hành (Executive KPI Stats)
+  // Tính toán các chỉ số thống kê điều hành bám sát lăng kính đang chọn (Dynamic KPIs)
   const stats = useMemo(() => {
-    const totalCadres = rows.length;
+    const activeDataset = filteredRows;
+    const totalCadres = activeDataset.length;
     if (totalCadres === 0) {
       return {
         totalCadres: 0,
@@ -283,18 +376,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         mau04Count: 0,
       };
     }
-    const sumScore = rows.reduce(
+    const sumScore = activeDataset.reduce(
       (acc: number, r: any) => acc + Number(r.sTong || r.qualityScore || 0),
       0,
     );
     const avgScore = Math.round((sumScore / totalCadres) * 10) / 10;
-    const excellentCount = rows.filter((r: any) => {
+    const excellentCount = activeDataset.filter((r: any) => {
       const rank = r.approvedRank || r.ranking || '';
       return rank.includes('xuất sắc') || rank.includes('Xuất sắc');
     }).length;
     const excellentRatio = Math.round((excellentCount / totalCadres) * 1000) / 10;
-    const deptCount = departmentsList.length || 5;
-    const mau04Count = rows.filter((r: any) =>
+
+    const deptsInActive = new Set<string>();
+    activeDataset.forEach((r: any) => {
+      if (r.departmentName) deptsInActive.add(r.departmentName);
+    });
+    const deptCount = deptsInActive.size || (departmentsList.length > 0 ? departmentsList.length : 5);
+    const mau04Count = activeDataset.filter((r: any) =>
       String(r.hasMau04 || '').includes('Có'),
     ).length;
 
@@ -306,7 +404,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       deptCount,
       mau04Count,
     };
-  }, [rows, departmentsList]);
+  }, [filteredRows, rows, departmentsList]);
 
   // Schema thông minh: Tự động đối chiếu với các trường dữ liệu thực tế của rows
   const schema = useMemo(() => {
@@ -486,6 +584,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               </Button>
             )}
 
+            {/* Nút Phân quyền chia sẻ báo cáo cho các đơn vị */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsShareModalOpen(true)}
+              className="bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 border-indigo-200 font-semibold flex items-center gap-1.5 text-xs sm:text-sm shadow-xs"
+              title="Phân quyền chia sẻ báo cáo cho các đơn vị, cơ quan Đảng, Sở Ban Ngành"
+            >
+              <Share2 className="w-4 h-4 text-indigo-600" />
+              Chia sẻ cho Đơn vị
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -528,6 +638,186 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       {/* Main Content Area */}
       <div className="flex-1 min-h-0 min-w-0 w-full max-w-full overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 space-y-6">
         
+        {/* ────────────────── THANH ĐIỀU KHIỂN LĂNG KÍNH BÁO CÁO ĐA CHIỀU (MULTI-PERSPECTIVE DATA SLICER) ────────────────── */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs w-full min-w-0 space-y-3">
+          {/* Hàng 1: Chọn Chế độ Lăng Kính (Toàn tỉnh / Theo Lĩnh vực / Theo Đơn vị) */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5 shrink-0 uppercase tracking-wide">
+                <Compass className="w-4 h-4 text-indigo-600" />
+                Lăng kính Số liệu:
+              </span>
+
+              <div className="inline-flex p-1 bg-slate-100 rounded-xl gap-1">
+                <button
+                  type="button"
+                  onClick={() => setDataLensMode('ALL')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    dataLensMode === 'ALL'
+                      ? 'bg-white shadow-xs text-indigo-700 font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5 text-indigo-500" />
+                  Toàn tỉnh (Toàn cảnh)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDataLensMode('DOMAIN')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    dataLensMode === 'DOMAIN'
+                      ? 'bg-white shadow-xs text-indigo-700 font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5 text-blue-500" />
+                  Theo Khối / Lĩnh vực
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDataLensMode('UNIT')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    dataLensMode === 'UNIT'
+                      ? 'bg-white shadow-xs text-indigo-700 font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+                  Theo Đơn vị cụ thể
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs text-slate-500">
+                Hiển thị: <strong className="text-indigo-700 font-bold">{filteredRows.length}</strong> / {rows.length} cán bộ
+              </span>
+            </div>
+          </div>
+
+          {/* Hàng 2: Bộ lọc tương ứng theo từng Lăng Kính */}
+          <div className="flex items-center gap-2 flex-wrap text-xs pt-0.5">
+            {dataLensMode === 'ALL' && (
+              <div className="flex items-center gap-2 text-slate-600">
+                <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 py-1 px-2.5 font-normal">
+                  🌐 Đang xem: Tổng hợp toàn bộ các sở, ban, ngành, cơ quan Đảng và UBND quận huyện trên địa bàn tỉnh Đắk Lắk.
+                </Badge>
+              </div>
+            )}
+
+            {dataLensMode === 'DOMAIN' && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-medium text-slate-500">Chọn khối phụ trách:</span>
+                <Button
+                  type="button"
+                  variant={selectedDomain === 'ALL_DOMAINS' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedDomain('ALL_DOMAINS')}
+                  className={`text-xs h-7 rounded-lg font-medium ${
+                    selectedDomain === 'ALL_DOMAINS'
+                      ? 'bg-slate-800 text-white'
+                      : 'bg-white text-slate-700 border-slate-200'
+                  }`}
+                >
+                  Tất cả các khối
+                </Button>
+                {DAKLAK_DOMAINS.map((domain) => (
+                  <Button
+                    key={domain.code}
+                    type="button"
+                    variant={selectedDomain === domain.code ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedDomain(domain.code)}
+                    className={`text-xs h-7 rounded-lg font-semibold flex items-center gap-1.5 transition-all ${
+                      selectedDomain === domain.code
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-indigo-50/70 hover:bg-indigo-100 text-indigo-800 border-indigo-200'
+                    }`}
+                  >
+                    {domain.name}
+                    {selectedDomain === domain.code && <CheckCircle2 className="w-3 h-3 text-white" />}
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            {dataLensMode === 'UNIT' && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-medium text-slate-500">Chọn đơn vị:</span>
+                <Button
+                  type="button"
+                  variant={selectedUnitScope === 'A15.05' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedUnitScope('A15.05')}
+                  className={`text-xs h-7 rounded-lg font-semibold flex items-center gap-1.5 transition-all ${
+                    selectedUnitScope === 'A15.05'
+                      ? 'bg-indigo-600 text-white shadow-xs ring-1 ring-indigo-300'
+                      : 'bg-indigo-50/80 hover:bg-indigo-100 text-indigo-800 border-indigo-200'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  Ban Tổ chức Tỉnh ủy (A15.05)
+                  {selectedUnitScope === 'A15.05' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant={selectedUnitScope === 'H15.20' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedUnitScope('H15.20')}
+                  className={`text-xs h-7 rounded-lg font-medium ${
+                    selectedUnitScope === 'H15.20'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                  }`}
+                >
+                  Sở Khoa học và Công nghệ (H15.20)
+                </Button>
+
+                <Button
+                  type="button"
+                  variant={selectedUnitScope === 'H15.25' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedUnitScope('H15.25')}
+                  className={`text-xs h-7 rounded-lg font-medium ${
+                    selectedUnitScope === 'H15.25'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                  }`}
+                >
+                  Văn phòng UBND Tỉnh (H15.25)
+                </Button>
+
+                <select
+                  value={selectedUnitScope}
+                  onChange={(e) => setSelectedUnitScope(e.target.value)}
+                  className="text-xs h-7 px-2.5 rounded-lg border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="ALL">-- Danh mục đơn vị khác --</option>
+                  {DAKLAK_UNITS.map((unit) => (
+                    <option key={unit.code} value={unit.code}>
+                      [{unit.group}] {unit.name} ({unit.code})
+                    </option>
+                  ))}
+                </select>
+
+                {selectedUnitScope !== 'ALL' && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedUnitScope('ALL')}
+                    className="text-[11px] h-7 px-2 text-rose-600 hover:bg-rose-50"
+                  >
+                    Xem tất cả đơn vị
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Executive KPI Stats Overview Bar */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 w-full min-w-0">
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
@@ -753,14 +1043,15 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 <span className="truncate">Trực quan hóa Dữ liệu Thực tế</span>
               </h2>
               <span className="text-xs text-slate-400 shrink-0">
-                Tự động tổng hợp từ {rows.length} bản ghi
+                Tự động tổng hợp từ {filteredRows.length} bản ghi
+                {filteredRows.length !== rows.length && ` (trong tổng số ${rows.length})`}
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 w-full min-w-0">
               {effectiveCharts.map((chart: any, cIdx: number) => {
                 const chartData = aggregateData(
-                  rows,
+                  filteredRows,
                   chart.xAxis,
                   chart.yAxis,
                 );
@@ -779,8 +1070,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                     className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden w-full min-w-0"
                   >
                     <div className="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 gap-2 min-w-0">
-                      <h3 className="font-bold text-xs sm:text-sm text-slate-800 truncate pr-2 min-w-0 flex-1">
-                        {chart.title || `Biểu đồ ${cIdx + 1}`}
+                      <h3 className="font-bold text-xs sm:text-sm text-slate-800 truncate pr-2 min-w-0 flex-1" title={fixMojibake(chart.title)}>
+                        {fixMojibake(chart.title) || `Biểu đồ ${cIdx + 1}`}
                       </h3>
                       <div className="flex items-center gap-2 shrink-0">
                         {chart.type !== 'pie' && (
@@ -875,8 +1166,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                 className="flex-1 text-center px-0.5 min-w-0 overflow-hidden"
                                 title={item.label}
                               >
-                                <div className="truncate text-slate-700 font-semibold">
-                                  {item.label}
+                                <div className="truncate text-slate-700 font-semibold" title={item.label}>
+                                  {getShortChartLabel(item.label)}
                                 </div>
                               </div>
                             ))}
@@ -958,7 +1249,9 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                           <div className="flex justify-around items-start gap-1 pt-2 border-t border-slate-100 text-[10px] text-slate-500 font-medium w-full min-w-0">
                             {chartData.map((item, i) => (
                               <div key={i} className="flex-1 text-center px-0.5 min-w-0 overflow-hidden" title={item.label}>
-                                <div className="truncate text-slate-700 font-semibold">{item.label}</div>
+                                <div className="truncate text-slate-700 font-semibold" title={item.label}>
+                                  {getShortChartLabel(item.label)}
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -1009,7 +1302,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   <div key={i} className="flex items-center justify-between text-[11px] gap-1 min-w-0">
                                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                                      <span className="text-slate-600 truncate flex-1 min-w-0" title={item.label}>{item.label}</span>
+                                      <span className="text-slate-600 truncate flex-1 min-w-0" title={item.label}>{fixMojibake(item.label)}</span>
                                     </div>
                                     <span className="font-bold text-slate-800 shrink-0 text-right">
                                       {item.value} <span className="text-slate-400 font-normal">({pct}%)</span>
@@ -1023,8 +1316,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                       )}
 
                       <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-                        <span>Trục X: {chart.xAxis}</span>
-                        <span>Trục Y: {chart.yAxis}</span>
+                        <span>Trục X: {getFriendlyFieldLabel(chart.xAxis)}</span>
+                        <span>Trục Y: {getFriendlyFieldLabel(chart.yAxis)}</span>
                       </div>
                     </div>
                   </div>
@@ -1487,6 +1780,15 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Modal Phân quyền & Chia sẻ Báo cáo cho các đơn vị */}
+      {reportDef && (
+        <ReportShareModal
+          report={reportDef}
+          open={isShareModalOpen}
+          onOpenChange={setIsShareModalOpen}
+        />
+      )}
     </div>
   );
 };

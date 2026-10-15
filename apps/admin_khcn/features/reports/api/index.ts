@@ -101,11 +101,12 @@ export const useCreateReportDefinition = () => {
 export const useRunReport = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { definitionId: number; config?: any }) => {
+    mutationFn: async (payload: { definitionId: number; config?: any; params?: Record<string, any> }) => {
       const body = {
         reportDefinitionId: payload.definitionId,
         definitionId: payload.definitionId,
         config: payload.config,
+        params: payload.params,
       };
       const res: any = await axiosInstance.post("/reports/runs", body);
       const data = unwrapData<any>(res, res);
