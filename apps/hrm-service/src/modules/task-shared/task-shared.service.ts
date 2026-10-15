@@ -1076,7 +1076,7 @@ export class TaskSharedService {
 
   public async buildScopingWhereClause(query: any): Promise<any | null> {
     const perms = query.currentUserPermissions || [];
-    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE');
+    const isAdmin = query.isAdmin || perms.includes('TASK:MANAGE') || perms.includes('*');
 
     if (isAdmin) {
       return null; // Admin sees everything

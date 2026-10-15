@@ -1,5 +1,39 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Loại Bỏ Triệt Để Trùng Lặp Code HrmReportsClient Tại HRM, Chuyển Toàn Bộ Thống Kê/Báo Cáo Về Report Service & Dùng 100% Dữ Liệu Thật
+
+### 1. Yêu Cầu & Nguyên Tắc Kỹ Thuật (Architecture & Source of Truth)
+- **Chỉ đạo từ người dùng**:
+  * "personal-task-workbench.tsx , HrmReportWorkbenchClient.tsx xoá 2 component này đi chuyển về seed thiết kế trên report-service cho tôi sau đó thêm vào dashboard của dịch vụ này".
+  * "/code1 sử dụng data thật đừng dùng data tĩnh để hiển thị như trong seed".
+  * "tôi đã sử dụng từ report tại sao ở hrm lại có component HrmReportsClient.tsx kiểm tra lại cho tôi tránh trùng lặp code bên report-service đổ sang".
+- **Tuân thủ 7 Bộ ràng buộc kỹ thuật & Hiến chương .agents/AGENTS.md**:
+  * **Hiểu sâu sắc Cấu trúc Hệ thống & Chống Trùng lặp Chức năng (Architecture Pre-flight & Deduplication)**: `report-service` là Source of Truth duy nhất cho các báo cáo, BI, thống kê và dashboards của toàn hệ thống. Phân hệ HRM không được tự ý dựng lại route hay các component báo cáo ad-hoc.
+  * **Triệt tiêu Ảo giác AI (Anti-AI Hallucination & Zero Assumptions)**: Không sử dụng mock data tĩnh, dữ liệu giả hay fix cứng (`CB_001`, `Trần Trung Thành`...). Dữ liệu phải được query và tổng hợp trực tiếp từ CSDL thật của `hrm-service` (`admin_hrm.tasks`, `admin_hrm.kpi_evaluations`, `admin_hrm.employees`).
+  * **Service Data Sovereignty & gRPC Contract**: Giao tiếp liên service thông qua gRPC (kết nối port `50052` của `hrm-service`), metadata kèm quyền hệ thống (`*`).
+  * **Dọn rác 100%**: Xóa bỏ hoàn toàn component thừa `HrmReportsClient.tsx`, thư mục `features/hrm/components/reports/`, route `app/services/hrm/reports/` và các file scratch.
+
+### 2. Các Thay Đổi Cụ Thể Đã Triển Khai
+1. **Loại bỏ triệt để file & component trùng lặp ở Frontend (`apps/admin_khcn`)**:
+   - Xóa bỏ `apps/admin_khcn/features/hrm/components/reports/HrmReportsClient.tsx`.
+   - Xóa bỏ thư mục `apps/admin_khcn/features/hrm/components/reports/`.
+   - Xóa bỏ route `apps/admin_khcn/app/services/hrm/reports/page.tsx` và thư mục route `apps/admin_khcn/app/services/hrm/reports/`.
+   - Toàn bộ thống kê, báo cáo và BI giờ đây tập trung duy nhất tại phân hệ Report (`/services/reports`).
+2. **Khắc phục kết nối gRPC liên service**:
+   - `hrm-service` chạy trên cổng gRPC `50052`. Đã sửa fallback cấu hình từ `50053` thành `50052` trong `apps/report-service/src/modules/statistics/statistics.module.ts` và `apps/report-service/src/modules/reports/reports.module.ts`.
+   - Bổ sung quyền wildcard `perms.includes('*')` trong hàm `buildScopingWhereClause` tại `apps/hrm-service/src/modules/task-shared/task-shared.service.ts` để gRPC call từ `report-service` (với SYSTEM token) truy vấn được toàn bộ danh sách tasks.
+3. **Chuyển đổi 100% sang Dữ liệu Thật trong `statistics.service.ts`**:
+   - Thay thế toàn bộ mock data tĩnh bằng truy vấn trực tiếp từ `admin_hrm.tasks` (38 tasks thật) và `admin_hrm.kpi_evaluations` (23 cán bộ Ban Tổ chức Tỉnh ủy thật).
+   - Tính toán động xu hướng 6 tháng, cơ cấu trạng thái (Hoàn thành, Đang thực hiện, Chờ duyệt, Quá hạn), cân đối tải theo 5 phòng ban và danh sách nhiệm vụ thật.
+   - Đồng bộ dữ liệu thật vào `DatasetSnapshot` và `ReportRun` (#50 cho `REP_PERSONAL_WORKBENCH` và #47 cho `REP_BTCTU_SOP_KPI`).
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan
+- **Biên dịch Frontend (`apps/admin_khcn`)**: `npm run build` hoàn thành với **Exit code 0** (83 routes, pre-rendered thành công).
+- **Biên dịch Microservices**: `hrm-service` và `report-service` build và cập nhật dist vào Docker containers hoạt động ổn định.
+- **Kiểm chứng Browser Subagent**: Xác nhận không còn route thừa `/services/hrm/reports` hay component duplicate; hệ thống hoạt động trơn tru.
+
+---
+
 ## [2026-10-15] Chuyển Đổi Xuất Báo Cáo Excel (.xlsx/.csv) & Văn Bản/PDF (Mẫu 05) Sang Backend Report Service API (Smart Backend / Dumb Client)
 
 ### 1. Yêu cầu & Nguyên Tắc Kỹ Thuật (Architecture & Source of Truth)

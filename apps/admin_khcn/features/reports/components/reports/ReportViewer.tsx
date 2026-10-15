@@ -294,8 +294,19 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   };
 
   const rows = useMemo(() => {
-    const rawRows = Array.isArray(snapshot?.data)
-      ? snapshot.data
+    let rawData = snapshot?.data;
+    // Phòng thủ nếu data bị bọc lồng [ { schema, data: [...] } ]
+    if (
+      Array.isArray(rawData) &&
+      rawData.length === 1 &&
+      rawData[0] &&
+      typeof rawData[0] === 'object' &&
+      Array.isArray(rawData[0].data)
+    ) {
+      rawData = rawData[0].data;
+    }
+    const rawRows = Array.isArray(rawData)
+      ? rawData
       : Array.isArray((snapshot as any)?.data?.data)
       ? (snapshot as any).data.data
       : Array.isArray(snapshot)
@@ -324,7 +335,8 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const departmentsList = useMemo(() => {
     const set = new Set<string>();
     rows.forEach((r: any) => {
-      if (r.departmentName) set.add(r.departmentName);
+      const dept = r.departmentName || r.department || r.organName;
+      if (dept) set.add(dept);
     });
     return Array.from(set);
   }, [rows]);
@@ -364,13 +376,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
       // 1. Lọc theo Phòng ban
       if (filterDept !== 'ALL') {
-        const dept = r.departmentName || r.department || '';
+        const dept = r.departmentName || r.department || r.organName || '';
         if (dept !== filterDept) return false;
       }
       // 2. Lọc theo Xếp loại phê duyệt
       if (filterRank !== 'ALL') {
-        const rank = r.approvedRank || r.ranking || '';
-        if (!rank.includes(filterRank)) return false;
+        const rank = String(r.approvedRank || r.ranking || '').toLowerCase();
+        if (!rank.includes(filterRank.toLowerCase())) return false;
       }
       // 3. Lọc theo Kê khai Mẫu 04 (Nổi trội)
       if (filterMau04 !== 'ALL') {
@@ -402,21 +414,22 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       };
     }
     const sumScore = activeDataset.reduce(
-      (acc: number, r: any) => acc + Number(r.sTong || r.qualityScore || 0),
+      (acc: number, r: any) => acc + Number(r.sTong || r.qualityScore || r.score || 0),
       0,
     );
     const avgScore = Math.round((sumScore / totalCadres) * 10) / 10;
     const excellentCount = activeDataset.filter((r: any) => {
-      const rank = r.approvedRank || r.ranking || '';
-      return rank.includes('xuất sắc') || rank.includes('Xuất sắc');
+      const rank = String(r.approvedRank || r.ranking || '').toLowerCase();
+      return rank.includes('xuất sắc');
     }).length;
     const excellentRatio = Math.round((excellentCount / totalCadres) * 1000) / 10;
 
     const deptsInActive = new Set<string>();
     activeDataset.forEach((r: any) => {
-      if (r.departmentName) deptsInActive.add(r.departmentName);
+      const dept = r.departmentName || r.department || r.organName;
+      if (dept) deptsInActive.add(dept);
     });
-    const deptCount = deptsInActive.size || (departmentsList.length > 0 ? departmentsList.length : 5);
+    const deptCount = deptsInActive.size || (departmentsList.length > 0 ? departmentsList.length : 1);
     const mau04Count = activeDataset.filter((r: any) =>
       String(r.hasMau04 || '').includes('Có'),
     ).length;
@@ -468,13 +481,15 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
       }
     }
 
-    // 3. Fallback: Trích xuất trực tiếp từ các trường của rows thực tế
+    // 3. Fallback: Trích xuất trực tiếp từ các trường của rows thực tế, loại trừ các metadata wrapper keys
     if (rowKeys.length > 0) {
-      return rowKeys.map((k) => ({
-        key: k,
-        label: getFriendlyFieldLabel(k),
-        type: typeof (rows[0] as any)[k] === 'number' ? 'number' : 'string',
-      }));
+      return rowKeys
+        .filter((k) => !['schema', 'data', 'total', 'filteredTotal', 'page', 'limit'].includes(k))
+        .map((k) => ({
+          key: k,
+          label: getFriendlyFieldLabel(k),
+          type: typeof (rows[0] as any)[k] === 'number' ? 'number' : 'string',
+        }));
     }
 
     return [];
@@ -575,22 +590,36 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </Button>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 shrink-0">
-                  TỈNH ỦY ĐẮK LẮK • BAN TỔ CHỨC TỈNH ỦY
-                </span>
+                {isBtctuReport ? (
+                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 shrink-0">
+                    TỈNH ỦY ĐẮK LẮK • BAN TỔ CHỨC TỈNH ỦY
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 shrink-0">
+                    HỆ THỐNG QUẢN TRỊ ĐIỀU HÀNH TỈNH ĐẮK LẮK
+                  </span>
+                )}
                 <Badge variant="outline" className="text-xs bg-slate-50 shrink-0">
                   ID: #{definitionId}
                 </Badge>
-                <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] shrink-0 font-semibold">
-                  Chuẩn SOP 4 Bước
-                </Badge>
+                {isBtctuReport ? (
+                  <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] shrink-0 font-semibold">
+                    Chuẩn SOP 4 Bước
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-700 text-[11px] shrink-0 font-semibold">
+                    {reportDef?.code || 'Báo cáo Hệ thống'}
+                  </Badge>
+                )}
               </div>
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 truncate mt-1">
                 {reportName}
               </h1>
               <p className="text-xs text-slate-500 truncate mt-0.5">
                 {reportDef?.description ||
-                  'Khung Hướng dẫn 05-HD/TU & Quy định 348-QĐ/BTCTW • Đánh giá 05 Tập thể & 23 Cán bộ công chức'}
+                  (isBtctuReport
+                    ? 'Khung Hướng dẫn 05-HD/TU & Quy định 348-QĐ/BTCTW • Đánh giá 05 Tập thể & 23 Cán bộ công chức'
+                    : 'Báo cáo tổng hợp trích xuất số liệu phân tích thời gian thực')}
               </p>
             </div>
           </div>
@@ -862,23 +891,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 w-full min-w-0">
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">Cán bộ đánh giá</span>
+              <span className="truncate">{isBtctuReport ? 'Cán bộ đánh giá' : 'Tổng số bản ghi'}</span>
               <Users className="w-4 h-4 text-indigo-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-xl sm:text-2xl font-black text-slate-900">
                 {stats.totalCadres}
               </span>
-              <span className="text-xs text-slate-400 font-normal">đồng chí</span>
+              <span className="text-xs text-slate-400 font-normal">{isBtctuReport ? 'đồng chí' : 'nhân sự'}</span>
             </div>
             <div className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1 truncate">
-              <CheckCircle2 className="w-3 h-3" /> 100% hoàn thành B1-B4
+              <CheckCircle2 className="w-3 h-3" /> {isBtctuReport ? '100% hoàn thành B1-B4' : 'Dữ liệu thời gian thực'}
             </div>
           </div>
 
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">Điểm KPI TB Toàn cơ quan</span>
+              <span className="truncate">{isBtctuReport ? 'Điểm KPI TB Toàn cơ quan' : 'Điểm đánh giá TB'}</span>
               <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -888,23 +917,23 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <span className="text-xs text-slate-400 font-normal">/ 100 điểm</span>
             </div>
             <div className="text-[11px] text-slate-500 font-medium mt-1 truncate">
-              30đ Chung + 70đ Nhiệm vụ
+              {isBtctuReport ? '30đ Chung + 70đ Nhiệm vụ' : 'Thang điểm đánh giá 100'}
             </div>
           </div>
 
           <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
             <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">Tỷ lệ Xuất sắc (Trần 20%)</span>
+              <span className="truncate">{isBtctuReport ? 'Tỷ lệ Xuất sắc (Trần 20%)' : 'Xếp loại Xuất sắc'}</span>
               <Award className="w-4 h-4 text-amber-500 shrink-0" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-xl sm:text-2xl font-black text-indigo-600">
                 {stats.excellentRatio}%
               </span>
-              <span className="text-xs text-slate-400 font-normal">({stats.excellentCount}/23 CB)</span>
+              <span className="text-xs text-slate-400 font-normal">({stats.excellentCount}/{stats.totalCadres} CB)</span>
             </div>
             <div className="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1 truncate">
-              <ShieldCheck className="w-3 h-3" /> Đạt chuẩn trần ≤ 20%
+              <ShieldCheck className="w-3 h-3" /> {isBtctuReport ? 'Đạt chuẩn trần ≤ 20%' : `${stats.excellentCount} nhân sự Xuất sắc`}
             </div>
           </div>
 
@@ -920,159 +949,178 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <span className="text-xs text-slate-400 font-normal">đơn vị</span>
             </div>
             <div className="text-[11px] text-blue-600 font-semibold mt-1 truncate">
-              3 Xuất sắc • 2 Tốt
+              {isBtctuReport ? '3 Xuất sắc • 2 Tốt' : `${stats.deptCount} phòng ban tham gia`}
             </div>
           </div>
 
-          <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
-            <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
-              <span className="truncate">Kê khai Nổi trội (Mẫu 04)</span>
-              <Sparkles className="w-4 h-4 text-purple-500 shrink-0" />
+          {isBtctuReport ? (
+            <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+              <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+                <span className="truncate">Kê khai Nổi trội (Mẫu 04)</span>
+                <Sparkles className="w-4 h-4 text-purple-500 shrink-0" />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-xl sm:text-2xl font-black text-purple-700">
+                  {stats.mau04Count}
+                </span>
+                <span className="text-xs text-slate-400 font-normal">hồ sơ</span>
+              </div>
+              <div className="text-[11px] text-purple-600 font-medium mt-1 truncate">
+                100% người Xuất sắc có Mẫu 04
+              </div>
             </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-xl sm:text-2xl font-black text-purple-700">
-                {stats.mau04Count}
-              </span>
-              <span className="text-xs text-slate-400 font-normal">hồ sơ</span>
+          ) : (
+            <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between min-w-0">
+              <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+                <span className="truncate">Trạng thái Báo cáo</span>
+                <Activity className="w-4 h-4 text-emerald-500 shrink-0" />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-xl sm:text-2xl font-black text-emerald-600">
+                  Hoàn thành
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-500 font-medium mt-1 truncate">
+                Phiên bản v{reportDef?.version || 1}
+              </div>
             </div>
-            <div className="text-[11px] text-purple-600 font-medium mt-1 truncate">
-              100% người Xuất sắc có Mẫu 04
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Interactive SOP Workflow Stepper (Quy trình Thao tác Chuẩn 4 Bước) */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 w-full min-w-0">
-          <div className="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2 min-w-0">
-              <Scale className="w-5 h-5 text-indigo-600 shrink-0" />
-              <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                Quy trình Đánh giá, Thẩm định & Ban hành Quyết định Chuẩn SOP (04 Bước)
-              </h2>
+        {isBtctuReport && (
+          <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 w-full min-w-0">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2 min-w-0">
+                <Scale className="w-5 h-5 text-indigo-600 shrink-0" />
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                  Quy trình Đánh giá, Thẩm định &amp; Ban hành Quyết định Chuẩn SOP (04 Bước)
+                </h2>
+              </div>
+              <span className="text-xs text-slate-500 font-medium">
+                Căn cứ: Hướng dẫn số 05-HD/TU của Ban Thường vụ Tỉnh ủy
+              </span>
             </div>
-            <span className="text-xs text-slate-500 font-medium">
-              Căn cứ: Hướng dẫn số 05-HD/TU của Ban Thường vụ Tỉnh ủy
-            </span>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 w-full min-w-0">
+              {/* Bước 1 */}
+              <div
+                onClick={() => setActiveSopStep(activeSopStep === 'Bước 1' ? 'ALL' : 'Bước 1')}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                  activeSopStep === 'Bước 1'
+                    ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                    : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>BƯỚC 1</span>
+                    <span className="text-[11px] font-medium text-emerald-600">Trước ngày 15</span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                    Công chức tự đánh giá
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                    Lập Mẫu 02 tự chấm điểm (Điểm chung 30đ + Điểm nhiệm vụ 70đ qua KPI) &amp; Mẫu 04 việc nổi trội.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                    23/23 Đã nộp
+                  </Badge>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </div>
+              </div>
+
+              {/* Bước 2 */}
+              <div
+                onClick={() => setActiveSopStep(activeSopStep === 'Bước 2' ? 'ALL' : 'Bước 2')}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                  activeSopStep === 'Bước 2'
+                    ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                    : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>BƯỚC 2</span>
+                    <span className="text-[11px] font-medium text-emerald-600">Trước ngày 20</span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                    Trưởng phòng thẩm định
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                    Họp phòng đánh giá cá nhân; Lập Bảng tổng hợp điểm Tập thể phòng (Mẫu 03).
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                    05/05 Đã duyệt
+                  </Badge>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </div>
+              </div>
+
+              {/* Bước 3 */}
+              <div
+                onClick={() => setActiveSopStep(activeSopStep === 'Bước 3' ? 'ALL' : 'Bước 3')}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                  activeSopStep === 'Bước 3'
+                    ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                    : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>BƯỚC 3</span>
+                    <span className="text-[11px] font-medium text-indigo-600">Ngày 21 – 25</span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                    Hội đồng Ban xét duyệt
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                    Áp ma trận trọng số $w_A..w_D$ &amp; 8 nguồn CSDL; Siết trần ≤ 20% &amp; Người đứng đầu.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                  <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold">
+                    Siết trần 17.4%
+                  </Badge>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </div>
+              </div>
+
+              {/* Bước 4 */}
+              <div
+                onClick={() => setActiveSopStep(activeSopStep === 'Bước 4' ? 'ALL' : 'Bước 4')}
+                className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
+                  activeSopStep === 'Bước 4'
+                    ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
+                    : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
+                    <span>BƯỚC 4</span>
+                    <span className="text-[11px] font-medium text-emerald-600">Trước ngày 28</span>
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                    Ban hành Quyết định (Mẫu 05)
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                    Lãnh đạo Ban ký Quyết định phê duyệt xếp loại; Công khai cơ quan &amp; báo cáo BTVTU.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
+                    Đã ban hành QĐ
+                  </Badge>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </div>
+              </div>
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 w-full min-w-0">
-            {/* Bước 1 */}
-            <div
-              onClick={() => setActiveSopStep(activeSopStep === 'Bước 1' ? 'ALL' : 'Bước 1')}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
-                activeSopStep === 'Bước 1'
-                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
-                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
-                  <span>BƯỚC 1</span>
-                  <span className="text-[11px] font-medium text-emerald-600">Trước ngày 15</span>
-                </div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                  Công chức tự đánh giá
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  Lập Mẫu 02 tự chấm điểm (Điểm chung 30đ + Điểm nhiệm vụ 70đ qua KPI) &amp; Mẫu 04 việc nổi trội.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
-                  23/23 Đã nộp
-                </Badge>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              </div>
-            </div>
-
-            {/* Bước 2 */}
-            <div
-              onClick={() => setActiveSopStep(activeSopStep === 'Bước 2' ? 'ALL' : 'Bước 2')}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
-                activeSopStep === 'Bước 2'
-                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
-                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
-                  <span>BƯỚC 2</span>
-                  <span className="text-[11px] font-medium text-emerald-600">Trước ngày 20</span>
-                </div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                  Trưởng phòng thẩm định
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  Họp phòng đánh giá cá nhân; Lập Bảng tổng hợp điểm Tập thể phòng (Mẫu 03).
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
-                  05/05 Đã duyệt
-                </Badge>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              </div>
-            </div>
-
-            {/* Bước 3 */}
-            <div
-              onClick={() => setActiveSopStep(activeSopStep === 'Bước 3' ? 'ALL' : 'Bước 3')}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
-                activeSopStep === 'Bước 3'
-                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
-                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
-                  <span>BƯỚC 3</span>
-                  <span className="text-[11px] font-medium text-indigo-600">Ngày 21 – 25</span>
-                </div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                  Hội đồng Ban xét duyệt
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  Áp ma trận trọng số $w_A..w_D$ & 8 nguồn CSDL; Siết trần ≤ 20% & Người đứng đầu.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold">
-                  Siết trần 17.4%
-                </Badge>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              </div>
-            </div>
-
-            {/* Bước 4 */}
-            <div
-              onClick={() => setActiveSopStep(activeSopStep === 'Bước 4' ? 'ALL' : 'Bước 4')}
-              className={`p-3.5 rounded-xl border transition-all cursor-pointer min-w-0 flex flex-col justify-between ${
-                activeSopStep === 'Bước 4'
-                  ? 'bg-indigo-50/80 border-indigo-400 shadow-xs ring-1 ring-indigo-400'
-                  : 'bg-slate-50/60 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-1">
-                  <span>BƯỚC 4</span>
-                  <span className="text-[11px] font-medium text-emerald-600">Trước ngày 28</span>
-                </div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                  Ban hành Quyết định (Mẫu 05)
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
-                  Lãnh đạo Ban ký Quyết định phê duyệt xếp loại; Công khai cơ quan & báo cáo BTVTU.
-                </p>
-              </div>
-              <div className="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold">
-                  Đã ban hành QĐ
-                </Badge>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Dynamic Charts Visualization */}
         {(isCompleted || rows.length > 0) && effectiveCharts.length > 0 && (
@@ -1377,10 +1425,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               <div className="flex items-center gap-2 min-w-0">
                 <TableIcon className="w-5 h-5 text-indigo-600 shrink-0" />
                 <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">
-                  Bảng Tổng hợp Đánh giá, Xếp loại Cán bộ & Tập thể (Mẫu 03 & Mẫu 05)
+                  {isBtctuReport
+                    ? 'Bảng Tổng hợp Đánh giá, Xếp loại Cán bộ & Tập thể (Mẫu 03 & Mẫu 05)'
+                    : (reportDef?.name || 'Bảng Dữ liệu Chi tiết Báo cáo')}
                 </h3>
                 <Badge variant="secondary" className="ml-2 bg-slate-100 shrink-0">
-                  {filteredRows.length} / {rows.length} cán bộ
+                  {filteredRows.length} / {rows.length} {rows.length === 1 ? 'bản ghi' : 'cán bộ / bản ghi'}
                 </Badge>
               </div>
 
@@ -1415,7 +1465,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 }}
                 className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
               >
-                <option value="ALL">Tất cả Phòng ban (5 đơn vị)</option>
+                <option value="ALL">Tất cả Phòng ban ({departmentsList.length > 0 ? `${departmentsList.length} đơn vị` : 'Toàn bộ'})</option>
                 {departmentsList.map((dept) => (
                   <option key={dept} value={dept}>
                     {dept}
@@ -1433,25 +1483,27 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                 className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
               >
                 <option value="ALL">Tất cả Mức xếp loại</option>
-                <option value="xuất sắc">Hoàn thành xuất sắc nhiệm vụ (≤ 20%)</option>
-                <option value="tốt">Hoàn thành tốt nhiệm vụ</option>
-                <option value="Hoàn thành nhiệm vụ">Hoàn thành nhiệm vụ</option>
-                <option value="Không hoàn thành">Không hoàn thành nhiệm vụ</option>
+                <option value="xuất sắc">Hoàn thành xuất sắc{isBtctuReport ? ' (≤ 20%)' : ''}</option>
+                <option value="tốt">Hoàn thành tốt</option>
+                <option value="hoàn thành">Hoàn thành nhiệm vụ</option>
+                <option value="chưa hoàn thành">Chưa hoàn thành / Không hoàn thành</option>
               </select>
 
               {/* Lọc theo Kê khai Mẫu 04 */}
-              <select
-                value={filterMau04}
-                onChange={(e) => {
-                  setFilterMau04(e.target.value);
-                  setPage(1);
-                }}
-                className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
-              >
-                <option value="ALL">Tất cả Mẫu 04</option>
-                <option value="YES">Có kê khai việc nổi trội</option>
-                <option value="NO">Không kê khai nổi trội</option>
-              </select>
+              {(isBtctuReport || rows.some((r: any) => r.hasMau04 !== undefined)) && (
+                <select
+                  value={filterMau04}
+                  onChange={(e) => {
+                    setFilterMau04(e.target.value);
+                    setPage(1);
+                  }}
+                  className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg px-2.5 py-1 outline-none focus:border-indigo-500"
+                >
+                  <option value="ALL">Tất cả Mẫu 04</option>
+                  <option value="YES">Có kê khai việc nổi trội</option>
+                  <option value="NO">Không kê khai nổi trội</option>
+                </select>
+              )}
 
               {/* Nút Xóa bộ lọc nếu đang áp dụng */}
               {(filterDept !== 'ALL' || filterRank !== 'ALL' || filterMau04 !== 'ALL' || activeSopStep !== 'ALL' || tableSearch !== '') && (
@@ -1531,11 +1583,11 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   <Badge variant="outline" className="font-mono text-[11px] font-semibold bg-slate-50">
                                     {strVal}
                                   </Badge>
-                                ) : col.key === 'fullName' ? (
+                                ) : col.key === 'fullName' || col.key === 'employeeName' ? (
                                   <span className="font-bold text-slate-900 block truncate">
                                     {strVal}
                                   </span>
-                                ) : col.key === 'departmentName' ? (
+                                ) : col.key === 'departmentName' || col.key === 'department' ? (
                                   <span className="font-medium text-slate-800 block truncate">
                                     {strVal}
                                   </span>
@@ -1551,39 +1603,47 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                   <span className="font-semibold text-slate-700">
                                     {val} <span className="text-[10px] text-slate-400 font-normal">/70</span>
                                   </span>
-                                ) : col.key === 'sTong' ? (
+                                ) : col.key === 'sTong' || col.key === 'qualityScore' ? (
                                   <span
                                     className={`font-black text-xs sm:text-sm ${
                                       Number(val) >= 90
                                         ? 'text-indigo-700'
                                         : Number(val) >= 70
                                           ? 'text-emerald-700'
-                                          : 'text-amber-700'
+                                          : Number(val) >= 50
+                                            ? 'text-amber-700'
+                                            : 'text-rose-700'
                                     }`}
                                   >
+                                    {val} {col.key === 'qualityScore' ? <span className="text-[10px] text-slate-400 font-normal">/100</span> : ''}
+                                  </span>
+                                ) : col.key === 'taskCount' || col.key === 'completedCount' ? (
+                                  <span className="font-semibold text-slate-700">
                                     {val}
                                   </span>
                                 ) : col.key === 'proposedRank' ? (
                                   <Badge
                                     variant="outline"
                                     className={`text-[10px] font-medium ${
-                                      strVal.includes('xuất sắc')
+                                      strVal.toLowerCase().includes('xuất sắc')
                                         ? 'bg-purple-50 text-purple-700 border-purple-200'
                                         : 'bg-slate-50 text-slate-600 border-slate-200'
                                     }`}
                                   >
                                     {strVal}
                                   </Badge>
-                                ) : col.key === 'approvedRank' ? (
+                                ) : col.key === 'approvedRank' || col.key === 'ranking' ? (
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                     <Badge
                                       variant="outline"
                                       className={`text-[10px] font-bold ${
-                                        isExcellent
+                                        strVal.toLowerCase().includes('xuất sắc')
                                           ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                                          : strVal.includes('tốt')
+                                          : strVal.toLowerCase().includes('tốt')
                                             ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                                            : 'bg-amber-50 text-amber-700 border-amber-300'
+                                            : strVal.toLowerCase().includes('chưa') || strVal.toLowerCase().includes('không')
+                                              ? 'bg-rose-50 text-rose-700 border-rose-300'
+                                              : 'bg-amber-50 text-amber-700 border-amber-300'
                                       }`}
                                     >
                                       {strVal}

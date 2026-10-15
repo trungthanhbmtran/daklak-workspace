@@ -31,8 +31,9 @@ export function useEmployeeTitles(employee: any) {
 
   const unitName = useMemo(() => {
     if (!employee?.departmentId) return employee?.department?.name ?? "—";
-    if (!Array.isArray(treeNodes)) return employee?.department?.name ?? "—";
-    const flat = flattenUnits(treeNodes);
+    const rawTree = Array.isArray(treeNodes) ? treeNodes : (treeNodes as any)?.data ?? [];
+    if (!Array.isArray(rawTree) || rawTree.length === 0) return employee?.department?.name ?? "—";
+    const flat = flattenUnits(rawTree);
     const found = flat.find((u) => u.id === employee.departmentId);
     return found?.name ?? employee?.department?.name ?? "—";
   }, [employee, treeNodes]);

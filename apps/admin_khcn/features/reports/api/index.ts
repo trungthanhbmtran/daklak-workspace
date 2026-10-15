@@ -163,10 +163,21 @@ export const useGetDatasetSnapshot = (
         `/reports/runs/${numericId}/snapshot`,
         { params: { limit, page, search: search.trim() || undefined } },
       );
-      const snapshot = unwrapData<any>(res, {
+      let snapshot = unwrapData<any>(res, {
         schema: [],
         data: [],
       });
+      // Phòng thủ: nếu gateway hoặc middleware bọc snapshot container thành mảng 1 phần tử
+      if (
+        Array.isArray(snapshot) &&
+        snapshot.length === 1 &&
+        snapshot[0] &&
+        typeof snapshot[0] === 'object' &&
+        ('data' in snapshot[0] || 'schema' in snapshot[0])
+      ) {
+        snapshot = snapshot[0];
+      }
+
       const rawData = Array.isArray(snapshot?.data)
         ? snapshot.data
         : Array.isArray(snapshot)

@@ -29,8 +29,8 @@ const NUMERIC_TAIL_RE = /\/\d+$/;
 const CUID_TAIL_RE = /\/c[a-z0-9]{24}$/i;
 const STATS_RE = /\/(reports|stats|metrics|dashboard|kpis)/i;
 
-const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report', '/kpi-forms/'];
-const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles', '/global-settings', '/xml'];
+const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report', '/kpi-forms/', '/snapshot'];
+const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles', '/global-settings', '/xml', '/snapshot'];
 
 /* -------------------------------------------------------------------------- */
 /* deepClean                                                                   */
@@ -167,7 +167,13 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
     if (data === undefined) {
       data = isList ? [] : {};
     } else if (isList && !Array.isArray(data)) {
-      data = isEmptyObject(data) ? [] : [data];
+      const isContainer =
+        data !== null &&
+        typeof data === 'object' &&
+        ('schema' in data || 'data' in data || 'items' in data || 'rows' in data);
+      if (!isContainer) {
+        data = isEmptyObject(data) ? [] : [data];
+      }
     }
 
     const result: ApiResponse = {

@@ -48,7 +48,7 @@ const DEFAULT_CHANNEL_OPTIONS = {
         options: {
           package: 'task',
           protoPath: join(PROTO_ROOT, 'hrm/task.proto'),
-          url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
+          url: process.env.HRM_GRPC_URL || 'hrm-service:50052',
           channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,

@@ -142,7 +142,8 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
     queryFn: () => organizationApi.getTree(),
   });
 
-  const units = useMemo(() => flattenUnits(Array.isArray(treeNodes) ? treeNodes : []), [treeNodes]);
+  const rawTree = Array.isArray(treeNodes) ? treeNodes : (treeNodes as any)?.data ?? [];
+  const units = useMemo(() => flattenUnits(Array.isArray(rawTree) ? rawTree : []), [rawTree]);
 
   const { data: jobTitlesRes, isLoading: isLoadingJobs } = useQuery({
     queryKey: ["organizations", "job-titles", departmentId],

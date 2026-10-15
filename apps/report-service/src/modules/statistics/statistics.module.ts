@@ -21,7 +21,7 @@ const DEFAULT_CHANNEL_OPTIONS = {
         options: {
           package: 'task',
           protoPath: join(PROTO_ROOT, 'hrm/task.proto'),
-          url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
+          url: process.env.HRM_GRPC_URL || 'hrm-service:50052',
           channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
@@ -62,7 +62,7 @@ const DEFAULT_CHANNEL_OPTIONS = {
         options: {
           package: 'document',
           protoPath: join(PROTO_ROOT, 'document/document.proto'),
-          url: process.env.DOCUMENT_GRPC_URL || '0.0.0.0:50052',
+          url: process.env.DOCUMENT_GRPC_URL || 'document-service:50056',
           channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,
@@ -81,7 +81,7 @@ const DEFAULT_CHANNEL_OPTIONS = {
         options: {
           package: 'kpi',
           protoPath: join(PROTO_ROOT, 'hrm/kpi.proto'),
-          url: process.env.HRM_GRPC_URL || '0.0.0.0:50053',
+          url: process.env.HRM_GRPC_URL || 'hrm-service:50052',
           channelOptions: DEFAULT_CHANNEL_OPTIONS,
           loader: {
             keepCase: false,

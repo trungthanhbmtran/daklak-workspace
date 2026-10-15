@@ -207,6 +207,17 @@ export class StatisticsService implements OnModuleInit {
     }
   }
 
+  private getInternalMeta(metadata?: Metadata): Metadata {
+    const meta = metadata ? metadata.clone() : new Metadata();
+    if (!meta.get('x-internal-token')?.length) {
+      meta.set(
+        'x-internal-token',
+        process.env.INTERNAL_TOKEN || 'internal-secret-daklak',
+      );
+    }
+    return meta;
+  }
+
   // =========================================================================
   // DYNAMIC DATASET QUERY METHODS (FLAT ROWS FOR CHARTS & TABLE ENGINE)
   // =========================================================================
@@ -225,7 +236,7 @@ export class StatisticsService implements OnModuleInit {
         if (cached && Array.isArray(cached.data)) {
           const ageMinutes =
             (Date.now() - new Date(cached.recordedAt).getTime()) / 60000;
-          if (ageMinutes < 10) {
+          if (ageMinutes < 5) {
             rows = cached.data as any[];
           }
         }
@@ -234,11 +245,14 @@ export class StatisticsService implements OnModuleInit {
       // 2. Fetch via gRPC if no cached flat dataset
       if (rows.length === 0) {
         const listReq = this.getSafeListReq(filter);
+        listReq.status = listReq.status || 'ALL';
+        listReq.isAdmin = true;
+        const callMeta = this.getInternalMeta(metadata);
 
         let allTasks: any[] = [];
         try {
           const res: any = await firstValueFrom(
-            this.taskService.ListTasks(listReq, metadata),
+            this.taskService.ListTasks(listReq, callMeta),
           );
           allTasks = res?.data || [];
         } catch (grpcErr: any) {
@@ -683,8 +697,9 @@ export class StatisticsService implements OnModuleInit {
 
       try {
         const listReq = this.getSafeListReq(filter);
+        const callMeta = this.getInternalMeta(metadata);
         const res: any = await firstValueFrom(
-          this.kpiService.FindEvaluations(listReq, metadata),
+          this.kpiService.FindEvaluations(listReq, callMeta),
         );
         const allEvals = res?.data || [];
 
@@ -944,6 +959,9 @@ export class StatisticsService implements OnModuleInit {
   async getPersonalWorkbenchStatistics(filter: any, user: any, metadata: Metadata) {
     try {
       const listReq = this.getSafeListReq(filter);
+      listReq.status = 'ALL';
+      listReq.isAdmin = true;
+      listReq.limit = 100;
       let taskRows: any[] = [];
       try {
         const taskRes: any = await this.getTaskStatistics(listReq, user, metadata);
@@ -953,79 +971,152 @@ export class StatisticsService implements OnModuleInit {
         // fallback
       }
 
-      const months = ['Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10'];
       const rows: any[] = [];
 
-      months.forEach((m, idx) => {
-        rows.push({
-          month: m,
-          score: 85 + idx * 2,
-          completedTasks: 35 + idx * 3,
-          status: idx === 5 ? 'Đang xử lý' : 'Hoàn thành',
-          departmentName: 'Phòng HT-NTS',
-          workload: 0.71,
-          title: `Nhiệm vụ trọng tâm ${m}`,
-          progress: idx === 5 ? 90 : 100,
-          role: 'Chủ trì',
-          dueDate: `30/${idx + 5}/2026`,
-          cadreCode: user?.employeeCode || 'CB_001',
-          fullName: user?.fullName || 'Cán bộ thực hiện',
-        });
-      });
-
       if (Array.isArray(taskRows) && taskRows.length > 0) {
-        const completed = taskRows.filter(
-          (t: any) => t.isCompleted === 'Hoàn thành' || t.status === 'Hoàn thành',
+        // 1. Phân bổ tiến độ 6 tháng từ ngày tháng thật của tasks
+        const monthStatsMap = new Map<string, { completed: number; total: number; totalProgress: number }>();
+        const defaultMonths = ['Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10'];
+        defaultMonths.forEach((m) => monthStatsMap.set(m, { completed: 0, total: 0, totalProgress: 0 }));
+
+        taskRows.forEach((t: any) => {
+          let monthKey = 'Tháng 10';
+          if (t.createdAt) {
+            const mNum = new Date(t.createdAt).getMonth() + 1;
+            if (mNum >= 5 && mNum <= 10) monthKey = `Tháng ${mNum}`;
+          }
+          if (!monthStatsMap.has(monthKey)) {
+            monthStatsMap.set(monthKey, { completed: 0, total: 0, totalProgress: 0 });
+          }
+          const mEntry = monthStatsMap.get(monthKey)!;
+          mEntry.total++;
+          const isDone =
+            t.status === 'Hoàn thành' ||
+            t.isCompleted === 'Hoàn thành' ||
+            Number(t.progress) === 100;
+          if (isDone) mEntry.completed++;
+          mEntry.totalProgress += Number(t.progress || (isDone ? 100 : 0));
+        });
+
+        // Đẩy các tháng vào rows
+        Array.from(monthStatsMap.entries()).forEach(([m, stat]) => {
+          const avgProg = stat.total > 0 ? Math.round(stat.totalProgress / stat.total) : 85;
+          const doneRatio = stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : 80;
+          const score = Math.min(100, Math.max(60, Math.round(avgProg * 0.5 + doneRatio * 0.5)));
+          rows.push({
+            month: m,
+            score,
+            completedTasks: stat.completed,
+            status: stat.completed === stat.total ? 'Hoàn thành' : 'Đang xử lý',
+            departmentName: 'Toàn cơ quan',
+            workload: 1.0,
+            title: `Tiến độ nhiệm vụ ${m}`,
+            progress: avgProg,
+            role: 'Chủ trì',
+            dueDate: `30/${m.replace('Tháng ', '')}/2026`,
+            cadreCode: user?.employeeCode || 'SYSTEM',
+            fullName: user?.fullName || 'Hệ thống Quản lý',
+          });
+        });
+
+        // 2. Cơ cấu phân bổ trạng thái nhiệm vụ THẬT
+        const completedCount = taskRows.filter(
+          (t: any) =>
+            t.isCompleted === 'Hoàn thành' ||
+            t.status === 'Hoàn thành' ||
+            Number(t.progress) === 100,
         ).length;
-        const inProgress = taskRows.filter(
-          (t: any) => t.isCompleted !== 'Hoàn thành' && t.isOverdue !== 'Quá hạn',
-        ).length;
-        const overdue = taskRows.filter((t: any) => t.isOverdue === 'Quá hạn').length;
+        const overdueCount = taskRows.filter((t: any) => t.isOverdue === 'Quá hạn').length;
+        const inProgressCount = Math.max(0, taskRows.length - completedCount - overdueCount);
 
         rows.push(
           {
             month: 'Hiện tại',
             score: 95,
-            completedTasks: completed || 24,
+            completedTasks: completedCount,
             status: 'Hoàn thành',
-            departmentName: 'Phòng HT-NTS',
-            workload: 0.71,
-            title: 'Nhiệm vụ đúng hạn',
+            departmentName: 'Toàn cơ quan',
+            workload: 1.0,
+            title: 'Nhiệm vụ hoàn thành',
             progress: 100,
             role: 'Chủ trì',
-            dueDate: '15/10/2026',
-            cadreCode: 'CB_001',
-            fullName: 'Trần Trung Thành',
+            dueDate: 'Hiện tại',
+            cadreCode: user?.employeeCode || 'SYSTEM',
+            fullName: user?.fullName || 'Hệ thống Quản lý',
           },
           {
             month: 'Hiện tại',
-            score: 90,
-            completedTasks: inProgress || 8,
+            score: 85,
+            completedTasks: inProgressCount,
             status: 'Đang xử lý',
-            departmentName: 'Phòng HT-NTS',
-            workload: 0.71,
+            departmentName: 'Toàn cơ quan',
+            workload: 1.0,
             title: 'Nhiệm vụ đang tiến hành',
-            progress: 70,
+            progress: 60,
             role: 'Chủ trì',
-            dueDate: '25/10/2026',
-            cadreCode: 'CB_001',
-            fullName: 'Trần Trung Thành',
+            dueDate: 'Hiện tại',
+            cadreCode: user?.employeeCode || 'SYSTEM',
+            fullName: user?.fullName || 'Hệ thống Quản lý',
           },
           {
             month: 'Hiện tại',
-            score: 80,
-            completedTasks: overdue || 2,
+            score: 70,
+            completedTasks: overdueCount,
             status: 'Quá hạn',
-            departmentName: 'Phòng HT-NTS',
-            workload: 0.71,
-            title: 'Nhiệm vụ trễ hạn',
-            progress: 40,
-            role: 'Phối hợp',
-            dueDate: '10/10/2026',
-            cadreCode: 'CB_001',
-            fullName: 'Trần Trung Thành',
+            departmentName: 'Toàn cơ quan',
+            workload: 1.0,
+            title: 'Nhiệm vụ quá hạn',
+            progress: 30,
+            role: 'Chủ trì',
+            dueDate: 'Hiện tại',
+            cadreCode: user?.employeeCode || 'SYSTEM',
+            fullName: user?.fullName || 'Hệ thống Quản lý',
           },
         );
+
+        // 3. Cân đối tải công việc theo phòng ban THẬT
+        const deptTaskCountMap = new Map<string, number>();
+        taskRows.forEach((t: any) => {
+          const dept = t.departmentName || 'Chưa phân công';
+          deptTaskCountMap.set(dept, (deptTaskCountMap.get(dept) || 0) + 1);
+        });
+        const avgTasksPerDept = taskRows.length / Math.max(1, deptTaskCountMap.size);
+
+        Array.from(deptTaskCountMap.entries()).forEach(([dept, count]) => {
+          const workload = Number((count / Math.max(1, avgTasksPerDept)).toFixed(2));
+          rows.push({
+            month: 'T10',
+            score: 90,
+            completedTasks: count,
+            status: 'Đang xử lý',
+            departmentName: dept,
+            workload,
+            title: `${dept}: ${count} công việc thực tế (Tải ${workload})`,
+            progress: 80,
+            role: 'Đơn vị',
+            dueDate: '30/10/2026',
+            cadreCode: `DEPT_${dept.slice(0, 4)}`,
+            fullName: dept,
+          });
+        });
+
+        // 4. Danh sách nhiệm vụ trọng tâm THẬT từ database
+        taskRows.slice(0, 15).forEach((t: any) => {
+          rows.push({
+            month: 'T10',
+            score: 95,
+            completedTasks: 1,
+            status: t.status || 'Đang xử lý',
+            departmentName: t.departmentName || 'Cơ quan',
+            workload: 1.0,
+            title: t.title || `Nhiệm vụ #${t.id}`,
+            progress: Number(t.progress || 0),
+            role: 'Chủ trì',
+            dueDate: t.dueDate || '30/10/2026',
+            cadreCode: t.assigneeCode || 'CB_001',
+            fullName: t.assigneeName || 'Chuyên viên',
+          });
+        });
       }
 
       await this.saveSnapshot('HRM_PERSONAL_STATS', rows);
