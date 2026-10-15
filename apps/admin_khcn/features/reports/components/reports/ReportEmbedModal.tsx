@@ -284,6 +284,18 @@ export function ReportEmbedModal({
                     <p className="text-[11px] text-muted-foreground">Đường dẫn: /hub (Bức tranh tổng quan điều hành toàn cơ quan)</p>
                   </div>
                 </div>
+
+                <div className="p-3.5 rounded-xl border bg-card flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-foreground">Dashboard Quản trị Hệ thống</h4>
+                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
+                        <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đã nhúng REP_BTCTU_SOP_KPI & REP_HRM_TASKS
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Đường dẫn: /services/admin (Trung tâm điều hành tổ chức, VTVL, người dùng & PBAC)</p>
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>

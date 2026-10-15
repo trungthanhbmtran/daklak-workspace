@@ -29,6 +29,11 @@
     - Tích hợp khối **Báo Cáo & Chỉ Số Điều Hành Toàn Tỉnh** vào Cổng Ứng dụng Nội bộ (`apps/admin_khcn/features/hub/components/HubClient.tsx`) sử dụng báo cáo `REP_BTCTU_SOP_KPI`.
     - Tích hợp trực quan hóa báo cáo động vào **Quản lý Tin bài & Cổng Thông tin** (`apps/admin_khcn/features/posts/components/PostList.tsx`) sử dụng báo cáo `REP_POST_STATS` (3 biểu đồ: Lượt xem chuyên mục, cơ cấu trạng thái duyệt, tương tác tin bài).
     - Nâng cấp **Tính năng Thu gọn / Mở rộng (Collapsible Widget)** trong `EmbeddedReportWidget`: Cho phép cán bộ thu gọn biểu đồ để tập trung vào bảng dữ liệu chi tiết, hoặc mở rộng khi cần họp giao ban, tối ưu hóa không gian làm việc.
+    - Xây dựng **Dashboard Quản trị Hệ thống Toàn Diện (`AdminDashboardClient.tsx` & `page.tsx`)**:
+      * Thay thế trang trống `/services/admin` bằng Trung tâm Điều hành Quản trị chuẩn mực.
+      * Thẻ thống kê nhanh: Cơ cấu Tổ chức & Định biên VTVL, Tài khoản & Người dùng, Chính sách PBAC, Khung Mẫu Vị trí việc làm.
+      * Nhúng 2 báo cáo điều hành động từ `report-service`: `REP_BTCTU_SOP_KPI` (Xếp loại thi đua cán bộ) và `REP_HRM_TASKS` (Nhiệm vụ & Công việc).
+      * Lưới 6 phân hệ quản trị chi tiết kèm icon, badge và liên kết trực tiếp.
   5. *Kiểm chứng Máy Thực Tế (Verification Gate)*:
      - Quét mã hóa & vệ sinh: 100% UTF-8 không BOM, 0 `console.log`, 0 `debugger`.
      - `npm run typecheck --prefix apps/admin_khcn`: `tsc --noEmit` PASS (Exit Code 0).
@@ -43,6 +48,8 @@
   - `apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`
   - `apps/admin_khcn/features/hub/components/HubClient.tsx`
   - `apps/admin_khcn/features/posts/components/PostList.tsx`
+  - `apps/admin_khcn/app/services/admin/AdminDashboardClient.tsx`
+  - `apps/admin_khcn/app/services/admin/page.tsx`
   - `.agents/execution_logs/code2.md`
 - **Kiểm chứng thực tế**:
   - Typecheck: `tsc --noEmit` (admin_khcn) -> PASS (0 errors).

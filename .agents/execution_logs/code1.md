@@ -1,5 +1,42 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Kế Thừa Trực Tiếp Biểu Đồ Từ Report Service Qua EmbeddedReportWidget & Gỡ Bỏ Hoàn Toàn Biểu Đồ Fix Cứng Tại HrmReportWorkbenchClient
+
+### 1. Yêu cầu & Nguyên Tắc Kỹ Thuật (Architecture & Source of Truth)
+- **Chỉ đạo từ người dùng**: "HrmReportWorkbenchClient.tsx không được sử dụng biểu đồ fix cứng này vì trang này phải được kế thừa từ các hệ thống report-service cho tôi . Xoá những thứ liên quan dư thừa".
+- **Tuân thủ Source of Truth**:
+  * Phân hệ `report-service` là Source of Truth duy nhất cho cấu hình biểu đồ, dataset snapshot và chỉ số thống kê phân tích của hệ thống.
+  * Tuyệt đối không hardcode vẽ biểu đồ cục bộ bằng Recharts ad-hoc trong các component nghiệp vụ HRM.
+  * Tái sử dụng component nền tảng `EmbeddedReportWidget` từ `@/features/reports` để nạp động cấu hình charts và dữ liệu từ API `report-service`.
+
+### 2. Các Thay Đổi Cụ Thể
+- **Gỡ bỏ 100% biểu đồ fix cứng và code dư thừa trong `HrmReportWorkbenchClient.tsx`**:
+  * Xóa khối JSX vẽ biểu đồ cục bộ (`BarChart` điểm TB theo phòng ban, `PieChart` cơ cấu xếp loại).
+  * Xóa các biến/hooks tính toán cục bộ dư thừa: `chartDeptData`, `pieRankData`, hằng số `PIE_COLORS`.
+  * Xóa toàn bộ imports từ thư viện `recharts` (`BarChart`, `Bar`, `XAxis`, `YAxis`, `CartesianGrid`, `ResponsiveContainer`, `PieChart`, `Pie`, `Cell`, `Legend`...).
+  * Dọn sạch các icon không dùng (`CheckCircle2`, `RefreshCw`, `ChevronRight`, `Building2`).
+- **Kế thừa động từ `report-service` qua `EmbeddedReportWidget`**:
+  * Tích hợp component `EmbeddedReportWidget` từ `@/features/reports` với chiều cao tối ưu `chartHeight={260}`, bố cục 2 cột linh hoạt (`columns={2}`).
+  * Bổ sung bộ chọn góc nhìn nguồn báo cáo động:
+    1. **Năng suất & Chất lượng (`REP_EMP_QUALITY`)**: Mặc định, hiển thị trực quan các biểu đồ đánh giá năng suất chất lượng cán bộ từ `report-service`.
+    2. **Xếp loại SOP (Mẫu 05) (`REP_BTCTU_SOP_KPI`)**: Hiển thị phân bổ xếp loại theo Hướng dẫn 05-HD/TU Ban Thường vụ Tỉnh ủy.
+    3. **Tiến độ công việc (`REP_HRM_TASKS`)**: Hiển thị cơ cấu trạng thái và tiến độ xử lý nhiệm vụ.
+  * Hỗ trợ nút chuyển đổi định dạng biểu đồ Cột / Đường (`allowToggleType={true}`) và liên kết chuyển tiếp trực tiếp sang phân hệ báo cáo chuyên sâu (`showDetailLink={true}`).
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan
+- **Kiểm tra TypeScript (`tsc --noEmit`)**: **Exit code 0 (Hoàn toàn sạch lỗi kiểu dữ liệu)**.
+- **Biên dịch Production Next.js (`npm run build`)**: **Exit code 0 (84/84 routes compiled thành công; hoàn toàn không còn bất kỳ cảnh báo chart dimensions nào khi build)**.
+- **Triển khai Container**: Cập nhật standalone bundle vào `daklak-workspace-admin-frontend-1` và khởi động lại dịch vụ (`Ready in 180ms`).
+- **Xác thực trực quan bằng Browser Subagent**:
+  * Đăng nhập thành công với tài khoản Quản trị viên (`admin` / `Admin@123`).
+  * Truy cập `http://113.184.220.82/admin/services/hrm/reports`.
+  * Chụp ảnh nghiệm thu [`hrm_reports_embedded_widget_1792063363787.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/hrm_reports_embedded_widget_1792063363787.png):
+    + Xác nhận khu vực "Đồng bộ từ Report Service" hiển thị thanh thoát, chuyên nghiệp.
+    + Nhấn chuyển sang "Xếp loại SOP (Mẫu 05)" (`REP_BTCTU_SOP_KPI`): Biểu đồ BarChart "Điểm KPI Trung bình theo 05 Tập thể Phòng" và PieChart "Tỷ lệ Phân bổ Xếp loại (Đã siết trần ≤ 20% Xuất sắc)" nạp dữ liệu động từ backend `report-service` cực kỳ mượt mà.
+    + Có nút "Cập nhật" và nút "Chi tiết ↗" liên thông sang phân hệ báo cáo chuyên sâu.
+
+---
+
 ## [2026-10-15] Bổ Sung Toàn Diện Phân Hệ "Tra Cứu, Thống Kê, Báo Cáo Và Xuất Kết Quả" (Nhóm 8 - Đề Bài KPI/OKR) Tại Phân Hệ HRM
 
 ### 1. Khảo Sát Hiện Trạng Toàn Hệ Thống & Chống Trùng Lặp

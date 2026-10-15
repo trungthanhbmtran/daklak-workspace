@@ -25,30 +25,13 @@ import {
   FileSpreadsheet,
   FileText,
   Filter,
-  CheckCircle2,
   Users,
   Award,
   TrendingUp,
   Clock,
   ExternalLink,
-  ChevronRight,
   Eye,
-  Building2,
-  RefreshCw,
 } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
 import { toast } from "sonner";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useTasksList } from "../../hooks/useTasks";
@@ -58,9 +41,8 @@ import {
   printMau05Decision,
   renderMau05DecisionHtml,
 } from "@/features/reports/utils/mau05DecisionHelper";
+import { EmbeddedReportWidget } from "@/features/reports";
 import Link from "next/link";
-
-const PIE_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
 
 export function HrmReportWorkbenchClient() {
   // 1. Data queries từ CSDL thực tế
@@ -73,6 +55,7 @@ export function HrmReportWorkbenchClient() {
   const [selectedDept, setSelectedDept] = useState("ALL");
   const [selectedQuarter, setSelectedQuarter] = useState("Q3_2026");
   const [selectedRank, setSelectedRank] = useState("ALL");
+  const [selectedReportCode, setSelectedReportCode] = useState<string>("REP_EMP_QUALITY");
   const [isDecisionSheetOpen, setIsDecisionSheetOpen] = useState(false);
   const [selectedEmpDetail, setSelectedEmpDetail] = useState<any | null>(null);
 
@@ -236,55 +219,7 @@ export function HrmReportWorkbenchClient() {
   const avgScore = totalEvaluated > 0 ? (evaluationRows.reduce((sum, r) => sum + r.sTong, 0) / totalEvaluated).toFixed(1) : "0";
   const onTimeRatio = "96.5";
 
-  // 7. Thống kê theo phòng ban cho Biểu đồ
-  const chartDeptData = useMemo(() => {
-    const deptMap = new Map<string, { totalScore: number; count: number; name: string }>();
-    evaluationRows.forEach((r) => {
-      const dName = String(r.departmentName || "");
-      const shortName = dName.includes("Hạ tầng")
-        ? "HT-NTS"
-        : dName.includes("Hành chính")
-        ? "HCTH"
-        : dName.includes("Khai thác")
-        ? "QL-KTDL"
-        : dName.slice(0, 15) || "Đơn vị";
-      if (!deptMap.has(shortName)) {
-        deptMap.set(shortName, { totalScore: 0, count: 0, name: shortName });
-      }
-      const entry = deptMap.get(shortName)!;
-      entry.totalScore += r.sTong;
-      entry.count += 1;
-    });
 
-    return Array.from(deptMap.values()).map((d) => ({
-      name: d.name,
-      avgScore: Number((d.totalScore / d.count).toFixed(1)),
-      cánBộ: d.count,
-    }));
-  }, [evaluationRows]);
-
-  // 8. Cơ cấu xếp loại cho Biểu đồ tròn
-  const pieRankData = useMemo(() => {
-    const countMap: Record<string, number> = {
-      "Xuất sắc": 0,
-      "Tốt": 0,
-      "Hoàn thành": 0,
-      "Chưa hoàn thành": 0,
-    };
-    evaluationRows.forEach((r) => {
-      if (r.rank.includes("xuất sắc")) countMap["Xuất sắc"]++;
-      else if (r.rank.includes("tốt")) countMap["Tốt"]++;
-      else if (r.rank.includes("không")) countMap["Chưa hoàn thành"]++;
-      else countMap["Hoàn thành"]++;
-    });
-
-    return [
-      { name: "Xuất sắc", value: countMap["Xuất sắc"] },
-      { name: "Tốt", value: countMap["Tốt"] },
-      { name: "Hoàn thành", value: countMap["Hoàn thành"] },
-      { name: "Chưa đạt", value: countMap["Chưa hoàn thành"] },
-    ].filter((item) => item.value > 0);
-  }, [evaluationRows]);
 
   // 9. Hành động Xuất dữ liệu
   const handleExportCSV = () => {
@@ -545,65 +480,68 @@ export function HrmReportWorkbenchClient() {
         </CardContent>
       </Card>
 
-      {/* 4. Khu vực Đồ thị Thống kê Trực quan */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Biểu đồ cột: Điểm trung bình theo phòng ban */}
-        <Card className="lg:col-span-2 border-slate-200/80 shadow-xs bg-white">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-slate-900 flex items-center justify-between">
-              <span>Thống kê điểm KPI trung bình theo Phòng ban</span>
-              <span className="text-xs font-normal text-slate-400">Thang điểm 100</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[220px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartDeptData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[70, 100]} tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                  <RechartsTooltip
-                    formatter={(val) => [`${val} điểm`, "Điểm TB"]}
-                    contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }}
-                  />
-                  <Bar dataKey="avgScore" name="Điểm TB" fill="#4f46e5" radius={[4, 4, 0, 0]} maxBarSize={36} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      {/* 4. Khu vực Biểu đồ Động Kế thừa từ Report Service */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold text-xs">
+              Đồng bộ từ Report Service
+            </Badge>
+            <span className="text-xs text-slate-500 font-medium">
+              Biểu đồ trực quan hóa động theo cấu hình hệ thống báo cáo tập trung
+            </span>
+          </div>
 
-        {/* Biểu đồ tròn: Cơ cấu Xếp loại */}
-        <Card className="border-slate-200/80 shadow-xs bg-white">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-slate-900">
-              Cơ cấu Xếp loại Cán bộ & Công chức
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[220px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieRankData}
-                    cx="50%"
-                    cy="45%"
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {pieRankData.map((entry, index) => (
-                      <Cell key={`pie-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip formatter={(val) => [`${val} cán bộ`, "Số lượng"]} />
-                  <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "5px" }} />
-                </PieChart>
-              </ResponsiveContainer>
+          {/* Bộ chọn góc nhìn báo cáo từ report-service */}
+          <div className="flex items-center gap-1.5 self-end sm:self-auto">
+            <span className="text-xs text-slate-500 font-medium">Báo cáo nguồn:</span>
+            <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setSelectedReportCode("REP_EMP_QUALITY")}
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                  selectedReportCode === "REP_EMP_QUALITY"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                }`}
+              >
+                Năng suất & Chất lượng
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedReportCode("REP_BTCTU_SOP_KPI")}
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                  selectedReportCode === "REP_BTCTU_SOP_KPI"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                }`}
+              >
+                Xếp loại SOP (Mẫu 05)
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedReportCode("REP_HRM_TASKS")}
+                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                  selectedReportCode === "REP_HRM_TASKS"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                }`}
+              >
+                Tiến độ công việc
+              </button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        <EmbeddedReportWidget
+          reportIdOrCode={selectedReportCode}
+          chartHeight={260}
+          columns={2}
+          allowToggleType={true}
+          showDetailLink={true}
+          collapsible={false}
+          className="border-slate-200/80 shadow-xs"
+        />
       </div>
 
       {/* 5. Bảng Dữ liệu Tra cứu & Đánh giá Chi tiết */}
