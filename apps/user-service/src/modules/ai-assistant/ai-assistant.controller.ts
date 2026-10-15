@@ -144,7 +144,8 @@ export class AiAssistantController implements OnModuleInit {
     qdrant_id?: string;
     user_id?: number;
   }) {
-    this.logger.log(`Worker processing knowledge source: ${data.title}`);
+    data = data || ({} as any);
+    this.logger.log(`Worker processing knowledge source: ${data?.title || 'Unknown'}`);
     try {
       let finalContent = data.content || '';
       const qdrantId = data.qdrant_id || require('crypto').randomUUID();

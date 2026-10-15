@@ -1,4 +1,4 @@
-﻿import OrganizationHomePage from "./OrganizationHomePage";
+import OrganizationHomePage from "./OrganizationHomePage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

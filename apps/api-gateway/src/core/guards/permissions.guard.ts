@@ -30,14 +30,53 @@ export class PermissionsGuard implements CanActivate {
       );
     }
 
-    const userPermissions = user.permissionsFlatten || [];
+    // 1. Quản trị viên cấp cao / Toàn quyền hệ thống
+    const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
+    if (
+      user.isSuperAdmin === true ||
+      roles.some((r) => ['ADMIN', 'SUPER_ADMIN', 'SYSTEM_ADMIN'].includes(r.toUpperCase()))
+    ) {
+      return true;
+    }
 
-    // Kiểm tra xem user có ÍT NHẤT MỘT trong các quyền yêu cầu hay không
-    // Cấp quyền nếu có quyền cụ thể, hoặc có quyền wildcard (VD: RESOURCE:*)
-    const hasPermission = requiredPermissions.some((permission) => {
-      if (userPermissions.includes(permission)) return true;
-      const resource = permission.split(':')[0];
-      if (resource && userPermissions.includes(`${resource}:*`)) return true;
+    const userPermissions: string[] = Array.isArray(user.permissionsFlatten)
+      ? user.permissionsFlatten
+      : [];
+
+    // 2. Wildcard toàn cục
+    if (userPermissions.some((p) => p === '*' || p === '*:*' || p.startsWith('ADMIN:'))) {
+      return true;
+    }
+
+    // 3. Kiểm tra xem user có ÍT NHẤT MỘT trong các quyền yêu cầu hay không
+    // Cấp quyền nếu có quyền cụ thể, quyền wildcard, alias tương đương (READ <=> VIEW) hoặc quyền MANAGE
+    const hasPermission = requiredPermissions.some((required) => {
+      if (userPermissions.includes(required)) return true;
+
+      const [res, act] = required.split(':');
+      if (!res) return false;
+
+      // Resource wildcard (VD: REPORT:*)
+      if (userPermissions.includes(`${res}:*`)) return true;
+
+      // Quyền MANAGE có thẩm quyền bao trùm tất cả hành động trên tài nguyên
+      if (userPermissions.includes(`${res}:MANAGE`)) return true;
+
+      // Alias tương đương: READ <=> VIEW
+      if (act === 'READ' && userPermissions.includes(`${res}:VIEW`)) return true;
+      if (act === 'VIEW' && userPermissions.includes(`${res}:READ`)) return true;
+
+      // Quyền EXECUTE: Cho phép nếu có CREATE, UPDATE, VIEW hoặc MANAGE
+      if (act === 'EXECUTE') {
+        if (
+          userPermissions.includes(`${res}:CREATE`) ||
+          userPermissions.includes(`${res}:UPDATE`) ||
+          userPermissions.includes(`${res}:VIEW`)
+        ) {
+          return true;
+        }
+      }
+
       return false;
     });
 

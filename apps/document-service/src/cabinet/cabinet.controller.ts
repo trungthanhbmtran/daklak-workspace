@@ -8,17 +8,20 @@ export class CabinetController {
 
   @GrpcMethod('CabinetService', 'ListFiles')
   async listFiles(data: { userId?: string, orgId?: string }) {
+    data = data || {};
     const res = await this.cabinetService.listFiles(data.userId, data.orgId);
     return { data: res };
   }
 
   @GrpcMethod('CabinetService', 'AddFile')
   async addFile(data: any) {
+    data = data || {};
     return this.cabinetService.addFile(data);
   }
 
   @GrpcMethod('CabinetService', 'DeleteFile')
   async deleteFile(data: { id: string }) {
+    data = data || {};
     await this.cabinetService.deleteFile(data.id);
     return {};
   }

@@ -22,7 +22,8 @@ export class TaskKpiController {
   }
 
   @GrpcMethod('TaskService', 'GetTaskKpiSetting')
-  getTaskKpiSetting(data: any, @CurrentUser() user: any) {
+  getTaskKpiSetting(_data: any, @CurrentUser() _user: any) {
+    _data = _data || {};
     return this.service.getTaskKpiSetting();
   }
 
@@ -38,11 +39,13 @@ export class TaskKpiController {
 
   @GrpcMethod('TaskService', 'SaveGlobalKpiSettings')
   saveGlobalKpiSettings(@Payload() data: any) {
+    data = data || {};
     return this.service.upsertTaskKpiSetting(data);
   }
 
   @GrpcMethod('TaskService', 'PreviewGlobalKpiSettings')
   previewGlobalKpiSettings(@Payload() data: any) {
+    data = data || {};
     let settings: any;
     try { settings = JSON.parse(data.settingsJson || '{}'); }
     catch { return { success: true, valid: false, error: 'Cấu hình gửi lên không phải JSON hợp lệ.' }; }

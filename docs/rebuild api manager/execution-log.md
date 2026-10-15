@@ -1,4 +1,4 @@
-﻿# Nhật ký thực thi và kiểm chứng
+# Nhật ký thực thi và kiểm chứng
 
 ## 06/10/2026 — Lập kế hoạch và tổ chức tài liệu
 

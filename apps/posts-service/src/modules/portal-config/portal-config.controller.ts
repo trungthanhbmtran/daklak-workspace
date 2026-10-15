@@ -9,6 +9,7 @@ export class PortalConfigController {
 
   @GrpcMethod('PortalConfigService', 'Create')
   async create(data: { code: string; name: string; description?: string }) {
+    data = data || ({} as any);
     try {
       const result = await this.configService.create(data);
       return { data: result, success: true, message: 'Tạo cấu hình thành công' };
@@ -22,6 +23,7 @@ export class PortalConfigController {
 
   @GrpcMethod('PortalConfigService', 'GetByCode')
   async getByCode(data: { code: string }) {
+    data = data || ({} as any);
     const result = await this.configService.findOneByCode(data.code);
     if (!result) {
       throw new RpcException({
@@ -34,6 +36,7 @@ export class PortalConfigController {
 
   @GrpcMethod('PortalConfigService', 'GetAll')
   async getAll(@Payload() _data: Record<string, any>) {
+    _data = _data || {};
     try {
       const result = await this.configService.findAll();
       return { data: result };
@@ -47,6 +50,7 @@ export class PortalConfigController {
 
   @GrpcMethod('PortalConfigService', 'Update')
   async update(data: { id: number; code?: string; name?: string; description?: string }) {
+    data = data || ({} as any);
     try {
       const { id, ...rest } = data;
       const result = await this.configService.update(Number(id), rest);
@@ -61,6 +65,7 @@ export class PortalConfigController {
 
   @GrpcMethod('PortalConfigService', 'UpsertByCode')
   async upsertByCode(data: { code: string; name: string; description?: string }) {
+    data = data || ({} as any);
     try {
       const result = await this.configService.upsertByCode(data.code, {
         name: data.name,
@@ -80,6 +85,7 @@ export class PortalConfigController {
    */
   @GrpcMethod('PortalConfigService', 'BatchUpsert')
   async batchUpsert(payload: { data: { code: string; name: string; description?: string }[] }) {
+    payload = payload || ({} as any);
     try {
       const result = await this.configService.batchUpsert(payload.data || []);
       return { data: result, success: true, message: `Đã lưu ${result.count} cấu hình` };

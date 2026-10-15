@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ApiManagementController } from './api-management.controller';
 import { ApiManagementService } from './api-management.service';
 import { PartnerService } from './partner.service';

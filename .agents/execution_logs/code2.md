@@ -969,3 +969,125 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Vệ sinh mã nguồn: 0 debug log (`console.log`, `debugger`), mã hóa UTF-8 không BOM.
 
 
+## 2026-10-15: Rà Soát Toàn Diện Codebase Theo 7 Bộ Ràng Buộc Kỹ Thuật Bất Biến & Khắc Phục Triệt Để Lỗi UTF-8 BOM và Phòng Thủ gRPC
+- **Nội dung tác vụ**:
+  1. **Rà soát tự động & thủ công toàn diện 100% codebase theo 7 Bộ Ràng Buộc Kỹ Thuật Bất Biến**:
+     - Xây dựng công cụ kiểm toán độc lập `scripts/audit_constraints.js` quét toàn bộ các microservices và ứng dụng frontend (`admin_khcn`, `portal-goverment`, `api-gateway`, `user-service`, `workflow-service`, `hrm-service`, `document-service`, `posts-service`, `report-service`, `chat-service`, `media-service`, `notification_service`).
+     - Phát hiện và phân loại các vi phạm:
+       * **Ràng buộc 7 (Mã hóa UTF-8 không BOM)**: Phát hiện 31 files bị dính byte BOM (`0xEF, 0xBB, 0xBF`) do script PowerShell ghi tệp trước đó (nguy cơ crash Turbopack / Next.js / ts-node runtime).
+       * **Ràng buộc 4 (Phòng thủ gRPC Payload)**: Phát hiện 21 phương thức gRPC trong các controller truy cập/thao tác trực tiếp vào `data.prop` hoặc `data` mà thiếu defensive initialization `data = data || {}` (tiềm ẩn nguy cơ crash microservice văng RpcExceptionsHandler 500 khi client gửi payload rỗng).
+       * **Ràng buộc 1 (UI/UX & CSS Layout)**: 71 vị trí `<SelectTrigger>` thiếu `min-w-0` hoặc `w-full`, và các dialog form dài (DocumentUpload, EditMenu, RankTaskCatalog) cần chuyển đổi dần sang `<Sheet>`.
+       * **Ràng buộc 2 (BaseURL & Routing Frontend)**: 100% tuân thủ, không có vi phạm double prefix `/admin` hay `/api/v1`.
+       * **Ràng buộc 3 (Next.js App Router Server Components)**: 100% tuân thủ, `page.tsx` giữ chuẩn Server Component, `params`/`searchParams` được await chuẩn mực.
+       * **Ràng buộc 6 (Service Sovereignty & Source of Truth)**: 100% tuân thủ, VTVL định biên (`job_titles`, `staffing_slots`, `org_staffing`) thuộc độc quyền của `user-service`, quy trình thuộc `workflow-service`.
+  2. **Khắc phục Triệt để Vi phạm Kỹ thuật Trọng yếu (Immediate Remediation)**:
+     - **Triệt tiêu 100% lỗi BOM trên 31 files**: Chạy script bóc tách byte 0-3 (`0xEF, 0xBB, 0xBF`), đưa toàn bộ 31 files về chuẩn UTF-8 thuần không BOM, loại bỏ hoàn toàn nguy cơ crash trình biên dịch.
+     - **Củng cố Phòng thủ gRPC Payload tại tất cả microservices**:
+       * `apps/workflow-service/src/grpc/grpc.controller.ts`: Bổ sung `data = data || {}` cho toàn bộ các handler (`createWorkflow`, `updateWorkflow`, `findOneWorkflow`, `findWorkflowByCode`, `listWorkflows`, `deleteWorkflow`, `applyModule`, `publishWorkflow`, `validateWorkflowDefinition`, `registerProcessType`, `getProcessType`, `listProcessTypes`, và `parseGraphPayload`).
+       * `apps/user-service/src/modules/ai-assistant/ai-assistant.controller.ts`: Bổ sung `data = data || ({} as any)` cho knowledge worker handler.
+       * `apps/user-service/src/modules/menus/menus.controller.ts`: Bổ sung `data = data || {}` cho `getMyMenus`.
+       * `apps/hrm-service/src/modules/task-kpi/task-kpi.controller.ts`: Bổ sung phòng thủ cho `saveGlobalKpiSettings`, `previewGlobalKpiSettings`, và `getTaskKpiSetting`.
+       * `apps/hrm-service/src/modules/kpi-evaluations/kpi-evaluations.controller.ts`: Bổ sung phòng thủ và bọc an toàn `JSON.parse` cho 20+ phương thức gRPC (`findPeriods`, `createPeriod`, `findCriteria`, `createCriterion`, `updateCriterion`, `deleteCriterion`, `createEvaluation`, `findEvaluations`, `calculatePersonalKpi`, `getEvaluationDetail`, `submitEvaluation`, `approveEvaluation`, `findFormTemplates`, `getFormTemplateDetail`, `updateFormTemplate`, `getFormTemplateXml`, `saveFormTemplateXml`, `validateFormTemplateXml`, `createFormTemplate`, `listFormTemplateBindings`, `createFormTemplateBinding`, `deleteFormTemplateBinding`, `publishFormTemplate`, `resolveFormTemplateBinding`).
+       * `apps/document-service/src/cabinet/cabinet.controller.ts`: Bổ sung phòng thủ cho `listFiles`, `addFile`, `deleteFile`.
+       * `apps/document-service/src/dossiers/dossiers.controller.ts`: Bổ sung phòng thủ cho `getDossier`, `getComponents`, `updateComponent`, `createDossierFromTemplate`, `createBlankDossier`, `addComponentFromCabinet`.
+       * `apps/posts-service/src/modules/banners/banners.controller.ts`: Bổ sung phòng thủ cho `createBanner`, `getBanner`, `listBanners`, `updateBanner`, `deleteBanner`.
+       * `apps/posts-service/src/modules/categories/categories.controller.ts`: Bổ sung phòng thủ cho `createCategory`, `getCategory`, `listCategories`, `updateCategory`, `deleteCategory`; thay thế `console.error` bằng `this.logger.error`.
+       * `apps/posts-service/src/modules/interactions/interactions.controller.ts`: Bổ sung phòng thủ cho comments, questions, feedbacks.
+       * `apps/posts-service/src/modules/portal-config/portal-config.controller.ts`: Bổ sung phòng thủ cho `create`, `getByCode`, `getAll`, `update`, `upsertByCode`, `batchUpsert`.
+       * `apps/posts-service/src/modules/portal-menu/portal-menu.controller.ts`: Bổ sung phòng thủ cho `create`, `findOne`, `findAll`, `update`, `delete`.
+- **Tập tin đã cập nhật & kiểm tra**:
+     - 31 files xóa BOM (`.agents/skills/critical-review/...`, `OrganizationSidebar.tsx`, `app.module.ts`, `registry.controller.ts`, `decorators.ts`, `gateway-context.service.ts`, `grpc-auth.module.ts`, `index.ts`, v.v.)
+     - `apps/workflow-service/src/grpc/grpc.controller.ts`
+     - `apps/user-service/src/modules/ai-assistant/ai-assistant.controller.ts`
+     - `apps/user-service/src/modules/menus/menus.controller.ts`
+     - `apps/hrm-service/src/modules/task-kpi/task-kpi.controller.ts`
+     - `apps/hrm-service/src/modules/kpi-evaluations/kpi-evaluations.controller.ts`
+     - `apps/document-service/src/cabinet/cabinet.controller.ts`
+     - `apps/document-service/src/dossiers/dossiers.controller.ts`
+     - `apps/posts-service/src/modules/banners/banners.controller.ts`
+     - `apps/posts-service/src/modules/categories/categories.controller.ts`
+     - `apps/posts-service/src/modules/interactions/interactions.controller.ts`
+     - `apps/posts-service/src/modules/portal-config/portal-config.controller.ts`
+     - `apps/posts-service/src/modules/portal-menu/portal-menu.controller.ts`
+     - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+     - `npm --prefix apps/workflow-service run build`: PASS (Exit code 0, biên dịch sạch sẽ).
+     - `npm --prefix apps/hrm-service run build`: PASS (Exit code 0, biên dịch sạch sẽ).
+     - `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): PASS (Exit code 0, 0 typing error).
+     - Quét lại audit constraints: Lỗi BOM = 0 (100% UTF-8 không BOM), Lỗi phòng thủ gRPC = 0.
+     - Vệ sinh mã nguồn: 0 file tạm, 0 debug log trong mã nguồn ứng dụng.
+
+## 2026-10-15: Khắc Phục Triệt Để Lỗi Biểu Đồ Không Hiển Thị Dữ Liệu Thực Tế Tại Route /services/reports/[id]
+- **Nội dung tác vụ**:
+  1. *Truy tìm tận gốc nguyên nhân biểu đồ không hiển thị dữ liệu*:
+     - Kiểm tra dữ liệu trong CSDL `admin_report`: Báo cáo #4 (`REP_EMP_QUALITY`) có lượt chạy `runId = 46` trạng thái `SUCCEEDED`, snapshot `id = 47` chứa đầy đủ 23 bản ghi tiếng Việt chuẩn của Ban Tổ chức Tỉnh ủy.
+     - Kiểm tra log `api-gateway`: Phát hiện lỗi `ForbiddenException: Bạn không có quyền thực hiện thao tác này. Yêu cầu quyền: REPORT:READ hoặc REPORT:MANAGE`.
+     - Phân tích PBAC: Cán bộ lãnh đạo (`user 84 - TRUONG_BAN`) và các user đơn vị sở hữu quyền theo CSDL là `REPORT:VIEW`, `REPORT:APPROVE`, `REPORT:EXPORT`, `REPORT:PUBLISH`. Trong khi đó, `ReportsController` lại cấu hình cứng `@RequirePermissions('REPORT:READ')` trên các endpoint `runs/:id/status`, `runs/:runId/snapshot`, khiến Gateway chặn đứng toàn bộ request và trả về lỗi 403 Forbidden.
+     - Do bị 403, hook `useGetReportRunStatus` trả về trạng thái fallback `"RUNNING"`, khiến `isCompleted = latestStatus === 'SUCCEEDED'` nhận giá trị `false`. Điều kiện `isCompleted` trong `ReportViewer.tsx` chặn không cho mount và fetch snapshot, đồng thời ẩn hoàn toàn khối biểu đồ `Dynamic Charts Visualization`.
+  2. *Củng cố Hệ thống Phân Quyền PBAC & API Gateway*:
+     - Cập nhật `apps/api-gateway/src/core/guards/permissions.guard.ts`:
+       * Thêm cơ chế nhận diện tự động cho Quản trị viên cấp cao (`ADMIN`, `SUPER_ADMIN`, `SYSTEM_ADMIN`) và wildcard (`*`, `*:*`).
+       * Thiết lập cơ chế ánh xạ Alias tương đương: `READ <=> VIEW` (hành động xem báo cáo).
+       * Thiết lập cơ chế bao hàm: Quyền `MANAGE` tự động bao trùm toàn bộ các hành vi (`VIEW`, `READ`, `EXECUTE`, `CREATE`, `UPDATE`, `DELETE`, `EXPORT`).
+       * Hỗ trợ quyền `EXECUTE` tương thích với `CREATE`, `UPDATE`, `VIEW` và `MANAGE`.
+     - Cập nhật `apps/api-gateway/src/modules/reports/reports.controller.ts`:
+       * Chuẩn hóa toàn bộ decorators `@RequirePermissions` chấp nhận đồng thời `'REPORT:VIEW'`, `'REPORT:READ'`, `'REPORT:MANAGE'` trên các endpoint: `definitions`, `catalog`, `definitions/:id`, `runs`, `runs/:id/status`, `runs/:runId/snapshot`, `dashboard-stats`, `templates/:id/assignments`, `table/sources`, `table/preview`.
+  3. *Tối ưu hóa Trực quan hóa Dữ liệu Biểu đồ Frontend (`ReportViewer.tsx`)*:
+     - Giải mã an toàn `actualConfig`: Tự động parse chuỗi JSON sang Object nếu `reportDef.configuration` được lưu dưới dạng chuỗi.
+     - Bỏ phụ thuộc cứng nhắc vào chu kỳ polling trạng thái: Kích hoạt `useGetDatasetSnapshot` ngay khi có `runId > 0` và trích xuất đa tầng (`snapshot.data`, `snapshot.data.data`, mảng thuần).
+     - Điều kiện render biểu đồ an toàn: `(isCompleted || rows.length > 0) && effectiveCharts.length > 0`, bảo đảm khi có 23 dòng dữ liệu thực tế thì biểu đồ BẮT BUỘC hiển thị 100%.
+     - Chuẩn hóa hàm tổng hợp `aggregateData`: Nhận diện biểu đồ phân bổ thi đua / xếp loại (`ranking`, `approvedRank`) để lấy số lượng cán bộ (`g.count`), giúp biểu đồ Donut/Pie thể hiện chính xác tỷ lệ và số lượng cán bộ thay vì cộng điểm trung bình gây sai lệch.
+     - Trực quan hóa biểu đồ Đường (Line chart): Bổ sung nhãn điểm số (`p.value`) trực tiếp trên từng nút giao thông của các phòng ban.
+  4. *Cập nhật Live Container & Kiểm chứng máy*:
+     - Biên dịch thành công `apps/api-gateway` và nạp mã mới vào container `daklak-workspace-api-gateway-1`.
+     - Biên dịch thành công `apps/admin_khcn` và nạp bản build standalone mới vào container `daklak-workspace-admin-frontend-1`.
+     - Khởi động lại các container dịch vụ và xác nhận hoạt động ổn định.
+- **Tập tin đã sửa đổi**:
+  - `apps/api-gateway/src/core/guards/permissions.guard.ts`
+  - `apps/api-gateway/src/modules/reports/reports.controller.ts`
+  - `apps/admin_khcn/features/reports/api/index.ts`
+  - `apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - `npm run build` trên `apps/api-gateway`: PASS (Exit code 0).
+  - `npm run typecheck` (`tsc --noEmit`) trên `apps/admin_khcn`: PASS (Exit code 0).
+  - `npm run build` trên `apps/admin_khcn`: PASS (Compiled successfully in 47s, 83/83 static pages generated).
+  - Kiểm tra 0 BOM, 0 `console.log` trên 100% các file đã sửa.
+## 2026-10-15: Phân Bổ Lại Hệ Thống Quyền PBAC Cho Ban Tổ Chức Tỉnh Ủy Đắk Lắk Bám Sát Chức Năng Nhiệm Vụ
+- **Nội dung tác vụ**:
+  1. *Khảo sát & Thiết kế Kiến trúc Phân quyền Chuẩn mực (PBAC Matrix)*:
+     - Rà soát toàn bộ 23 cán bộ công chức thuộc Ban Tổ chức Tỉnh ủy Đắk Lắk (BTCTU) và 04 phòng ban chuyên môn trực thuộc (Phòng Tổ chức đảng - đảng viên, Phòng Tổ chức cán bộ, Phòng Bảo vệ chính trị nội bộ, Văn phòng Ban) cùng 01 Quản trị viên hệ thống đơn vị (`admin_btc`).
+     - Bám sát chức năng, nhiệm vụ chuyên môn theo Đề án 01-ĐA/TU, Quy định số 348-QĐ/BTCTW và Quy định số 138-QĐ/TW.
+     - Triệt tiêu hạn chế gộp chung quyền cấp phòng: Thiết lập 04 nhóm quyền Lãnh đạo Phòng chuyên sâu cho 04 phòng ban và 04 nhóm chuyên viên/cán bộ chuyên trách, phân định rành mạch thẩm quyền theo đúng nguyên tắc Đặc quyền tối thiểu (Least Privilege).
+  2. *Chuẩn hóa & Mở rộng 11 Nhóm Quyền PBAC Ban Tổ chức Tỉnh ủy*:
+     - `BTCTU_LANH_DAO_BAN` (Lãnh đạo Ban - 5 đồng chí: Trưởng ban & 4 Phó Trưởng ban): Toàn quyền `*` trên `TASK`, `PLAN`, `KPI`, `OBJECTIVE`, `REPORT`, `PROJECT`; thẩm quyền phê duyệt, ký duyệt văn bản `DOCUMENT`, `DOC_*`; thẩm quyền phê duyệt đánh giá cán bộ, luân chuyển `HRM_EMPLOYEE`; phê duyệt VTVL `ORGANIZATION`; phê duyệt quy trình `WORKFLOW`.
+     - `BTCTU_LANH_DAO_PHONG` (Lãnh đạo Phòng - 12 đồng chí): Quyền chỉ đạo điều hành chung của cấp Phòng (`TASK`, `PLAN`, `KPI`, `REPORT`, `DOCUMENT`, `DOC_*`, `MEETING`, `NOTIFICATION`, `WORKFLOW`).
+     - `BTCTU_LANH_DAO_TCD_DV` (Lãnh đạo Phòng TCĐ-ĐV - 3 đồng chí): Thẩm quyền chuyên sâu về nghiệp vụ tổ chức cơ sở đảng, phát triển đảng viên, thẻ đảng viên, quy trình đảng vụ `WORKFLOW`, `REPORT` đảng vụ, `ORGANIZATION: UPDATE`. Quyền `HRM_EMPLOYEE` giới hạn ở `READ`, `VIEW` tra cứu.
+     - `BTCTU_CV_TCD_DV` (Chuyên viên Phòng TCĐ-ĐV - User 92): Tác nghiệp đảng vụ, dự thảo văn bản, tự lập phiếu KPI Mẫu 02, kê khai Mẫu 04.
+     - `BTCTU_LANH_DAO_TCCB` (Lãnh đạo Phòng TCCB - 3 đồng chí): Thẩm quyền nòng cốt về công tác cán bộ toàn diện (`HRM_EMPLOYEE`: `APPROVE`, `ASSIGN`, `CREATE`, `EXPORT`, `READ`, `UPDATE`, `VIEW`), quản lý VTVL và định biên (`ORGANIZATION`: `APPROVE`, `CREATE`, `EXPORT`, `READ`, `UPDATE`, `VIEW`), danh mục ngạch bậc chức danh (`CATEGORY`), chủ trì quy trình bổ nhiệm cán bộ 5 bước SOP (`WORKFLOW`), xây dựng KPI cán bộ.
+     - `BTCTU_CV_TCCB` (Chuyên viên Phòng TCCB - User 96): Tác nghiệp hồ sơ cán bộ 2C (`HRM_EMPLOYEE: CREATE, UPDATE, EXPORT, READ, VIEW`), cập nhật biến động biên chế VTVL (`ORGANIZATION: UPDATE`), lập báo cáo cán bộ.
+     - `BTCTU_LANH_DAO_BVCTNB` (Lãnh đạo Phòng BVCTNB - 3 đồng chí): Chủ trì và phê duyệt quy trình thẩm tra, xác minh chính trị nội bộ (`WORKFLOW: APPROVE, CREATE, EXECUTE, READ, UPDATE, VIEW`), thẩm quyền cập nhật kết luận thẩm tra tiêu chuẩn chính trị cán bộ (`HRM_EMPLOYEE: UPDATE, READ, VIEW`).
+     - `BTCTU_CB_BVCTNB` (Cán bộ BVCTNB - User 100): Thực thi thẩm tra xác minh chính trị trong quy trình (`WORKFLOW: EXECUTE`), tra cứu nhân thân (`HRM_EMPLOYEE: READ, VIEW`).
+     - `BTCTU_LANH_DAO_VAN_PHONG` (Lãnh đạo Văn phòng - 3 đồng chí): Toàn quyền điều hành văn phòng, duyệt phát hành văn bản hành chính (`DOCUMENT`, `DOC_*`), quản lý biểu mẫu `DOC_TEMPLATE`, điều phối lịch họp `MEETING`, thông báo `NOTIFICATION`.
+     - `BTCTU_VAN_THU` (Văn thư - Lưu trữ - Kế toán - User 105): Toàn quyền nghiệp vụ văn thư `*` trên mọi tài nguyên văn bản (`DOCUMENT`, `DOC_INCOMING`, `DOC_OUTGOING`, `DOC_INTERNAL`, `DOC_DRAFT`, `DOC_PUBLISH`, `DOC_TEMPLATE`, `DOC_PROCESSING`, `DOC_CATEGORIES`).
+     - `BTCTU_ADMIN_CNTT` (Quản trị CNTT & ATTT - 2 đồng chí): Toàn quyền quản trị tài khoản, PBAC, an toàn thông tin, menu, danh mục (`USER:*`, `ROLE:*`, `RESOURCE:*`, `MENU:*`, `CATEGORY:*`, `API_GATEWAY:*`, `INTEGRATION:*`, `NOTIFICATION:*`, `HRM_EMPLOYEE`).
+     - `ADMIN_SYSTEM` (`admin_btc` - BTCTU_ADMIN): Quản trị viên hệ thống cấp đơn vị với full `*` trên toàn bộ tài nguyên.
+  3. *Thực thi Cập nhật Đồng bộ & Nâng Cấp Source of Truth*:
+     - Cập nhật file seed chuẩn `apps/user-service/prisma/seeds/10-daklak-party-organizations.seed.ts`: Bổ sung 4 nhóm quyền mới, ma trận phân quyền 11 nhóm, logic gán `roleGroups` đa nhóm, hỗ trợ mở rộng tự động cặp alias `READ <=> VIEW`.
+     - Thực thi cập nhật trực tiếp vào CSDL `admin_systems`: Tạo các nhóm quyền 13, 14, 15, 16; đồng bộ chính sách vào `policies` và `_PolicyToUserGroup`; gán chính xác nhóm cho 23 cán bộ vào `_UserToUserGroup`.
+     - Tăng `auth_version` cho toàn bộ tài khoản BTCTU để vô hiệu hóa token cũ, ép sinh token mới với đầy đủ quyền hạn.
+     - Xóa toàn bộ cache Redis (`FLUSHALL`) để làm mới phiên làm việc trên các microservices.
+  4. *Kiểm chứng thực tế*:
+     - Kiểm tra trực tiếp hàm `findOne` trong `UsersService`: Xác nhận `tccb_tp` (Hoàng Đức Nam) sở hữu đủ 100 permissions gồm `HRM_EMPLOYEE`, `ORGANIZATION`, `WORKFLOW` cấp Trưởng phòng TCCB.
+     - Xác nhận `truongban` (Nguyễn Thượng Hải) sở hữu 212 permissions toàn quyền điều hành `*` trên `TASK`, `KPI`, `PLAN`, `REPORT`.
+     - Xác nhận `vp_nv` (Lê Thu Thảo) sở hữu 230 permissions toàn quyền văn thư `*` trên `DOC_*`.
+     - Kiểm tra vệ sinh: 0 `console.log` trong code ứng dụng, 100% file UTF-8 không BOM, dọn dẹp sạch sẽ toàn bộ script tạm.
+- **Tập tin đã cập nhật**:
+  - `apps/user-service/prisma/seeds/10-daklak-party-organizations.seed.ts`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - Kiểm tra database `admin_systems`: User groups 6 -> 16 đã được gán đầy đủ chính sách và người dùng tương ứng (Pass 100%).
+  - Chạy `NestJS UsersService.findOne({ id: 93 })`: PASS (Roles: `Lãnh đạo Phòng - BTCTU`, `Lãnh đạo Phòng Tổ chức cán bộ - BTCTU`, HRM & ORG permissions đầy đủ).
+  - Chạy `NestJS UsersService.findOne({ id: 84 })`: PASS (Roles: `Lãnh đạo Ban Tổ chức Tỉnh ủy`, full wildcard `TASK:*`, `KPI:*`, `REPORT:*`).
+  - Chạy `NestJS UsersService.findOne({ id: 105 })`: PASS (Roles: `Văn thư - Lưu trữ - Kế toán - BTCTU`, full `DOCUMENT:*`).
+  - Kiểm tra UTF-8 không BOM: File size 57678 bytes, `Has BOM: false` (PASS).

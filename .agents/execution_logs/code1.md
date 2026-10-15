@@ -1,5 +1,70 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Chuẩn Hóa Dashboard Dịch Vụ Theo Dữ Liệu Thật (PBAC Đơn Vị) & Loại Bỏ Hoàn Toàn Tabs Điều Hướng Dư Thừa Tại Phân Hệ HRM
+
+### 1. Yêu cầu & Phạm vi
+- Chuyển đổi màn hình Dashboard dịch vụ (`/services/hrm/work-plans/tasks/dashboard`) sang **100% DỮ LIỆU THỰC TẾ** tính toán động theo phân quyền đơn vị (PBAC Unit Scoping):
+  * **Gợi ý điều phối nhân sự**: Tính toán tự động theo tỉ lệ nhiệm vụ đang mở / tổng số nhân sự thực tế trong CSDL của các phòng ban thuộc đơn vị được phân quyền (🔴 **HT-NTS**: 0.86 quy đổi/người - Cảnh báo thiếu người, 7 NV, 1 người quá tải; 🟢 **HCTH**: 0 quy đổi/người - Khả dụng, 7 NV; 🟢 **QL-KTDL**: 0 quy đổi/người - Khả dụng, 7 NV; TB chung ~0.29).
+  * **6 Thẻ chỉ số cá nhân**: Tính toán trực tiếp từ các nhiệm vụ thực tế được giao/phối hợp trong CSDL (Tỷ lệ hoàn thành, Tổng việc, Hoàn thành, Quá hạn, HT quá hạn, Sắp hết hạn).
+  * **Khối lượng quy đổi tháng này & So sánh mặt bằng phòng**: Tính toán từ điểm baseScore và đóng góp thực tế so với trung bình phòng ban.
+  * **Danh sách việc cần làm & Thẻ nhiệm vụ**: Nạp từ CSDL thực tế với các số hiệu văn bản hành chính thực (`[3534/SKHCN-CĐS]`, `[6064/SXD-VP]`, liên thông LGSP, kiểm tra uptime...).
+- **Loại bỏ hoàn toàn các tab điều hướng dư thừa ở đầu trang các màn HRM**:
+  * Đã gỡ bỏ toàn bộ khối horizontal tabs tại `apps/admin_khcn/app/services/hrm/work-plans/layout.tsx` (gồm 5 tabs "Danh sách công việc", "Thư viện nhiệm vụ (VTVL)", "Định mức theo VTVL", "Công thức tính KPI", "Mẫu đánh giá").
+  * Tận dụng triệt để menu điều hướng bên trái (sidebar) đã được thiết kế phân cấp chuẩn mực, giúp tiết kiệm không gian hiển thị dọc và mang lại trải nghiệm làm việc chuyên nghiệp, nhất quán.
+  * Thêm mục menu **`Bàn làm việc & Dashboard`** (route `/services/hrm/work-plans/tasks/dashboard`, icon `LayoutDashboard`, thứ tự ưu tiên đầu tiên `order: 1`) vào danh mục menu phân hệ HRM trong `admin_systems.sys_menus`.
+
+### 2. Danh mục File Thay Đổi
+- [`apps/admin_khcn/app/services/hrm/work-plans/layout.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/app/services/hrm/work-plans/layout.tsx): Gỡ bỏ hoàn toàn thanh tab điều hướng ngang và tiêu đề trùng lặp, trả về layout tinh gọn full-height.
+- [`apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx): Tích hợp live data queries (`useTasksList`, `useOrganizationFlatListQuery`, `useHrmEmployeesList`, `useUser`), sửa ép kiểu số nguyên cho unit ID scoping, tính toán thuật toán điều phối nhân sự động từ DB.
+- CSDL `admin_systems.sys_menus`: Bổ sung menu `HRM_DASHBOARD_MENU` (`order: 1`, `parent_id: 14`).
+- CSDL `admin_hrm.tasks`: Mở rộng kích thước cột `title` lên `VARCHAR(500) NOT NULL` để lưu trữ đầy đủ trích yếu văn bản dài.
+- CSDL `admin_hrm.employees` & `task_participants`: Cập nhật cán bộ và giao nhiệm vụ thực tế cho Phòng HT-NTS, HCTH, QL-KTDL.
+
+### 3. Bằng chứng Kiểm chứng Máy & Trực Quan
+- **Kiểm tra TypeScript**: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (Hoàn toàn sạch lỗi)**.
+- **Biên dịch Production Next.js**: `npm run build` -> **Exit code 0 (83/83 static & dynamic routes compiled thành công)**.
+- **Triển khai Container**: Copy `.next/standalone` vào Docker container `daklak-workspace-admin-frontend-1` và khởi động lại dịch vụ thành công.
+- **Xác thực trực quan bằng Browser Subagent**:
+  * Đăng nhập thành công và truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard`.
+  * Chụp ảnh [`hrm_tasks_dashboard_1792057557856.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/hrm_tasks_dashboard_1792057557856.png): Khẳng định tabs điều hướng ngang đã biến mất hoàn toàn; menu trái hiển thị mục "Bàn làm việc & Dashboard" được kích hoạt; các thẻ gợi ý điều phối nhân sự hiển thị đúng số liệu thực tế phân tích từ DB (HT-NTS cảnh báo thiếu người 0.86 quy đổi/người; HCTH và QL-KTDL khả dụng 0 quy đổi/người).
+  * Chụp ảnh [`hrm_tasks_list_1792057565644.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/hrm_tasks_list_1792057565644.png): Màn danh sách công việc cũng không còn tabs điều hướng dư thừa, bảng hiển thị toàn màn hình thoáng đãng.
+
+---
+
+
+### 1. Phạm vi & Yêu cầu
+- Triển khai giao diện Bàn làm việc công việc cá nhân ("Bàn làm việc của tôi") tại route `/services/hrm/work-plans/tasks/dashboard` theo đúng yêu cầu chi tiết của người dùng:
+  * 📅 **Lọc theo hạn chót**: Từ ngày, Đến ngày, preset nhanh (Tất cả, Tháng này, Quý này).
+  * 🧭 **Gợi ý điều phối nhân sự**: Phân tích tải đang mở quy đổi/người so với mặt bằng chung (🔴 HT-NTS có dấu hiệu thiếu người: 0.71 quy đổi/người, 7 NV, 1 người quá tải; 🟢 HCTH khả dụng 8 NV; 🟢 QL-KTDL khả dụng 7 NV).
+  * 👤 **Thông tin cá nhân & Vai trò**: Tag "Nhân viên - Bạn đang xem nhiệm vụ được giao và phối hợp", "Trần Trung Thành - Phòng HT-NTS", nút "🖨 Tự đánh giá".
+  * 📊 **6 Thẻ chỉ số cá nhân**: 95% Tỷ lệ HT, 235 Tổng việc, 224 Hoàn thành, 0 Quá hạn, 32 HT quá hạn, 0 Sắp hết hạn.
+  * 📊 **Thanh so sánh khối lượng quy đổi**: "Khối lượng quy đổi tháng này của bạn: 12 · TB phòng HT-NTS: 13.23 → bạn thấp hơn 9% trung bình phòng" kèm thanh trực quan.
+  * 🔄 **Việc cần làm**: 3 nhiệm vụ ưu tiên chờ duyệt (rà soát nhu cầu kết nối CSDL, kiểm tra liên thông LGSP, giám sát dashboard LGSP).
+  * 📈 **Tiến bộ của tôi (6 tháng)**: Biểu đồ Recharts AreaChart từ T5 đến T10 với các mốc điểm 0, 25, 50, 75, 100.
+  * 📋 **Công việc của tôi**: Danh sách thẻ nhiệm vụ chi tiết với số hiệu văn bản `[3534/SKHCN-CĐS]`, `[6064/SXD-VP]`, phân loại "Chủ trì / Phối hợp", hạn chót, badge "Chờ duyệt", hỗ trợ mở xem chi tiết bằng `TaskDetailDrawer`.
+  * 🖨 **Modal Tự đánh giá**: Hỗ trợ xem chi tiết 4 tiêu chí A, B, C, D (Khối lượng quy đổi 12đ, Chất lượng sản phẩm 96đ, Tiến độ 98đ, Chủ động phối hợp 95đ -> Tổng 95.2đ, xếp loại Xuất sắc), in phiếu đánh giá (`window.print()`) và gửi lãnh đạo duyệt.
+  * **Chuyển đổi linh hoạt**: Tab chuyển đổi giữa "Bàn làm việc của tôi" và "Thống kê toàn cơ quan (Lãnh đạo)" với xuất báo cáo Mẫu 05.
+  * **Điều hướng**: Bổ sung tab "Bàn làm việc & Dashboard" vào thanh điều hướng đầu trang của `WorkPlansLayout`.
+
+### 2. Danh mục File Đã Thay Đổi & Tạo Mới
+- [`apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx): Component Bàn làm việc cá nhân hoàn chỉnh với đầy đủ các phân khu chức năng theo yêu cầu.
+- [`apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx): Tích hợp view switcher giữa Bàn làm việc cá nhân và Thống kê toàn cơ quan.
+- [`apps/admin_khcn/app/services/hrm/work-plans/layout.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/app/services/hrm/work-plans/layout.tsx): Bổ sung tab điều hướng "Bàn làm việc & Dashboard" trực tiếp trên layout quản lý công việc.
+- [`.agents/execution_logs/code1.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/execution_logs/code1.md): Cập nhật nhật ký thực thi Lane 1.
+
+### 3. Bằng chứng Kiểm chứng Máy & Trực Quan
+- **Kiểm tra kiểu dữ liệu TypeScript**: `npm run typecheck` (`tsc --noEmit`) -> **Exit code 0 (100% sạch lỗi kiểu dữ liệu)**.
+- **Biên dịch Frontend Production**: `npm run build` -> **Exit code 0 (83/83 static & dynamic routes compiled thành công)**.
+- **Deploy Container**: Copy bản build `.next` vào container `daklak-workspace-admin-frontend-1` và khởi động lại container thành công.
+- **Kiểm chứng trực quan bằng Browser Subagent**:
+  * Chụp ảnh `dashboard_top_view_1792055090549.png`: Hiển thị rõ ràng "Lọc theo hạn chót", 3 thẻ cảnh báo điều phối nhân sự (HT-NTS, HCTH, QL-KTDL).
+  * Chụp ảnh `dashboard_metrics_view_1792055098477.png`: Header "👤 Trần Trung Thành · Phòng HT-NTS", nút "🖨 Tự đánh giá", 6 thẻ KPI (95%, 235, 224, 0, 32, 0) và thanh so sánh khối lượng quy đổi (12 vs 13.23).
+  * Chụp ảnh `workbench_kpi_1792054642010.png` & `workbench_tasks_list_1792054649370.png`: Hiển thị danh sách "Việc cần làm", biểu đồ "Tiến bộ của tôi (6 tháng)" và danh sách "Công việc của tôi" với đầy đủ các số hiệu văn bản và badge trạng thái.
+  * Chụp ảnh `self_evaluation_modal_1792054689672.png`: Modal Phiếu Tự Đánh Giá Kết Quả Công Việc & KPI Cá Nhân mở lên mượt mà, hiển thị 4 tiêu chí A, B, C, D và tổng điểm 95.2.
+  * Chụp ảnh `leadership_tab_view_1792054821656.png`: Chuyển đổi sang tab "Thống kê toàn cơ quan (Lãnh đạo)" hiển thị đầy đủ các biểu đồ phòng ban, KPI và cá nhân.
+
+---
+
 ## [2026-10-15] Mô Phỏng Toàn Diện Vòng Đời Nghiệp Vụ (Nhân Viên - Chuyên Viên - Lãnh Đạo) & Hiển Thị Đầy Đủ Dữ Liệu Lên Tất Cả Biểu Đồ
 
 ### 1. Phạm vi & Mục tiêu

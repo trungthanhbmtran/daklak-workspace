@@ -1,4 +1,4 @@
-﻿import { IsString, IsOptional, IsInt, IsBoolean, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsBoolean, IsArray } from 'class-validator';
 
 export class CreateEmployeeGrpcDto {
   @IsString() @IsOptional() firstname?: string;

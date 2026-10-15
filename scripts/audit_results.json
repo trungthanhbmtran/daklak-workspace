@@ -1,0 +1,777 @@
+{
+  "rule1_ui_layout": [
+    {
+      "file": "apps\\admin_khcn\\components\\ui\\page-size-selector.tsx",
+      "line": 29,
+      "code": "<SelectTrigger className=\"h-8 w-[70px] rounded-lg text-xs font-extrabold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\api-management\\components\\ApiConnectionAuthDialog.tsx",
+      "line": 232,
+      "code": "<SelectTrigger className=\"h-11 font-medium bg-background\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\api-management\\components\\ApiEndpointEditDialog.tsx",
+      "line": 511,
+      "code": "<SelectTrigger className=\"h-8 text-xs shadow-none\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\api-management\\components\\ApiEndpointEditDialog.tsx",
+      "line": 533,
+      "code": "<SelectTrigger className=\"h-8 text-xs shadow-none font-mono\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\api-management\\components\\ApiEndpointEditDialog.tsx",
+      "line": 555,
+      "code": "<SelectTrigger className=\"h-8 text-xs shadow-none\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\api-management\\components\\ApiEndpointEditDialog.tsx",
+      "line": 648,
+      "code": "<SelectTrigger className=\"h-9 max-w-sm\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\api-management\\components\\ApiImportWizard.tsx",
+      "line": 203,
+      "code": "<SelectTrigger className=\"w-[130px] h-8 text-xs\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\ConsultationManageClient.tsx",
+      "line": 221,
+      "code": "<SelectTrigger className=\"w-[200px] h-12 rounded-2xl bg-muted/30 border-none font-bold text-sm shadow-none\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentManager.tsx",
+      "line": 98,
+      "code": "<SelectTrigger className=\"w-[160px] bg-background\"><SelectValue /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentManager.tsx",
+      "line": 168,
+      "code": "<SelectTrigger className=\"w-[160px] bg-background\"><SelectValue /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentManager.tsx",
+      "line": 256,
+      "code": "<SelectTrigger className=\"w-[120px] font-bold\"><SelectValue /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentManager.tsx",
+      "line": 263,
+      "code": "<SelectTrigger className=\"w-[200px]\"><SelectValue /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentProcessingWorkspace.tsx",
+      "line": 191,
+      "code": "<SelectTrigger className=\"h-8 text-[11px] bg-background\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentProcessingWorkspace.tsx",
+      "line": 205,
+      "code": "<SelectTrigger className=\"h-8 text-[11px] bg-background\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentPublishingPage.tsx",
+      "line": 229,
+      "code": "<SelectTrigger className=\"font-semibold text-primary bg-muted/20 border-transparent focus:ring-primary h-11\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentPublishingPage.tsx",
+      "line": 270,
+      "code": "<SelectTrigger className=\"w-[180px] h-9 bg-background\"><SelectValue /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentPublishingPage.tsx",
+      "line": 305,
+      "code": "<SelectTrigger className=\"h-11 font-bold\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentPublishingPage.tsx",
+      "line": 321,
+      "code": "<SelectTrigger className=\"h-11 font-bold\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentUploadModal.tsx",
+      "line": 549,
+      "code": "<FormControl><SelectTrigger className=\"bg-background border-primary/20 h-9\"><SelectValue placeholder=\"Chọn loại báo cáo...\" /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentUploadModal.tsx",
+      "line": 586,
+      "code": "<FormControl><SelectTrigger className=\"bg-muted/10 border-muted-foreground/10\"><SelectValue placeholder=\"Chọn loại...\" /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentUploadModal.tsx",
+      "line": 598,
+      "code": "<FormControl><SelectTrigger className=\"bg-muted/10 border-muted-foreground/10\"><SelectValue placeholder=\"Chọn lĩnh vực...\" /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentUploadModal.tsx",
+      "line": 610,
+      "code": "<FormControl><SelectTrigger className=\"bg-muted/10 border-muted-foreground/10\"><SelectValue placeholder=\"Chọn độ khẩn...\" /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentUploadModal.tsx",
+      "line": 633,
+      "code": "<FormControl><SelectTrigger className=\"bg-muted/10 border-muted-foreground/10\"><SelectValue placeholder=\"Chọn độ mật...\" /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\FinanceUploadModal.tsx",
+      "line": 138,
+      "code": "<FormControl><SelectTrigger className=\"font-semibold bg-muted/10 h-10\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\FinanceUploadModal.tsx",
+      "line": 153,
+      "code": "<FormControl><SelectTrigger className=\"font-mono bg-muted/10 h-10\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\FinanceUploadModal.tsx",
+      "line": 167,
+      "code": "<FormControl><SelectTrigger className=\"bg-muted/10 h-10\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\processing\\ProcessingFilterBar.tsx",
+      "line": 19,
+      "code": "<SelectTrigger className=\"w-[180px] h-12 rounded-2xl border-none bg-muted/20 font-bold\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\PublicFeedbacksClient.tsx",
+      "line": 172,
+      "code": "<SelectTrigger className=\"w-[180px] h-10 font-medium\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\TransparencyClient.tsx",
+      "line": 209,
+      "code": "<SelectTrigger className=\"w-[110px] h-10 rounded-xl\"><SelectValue /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\TransparencyFinanceClient.tsx",
+      "line": 190,
+      "code": "<SelectTrigger className=\"w-[140px] font-semibold h-10\"><SelectValue placeholder=\"Năm tài chính\" /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\TransparencyFinanceClient.tsx",
+      "line": 198,
+      "code": "<SelectTrigger className=\"w-[200px] font-medium h-10\"><SelectValue placeholder=\"Loại công khai\" /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\hrm\\components\\tasks\\task-list.tsx",
+      "line": 224,
+      "code": "<SelectTrigger className=\"w-[160px]\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\hrm\\components\\work-plans\\master-plans\\ManualPlanSelectorByRankClient.tsx",
+      "line": 653,
+      "code": "<SelectTrigger className=\"h-9 rounded-xl bg-background border-input shadow-xs text-xs\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\banner\\BannerBasicInfo.tsx",
+      "line": 241,
+      "code": "<SelectTrigger className=\"bg-slate-50/50 dark:bg-slate-900\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\banner\\BannerBasicInfo.tsx",
+      "line": 284,
+      "code": "<FormControl><SelectTrigger className=\"bg-slate-50/50 dark:bg-slate-900\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\banner\\BannerBasicInfo.tsx",
+      "line": 301,
+      "code": "<FormControl><SelectTrigger className=\"bg-slate-50/50 dark:bg-slate-900\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\CategoryForm.tsx",
+      "line": 320,
+      "code": "<SelectTrigger className=\"rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\editor\\plugins\\ToolbarPlugin.tsx",
+      "line": 119,
+      "code": "<SelectTrigger className=\"w-[130px] h-8 bg-transparent border-none shadow-none font-medium focus:ring-0 text-foreground\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\editor\\plugins\\ToolbarPlugin.tsx",
+      "line": 145,
+      "code": "<SelectTrigger className=\"w-[120px] h-8 bg-transparent border-none shadow-none text-sm focus:ring-0 text-foreground\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\post-form\\PostConfigCard.tsx",
+      "line": 26,
+      "code": "<FormControl><SelectTrigger className=\"font-medium\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\components\\post-form\\PostContentTabs.tsx",
+      "line": 154,
+      "code": "<FormControl><SelectTrigger className=\"bg-muted/50\"><SelectValue placeholder=\"Chọn chuyên mục\" /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 355,
+      "code": "<SelectTrigger className=\"col-span-3 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 378,
+      "code": "<SelectTrigger className=\"col-span-3 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 404,
+      "code": "<SelectTrigger id=\"categorySelect\" className=\"col-span-3 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 445,
+      "code": "<SelectTrigger id=\"unitSelect\" className=\"col-span-3 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 498,
+      "code": "<SelectTrigger className=\"rounded-lg text-xs\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 543,
+      "code": "<SelectTrigger id=\"customPageSelect\" className=\"col-span-3 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 588,
+      "code": "<SelectTrigger className=\"col-span-3 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 628,
+      "code": "<SelectTrigger className=\"col-span-1 rounded-lg\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\reports\\components\\reports\\ReportShareModal.tsx",
+      "line": 1104,
+      "code": "<SelectTrigger className=\"h-9 text-xs bg-white border-slate-200\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\reports\\components\\reports\\ReportShareModal.tsx",
+      "line": 1138,
+      "code": "<SelectTrigger className=\"h-9 text-xs bg-white border-slate-200\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\reports\\components\\reports\\ReportShareModal.tsx",
+      "line": 1664,
+      "code": "<SelectTrigger className=\"w-40 h-8 text-xs bg-white border-slate-200\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\organization\\components\\OrganizationStaffing\\index.tsx",
+      "line": 178,
+      "code": "<SelectTrigger className=\"h-10\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\organization\\components\\OrganizationStaffing\\JobTitleConfigDialog.tsx",
+      "line": 47,
+      "code": "<SelectTrigger className=\"h-10 bg-background\"><SelectValue placeholder=\"-- Chọn lĩnh vực phụ trách --\" /></SelectTrigger>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\policies\\components\\PermissionMatrixTable.tsx",
+      "line": 72,
+      "code": "<SelectTrigger className=\"h-8 text-xs font-medium\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\policies\\components\\PolicyForm.tsx",
+      "line": 214,
+      "code": "<FormControl><SelectTrigger className=\"h-9 text-sm\"><SelectValue /></SelectTrigger></FormControl>",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\resources\\components\\ResourceSidebar.tsx",
+      "line": 155,
+      "code": "<SelectTrigger className=\"h-9 text-sm\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\modules\\page-builder\\blocks\\custom-widgets\\custom-widgets.editor.tsx",
+      "line": 128,
+      "code": "<SelectTrigger className=\"h-8 text-xs rounded-lg bg-white dark:bg-slate-900 border-slate-200\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\modules\\page-builder\\blocks\\custom-widgets\\custom-widgets.editor.tsx",
+      "line": 181,
+      "code": "<SelectTrigger className=\"h-10 rounded-xl border-slate-150 dark:border-slate-800 text-xs font-bold bg-white dark:bg-slate-900\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\modules\\page-builder\\blocks\\custom-widgets\\custom-widgets.editor.tsx",
+      "line": 375,
+      "code": "<SelectTrigger className=\"h-10 rounded-xl border-slate-150 dark:border-slate-800 text-xs font-bold bg-white dark:bg-slate-900\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\modules\\page-builder\\blocks\\news-list\\news-list.editor.tsx",
+      "line": 73,
+      "code": "<SelectTrigger className=\"h-12 rounded-2xl border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-bold focus:ring-4 focus:ring-indigo-50/50\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\modules\\page-builder\\editor\\components\\RightProperties.tsx",
+      "line": 211,
+      "code": "<SelectTrigger className=\"h-10 rounded-xl border-slate-100 dark:border-slate-800 text-xs font-bold bg-white dark:bg-slate-900\">",
+      "message": "<SelectTrigger> without explicit w-full or min-w-0"
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\DocumentUploadModal.tsx",
+      "line": 1,
+      "message": "Dialog contains 18 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\document\\components\\LgspConfigModal.tsx",
+      "line": 1,
+      "message": "Dialog contains 7 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\gateway\\components\\RoutesTab.tsx",
+      "line": 1,
+      "message": "Dialog contains 6 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\gateway\\components\\ServicesTab.tsx",
+      "line": 1,
+      "message": "Dialog contains 7 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\hrm\\components\\work-plans\\kpi\\KpiFormulasClient.tsx",
+      "line": 1,
+      "message": "Dialog contains 6 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\hrm\\components\\work-plans\\master-plans\\RankTaskCatalogManager.tsx",
+      "line": 1,
+      "message": "Dialog contains 10 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\posts\\portal-menus\\components\\EditMenuModal.tsx",
+      "line": 1,
+      "message": "Dialog contains 15 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\categories\\components\\CategoryModals.tsx",
+      "line": 1,
+      "message": "Dialog contains 7 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    },
+    {
+      "file": "apps\\admin_khcn\\features\\system-admin\\users\\components\\settings\\PersonalAiAssistants.tsx",
+      "line": 1,
+      "message": "Dialog contains 6 form fields. Rule 1 requires <Sheet> for long forms/detailed config."
+    }
+  ],
+  "rule2_base_url": [],
+  "rule3_next_router": [],
+  "rule4_grpc": [],
+  "rule5_database_prisma": [
+    {
+      "file": "apps\\document-service\\src\\modules\\document\\document.service.ts",
+      "line": 218,
+      "code": "const document = await this.prisma.document.update({ where: { id }, data: updateData });",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\document-service\\src\\modules\\document\\document.service.ts",
+      "line": 224,
+      "code": "const doc = await this.prisma.document.findUnique({ where: { id } });",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\document-service\\src\\modules\\lgsp\\lgsp.service.ts",
+      "line": 315,
+      "code": "const existing = await this.prisma.document.findFirst({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-kpi-templates.ts",
+      "line": 30,
+      "code": "await prisma.kpiFormTemplate.upsert({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\hrm-service\\src\\modules\\kpi-evaluations\\kpi-evaluations.service.ts",
+      "line": 385,
+      "code": "await this.prisma.kpiFormTemplate.upsert({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\hrm-service\\src\\modules\\task-workflow\\task-outbox.worker.ts",
+      "line": 52,
+      "code": "await this.prisma.outboxEvent.updateMany({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\report-service\\src\\modules\\reports\\reports.service.ts",
+      "line": 614,
+      "code": "await this.prisma.datasetSnapshot.createMany({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\report-service\\src\\modules\\reports\\reports.service.ts",
+      "line": 618,
+      "code": "await this.prisma.datasetSnapshot.create({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\user-service\\src\\modules\\api-management\\outbox-worker.service.ts",
+      "line": 55,
+      "code": "await this.prisma.apiOutbox.update({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update_diagram_positions.ts",
+      "line": 75,
+      "code": "const def = await prisma.processDefinition.findFirst({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update_diagram_positions.ts",
+      "line": 85,
+      "code": "await prisma.processVersion.update({",
+      "message": "Potential N+1 Query: Await Prisma query inside loop/map in production service"
+    }
+  ],
+  "rule6_pbac_sovereignty": [],
+  "rule7_cleanup_encoding": [
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-db.ts",
+      "line": 25,
+      "code": "console.log('Syncing users and employees...');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-db.ts",
+      "line": 34,
+      "code": "console.log(`Updated ${updateEmployeesResult} employees with user_id.`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-db.ts",
+      "line": 43,
+      "code": "console.log(`Updated ${updateUsersResult} users with employee_code.`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-db.ts",
+      "line": 51,
+      "code": "console.log(`Synced UNASSIGNED employee to user ID 0 (updated: ${syncUnassigned}).`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-kpi-templates.ts",
+      "line": 24,
+      "code": "console.log(`Bắt đầu đồng bộ ${DEFAULT_KPI_FORM_TEMPLATES.length} Biểu mẫu XML KPI vào CSDL...`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-kpi-templates.ts",
+      "line": 82,
+      "code": "console.log(`  ✓ Đã đồng bộ [${def.formCode}] (${(xmlSize / 1024).toFixed(1)} KB): ${def.name}`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\hrm-service\\prisma\\sync-kpi-templates.ts",
+      "line": 85,
+      "code": "console.log('✅ Hoàn tất đồng bộ 100% Biểu mẫu XML KPI vào CSDL!');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\adapters\\ConsoleAdapter.js",
+      "line": 9,
+      "code": "console.log(`[Notification][${this.id}] ${id}`, {",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 9,
+      "code": "console.log('--- Bắt đầu Benchmark: N+1 Inserts vs Batch Insert ---');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 26,
+      "code": "console.log(`\\nĐang chạy Cách 1: Vòng lặp N+1 (Tạo từng bản ghi một cho ${numRecords} records)...`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 35,
+      "code": "console.log(`⏱ Thời gian Cách 1 (N+1): ${timeNPlus1} ms`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 41,
+      "code": "console.log(`\\nĐang chạy Cách 2: Batch Insert (createMany cho ${numRecords} records)...`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 49,
+      "code": "console.log(`⏱ Thời gian Cách 2 (Batch): ${timeBatch} ms`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 52,
+      "code": "console.log(`\\n=== KẾT QUẢ TỐI ƯU ===`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\benchmark.js",
+      "line": 54,
+      "code": "console.log(`🚀 Batch Insert nhanh gấp ${speedup} lần so với vòng lặp N+1!`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\server.js",
+      "line": 123,
+      "code": "console.log('[Notification] Starting consumer...');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\server.js",
+      "line": 125,
+      "code": "console.log('[Notification] Consumer ready.');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\server.js",
+      "line": 129,
+      "code": "console.log(`[Notification] API Server ready on port ${port}`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\server.js",
+      "line": 135,
+      "code": "console.log(`[Notification] ${sig}, shutting down...`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\worker\\consumer.js",
+      "line": 96,
+      "code": "console.log(`[Notification] Broadcasted to ${adapter.id} ok`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\worker\\consumer.js",
+      "line": 143,
+      "code": "console.log(`[Notification] Retrying in ${retryDelayMs / 1000}s...`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\notification_service\\worker\\consumer.js",
+      "line": 169,
+      "code": "console.log(`[Notification] Consuming queue: ${queueName} with DLX enabled`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\report-service\\test-query.js",
+      "line": 17,
+      "code": "console.log(JSON.stringify(res, null, 2));",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\benchmark.ts",
+      "line": 64,
+      "code": "console.log('--- BẮT ĐẦU BENCHMARK TRÊN 20,000 NODES (CÂY SÂU TUYỆT ĐỐI) ---');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\benchmark.ts",
+      "line": 73,
+      "code": "console.log(`[CŨ] Đệ Quy (Recursive): ${(endRec - startRec).toFixed(2)} ms`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\benchmark.ts",
+      "line": 75,
+      "code": "console.log(`[CŨ] Đệ Quy (Recursive): LỖI CRASH TRẦM TRỌNG - ${e.message}`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\benchmark.ts",
+      "line": 81,
+      "code": "console.log(`[MỚI] Tuyến tính (Iterative / Rule E): ${(endIter - startIter).toFixed(2)} ms`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\insert-menu.ts",
+      "line": 44,
+      "code": "console.log('Inserted SYS_UNIT_JOB_TEMPLATE menu successfully!');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\query_policy.ts",
+      "line": 15,
+      "code": "console.log(\"RESOURCES:\");",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\query_policy.ts",
+      "line": 16,
+      "code": "console.dir(resources.map(r => r.code), {depth: null});",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\query_policy.ts",
+      "line": 17,
+      "code": "console.log(\"JOB TITLES:\");",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\query_policy.ts",
+      "line": 18,
+      "code": "console.dir(jobTitles.map(j => ({code: j.code, name: j.name})).slice(0, 5));",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\query_policy.ts",
+      "line": 19,
+      "code": "console.log(\"GROUPS:\");",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\query_policy.ts",
+      "line": 20,
+      "code": "console.dir(userGroups.map(g => ({id: g.id, name: g.name})));",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\sync-pbac.ts",
+      "line": 14,
+      "code": "console.log('🔄 Bắt đầu đồng bộ và cập nhật phân quyền PBAC thực tế...');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\sync-pbac.ts",
+      "line": 52,
+      "code": "console.log(`  ✓ Đã cập nhật quyền chuẩn cho nhóm: [${groupName}]`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\user-service\\prisma\\sync-pbac.ts",
+      "line": 171,
+      "code": "console.log('✅ Hoàn thành 100% đồng bộ phân quyền PBAC thực tế.');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\grpc_test.js",
+      "line": 21,
+      "code": "console.log(JSON.stringify(response, null, 2));",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\check_positions.ts",
+      "line": 14,
+      "code": "console.log('=== ' + d.code + ' ===');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update-edge-labels.ts",
+      "line": 232,
+      "code": "console.log(`Tìm thấy ${definitions.length} quy trình trong CSDL.`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update-edge-labels.ts",
+      "line": 294,
+      "code": "console.log(`- Đã cập nhật ${newEdges.length} nhãn đường nối cho quy trình: [${def.code}] version ${ver.version}`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update-edge-labels.ts",
+      "line": 299,
+      "code": "console.log(`Hoàn thành! Đã cập nhật thành công ${updatedVersionsCount} phiên bản quy trình.`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update_diagram_positions.ts",
+      "line": 72,
+      "code": "console.log('--- BẮT ĐẦU CẬP NHẬT TỌA ĐỘ VÀ ĐỒ THỊ SƠ ĐỒ QUY TRÌNH HỆ THỐNG ---');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update_diagram_positions.ts",
+      "line": 81,
+      "code": "console.log(`Tìm thấy ${item.code} (${def.id}), số versions: ${def.versions.length}`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update_diagram_positions.ts",
+      "line": 92,
+      "code": "console.log(`  -> Đã cập nhật Version ${v.version} (${v.id}) cho ${item.code}`);",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\prisma\\update_diagram_positions.ts",
+      "line": 99,
+      "code": "console.log('--- HOÀN THÀNH CẬP NHẬT TỌA ĐỘ & ĐỒ THỊ 9 QUY TRÌNH THÀNH CÔNG ---');",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    },
+    {
+      "file": "apps\\workflow-service\\test.js",
+      "line": 21,
+      "code": "console.log(JSON.stringify(res, null, 2));",
+      "message": "Debug log (console.log/debug/dir) found in production code"
+    }
+  ]
+}

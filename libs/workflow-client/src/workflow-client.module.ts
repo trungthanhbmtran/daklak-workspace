@@ -1,4 +1,4 @@
-﻿import { Module, Global } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { TransactionalOutboxService } from './services/transactional-outbox.service';
 import { InboxIdempotencyService } from './services/inbox-idempotency.service';
 

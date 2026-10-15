@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException, ConflictException, Logger } from "@nestjs/common";
+import { Injectable, NotFoundException, ConflictException, Logger } from "@nestjs/common";
 import { PrismaService } from "../infra/prisma.service";
 
 export interface RegisterProcessTypeDto {

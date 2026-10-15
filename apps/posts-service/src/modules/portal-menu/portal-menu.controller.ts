@@ -8,24 +8,28 @@ export class PortalMenuController {
 
   @GrpcMethod('PortalMenuService', 'CreatePortalMenu')
   async create(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.service.create(data);
     return this.mapToProto(result);
   }
 
   @GrpcMethod('PortalMenuService', 'GetPortalMenu')
   async findOne(data: { id: string }) {
+    data = data || ({} as any);
     const result = await this.service.findOne(data.id);
     return this.mapToProto(result);
   }
 
   @GrpcMethod('PortalMenuService', 'ListPortalMenus')
   async findAll(data: { onlyActive: boolean, position?: string }) {
+    data = data || ({} as any);
     const items = await this.service.findAll(data.onlyActive, data.position);
     return { data: items.map(i => this.mapToProto(i)).filter(i => !!i) };
   }
 
   @GrpcMethod('PortalMenuService', 'UpdatePortalMenu')
   async update(@Payload() data: Record<string, any>) {
+    data = data || {};
     const { id, ...updateData } = data;
     const result = await this.service.update(id, updateData);
     return this.mapToProto(result);
@@ -33,6 +37,7 @@ export class PortalMenuController {
 
   @GrpcMethod('PortalMenuService', 'DeletePortalMenu')
   async delete(data: { id: string }) {
+    data = data || ({} as any);
     return this.service.delete(data.id);
   }
 

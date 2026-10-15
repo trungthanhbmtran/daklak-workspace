@@ -2,12 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Text } from "@/components/ui/typography";
-import { CheckCircle, Clock, AlertTriangle, FileText, Loader2, Download } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, FileText, Loader2, Download, UserCheck, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import { useTaskStats } from "../../hooks/useTasks";
+import { PersonalTaskWorkbench } from "./personal-task-workbench";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -142,6 +143,7 @@ export function TaskDashboard() {
     kpiStats,
   };
 
+  const [activeView, setActiveView] = useState<"workbench" | "agency">("workbench");
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
@@ -180,16 +182,47 @@ export function TaskDashboard() {
   }
 
   return (
-    
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold tracking-tight">Tổng quan KPI & Công việc</h2>
-        <Button onClick={handleExport} disabled={isExporting}>
-          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-          Xuất Báo cáo (Mẫu 05)
-        </Button>
+    <div className="space-y-5">
+      {/* View Switcher Bar */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-200">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          <button
+            onClick={() => setActiveView("workbench")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all ${
+              activeView === "workbench"
+                ? "bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+            }`}
+          >
+            <UserCheck className="w-4 h-4" />
+            Bàn làm việc của tôi
+          </button>
+          <button
+            onClick={() => setActiveView("agency")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all ${
+              activeView === "agency"
+                ? "bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-xs"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+            }`}
+          >
+            <BarChart2 className="w-4 h-4" />
+            Thống kê toàn cơ quan (Lãnh đạo)
+          </button>
+        </div>
+
+        {activeView === "agency" && (
+          <Button onClick={handleExport} disabled={isExporting} size="sm" className="h-8 text-xs bg-blue-600 hover:bg-blue-700">
+            {isExporting ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-2 h-3.5 w-3.5" />}
+            Xuất Báo cáo (Mẫu 05)
+          </Button>
+        )}
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
+      {activeView === "workbench" ? (
+        <PersonalTaskWorkbench />
+      ) : (
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -344,6 +377,8 @@ export function TaskDashboard() {
         </Card>
       </div>
     </div>
-  );
+  )}
+</div>
+);
 }
 

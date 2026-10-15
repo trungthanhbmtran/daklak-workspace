@@ -23,6 +23,7 @@ export class GrpcWorkflowController {
   // =========================================================================
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
   async createWorkflow(@Payload() data: any) {
+    data = data || {};
     const result = await this.definitionService.createProcess({
       code: data.code,
       name: data.name,
@@ -37,6 +38,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
   async updateWorkflow(@Payload() data: any) {
+    data = data || {};
     let updatePayload = { ...data };
     const graphPayload = this.parseGraphPayload(data);
     if (Object.keys(graphPayload).length > 0) {
@@ -48,6 +50,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
   async findOneWorkflow(@Payload() data: any) {
+    data = data || {};
     try {
       const def = await this.definitionService.getDefinitionById(data.id, data.organizationId);
       return this.mapToWorkflowResponse(def, def.versions[0]);
@@ -61,6 +64,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'FindWorkflowByCode')
   async findWorkflowByCode(@Payload() data: any) {
+    data = data || {};
     try {
       const def = await this.definitionService.getDefinition(data.code, data.organizationId);
       return this.mapToWorkflowResponse(def, def.versions[0]);
@@ -74,8 +78,9 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
   async listWorkflows(@Payload() data: any) {
+    data = data || {};
     const { items, total } = await this.definitionService.listProcesses({
-      ...(data || {}),
+      ...data,
       includeGraph: false,
     });
     const take = Math.min(100, Math.max(1, Number(data?.take) || 20));
@@ -94,24 +99,28 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'DeleteWorkflow')
   async deleteWorkflow(@Payload() data: any) {
+    data = data || {};
     await this.definitionService.deleteProcess(data.id, data.organizationId);
     return { success: true };
   }
 
   @GrpcMethod('WorkflowService', 'ApplyModule')
   async applyModule(@Payload() data: any) {
+    data = data || {};
     const result = await this.definitionService.applyModule(data.id, data.moduleCode);
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
   @GrpcMethod('WorkflowService', 'PublishWorkflow')
   async publishWorkflow(@Payload() data: any) {
+    data = data || {};
     const result = await this.definitionService.publishProcess(data.id, data.actorId);
     return this.mapToWorkflowResponse(result.def, result.version);
   }
 
   @GrpcMethod('WorkflowService', 'ValidateWorkflowDefinition')
   async validateWorkflowDefinition(@Payload() data: any) {
+    data = data || {};
     const result = await this.definitionService.validateProcess(data.definitionId, data.versionId);
     return {
       valid: result.valid,
@@ -124,17 +133,20 @@ export class GrpcWorkflowController {
   // =========================================================================
   @GrpcMethod('WorkflowService', 'RegisterProcessType')
   async registerProcessType(@Payload() data: any) {
+    data = data || {};
     return this.catalogService.register(data);
   }
 
   @GrpcMethod('WorkflowService', 'GetProcessType')
   async getProcessType(@Payload() data: any) {
+    data = data || {};
     const pt = await this.catalogService.findByCode(data.code);
     return this.mapProcessTypeToResponse(pt);
   }
 
   @GrpcMethod('WorkflowService', 'ListProcessTypes')
   async listProcessTypes(@Payload() data: any) {
+    data = data || {};
     const types = await this.catalogService.listAll(data.activeOnly);
     return { data: types.map(pt => this.mapProcessTypeToResponse(pt)) };
   }
@@ -343,6 +355,7 @@ export class GrpcWorkflowController {
   }
 
   private parseGraphPayload(data: any): any {
+    data = data || {};
     if (data.bpmnLogic) {
       const bpmnLogic = typeof data.bpmnLogic === 'string' ? JSON.parse(data.bpmnLogic) : data.bpmnLogic;
       const uiMetadata = typeof data.uiMetadata === 'string' && data.uiMetadata ? JSON.parse(data.uiMetadata) : data.uiMetadata;

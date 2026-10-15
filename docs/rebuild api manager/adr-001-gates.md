@@ -1,4 +1,4 @@
-﻿# ADR-001: Quyết định các Gate cho Rebuild API Manager
+# ADR-001: Quyết định các Gate cho Rebuild API Manager
 
 Ngày: 2026-10-07
 Người chốt (đại diện): Antigravity Agent (Dựa trên default an toàn từ kế hoạch)

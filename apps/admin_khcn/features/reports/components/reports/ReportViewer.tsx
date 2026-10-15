@@ -94,17 +94,9 @@ function aggregateData(
 ): AggregatedItem[] {
   if (!rows || rows.length === 0 || !xAxis) return [];
 
-  // Thích ứng trục X thông minh (Smart Adaptive X-Axis):
-  // 1. Nếu xAxis là 'organName': Nếu active dataset chỉ thuộc 1 đơn vị duy nhất (ví dụ người dùng đang xem Ban Tổ chức Tỉnh ủy),
-  // tự động phân rã theo 'departmentName' để biểu đồ hiển thị các phòng ban nội bộ thay vì chỉ 1 cột đơn điệu!
   let effectiveXAxis = xAxis;
-  if (xAxis === 'organName') {
-    const uniqueOrgans = new Set(rows.map((r) => r.organName).filter(Boolean));
-    if (uniqueOrgans.size <= 1 && rows.some((r) => r.departmentName)) {
-      effectiveXAxis = 'departmentName';
-    }
-  } else if (xAxis === 'employeeName' && rows.some((r) => r.departmentName || r.organName)) {
-    // 2. Nếu xAxis là 'employeeName': Nếu có nhiều hơn 8 nhân sự, ưu tiên nhóm theo phòng ban để biểu đồ không bị dồn nén!
+  if (xAxis === 'employeeName' && rows.some((r) => r.departmentName || r.organName)) {
+    // Nếu xAxis là 'employeeName': Nếu có nhiều hơn 8 nhân sự, ưu tiên nhóm theo phòng ban để biểu đồ không bị dồn nén!
     const uniqueEmployees = new Set(rows.map((r) => r.employeeName || r.fullName).filter(Boolean));
     if (uniqueEmployees.size > 8) {
       effectiveXAxis = rows.some((r) => r.departmentName) ? 'departmentName' : 'organName';
@@ -130,9 +122,16 @@ function aggregateData(
     }
   }
 
+  // Nhận diện biểu đồ phân bổ thi đua / xếp loại / cơ cấu để ưu tiên lấy số lượng cán bộ
+  const isDistribution =
+    ['ranking', 'approvedRank', 'proposedRank', 'status', 'quarterYear', 'sopStep'].includes(xAxis) ||
+    ['ranking', 'approvedRank', 'proposedRank', 'status', 'quarterYear', 'sopStep'].includes(effectiveXAxis) ||
+    yAxis === 'count' ||
+    yAxis === xAxis;
+
   const result: AggregatedItem[] = Object.entries(groups).map(([label, g]) => {
     let val = g.count;
-    if (g.values.length > 0) {
+    if (!isDistribution && g.values.length > 0) {
       if (['progress', 'qualityScore', 'score', 'rate', 'sTong', 'sNhiemVu', 'sChung'].includes(yAxis)) {
         val = Math.round((g.sum / g.values.length) * 10) / 10;
       } else if (
@@ -186,7 +185,21 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   }, [tableSearch]);
 
   const { data: reportDef, isLoading: isDefLoading } = useGetReportDefinition(definitionId);
-  const actualConfig = config || reportDef?.configuration;
+
+  // Bảo đảm actualConfig luôn là Object hợp lệ (giải mã chuỗi JSON nếu lưu trữ dạng string)
+  const actualConfig = useMemo(() => {
+    const raw = config || reportDef?.configuration;
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+    return raw;
+  }, [config, reportDef?.configuration]);
+
   const reportName = reportDef?.name || 'Báo cáo Chi tiết';
 
   // Nhận diện báo cáo chuẩn SOP / Ban Tổ chức Tỉnh ủy
@@ -211,9 +224,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   const { data: runStatus, isLoading: isStatusLoading } = useGetReportRunStatus(runId);
 
   const latestStatus = runStatus?.status || (reportDef as any)?.runs?.[0]?.status;
-  const isCompleted = latestStatus === 'SUCCEEDED';
+  const isCompleted =
+    latestStatus === 'SUCCEEDED' ||
+    (reportDef as any)?.runs?.[0]?.status === 'SUCCEEDED';
+
   const { data: snapshot, isLoading: isSnapshotLoading } = useGetDatasetSnapshot(
-    isCompleted ? runId : null,
+    runId ? runId : null,
     { search: debouncedSearch, page: 1, limit: 1000 },
   );
 
@@ -275,7 +291,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
   };
 
   const rows = useMemo(() => {
-    const rawRows = snapshot?.data || [];
+    const rawRows = Array.isArray(snapshot?.data)
+      ? snapshot.data
+      : Array.isArray((snapshot as any)?.data?.data)
+      ? (snapshot as any).data.data
+      : Array.isArray(snapshot)
+      ? snapshot
+      : [];
     if (!Array.isArray(rawRows)) return [];
     return rawRows.map((row: any) => {
       if (!row || typeof row !== 'object') return row;
@@ -1035,7 +1057,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
         </div>
 
         {/* Dynamic Charts Visualization */}
-        {isCompleted && effectiveCharts.length > 0 && (
+        {(isCompleted || rows.length > 0) && effectiveCharts.length > 0 && (
           <div className="space-y-4 w-full min-w-0">
             <div className="flex items-center justify-between flex-wrap gap-2 min-w-0">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 min-w-0">
@@ -1235,10 +1257,13 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                                     {pts.map((p, idx) => (
                                       <div
                                         key={idx}
-                                        className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto cursor-pointer z-10"
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto cursor-pointer z-10 group/pt"
                                         style={{ left: `${p.x}%`, top: `${p.y}%` }}
                                       >
-                                        <div className="w-3 h-3 rounded-full bg-white border-2 border-indigo-600 shadow-xs" />
+                                        <span className="text-[10px] font-bold text-indigo-700 bg-white/95 px-1 py-0.2 rounded border border-indigo-100 shadow-xs mb-0.5 whitespace-nowrap">
+                                          {p.value.toLocaleString('vi-VN')}
+                                        </span>
+                                        <div className="w-3 h-3 rounded-full bg-white border-2 border-indigo-600 shadow-xs group-hover/pt:scale-125 transition-transform" />
                                       </div>
                                     ))}
                                   </>

@@ -31,6 +31,7 @@ export class MenusController {
 
   @GrpcMethod('MenuService', 'GetMyMenus')
   async getMyMenus(@Payload() data: Record<string, any>) {
+    data = data || {};
     const userId = data.userId ?? data.user_id;
     const result = await this.menusService.getMyMenus(
       typeof userId === 'number' ? userId : Number(userId),

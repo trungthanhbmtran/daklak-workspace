@@ -163,15 +163,22 @@ export const useGetDatasetSnapshot = (
         `/reports/runs/${numericId}/snapshot`,
         { params: { limit, page, search: search.trim() || undefined } },
       );
-      const snapshot = unwrapData<DatasetSnapshot & { total?: number; filteredTotal?: number }>(res, {
+      const snapshot = unwrapData<any>(res, {
         schema: [],
         data: [],
       });
+      const rawData = Array.isArray(snapshot?.data)
+        ? snapshot.data
+        : Array.isArray(snapshot)
+        ? snapshot
+        : Array.isArray(res?.data?.data)
+        ? res.data.data
+        : [];
       return {
         schema: Array.isArray(snapshot?.schema) ? snapshot.schema : [],
-        data: Array.isArray(snapshot?.data) ? snapshot.data : [],
-        total: Number(snapshot?.total ?? (snapshot?.data?.length || 0)),
-        filteredTotal: Number(snapshot?.filteredTotal ?? (snapshot?.data?.length || 0)),
+        data: rawData,
+        total: Number(snapshot?.total ?? rawData.length),
+        filteredTotal: Number(snapshot?.filteredTotal ?? rawData.length),
       };
     },
     enabled: isValid,

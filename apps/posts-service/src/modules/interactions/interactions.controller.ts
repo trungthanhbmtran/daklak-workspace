@@ -9,12 +9,14 @@ export class InteractionsController {
   // --- Comments ---
   @GrpcMethod('InteractionService', 'CreateComment')
   async createComment(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.service.createComment(data);
     return this.mapComment(result);
   }
 
   @GrpcMethod('InteractionService', 'ListComments')
   async listComments(query: any) {
+    query = query || {};
     const { items, total } = await this.service.listComments(query);
     return {
       data: items.map(i => this.mapComment(i)),
@@ -26,24 +28,28 @@ export class InteractionsController {
 
   @GrpcMethod('InteractionService', 'UpdateCommentStatus')
   async updateCommentStatus(data: { id: string, status: string }) {
+    data = data || ({} as any);
     const result = await this.service.updateCommentStatus(data.id, data.status);
     return this.mapComment(result);
   }
 
   @GrpcMethod('InteractionService', 'DeleteComment')
   async deleteComment(data: { id: string }) {
+    data = data || ({} as any);
     return this.service.deleteComment(data.id);
   }
 
   // --- Questions ---
   @GrpcMethod('InteractionService', 'CreateQuestion')
   async createQuestion(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.service.createQuestion(data);
     return this.mapQuestion(result);
   }
 
   @GrpcMethod('InteractionService', 'ListQuestions')
   async listQuestions(query: any) {
+    query = query || {};
     const { items, total } = await this.service.listQuestions(query);
     return {
       data: items.map(i => this.mapQuestion(i)),
@@ -55,12 +61,14 @@ export class InteractionsController {
 
   @GrpcMethod('InteractionService', 'AnswerQuestion')
   async answerQuestion(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.service.answerQuestion(data);
     return this.mapQuestion(result);
   }
 
   @GrpcMethod('InteractionService', 'GetQuestion')
   async getQuestion(data: { id: string }) {
+    data = data || ({} as any);
     const result = await this.service.getQuestion(data.id);
     return this.mapQuestion(result);
   }
@@ -68,12 +76,14 @@ export class InteractionsController {
   // --- Feedback ---
   @GrpcMethod('InteractionService', 'CreateFeedback')
   async createFeedback(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.service.createFeedback(data);
     return this.mapFeedback(result);
   }
 
   @GrpcMethod('InteractionService', 'ListFeedbacks')
   async listFeedbacks(query: any) {
+    query = query || {};
     const { items, total } = await this.service.listFeedbacks(query);
     return {
       data: items.map(i => this.mapFeedback(i)),
@@ -85,6 +95,7 @@ export class InteractionsController {
 
   @GrpcMethod('InteractionService', 'UpdateFeedbackStatus')
   async updateFeedbackStatus(data: { id: string, status: string }) {
+    data = data || ({} as any);
     const result = await this.service.updateFeedbackStatus(data.id, data.status);
     return this.mapFeedback(result);
   }

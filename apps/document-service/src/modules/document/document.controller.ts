@@ -1,4 +1,4 @@
-﻿import { Controller } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { GrpcMethod, Payload, EventPattern } from '@nestjs/microservices';
 import { CreateDocumentGrpcDto, UpdateDocumentGrpcDto, IdStringGrpcDto, ListDocumentsGrpcDto, ExtractMetadataGrpcDto, GetLogsGrpcDto, DocumentActionGrpcDto, ReceiveDocumentGrpcDto, DossierCodeDto, AnyGrpcDto } from './dto/document.grpc.dto';
 import { DocumentService } from './document.service';

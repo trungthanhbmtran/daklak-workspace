@@ -36,6 +36,7 @@ export class ReportsController {
     'INTEGRATION:VIEW',
     'INTEGRATION:READ',
     'INTEGRATION:MANAGE',
+    'REPORT:VIEW',
     'REPORT:READ',
     'REPORT:MANAGE',
   )
@@ -48,6 +49,7 @@ export class ReportsController {
     'INTEGRATION:VIEW',
     'INTEGRATION:READ',
     'INTEGRATION:MANAGE',
+    'REPORT:VIEW',
     'REPORT:READ',
     'REPORT:MANAGE',
   )
@@ -90,7 +92,7 @@ export class ReportsController {
   }
 
   @Get('templates/:id/assignments')
-  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getReportAssignments(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any,
@@ -189,7 +191,7 @@ export class ReportsController {
   }
 
   @Get('definitions')
-  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getReportDefinitions(@Req() req: any) {
     return this.reportsService.getReportDefinitions(
       req.query,
@@ -199,7 +201,7 @@ export class ReportsController {
   }
 
   @Get('catalog')
-  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getReportCatalog(@Req() req: any) {
     return this.reportsService.getReportCatalog(
       req.user,
@@ -212,7 +214,7 @@ export class ReportsController {
   }
 
   @Get('definitions/:id')
-  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getReportDefinitionById(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any,
@@ -225,7 +227,13 @@ export class ReportsController {
   }
 
   @Post('runs')
-  @RequirePermissions('REPORT:EXECUTE')
+  @RequirePermissions(
+    'REPORT:EXECUTE',
+    'REPORT:CREATE',
+    'REPORT:VIEW',
+    'REPORT:READ',
+    'REPORT:MANAGE',
+  )
   async runReport(@Body() body: any, @Req() req: any) {
     return this.reportsService.runReport(
       body,
@@ -235,7 +243,7 @@ export class ReportsController {
   }
 
   @Get('runs/:id/status')
-  @RequirePermissions('REPORT:READ')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getReportRunStatus(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any,
@@ -248,7 +256,7 @@ export class ReportsController {
   }
 
   @Get('runs/:runId/snapshot')
-  @RequirePermissions('REPORT:READ')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getDatasetSnapshot(
     @Param('runId', ParseIntPipe) runId: number,
     @Req() req: any,
@@ -262,7 +270,7 @@ export class ReportsController {
   }
 
   @Get('dashboard-stats')
-  @RequirePermissions('REPORT:READ', 'REPORT:MANAGE')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
   async getReportDashboardStats(@Req() req: any) {
     return this.reportsService.getReportDashboardStats(
       req.user,

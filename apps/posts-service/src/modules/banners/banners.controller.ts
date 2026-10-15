@@ -9,12 +9,14 @@ export class BannersController {
 
   @GrpcMethod('BannerService', 'CreateBanner')
   async createBanner(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.bannersService.create(data);
     return { data: result, success: true };
   }
 
   @GrpcMethod('BannerService', 'GetBanner')
   async getBanner(data: { id: string }) {
+    data = data || ({} as any);
     const result = await this.bannersService.findOne(data.id);
     if (!result) {
       throw new RpcException({
@@ -27,6 +29,7 @@ export class BannersController {
 
   @GrpcMethod('BannerService', 'ListBanners')
   async listBanners(query: any) {
+    query = query || {};
     const { items, total } = await this.bannersService.findAll(query);
     
     // Aligned with common.PaginationMeta proto
@@ -44,6 +47,7 @@ export class BannersController {
 
   @GrpcMethod('BannerService', 'UpdateBanner')
   async updateBanner(@Payload() data: Record<string, any>) {
+    data = data || {};
     const { id, ...rest } = data;
     const result = await this.bannersService.update(id, rest);
     return { data: result, success: true };
@@ -51,6 +55,7 @@ export class BannersController {
 
   @GrpcMethod('BannerService', 'DeleteBanner')
   async deleteBanner(data: { id: string }) {
+    data = data || ({} as any);
     await this.bannersService.remove(data.id);
     return { success: true };
   }

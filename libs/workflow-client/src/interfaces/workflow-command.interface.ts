@@ -1,4 +1,4 @@
-﻿export interface WorkflowCommand {
+export interface WorkflowCommand {
   commandId: string;
   workflowInstanceId: string;
   processVersion: number;

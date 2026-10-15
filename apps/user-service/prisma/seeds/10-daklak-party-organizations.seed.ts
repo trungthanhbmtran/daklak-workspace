@@ -684,41 +684,41 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
   // 8. Cập nhật Danh sách Cán bộ Công chức & Vị trí công tác (JobPosition)
   // -------------------------------------------------------------
   const usersToSeed = [
-    // Lãnh đạo Ban
-    { email: 'truongban@daklak.gov.vn', username: 'truongban', fullName: 'Nguyễn Thượng Hải', employeeCode: 'BTCTU_001', jobCode: 'TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_BAN' },
-    { email: 'phoban1@daklak.gov.vn', username: 'phoban1', fullName: 'Lưu Vĩnh Hưng', employeeCode: 'BTCTU_002', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_BAN' },
-    { email: 'phoban2@daklak.gov.vn', username: 'phoban2', fullName: 'Nguyễn Hữu Toàn', employeeCode: 'BTCTU_003', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 2, roleGroup: 'BTCTU_LANH_DAO_BAN' },
-    { email: 'phoban3@daklak.gov.vn', username: 'phoban3', fullName: 'Trần Tuấn Anh', employeeCode: 'BTCTU_004', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 3, roleGroup: 'BTCTU_LANH_DAO_BAN' },
-    { email: 'phoban4@daklak.gov.vn', username: 'phoban4', fullName: 'Y Nhuân Byă', employeeCode: 'BTCTU_005', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 4, roleGroup: 'BTCTU_LANH_DAO_BAN' },
+    // Lãnh đạo Ban Tổ chức Tỉnh ủy (5 đồng chí)
+    { email: 'truongban@daklak.gov.vn', username: 'truongban', fullName: 'Nguyễn Thượng Hải', employeeCode: 'BTCTU_001', jobCode: 'TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: true, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_BAN'] },
+    { email: 'phoban1@daklak.gov.vn', username: 'phoban1', fullName: 'Lưu Vĩnh Hưng', employeeCode: 'BTCTU_002', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_BAN'] },
+    { email: 'phoban2@daklak.gov.vn', username: 'phoban2', fullName: 'Nguyễn Hữu Toàn', employeeCode: 'BTCTU_003', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 2, roleGroups: ['BTCTU_LANH_DAO_BAN'] },
+    { email: 'phoban3@daklak.gov.vn', username: 'phoban3', fullName: 'Trần Tuấn Anh', employeeCode: 'BTCTU_004', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 3, roleGroups: ['BTCTU_LANH_DAO_BAN'] },
+    { email: 'phoban4@daklak.gov.vn', username: 'phoban4', fullName: 'Y Nhuân Byă', employeeCode: 'BTCTU_005', jobCode: 'PHO_TRUONG_BAN', orgCode: 'BTCTU_DAKLAK', isLeader: false, isDeputy: true, slotOrder: 4, roleGroups: ['BTCTU_LANH_DAO_BAN'] },
 
-    // Phòng TCĐ-ĐV
-    { email: 'tcd_tp@daklak.gov.vn', username: 'tcd_tp', fullName: 'Lê Đình Hoàng', employeeCode: 'BTCTU_006', jobCode: 'R_P_TCD_DV_TP', orgCode: 'P_TCD_DV', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tcd_ptp1@daklak.gov.vn', username: 'tcd_ptp1', fullName: 'Phạm Văn Minh', employeeCode: 'BTCTU_007', jobCode: 'R_P_TCD_DV_PTP1', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tcd_ptp2@daklak.gov.vn', username: 'tcd_ptp2', fullName: 'Vũ Thị Mai', employeeCode: 'BTCTU_008', jobCode: 'R_P_TCD_DV_PTP2', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tcd_cv@daklak.gov.vn', username: 'tcd_cv', fullName: 'Đặng Quang Huy', employeeCode: 'BTCTU_009', jobCode: 'R_P_TCD_DV_CV', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CV_TCD_DV' },
+    // Phòng TCĐ-ĐV (3 Lãnh đạo phòng + 1 Chuyên viên)
+    { email: 'tcd_tp@daklak.gov.vn', username: 'tcd_tp', fullName: 'Lê Đình Hoàng', employeeCode: 'BTCTU_006', jobCode: 'R_P_TCD_DV_TP', orgCode: 'P_TCD_DV', isLeader: true, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_TCD_DV'] },
+    { email: 'tcd_ptp1@daklak.gov.vn', username: 'tcd_ptp1', fullName: 'Phạm Văn Minh', employeeCode: 'BTCTU_007', jobCode: 'R_P_TCD_DV_PTP1', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_TCD_DV'] },
+    { email: 'tcd_ptp2@daklak.gov.vn', username: 'tcd_ptp2', fullName: 'Vũ Thị Mai', employeeCode: 'BTCTU_008', jobCode: 'R_P_TCD_DV_PTP2', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_TCD_DV'] },
+    { email: 'tcd_cv@daklak.gov.vn', username: 'tcd_cv', fullName: 'Đặng Quang Huy', employeeCode: 'BTCTU_009', jobCode: 'R_P_TCD_DV_CV', orgCode: 'P_TCD_DV', isLeader: false, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_CV_TCD_DV'] },
 
-    // Phòng TCCB
-    { email: 'tccb_tp@daklak.gov.vn', username: 'tccb_tp', fullName: 'Hoàng Đức Nam', employeeCode: 'BTCTU_010', jobCode: 'R_P_TCCB_TP', orgCode: 'P_TCCB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tccb_ptp1@daklak.gov.vn', username: 'tccb_ptp1', fullName: 'Trần Quốc Tuấn', employeeCode: 'BTCTU_011', jobCode: 'R_P_TCCB_PTP1', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tccb_ptp2@daklak.gov.vn', username: 'tccb_ptp2', fullName: 'Bùi Thị Bích Ngọc', employeeCode: 'BTCTU_012', jobCode: 'R_P_TCCB_PTP2', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'tccb_cv@daklak.gov.vn', username: 'tccb_cv', fullName: 'Nguyễn Tiến Đạt', employeeCode: 'BTCTU_013', jobCode: 'R_P_TCCB_CV', orgCode: 'P_TCCB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CV_TCCB' },
+    // Phòng TCCB (3 Lãnh đạo phòng + 1 Chuyên viên)
+    { email: 'tccb_tp@daklak.gov.vn', username: 'tccb_tp', fullName: 'Hoàng Đức Nam', employeeCode: 'BTCTU_010', jobCode: 'R_P_TCCB_TP', orgCode: 'P_TCCB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_TCCB'] },
+    { email: 'tccb_ptp1@daklak.gov.vn', username: 'tccb_ptp1', fullName: 'Trần Quốc Tuấn', employeeCode: 'BTCTU_011', jobCode: 'R_P_TCCB_PTP1', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_TCCB'] },
+    { email: 'tccb_ptp2@daklak.gov.vn', username: 'tccb_ptp2', fullName: 'Bùi Thị Bích Ngọc', employeeCode: 'BTCTU_012', jobCode: 'R_P_TCCB_PTP2', orgCode: 'P_TCCB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_TCCB'] },
+    { email: 'tccb_cv@daklak.gov.vn', username: 'tccb_cv', fullName: 'Nguyễn Tiến Đạt', employeeCode: 'BTCTU_013', jobCode: 'R_P_TCCB_CV', orgCode: 'P_TCCB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_CV_TCCB'] },
 
-    // Phòng BVCTNB
-    { email: 'bvctnb_tp@daklak.gov.vn', username: 'bvctnb_tp', fullName: 'Ngô Thanh Tùng', employeeCode: 'BTCTU_014', jobCode: 'R_P_BVCTNB_TP', orgCode: 'P_BVCTNB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'bvctnb_ptp1@daklak.gov.vn', username: 'bvctnb_ptp1', fullName: 'Đinh Trọng Hưng', employeeCode: 'BTCTU_015', jobCode: 'R_P_BVCTNB_PTP1', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'bvctnb_ptp2@daklak.gov.vn', username: 'bvctnb_ptp2', fullName: 'Dương Văn Hùng', employeeCode: 'BTCTU_016', jobCode: 'R_P_BVCTNB_PTP2', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'bvctnb_cv@daklak.gov.vn', username: 'bvctnb_cv', fullName: 'Phan Thành Trung', employeeCode: 'BTCTU_017', jobCode: 'R_P_BVCTNB_CV', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_CB_BVCTNB' },
+    // Phòng BVCTNB (3 Lãnh đạo phòng + 1 Cán bộ)
+    { email: 'bvctnb_tp@daklak.gov.vn', username: 'bvctnb_tp', fullName: 'Ngô Thanh Tùng', employeeCode: 'BTCTU_014', jobCode: 'R_P_BVCTNB_TP', orgCode: 'P_BVCTNB', isLeader: true, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_BVCTNB'] },
+    { email: 'bvctnb_ptp1@daklak.gov.vn', username: 'bvctnb_ptp1', fullName: 'Đinh Trọng Hưng', employeeCode: 'BTCTU_015', jobCode: 'R_P_BVCTNB_PTP1', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_BVCTNB'] },
+    { email: 'bvctnb_ptp2@daklak.gov.vn', username: 'bvctnb_ptp2', fullName: 'Dương Văn Hùng', employeeCode: 'BTCTU_016', jobCode: 'R_P_BVCTNB_PTP2', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_BVCTNB'] },
+    { email: 'bvctnb_cv@daklak.gov.vn', username: 'bvctnb_cv', fullName: 'Phan Thành Trung', employeeCode: 'BTCTU_017', jobCode: 'R_P_BVCTNB_CV', orgCode: 'P_BVCTNB', isLeader: false, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_CB_BVCTNB'] },
 
-    // Khối Văn phòng Ban
-    { email: 'vp_cvp@daklak.gov.vn', username: 'vp_cvp', fullName: 'Chu Văn Kiên', employeeCode: 'BTCTU_018', jobCode: 'R_VP_CVP', orgCode: 'VAN_PHONG', isLeader: true, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'vp_pcvp1@daklak.gov.vn', username: 'vp_pcvp1', fullName: 'Nguyễn Hồng Ánh', employeeCode: 'BTCTU_019', jobCode: 'R_VP_PCVP1', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'vp_pcvp2@daklak.gov.vn', username: 'vp_pcvp2', fullName: 'Lương Đình Quý', employeeCode: 'BTCTU_020', jobCode: 'R_VP_PCVP2', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroup: 'BTCTU_LANH_DAO_PHONG' },
-    { email: 'vp_it1@daklak.gov.vn', username: 'vp_it1', fullName: 'Trương Minh Cường', employeeCode: 'BTCTU_021', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_ADMIN_CNTT' },
-    { email: 'vp_it2@daklak.gov.vn', username: 'vp_it2', fullName: 'Võ Thành Danh', employeeCode: 'BTCTU_022', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 2, roleGroup: 'BTCTU_ADMIN_CNTT' },
-    { email: 'vp_nv@daklak.gov.vn', username: 'vp_nv', fullName: 'Lê Thu Thảo', employeeCode: 'BTCTU_023', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'BTCTU_VAN_THU' },
+    // Khối Văn phòng Ban (3 Lãnh đạo văn phòng + 1 Văn thư + 2 Quản trị CNTT)
+    { email: 'vp_cvp@daklak.gov.vn', username: 'vp_cvp', fullName: 'Chu Văn Kiên', employeeCode: 'BTCTU_018', jobCode: 'R_VP_CVP', orgCode: 'VAN_PHONG', isLeader: true, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_VAN_PHONG'] },
+    { email: 'vp_pcvp1@daklak.gov.vn', username: 'vp_pcvp1', fullName: 'Nguyễn Hồng Ánh', employeeCode: 'BTCTU_019', jobCode: 'R_VP_PCVP1', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_VAN_PHONG'] },
+    { email: 'vp_pcvp2@daklak.gov.vn', username: 'vp_pcvp2', fullName: 'Lương Đình Quý', employeeCode: 'BTCTU_020', jobCode: 'R_VP_PCVP2', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: true, slotOrder: 1, roleGroups: ['BTCTU_LANH_DAO_PHONG', 'BTCTU_LANH_DAO_VAN_PHONG'] },
+    { email: 'vp_it1@daklak.gov.vn', username: 'vp_it1', fullName: 'Trương Minh Cường', employeeCode: 'BTCTU_021', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_ADMIN_CNTT'] },
+    { email: 'vp_it2@daklak.gov.vn', username: 'vp_it2', fullName: 'Võ Thành Danh', employeeCode: 'BTCTU_022', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 2, roleGroups: ['BTCTU_ADMIN_CNTT'] },
+    { email: 'vp_nv@daklak.gov.vn', username: 'vp_nv', fullName: 'Lê Thu Thảo', employeeCode: 'BTCTU_023', jobCode: 'R_VP_NV', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroups: ['BTCTU_VAN_THU'] },
 
     // Quản trị viên Hệ thống Ban Tổ chức
-    { email: 'admin_btc@daklak.gov.vn', username: 'admin_btc', fullName: 'Quản trị viên Hệ thống BTCTU', employeeCode: 'BTCTU_ADMIN', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroup: 'ADMIN_SYSTEM' },
+    { email: 'admin_btc@daklak.gov.vn', username: 'admin_btc', fullName: 'Quản trị viên Hệ thống BTCTU', employeeCode: 'BTCTU_ADMIN', jobCode: 'R_VP_CV_IT', orgCode: 'VAN_PHONG', isLeader: false, isDeputy: false, slotOrder: 1, roleGroups: ['ADMIN_SYSTEM'] },
   ];
 
   const DEFAULT_PASSWORD = 'Admin@123';
@@ -731,9 +731,13 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
     { key: 'ADMIN_SYSTEM', name: 'Quản trị viên hệ thống' },
     { key: 'BTCTU_LANH_DAO_BAN', name: 'Lãnh đạo Ban Tổ chức Tỉnh ủy' },
     { key: 'BTCTU_LANH_DAO_PHONG', name: 'Lãnh đạo Phòng - BTCTU' },
+    { key: 'BTCTU_LANH_DAO_TCD_DV', name: 'Lãnh đạo Phòng Tổ chức đảng, đảng viên - BTCTU' },
     { key: 'BTCTU_CV_TCD_DV', name: 'Chuyên viên Tổ chức đảng, đảng viên - BTCTU' },
+    { key: 'BTCTU_LANH_DAO_TCCB', name: 'Lãnh đạo Phòng Tổ chức cán bộ - BTCTU' },
     { key: 'BTCTU_CV_TCCB', name: 'Chuyên viên Tổ chức cán bộ - BTCTU' },
+    { key: 'BTCTU_LANH_DAO_BVCTNB', name: 'Lãnh đạo Phòng Bảo vệ chính trị nội bộ - BTCTU' },
     { key: 'BTCTU_CB_BVCTNB', name: 'Cán bộ Bảo vệ chính trị nội bộ - BTCTU' },
+    { key: 'BTCTU_LANH_DAO_VAN_PHONG', name: 'Lãnh đạo Văn phòng Ban - BTCTU' },
     { key: 'BTCTU_VAN_THU', name: 'Văn thư - Lưu trữ - Kế toán - BTCTU' },
     { key: 'BTCTU_ADMIN_CNTT', name: 'Quản trị CNTT & ATTT - BTCTU' },
   ];
@@ -752,7 +756,7 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
   const allResources = await prisma.resource.findMany();
   const getResource = (code: string) => allResources.find((r) => r.code === code);
 
-  // Helper đảm bảo Policy
+  // Helper đảm bảo Policy (hỗ trợ alias VIEW <=> READ)
   const ensureGroupPolicies = async (
     groupId: number,
     resourceCode: string,
@@ -762,7 +766,14 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
     const res = getResource(resourceCode);
     if (!res) return;
 
-    for (const action of actions) {
+    const expandedActions = new Set<string>();
+    for (const a of actions) {
+      expandedActions.add(a);
+      if (a === 'VIEW') expandedActions.add('READ');
+      if (a === 'READ') expandedActions.add('VIEW');
+    }
+
+    for (const action of Array.from(expandedActions)) {
       const existing = await prisma.policy.findFirst({
         where: {
           resourceId: res.id,
@@ -790,87 +801,189 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
     await ensureGroupPolicies(createdUserGroups['ADMIN_SYSTEM'].id, res.code, ['*']);
   }
 
-  // Policy: Lãnh đạo Ban Tổ chức Tỉnh ủy (Điều hành toàn diện, giao việc, thẩm định & phê duyệt)
+  // Policy 1: Lãnh đạo Ban Tổ chức Tỉnh ủy (Điều hành toàn diện, phê duyệt, chỉ đạo)
   const lanhDaoBanId = createdUserGroups['BTCTU_LANH_DAO_BAN'].id;
   await ensureGroupPolicies(lanhDaoBanId, 'TASK', ['*']);
-  await ensureGroupPolicies(lanhDaoBanId, 'HRM_EMPLOYEE', ['VIEW']);
-  await ensureGroupPolicies(lanhDaoBanId, 'REPORT', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
-  await ensureGroupPolicies(lanhDaoBanId, 'DOCUMENT', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
-  await ensureGroupPolicies(lanhDaoBanId, 'DOC_INCOMING', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
-  await ensureGroupPolicies(lanhDaoBanId, 'DOC_OUTGOING', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
-  await ensureGroupPolicies(lanhDaoBanId, 'DOC_INTERNAL', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
-  await ensureGroupPolicies(lanhDaoBanId, 'DOC_PUBLISH', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
-  await ensureGroupPolicies(lanhDaoBanId, 'PLAN', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
-  await ensureGroupPolicies(lanhDaoBanId, 'MEETING', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE']);
-  await ensureGroupPolicies(lanhDaoBanId, 'WORKFLOW', ['VIEW', 'EXECUTE', 'APPROVE']);
-  await ensureGroupPolicies(lanhDaoBanId, 'ORGANIZATION', ['VIEW']);
-  await ensureGroupPolicies(lanhDaoBanId, 'CATEGORY', ['VIEW']);
+  await ensureGroupPolicies(lanhDaoBanId, 'PLAN', ['*']);
+  await ensureGroupPolicies(lanhDaoBanId, 'KPI', ['*']);
+  await ensureGroupPolicies(lanhDaoBanId, 'OBJECTIVE', ['*']);
+  await ensureGroupPolicies(lanhDaoBanId, 'REPORT', ['*']);
+  await ensureGroupPolicies(lanhDaoBanId, 'PROJECT', ['*']);
+  await ensureGroupPolicies(lanhDaoBanId, 'HRM_EMPLOYEE', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EXPORT']);
+  await ensureGroupPolicies(lanhDaoBanId, 'ORGANIZATION', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOC_INCOMING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOC_OUTGOING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOC_INTERNAL', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOC_PUBLISH', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'PUBLISH']);
+  await ensureGroupPolicies(lanhDaoBanId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoBanId, 'WORKFLOW', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXECUTE', 'APPROVE', 'ASSIGN', 'EXPORT']);
+  await ensureGroupPolicies(lanhDaoBanId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'PUBLISH']);
+  await ensureGroupPolicies(lanhDaoBanId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE', 'PUBLISH']);
+  await ensureGroupPolicies(lanhDaoBanId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(lanhDaoBanId, 'SYSTEM', ['VIEW', 'READ']);
 
-  // Policy: Lãnh đạo Phòng - BTCTU (Giao việc cho phòng, thẩm định bước và đánh giá kết quả)
+  // Policy 2: Lãnh đạo Phòng - BTCTU (Quyền chung cấp phòng)
   const lanhDaoPhongId = createdUserGroups['BTCTU_LANH_DAO_PHONG'].id;
-  await ensureGroupPolicies(lanhDaoPhongId, 'TASK', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'HRM_EMPLOYEE', ['VIEW']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'REPORT', ['VIEW', 'CREATE', 'UPDATE', 'EXPORT']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'DOCUMENT', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_INCOMING', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_OUTGOING', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_INTERNAL', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_DRAFT', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'PLAN', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'MEETING', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'WORKFLOW', ['VIEW', 'EXECUTE']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'ORGANIZATION', ['VIEW']);
-  await ensureGroupPolicies(lanhDaoPhongId, 'CATEGORY', ['VIEW']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'OBJECTIVE', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_INCOMING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_OUTGOING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_INTERNAL', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'WORKFLOW', ['VIEW', 'READ', 'EXECUTE', 'APPROVE']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'ORGANIZATION', ['VIEW', 'READ']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(lanhDaoPhongId, 'HRM_EMPLOYEE', ['VIEW', 'READ']);
 
-  // Policy: Chuyên viên Phòng TCĐ-ĐV (Thực thi nhiệm vụ, lập báo cáo, soạn dự thảo văn bản)
+  // Policy 3: Lãnh đạo Phòng Tổ chức đảng, đảng viên - BTCTU
+  const ldTcdDvId = createdUserGroups['BTCTU_LANH_DAO_TCD_DV'].id;
+  await ensureGroupPolicies(ldTcdDvId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldTcdDvId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldTcdDvId, 'OBJECTIVE', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(ldTcdDvId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(ldTcdDvId, 'WORKFLOW', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXECUTE', 'APPROVE']);
+  await ensureGroupPolicies(ldTcdDvId, 'ORGANIZATION', ['VIEW', 'READ', 'UPDATE']);
+  await ensureGroupPolicies(ldTcdDvId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'DOC_INCOMING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'DOC_OUTGOING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'DOC_INTERNAL', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTcdDvId, 'HRM_EMPLOYEE', ['VIEW', 'READ']);
+  await ensureGroupPolicies(ldTcdDvId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(ldTcdDvId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(ldTcdDvId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE']);
+
+  // Policy 4: Chuyên viên Phòng Tổ chức đảng, đảng viên - BTCTU
   const tcdDvId = createdUserGroups['BTCTU_CV_TCD_DV'].id;
-  await ensureGroupPolicies(tcdDvId, 'TASK', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tcdDvId, 'HRM_EMPLOYEE', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'REPORT', ['VIEW', 'CREATE', 'UPDATE', 'EXPORT']);
-  await ensureGroupPolicies(tcdDvId, 'DOCUMENT', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tcdDvId, 'DOC_DRAFT', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tcdDvId, 'DOC_INCOMING', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'DOC_OUTGOING', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'DOC_INTERNAL', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'WORKFLOW', ['VIEW', 'EXECUTE']);
-  await ensureGroupPolicies(tcdDvId, 'PLAN', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'MEETING', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'ORGANIZATION', ['VIEW']);
-  await ensureGroupPolicies(tcdDvId, 'CATEGORY', ['VIEW']);
+  await ensureGroupPolicies(tcdDvId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tcdDvId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tcdDvId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tcdDvId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXPORT']);
+  await ensureGroupPolicies(tcdDvId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tcdDvId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tcdDvId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tcdDvId, 'DOC_INCOMING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'DOC_OUTGOING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'DOC_INTERNAL', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'WORKFLOW', ['VIEW', 'READ', 'EXECUTE']);
+  await ensureGroupPolicies(tcdDvId, 'ORGANIZATION', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'HRM_EMPLOYEE', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'MEETING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tcdDvId, 'NOTIFICATION', ['VIEW', 'READ']);
 
-  // Policy: Chuyên viên Phòng TCCB (Thực thi nhiệm vụ cán bộ, quản lý hồ sơ nhân sự, biên chế)
+  // Policy 5: Lãnh đạo Phòng Tổ chức cán bộ - BTCTU (Chuyên trách nhân sự, VTVL, biên chế)
+  const ldTccbId = createdUserGroups['BTCTU_LANH_DAO_TCCB'].id;
+  await ensureGroupPolicies(ldTccbId, 'HRM_EMPLOYEE', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EXPORT']);
+  await ensureGroupPolicies(ldTccbId, 'ORGANIZATION', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(ldTccbId, 'CATEGORY', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(ldTccbId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldTccbId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EXPORT']);
+  await ensureGroupPolicies(ldTccbId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EVALUATE', 'EXPORT']);
+  await ensureGroupPolicies(ldTccbId, 'OBJECTIVE', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE']);
+  await ensureGroupPolicies(ldTccbId, 'WORKFLOW', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXECUTE', 'APPROVE']);
+  await ensureGroupPolicies(ldTccbId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(ldTccbId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTccbId, 'DOC_INCOMING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTccbId, 'DOC_OUTGOING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTccbId, 'DOC_INTERNAL', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTccbId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTccbId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldTccbId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(ldTccbId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE']);
+
+  // Policy 6: Chuyên viên Phòng Tổ chức cán bộ - BTCTU
   const tccbId = createdUserGroups['BTCTU_CV_TCCB'].id;
-  await ensureGroupPolicies(tccbId, 'TASK', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tccbId, 'HRM_EMPLOYEE', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tccbId, 'REPORT', ['VIEW', 'CREATE', 'UPDATE', 'EXPORT']);
-  await ensureGroupPolicies(tccbId, 'DOCUMENT', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tccbId, 'DOC_DRAFT', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(tccbId, 'DOC_INCOMING', ['VIEW']);
-  await ensureGroupPolicies(tccbId, 'DOC_OUTGOING', ['VIEW']);
-  await ensureGroupPolicies(tccbId, 'DOC_INTERNAL', ['VIEW']);
-  await ensureGroupPolicies(tccbId, 'ORGANIZATION', ['VIEW']);
-  await ensureGroupPolicies(tccbId, 'CATEGORY', ['VIEW']);
-  await ensureGroupPolicies(tccbId, 'WORKFLOW', ['VIEW', 'EXECUTE']);
-  await ensureGroupPolicies(tccbId, 'PLAN', ['VIEW']);
-  await ensureGroupPolicies(tccbId, 'MEETING', ['VIEW']);
+  await ensureGroupPolicies(tccbId, 'HRM_EMPLOYEE', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXPORT']);
+  await ensureGroupPolicies(tccbId, 'ORGANIZATION', ['VIEW', 'READ', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tccbId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'OBJECTIVE', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tccbId, 'WORKFLOW', ['VIEW', 'READ', 'EXECUTE']);
+  await ensureGroupPolicies(tccbId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXPORT']);
+  await ensureGroupPolicies(tccbId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(tccbId, 'DOC_INCOMING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tccbId, 'DOC_OUTGOING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tccbId, 'DOC_INTERNAL', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tccbId, 'MEETING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(tccbId, 'NOTIFICATION', ['VIEW', 'READ']);
 
-  // Policy: Cán bộ BVCTNB (Bảo vệ chính trị nội bộ)
+  // Policy 7: Lãnh đạo Phòng Bảo vệ chính trị nội bộ - BTCTU
+  const ldBvctnbId = createdUserGroups['BTCTU_LANH_DAO_BVCTNB'].id;
+  await ensureGroupPolicies(ldBvctnbId, 'WORKFLOW', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXECUTE', 'APPROVE']);
+  await ensureGroupPolicies(ldBvctnbId, 'HRM_EMPLOYEE', ['VIEW', 'READ', 'UPDATE']);
+  await ensureGroupPolicies(ldBvctnbId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldBvctnbId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldBvctnbId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(ldBvctnbId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'DOC_INCOMING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'DOC_OUTGOING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'DOC_INTERNAL', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldBvctnbId, 'ORGANIZATION', ['VIEW', 'READ']);
+  await ensureGroupPolicies(ldBvctnbId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(ldBvctnbId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(ldBvctnbId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE']);
+
+  // Policy 8: Cán bộ Bảo vệ chính trị nội bộ - BTCTU
   const bvctnbId = createdUserGroups['BTCTU_CB_BVCTNB'].id;
-  await ensureGroupPolicies(bvctnbId, 'TASK', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(bvctnbId, 'HRM_EMPLOYEE', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'REPORT', ['VIEW', 'CREATE', 'UPDATE', 'EXPORT']);
-  await ensureGroupPolicies(bvctnbId, 'DOCUMENT', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(bvctnbId, 'DOC_DRAFT', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(bvctnbId, 'DOC_INCOMING', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'DOC_OUTGOING', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'DOC_INTERNAL', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'WORKFLOW', ['VIEW', 'EXECUTE']);
-  await ensureGroupPolicies(bvctnbId, 'PLAN', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'MEETING', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'ORGANIZATION', ['VIEW']);
-  await ensureGroupPolicies(bvctnbId, 'CATEGORY', ['VIEW']);
+  await ensureGroupPolicies(bvctnbId, 'WORKFLOW', ['VIEW', 'READ', 'EXECUTE']);
+  await ensureGroupPolicies(bvctnbId, 'HRM_EMPLOYEE', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(bvctnbId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(bvctnbId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(bvctnbId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXPORT']);
+  await ensureGroupPolicies(bvctnbId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(bvctnbId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(bvctnbId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(bvctnbId, 'DOC_INCOMING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'DOC_OUTGOING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'DOC_INTERNAL', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'ORGANIZATION', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'MEETING', ['VIEW', 'READ']);
+  await ensureGroupPolicies(bvctnbId, 'NOTIFICATION', ['VIEW', 'READ']);
 
-  // Policy: Văn thư - Lưu trữ - Kế toán - BTCTU (Văn bản đến, đi, phát hành, lịch họp)
+  // Policy 9: Lãnh đạo Văn phòng Ban - BTCTU
+  const ldVpId = createdUserGroups['BTCTU_LANH_DAO_VAN_PHONG'].id;
+  await ensureGroupPolicies(ldVpId, 'DOCUMENT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'DOC_INCOMING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'DOC_OUTGOING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'DOC_INTERNAL', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'DOC_DRAFT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldVpId, 'DOC_PUBLISH', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'DOC_PROCESSING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN']);
+  await ensureGroupPolicies(ldVpId, 'DOC_TEMPLATE', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE']);
+  await ensureGroupPolicies(ldVpId, 'DOC_CATEGORIES', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE']);
+  await ensureGroupPolicies(ldVpId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'PUBLISH']);
+  await ensureGroupPolicies(ldVpId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldVpId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EXPORT']);
+  await ensureGroupPolicies(ldVpId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'EVALUATE']);
+  await ensureGroupPolicies(ldVpId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT']);
+  await ensureGroupPolicies(ldVpId, 'WORKFLOW', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXECUTE', 'APPROVE']);
+  await ensureGroupPolicies(ldVpId, 'HRM_EMPLOYEE', ['VIEW', 'READ']);
+  await ensureGroupPolicies(ldVpId, 'ORGANIZATION', ['VIEW', 'READ']);
+  await ensureGroupPolicies(ldVpId, 'CATEGORY', ['VIEW', 'READ', 'UPDATE']);
+
+  // Policy 10: Văn thư - Lưu trữ - Kế toán - BTCTU
   const vanThuId = createdUserGroups['BTCTU_VAN_THU'].id;
   await ensureGroupPolicies(vanThuId, 'DOCUMENT', ['*']);
   await ensureGroupPolicies(vanThuId, 'DOC_INCOMING', ['*']);
@@ -878,26 +991,38 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
   await ensureGroupPolicies(vanThuId, 'DOC_INTERNAL', ['*']);
   await ensureGroupPolicies(vanThuId, 'DOC_DRAFT', ['*']);
   await ensureGroupPolicies(vanThuId, 'DOC_PUBLISH', ['*']);
+  await ensureGroupPolicies(vanThuId, 'DOC_TEMPLATE', ['*']);
+  await ensureGroupPolicies(vanThuId, 'DOC_PROCESSING', ['*']);
   await ensureGroupPolicies(vanThuId, 'DOC_CATEGORIES', ['*']);
-  await ensureGroupPolicies(vanThuId, 'MEETING', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(vanThuId, 'TASK', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(vanThuId, 'REPORT', ['VIEW', 'CREATE', 'EXPORT']);
-  await ensureGroupPolicies(vanThuId, 'HRM_EMPLOYEE', ['VIEW']);
-  await ensureGroupPolicies(vanThuId, 'ORGANIZATION', ['VIEW']);
-  await ensureGroupPolicies(vanThuId, 'CATEGORY', ['VIEW']);
+  await ensureGroupPolicies(vanThuId, 'MEETING', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(vanThuId, 'NOTIFICATION', ['VIEW', 'READ', 'CREATE']);
+  await ensureGroupPolicies(vanThuId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(vanThuId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(vanThuId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(vanThuId, 'REPORT', ['VIEW', 'READ', 'CREATE', 'EXPORT']);
+  await ensureGroupPolicies(vanThuId, 'HRM_EMPLOYEE', ['VIEW', 'READ']);
+  await ensureGroupPolicies(vanThuId, 'ORGANIZATION', ['VIEW', 'READ']);
+  await ensureGroupPolicies(vanThuId, 'CATEGORY', ['VIEW', 'READ']);
+  await ensureGroupPolicies(vanThuId, 'WORKFLOW', ['VIEW', 'READ', 'EXECUTE']);
 
-  // Policy: Quản trị CNTT & ATTT - BTCTU
+  // Policy 11: Quản trị CNTT & ATTT - BTCTU
   const itId = createdUserGroups['BTCTU_ADMIN_CNTT'].id;
   await ensureGroupPolicies(itId, 'USER', ['*']);
   await ensureGroupPolicies(itId, 'ROLE', ['*']);
   await ensureGroupPolicies(itId, 'RESOURCE', ['*']);
-  await ensureGroupPolicies(itId, 'ORGANIZATION', ['*']);
+  await ensureGroupPolicies(itId, 'ORGANIZATION', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
   await ensureGroupPolicies(itId, 'CATEGORY', ['*']);
   await ensureGroupPolicies(itId, 'MENU', ['*']);
-  await ensureGroupPolicies(itId, 'HRM_EMPLOYEE', ['VIEW', 'CREATE', 'UPDATE', 'DELETE', 'MANAGE']);
-  await ensureGroupPolicies(itId, 'TASK', ['VIEW', 'CREATE', 'UPDATE']);
-  await ensureGroupPolicies(itId, 'REPORT', ['VIEW', 'EXPORT']);
-  await ensureGroupPolicies(itId, 'SYSTEM', ['VIEW', 'UPDATE']);
+  await ensureGroupPolicies(itId, 'API_GATEWAY', ['*']);
+  await ensureGroupPolicies(itId, 'INTEGRATION', ['*']);
+  await ensureGroupPolicies(itId, 'NOTIFICATION', ['*']);
+  await ensureGroupPolicies(itId, 'HRM_EMPLOYEE', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'DELETE', 'MANAGE']);
+  await ensureGroupPolicies(itId, 'TASK', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(itId, 'PLAN', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(itId, 'KPI', ['VIEW', 'READ', 'CREATE', 'UPDATE']);
+  await ensureGroupPolicies(itId, 'WORKFLOW', ['VIEW', 'READ', 'CREATE', 'UPDATE', 'EXECUTE']);
+  await ensureGroupPolicies(itId, 'REPORT', ['VIEW', 'READ', 'EXPORT']);
+  await ensureGroupPolicies(itId, 'SYSTEM', ['VIEW', 'READ', 'UPDATE']);
 
   // -------------------------------------------------------------
   // 10. Tạo Users, Bổ nhiệm JobPosition & Gán Slot cho BTCTU
@@ -907,7 +1032,11 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
     const job = jobMap[u.jobCode];
     if (!unit || !job) continue;
 
-    const group = createdUserGroups[u.roleGroup];
+    const targetGroupKeys = u.roleGroups || [];
+    const connectGroups = targetGroupKeys
+      .map((k: string) => createdUserGroups[k])
+      .filter((g: any) => !!g)
+      .map((g: any) => ({ B: g.id }));
 
     const user = await prisma.user.upsert({
       where: { username: u.username },
@@ -916,11 +1045,11 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
         email: u.email,
         employeeCode: u.employeeCode,
         isActive: true,
-        ...(group
+        ...(connectGroups.length > 0
           ? {
               UserToUserGroup: {
                 deleteMany: {},
-                create: [{ B: group.id }],
+                create: connectGroups,
               },
             }
           : {}),
@@ -931,10 +1060,10 @@ export async function seedPartyOrganizationsDakLak(prisma: PrismaClient) {
         fullName: u.fullName,
         employeeCode: u.employeeCode,
         isActive: true,
-        ...(group
+        ...(connectGroups.length > 0
           ? {
               UserToUserGroup: {
-                create: [{ B: group.id }],
+                create: connectGroups,
               },
             }
           : {}),

@@ -21,6 +21,7 @@ export class DossiersController {
 
   @GrpcMethod('DossierService', 'GetDossier')
   async getDossier(data: { id: string }) {
+    data = data || ({} as any);
     const d = await this.dossiersService.getDossier(data.id);
     if (!d) throw new RpcException({ message: 'Bản ghi không tồn tại', code: 5 });
     return {
@@ -32,6 +33,7 @@ export class DossiersController {
 
   @GrpcMethod('DossierService', 'GetComponents')
   async getComponents(data: { id: string }) {
+    data = data || ({} as any);
     const res = await this.dossiersService.getComponents(data.id);
     return {
       data: res.map(c => ({
@@ -44,6 +46,7 @@ export class DossiersController {
 
   @GrpcMethod('DossierService', 'UpdateComponent')
   async updateComponent(data: any) {
+    data = data || ({} as any);
     const c = await this.dossiersService.updateComponent(data.id, data);
     return {
       ...c,
@@ -54,19 +57,19 @@ export class DossiersController {
 
   @GrpcMethod('DossierService', 'CreateDossierFromTemplate')
   async createDossierFromTemplate(data: { procedureId: string, senderName: string }) {
-    // createDossierFromTemplate in service already returns strings for dates, wait!
-    // No, createDossierFromTemplate in service: `createdAt: dossier.createdAt.toISOString()`
-    // So it's already strings!
+    data = data || ({} as any);
     return this.dossiersService.createDossierFromTemplate(data.procedureId, data.senderName);
   }
 
   @GrpcMethod('DossierService', 'CreateBlankDossier')
   async createBlankDossier(data: { procedureName: string, senderName: string }) {
+    data = data || ({} as any);
     return this.dossiersService.createBlankDossier(data.procedureName, data.senderName);
   }
 
   @GrpcMethod('DossierService', 'AddComponentFromCabinet')
   async addComponentFromCabinet(data: { dossierId: string, name: string, fileUrl: string }) {
+    data = data || ({} as any);
     const c = await this.dossiersService.addComponentFromCabinet(data.dossierId, data.name, data.fileUrl);
     return {
       ...c,

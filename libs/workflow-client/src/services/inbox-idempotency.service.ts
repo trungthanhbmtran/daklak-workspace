@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger, ConflictException } from '@nestjs/common';
+import { Injectable, Logger, ConflictException } from '@nestjs/common';
 import { WorkflowCommand } from '../interfaces/workflow-command.interface';
 
 @Injectable()

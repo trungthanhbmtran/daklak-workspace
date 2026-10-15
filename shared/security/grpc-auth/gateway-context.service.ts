@@ -1,4 +1,4 @@
-﻿import {
+import {
   Global,
   Injectable,
   Module,

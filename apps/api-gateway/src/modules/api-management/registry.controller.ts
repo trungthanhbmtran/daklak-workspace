@@ -1,4 +1,4 @@
-﻿import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { EventPattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
 import { GatewayRegistryService } from './registry.service';
 

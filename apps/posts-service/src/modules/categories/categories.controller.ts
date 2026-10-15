@@ -67,18 +67,21 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'CreateCategory')
   async createCategory(@Payload() data: Record<string, any>) {
+    data = data || {};
     const result = await this.categoriesService.create(data);
     return { data: sanitizeCategory(result) };
   }
 
   @GrpcMethod('CategoryService', 'GetCategory')
   async getCategory(data: { id: string }) {
+    data = data || ({} as any);
     const result = await this.categoriesService.findOne(data.id);
     return { data: sanitizeCategory(result) };
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
   async listCategories(@Payload() data: Record<string, any>) {
+    data = data || {};
     const mode = data?.mode || 'flat';
     this.logger.log(`CategoryService.ListCategories called with mode: ${mode}`);
     try {
@@ -96,13 +99,14 @@ export class CategoriesController {
         return { data: sanitized, meta: { total: result.total } };
       }
     } catch (error) {
-      console.error('Error in listCategories:', error);
+      this.logger.error(`Error in listCategories: ${error?.message || error}`);
       throw error;
     }
   }
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
   async updateCategory(@Payload() data: Record<string, any>) {
+    data = data || {};
     const { id, ...rest } = data;
     const result = await this.categoriesService.update(id, rest);
     return { data: sanitizeCategory(result) };
@@ -110,6 +114,7 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'DeleteCategory')
   async deleteCategory(data: { id: string }) {
+    data = data || ({} as any);
     await this.categoriesService.remove(data.id);
     return { success: true };
   }
