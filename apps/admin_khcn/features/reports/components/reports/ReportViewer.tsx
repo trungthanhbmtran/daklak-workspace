@@ -43,8 +43,10 @@ import {
   Compass,
   Globe,
   Layers,
+  LayoutDashboard,
 } from 'lucide-react';
 import { ReportShareModal } from './ReportShareModal';
+import { ReportEmbedModal } from './ReportEmbedModal';
 import { DAKLAK_UNITS } from './designer/Canvas';
 
 export const DAKLAK_DOMAINS = [
@@ -170,6 +172,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
   // State phân quyền chia sẻ và lăng kính dữ liệu đa chiều
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isEmbedModalOpen, setIsEmbedModalOpen] = useState(false);
   const [dataLensMode, setDataLensMode] = useState<'ALL' | 'DOMAIN' | 'UNIT'>('ALL');
   const [selectedDomain, setSelectedDomain] = useState<string>('DANG');
   const [selectedUnitScope, setSelectedUnitScope] = useState<string>('A15.05');
@@ -616,6 +619,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             >
               <Share2 className="w-4 h-4 text-indigo-600" />
               Chia sẻ cho Đơn vị
+            </Button>
+
+            {/* Nút Nhúng Widget Báo cáo vào Dashboard Dịch vụ */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEmbedModalOpen(true)}
+              className="bg-emerald-50/70 hover:bg-emerald-100 text-emerald-700 border-emerald-200 font-semibold flex items-center gap-1.5 text-xs sm:text-sm shadow-xs"
+              title="Lấy mã nhúng hoặc xem trước widget để tích hợp vào Dashboard các dịch vụ"
+            >
+              <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+              Nhúng vào Dashboard
             </Button>
 
             <Button
@@ -1812,6 +1827,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
           report={reportDef}
           open={isShareModalOpen}
           onOpenChange={setIsShareModalOpen}
+        />
+      )}
+
+      {/* Modal Nhúng Báo Cáo vào Dashboard */}
+      {reportDef && (
+        <ReportEmbedModal
+          open={isEmbedModalOpen}
+          onOpenChange={setIsEmbedModalOpen}
+          reportId={definitionId}
+          reportCode={reportDef.code}
+          reportName={reportDef.name}
+          reportDescription={reportDef.description}
         />
       )}
     </div>

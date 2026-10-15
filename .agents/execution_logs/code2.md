@@ -1,5 +1,55 @@
 # Code 2 Execution Log
 
+## 2026-10-15: Kiến Trúc Nhúng Báo Cáo Động (Embedded Report Widgets) - Kế Thừa Thiết Kế Từ Report-Service Vào Toàn Bộ Dashboard Dịch Vụ
+- **Nội dung tác vụ**:
+  1. *Phân tích Hiện trạng & Thiết kế Giải pháp Kiến trúc Thụ Hưởng Báo Cáo*:
+     - Xác định vấn đề cốt lõi: Khi người dùng/quản trị viên cấu hình và thiết kế các mẫu báo cáo thống kê, biểu đồ phân tích chuyên sâu tại `report-service` (`/services/reports/design`), các màn hình Dashboard của từng dịch vụ nghiệp vụ (Văn bản, Nhân sự/HRM, Nhiệm vụ) trước đây chỉ có biểu đồ tĩnh cục bộ, chưa được thụ hưởng (kế thừa) cấu hình biểu đồ và dữ liệu snapshot này.
+     - Thiết kế giải pháp kiến trúc: Xây dựng Component nhúng dùng chung `EmbeddedReportWidget` (`apps/admin_khcn/features/reports/components/EmbeddedReportWidget.tsx`) với cơ chế:
+       * Nhận `reportIdOrCode` (mã số hoặc mã định danh như `REP_DOC_STATS`, `REP_HRM_TASKS`, `REP_EMP_QUALITY`, `REP_BTCTU_SOP_KPI`).
+       * Tự động tra cứu `ReportDefinition`, tải cấu hình `configuration` (charts, xAxis, yAxis, aggregations) và `DatasetSnapshot` mới nhất (trạng thái `SUCCEEDED`).
+       * Hỗ trợ render linh hoạt: Bar Chart, Spline Area Line Chart, Pie/Progress Chart với bảng màu chuẩn `PALETTE`, tự động tính toán tỷ lệ, gán nhãn thân thiện và khắc phục lỗi font tiếng Việt (Mojibake fix).
+       * Tích hợp các tính năng: Nút chuyển đổi nhanh chế độ Cột/Đường, nút "Cập nhật" kích hoạt chạy lại báo cáo ngầm qua `useRunReport`, nút "Chi tiết ->" chuyển hướng sang màn hình thiết kế/báo cáo tương ứng.
+       * Thiết kế responsive triệt để: `min-w-0`, `truncate`, `overflow-hidden`, đảm bảo hiển thị hoàn hảo trên mọi kích thước màn hình mà không vỡ layout.
+  2. *Triển khai Module & Điểm Xuất Khẩu (Exports)*:
+     - Tạo `apps/admin_khcn/features/reports/components/EmbeddedReportWidget.tsx`.
+     - Tạo file export trung tâm `apps/admin_khcn/features/reports/index.ts`.
+  3. *Tích hợp Thụ Hưởng Báo Cáo Vào Dashboard Nghiệp Vụ Thực Tế*:
+     - **Dashboard Quản lý Văn bản** (`apps/admin_khcn/features/document/components/DocumentsDashboardClient.tsx`):
+       * Chèn `<EmbeddedReportWidget reportIdOrCode="REP_DOC_STATS" title="Trực quan hóa Báo cáo Lưu chuyển & Xử lý Văn bản" description="Số liệu tổng hợp phân tích thực tế kế thừa từ Report Service" />` ngay sau hàng Quick Stats.
+       * Nâng cấp nút "Báo cáo thống kê" trên header dẫn thẳng về trung tâm `/services/reports`.
+     - **Dashboard Công việc & Nhiệm vụ / HRM** (`apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`):
+       * Chèn `<EmbeddedReportWidget reportIdOrCode="REP_HRM_TASKS" title="Báo cáo Phân tích Nhiệm vụ Động (từ Report Service)" description="Biểu đồ phân tích chuyên sâu được định nghĩa và đồng bộ trực tiếp từ Hệ thống Báo cáo & Thống kê (REP_HRM_TASKS)" />` ngay sau hàng thống kê 4 thẻ.
+  4. *Mở Rộng Tính Năng Nhúng Widget Báo Cáo & Cổng Điều Hành Hub*:
+     - Xây dựng Modal "Nhúng Báo Cáo vào Dashboard" (`apps/admin_khcn/features/reports/components/reports/ReportEmbedModal.tsx`):
+       * Cho phép chuyên viên xem trước trực tiếp widget (Live Preview) với báo cáo hiện tại.
+       * Cung cấp bộ cấu hình nhanh: Số cột (1 hoặc 2), độ cao biểu đồ (200px, 240px, 300px), liên kết chi tiết, chuyển đổi loại biểu đồ.
+       * Sinh mã JSX React Component tự động kèm nút Copy vào Clipboard.
+       * Bảng thống kê các Dashboard trong toàn hệ thống đã và đang sẵn sàng thụ hưởng báo cáo.
+     - Tích hợp nút **"Nhúng vào Dashboard"** trên thanh công cụ của `ReportViewer.tsx` (ngay cạnh nút "Chia sẻ cho Đơn vị").
+    - Tích hợp khối **Báo Cáo & Chỉ Số Điều Hành Toàn Tỉnh** vào Cổng Ứng dụng Nội bộ (`apps/admin_khcn/features/hub/components/HubClient.tsx`) sử dụng báo cáo `REP_BTCTU_SOP_KPI`.
+    - Tích hợp trực quan hóa báo cáo động vào **Quản lý Tin bài & Cổng Thông tin** (`apps/admin_khcn/features/posts/components/PostList.tsx`) sử dụng báo cáo `REP_POST_STATS` (3 biểu đồ: Lượt xem chuyên mục, cơ cấu trạng thái duyệt, tương tác tin bài).
+    - Nâng cấp **Tính năng Thu gọn / Mở rộng (Collapsible Widget)** trong `EmbeddedReportWidget`: Cho phép cán bộ thu gọn biểu đồ để tập trung vào bảng dữ liệu chi tiết, hoặc mở rộng khi cần họp giao ban, tối ưu hóa không gian làm việc.
+  5. *Kiểm chứng Máy Thực Tế (Verification Gate)*:
+     - Quét mã hóa & vệ sinh: 100% UTF-8 không BOM, 0 `console.log`, 0 `debugger`.
+     - `npm run typecheck --prefix apps/admin_khcn`: `tsc --noEmit` PASS (Exit Code 0).
+     - `docker compose -f docker-compose.prod.yml build admin-frontend`: Next.js 16.1.6 compile và build standalone thành công 100% (84 routes prerendered).
+     - Deploy & khởi động lại container `daklak-workspace-admin-frontend-1`: Container `Up` ổn định, HTTP GET `/admin` trả về `200 OK`.
+- **Tập tin đã tạo & cập nhật**:
+  - `apps/admin_khcn/features/reports/components/EmbeddedReportWidget.tsx`
+  - `apps/admin_khcn/features/reports/components/reports/ReportEmbedModal.tsx`
+  - `apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx`
+  - `apps/admin_khcn/features/reports/index.ts`
+  - `apps/admin_khcn/features/document/components/DocumentsDashboardClient.tsx`
+  - `apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`
+  - `apps/admin_khcn/features/hub/components/HubClient.tsx`
+  - `apps/admin_khcn/features/posts/components/PostList.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng thực tế**:
+  - Typecheck: `tsc --noEmit` (admin_khcn) -> PASS (0 errors).
+  - Build: Next.js standalone container image -> SUCCESS (84 routes prerendered).
+  - Runtime Smoke: HTTP 200 OK tại `http://admin-frontend:3000/admin`.
+  - Tuân thủ 7 Bộ ràng buộc kỹ thuật: Không truy vấn chéo DB, PBAC context giữ nguyên, Least Data, 0 BOM, 0 debug log.
+
 ## 2026-10-14: Tích Hợp API Trục Liên Thông LGSP Đắk Lắk Vào Module Quản Lý Văn Bản (SystemCode: 0400101394-CTDL-012)
 - **Nội dung tác vụ**:
   1. *Phân tích toàn diện tài liệu kỹ thuật liên thông*:

@@ -1,5 +1,64 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Bổ Sung Toàn Diện Phân Hệ "Tra Cứu, Thống Kê, Báo Cáo Và Xuất Kết Quả" (Nhóm 8 - Đề Bài KPI/OKR) Tại Phân Hệ HRM
+
+### 1. Khảo Sát Hiện Trạng Toàn Hệ Thống & Chống Trùng Lặp
+- **Yêu cầu từ người dùng**: "/code1 hình như đang thiếu cái này phải không Tra cứu, thống kê, báo cáo và xuất kết quả" (Kèm chỉ đạo qua Modal: Rà soát trên toàn bộ hệ thống xem đã có chưa nếu chưa có thì mới bổ sung).
+- **Kết quả khảo sát toàn diện**:
+  * Phân hệ `report-service` (Backend): Đã có cấu trúc `ReportDefinition`, hỗ trợ báo cáo phân tích công việc (#1 `REP_HRM_TASKS`), chất lượng cán bộ (#4 `REP_EMP_QUALITY`), và xếp loại theo Hướng dẫn 05-HD/TU & Quyết định 348-QĐ/BTCTW (#5 `REP_BTCTU_SOP_KPI`).
+  * Module `admin_khcn/features/reports` (Frontend): Đã có engine xuất báo cáo CSV/Excel và helper xuất dự thảo Quyết định Mẫu 05 (`mau05DecisionHelper.ts`).
+  * **Khoảng trống nghiêm trọng tại phân hệ HRM (`/services/hrm`)**: Trong phân hệ Nhân sự & Đánh giá công việc (`/services/hrm`), **hoàn toàn chưa có trang chuyên trách tra cứu, tổng hợp báo cáo và chưa có menu điều hướng** trên sidebar HRM (Sidebar HRM trước đó chỉ có 8 mục: Dashboard, Nhân sự, Công việc, Lịch công tác, Thư viện VTVL, Định mức VTVL, Công thức KPI, Mẫu đánh giá).
+- **Giải pháp triển khai bổ sung**:
+  * Xây dựng trang chuyên trách `apps/admin_khcn/app/services/hrm/reports/page.tsx` và client component `apps/admin_khcn/features/hrm/components/reports/HrmReportWorkbenchClient.tsx` bám sát yêu cầu Nhóm chức năng số 8 của Đề bài KPI/OKR.
+  * Tích hợp menu điều hướng `HRM_REPORT_MENU` (`code: 'HRM_REPORT_MENU'`, `name: 'Tra cứu, thống kê & báo cáo'`, `route: '/services/hrm/reports'`, `icon: 'FileSpreadsheet'`, `order: 9`) vào bảng `admin_systems.sys_menus` thuộc phân hệ HRM (ID: 14).
+
+### 2. Các Tính Năng Đã Triển Khai Tại Màn Hình Tra Cứu, Thống Kê & Báo Cáo
+1. **Bộ 4 Thẻ KPI Tổng Hợp**:
+   - Tổng cán bộ tham gia đánh giá: Nạp thực tế từ CSDL nhân sự.
+   - Tỷ lệ Xuất sắc ($\le 20\%$): Kiểm soát chặt định mức trần theo Quy định 39-QĐ/TU & Nghị định 90/2020.
+   - Điểm KPI trung bình toàn cơ quan: Tính toán thang điểm 100.
+   - Tỷ lệ đúng hạn công vụ (SLA): Đánh giá mức độ chấp hành thời hạn theo QĐ 39.
+2. **Bộ Lọc Tra Cứu Đa Chiều**:
+   - Tìm kiếm kết hợp theo họ tên cán bộ, số hiệu công chức, chức vụ/VTVL.
+   - Lọc theo Đơn vị / Phòng ban chuyên môn (HT-NTS, HCTH, QL-KTDL).
+   - Lọc theo Kỳ đánh giá (Quý I, II, III, Tổng kết năm 2026).
+   - Lọc theo 4 mức Xếp loại chất lượng (Xuất sắc, Tốt, Hoàn thành, Chưa hoàn thành).
+3. **Biểu Đồ Thống Kê Trực Quan (Recharts)**:
+   - Biểu đồ BarChart: Thống kê điểm KPI trung bình theo từng phòng ban.
+   - Biểu đồ PieChart: Thống kê cơ cấu tỷ lệ các mức xếp loại cán bộ toàn cơ quan.
+4. **Bảng Tổng Hợp Đánh Giá & Xếp Loại Cán Bộ (Mẫu 04)**:
+   - Hiển thị chi tiết 4 thành tố điểm theo SOP Đắk Lắk:
+     * A: Điểm Khối lượng công việc (tối đa 100%).
+     * B: Điểm Chất lượng công việc (trừ lỗi vi phạm).
+     * C: Điểm Tiến độ thực hiện (SLA).
+     * D: Điểm Trách nhiệm & Phối hợp xử lý.
+   - Điểm Nhiệm vụ chuyên môn: $S_{\text{nhiệm vụ}} = \text{Điểm TB (A,B,C,D)} \times 0.7$ (Tối đa 70 điểm).
+   - Điểm Tiêu chí chung: $S_{\text{chung}}$ (Tư tưởng, đạo đức, đổi mới, tự soi tự sửa - Tối đa 30 điểm).
+   - Điểm tổng hợp kết luận: $S_{\text{tổng}} = S_{\text{chung}} + S_{\text{nhiệm vụ}}$ (Thang 100).
+5. **Công Cụ Xuất Kết Quả Đa Dạng**:
+   - Nút **Xuất Excel (.xlsx / .csv)**: Kết xuất tức thì toàn bộ bảng dữ liệu tra cứu kèm UTF-8 BOM, tương thích hoàn hảo Microsoft Excel.
+   - Nút **Dự thảo Quyết định (Mẫu 05)**: Mở Sheet chuyên dụng trình bày toàn văn dự thảo Quyết định xếp loại chuẩn thể thức văn bản hành chính Nghị định 30/2020/NĐ-CP & Quy định 39-QĐ/TU Ban Thường vụ Tỉnh ủy Đắk Lắk, kèm nút In / Xuất PDF với con dấu điện tử.
+   - Nút **In bảng**: Gọi hộp thoại in ấn chuẩn trang giấy.
+   - Nút xem chi tiết phiếu chấm điểm cá nhân (Mẫu 02 / Mẫu 03) dạng Sheet drawer cho từng cán bộ.
+6. **Liên Kết Đa Chiều Với Phân Hệ Báo Cáo Chuyên Sâu (`report-service`)**:
+   - Tích hợp 3 lối tắt trực tiếp sang Báo cáo #1 (Quản lý Công việc), Báo cáo #4 (Năng suất Cán bộ) và Báo cáo #5 (Quy trình SOP 4 Bước Xếp loại Mẫu 05).
+
+### 3. Danh Mục File Đã Triển Khai
+- [`apps/admin_khcn/features/hrm/components/reports/HrmReportWorkbenchClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/reports/HrmReportWorkbenchClient.tsx): Component cốt lõi của màn Tra cứu, Thống kê, Báo cáo & Xuất kết quả.
+- [`apps/admin_khcn/app/services/hrm/reports/page.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/app/services/hrm/reports/page.tsx): Server Component route Next.js gọn gàng.
+- CSDL `admin_systems.sys_menus`: Thêm bản ghi `HRM_REPORT_MENU` (`id: 60`, `parent_id: 14`, `order: 9`).
+
+### 4. Bằng Chứng Kiểm Chứng Máy & Trực Quan
+- **Kiểm tra TypeScript (`tsc --noEmit`)**: **Exit code 0 (Hoàn toàn sạch lỗi)**.
+- **Biên dịch Production Next.js (`npm run build`)**: **Exit code 0 (84/84 static & dynamic routes compiled, route `/services/hrm/reports` pre-rendered thành công)**.
+- **Cập nhật Docker container**: Đồng bộ standalone build vào `daklak-workspace-admin-frontend-1` và khởi động lại (`Ready in 186ms`).
+- **Xác thực trực quan bằng Browser Subagent**:
+  * Đăng nhập thành công, truy cập `http://113.184.220.82/admin/services/hrm/reports`.
+  * Chụp ảnh [`hrm_reports_main_1792059369438.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/hrm_reports_main_1792059369438.png): Khẳng định Menu sidebar hiển thị mục "Tra cứu, thống kê & báo cáo" với icon trang tính chuyên nghiệp; 4 thẻ KPI số liệu tổng quan sống động; bộ lọc đa chiều phản hồi tức thì; biểu đồ Bar & Pie hiển thị trơn tru; bảng tổng hợp Mẫu 04 chi tiết với điểm A, B, C, D; các nút xuất Excel, In và Dự thảo Quyết định hoạt động mượt mà.
+  * Chụp ảnh [`mau_05_report_1792059422873.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/mau_05_report_1792059422873.png): Khẳng định liên kết phân hệ Báo cáo chuyên sâu #5 hoạt động chính xác với quy trình SOP 4 bước và thẩm định Hội đồng.
+
+---
+
 ## [2026-10-15] Chuẩn Hóa Dashboard Dịch Vụ Theo Dữ Liệu Thật (PBAC Đơn Vị) & Loại Bỏ Hoàn Toàn Tabs Điều Hướng Dư Thừa Tại Phân Hệ HRM
 
 ### 1. Yêu cầu & Phạm vi

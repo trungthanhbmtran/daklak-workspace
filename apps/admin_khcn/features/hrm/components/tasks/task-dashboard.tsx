@@ -9,6 +9,7 @@ import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import { useTaskStats } from "../../hooks/useTasks";
 import { PersonalTaskWorkbench } from "./personal-task-workbench";
+import { EmbeddedReportWidget } from "@/features/reports";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -273,6 +274,13 @@ export function TaskDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dynamic Report Service Integration */}
+      <EmbeddedReportWidget
+        reportIdOrCode="REP_HRM_TASKS"
+        title="Báo cáo Phân tích Nhiệm vụ Động (từ Report Service)"
+        description="Biểu đồ phân tích chuyên sâu được định nghĩa và đồng bộ trực tiếp từ Hệ thống Báo cáo & Thống kê (REP_HRM_TASKS)"
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">

@@ -2,6 +2,7 @@
 import { PostListStats } from "./post-list/PostListStats";
 import { PostListFilters } from "./post-list/PostListFilters";
 import { PostListTable } from "./post-list/PostListTable";
+import { EmbeddedReportWidget } from "@/features/reports";
 
 export function PostList({
   onNavigateToCreate,
@@ -11,8 +12,18 @@ export function PostList({
   onNavigateToEdit: (id: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-6 animate-fade-in p-4 md:p-6 h-full">
+    <div className="flex flex-col gap-6 animate-fade-in p-4 md:p-6 h-full min-w-0">
       <PostListStats />
+
+      {/* Trực quan hóa Báo cáo Tin bài từ Report Service */}
+      <EmbeddedReportWidget
+        reportIdOrCode="REP_POST_STATS"
+        title="Trực quan hóa Hoạt động Tin bài & Cổng Thông tin"
+        description="Số liệu tổng hợp phân tích thực tế kế thừa từ Hệ thống Báo cáo & Thống kê (REP_POST_STATS)"
+        columns={2}
+        chartHeight={220}
+      />
+
       <PostListFilters onNavigateToCreate={onNavigateToCreate} />
       <PostListTable onNavigateToEdit={onNavigateToEdit} />
     </div>

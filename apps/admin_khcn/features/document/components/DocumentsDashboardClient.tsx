@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 import { useDocumentStats, useListDocuments } from "@/features/document/hooks/useDocuments";
+import { EmbeddedReportWidget } from "@/features/reports";
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return "Không có";
@@ -63,7 +64,11 @@ export function DocumentsDashboardClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="bg-background shadow-sm" iconStart={<BarChart3 className="h-4 w-4" />}>Báo cáo thống kê</Button>
+          <Link href="/services/reports">
+            <Button variant="outline" className="bg-background shadow-sm" iconStart={<BarChart3 className="h-4 w-4" />}>
+              Báo cáo thống kê
+            </Button>
+          </Link>
           <Link href="/services/documents/incoming">
             <Button className="shadow-sm">
               Vào sổ văn bản ngay <ArrowRight className="h-4 w-4" />
@@ -138,6 +143,13 @@ export function DocumentsDashboardClient() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 2.5. TRỰC QUAN HÓA BÁO CÁO THỤ HƯỞNG TỪ REPORT SERVICE */}
+      <EmbeddedReportWidget
+        reportIdOrCode="REP_DOC_STATS"
+        title="Trực quan hóa Báo cáo Lưu chuyển & Xử lý Văn bản"
+        description="Số liệu tổng hợp phân tích thực tế kế thừa từ Report Service"
+      />
 
       {/* 3. KHU VỰC CHI TIẾT THEO LUỒNG */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
