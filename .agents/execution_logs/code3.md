@@ -59,3 +59,18 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - Kiểm tra rác thừa: `Select-String "console\.log"` -> 0 kết quả.
 - **Kết quả nghiệm thu**: Xử lý triệt để nguyên nhân gây timeout 8000ms; ứng dụng không còn bị crash gRPC mà phản hồi có chẩn đoán chi tiết; giao diện quản trị có công cụ test connection đo latency thực tế.
 
+## [2026-10-15] Khắc phục lỗi gRPC 2 UNKNOWN: Internal server error & Tái triển khai Docker Container
+- **Tác vụ**: Xử lý lỗi `2 UNKNOWN: Internal server error` khi gọi `DocumentService.SyncLgsp`. Nguyên nhân: Container Docker `document-service` chạy bản build cũ thiếu try-catch tại gRPC controller khiến exception HTTP bị NestJS `RpcExceptionsHandler` bọc thành mã lỗi `2 UNKNOWN`. Đồng thời Gateway chưa có fallback bắt lỗi ngoại lệ cấp microservice.
+- **Phạm vi file đã thực thi**:
+  - `apps/document-service/src/modules/lgsp/lgsp.controller.ts`: Bọc toàn bộ 5 `@GrpcMethod` (`SyncLgsp`, `SendLgspDocument`, `GetLgspAgencies`, `GetLgspSentStatus`, `TestLgspConnection`) trong `try ... catch` an toàn; trả về trực tiếp `{ success: false, message: ... }` thay vì ném unhandled exception ra ngoài gRPC transport.
+  - `apps/api-gateway/src/modules/documents/documents.service.ts`: Bổ sung khối try-catch phòng thủ cho `syncLgsp`, `sendLgspDocument`, `testLgspConnection`, trả về thông điệp tiếng Việt cụ thể chỉ dẫn quản trị viên về yêu cầu VPN Tỉnh Đắk Lắk (10.30.1.x) khi hạ tầng microservice gặp sự cố.
+  - `docker-compose.prod.yml`: Bổ sung chỉ thị `build:` cho `document-service` và `admin-frontend` để đồng bộ hoàn toàn giữa mã nguồn và image container production.
+  - Tái tạo và khởi chạy lại các container: `daklak-workspace-document-service-1`, `daklak-workspace-api-gateway-1`, `daklak-workspace-admin-frontend-1`.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `docker compose -f docker-compose.prod.yml build document-service api-gateway admin-frontend`: 100% build thành công.
+  - `docker compose -f docker-compose.prod.yml up -d document-service api-gateway admin-frontend`: Containers khởi động thành công, listening port gRPC 50056 & Gateway 8080.
+  - Kiểm chứng E2E với tài khoản Admin thật trên live server:
+    + Endpoint `GET /api/v1/admin/documents/lgsp/test-connection` trả về HTTP 200, latency SSO 66ms, Gateway 19ms, thông báo rõ ràng: `"Không thể kết nối đến máy chủ LGSP Đắk Lắk (SSO: fetch failed, Gateway: fetch failed). Các máy chủ (10.30.1.6, 10.30.1.7) yêu cầu kết nối Mạng chuyên dùng / VPN Tỉnh Đắk Lắk."`.
+    + Endpoint `POST /api/v1/admin/documents/lgsp/sync` trả về HTTP 200 (không còn 500 hay `2 UNKNOWN`), message thân thiện, xử lý dứt điểm lỗi crash gRPC.
+
+
