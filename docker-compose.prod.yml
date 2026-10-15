@@ -229,6 +229,9 @@ services:
       - ./shared/protos:/app/protos:ro
 
   document-service:
+    build:
+      context: .
+      dockerfile: ./apps/document-service/Dockerfile
     image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     logging:
@@ -323,6 +326,9 @@ services:
       - ./shared/protos:/app/protos:ro
 
   admin-frontend:
+    build:
+      context: .
+      dockerfile: ./apps/admin_khcn/Dockerfile
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
     restart: unless-stopped
     logging:

@@ -293,35 +293,57 @@ export class DocumentsService implements OnModuleInit {
 
   // --- LGSP Interoperability Methods ---
   async syncLgsp(user?: any) {
-    const res: any = await this.callGrpc(
-      this.documentService.SyncLgsp({
-        actorId: user?.id ? String(user.id) : undefined,
-        actorName: user?.fullname || user?.username || undefined,
-      }),
-      'DocumentService.SyncLgsp',
-      35000,
-    );
     try {
-      if (res?.data && typeof res.data === 'string') {
-        res.documents = JSON.parse(res.data);
+      const res: any = await this.callGrpc(
+        this.documentService.SyncLgsp({
+          actorId: user?.id ? String(user.id) : undefined,
+          actorName: user?.fullname || user?.username || undefined,
+        }),
+        'DocumentService.SyncLgsp',
+        35000,
+      );
+      try {
+        if (res?.data && typeof res.data === 'string') {
+          res.documents = JSON.parse(res.data);
+        }
+      } catch {
+        res.documents = [];
       }
-    } catch {
-      res.documents = [];
+      return res;
+    } catch (e: any) {
+      this.logger.error(`DocumentService.SyncLgsp failed: ${e.message}`);
+      return {
+        success: false,
+        syncedCount: 0,
+        documents: [],
+        message:
+          'Không thể kết nối đến máy chủ LGSP Đắk Lắk (10.30.1.7:9445 / 10.30.1.6:8243). Vui lòng kiểm tra kết nối mạng nội bộ hoặc kích hoạt VPN Tỉnh Đắk Lắk.',
+      };
     }
-    return res;
   }
 
   async sendLgspDocument(id: string, body: { receiverCode: string }, user?: any) {
-    return this.callGrpc(
-      this.documentService.SendLgspDocument({
-        documentId: id,
-        receiverCode: body.receiverCode,
-        actorId: user?.id ? String(user.id) : undefined,
-        actorName: user?.fullname || user?.username || undefined,
-      }),
-      'DocumentService.SendLgspDocument',
-      25000,
-    );
+    try {
+      return await this.callGrpc(
+        this.documentService.SendLgspDocument({
+          documentId: id,
+          receiverCode: body.receiverCode,
+          actorId: user?.id ? String(user.id) : undefined,
+          actorName: user?.fullname || user?.username || undefined,
+        }),
+        'DocumentService.SendLgspDocument',
+        25000,
+      );
+    } catch (e: any) {
+      this.logger.error(`DocumentService.SendLgspDocument failed: ${e.message}`);
+      return {
+        success: false,
+        docId: '',
+        message:
+          'Không thể gửi văn bản lên trục LGSP Đắk Lắk do máy chủ LGSP không phản hồi. Vui lòng kiểm tra đường truyền VPN Tỉnh Đắk Lắk (10.30.1.6:8243).',
+        rawResponse: '{}',
+      };
+    }
   }
 
   async getLgspAgencies(query: any) {
@@ -379,10 +401,24 @@ export class DocumentsService implements OnModuleInit {
   }
 
   async testLgspConnection() {
-    return this.callGrpc(
-      this.documentService.TestLgspConnection({}),
-      'DocumentService.TestLgspConnection',
-      12000,
-    );
+    try {
+      return await this.callGrpc(
+        this.documentService.TestLgspConnection({}),
+        'DocumentService.TestLgspConnection',
+        12000,
+      );
+    } catch (e: any) {
+      this.logger.error(`DocumentService.TestLgspConnection failed: ${e.message}`);
+      return {
+        success: false,
+        message:
+          'Không thể kết nối đến máy chủ LGSP Đắk Lắk (10.30.1.7:9445 / 10.30.1.6:8243). Yêu cầu kết nối Mạng chuyên dùng / VPN Tỉnh Đắk Lắk.',
+        ssoLatencyMs: 0,
+        gatewayLatencyMs: 0,
+        ssoStatus: 'Không kết nối được',
+        gatewayStatus: 'Không kết nối được',
+        isVpnReachable: false,
+      };
+    }
   }
 }
