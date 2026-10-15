@@ -153,6 +153,11 @@ export class DocumentsController {
     return this.documentsService.updateLgspConfig(body);
   }
 
+  @Get('lgsp/test-connection')
+  async testLgspConnection() {
+    return this.documentsService.testLgspConnection();
+  }
+
   @Post(':id/send-lgsp')
   async sendLgspDocument(
     @Req() req: any,

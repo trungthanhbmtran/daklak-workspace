@@ -52,7 +52,7 @@ export class LgspTokenService {
     try {
       this.logger.log(`Yêu cầu cấp access_token từ SSO: scope=${scope}`);
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(ssoUrl, {
         method: 'POST',
@@ -94,8 +94,17 @@ export class LgspTokenService {
       if (err instanceof BadRequestException || err instanceof InternalServerErrorException) {
         throw err;
       }
+      const isTimeout = err.name === 'AbortError' || err.name === 'TimeoutError' || err.message?.includes('aborted');
+      if (isTimeout) {
+        this.logger.error(`Kết nối SSO LGSP quá thời gian (10s): ${ssoUrl}`);
+        throw new InternalServerErrorException(
+          `Thời gian kết nối tới máy chủ SSO LGSP (${ssoUrl}) quá hạn (10s). Máy chủ thuộc mạng nội bộ/VPN Đắk Lắk (10.30.1.7). Vui lòng kiểm tra VPN hoặc cấu hình liên thông.`,
+        );
+      }
       this.logger.error(`Lỗi kết nối tới SSO LGSP: ${err.message}`);
-      throw new InternalServerErrorException(`Lỗi kết nối tới SSO LGSP: ${err.message}`);
+      throw new InternalServerErrorException(
+        `Không thể kết nối tới máy chủ SSO LGSP (${ssoUrl}): ${err.message}. Kiểm tra kết nối mạng/VPN tỉnh Đắk Lắk.`,
+      );
     }
   }
 

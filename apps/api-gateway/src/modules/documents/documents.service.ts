@@ -35,9 +35,9 @@ export class DocumentsService implements OnModuleInit {
     );
   }
 
-  private async callGrpc<T>(call$: Observable<T>, action: string): Promise<T> {
+  private async callGrpc<T>(call$: Observable<T>, action: string, timeoutMs = 8000): Promise<T> {
     try {
-      return await executeGrpcCall(call$, 8000, action);
+      return await executeGrpcCall(call$, timeoutMs, action);
     } catch (e: any) {
       this.logger.error(`${action} failed: ${e.message}`);
       if (e.status) throw e;
@@ -299,6 +299,7 @@ export class DocumentsService implements OnModuleInit {
         actorName: user?.fullname || user?.username || undefined,
       }),
       'DocumentService.SyncLgsp',
+      35000,
     );
     try {
       if (res?.data && typeof res.data === 'string') {
@@ -319,6 +320,7 @@ export class DocumentsService implements OnModuleInit {
         actorName: user?.fullname || user?.username || undefined,
       }),
       'DocumentService.SendLgspDocument',
+      25000,
     );
   }
 
@@ -329,6 +331,7 @@ export class DocumentsService implements OnModuleInit {
         offset: query?.offset ? parseInt(query.offset) : undefined,
       }),
       'DocumentService.GetLgspAgencies',
+      15000,
     );
     try {
       if (res?.data && typeof res.data === 'string') {
@@ -347,6 +350,7 @@ export class DocumentsService implements OnModuleInit {
         lgspDocId: lgspDocId,
       }),
       'DocumentService.GetLgspSentStatus',
+      15000,
     );
     try {
       if (res?.data && typeof res.data === 'string') {
@@ -362,6 +366,7 @@ export class DocumentsService implements OnModuleInit {
     return this.callGrpc(
       this.documentService.GetLgspConfig({}),
       'DocumentService.GetLgspConfig',
+      10000,
     );
   }
 
@@ -369,6 +374,15 @@ export class DocumentsService implements OnModuleInit {
     return this.callGrpc(
       this.documentService.UpdateLgspConfig(body),
       'DocumentService.UpdateLgspConfig',
+      10000,
+    );
+  }
+
+  async testLgspConnection() {
+    return this.callGrpc(
+      this.documentService.TestLgspConnection({}),
+      'DocumentService.TestLgspConnection',
+      12000,
     );
   }
 }

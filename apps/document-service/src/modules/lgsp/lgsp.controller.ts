@@ -72,4 +72,9 @@ export class LgspController {
   async updateLgspConfig(@Payload() data: any) {
     return this.lgspService.updateConfig(data);
   }
+
+  @GrpcMethod('DocumentService', 'TestLgspConnection')
+  async testLgspConnection() {
+    return this.lgspService.testConnection();
+  }
 }

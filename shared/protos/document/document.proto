@@ -23,6 +23,7 @@ service DocumentService {
   rpc GetLgspSentStatus(GetLgspSentStatusRequest) returns (GetLgspSentStatusResponse) {}
   rpc GetLgspConfig(common.Empty) returns (LgspConfigResponse) {}
   rpc UpdateLgspConfig(UpdateLgspConfigRequest) returns (LgspConfigResponse) {}
+  rpc TestLgspConnection(common.Empty) returns (LgspTestConnectionResponse) {}
   
   // Workflow methods
   rpc ReceiveDocument(WorkflowRequest) returns (DocumentResponse) {}
@@ -440,4 +441,15 @@ message UpdateLgspConfigRequest {
   optional string ssoUrl = 6;
   optional string baseUrl = 7;
 }
+
+message LgspTestConnectionResponse {
+  bool success = 1;
+  string message = 2;
+  int32 ssoLatencyMs = 3;
+  int32 gatewayLatencyMs = 4;
+  string ssoStatus = 5;
+  string gatewayStatus = 6;
+  bool isVpnReachable = 7;
+}
+
 

@@ -38,3 +38,24 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - `node -e "const mammoth = require('mammoth'); ..."`: Trích xuất 47.360 ký tự văn bản, kiểm chứng đầy đủ 5 phần lớn, 100% cấu trúc Câu 1, Câu 2, Câu 3 không lỗi cú pháp.
 - **Kết quả nghiệm thu**: Bám sát 100% đề bài và yêu cầu bổ sung của người dùng; tuân thủ nghiêm ngặt 7 Bộ ràng buộc kỹ thuật; mã hóa UTF-8 không BOM; dọn sạch file tạm.
 
+## [2026-10-15] Xử lý triệt để lỗi DocumentService.SyncLgsp timeout 8000ms & Nâng cấp Thẩm định Kết nối LGSP
+- **Tác vụ**: Khắc phục lỗi `DocumentService.SyncLgsp timed out sau 8000ms` khi nhấn "Đồng bộ LGSP" tại `/admin/services/documents/incoming`. Nguyên nhân: API Gateway giới hạn gRPC timeout cứng 8000ms đối với tác vụ đồng bộ liên thông ngoài mạng; đồng thời máy chủ LGSP Đắk Lắk (`lifesso.daklak.gov.vn:9445`, `lifelgsp.daklak.gov.vn:8243`) phân giải ra dải IP nội bộ tỉnh (`10.30.1.7`, `10.30.1.6`) thuộc Mạng chuyên dùng/VPN Đắk Lắk khiến kết nối TCP bị treo. Ngoài ra, DocumentService thiếu AbortSignal timeout trên các HTTP fetch call và thiếu try-catch bọc luồng đồng bộ cấp cao.
+- **Phạm vi file đã thực thi**:
+  - `shared/protos/document/document.proto`: Bổ sung RPC `TestLgspConnection` và message `LgspTestConnectionResponse` theo nguyên tắc Additive Migration.
+  - `apps/document-service/src/modules/lgsp/lgsp-token.service.ts`: Cấu hình AbortController timeout 10000ms cho SSO token request; xử lý chi tiết lỗi TimeoutError / network error và thông báo rõ nguyên nhân VPN Đắk Lắk (10.30.1.7).
+  - `apps/document-service/src/modules/lgsp/lgsp.service.ts`: Bổ sung helper `getEndpoint` xây dựng URL động từ `baseUrl`; thêm `AbortSignal.timeout` cho toàn bộ 7 API LGSP; bọc `syncIncomingEdocs` trong try-catch trả về cấu trúc `{ success: false, syncedCount: 0, documents: [], message }` thân thiện khi mạng bị nghẽn; bổ sung phương thức `testConnection` probe nhanh cả SSO và Gateway với latency ms và cảnh báo trạng thái VPN.
+  - `apps/document-service/src/modules/lgsp/lgsp.controller.ts`: Đăng ký `@GrpcMethod('DocumentService', 'TestLgspConnection')`.
+  - `apps/document-service/src/modules/lgsp/lgsp.service.spec.ts`: Bổ sung 3 test cases cho timeout handling, structured error return và probe hạ tầng; 10/10 test cases PASS.
+  - `apps/api-gateway/src/modules/documents/documents.service.ts`: Mở rộng `callGrpc` nhận tham số `timeoutMs` tùy biến (mặc định 8000ms); nâng timeout cho `SyncLgsp` lên 35000ms và `SendLgspDocument` lên 25000ms; bổ sung phương thức `testLgspConnection`.
+  - `apps/api-gateway/src/modules/documents/documents.controller.ts`: Bổ sung REST endpoint `@Get('lgsp/test-connection')`.
+  - `apps/admin_khcn/features/document/hooks/useDocuments.ts`: Cập nhật `syncLgspMutation` và `sendLgspDocumentMutation` xử lý phản hồi `res?.success === false` bằng `toast.error`; bổ sung mutation hook `useTestLgspConnection`.
+  - `apps/admin_khcn/features/document/components/LgspConfigModal.tsx`: Tích hợp tính năng "Thẩm định Kết nối Hạ tầng LGSP (Test Connection)" thời gian thực; hiển thị thẻ trạng thái phản hồi, độ trễ ms của SSO và Gateway; đưa ra cảnh báo hướng dẫn kích hoạt VPN Đắk Lắk; bổ sung bảng Cấu hình Nâng cao (URL Máy chủ LGSP & SSO) linh hoạt.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `apps/document-service`: `npm test -- lgsp.service.spec.ts` -> PASS 10/10 test cases (2.32s).
+  - `apps/document-service`: `npx tsc --noEmit` -> Exit code 0 (0 lỗi TypeScript).
+  - `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0 (0 lỗi TypeScript).
+  - `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> Exit code 0 (0 lỗi TypeScript).
+  - Kiểm tra UTF-8 không BOM: 100% file `hasBOM=False`.
+  - Kiểm tra rác thừa: `Select-String "console\.log"` -> 0 kết quả.
+- **Kết quả nghiệm thu**: Xử lý triệt để nguyên nhân gây timeout 8000ms; ứng dụng không còn bị crash gRPC mà phản hồi có chẩn đoán chi tiết; giao diện quản trị có công cụ test connection đo latency thực tế.
+

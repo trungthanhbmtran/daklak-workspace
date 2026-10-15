@@ -166,6 +166,16 @@ export const useLgspSentStatus = (documentId: string, lgspDocId?: string) => {
   });
 };
 
+/** Thẩm định kiểm tra kết nối tới hạ tầng LGSP Đắk Lắk */
+export const useTestLgspConnection = () => {
+  return useMutation({
+    mutationFn: async (): Promise<any> => {
+      const res = await apiClient.get(`${API_BASE}/lgsp/test-connection`) as any;
+      return res?.data ?? res;
+    },
+  });
+};
+
 // ─── Helper: bóc array từ ApiResponse (cho backward-compat) ──────────────────
 /** @deprecated Dùng trực tiếp res.data thay vì hàm này */
 export const extractDataArray = (res: ApiResponse<any[]> | null | undefined): any[] => {
@@ -261,7 +271,11 @@ export function useDocuments() {
     mutationFn: () => apiClient.post(`${API_BASE}/lgsp/sync`),
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success(res?.message || 'Đồng bộ văn bản từ trục LGSP thành công!');
+      if (res?.success === false) {
+        toast.error(res?.message || 'Không thể đồng bộ văn bản từ trục LGSP');
+      } else {
+        toast.success(res?.message || 'Đồng bộ văn bản từ trục LGSP thành công!');
+      }
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || error?.message || 'Lỗi đồng bộ văn bản từ trục LGSP');
@@ -273,7 +287,11 @@ export function useDocuments() {
       apiClient.post(`${API_BASE}/${id}/send-lgsp`, { receiverCode }),
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success(res?.message || 'Văn bản đã được gửi lên trục liên thông LGSP!');
+      if (res?.success === false) {
+        toast.error(res?.message || 'Không thể gửi văn bản lên trục LGSP');
+      } else {
+        toast.success(res?.message || 'Văn bản đã được gửi lên trục liên thông LGSP!');
+      }
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || error?.message || 'Lỗi gửi văn bản lên trục LGSP');
@@ -288,6 +306,13 @@ export function useDocuments() {
     },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || error?.message || 'Lỗi cập nhật cấu hình LGSP');
+    },
+  });
+
+  const testLgspConnectionMutation = useMutation({
+    mutationFn: async (): Promise<any> => {
+      const res = await apiClient.get(`${API_BASE}/lgsp/test-connection`) as any;
+      return res?.data ?? res;
     },
   });
 
@@ -306,6 +331,7 @@ export function useDocuments() {
     useLgspConfig,
     useLgspAgencies,
     useLgspSentStatus,
+    useTestLgspConnection,
     // Mutations
     createDocument: createDocumentMutation.mutateAsync,
     createConsultation: createConsultationMutation.mutateAsync,
@@ -320,8 +346,10 @@ export function useDocuments() {
     syncLgsp: syncLgspMutation.mutateAsync,
     sendLgspDocument: sendLgspDocumentMutation.mutateAsync,
     updateLgspConfig: updateLgspConfigMutation.mutateAsync,
+    testLgspConnection: testLgspConnectionMutation.mutateAsync,
     isSyncingLgsp: syncLgspMutation.isPending,
     isSendingLgsp: sendLgspDocumentMutation.isPending,
+    isTestingLgspConnection: testLgspConnectionMutation.isPending,
     isLoading:
       createDocumentMutation.isPending ||
       createConsultationMutation.isPending ||
@@ -335,6 +363,7 @@ export function useDocuments() {
       createMinutesMutation.isPending ||
       syncLgspMutation.isPending ||
       sendLgspDocumentMutation.isPending ||
-      updateLgspConfigMutation.isPending,
+      updateLgspConfigMutation.isPending ||
+      testLgspConnectionMutation.isPending,
   };
 }

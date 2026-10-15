@@ -238,5 +238,49 @@ describe('LGSP Interoperability Module', () => {
       expect(updateStatusSpy).toHaveBeenCalledWith('DOC_INCOMING_001', 'done');
       expect(mockPrismaService.documentLog.create).toHaveBeenCalled();
     });
+
+    it('syncIncomingEdocs: xử lý lỗi mạng/timeout một cách an toàn và trả về structured message', async () => {
+      jest.spyOn(lgspService, 'getReceivedEdocList').mockRejectedValue(
+        new Error('Thời gian kết nối tới máy chủ LGSP quá hạn (10s)'),
+      );
+
+      const result = await lgspService.syncIncomingEdocs({ id: 'user1' });
+
+      expect(result.success).toBe(false);
+      expect(result.syncedCount).toBe(0);
+      expect(result.documents).toHaveLength(0);
+      expect(result.message).toContain('Đồng bộ LGSP không thành công');
+    });
+
+    it('testConnection: probe kết nối SSO và Gateway thành công', async () => {
+      const mockFetch = jest.fn().mockResolvedValue({
+        status: 200,
+        ok: true,
+      });
+      global.fetch = mockFetch;
+
+      const res = await lgspService.testConnection();
+
+      expect(res.success).toBe(true);
+      expect(res.isVpnReachable).toBe(true);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(res.message).toContain('Kết nối thành công tới toàn bộ hạ tầng LGSP Đắk Lắk');
+    });
+
+    it('testConnection: nhận diện và cảnh báo khi hạ tầng VPN Đắk Lắk bị timeout', async () => {
+      const mockFetch = jest.fn().mockRejectedValue({
+        name: 'TimeoutError',
+        message: 'The operation was aborted due to timeout',
+      });
+      global.fetch = mockFetch;
+
+      const res = await lgspService.testConnection();
+
+      expect(res.success).toBe(false);
+      expect(res.isVpnReachable).toBe(false);
+      expect(res.ssoStatus).toContain('Timeout');
+      expect(res.gatewayStatus).toContain('Timeout');
+      expect(res.message).toContain('yêu cầu kết nối Mạng chuyên dùng / VPN Tỉnh Đắk Lắk');
+    });
   });
 });
