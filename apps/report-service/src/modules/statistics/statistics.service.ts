@@ -235,18 +235,33 @@ export class StatisticsService implements OnModuleInit {
       if (rows.length === 0) {
         const listReq = this.getSafeListReq(filter);
 
-        const res: any = await firstValueFrom(
-          this.taskService.ListTasks(listReq, metadata),
-        );
-        const allTasks = res?.data || [];
-        const nowTime = Date.now();
-
-        let unitMap: Record<number, any> = {};
+        let allTasks: any[] = [];
         try {
-          unitMap = await this.getUnitMap();
-        } catch {
-          // Fallback to empty unit map
+          const res: any = await firstValueFrom(
+            this.taskService.ListTasks(listReq, metadata),
+          );
+          allTasks = res?.data || [];
+        } catch (grpcErr: any) {
+          this.logger.warn(
+            `Failed to call taskService.ListTasks: ${grpcErr?.message}`,
+          );
+          const fallbackSnap = await this.prisma.statisticsSnapshot.findFirst({
+            where: { dataSourceCode: 'HRM_TASK_STATS' },
+            orderBy: { recordedAt: 'desc' },
+          });
+          if (fallbackSnap && Array.isArray(fallbackSnap.data)) {
+            rows = fallbackSnap.data as any[];
+          }
         }
+
+        if (allTasks.length > 0) {
+          const nowTime = Date.now();
+          let unitMap: Record<number, any> = {};
+          try {
+            unitMap = await this.getUnitMap();
+          } catch {
+            // Fallback to empty unit map
+          }
 
         rows = allTasks.map((t: any) => {
           const isDone = t.status === 'COMPLETED' || t.status === 'DONE';
@@ -285,8 +300,9 @@ export class StatisticsService implements OnModuleInit {
           };
         });
 
-        if (isGenericQuery) {
-          await this.saveSnapshot('HRM_TASK_STATS', rows);
+          if (isGenericQuery) {
+            await this.saveSnapshot('HRM_TASK_STATS', rows);
+          }
         }
       }
 

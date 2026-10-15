@@ -1,30 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-  Code2,
-  Copy,
-  Check,
   LayoutDashboard,
   Eye,
-  FileCheck2,
   CheckCircle2,
-  Layers,
   Sparkles,
+  ExternalLink,
+  Layers,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EmbeddedReportWidget } from "../EmbeddedReportWidget";
+import {
+  DASHBOARD_TARGETS,
+  isReportAssignedToDashboard,
+  toggleReportAssignment,
+  DashboardTarget,
+} from "../../utils/dashboardAssignment";
 
 interface ReportEmbedModalProps {
   open: boolean;
@@ -43,264 +48,291 @@ export function ReportEmbedModal({
   reportName,
   reportDescription,
 }: ReportEmbedModalProps) {
-  const [copied, setCopied] = useState(false);
   const [columns, setColumns] = useState<1 | 2>(2);
   const [chartHeight, setChartHeight] = useState<number>(240);
   const [showDetailLink, setShowDetailLink] = useState(true);
   const [allowToggleType, setAllowToggleType] = useState(true);
+  const [activeTab, setActiveTab] = useState<"assign" | "preview">("assign");
+
+  // State theo dõi các dashboard đã được gán
+  const [assignedStatus, setAssignedStatus] = useState<Record<string, boolean>>({});
 
   const identifier = reportCode || reportId;
 
-  const generatedSnippet = `<EmbeddedReportWidget
-  reportIdOrCode="${identifier}"
-  columns={${columns}}
-  chartHeight={${chartHeight}}
-  showDetailLink={${showDetailLink}}
-  allowToggleType={${allowToggleType}}
-/>`;
+  // Cập nhật trạng thái gán khi mở Sheet hoặc khi có thay đổi
+  const refreshAssignmentStatus = () => {
+    const statusMap: Record<string, boolean> = {};
+    for (const target of DASHBOARD_TARGETS) {
+      statusMap[target.key] = isReportAssignedToDashboard(target.key, identifier);
+    }
+    setAssignedStatus(statusMap);
+  };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(generatedSnippet);
-    setCopied(true);
-    toast.success("Đã sao chép mã nhúng vào clipboard!");
-    setTimeout(() => setCopied(false), 2000);
+  useEffect(() => {
+    if (open) {
+      refreshAssignmentStatus();
+    }
+  }, [open, identifier]);
+
+  // Xử lý bật/tắt gán báo cáo cho một dashboard dịch vụ
+  const handleToggle = (target: DashboardTarget) => {
+    const isNowAssigned = toggleReportAssignment(target.key, identifier, {
+      columns,
+      chartHeight,
+      showDetailLink,
+      allowToggleType,
+    });
+
+    setAssignedStatus((prev) => ({
+      ...prev,
+      [target.key]: isNowAssigned,
+    }));
+
+    if (isNowAssigned) {
+      toast.success(`Đã gán báo cáo vào ${target.name}!`, {
+        description: "Dashboard của dịch vụ này sẽ hiển thị biểu đồ phân tích trực quan.",
+      });
+    } else {
+      toast.info(`Đã gỡ báo cáo khỏi ${target.name}.`);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden rounded-2xl border bg-background">
-        <DialogHeader className="p-5 pb-4 border-b bg-muted/20">
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs font-bold">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl p-0 flex flex-col h-full bg-background border-l shadow-2xl overflow-hidden min-w-0"
+      >
+        {/* Header Sheet */}
+        <SheetHeader className="p-5 pb-4 border-b bg-muted/20 shrink-0 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap min-w-0">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs font-bold shrink-0">
               <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Thụ Hưởng Báo Cáo
             </Badge>
-            <DialogTitle className="text-lg font-bold text-foreground">
-              Nhúng Báo Cáo Vào Dashboard Dịch Vụ
-            </DialogTitle>
+            <SheetTitle className="text-base sm:text-lg font-bold text-foreground truncate min-w-0">
+              Gán Báo Cáo Vào Dashboard Dịch Vụ
+            </SheetTitle>
           </div>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Sử dụng component nhúng để hiển thị biểu đồ phân tích thực tế từ báo cáo{" "}
-            <strong className="text-foreground">{reportName || `#${reportId}`}</strong> trực tiếp lên các Dashboard chuyên ngành.
-          </DialogDescription>
-        </DialogHeader>
+          <SheetDescription className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+            Chọn các phân hệ dịch vụ bên dưới để gán biểu đồ phân tích từ báo cáo{" "}
+            <strong className="text-foreground">{reportName || `#${reportId}`}</strong> trực tiếp lên màn hình Dashboard của dịch vụ đó.
+          </SheetDescription>
+        </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          {/* Cấu hình nhanh thuộc tính widget */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-muted/30 p-3.5 rounded-xl border">
-            <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                Số cột biểu đồ
-              </Label>
-              <div className="flex gap-1.5 mt-1.5">
-                <Button
-                  type="button"
-                  variant={columns === 1 ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setColumns(1)}
-                  className="h-7 text-xs flex-1 rounded-lg"
-                >
-                  1 Cột
-                </Button>
-                <Button
-                  type="button"
-                  variant={columns === 2 ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setColumns(2)}
-                  className="h-7 text-xs flex-1 rounded-lg"
-                >
-                  2 Cột
-                </Button>
+        {/* Nội dung Sheet */}
+        {open && (
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 min-w-0">
+            {/* Tùy chỉnh nhanh thuộc tính biểu đồ */}
+            <div className="bg-muted/30 p-4 rounded-xl border space-y-3 min-w-0">
+              <div className="flex items-center justify-between pb-2 border-b">
+                <span className="text-xs font-bold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-primary" />
+                  Cấu hình Hiển thị Khi Gán
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  Mã báo cáo: <code className="bg-background px-1.5 py-0.5 rounded border font-mono font-bold text-primary">{identifier}</code>
+                </span>
               </div>
-            </div>
 
-            <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                Độ cao biểu đồ
-              </Label>
-              <div className="flex gap-1.5 mt-1.5">
-                {[200, 240, 300].map((h) => (
-                  <Button
-                    key={h}
-                    type="button"
-                    variant={chartHeight === h ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setChartHeight(h)}
-                    className="h-7 text-xs flex-1 rounded-lg px-1"
-                  >
-                    {h}px
-                  </Button>
-                ))}
-              </div>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 min-w-0">
+                <div className="space-y-1.5 min-w-0">
+                  <Label className="text-[11px] font-semibold text-muted-foreground">
+                    Số cột hiển thị
+                  </Label>
+                  <div className="flex gap-1.5">
+                    <Button
+                      type="button"
+                      variant={columns === 1 ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setColumns(1)}
+                      className="h-7 text-xs flex-1 rounded-lg font-medium"
+                    >
+                      1 Cột
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={columns === 2 ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setColumns(2)}
+                      className="h-7 text-xs flex-1 rounded-lg font-medium"
+                    >
+                      2 Cột
+                    </Button>
+                  </div>
+                </div>
 
-            <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                Liên kết chi tiết
-              </Label>
-              <div className="flex gap-1.5 mt-1.5">
-                <Button
-                  type="button"
-                  variant={showDetailLink ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setShowDetailLink(!showDetailLink)}
-                  className="h-7 text-xs w-full rounded-lg"
-                >
-                  {showDetailLink ? "Đang bật" : "Đang tắt"}
-                </Button>
-              </div>
-            </div>
+                <div className="space-y-1.5 min-w-0">
+                  <Label className="text-[11px] font-semibold text-muted-foreground">
+                    Chiều cao biểu đồ
+                  </Label>
+                  <div className="flex gap-1">
+                    {[200, 240, 300].map((h) => (
+                      <Button
+                        key={h}
+                        type="button"
+                        variant={chartHeight === h ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setChartHeight(h)}
+                        className="h-7 text-xs flex-1 rounded-lg px-1 font-medium"
+                      >
+                        {h}px
+                      </Button>
+                    ))}
+                  </div>
+                </div>
 
-            <div>
-              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                Đổi loại Cột/Đường
-              </Label>
-              <div className="flex gap-1.5 mt-1.5">
-                <Button
-                  type="button"
-                  variant={allowToggleType ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setAllowToggleType(!allowToggleType)}
-                  className="h-7 text-xs w-full rounded-lg"
-                >
-                  {allowToggleType ? "Cho phép" : "Khóa"}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs: Xem trước và Lấy mã nguồn */}
-          <Tabs defaultValue="preview" className="w-full space-y-3">
-            <TabsList className="grid grid-cols-3 h-9 p-1 bg-muted/60 rounded-xl">
-              <TabsTrigger value="preview" className="text-xs font-semibold flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5" /> Xem trước (Preview)
-              </TabsTrigger>
-              <TabsTrigger value="code" className="text-xs font-semibold flex items-center gap-1.5">
-                <Code2 className="w-3.5 h-3.5" /> Mã nhúng Component
-              </TabsTrigger>
-              <TabsTrigger value="destinations" className="text-xs font-semibold flex items-center gap-1.5">
-                <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard khả dụng
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Tab 1: Preview */}
-            <TabsContent value="preview" className="mt-0 space-y-2">
-              <div className="border rounded-xl p-3 bg-card shadow-2xs">
-                <EmbeddedReportWidget
-                  reportIdOrCode={identifier}
-                  columns={columns}
-                  chartHeight={chartHeight}
-                  showDetailLink={showDetailLink}
-                  allowToggleType={allowToggleType}
-                />
-              </div>
-            </TabsContent>
-
-            {/* Tab 2: Code Snippet */}
-            <TabsContent value="code" className="mt-0 space-y-3">
-              <div className="relative rounded-xl overflow-hidden border bg-slate-950 text-slate-100 p-4 font-mono text-xs shadow-inner">
-                <div className="flex justify-between items-center pb-2 border-b border-slate-800 mb-3 text-slate-400">
-                  <span className="flex items-center gap-1.5 text-[11px]">
-                    <Code2 className="w-4 h-4 text-primary" /> React / Next.js Component
-                  </span>
+                <div className="space-y-1.5 min-w-0">
+                  <Label className="text-[11px] font-semibold text-muted-foreground">
+                    Liên kết chi tiết
+                  </Label>
                   <Button
                     type="button"
+                    variant={showDetailLink ? "default" : "outline"}
                     size="sm"
-                    variant="ghost"
-                    onClick={handleCopy}
-                    className="h-7 px-2.5 text-xs text-slate-200 hover:text-white hover:bg-slate-800"
+                    onClick={() => setShowDetailLink(!showDetailLink)}
+                    className="h-7 text-xs w-full rounded-lg font-medium"
                   >
-                    {copied ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" /> Đã sao chép
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 mr-1" /> Sao chép mã
-                      </>
-                    )}
+                    {showDetailLink ? "Đang bật" : "Đang tắt"}
                   </Button>
                 </div>
-                <pre className="text-emerald-400 overflow-x-auto py-1 leading-relaxed">
-                  <code>{generatedSnippet}</code>
-                </pre>
-              </div>
 
-              <div className="bg-muted/40 p-3 rounded-xl border text-xs text-muted-foreground space-y-1">
-                <p className="font-semibold text-foreground flex items-center gap-1.5">
-                  <FileCheck2 className="w-4 h-4 text-primary" /> Cách dùng trong màn hình Dashboard:
-                </p>
-                <p>1. Import component: <code className="bg-background px-1.5 py-0.5 rounded border font-mono text-[11px]">import &#123; EmbeddedReportWidget &#125; from &apos;@/features/reports&apos;;</code></p>
-                <p>2. Đặt component vào vị trí mong muốn trên JSX của Dashboard.</p>
-              </div>
-            </TabsContent>
-
-            {/* Tab 3: Dashboard Destinations */}
-            <TabsContent value="destinations" className="mt-0 space-y-2.5">
-              <div className="grid gap-2.5">
-                <div className="p-3.5 rounded-xl border bg-card flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-foreground">Dashboard Quản lý Văn bản</h4>
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                        <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đã nhúng REP_DOC_STATS
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">Đường dẫn: /services/documents (Sổ văn bản đến, đi, lưu chuyển)</p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border bg-card flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-foreground">Dashboard Công việc & Nhiệm vụ / HRM</h4>
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                        <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đã nhúng REP_HRM_TASKS
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">Đường dẫn: /services/hrm/work-plans/tasks/dashboard (Tiến độ giao việc, đánh giá)</p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border bg-card flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-foreground">Dashboard Quản lý Tin bài & Cổng Thông tin</h4>
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                        <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đã nhúng REP_POST_STATS
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">Đường dẫn: /services/posts (Xuất bản tin tức, chuyên mục, tương tác công dân)</p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border bg-card flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-foreground">Cổng Ứng dụng Nội bộ (Hub Tổng quan)</h4>
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                        <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đã nhúng REP_BTCTU_SOP_KPI
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">Đường dẫn: /hub (Bức tranh tổng quan điều hành toàn cơ quan)</p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border bg-card flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-foreground">Dashboard Quản trị Hệ thống</h4>
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                        <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đã nhúng REP_BTCTU_SOP_KPI & REP_HRM_TASKS
-                      </Badge>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground">Đường dẫn: /services/admin (Trung tâm điều hành tổ chức, VTVL, người dùng & PBAC)</p>
-                  </div>
+                <div className="space-y-1.5 min-w-0">
+                  <Label className="text-[11px] font-semibold text-muted-foreground">
+                    Đổi Cột / Đường
+                  </Label>
+                  <Button
+                    type="button"
+                    variant={allowToggleType ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setAllowToggleType(!allowToggleType)}
+                    className="h-7 text-xs w-full rounded-lg font-medium"
+                  >
+                    {allowToggleType ? "Cho phép" : "Khóa"}
+                  </Button>
                 </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
+            </div>
+
+            {/* Thanh chuyển chế độ: Danh sách Gán vs Xem trước */}
+            <div className="flex items-center justify-between gap-2 border-b pb-3">
+              <div className="inline-flex p-1 bg-muted/70 rounded-xl gap-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("assign")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    activeTab === "assign"
+                      ? "bg-background text-foreground shadow-xs font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <LayoutDashboard className="w-3.5 h-3.5 text-primary" />
+                  Chọn Dashboard Gán Vào ({Object.values(assignedStatus).filter(Boolean).length}/{DASHBOARD_TARGETS.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("preview")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                    activeTab === "preview"
+                      ? "bg-background text-foreground shadow-xs font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5 text-indigo-500" />
+                  Xem Trước Biểu Đồ
+                </button>
+              </div>
+
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                Gạt nút để Bật/Tắt gán biểu đồ vào từng dịch vụ
+              </span>
+            </div>
+
+            {/* Tab 1: Danh sách các Dashboard để gán */}
+            {activeTab === "assign" && (
+              <div className="space-y-3 min-w-0">
+                <div className="grid gap-3 min-w-0">
+                  {DASHBOARD_TARGETS.map((target) => {
+                    const isAssigned = !!assignedStatus[target.key];
+                    return (
+                      <div
+                        key={target.key}
+                        className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0 ${
+                          isAssigned
+                            ? "bg-primary/5 border-primary/30 shadow-2xs"
+                            : "bg-card border-border/80 hover:border-border"
+                        }`}
+                      >
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap min-w-0">
+                            <h4 className="text-xs sm:text-sm font-bold text-foreground">
+                              {target.name}
+                            </h4>
+                            {isAssigned ? (
+                              <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold px-2 py-0.5">
+                                <CheckCircle2 className="w-3 h-3 mr-1 inline" /> Đang hiển thị
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground text-[10px] font-normal">
+                                Chưa gán
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {target.description}
+                          </p>
+                          <div className="pt-1 flex items-center gap-2">
+                            <Link
+                              href={target.href}
+                              target="_blank"
+                              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-medium"
+                            >
+                              Truy cập Dashboard <ExternalLink className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        </div>
+
+                        {/* Nút Gạt Switch Gán Trực Tiếp */}
+                        <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto border-t sm:border-t-0 pt-2 sm:pt-0">
+                          <span className="text-xs font-semibold text-foreground">
+                            {isAssigned ? "Đã gán" : "Chưa gán"}
+                          </span>
+                          <Switch
+                            checked={isAssigned}
+                            onCheckedChange={() => handleToggle(target)}
+                            className="data-[state=checked]:bg-emerald-600"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tab 2: Xem trước trực tiếp biểu đồ */}
+            {activeTab === "preview" && (
+              <div className="space-y-2 min-w-0">
+                <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+                  <span>Trực quan hóa thực tế sẽ xuất hiện trên Dashboard sau khi gán:</span>
+                  <Badge variant="outline" className="text-[10px]">
+                    {columns} Cột • {chartHeight}px
+                  </Badge>
+                </div>
+                <div className="border rounded-xl p-2 sm:p-3 bg-card shadow-2xs min-w-0 overflow-hidden">
+                  <EmbeddedReportWidget
+                    reportIdOrCode={identifier}
+                    columns={columns}
+                    chartHeight={chartHeight}
+                    showDetailLink={showDetailLink}
+                    allowToggleType={allowToggleType}
+                    collapsible={false}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

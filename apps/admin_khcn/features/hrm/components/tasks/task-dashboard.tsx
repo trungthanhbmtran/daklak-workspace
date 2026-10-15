@@ -8,8 +8,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import { useTaskStats } from "../../hooks/useTasks";
-import { PersonalTaskWorkbench } from "./personal-task-workbench";
-import { EmbeddedReportWidget } from "@/features/reports";
+import { DashboardReportContainer, EmbeddedReportWidget } from "@/features/reports";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -220,7 +219,17 @@ export function TaskDashboard() {
       </div>
 
       {activeView === "workbench" ? (
-        <PersonalTaskWorkbench />
+        <div className="space-y-6 min-w-0">
+          <EmbeddedReportWidget
+            reportIdOrCode="REP_PERSONAL_WORKBENCH"
+            title="Bàn làm việc Nhiệm vụ Cá nhân & Điều phối"
+            description="Báo cáo phân tích động từ Report Service: Chỉ số năng suất, xu hướng 6 tháng và cân đối tải phòng ban"
+            columns={2}
+            chartHeight={260}
+            showDetailLink={true}
+            allowToggleType={true}
+          />
+        </div>
       ) : (
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -276,10 +285,11 @@ export function TaskDashboard() {
       </div>
 
       {/* Dynamic Report Service Integration */}
-      <EmbeddedReportWidget
-        reportIdOrCode="REP_HRM_TASKS"
-        title="Báo cáo Phân tích Nhiệm vụ Động (từ Report Service)"
-        description="Biểu đồ phân tích chuyên sâu được định nghĩa và đồng bộ trực tiếp từ Hệ thống Báo cáo & Thống kê (REP_HRM_TASKS)"
+      <DashboardReportContainer
+        dashboardKey="tasks"
+        defaultReportCode="REP_HRM_TASKS"
+        defaultTitle="Báo cáo Phân tích Nhiệm vụ Động (từ Report Service)"
+        defaultDescription="Biểu đồ phân tích chuyên sâu được định nghĩa và đồng bộ trực tiếp từ Hệ thống Báo cáo & Thống kê (REP_HRM_TASKS)"
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -383,6 +393,18 @@ export function TaskDashboard() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="pt-2">
+        <EmbeddedReportWidget
+          reportIdOrCode="REP_BTCTU_SOP_KPI"
+          title="Báo cáo Đánh giá, Xếp loại Cán bộ Toàn cơ quan (Chuẩn SOP & Mẫu 05)"
+          description="Tổng hợp phân bổ xếp loại, tiến độ SOP 4 bước và điểm năng suất cán bộ từ Report Service"
+          columns={2}
+          chartHeight={260}
+          showDetailLink={true}
+          allowToggleType={true}
+        />
       </div>
     </div>
   )}

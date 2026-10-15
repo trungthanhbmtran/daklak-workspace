@@ -2,7 +2,7 @@
 import { PostListStats } from "./post-list/PostListStats";
 import { PostListFilters } from "./post-list/PostListFilters";
 import { PostListTable } from "./post-list/PostListTable";
-import { EmbeddedReportWidget } from "@/features/reports";
+import { DashboardReportContainer } from "@/features/reports";
 
 export function PostList({
   onNavigateToCreate,
@@ -16,12 +16,11 @@ export function PostList({
       <PostListStats />
 
       {/* Trực quan hóa Báo cáo Tin bài từ Report Service */}
-      <EmbeddedReportWidget
-        reportIdOrCode="REP_POST_STATS"
-        title="Trực quan hóa Hoạt động Tin bài & Cổng Thông tin"
-        description="Số liệu tổng hợp phân tích thực tế kế thừa từ Hệ thống Báo cáo & Thống kê (REP_POST_STATS)"
-        columns={2}
-        chartHeight={220}
+      <DashboardReportContainer
+        dashboardKey="posts"
+        defaultReportCode="REP_POST_STATS"
+        defaultTitle="Trực quan hóa Hoạt động Tin bài & Cổng Thông tin"
+        defaultDescription="Số liệu tổng hợp phân tích thực tế kế thừa từ Hệ thống Báo cáo & Thống kê (REP_POST_STATS)"
       />
 
       <PostListFilters onNavigateToCreate={onNavigateToCreate} />

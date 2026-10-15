@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 import { useDocumentStats, useListDocuments } from "@/features/document/hooks/useDocuments";
-import { EmbeddedReportWidget } from "@/features/reports";
+import { DashboardReportContainer } from "@/features/reports";
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return "Không có";
@@ -145,10 +145,11 @@ export function DocumentsDashboardClient() {
       </div>
 
       {/* 2.5. TRỰC QUAN HÓA BÁO CÁO THỤ HƯỞNG TỪ REPORT SERVICE */}
-      <EmbeddedReportWidget
-        reportIdOrCode="REP_DOC_STATS"
-        title="Trực quan hóa Báo cáo Lưu chuyển & Xử lý Văn bản"
-        description="Số liệu tổng hợp phân tích thực tế kế thừa từ Report Service"
+      <DashboardReportContainer
+        dashboardKey="documents"
+        defaultReportCode="REP_DOC_STATS"
+        defaultTitle="Trực quan hóa Báo cáo Lưu chuyển & Xử lý Văn bản"
+        defaultDescription="Số liệu tổng hợp phân tích thực tế kế thừa từ Report Service"
       />
 
       {/* 3. KHU VỰC CHI TIẾT THEO LUỒNG */}

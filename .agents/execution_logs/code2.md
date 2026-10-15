@@ -34,8 +34,13 @@
       * Thẻ thống kê nhanh: Cơ cấu Tổ chức & Định biên VTVL, Tài khoản & Người dùng, Chính sách PBAC, Khung Mẫu Vị trí việc làm.
       * Nhúng 2 báo cáo điều hành động từ `report-service`: `REP_BTCTU_SOP_KPI` (Xếp loại thi đua cán bộ) và `REP_HRM_TASKS` (Nhiệm vụ & Công việc).
       * Lưới 6 phân hệ quản trị chi tiết kèm icon, badge và liên kết trực tiếp.
+    - Chuẩn hóa **Giao diện Nhúng Báo Cáo & Khắc phục Lỗi Giao diện theo Quy định**:
+      * Chuyển đổi `ReportEmbedModal.tsx` từ `<Dialog>` sang `<Sheet side="right">` tuân thủ nghiêm ngặt Ràng buộc 1 (*Dùng Sheet cho form dài/cấu hình chi tiết; chỉ dùng Dialog cho xác nhận ngắn/alert*).
+      * Cấu hình độ rộng Sheet linh hoạt (`w-full sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl`), tích hợp thanh cuộn độc lập, tránh hiện tượng co rúm biểu đồ.
+      * Tối ưu thanh công cụ `ReportViewer.tsx`: Loại bỏ class cứng `sm:flex-nowrap`, hỗ trợ co giãn linh hoạt trên mọi kích thước màn hình và ẩn bớt text phụ trên màn hình nhỏ nhằm chống tràn viền.
+      * Tối ưu mã nguồn nhúng: Thêm `whitespace-pre-wrap break-all` cho thẻ `<pre>` chống phình rộng container, kích hoạt lazy render guard `{open && (...)}` theo Ràng buộc Frontend State.
   5. *Kiểm chứng Máy Thực Tế (Verification Gate)*:
-     - Quét mã hóa & vệ sinh: 100% UTF-8 không BOM, 0 `console.log`, 0 `debugger`.
+     - Quét mã hóa & vệ sinh: 100% UTF-8 không BOM, 0 `console.log`, 0 `debugger`, 0 `break-words`.
      - `npm run typecheck --prefix apps/admin_khcn`: `tsc --noEmit` PASS (Exit Code 0).
      - `docker compose -f docker-compose.prod.yml build admin-frontend`: Next.js 16.1.6 compile và build standalone thành công 100% (84 routes prerendered).
      - Deploy & khởi động lại container `daklak-workspace-admin-frontend-1`: Container `Up` ổn định, HTTP GET `/admin` trả về `200 OK`.
@@ -1148,3 +1153,43 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Chạy `NestJS UsersService.findOne({ id: 84 })`: PASS (Roles: `Lãnh đạo Ban Tổ chức Tỉnh ủy`, full wildcard `TASK:*`, `KPI:*`, `REPORT:*`).
   - Chạy `NestJS UsersService.findOne({ id: 105 })`: PASS (Roles: `Văn thư - Lưu trữ - Kế toán - BTCTU`, full `DOCUMENT:*`).
   - Kiểm tra UTF-8 không BOM: File size 57678 bytes, `Has BOM: false` (PASS).
+
+## 2026-10-15: Tái Cấu Trúc & Tối Ưu Hóa Gán Báo Cáo Vào Dashboard Dịch Vụ (Loại Bỏ Mã Nhúng JSX, Tự Động Hóa Gán Động)
+- **Nội dung tác vụ**:
+  1. *Khảo sát & Tái định hình Luồng Trải nghiệm Người Dùng (UX)*:
+     - Tiếp thu phản hồi: Người dùng là lãnh đạo, chuyên viên cơ quan hành chính không có kiến thức kỹ thuật lập trình; tab "Mã nhúng JSX" gây rối rắm và không thực tế.
+     - Tái thiết kế toàn bộ modal nhúng báo cáo sang mô hình **"Chọn Dashboard cho dịch vụ rồi gán trực tiếp"**.
+  2. *Triển khai Cơ chế Quản lý Gán Báo cáo (Dashboard Assignment Engine)*:
+     - Tạo mới `apps/admin_khcn/features/reports/utils/dashboardAssignment.ts`: Quản lý danh mục 5 Dashboard mục tiêu (`documents` - Quản lý Văn bản, `tasks` - Theo dõi Nhiệm vụ, `posts` - Cổng Thông tin & Tin bài, `admin` - Quản trị Trung tâm, `hub` - Cổng Điều hành Nội bộ).
+     - Hỗ trợ lưu trữ persistent qua `localStorage`, đồng bộ thời gian thực qua CustomEvent `daklak-dashboard-assignments-updated`.
+     - Cung cấp các hàm `getAssignedReportsForDashboard`, `isReportAssignedToDashboard`, `toggleReportAssignment`, `updateReportAssignmentOptions`.
+  3. *Tạo Component Khung Chứa Báo Cáo Động (`DashboardReportContainer`)*:
+     - Tạo mới `apps/admin_khcn/features/reports/components/DashboardReportContainer.tsx`: Lắng nghe sự kiện đồng bộ và tự động hiển thị các báo cáo được người dùng gán cho từng phân hệ; hỗ trợ fallback báo cáo mặc định khi chưa có gán tùy biến.
+  4. *Tái thiết kế `ReportEmbedModal.tsx`*:
+     - Chuyển đổi từ `Dialog` sang `Sheet side="right"` theo đúng Ràng buộc 1 của AGENTS.md (form cấu hình dài/chi tiết).
+     - Loại bỏ hoàn toàn tab mã nhúng code JSX.
+     - Thay thế bằng giao diện trực quan: Danh sách Dashboard các dịch vụ kèm công tắc Switch Bật/Tắt gán trực tiếp, huy hiệu trạng thái "Đang hiển thị" / "Chưa gán", nút điều hướng nhanh "Truy cập Dashboard ->", và Tab Live Preview xem trước biểu đồ.
+     - Loại bỏ toàn bộ class cấm `break-words`, thay thế bằng `wrap-break-word` và `break-all`.
+  5. *Tích hợp Đồng bộ Vào 5 Dashboard Phân hệ*:
+     - `DocumentsDashboardClient.tsx`: Tích hợp `DashboardReportContainer` (key `documents`, default `REP_DOC_STATS`).
+     - `task-dashboard.tsx`: Tích hợp `DashboardReportContainer` (key `tasks`, default `REP_HRM_TASKS`).
+     - `PostList.tsx`: Tích hợp `DashboardReportContainer` (key `posts`, default `REP_POST_STATS`).
+     - `AdminDashboardClient.tsx`: Tích hợp `DashboardReportContainer` (key `admin`, default `REP_BTCTU_SOP_KPI`).
+     - `HubClient.tsx`: Tích hợp `DashboardReportContainer` (key `hub`, default `REP_BTCTU_SOP_KPI`).
+- **Tập tin đã tạo & sửa đổi**:
+  - `apps/admin_khcn/features/reports/utils/dashboardAssignment.ts` (Tạo mới)
+  - `apps/admin_khcn/features/reports/components/DashboardReportContainer.tsx` (Tạo mới)
+  - `apps/admin_khcn/features/reports/components/reports/ReportEmbedModal.tsx` (Tái thiết kế hoàn toàn)
+  - `apps/admin_khcn/features/reports/components/reports/ReportViewer.tsx` (Tối ưu responsive toolbar)
+  - `apps/admin_khcn/features/reports/index.ts` (Export module)
+  - `apps/admin_khcn/features/document/components/DocumentsDashboardClient.tsx` (Tích hợp)
+  - `apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx` (Tích hợp)
+  - `apps/admin_khcn/features/posts/components/PostList.tsx` (Tích hợp)
+  - `apps/admin_khcn/app/services/admin/AdminDashboardClient.tsx` (Tích hợp)
+  - `apps/admin_khcn/features/hub/components/HubClient.tsx` (Tích hợp)
+  - `.agents/execution_logs/code2.md` (Nhật ký thực thi)
+- **Kiểm chứng máy thực tế**:
+  - `npm run typecheck --prefix apps/admin_khcn` (`tsc --noEmit`): Hoàn thành 100% không có lỗi (Exit code 0).
+  - Quét 0 `console.log`, 0 `debugger`, dọn sạch 100% rác thừa và imports không dùng.
+  - Kiểm tra chuẩn mã hóa UTF-8 không BOM trên toàn bộ các file.
+  - Docker compose build & deploy container `daklak-workspace-admin-frontend-1` thành công.

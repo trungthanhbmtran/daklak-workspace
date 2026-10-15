@@ -595,17 +595,18 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full md:w-auto shrink-0 justify-start md:justify-end">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap w-full xl:w-auto shrink-0 justify-start xl:justify-end min-w-0">
             {/* Nút xem Dự thảo Quyết định Mẫu 05 */}
             {isBtctuReport && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsMau05Open(true)}
-                className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-bold flex items-center gap-1.5 text-xs sm:text-sm shadow-xs"
+                className="bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 font-bold flex items-center gap-1.5 text-xs shadow-xs"
               >
-                <FileText className="w-4 h-4 text-amber-700" />
-                Dự thảo Quyết định (Mẫu 05)
+                <FileText className="w-4 h-4 text-amber-700 shrink-0" />
+                <span className="hidden md:inline">Dự thảo QĐ (Mẫu 05)</span>
+                <span className="md:hidden">Mẫu 05</span>
               </Button>
             )}
 
@@ -614,11 +615,12 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setIsShareModalOpen(true)}
-              className="bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 border-indigo-200 font-semibold flex items-center gap-1.5 text-xs sm:text-sm shadow-xs"
+              className="bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 border-indigo-200 font-semibold flex items-center gap-1.5 text-xs shadow-xs"
               title="Phân quyền chia sẻ báo cáo cho các đơn vị, cơ quan Đảng, Sở Ban Ngành"
             >
-              <Share2 className="w-4 h-4 text-indigo-600" />
-              Chia sẻ cho Đơn vị
+              <Share2 className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span className="hidden lg:inline">Chia sẻ cho Đơn vị</span>
+              <span className="lg:hidden">Chia sẻ</span>
             </Button>
 
             {/* Nút Nhúng Widget Báo cáo vào Dashboard Dịch vụ */}
@@ -626,47 +628,48 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
               variant="outline"
               size="sm"
               onClick={() => setIsEmbedModalOpen(true)}
-              className="bg-emerald-50/70 hover:bg-emerald-100 text-emerald-700 border-emerald-200 font-semibold flex items-center gap-1.5 text-xs sm:text-sm shadow-xs"
+              className="bg-emerald-50/70 hover:bg-emerald-100 text-emerald-700 border-emerald-200 font-semibold flex items-center gap-1.5 text-xs shadow-xs"
               title="Lấy mã nhúng hoặc xem trước widget để tích hợp vào Dashboard các dịch vụ"
             >
-              <LayoutDashboard className="w-4 h-4 text-emerald-600" />
-              Nhúng vào Dashboard
+              <LayoutDashboard className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span className="hidden lg:inline">Nhúng vào Dashboard</span>
+              <span className="lg:hidden">Nhúng</span>
             </Button>
 
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push(`/services/reports/${definitionId}/design`)}
-              className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 text-xs sm:text-sm"
+              className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 text-xs"
             >
-              <Settings2 className="w-4 h-4 text-slate-500" />
-              Thiết kế lại
+              <Settings2 className="w-4 h-4 text-slate-500 shrink-0" />
+              <span className="hidden sm:inline">Thiết kế lại</span>
             </Button>
             {rows.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleExportCSV}
-                className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 text-xs sm:text-sm"
+                className="text-slate-700 border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 text-xs"
               >
-                <Download className="w-4 h-4 text-slate-500" />
-                Xuất CSV / Excel
+                <Download className="w-4 h-4 text-slate-500 shrink-0" />
+                <span className="hidden sm:inline">Xuất CSV</span>
               </Button>
             )}
             <Button
               size="sm"
               onClick={handleRun}
               disabled={runMutation.isPending || runStatus?.status === 'RUNNING'}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm flex items-center gap-1.5 text-xs sm:text-sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs flex items-center gap-1.5 text-xs"
             >
               <RefreshCw
-                className={`w-4 h-4 ${
+                className={`w-4 h-4 shrink-0 ${
                   runMutation.isPending || runStatus?.status === 'RUNNING'
                     ? 'animate-spin'
                     : ''
                 }`}
               />
-              {runMutation.isPending ? 'Đang gửi lệnh...' : 'Chạy lại (Run)'}
+              <span>{runMutation.isPending ? 'Đang gửi...' : 'Chạy lại'}</span>
             </Button>
           </div>
         </div>
@@ -1731,7 +1734,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
 
             {/* Căn cứ pháp lý */}
             <div className="space-y-1.5 italic text-[13pt] text-black text-justify leading-[1.4]">
-              {mau05Data.legalBases.map((base, idx) => (
+              {mau05Data.legalBases.map((base: string, idx: number) => (
                 <p key={idx} style={{ textIndent: '1.27cm' }}>- {base}</p>
               ))}
             </div>
@@ -1747,7 +1750,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                   Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan {mau05Data.organizationName} Đắk Lắk:
                 </p>
                 <div className="mt-2 pl-8 space-y-1 text-black text-[13pt]">
-                  {mau05Data.collectives.map((c, idx) => (
+                  {mau05Data.collectives.map((c: any, idx: number) => (
                     <p key={idx}>
                       {idx + 1}. <strong>{c.name}:</strong> Điểm KPI {c.score.toFixed(1)}/100 • Xếp loại: <strong>{c.rank}</strong>.
                     </p>
@@ -1764,7 +1767,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                     • <strong>1. Hoàn thành xuất sắc nhiệm vụ: 0{mau05Data.individuals.excellentCount} đồng chí</strong> (Tỷ lệ {mau05Data.individuals.excellentRatio} tổng biên chế, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):
                   </p>
                   <ul className="list-disc pl-8 space-y-1 text-black">
-                    {mau05Data.individuals.excellentList.map((cadre, idx) => (
+                    {mau05Data.individuals.excellentList.map((cadre: any, idx: number) => (
                       <li key={idx}>
                         Đ/c {cadre.name} - {cadre.title} ({cadre.score.toFixed(1)} điểm)
                       </li>
@@ -1800,7 +1803,7 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
                   <td className="w-1/2 align-top text-left p-0">
                     <p className="font-bold italic text-[12pt] text-black">Nơi nhận:</p>
                     <div className="text-[11pt] leading-[1.35] text-black mt-1 space-y-0.5">
-                      {mau05Data.recipients.map((r, idx) => (
+                      {mau05Data.recipients.map((r: string, idx: number) => (
                         <p key={idx}>{r}</p>
                       ))}
                     </div>

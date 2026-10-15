@@ -273,3 +273,113 @@ export const useGetReportDashboardStats = () => {
     },
   });
 };
+
+/**
+ * Gọi backend API kết xuất báo cáo (Excel, CSV, PDF, HTML, Decision) từ DatasetSnapshot thực tế
+ */
+export async function downloadReportRunExport(
+  runId: number | string,
+  format: 'excel' | 'csv' | 'pdf' | 'html' | 'decision' = 'excel',
+  search?: string,
+): Promise<void> {
+  const numericId = Number(runId);
+  if (!numericId) throw new Error('Mã lần chạy báo cáo không hợp lệ');
+
+  const response: any = await axiosInstance.get(
+    `/reports/runs/${numericId}/export`,
+    {
+      params: { format, search: search?.trim() || undefined },
+      responseType: 'blob',
+    },
+  );
+
+  const isDoc = ['html', 'pdf', 'decision'].includes(format);
+  const contentType = isDoc
+    ? 'text/html;charset=utf-8;'
+    : 'text/csv;charset=utf-8;';
+
+  const blob =
+    response instanceof Blob
+      ? response
+      : new Blob([response], { type: contentType });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const prefix = format === 'decision' ? 'Quyet_Dinh_Mau05' : 'Bang_Tong_Hop_KPI';
+  const ext = isDoc ? 'html' : 'csv';
+  link.download = `${prefix}_${numericId}_${dateStr}.${ext}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Mở cửa sổ in / xuất PDF trực tiếp từ nội dung văn bản chuẩn do Backend kết xuất
+ */
+export async function printReportRunExport(
+  runId: number | string,
+  format: 'html' | 'decision' = 'html',
+  search?: string,
+): Promise<void> {
+  const numericId = Number(runId);
+  if (!numericId) throw new Error('Mã lần chạy báo cáo không hợp lệ');
+
+  const response: any = await axiosInstance.get(
+    `/reports/runs/${numericId}/export`,
+    {
+      params: { format, search: search?.trim() || undefined },
+      responseType: 'text',
+    },
+  );
+
+  const htmlContent = typeof response === 'string' ? response : (response?.data || '');
+  if (!htmlContent) throw new Error('Không nhận được nội dung văn bản từ máy chủ');
+
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  iframe.style.visibility = 'hidden';
+  iframe.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentWindow?.document || iframe.contentDocument;
+  if (!iframeDoc || !iframe.contentWindow) {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    }
+    return;
+  }
+
+  iframeDoc.open();
+  iframeDoc.write(htmlContent);
+  iframeDoc.close();
+
+  setTimeout(() => {
+    try {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    } finally {
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 3000);
+    }
+  }, 400);
+}
+

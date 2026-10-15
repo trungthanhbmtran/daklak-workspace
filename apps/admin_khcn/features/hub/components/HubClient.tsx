@@ -8,7 +8,7 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { useUser } from "@/hooks/useUser";
-import { EmbeddedReportWidget } from "@/features/reports";
+import { DashboardReportContainer } from "@/features/reports";
 
 type AppItem = {
   id: string;
@@ -102,12 +102,11 @@ export function HubClient() {
           </Link>
         </div>
 
-        <EmbeddedReportWidget
-          reportIdOrCode="REP_BTCTU_SOP_KPI"
-          title="Báo cáo Xếp loại Đánh giá Thi đua Cán bộ (Ban Tổ chức Tỉnh ủy)"
-          description="Thống kê cơ cấu xếp loại và tiến độ đánh giá cán bộ các cơ quan Đảng, Sở Ban Ngành tỉnh Đắk Lắk"
-          columns={2}
-          chartHeight={220}
+        <DashboardReportContainer
+          dashboardKey="hub"
+          defaultReportCode="REP_BTCTU_SOP_KPI"
+          defaultTitle="Báo cáo Xếp loại Đánh giá Thi đua Cán bộ (Ban Tổ chức Tỉnh ủy)"
+          defaultDescription="Thống kê cơ cấu xếp loại và tiến độ đánh giá cán bộ các cơ quan Đảng, Sở Ban Ngành tỉnh Đắk Lắk"
         />
       </div>
     </main>

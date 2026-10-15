@@ -89,4 +89,9 @@ export class ReportsController {
       data.userData,
     );
   }
+
+  @GrpcMethod('ReportService', 'ExportReportRun')
+  async exportReportRun(data: { payload: string; userData: string }) {
+    return this.reportsService.exportReportRun(data.payload, data.userData);
+  }
 }

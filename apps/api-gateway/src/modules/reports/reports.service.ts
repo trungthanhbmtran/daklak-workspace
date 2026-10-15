@@ -229,4 +229,20 @@ export class ReportsService implements OnModuleInit {
       await this.callGrpc('GenerateDocument', body, user, authHeader),
     );
   }
+
+  async exportReportRun(
+    runId: number | string,
+    query: any,
+    user: any,
+    authHeader: string,
+  ) {
+    return this.parseResponse(
+      await this.callGrpc(
+        'ExportReportRun',
+        { runId: Number(runId), ...query },
+        user,
+        authHeader,
+      ),
+    );
+  }
 }

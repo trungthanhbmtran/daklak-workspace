@@ -8,9 +8,12 @@ import {
   Delete,
   Query,
   Req,
+  Res,
   UseGuards,
   ParseIntPipe,
+  HttpStatus,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
@@ -30,6 +33,17 @@ export class ReportsController {
     private readonly sources: ReportSourceService,
     private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getDelegationToken(req: any) {
+    if (!req?.user) return req?.headers?.authorization || '';
+    return (
+      'Bearer ' +
+      this.issuer.signDelegation(req.user, {
+        requestId: randomUUID(),
+        ipAddress: clientIp(req),
+      })
+    );
+  }
 
   @Post('table/sources')
   @RequirePermissions(
@@ -285,5 +299,56 @@ export class ReportsController {
       req.user,
       req.headers.authorization,
     );
+  }
+
+  @Get('runs/:runId/export')
+  @RequirePermissions('REPORT:VIEW', 'REPORT:READ', 'REPORT:MANAGE')
+  async exportReportRun(
+    @Param('runId', ParseIntPipe) runId: number,
+    @Query() query: any,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    const rawResult: any = await this.reportsService.exportReportRun(
+      runId,
+      query,
+      req.user,
+      req.headers.authorization,
+    );
+
+    const result =
+      typeof rawResult === 'string'
+        ? JSON.parse(rawResult)
+        : rawResult?.data
+        ? typeof rawResult.data === 'string'
+          ? JSON.parse(rawResult.data)
+          : rawResult.data
+        : rawResult;
+
+    const format = String(query.format || result?.format || 'excel').toLowerCase();
+    const isDoc = ['html', 'pdf', 'decision', 'decision_html', 'mau05'].includes(format);
+    const fileName =
+      result?.fileName ||
+      `Bao_Cao_${runId}.${isDoc ? 'html' : 'csv'}`;
+    const base64Content = result?.base64Content;
+
+    if (!base64Content) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'Không tìm thấy nội dung xuất dữ liệu báo cáo',
+      });
+    }
+
+    const buffer = Buffer.from(base64Content, 'base64');
+
+    if (isDoc) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+      return res.send(buffer);
+    }
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    return res.send(buffer);
   }
 }

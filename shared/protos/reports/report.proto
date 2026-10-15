@@ -30,6 +30,7 @@ service ReportService {
   rpc GetReportRunStatus (GenericRequest) returns (GenericResponse);
   rpc GetDatasetSnapshot (GenericRequest) returns (GenericResponse);
   rpc GetReportDashboardStats (GenericRequest) returns (GenericResponse);
+  rpc ExportReportRun (GenericRequest) returns (GenericResponse);
   
   // Document Generator
   rpc GenerateDocument (GenericRequest) returns (GenericResponse);

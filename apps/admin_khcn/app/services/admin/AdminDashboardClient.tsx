@@ -18,7 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { EmbeddedReportWidget } from "@/features/reports";
+import { DashboardReportContainer } from "@/features/reports";
 
 const ADMIN_QUICK_LINKS = [
   {
@@ -170,24 +170,12 @@ export function AdminDashboardClient() {
       </div>
 
       {/* 3. Khối Báo Cáo Điều Hành Thụ Hưởng từ Report Service */}
-      <div className="space-y-5 min-w-0">
-        <EmbeddedReportWidget
-          reportIdOrCode="REP_BTCTU_SOP_KPI"
-          title="Báo cáo Xếp loại & Đánh giá Cán bộ Ban Tổ chức Tỉnh ủy"
-          description="Thống kê cơ cấu xếp loại và tiến độ đánh giá cán bộ các cơ quan Đảng, Sở Ban Ngành tỉnh Đắk Lắk"
-          columns={2}
-          chartHeight={240}
-        />
-
-        <EmbeddedReportWidget
-          reportIdOrCode="REP_HRM_TASKS"
-          title="Báo cáo Tổng hợp Nhiệm vụ & Công việc Toàn Tỉnh"
-          description="Biểu đồ tiến độ giao việc và xử lý nhiệm vụ các cơ quan, đơn vị đồng bộ từ Report Service"
-          columns={2}
-          chartHeight={240}
-          defaultCollapsed={true}
-        />
-      </div>
+      <DashboardReportContainer
+        dashboardKey="admin"
+        defaultReportCode="REP_BTCTU_SOP_KPI"
+        defaultTitle="Báo cáo Xếp loại & Đánh giá Cán bộ Ban Tổ chức Tỉnh ủy"
+        defaultDescription="Thống kê cơ cấu xếp loại và tiến độ đánh giá cán bộ các cơ quan Đảng, Sở Ban Ngành tỉnh Đắk Lắk"
+      />
 
       {/* 4. Lưới Phân Hệ Quản Trị Chi Tiết */}
       <div className="space-y-3 min-w-0 pt-2">

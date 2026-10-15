@@ -1,5 +1,54 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Chuyển Đổi Xuất Báo Cáo Excel (.xlsx/.csv) & Văn Bản/PDF (Mẫu 05) Sang Backend Report Service API (Smart Backend / Dumb Client)
+
+### 1. Yêu cầu & Nguyên Tắc Kỹ Thuật (Architecture & Source of Truth)
+- **Chỉ đạo từ người dùng**: "tôi đã có trong report service rồi ở đây chỉ gọi tới backend api xuất ra thôi, phần export excel và pdf đã có ultis trên backend tích hợp vào luôn tuân thủ nguyên tắc skill cho tôi".
+- **Tuân thủ 7 Bộ ràng buộc kỹ thuật**:
+  * **Frontend là Dumb Client**: Frontend không tự tính toán, không tự dựng chuỗi CSV hoặc tạo file Blob cục bộ. Chỉ gọi endpoint kết xuất từ Backend.
+  * **Service Data Sovereignty & Source of Truth**: `report-service` là trung tâm dữ liệu và xuất báo cáo hệ thống.
+  * **Encoding Strictness**: Mã hóa UTF-8 không BOM cho toàn bộ mã nguồn, nhưng kèm ký tự UTF-8 BOM (`\uFEFF`) cho file CSV tải về để tương thích hoàn hảo Microsoft Excel mà không bị lỗi font tiếng Việt.
+  * **Dọn rác 100%**: Xóa bỏ các helper tính toán trùng lặp ở frontend, không để lại bất kỳ `console.log` hay mã tạm.
+
+### 2. Các Thay Đổi Cụ Thể Đã Triển Khai
+1. **gRPC Contract (`shared/protos/reports/report.proto`)**:
+   - Khai báo RPC method chuẩn: `rpc ExportReportRun (GenericRequest) returns (GenericResponse);`.
+2. **Microservice Backend (`apps/report-service`)**:
+   - `reports.controller.ts`: Đăng ký `@GrpcMethod('ReportService', 'ExportReportRun')`.
+   - `reports.service.ts`: Triển khai hàm `exportReportRun(payloadStr, userDataStr)`:
+     * Đọc `DatasetSnapshot` theo `runId`, bóc tách dữ liệu thực tế và lọc theo truy vấn tìm kiếm.
+     * Khi `format === 'excel' | 'csv'`: Sinh nội dung CSV kèm UTF-8 BOM (`\uFEFF`), đầy đủ 17 cột dữ liệu (Mã CB, Họ tên, Chức vụ, Đơn vị, Nhiệm vụ, Hoàn thành, Điểm A, B, C, D, Điểm Chung 30đ, Điểm NV 70đ, Tổng điểm 100đ, Xếp loại, Bước SOP, Kê khai Mẫu 04).
+     * Khi `format === 'decision' | 'decision_html'`: Kết xuất toàn văn Dự thảo Quyết định xếp loại Mẫu 05 chuẩn Thể thức Đảng & Nghị định 30/2020/NĐ-CP (Căn cứ pháp lý, Điều 1, Điều 2 khống chế trần ≤20% Xuất sắc, Điều 3, Nơi nhận và chữ ký điện tử Trưởng ban).
+     * Khi `format === 'html' | 'pdf'`: Kết xuất văn bản bảng biểu tổng hợp A4 Landscape kèm chữ ký và nơi nhận.
+     * Trả về kết quả JSON base64Content chuẩn gRPC envelope.
+3. **API Gateway (`apps/api-gateway`)**:
+   - `reports.controller.ts`: Đăng ký route `GET /api/v1/admin/reports/runs/:runId/export`.
+   - `reports.service.ts`: Chuyển tiếp lời gọi sang gRPC `ExportReportRun` kèm `GatewayContextToken`. Bóc tách base64 Buffer và stream trực tiếp về browser với header tương ứng (`text/csv; charset=utf-8` hoặc `text/html; charset=utf-8`).
+4. **Frontend (`apps/admin_khcn`)**:
+   - `features/reports/api/index.ts`: Bổ sung helper `downloadReportRunExport(runId, format, search)` và `printReportRunExport(runId, format, search)` giao tiếp trực tiếp với Backend API.
+   - `HrmReportWorkbenchClient.tsx`:
+     * Loại bỏ hoàn toàn 100% logic ghép mảng CSV và fallback `new Blob(...)` ở client.
+     * Nút **Xuất Excel (.xlsx / .csv)**: Gọi trực tiếp `downloadReportRunExport(latestRunId, 'excel', searchTerm)`.
+     * Nút **Dự thảo Quyết định (Mẫu 05)**: Mở Sheet xem trước văn bản; nút **Tải văn bản (Backend)** gọi `downloadReportRunExport(latestRunId, 'decision', searchTerm)`; nút **In / Xuất PDF** gọi `printReportRunExport(latestRunId, 'decision', searchTerm)`.
+     * Nút **In bảng**: Gọi `printReportRunExport(latestRunId, 'html', searchTerm)` để in văn bản chuẩn từ máy chủ.
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan
+- **Kiểm tra TypeScript (`tsc --noEmit`)**:
+  * `apps/report-service`: **Exit code 0**.
+  * `apps/api-gateway`: **Exit code 0**.
+  * `apps/admin_khcn`: **Exit code 0**.
+- **Biên dịch Production Next.js (`npm run build`)**: **Exit code 0 (84/84 routes pre-rendered thành công)**.
+- **Triển khai Container**: Đã copy dist và restart thành công cả 3 container: `report-service-1`, `api-gateway-1`, `admin-frontend-1`.
+- **Kiểm chứng Browser Subagent**:
+  * Đăng nhập thành công với tài khoản Quản trị (`admin` / `Admin@123`).
+  * Truy cập `http://113.184.220.82/admin/services/hrm/reports`.
+  * Nhấn nút `#btn-export-excel`: Browser kích hoạt tải trực tiếp file `Bang_Tong_Hop_KPI_47_2026-10-15.csv` từ Backend Report Service.
+  * Nhấn nút `#btn-open-decision-sheet`: Sheet Quyết định Mẫu 05 mở trơn tru.
+  * Nhấn nút `#btn-download-decision-doc`: Browser kích hoạt tải trực tiếp file `Quyet_Dinh_Mau05_47_2026-10-15.html` từ Backend.
+  * Chụp ảnh nghiệm thu: [`report_workbench_header_png_1792066800626.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/report_workbench_header_png_1792066800626.png), [`mau05_sheet_open_png_1792066836649.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/mau05_sheet_open_png_1792066836649.png).
+
+---
+
 ## [2026-10-15] Kế Thừa Trực Tiếp Biểu Đồ Từ Report Service Qua EmbeddedReportWidget & Gỡ Bỏ Hoàn Toàn Biểu Đồ Fix Cứng Tại HrmReportWorkbenchClient
 
 ### 1. Yêu cầu & Nguyên Tắc Kỹ Thuật (Architecture & Source of Truth)
