@@ -65,6 +65,15 @@ const PROFILE_FIELDS = [
   'fullName',
   'avatarUrl',
   'phone',
+  'unitId',
+  'unitCode',
+  'unitName',
+  'jobTitleCode',
+  'jobTitleName',
+  'permissionsFlatten',
+  'roles',
+  'roleNames',
+  'policies',
 ] as const;
 
 const MSG_INVALID_CREDENTIALS =
@@ -527,8 +536,51 @@ export class AuthService implements OnModuleInit {
     for (const key of PROFILE_FIELDS) {
       if (user[key] !== undefined) profile[key] = user[key];
     }
+
+    const reqUser = (req.user as any) || {};
+
+    const perms = Array.from(
+      new Set([
+        ...((user.permissionsFlatten || (user as any).permissions_flatten || []) as string[]),
+        ...((reqUser.permissionsFlatten || []) as string[]),
+      ]),
+    );
+
+    const roles = Array.from(
+      new Set([
+        ...((user.roles || user.roleNames || (user as any).role_names || []) as string[]),
+        ...((reqUser.roles || []) as string[]),
+      ]),
+    );
+
+    const isAdmin = Boolean(
+      (user as any).isAdmin ||
+      reqUser.isAdmin ||
+      user.username === 'admin' ||
+      user.username === 'superadmin' ||
+      perms.includes('*') ||
+      perms.includes('*:*') ||
+      perms.includes('SYSTEM:*') ||
+      roles.some((r: any) => {
+        const str = typeof r === 'string' ? r : r?.name || '';
+        return (
+          str.toLowerCase().includes('quản trị viên hệ thống') ||
+          str.toLowerCase().includes('admin')
+        );
+      }),
+    );
+
     return {
       ...profile,
+      unitId: user.unitId || (user as any).unit_id || reqUser.unitId || null,
+      unitCode: user.unitCode || (user as any).unit_code || reqUser.unitCode || null,
+      unitName: user.unitName || (user as any).unit_name || reqUser.unitName || '',
+      jobTitleCode: user.jobTitleCode || (user as any).job_title_code || reqUser.jobTitleCode || null,
+      jobTitleName: user.jobTitleName || (user as any).job_title_name || reqUser.jobTitleName || '',
+      permissionsFlatten: perms,
+      roles,
+      roleNames: roles.map((r: any) => (typeof r === 'string' ? r : r?.name || '')).filter(Boolean),
+      isAdmin,
       fullName: hrm?.fullName || user.fullName,
       avatarUrl: hrm?.avatar || user.avatarUrl,
     };

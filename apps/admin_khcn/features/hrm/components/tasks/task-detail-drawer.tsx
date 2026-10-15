@@ -2,6 +2,7 @@
 "use client";
 
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Heading, Text } from "@/components/ui/typography";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HrmTask } from "../../types/task";
@@ -28,8 +29,8 @@ import { TaskDiscussionTab } from "./task-detail-discussion-tab";
 import { TaskHistoryTab } from "./task-detail-history-tab";
 import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
 import { EditTaskDialog } from "./edit-task-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/hooks/useUser";
+import { useHrmPermissions } from "../../hooks/useHrmPermissions";
 import { useState } from "react";
 import { TaskAssignDialog } from "./task-assign-dialog";
 import { TaskRespondDialog } from "./task-respond-dialog";
@@ -46,6 +47,7 @@ interface TaskDetailDrawerProps {
 export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetailDrawerProps) {
   const activeTaskId = taskId ? Number(taskId) : (task ? Number(task.id) : null);
   const { user } = useUser();
+  const { canEvaluateTask, canEditTask, canApproveIncidental: checkApproveIncidental } = useHrmPermissions();
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isExtendOpen, setIsExtendOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -72,10 +74,7 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
 
   const canApproveIncidental =
     currentTask?.allowedActions?.includes("APPROVE_INCIDENTAL") ||
-    (isPendingIncidentalApproval &&
-      (user?.employeeCode === currentTask?.supervisorCode ||
-        user?.isAdmin ||
-        user?.permissionsFlatten?.includes("TASK:MANAGE")));
+    (isPendingIncidentalApproval && checkApproveIncidental(currentTask));
 
   const isPendingReview =
     currentTask?.status === "REVIEWING" ||
@@ -84,16 +83,12 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
 
   const hasEvaluation = Boolean(currentTask?.kpi || currentTask?.metadata?.evaluation);
 
+  const isReviewable = isPendingReview || isCompleted;
+
   const canEvaluate =
-    currentTask?.allowedActions?.includes("EVALUATE_APPROVE") ||
-    currentTask?.allowedActions?.includes("APPROVE") ||
-    currentTask?.allowedActions?.includes("REVIEW") ||
-    isPendingReview ||
-    isCompleted ||
-    user?.employeeCode === currentTask?.supervisorCode ||
-    user?.employeeCode === currentTask?.assignerCode ||
-    user?.isAdmin ||
-    user?.permissionsFlatten?.includes("TASK:EVALUATE");
+    isReviewable && canEvaluateTask(currentTask);
+
+  const canEdit = !isCompleted && canEditTask(currentTask);
 
   // ── Mutations ──
   const respondTask = useRespondTask(activeTaskId || undefined);
@@ -212,7 +207,7 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                           {hasEvaluation ? "Cập nhật đánh giá" : "Thẩm định & Đánh giá"}
                         </Button>
                       )}
-                      {!isCompleted && (
+                      {canEdit && (
                         <Button
                           variant="outline"
                           size="sm"

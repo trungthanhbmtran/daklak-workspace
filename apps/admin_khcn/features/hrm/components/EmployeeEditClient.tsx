@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { useHrmEmployee, useUpdateHrmEmployee } from "@/features/hrm/hooks/useHrmEmployees";
+import { useHrmPermissions } from "@/features/hrm/hooks/useHrmPermissions";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   const [submitting, setSubmitting] = useState(false);
+  const { canEditEmployee, isLoading: isAuthLoading } = useHrmPermissions();
 
   const { data: employee, isLoading: isLoadingEmployee } = useHrmEmployee(employeeId);
   const { mutateAsync: updateEmployee } = useUpdateHrmEmployee();
@@ -234,6 +236,21 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
       toast.error("Lỗi khi lưu dữ liệu");
     } finally { setSubmitting(false); }
   };
+
+  if (!isAuthLoading && !canEditEmployee) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center">
+        <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
+        <h2 className="text-xl font-bold">Không có quyền truy cập</h2>
+        <p className="text-sm text-muted-foreground mt-2 max-w-md">
+          Bạn không có quyền chỉnh sửa hồ sơ nhân sự (yêu cầu quyền HRM_EMPLOYEE:UPDATE). Vui lòng liên hệ quản trị viên để được phân quyền.
+        </p>
+        <Button className="mt-6" onClick={() => router.back()}>
+          Quay lại
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 p-6 md:p-10 text-slate-900">

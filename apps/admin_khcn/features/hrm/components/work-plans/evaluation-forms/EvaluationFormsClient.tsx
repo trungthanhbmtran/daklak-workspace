@@ -53,6 +53,7 @@ import { organizationApi } from '@/features/system-admin/organization/api';
 import type { OrganizationUnitNode } from '@/features/system-admin/organization/types';
 import { workflowApi } from '@/features/workflow/api';
 import { unwrapData } from '@/lib/api-helper';
+import { useHrmPermissions } from '@/features/hrm/hooks/useHrmPermissions';
 
 function flattenUnits(nodes: OrganizationUnitNode[], parentPath = ''): Array<{ code: string; name: string }> {
   return nodes.flatMap((unit) => {
@@ -62,6 +63,7 @@ function flattenUnits(nodes: OrganizationUnitNode[], parentPath = ''): Array<{ c
 }
 
 export function EvaluationFormsClient() {
+  const { canManageEvaluationForms } = useHrmPermissions();
   const { data: forms = [], isLoading, refetch, isRefetching } = useGetKpiForms();
   const updateFormMutation = useUpdateKpiForm();
   const saveXmlMutation = useSaveKpiFormXml();
@@ -575,9 +577,11 @@ export function EvaluationFormsClient() {
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
                 Làm mới
               </Button>
-              <Button size="sm" onClick={() => setCreateSheetOpen(true)} className="h-9 gap-2 bg-white text-blue-900 hover:bg-blue-50 font-semibold shadow-xs">
-                <Plus className="w-4 h-4" /> Tạo mẫu
-              </Button>
+              {canManageEvaluationForms && (
+                <Button size="sm" onClick={() => setCreateSheetOpen(true)} className="h-9 gap-2 bg-white text-blue-900 hover:bg-blue-50 font-semibold shadow-xs">
+                  <Plus className="w-4 h-4" /> Tạo mẫu
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -809,17 +813,19 @@ export function EvaluationFormsClient() {
                   {/* Hàng 2: Thao tác cấu hình, quy trình & quản trị */}
                   <div className="flex items-center gap-1.5 w-full justify-between min-w-0">
                     <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={item.organizationId === 'DEFAULT'}
-                        onClick={() => handleOpenEditXml(item)}
-                        title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Sửa mã nguồn XML'}
-                        className="h-7.5 px-2.5 text-xs gap-1.5 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-medium"
-                      >
-                        <Code2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                        <span>Sửa XML</span>
-                      </Button>
+                      {canManageEvaluationForms && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={item.organizationId === 'DEFAULT'}
+                          onClick={() => handleOpenEditXml(item)}
+                          title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Sửa mã nguồn XML'}
+                          className="h-7.5 px-2.5 text-xs gap-1.5 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-medium"
+                        >
+                          <Code2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                          <span>Sửa XML</span>
+                        </Button>
+                      )}
 
                       <Button
                         variant="outline"
@@ -837,22 +843,24 @@ export function EvaluationFormsClient() {
                         <span>XML</span>
                       </Button>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setAssignForm(item);
-                          setAssignUnitCode('');
-                          setAssignWorkflowId('');
-                        }}
-                        className="h-7.5 px-2.5 text-xs gap-1.5 font-medium hover:bg-muted"
-                        title="Gán mẫu đánh giá vào quy trình xử lý"
-                      >
-                        <GitBranch className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                        <span>Gán quy trình</span>
-                      </Button>
+                      {canManageEvaluationForms && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setAssignForm(item);
+                            setAssignUnitCode('');
+                            setAssignWorkflowId('');
+                          }}
+                          className="h-7.5 px-2.5 text-xs gap-1.5 font-medium hover:bg-muted"
+                          title="Gán mẫu đánh giá vào quy trình xử lý"
+                        >
+                          <GitBranch className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                          <span>Gán quy trình</span>
+                        </Button>
+                      )}
 
-                      {item.status !== 'PUBLISHED' && (
+                      {canManageEvaluationForms && item.status !== 'PUBLISHED' && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -865,16 +873,18 @@ export function EvaluationFormsClient() {
                       )}
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={item.organizationId === 'DEFAULT'}
-                      onClick={() => handleOpenEditMeta(item)}
-                      title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Chỉnh sửa thông tin biểu mẫu'}
-                      className="h-7.5 w-7.5 text-muted-foreground hover:text-foreground shrink-0"
-                    >
-                      <Edit className="w-3.5 h-3.5" />
-                    </Button>
+                    {canManageEvaluationForms && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={item.organizationId === 'DEFAULT'}
+                        onClick={() => handleOpenEditMeta(item)}
+                        title={item.organizationId === 'DEFAULT' ? 'Mẫu dùng chung chỉ đọc; hãy tạo mẫu riêng để chỉnh sửa' : 'Chỉnh sửa thông tin biểu mẫu'}
+                        className="h-7.5 w-7.5 text-muted-foreground hover:text-foreground shrink-0"
+                      >
+                        <Edit className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </div>
                 </CardFooter>
               </Card>

@@ -13,3 +13,4 @@ export {
 } from "./hooks/useHrmEmployees";
 
 export { EmployeeListClient } from "./components/EmployeeListClient";
+export { useHrmPermissions } from "./hooks/useHrmPermissions";

@@ -55,6 +55,7 @@ async function main() {
   // Lãnh đạo Ban Tổ chức Tỉnh ủy
   await ensurePolicies('Lãnh đạo Ban Tổ chức Tỉnh ủy', {
     TASK: ['*'],
+    KPI: ['*'],
     HRM_EMPLOYEE: ['VIEW'],
     REPORT: ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'EXPORT'],
     DOCUMENT: ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH'],
@@ -72,6 +73,7 @@ async function main() {
   // Lãnh đạo Phòng - BTCTU
   await ensurePolicies('Lãnh đạo Phòng - BTCTU', {
     TASK: ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE'],
+    KPI: ['VIEW', 'EVALUATE', 'APPROVE'],
     HRM_EMPLOYEE: ['VIEW'],
     REPORT: ['VIEW', 'CREATE', 'UPDATE', 'EXPORT'],
     DOCUMENT: ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN'],

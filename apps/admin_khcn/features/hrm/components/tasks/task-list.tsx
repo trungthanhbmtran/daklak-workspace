@@ -16,6 +16,7 @@ import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList } from "../../hooks/useTasks";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useHrmPermissions } from "../../hooks/useHrmPermissions";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -147,6 +148,7 @@ function buildTaskTree(tasks: HrmTask[]): HrmTask[] {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export function TaskList() {
+  const { canCreateTask, canEvaluateTask } = useHrmPermissions();
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   
@@ -235,7 +237,9 @@ export function TaskList() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
+        {canCreateTask && (
+          <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm">+ Giao việc mới</Button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 relative bg-white rounded-lg shadow-sm border border-slate-200">
@@ -362,15 +366,16 @@ export function TaskList() {
               header: "Thao tác",
               className: "text-right",
               cell: (task: any) => {
-                const canEvaluate =
+                const isReviewableStatus =
                   task.status === "REVIEWING" ||
                   task.status === "PENDING_REVIEW" ||
                   task.status === "COMPLETED" ||
                   task.status === "DONE";
+                const showEvaluateBtn = isReviewableStatus && canEvaluateTask(task);
 
                 return (
                   <div className="flex items-center justify-end gap-1.5 shrink-0">
-                    {canEvaluate && (
+                    {showEvaluateBtn && (
                       <Button
                         variant="outline"
                         size="sm"

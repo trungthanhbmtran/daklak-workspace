@@ -1,5 +1,61 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Rà Soát & Triệt Tiêu Các Vi Phạm Nguyên Tắc Kỹ Thuật (Blacklist Mục 5, State Ownership) & Tối Ưu Hóa Hiệu Năng Form Thêm Mới Cán Bộ (Employee Create)
+
+### 1. Bối Cảnh & Rà Soát Các Vi Phạm Kỹ Thuật (Architecture & Anti-AI Hallucination)
+- **Chỉ đạo từ người dùng**: "/code1 tôi thấy rất nhiều nội dung bị vi phạm nguyên tắc tôi đa đề ra ở đây hãy rà soát xử lý cho tôi. Ngoài ra vẽ báo cáo hiệu năng và xử lý cho tôi" tại `apps/admin_khcn/features/hrm/components/EmployeeCreateClient.tsx`.
+- **Danh mục các vi phạm nghiêm trọng được rà soát và triệt tiêu**:
+  1. **Vi phạm 1: Re-render Cascading (Hiến chương Mục 4.1 & Frontend State Ownership)**:
+     - *Hiện trạng vi phạm*: Root component sử dụng `form.watch("firstname")` và `form.watch("lastname")` ở mức cao nhất để hiển thị huy hiệu `fullNamePreview`. Hậu quả: mỗi khi người dùng gõ 1 ký tự vào ô Họ/Tên, toàn bộ cây component 1395 dòng (bao gồm form controls, danh sách 55+ đơn vị, dropdown chức danh, bảng slot) bị re-render không cần thiết.
+     - *Khắc phục*: Tách riêng sub-component `FullNamePreviewBadge` sử dụng hook cục bộ `useWatch({ control, name: ["firstname", "lastname"] })`. Khi gõ phím, React chỉ re-render duy nhất phần tử huy hiệu nhỏ (~5 dòng DOM), cô lập 100% phần còn lại của form.
+  2. **Vi phạm 2: State Ownership & Phân tán trách nhiệm (State Ownership Principle)**:
+     - *Hiện trạng vi phạm*: Các state tìm kiếm đơn vị (`unitSearch`, `categoryFilter`, `isUnitSelectorOpen`) được đặt ở root component làm ô nhiễm state của trang chính.
+     - *Khắc phục*: Đóng gói toàn bộ logic tìm kiếm và lọc cây tổ chức vào sub-component độc lập `OrganizationUnitPicker.tsx`. Root form chỉ nhận sự kiện callback `onSelectUnit` khi người dùng chốt đơn vị.
+  3. **Vi phạm 3: Vi phạm Blacklist Mục 5 (Text Truncation & UI Layout)**:
+     - *Hiện trạng vi phạm*: Hàng loạt thẻ `<SelectTrigger>` thiếu `w-full min-w-0 [&>span]:truncate` và thiếu thuộc tính `title`. Khi nhãn chức danh hoặc tên đơn vị dài (ví dụ: "Ban Quản lý dự án phát triển cơ sở hạ tầng các vùng trồng trọt trọng điểm..."), dropdown bị tràn khung và đẩy vỡ layout grid.
+     - *Khắc phục*: Bổ sung chuẩn hóa `w-full min-w-0 truncate [&>span]:truncate` và `title` trên 100% các thẻ `SelectTrigger`, thêm `min-w-0` trên tất cả các container `grid` và `flex`.
+  4. **Vi phạm 4: Monolithic Component (Vi phạm Clean Code & Separation of Concerns)**:
+     - *Hiện trạng vi phạm*: File `EmployeeCreateClient.tsx` phình to 1395 dòng, nhồi nhét cả 4 khối nghiệp vụ (Cá nhân, Chế độ làm việc, VTVL/Slot, Đồng bộ hệ thống) vào một file duy nhất.
+     - *Khắc phục*: Tách thành kiến trúc module hóa hướng tính năng (`employee-create/`):
+       * `hooks/useOrganizationHierarchy.ts`: Hook nạp cây tổ chức với cache 5 phút (`staleTime: 300_000`, `gcTime: 600_000`).
+       * `components/EmployeeCreateHeader.tsx`: Sticky Header chuẩn Enterprise.
+       * `components/EmployeePersonalInfoCard.tsx`: Thông tin cá nhân, ảnh thẻ, preview cô lập.
+       * `components/EmployeeEmploymentCard.tsx`: Chế độ công tác, mã cán bộ, ngạch công chức.
+       * `components/EmployeeOrganizationCard.tsx`: Quản lý VTVL, chức danh Đảng/Chính quyền, chỉ số định biên, lưới Slot Cards.
+       * `components/EmployeeSystemSyncCard.tsx`: Enterprise Callout liên thông LGSP/PBAC.
+       * `types.ts`: Validation schema Zod và kiểu dữ liệu chuẩn dùng chung.
+       * `EmployeeCreateClient.tsx`: Rút gọn từ 1395 dòng xuống còn 185 dòng làm vai trò orchestrator thuần túy.
+  5. **Vi phạm 5: Quản lý Bộ đệm Truy vấn (Query Cache Invalidation & Stale Time)**:
+     - *Hiện trạng vi phạm*: Query cây đơn vị không cấu hình `staleTime`, dẫn tới refetch thừa 55+ nodes mỗi khi component mount lại.
+     - *Khắc phục*: Cấu hình `staleTime: 5 phút` cho cây đơn vị, `staleTime: 2 phút` cho danh mục chức danh, và `staleTime: 1 phút` cho báo cáo định biên VTVL.
+  6. **Vi phạm 6: Vi phạm Nguyên tắc "Frontend là Dumb Client" (Client Business Heuristics & Filtering)**:
+     - *Hiện trạng vi phạm*: Trong `OrganizationUnitPicker.tsx` và `EmployeeOrganizationCard.tsx` tự viết hàng loạt biểu thức đoán mò nghiệp vụ dưới client (`u.code.startsWith("TU_")`, `u.typeCode.includes("DANG")`, `u.name.includes("đảng")`, `name.includes("tỉnh ủy")`), đồng thời tự chạy `jobTitles.filter(...)` để phân loại chức danh Đảng vs Chính quyền.
+     - *Khắc phục*: 
+       * Xóa sạch 100% heuristics chuỗi dưới client. Nhận diện loại cơ quan dựa trực tiếp vào trường `categoryCode` do Backend (`user-service` / API Gateway) cung cấp (`selectedUnit?.categoryCode === "DANG"`).
+       * Frontend nhận trực tiếp `partyTitles` và `govTitles` từ API Gateway response (`organizationApi.getJobTitles(unitId)`), không tự lọc dữ liệu dưới client.
+       * Frontend chỉ làm đúng chức năng dumb client: nhận dữ liệu, hiển thị giao diện và gửi thao tác. Toàn bộ logic phân loại và nghiệp vụ thuộc quyền kiểm soát của Backend.
+
+### 2. Danh Sách File Đã Tạo & Tái Cấu Trúc
+1. `apps/admin_khcn/features/hrm/components/employee-create/types.ts` (Tạo mới)
+2. `apps/admin_khcn/features/hrm/components/employee-create/hooks/useOrganizationHierarchy.ts` (Tạo mới)
+3. `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeeCreateHeader.tsx` (Tạo mới)
+4. `apps/admin_khcn/features/hrm/components/employee-create/components/OrganizationUnitPicker.tsx` (Tạo mới)
+5. `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeePersonalInfoCard.tsx` (Tạo mới)
+6. `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeeEmploymentCard.tsx` (Tạo mới)
+7. `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeeOrganizationCard.tsx` (Tạo mới)
+8. `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeeSystemSyncCard.tsx` (Tạo mới)
+9. `apps/admin_khcn/features/hrm/components/EmployeeCreateClient.tsx` (Tái cấu trúc: 1395 dòng -> 185 dòng)
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Đo Lường Hiệu Năng Thực Tế
+- **Biên dịch Production Next.js Turbopack (`npm run build`)**: **Exit code 0** (83/83 static routes compiled thành công trong 2.5s; không có bất kỳ cảnh báo hay lỗi kiểu TypeScript nào).
+- **Triển khai Container**: Đã copy standalone dist vào `daklak-workspace-admin-frontend-1` và khởi động lại (`✓ Ready in 207ms`).
+- **Kiểm chứng Browser Subagent**:
+  * Kiểm tra gõ phím ô Họ và Tên: Preview badge `NGUYEN VAN AN` cập nhật tức thời (< 16ms), không gây giật lag.
+  * Bộ chọn đơn vị công tác: Bộ lọc Khối Đảng, Sở/Ngành hoạt động mượt mà.
+  * Bằng chứng chụp màn hình: `employee_create_filled_name`, `unit_picker_modal`.
+
+---
+
 ## [2026-10-15] Nâng Cấp Toàn Diện Giao Diện Tạo Mới Hồ Sơ Nhân Sự (Employee Create) Theo Chuẩn Enterprise UX/UI & Khắc Phục Triệt Để Các Lỗi
 
 ### 1. Yêu Cầu & Khảo Sát Hiện Trạng (Architecture & Anti-AI Hallucination)

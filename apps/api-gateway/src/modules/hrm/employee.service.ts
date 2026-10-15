@@ -188,12 +188,19 @@ export class EmployeeService implements OnModuleInit {
     if (req.crossDepartment === 'true' || req.crossDepartment === true)
       req.crossDepartment = true;
 
+    const roles: string[] = Array.isArray(user?.roles) ? user.roles : [];
+    const perms: string[] = Array.isArray(user?.permissionsFlatten) ? user.permissionsFlatten : [];
     const isAdmin =
-      user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE') ||
-      user?.permissionsFlatten?.includes('HRM_EMPLOYEE:*') ||
-      user?.permissionsFlatten?.includes('SYSTEM:*') ||
-      user?.roles?.includes('Quản trị viên hệ thống') ||
-      user?.roles?.includes('Quản trị viên Hệ thống');
+      user?.isAdmin ||
+      perms.includes('*') ||
+      perms.includes('*:*') ||
+      perms.includes('HRM_EMPLOYEE:MANAGE') ||
+      perms.includes('HRM_EMPLOYEE:*') ||
+      perms.includes('SYSTEM:*') ||
+      roles.some((r: any) => {
+        const s = typeof r === 'string' ? r : r?.name || '';
+        return s.toLowerCase().includes('admin') || s.toLowerCase().includes('quản trị viên hệ thống');
+      });
 
     if (req.callerUnitId && !isAdmin) {
       const callerUnitId = parseInt(req.callerUnitId, 10);
@@ -219,12 +226,11 @@ export class EmployeeService implements OnModuleInit {
 
     if (res) {
       res.meta = res.meta || {};
-      const perms = user?.permissionsFlatten || [];
       const allowedActions: string[] = [];
 
-      if (perms.includes('HRM_EMPLOYEE:CREATE')) allowedActions.push('CREATE');
-      if (perms.includes('HRM_EMPLOYEE:UPDATE')) allowedActions.push('EDIT');
-      if (perms.includes('HRM_EMPLOYEE:DELETE')) allowedActions.push('DELETE');
+      if (isAdmin || perms.includes('HRM_EMPLOYEE:CREATE') || perms.includes('HRM_EMPLOYEE:*')) allowedActions.push('CREATE');
+      if (isAdmin || perms.includes('HRM_EMPLOYEE:UPDATE') || perms.includes('HRM_EMPLOYEE:*')) allowedActions.push('EDIT');
+      if (isAdmin || perms.includes('HRM_EMPLOYEE:DELETE') || perms.includes('HRM_EMPLOYEE:*')) allowedActions.push('DELETE');
 
       res.meta.allowedActions = allowedActions;
     }

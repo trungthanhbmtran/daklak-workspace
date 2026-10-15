@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { CreateTaskDialog } from "./create-task-dialog";
 import { CreateStepDialog } from "./create-step-dialog";
 import { useUser } from "@/hooks/useUser";
+import { useHrmPermissions } from "../../hooks/useHrmPermissions";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -38,6 +39,7 @@ export function TaskProcessingTab({
   onOpenEvaluation?: () => void;
 }) {
   const { user } = useUser();
+  const { canCreateSubtask, canCreateStep } = useHrmPermissions();
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
 
@@ -137,7 +139,7 @@ export function TaskProcessingTab({
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <Heading level="h4" className="font-medium">Nhiệm vụ con (Phân rã công việc)</Heading>
-          {currentTask.allowedActions?.includes('CREATE_SUBTASK') && !isCompleted && (
+          {canCreateSubtask(currentTask) && !isCompleted && (
             <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateSubTaskOpen(true)}>
               + Tạo nhiệm vụ con
             </Button>
@@ -206,7 +208,7 @@ export function TaskProcessingTab({
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <Heading level="h4" className="font-medium">Các bước thực hiện (Checklist nội bộ)</Heading>
-          {currentTask.allowedActions?.includes('CREATE_STEP') && !isCompleted && (
+          {canCreateStep(currentTask) && !isCompleted && (
             <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setIsCreateStepOpen(true)}>
               + Thêm bước
             </Button>

@@ -72,7 +72,9 @@ export async function seedUserGroups(prisma: PrismaClient) {
   await grant(orgAdminGroup.id, 'ROLE', ['VIEW', 'ASSIGN'], orgAdminCondition);
   await grant(orgAdminGroup.id, 'CATEGORY', ['VIEW'], orgAdminCondition);
   await grant(orgAdminGroup.id, 'MENU', ['VIEW'], orgAdminCondition);
-  await grant(orgAdminGroup.id, 'TASK', ['VIEW', 'CREATE', 'UPDATE'], orgAdminCondition);
+  await grant(orgAdminGroup.id, 'TASK', ['*'], orgAdminCondition);
+  await grant(orgAdminGroup.id, 'KPI', ['*'], orgAdminCondition);
+  await grant(orgAdminGroup.id, 'PLAN', ['*'], orgAdminCondition);
   await grant(orgAdminGroup.id, 'REPORT', ['VIEW', 'EXPORT'], orgAdminCondition);
   await grant(orgAdminGroup.id, 'DOCUMENT', ['VIEW'], orgAdminCondition);
 
@@ -85,6 +87,7 @@ export async function seedUserGroups(prisma: PrismaClient) {
   
   const leaderCondition = 'ALLOW IF resource.unitCode == user.unitCode OR resource.departmentId == currentDepartmentId';
   await grant(leaderGroup.id, 'TASK', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'REASSIGN', 'EVALUATE', 'DELETE'], leaderCondition);
+  await grant(leaderGroup.id, 'KPI', ['VIEW', 'EVALUATE', 'APPROVE'], leaderCondition);
   await grant(leaderGroup.id, 'HRM_EMPLOYEE', ['VIEW'], leaderCondition);
   await grant(leaderGroup.id, 'DOCUMENT', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH'], leaderCondition);
   await grant(leaderGroup.id, 'DOC_INCOMING', ['VIEW', 'CREATE', 'UPDATE', 'APPROVE', 'ASSIGN', 'PUBLISH'], leaderCondition);

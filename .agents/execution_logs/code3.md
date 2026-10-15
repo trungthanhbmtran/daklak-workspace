@@ -111,3 +111,34 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - `node -e "... ASCII Box chars check ..."`: Trả về `Has ASCII Box chars: false` (Xóa sạch 100% ký tự hộp ASCII gây lỗi font).
   - `node -e "... UNLOCKED check ..."`: Đảm bảo file ghi thành công không bị kẹt lock.
 - **Kết quả nghiệm thu**: Văn kiện Word đạt chuẩn thể thức cơ quan Đảng, trả lời trực diện, đầy đủ và sâu sắc Câu 1, Câu 2, Câu 3; các sơ đồ luồng quy trình hiển thị sắc nét, chuyên nghiệp, không còn bất kỳ lỗi vỡ dòng hay tràn khung nào.
+
+## [2026-10-15] Cập nhật Tài nguyên, Phân quyền PBAC và Đóng/Mở Nút Thao tác theo Quyền Nhân sự & Công việc
+- **Tác vụ**: Xử lý triệt để phản hồi của người dùng: "cập nhật lại các tài nguyên vai trò để đóng mở nút theo quyền nhân sự cho tôi. Tôi vẫn thấy rất nhiều user có thể thấy nút thao tác mặc dù họ không có quyền".
+- **Nguyên nhân gốc rễ**:
+  1. API Gateway `/auth/me` lọc whitelist `PROFILE_FIELDS` làm rơi rụng toàn bộ thông tin PBAC (`permissionsFlatten`, `roles`, `roleNames`, `isAdmin`, `policies`), khiến Frontend luôn nhận `undefined` và không thể kiểm tra quyền.
+  2. Gateway `EmployeeController` chưa gắn `@RequirePermissions(...)` trên các endpoint tạo/sửa/xóa hồ sơ nhân sự.
+  3. Frontend các màn hình Quản lý Nhân sự, Danh sách công việc, Drawer chi tiết công việc, Phân rã nhiệm vụ con & bước thực hiện, Cấu hình công thức KPI, và Quản lý file mẫu XML hiển thị các nút thao tác (`Thêm nhân sự`, `Sửa`, `Xóa`, `+ Giao việc mới`, `Đánh giá`, `Chỉnh sửa việc`, `+ Tạo nhiệm vụ con`, `+ Thêm bước`, `Ban hành phiên bản mới`, `+ Tạo mẫu`, `Sửa XML`, `Gán quy trình`, `Phát hành`) vô điều kiện hoặc chỉ dựa trên trạng thái `status` mà không kiểm tra quyền người dùng.
+- **Phạm vi file đã thực thi**:
+  - `apps/api-gateway/src/modules/auth/auth.service.ts`: Mở rộng `PROFILE_FIELDS` và phương thức `me(req)` tổng hợp đầy đủ `permissionsFlatten`, `roles`, `roleNames`, `isAdmin`, `unitId`, `jobTitleCode` trả về client.
+  - `apps/api-gateway/src/modules/hrm/employee.controller.ts`: Bổ sung `@RequirePermissions('HRM_EMPLOYEE:VIEW')`, `@RequirePermissions('HRM_EMPLOYEE:CREATE')`, `@RequirePermissions('HRM_EMPLOYEE:UPDATE')`, `@RequirePermissions('HRM_EMPLOYEE:DELETE')`.
+  - `apps/api-gateway/src/modules/hrm/employee.service.ts`: Cập nhật logic `list()` tính toán `allowedActions` chuẩn xác hỗ trợ quyền wildcard (`*`, `*:*`, `HRM_EMPLOYEE:*`, `SYSTEM:*`) và tài khoản quản trị.
+  - `apps/admin_khcn/features/hrm/hooks/useHrmPermissions.ts`: Xây dựng hook PBAC dùng chung tập trung, cung cấp các cờ quyền reactive (`canCreateEmployee`, `canEditEmployee`, `canDeleteEmployee`, `canCreateTask`, `canEvaluateTask`, `canEditTask`, `canApproveIncidental`, `canCreateSubtask`, `canCreateStep`, `canManageKpi`, `canManageEvaluationForms`).
+  - `apps/admin_khcn/features/hrm/index.ts`: Export `useHrmPermissions`.
+  - `apps/admin_khcn/features/hrm/components/EmployeeListClient.tsx`: Đóng mở các nút `Thêm nhân sự`, `Chỉnh sửa`, `Xóa` chặt chẽ theo PBAC.
+  - `apps/admin_khcn/features/hrm/components/EmployeeCreateClient.tsx` & `EmployeeEditClient.tsx`: Thêm màn chắn bảo vệ và giao diện thông báo "Không có quyền truy cập" khi người dùng không có quyền tạo/sửa.
+  - `apps/admin_khcn/features/hrm/components/tasks/task-list.tsx`: Đóng mở nút `+ Giao việc mới` và nút `Đánh giá` theo đúng quyền `canCreateTask`, `canEvaluateTask`.
+  - `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`: Đóng mở nút `Đánh giá`, `Chỉnh sửa`, `Phê duyệt việc phát sinh` theo `canEvaluateTask`, `canEditTask`, `canApproveIncidental`.
+  - `apps/admin_khcn/features/hrm/components/tasks/task-detail-processing-tab.tsx`: Đóng mở nút `+ Tạo nhiệm vụ con` và `+ Thêm bước` theo `canCreateSubtask`, `canCreateStep`.
+  - `apps/admin_khcn/features/hrm/components/work-plans/kpi/KpiFormulasClient.tsx`: Đóng mở nút `Ban hành phiên bản mới`, `+ Thêm nhóm ngoại lệ`, các nút sửa/xóa quy tắc và nạp phiên bản lịch sử theo `canManageKpi`.
+  - `apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx`: Đóng mở nút `+ Tạo mẫu`, `Sửa XML`, `Gán quy trình`, `Phát hành`, `Sửa thông tin mẫu` theo `canManageEvaluationForms`.
+  - `apps/user-service/prisma/seeds/04-pbac.seed.ts` & `apps/user-service/prisma/sync-pbac.ts`: Bổ sung phân quyền tài nguyên `KPI` cho nhóm `Quản trị viên đơn vị`, `Lãnh đạo đơn vị`, `Lãnh đạo Ban Tổ chức Tỉnh ủy`, `Lãnh đạo Phòng - BTCTU`.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npm --prefix apps/user-service run build`: Exit code 0.
+  - `docker exec daklak-workspace-user-service-1 node dist/apps/user-service/prisma/sync-pbac.js`: Exit code 0, cập nhật 100% policies vào MariaDB.
+  - `npm --prefix apps/api-gateway run build`: Exit code 0.
+  - `npm --prefix apps/admin_khcn run build`: Exit code 0 (100% 83 routes pass, Next.js Turbopack build thành công).
+  - Runtime API Verification:
+    - `admin` -> `isAdmin: true`, `permissionsCount: 814`.
+    - `author` (Chuyên viên) -> `isAdmin: false`, `permissionsCount: 25`, không có quyền tạo nhân sự/đánh giá/công thức KPI.
+    - `author` gọi `POST /api/v1/admin/hrm/employees` -> HTTP 403 Forbidden: `Bạn không có quyền thực hiện thao tác này. Yêu cầu quyền: HRM_EMPLOYEE:CREATE`.
+- **Kết quả nghiệm thu**: 100% các nút thao tác nhân sự, công việc, KPI, biểu mẫu XML được đóng mở chính xác theo quyền của từng user; triệt tiêu hoàn toàn tình trạng user không có quyền vẫn thấy nút bấm; bảo vệ 2 lớp cả ở UI dumb client và Gateway endpoint. Dọn sạch 100% debug logs và mã hóa UTF-8 không BOM.

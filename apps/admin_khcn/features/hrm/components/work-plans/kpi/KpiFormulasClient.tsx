@@ -53,6 +53,7 @@ import {
   KpiPreviewVariables,
   KpiFormulaVersion,
 } from '../../../api/task-kpi.api';
+import { useHrmPermissions } from '../../../hooks/useHrmPermissions';
 
 const DEFAULT_SETTINGS: GlobalKpiSettings = {
   baseFormula: '(C / Q) * W * 100',
@@ -132,6 +133,7 @@ function getRatingClassification(score: number): {
 
 export function KpiFormulasClient() {
   const queryClient = useQueryClient();
+  const { canManageKpi } = useHrmPermissions();
 
   const [activeTab, setActiveTab] = useState<string>('formula');
   const [baseFormula, setBaseFormula] = useState(DEFAULT_SETTINGS.baseFormula);
@@ -437,24 +439,26 @@ export function KpiFormulasClient() {
               <Zap className="size-3.5 fill-indigo-600 text-indigo-600" />
               <span>Mô phỏng KPI</span>
             </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={saveMutation.isPending || previewMutation.isPending}
-              className="h-9 gap-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
-            >
-              {saveMutation.isPending ? (
-                <>
-                  <Activity className="size-3.5 animate-spin" />
-                  <span>Đang lưu...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="size-3.5" />
-                  <span>Ban hành phiên bản mới</span>
-                </>
-              )}
-            </Button>
+            {canManageKpi && (
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={saveMutation.isPending || previewMutation.isPending}
+                className="h-9 gap-1.5 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+              >
+                {saveMutation.isPending ? (
+                  <>
+                    <Activity className="size-3.5 animate-spin" />
+                    <span>Đang lưu...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="size-3.5" />
+                    <span>Ban hành phiên bản mới</span>
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -859,13 +863,15 @@ export function KpiFormulasClient() {
                     Cấu hình công thức chuyên biệt ghi đè công thức chuẩn cho từng lĩnh vực đặc thù của Tỉnh ủy Đắk Lắk.
                   </CardDescription>
                 </div>
-                <Button
-                  type="button"
-                  onClick={handleOpenAddRule}
-                  className="h-9 px-3 text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs shrink-0"
-                >
-                  <Plus className="size-3.5" /> Thêm nhóm ngoại lệ
-                </Button>
+                {canManageKpi && (
+                  <Button
+                    type="button"
+                    onClick={handleOpenAddRule}
+                    className="h-9 px-3 text-xs gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xs shrink-0"
+                  >
+                    <Plus className="size-3.5" /> Thêm nhóm ngoại lệ
+                  </Button>
+                )}
               </div>
 
               {/* THANH TÌM KIẾM NHANH */}
@@ -903,28 +909,30 @@ export function KpiFormulasClient() {
                               {rule.domainCode}
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="size-7 text-muted-foreground hover:text-primary"
-                              onClick={() => handleOpenEditRule(idx)}
-                              title="Chỉnh sửa nhóm này"
-                            >
-                              <Edit3 className="size-3.5" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="size-7 text-muted-foreground hover:text-destructive"
-                              onClick={() => handleDeleteRule(idx)}
-                              title="Xóa nhóm này"
-                            >
-                              <Trash2 className="size-3.5" />
-                            </Button>
-                          </div>
+                          {canManageKpi && (
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-7 text-muted-foreground hover:text-primary"
+                                onClick={() => handleOpenEditRule(idx)}
+                                title="Chỉnh sửa nhóm này"
+                              >
+                                <Edit3 className="size-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="size-7 text-muted-foreground hover:text-destructive"
+                                onClick={() => handleDeleteRule(idx)}
+                                title="Xóa nhóm này"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
 
                         <div>
@@ -1305,15 +1313,17 @@ export function KpiFormulasClient() {
                         )}
                       </div>
 
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={isCurrent ? 'outline' : 'default'}
-                        onClick={() => loadVersion(item)}
-                        className="text-xs h-8 shrink-0"
-                      >
-                        {isCurrent ? 'Xem lại bản này' : 'Nạp phiên bản này'}
-                      </Button>
+                      {canManageKpi && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={isCurrent ? 'outline' : 'default'}
+                          onClick={() => loadVersion(item)}
+                          className="text-xs h-8 shrink-0"
+                        >
+                          {isCurrent ? 'Xem lại bản này' : 'Nạp phiên bản này'}
+                        </Button>
+                      )}
                     </div>
                   );
                 })
