@@ -225,4 +225,20 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - Dọn sạch rác: 0 `console.log`, 0 `debugger`, mã hóa UTF-8 không BOM.
 - **Kết quả nghiệm thu**: Backend là Source of Truth chuẩn mực cho việc chuẩn hóa ngôn ngữ hành chính; Frontend tuân thủ Dumb Client nhận dữ liệu đã được Việt hóa 100%.
 
+## [2026-10-15] Xóa Bỏ Menu 'Tra Cứu, Thống Kê & Báo Cáo' Khỏi Seed User Service và Dọn Sạch Cơ Sở Dữ Liệu
+- **Tác vụ**: Xử lý yêu cầu của người dùng: "xoá cái menu Tra cứu, thống kê & báo cáo đi trong seed user service menu và cập nhật lại ở data cho tôi".
+- **Nguyên nhân gốc rễ**: Trước đây trong quá trình thử nghiệm, một bản ghi menu với `code: 'HRM_REPORT_MENU'`, `name: 'Tra cứu, thống kê & báo cáo'`, `route: '/services/hrm/reports'` (ID: 60) đã được thêm vào bảng `admin_systems.sys_menus` của `user-service`. Menu này gây trùng lặp với phân hệ Báo cáo chuẩn của hệ thống (`report-service` tại `/services/reports`).
+- **Phạm vi file đã thực thi**:
+  - `apps/user-service/prisma/seeds/menus.seed.ts`: Bổ sung `'HRM_REPORT_MENU'` vào danh sách dọn dẹp `deleteMany` để vĩnh viễn không nạp lại menu này trong các lượt seed.
+  - CSDL `admin_systems.sys_menus`: Chạy câu lệnh `DELETE FROM admin_systems.sys_menus WHERE code = 'HRM_REPORT_MENU';` xóa sạch bản ghi ID 60 khỏi MariaDB/MySQL.
+  - Khởi động lại container `daklak-workspace-user-service-1` và `daklak-workspace-api-gateway-1` để làm mới bộ nhớ cache menu.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `docker exec daklak-workspace-mysql-1 mysql -u root -pmypassword -e "SELECT * FROM admin_systems.sys_menus WHERE code = 'HRM_REPORT_MENU';"`: Kết quả 0 rows (Đã xóa triệt để).
+  - Browser Subagent E2E Verification: Đăng nhập tài khoản admin, truy cập trực tiếp `http://113.184.220.82/admin/services/hrm/work-plans/tasks` và chụp ảnh màn hình nghiệm thu (`menu_sidebar_updated_1792082829606.png`):
+    + Thanh điều hướng Sidebar bên trái phân hệ HRM hoàn toàn sạch sẽ, mục "Tra cứu, thống kê & báo cáo" đã biến mất hoàn toàn.
+    + Danh sách menu phân hệ chức năng dừng lại chuẩn xác tại "Mẫu đánh giá KPI".
+  - Kiểm tra rác thừa: 0 `console.log`, 0 `debugger`, mã hóa UTF-8 không BOM.
+- **Kết quả nghiệm thu**: Menu dư thừa đã được xóa bỏ triệt để từ CSDL đến cấu hình seed theo đúng quy định phân định ranh giới giữa các service.
+
+
 

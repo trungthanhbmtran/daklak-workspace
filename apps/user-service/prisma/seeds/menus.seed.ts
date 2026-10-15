@@ -83,6 +83,7 @@ export async function seedMenus(prisma: PrismaClient) {
           'HRM_PERSONAL_KPI_MENU',
           'HRM_REVIEW_KPI_MENU',
           'HRM_DASHBOARD_KPI_MENU',
+          'HRM_REPORT_MENU',
           'API_GATEWAY_GROUP',
           'SYS_ENDPOINT',
         ],
