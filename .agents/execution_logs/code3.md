@@ -25,3 +25,16 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - `npx tsc --noEmit` tại `apps/admin_khcn`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
   - `Select-String -Pattern "console\.|debugger"`: 0 kết quả (Dọn sạch 100% debug logs).
 - **Kết quả nghiệm thu**: Đạt toàn bộ 7 Bộ ràng buộc kỹ thuật bất biến (UI/UX layout, min-w-0, fluid flex, dumb client, không đè tiền tố API, UTF-8 không BOM, dọn sạch debug logs).
+
+## [2026-10-15] Xây dựng Bài Báo cáo Giải pháp Kỹ thuật & Phương án Triển khai Phần mềm Quản lý, Đánh giá KPI/OKR Ban Tổ chức Tỉnh ủy Đắk Lắk (.docx)
+- **Tác vụ**: Đọc và bám sát 100% đề bài `docs/yeucau.md`, Quy định số 01-QĐ/BTCTU ngày 28/11/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk, Hướng dẫn 05-HD/TU, Quy định 348-QĐ/BTCTW và Nghị định số 331/2026/NĐ-CP (Điều 28, 29, 30). Xây dựng bài Báo cáo Giải pháp Kỹ thuật hoàn chỉnh bằng file Word (.docx) chuyên nghiệp, chứng minh đầy đủ 9 nhóm chức năng cốt lõi, cung cấp 7 sơ đồ luồng & phân tích thiết kế hệ thống (kèm hình ảnh kiến trúc và tuần tự nhúng trực tiếp), làm rõ 2 cụm điểm đột phá (Ứng dụng AI toàn trình & Liên thông hệ thống quốc gia lấy data realtime), và xác định Cấp độ an toàn thông tin Cấp độ 3 cùng toàn bộ giải pháp quản lý & kỹ thuật theo 3 nhóm A, B, C.
+- **Phạm vi file đã thực thi**:
+  - `docs/BAO_CAO_GIAI_PHAP_KPI_OKR_BAN_TO_CHUC_TINH_UY_DAKLAK.docx`: File tài liệu Word chính thức hoàn chỉnh (~515 KB, 47.360 ký tự văn bản, định dạng font Times New Roman, lề 1 inch chuẩn thể thức văn bản Đảng/Nhà nước, bảng biểu phân màu, callout box, công thức toán học và ảnh sơ đồ độ nét cao).
+  - `docs/examplebtc/BAO_CAO_GIAI_PHAP_KPI_OKR_BAN_TO_CHUC_TINH_UY_DAKLAK.docx`: Bản sao lưu đối chiếu tại thư mục tài liệu tham chiếu.
+  - `scripts/docx_helpers.js`: Bộ helper dựng thành phần văn bản docx (Paragraph, Heading 1/2/3, Bullet, Callout box, Table có viền và shading, ImageRun).
+  - `scripts/build_full_report.js`: Script Node.js tự động hóa sinh tài liệu Word theo cấu trúc phân tầng.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `node scripts/build_full_report.js`: Exit code 0 (Thành công sinh file Word dung lượng 514.897 bytes).
+  - `node -e "const mammoth = require('mammoth'); ..."`: Trích xuất 47.360 ký tự văn bản, kiểm chứng đầy đủ 5 phần lớn, 100% cấu trúc Câu 1, Câu 2, Câu 3 không lỗi cú pháp.
+- **Kết quả nghiệm thu**: Bám sát 100% đề bài và yêu cầu bổ sung của người dùng; tuân thủ nghiêm ngặt 7 Bộ ràng buộc kỹ thuật; mã hóa UTF-8 không BOM; dọn sạch file tạm.
+

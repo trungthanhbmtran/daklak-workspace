@@ -7,6 +7,7 @@
     "@nestjs/microservices": "^11.1.28",
     "@qdrant/js-client-rest": "^1.19.0",
     "@types/pdf-parse": "^1.1.5",
+    "docx": "^9.11.0",
     "ioredis": "^6.0.0",
     "mammoth": "^1.12.3",
     "mysql2": "^3.24.5",

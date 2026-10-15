@@ -172,6 +172,8 @@ export class ExecutorService implements OnModuleInit {
     let rawSecret = '';
     if (auth.secretRef) {
       rawSecret = await this.getResolvedCredential(auth.secretRef);
+    } else if (auth.secret) {
+      rawSecret = auth.secret;
     }
 
     switch (auth.kind) {
@@ -348,12 +350,12 @@ export class ExecutorService implements OnModuleInit {
           message: `Máy chủ từ chối xác thực (HTTP ${status} ${status === 401 ? 'Unauthorized' : 'Forbidden'}). Vui lòng kiểm tra lại Secret/Token hoặc Client ID.`,
           authModel: conn.auth?.kind || 'none',
         };
-      } else if (status === 404) {
+      } else if (status === 404 || status === 405) {
         return {
           success: true,
           statusCode: status,
           latencyMs,
-          message: `Máy chủ phản hồi (HTTP 404 Not Found trên URL gốc). Đường truyền mạng và kết nối máy chủ hoạt động tốt.`,
+          message: `Máy chủ phản hồi (HTTP ${status} trên URL gốc). Đường truyền mạng và kết nối máy chủ hoạt động tốt.`,
           authModel: conn.auth?.kind || 'none',
         };
       } else {
@@ -375,6 +377,13 @@ export class ExecutorService implements OnModuleInit {
         msg = 'Kết nối tới máy chủ hết hạn thời gian (Timeout).';
       } else if (e.code === 'ENOTFOUND') {
         msg = 'Không tìm thấy tên miền máy chủ (DNS Not Found).';
+      } else if (
+        e.code === 'EACCES' ||
+        e.message?.includes('Prohibited upstream') ||
+        e.message?.includes('Upstream DNS rejected')
+      ) {
+        msg =
+          'Bị chặn bởi cơ chế kiểm soát an toàn mạng SSRF (Prohibited Upstream / Private IP). Nếu đây là mạng nội bộ, vui lòng cấu hình Vùng mạng là "Internal".';
       }
 
       return {
@@ -452,7 +461,9 @@ export class ExecutorService implements OnModuleInit {
     }
 
     // Append path and query
-    const fullUrl = `${targetUrl.origin}${targetUrl.pathname === '/' ? '' : targetUrl.pathname}${path}`;
+    const basePath = targetUrl.pathname.replace(/\/+$/, '');
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const fullUrl = `${targetUrl.origin}${basePath}${cleanPath}`;
 
     // Clean headers
     const reqHeaders = { ...headers };

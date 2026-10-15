@@ -29,6 +29,9 @@ export function ApiConnectionCreateDialog() {
   const handleSubmit = () => {
     createMut.mutate({
       ...formData,
+      code: formData.code.trim(),
+      displayName: formData.displayName.trim(),
+      baseUrl: formData.baseUrl.trim(),
       auth: { kind: 'none' },
       enabled: true,
     }, {

@@ -49,6 +49,9 @@ export function ApiConnectionEditDialog({ connection, open, onOpenChange }: Prop
       id: connection.id,
       data: {
         ...formData,
+        code: formData.code.trim(),
+        displayName: formData.displayName.trim(),
+        baseUrl: formData.baseUrl.trim(),
         expectedVersion: connection.version
       }
     }, {

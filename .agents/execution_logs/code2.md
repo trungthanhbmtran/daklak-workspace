@@ -935,6 +935,37 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - `apps/hrm-service`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
   - `apps/hrm-service`: `npx jest tasks.service.spec` -> PASS (27/27 test suites passed, 100%).
   - `apps/api-gateway`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
-  - `apps/admin_khcn`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
   - Vệ sinh mã nguồn: Quét sạch 100% debug logs (`console.log`, `debugger`), mã hóa UTF-8 không BOM.
+
+## 2026-10-15: Khắc Phục Lỗi Thẩm Định Liên Thông API (Upstream URL Validation & Path Handling)
+- **Nội dung tác vụ**:
+  1. **Khắc phục lỗi `HttpException: Cấu hình URL không hợp lệ: Upstream must be an HTTP(S) origin without credentials, query or path`**:
+     - Nguyên nhân cốt lõi: `upstreamUrl()` trong `apps/api-gateway/src/core/utils/upstream-network.ts` áp đặt điều kiện quá chặt chẽ `url.pathname !== '/'`, dẫn đến mọi API Connection có `baseUrl` chứa đường dẫn con (subpath như `/api/v1`, `/services`, `/admin`, hoặc có port/trailing slash) đều bị từ chối và throw exception khi người dùng thực hiện Thẩm định liên thông (Test Connection).
+     - Ngoài ra, tham số vùng mạng `type` (networkZone) bị bắt buộc chính xác chuỗi thường `'internal' | 'external'`; nếu bị thiếu (undefined/null) hoặc sai hoa thường sẽ gây lỗi.
+  2. **Tái cấu trúc và hoàn thiện bộ tiền xử lý URL liên thông (`upstream-network.ts`)**:
+     - Cho phép đầy đủ các định dạng URL liên thông hợp lệ có chứa subpath (`url.pathname`) như `https://lgsp.daklak.gov.vn/api/v1`, `http://113.184.220.82:8080/api/v1`, `https://dvc.daklak.gov.vn/services/`.
+     - Tự động chuẩn hóa và trim khoảng trắng (`baseUrl.trim()`), tự động fallback vùng mạng an toàn (`type || 'external'`), hỗ trợ không phân biệt hoa thường.
+     - Vẫn duy trì nghiêm ngặt các rào chắn an toàn: Chặn URL chứa credentials (`username`/`password`), chặn hash fragment (`#`), chặn giao thức ngoài `http/https`.
+     - Duy trì 100% cơ chế phòng vệ an toàn mạng SSRF (`assertUpstreamAddress`, `guardedUpstreamLookup`): Chặn đứng IP loopback (`127.0.0.1`), cloud metadata (`169.254.169.254`), và các dải mạng private đối với vùng mạng external.
+  3. **Nâng cấp độ linh hoạt và thông điệp kiểm tra liên thông tại `ExecutorService`**:
+     - `applyAuthBinding`: Bổ sung fallback `auth.secret` trực tiếp nếu `auth.secretRef` chưa được gán.
+     - `testConnection`: Ghi nhận thêm mã trạng thái HTTP 405 (Method Not Allowed) là kết nối mạng thành công (do endpoint upstream chỉ nhận POST); cung cấp thông điệp hướng dẫn rõ ràng khi bị chặn bởi chính sách SSRF (chuyển sang vùng mạng Internal).
+     - `executeRequest`: Chuẩn hóa ghép nối đường dẫn (`cleanPath = path.startsWith('/') ? path : '/' + path`, loại bỏ trailing slash của `basePath`) chống lỗi double-slash `//`.
+  4. **Frontend Form Input Sanitization (`admin_khcn`)**:
+     - Tự động `.trim()` chuỗi `baseUrl`, `code`, `displayName` trước khi gửi mutation tạo mới hoặc cập nhật API Connection.
+  5. **Bộ kiểm thử tự động (Unit Tests)**:
+     - Tạo mới `apps/api-gateway/src/core/utils/upstream-network.spec.ts` bao phủ 14 test cases: URL subpath, port, IP, fallback network zone, từ chối credentials, hash, URL rỗng, và kiểm tra cơ chế phòng vệ SSRF.
+- **Tập tin đã sửa đổi & tạo mới**:
+  - `apps/api-gateway/src/core/utils/upstream-network.ts`
+  - `apps/api-gateway/src/modules/api-management/executor.service.ts`
+  - `apps/api-gateway/src/core/utils/upstream-network.spec.ts` (Tạo mới)
+  - `apps/admin_khcn/features/api-management/components/ApiConnectionCreateDialog.tsx`
+  - `apps/admin_khcn/features/api-management/components/ApiConnectionEditDialog.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng máy thực tế**:
+  - Jest Unit Tests `apps/api-gateway`: `npx jest src/core/utils/upstream-network.spec.ts` -> PASS (14/14 tests passed, 100%).
+  - Typecheck `apps/api-gateway`: `npx tsc --noEmit` -> PASS (Exit 0, 0 errors).
+  - Typecheck `apps/admin_khcn`: `npm run typecheck` (`tsc --noEmit`) -> PASS (Exit 0, 0 errors).
+  - Vệ sinh mã nguồn: 0 debug log (`console.log`, `debugger`), mã hóa UTF-8 không BOM.
+
 

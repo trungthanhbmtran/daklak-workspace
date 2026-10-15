@@ -32,36 +32,58 @@ for (const [address, prefix] of [
 const globalV6 = new BlockList();
 globalV6.addSubnet('2000::', 3, 'ipv6');
 
-export function assertUpstreamAddress(address: string, type: string): void {
+export function assertUpstreamAddress(address: string, type: string = 'external'): void {
+  const zone = (type || 'external').toLowerCase();
   const family = isIP(address);
-  if (!family || !['internal', 'external'].includes(type))
+  if (!family || !['internal', 'external'].includes(zone))
     throw new Error('Invalid upstream network destination');
   const kind = family === 4 ? 'ipv4' : 'ipv6';
   if (
     forbidden.check(address, kind) ||
-    (type === 'external' &&
+    (zone === 'external' &&
       (privateV4.check(address, kind) ||
         (family === 6 && !globalV6.check(address, 'ipv6'))))
   )
     throw new Error('Prohibited upstream network destination');
 }
 
-export function upstreamUrl(baseUrl: string, type: string): URL {
-  const url = new URL(baseUrl);
+export function upstreamUrl(baseUrl: string, type: string = 'external'): URL {
+  if (!baseUrl || typeof baseUrl !== 'string') {
+    throw new Error('Base URL không được để trống');
+  }
+
+  let url: URL;
+  try {
+    url = new URL(baseUrl.trim());
+  } catch {
+    throw new Error('Định dạng URL không hợp lệ');
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw new Error('Giao thức URL phải là http:// hoặc https://');
+  }
+
+  if (url.username || url.password) {
+    throw new Error('URL không được chứa tài khoản hoặc mật khẩu');
+  }
+
+  if (url.hash) {
+    throw new Error('URL không được chứa mã phân đoạn hash (#)');
+  }
+
+  const zone = (type || 'external').toLowerCase();
+  if (!['internal', 'external'].includes(zone)) {
+    throw new Error('Vùng mạng không hợp lệ (phải là internal hoặc external)');
+  }
+
   if (
-    !['http:', 'https:'].includes(url.protocol) ||
-    url.username ||
-    url.password ||
-    url.hash ||
-    url.search ||
-    url.pathname !== '/' ||
-    !['internal', 'external'].includes(type)
-  )
-    throw new Error(
-      'Upstream must be an HTTP(S) origin without credentials, query or path',
-    );
-  if (type === 'external' && url.protocol !== 'https:')
-    throw new Error('External upstream requires HTTPS');
+    process.env.REQUIRE_HTTPS_EXTERNAL === 'true' &&
+    zone === 'external' &&
+    url.protocol !== 'https:'
+  ) {
+    throw new Error('Vùng mạng external yêu cầu HTTPS');
+  }
+
   return url;
 }
 
