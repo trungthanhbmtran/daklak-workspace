@@ -1,5 +1,49 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-15] Nâng Cấp Toàn Diện Giao Diện Tạo Mới Hồ Sơ Nhân Sự (Employee Create) Theo Chuẩn Enterprise UX/UI & Khắc Phục Triệt Để Các Lỗi
+
+### 1. Yêu Cầu & Khảo Sát Hiện Trạng (Architecture & Anti-AI Hallucination)
+- **Chỉ đạo từ người dùng**: "http://113.184.220.82/admin/services/hrm/employees/create chuyển lại giao diện qua chuẩn ux ui enteprise cho tôi sửa các lỗi các lỗi đang xảy ra".
+- **Các lỗi và hạn chế nghiêm trọng phát hiện trong khảo sát thực tế**:
+  1. **Lỗi chặn chọn Đơn vị công tác (Critical Bug)**: `organizationApi.getTree()` trả về cấu trúc `{ data: OrganizationUnitNode[] }`. Code cũ kiểm tra `Array.isArray(treeNodes) ? treeNodes : []`, dẫn đến `units` luôn rỗng (`[]`). Người dùng không thể tìm kiếm hay chọn bất kỳ đơn vị nào; ô chọn phòng ban bị liệt hoàn toàn.
+  2. **Lỗi Router Thrashing khi tìm kiếm**: Component `<Search />` cũ gọi `router.replace` làm thay đổi query param `?search=...` trên URL sau mỗi 500ms, gây re-render toàn bộ trang và giật lag trong quá trình nhập form.
+  3. **Bố cục thô sơ, ngược luồng thao tác**: Đưa khối "Vị trí công tác" (danh sách cuộn chiếm nửa màn hình) sang cột trái, còn "Thông tin cá nhân" lại nằm bên phải; thiếu các trường cơ bản như Giới tính (`gender`), Địa chỉ thường trú (`address`); các hộp cảnh báo dùng nền đen (`bg-slate-900`) thô cứng, phá vỡ trải nghiệm Enterprise.
+  4. **Thiếu hỗ trợ phân công định biên trực quan**: Thiếu bộ lọc theo loại hình cơ quan (Đảng vs Chính quyền vs Đơn vị sự nghiệp); chưa tối ưu hóa lưới chọn Slot VTVL theo từng cán bộ.
+
+### 2. Các Thay Đổi Cụ Thể Đã Triển Khai
+1. **Khắc phục triệt để lỗi bóc tách dữ liệu cây tổ chức (`apps/admin_khcn/features/hrm/components/EmployeeCreateClient.tsx`)**:
+   - Trích xuất an toàn: `const rawTree = (treeRes as any)?.data ?? treeRes;` giúp nạp đầy đủ 55+ cơ quan/đơn vị từ `user-service`.
+   - Tìm kiếm nội bộ siêu tốc (`unitSearch`), không thay đổi URL, kèm các tab phân loại: **Tất cả**, **Khối Đảng**, **Sở / Ngành**, **Đơn vị sự nghiệp**.
+2. **Thiết kế lại toàn diện theo chuẩn Enterprise UX/UI**:
+   - **Thanh điều hướng đỉnh trang (Sticky Header)**: Breadcrumbs phân cấp `HRM & KPI VTVL / Thêm mới nhân sự`, nút Hủy và nút **Lưu hồ sơ** với gradient sang trọng, trạng thái loading mượt mà.
+   - **Khối 1: Thông tin cá nhân & Định danh (Left Column - 7 cols)**:
+     * Khu vực tải ảnh thẻ (Avatar Uploader) chuẩn 3x4 / 4x6 kèm hướng dẫn định dạng, nút xem trước và xóa ảnh.
+     * Tự động hiển thị huy hiệu Xem trước họ và tên đầy đủ (`fullNamePreview`) theo thời gian thực (ví dụ: `NGUYỄN VĂN AN`).
+     * Đầy đủ các trường: Họ và đệm (*), Tên (*), Giới tính (Nam / Nữ / Khác), Ngày sinh, Số CCCD / Định danh, Điện thoại liên hệ, Email công vụ / cá nhân, Địa chỉ thường trú.
+   - **Khối 2: Chế độ công tác & Thiết lập hồ sơ**:
+     * Mã cán bộ (tự sinh định dạng `E...` hoặc nhập tay), Ngày bắt đầu công tác, Trạng thái làm việc (Chính thức, Thử việc, Biệt phái), Ngạch công chức/viên chức.
+   - **Khối 3: Cơ quan & Vị trí việc làm (VTVL) (Right Column - 5 cols)**:
+     * Thẻ tóm tắt đơn vị đã chọn (Selected Unit Card) hiển thị biểu tượng, tên cơ quan, breadcrumb đường dẫn phân cấp, mã định danh và nút "Thay đổi đơn vị".
+     * Nhận diện thông minh khối Đảng vs Chính quyền: Tự động ưu tiên chọn Chức vụ / VTVL Đảng (*) nếu là Cơ quan Đảng (Ban Tổ chức Tỉnh ủy, Tỉnh ủy...), kèm kiêm nhiệm chính quyền.
+     * **Chỉ số Định biên VTVL trực quan**: Thanh trạng thái số lượng biên chế `Đã bố trí / Tổng chỉ tiêu` kèm cảnh báo thông minh khi đủ chỉ tiêu.
+     * **Lưới phân công Slot VTVL (Slot Cards Grid)**: Hiển thị danh sách từng vị trí việc làm (#1, #2...) kèm tình trạng (Còn trống / Đã có cán bộ: [Tên CB]) và các nhãn lĩnh vực phụ trách (domains).
+   - **Khối 4: Thông tin đồng bộ liên thông**:
+     * Hộp thông tin liên thông hiện đại, cam kết đồng bộ chuẩn hóa với Trục liên thông văn bản (LGSP), `user-service` và phân quyền PBAC của tỉnh Đắk Lắk.
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan
+- **Biên dịch Production Next.js (`npm run build`)**: **Exit code 0** (83/83 routes compiled thành công; không có bất kỳ lỗi kiểu TypeScript hay Zod nào).
+- **Triển khai Container**: Đã copy dist standalone sang `daklak-workspace-admin-frontend-1` và khởi động lại (`Ready in 169ms`).
+- **Kiểm chứng Browser Subagent**:
+  - Truy cập `http://113.184.220.82/admin/services/hrm/employees/create`.
+  - Nhập Họ và tên: Hệ thống hiển thị badge xem trước ngay lập tức.
+  - Tìm kiếm và chọn đơn vị "Ban Tổ chức Tỉnh ủy Đắk Lắk": Thẻ đơn vị hiển thị chuẩn xác với badge `Khối Cơ quan Đảng`.
+  - Chọn chức vụ "Phó Trưởng ban": Dropdown hiển thị định biên `4/4`, cảnh báo định biên kích hoạt, 4 slot cards (#1 Lưu Vĩnh Hưng, #2 Nguyễn Hữu Toàn, #3 Trần Tuấn Anh, #4 Y Nhuân Byă) hiển thị sắc nét, chuyên nghiệp.
+  - Bằng chứng ảnh chụp nghiệm thu:
+    * [`title_selected_1792073537671.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/title_selected_1792073537671.png)
+    * [`employee_create_full_1792073652783.png`](file:///C:/Users/Admin/.gemini/antigravity-ide/brain/b4246abe-2dac-43c2-bad0-8f9c8cbeabf2/employee_create_full_1792073652783.png)
+
+---
+
 ## [2026-10-15] Loại Bỏ Triệt Để Trùng Lặp Code HrmReportsClient Tại HRM, Chuyển Toàn Bộ Thống Kê/Báo Cáo Về Report Service & Dùng 100% Dữ Liệu Thật
 
 ### 1. Yêu Cầu & Nguyên Tắc Kỹ Thuật (Architecture & Source of Truth)
