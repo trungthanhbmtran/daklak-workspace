@@ -93,6 +93,8 @@ export interface ReportDefinition {
   ownerId?: number;
   organizationId?: number;
   configuration: ReportConfigAST;
+  latestRun?: ReportRun;
+  runs?: ReportRun[];
   createdAt: string;
   updatedAt: string;
 }

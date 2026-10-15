@@ -5,6 +5,7 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 
 import { PrismaModule } from '../prisma/prisma.module';
+import { StatisticsModule } from '../statistics/statistics.module';
 
 const PROTO_ROOT =
   process.env.PROTO_PATH || join(__dirname, '../../../../../../shared/protos');
@@ -17,6 +18,7 @@ const DEFAULT_CHANNEL_OPTIONS = {
 @Module({
   imports: [
     PrismaModule,
+    StatisticsModule,
     ClientsModule.register([
       {
         name: 'USER_SERVICE',

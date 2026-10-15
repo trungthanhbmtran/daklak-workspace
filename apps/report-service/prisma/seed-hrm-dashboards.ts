@@ -619,7 +619,7 @@ export async function seedHrmDashboards() {
   console.log('🎉 Hoàn tất Seed thiết kế Bàn làm việc Cá nhân & Báo cáo HRM lên Report Service!');
 }
 
-if (require.main === module) {
+if (require.main === module && process.argv.some((arg) => arg.includes('seed-hrm-dashboards'))) {
   seedHrmDashboards()
     .catch((e) => {
       console.error('❌ Lỗi:', e);

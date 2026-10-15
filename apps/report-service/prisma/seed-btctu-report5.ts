@@ -594,11 +594,13 @@ async function main() {
   console.log('🎉 Hoàn tất nạp dữ liệu Báo cáo #5 chuẩn SOP và Câu 2!');
 }
 
-main()
-  .catch((e) => {
-    console.error('❌ Lỗi:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (require.main === module && process.argv.some((arg) => arg.includes('seed-btctu-report5'))) {
+  main()
+    .catch((e) => {
+      console.error('❌ Lỗi:', e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

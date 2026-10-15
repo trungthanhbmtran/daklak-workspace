@@ -114,7 +114,7 @@ export class ReportsController {
     return this.reportsService.getReportAssignments(
       id,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -128,7 +128,7 @@ export class ReportsController {
     return this.reportsService.assignReport(
       { templateId: id, ...body },
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -143,7 +143,7 @@ export class ReportsController {
     return this.reportsService.unassignReport(
       { templateId: id, assigneeType, assigneeId },
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -152,7 +152,7 @@ export class ReportsController {
     return this.reportsService.getTaskStats(
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -161,7 +161,7 @@ export class ReportsController {
     return this.reportsService.getPostStats(
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -170,7 +170,7 @@ export class ReportsController {
     return this.reportsService.getKpiStats(
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -179,7 +179,7 @@ export class ReportsController {
     return this.reportsService.getDocumentStats(
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -188,7 +188,7 @@ export class ReportsController {
     return this.reportsService.getEmployeeQualityReport(
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -200,7 +200,7 @@ export class ReportsController {
     return this.reportsService.createReportDefinition(
       body,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -210,7 +210,7 @@ export class ReportsController {
     return this.reportsService.getReportDefinitions(
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -236,7 +236,7 @@ export class ReportsController {
     return this.reportsService.getReportDefinitionById(
       id,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -252,7 +252,7 @@ export class ReportsController {
     return this.reportsService.runReport(
       body,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -265,7 +265,7 @@ export class ReportsController {
     return this.reportsService.getReportRunStatus(
       id,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -279,7 +279,7 @@ export class ReportsController {
       runId,
       req.query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -288,7 +288,7 @@ export class ReportsController {
   async getReportDashboardStats(@Req() req: any) {
     return this.reportsService.getReportDashboardStats(
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -297,7 +297,7 @@ export class ReportsController {
     return this.reportsService.generateDocument(
       body,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
   }
 
@@ -313,7 +313,7 @@ export class ReportsController {
       runId,
       query,
       req.user,
-      req.headers.authorization,
+      this.getDelegationToken(req),
     );
 
     const result =

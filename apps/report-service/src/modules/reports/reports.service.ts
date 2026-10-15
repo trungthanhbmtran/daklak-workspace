@@ -6,6 +6,7 @@ import { executeTable } from './table-engine';
 import { Metadata } from '@grpc/grpc-js';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { StatisticsService } from '../statistics/statistics.service';
 import {
   normalizeRow,
   normalizeSchema,
@@ -231,6 +232,7 @@ export class ReportsService implements OnModuleInit {
     @Inject('DOCUMENT_SERVICE') private docClient: ClientGrpc,
     @Inject('API_MANAGEMENT_SERVICE') private apiClient: ClientGrpc,
     private readonly prisma: PrismaService,
+    private readonly statsService: StatisticsService,
   ) {}
 
   onModuleInit() {
@@ -396,7 +398,7 @@ export class ReportsService implements OnModuleInit {
     }
   }
 
-  async runReport(payloadStr: string, _userDataStr: string) {
+  async runReport(payloadStr: string, _userDataStr: string, metadata?: Metadata) {
     try {
       const payload = JSON.parse(payloadStr);
       const defId = Number(payload.reportDefinitionId || payload.definitionId);
@@ -443,32 +445,64 @@ export class ReportsService implements OnModuleInit {
         targetCode = sourceCode;
       }
 
-      const latestSnapshot = await this.prisma.statisticsSnapshot.findFirst({
-        where: { dataSourceCode: targetCode },
-        orderBy: { recordedAt: 'desc' },
-      });
+      // ────────────────── TRUY VẤN DỮ LIỆU HỆ THỐNG THỜI GIAN THỰC (REALTIME SYSTEM QUERY VIA gRPC) ──────────────────
+      try {
+        const queryMeta = metadata || new Metadata();
+        const queryParams = { ...(config?.sources?.[0]?.params || {}), ...(payload.params || {}) };
+        let liveRows: any[] = [];
 
-      if (latestSnapshot && Array.isArray(latestSnapshot.data)) {
-        sourceRows = (latestSnapshot.data as any[]).map(normalizeRow);
+        let statsRes: any;
+        if (targetCode === 'HRM_TASK_STATS' || targetCode.includes('TASK')) {
+          statsRes = await this.statsService.getTaskStatistics(queryParams, null, queryMeta);
+        } else if (targetCode === 'DOC_STATS' || targetCode.includes('DOC')) {
+          statsRes = await this.statsService.getDocumentStatistics(queryParams, queryMeta);
+        } else if (targetCode === 'POST_STATS' || targetCode.includes('POST')) {
+          statsRes = await this.statsService.getPostStatistics(queryParams, queryMeta);
+        } else if (targetCode === 'BTCTU_KPI_STATS' || targetCode.includes('BTCTU')) {
+          statsRes = await this.statsService.getBtctuKpiStatistics(queryParams, null, queryMeta);
+        } else if (targetCode === 'EMPLOYEE_QUALITY' || targetCode.includes('EMP')) {
+          statsRes = await this.statsService.getEmployeeQualityStatistics(queryParams, null, queryMeta);
+        } else if (targetCode === 'KPI_STATS') {
+          statsRes = await this.statsService.getKpiStatistics(queryParams, null, queryMeta);
+        } else if (targetCode === 'HRM_PERSONAL_STATS') {
+          statsRes = await this.statsService.getPersonalWorkbenchStatistics(queryParams, null, queryMeta);
+        }
+
+        const rawData: any = statsRes?.data;
+        if (Array.isArray(rawData)) {
+          liveRows = rawData;
+        } else if (Array.isArray(rawData?.rows)) {
+          liveRows = rawData.rows;
+        } else if (Array.isArray(rawData?.items)) {
+          liveRows = rawData.items;
+        } else {
+          liveRows = [];
+        }
+
+        if (Array.isArray(liveRows) && liveRows.length > 0) {
+          sourceRows = liveRows.map(normalizeRow);
+        }
+      } catch (liveErr: any) {
+        this.logger.warn(`Truy vấn thời gian thực cho ${targetCode} qua gRPC: ${liveErr?.message}. Sử dụng snapshot fallback.`);
       }
 
+      // Nếu gRPC upstream chưa có bản ghi hoặc lỗi, sử dụng bản snapshot gần nhất trong CSDL
       if (sourceRows.length === 0) {
-        // Nếu là nguồn API hoặc chưa có snapshot, tự động sinh sample data nghiệp vụ chuẩn
+        const latestSnapshot = await this.prisma.statisticsSnapshot.findFirst({
+          where: { dataSourceCode: targetCode },
+          orderBy: { recordedAt: 'desc' },
+        });
+
+        if (latestSnapshot && Array.isArray(latestSnapshot.data)) {
+          sourceRows = (latestSnapshot.data as any[]).map(normalizeRow);
+        }
+      }
+
+      // Fallback cuối cùng nếu chưa có snapshot
+      if (sourceRows.length === 0) {
         const sampleData = getSampleRowsForApi(targetCode || primarySource?.path || primarySource?.endpoint || definition.code);
         if (sampleData.length > 0) {
           sourceRows = sampleData.map(normalizeRow);
-          // Ghi nhớ snapshot để các lần truy vấn tiếp theo có sẵn dữ liệu
-          try {
-            await this.prisma.statisticsSnapshot.create({
-              data: {
-                dataSourceCode: targetCode,
-                data: sampleData as any,
-                recordedAt: new Date(),
-              },
-            });
-          } catch {
-            // Bỏ qua lỗi lưu snapshot nếu trùng hoặc database transient
-          }
         }
       }
 

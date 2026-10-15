@@ -10,8 +10,9 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'ExecuteTable')
   executeTable(data: { payload: string }) {
+    data = data || ({} as any);
     try {
-      const body = JSON.parse(data.payload) as {
+      const body = JSON.parse(data.payload || '{}') as {
         data: unknown;
         config: unknown;
       };
@@ -32,6 +33,7 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'CreateReportDefinition')
   async createReportDefinition(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.createReportDefinition(
       data.payload,
       data.userData,
@@ -40,6 +42,7 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'GetReportDefinitions')
   async getReportDefinitions(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.getReportDefinitions(
       data.payload,
       data.userData,
@@ -48,6 +51,7 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'GetReportDefinitionById')
   async getReportDefinitionById(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.getReportDefinitionById(
       data.payload,
       data.userData,
@@ -59,6 +63,7 @@ export class ReportsController {
     data: { payload: string; userData: string },
     metadata: Metadata,
   ) {
+    data = data || ({} as any);
     const authorization = metadata?.get('authorization')?.[0];
     return this.reportsService.getReportCatalog(
       data.payload,
@@ -68,22 +73,29 @@ export class ReportsController {
   }
 
   @GrpcMethod('ReportService', 'RunReport')
-  async runReport(data: { payload: string; userData: string }) {
-    return this.reportsService.runReport(data.payload, data.userData);
+  async runReport(
+    data: { payload: string; userData: string },
+    metadata?: Metadata,
+  ) {
+    data = data || ({} as any);
+    return this.reportsService.runReport(data.payload, data.userData, metadata);
   }
 
   @GrpcMethod('ReportService', 'GetReportRunStatus')
   async getReportRunStatus(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.getReportRunStatus(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetDatasetSnapshot')
   async getDatasetSnapshot(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.getDatasetSnapshot(data.payload, data.userData);
   }
 
   @GrpcMethod('ReportService', 'GetReportDashboardStats')
   async getReportDashboardStats(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.getReportDashboardStats(
       data.payload,
       data.userData,
@@ -92,6 +104,7 @@ export class ReportsController {
 
   @GrpcMethod('ReportService', 'ExportReportRun')
   async exportReportRun(data: { payload: string; userData: string }) {
+    data = data || ({} as any);
     return this.reportsService.exportReportRun(data.payload, data.userData);
   }
 }

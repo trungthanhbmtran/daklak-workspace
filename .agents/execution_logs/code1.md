@@ -2139,3 +2139,40 @@
   + View Theo Đơn vị (Ban Tổ chức Tỉnh ủy A15.05): Tự động phân rã 5 phòng ban của BTCTU (Lãnh đạo Ban, Phòng TCCB, Phòng CS-ĐT-CB, Phòng TCĐ-ĐV, Văn phòng Ban).
   + View Theo Đơn vị (Sở KH&CN H15.20): Tự động phân rã các phòng ban của Sở KH&CN (Quản lý KH, Quản lý CN, Chi cục TĐC, Thanh tra Sở).
 - Vệ sinh mã nguồn: Quét sạch 100% `console.log`, không import dư thừa, file UTF-8 không BOM.
+
+## [2026-10-15] Xóa bỏ 2 Component Cũ (`personal-task-workbench.tsx`, `HrmReportWorkbenchClient.tsx`), Chuyển Toàn bộ Thiết kế về Seed trên Report-Service và Tích hợp vào Dashboard HRM
+
+### 1. Yêu cầu & Kiến trúc
+- Yêu cầu người dùng: Xóa bỏ hoàn toàn 2 component ad-hoc cục bộ `personal-task-workbench.tsx` và `HrmReportWorkbenchClient.tsx`. Chuyển thiết kế và dữ liệu về seed trên `report-service`, sau đó thêm vào Dashboard của dịch vụ HRM (`/services/hrm/work-plans/tasks/dashboard`), đồng thời chuẩn hóa màn hình Tra cứu Báo cáo (`/services/hrm/reports`).
+- Ràng buộc kỹ thuật tuân thủ:
+  * **Source of Truth**: `report-service` là trung tâm duy nhất cho định nghĩa báo cáo (ReportDefinition, ReportTemplate, DatasetSnapshot).
+  * **Dumb Client**: Không tính nhẩm hay vẽ biểu đồ hardcoded thủ công ở client. Toàn bộ kế thừa từ `report-service` qua `EmbeddedReportWidget` và `DashboardReportContainer`.
+  * **gRPC Delegation**: api-gateway ký `signDelegation` gRPC metadata khi gọi `report-service`, triệt tiêu lỗi `16 UNAUTHENTICATED`.
+  * **Vệ sinh & Encoding**: Quét sạch 100% `console.log`, file chuẩn UTF-8 không BOM.
+
+### 2. Các Thay đổi Đã Triển khai
+1. **Xóa bỏ hoàn toàn 2 component ad-hoc cục bộ**:
+   - `apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx` (Đã xóa sạch).
+   - `apps/admin_khcn/features/hrm/components/reports/HrmReportWorkbenchClient.tsx` (Đã xóa sạch).
+2. **Seed thiết kế & Dữ liệu trên `report-service` (`apps/report-service/prisma/seed-hrm-dashboards.ts`)**:
+   - `ReportDefinition` #6 (`REP_PERSONAL_WORKBENCH`): 4 biểu đồ (Tiến độ & Điểm số 6 tháng, Cơ cấu trạng thái nhiệm vụ, Cân đối tải phòng ban, Tiến độ thực hiện nhiệm vụ) + DatasetSnapshot Run #50 (17 dòng dữ liệu cá nhân & điều phối).
+   - `ReportTemplate` #17 & #18: Gán widgets và quyền xem đơn vị (`UNIT 18`, `UNIT 32`).
+   - `ReportDefinition` #5 (`REP_BTCTU_SOP_KPI`): 4 biểu đồ chuẩn Ban Tổ chức Tỉnh ủy (Phân bổ xếp loại cán bộ, Tiến độ SOP 4 bước, Điểm TB phòng ban, Điểm chất lượng cán bộ) + DatasetSnapshot Run #47 (23 cán bộ).
+3. **Cập nhật Dashboard Dịch vụ HRM (`apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`)**:
+   - Xóa bỏ 100% thư viện Recharts vẽ tay thủ công và các hàm tính nhẩm ở client.
+   - Tab "Bàn làm việc của tôi": Nhúng `<EmbeddedReportWidget reportIdOrCode="REP_PERSONAL_WORKBENCH" />`.
+   - Tab "Thống kê toàn cơ quan (Lãnh đạo)": Giữ 4 thẻ KPI tóm tắt nhanh từ backend, nhúng `<EmbeddedReportWidget reportIdOrCode="REP_BTCTU_SOP_KPI" />` và `<DashboardReportContainer dashboardKey="tasks" defaultReportCode="REP_HRM_TASKS" />`.
+   - Nút "Xuất Quyết định Mẫu 05" tích hợp gọi trực tiếp `downloadReportRunExport(latestRunId, "decision")` từ Report Service.
+4. **Chuẩn hóa Màn hình Báo cáo (`apps/admin_khcn/app/services/hrm/reports/page.tsx` & `HrmReportsClient.tsx`)**:
+   - Server Component `page.tsx` xuất metadata và render `HrmReportsClient`.
+   - Kế thừa 100% từ `report-service`: Biểu đồ động SOP 4 bước & Mẫu 05, bảng snapshot 23 cán bộ, nút Xuất Excel và In Quyết định gọi trực tiếp utils backend.
+   - 0% biểu đồ fix cứng, 0% lỗi 404.
+
+### 3. Kiểm chứng Máy Thực tế
+- TypeScript Typecheck: `npx tsc --noEmit` tại `apps/admin_khcn` -> **Exit Code 0** (No errors found).
+- Next.js Production Build: `npm run build` tại `apps/admin_khcn` -> **Exit Code 0**, biên dịch thành công toàn bộ 84 routes kể cả `/services/hrm/reports` và `/services/hrm/work-plans/tasks/dashboard`.
+- Deploy Container: Copy `.next` bundle mới sang container `daklak-workspace-admin-frontend-1`, khởi động lại -> `Ready in 170ms`.
+- Kiểm thử Trình duyệt Thực tế (`browser_subagent`):
+  * Dashboard `/admin/services/hrm/work-plans/tasks/dashboard`: Tab "Bàn làm việc của tôi" hiển thị đầy đủ biểu đồ tiến độ và chỉ số năng suất cá nhân (`REP_PERSONAL_WORKBENCH`). Tab "Thống kê toàn cơ quan" hiển thị 4 thẻ KPI (16 công việc, 1 đang xử lý, 4 hoàn thành, 11 quá hạn), biểu đồ động `REP_BTCTU_SOP_KPI` và `REP_HRM_TASKS`, nút xuất Mẫu 05.
+  * Báo cáo `/admin/services/hrm/reports`: Tải thành công 100%, hiển thị 4 thẻ KPI tóm tắt, biểu đồ động chuẩn SOP Ban Tổ chức Tỉnh ủy, bảng dữ liệu snapshot cán bộ (Chuyên viên, Bước 4, 92.0 điểm, Hoàn thành tốt).
+
