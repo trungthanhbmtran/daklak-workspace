@@ -187,16 +187,19 @@ export class AuthService implements OnModuleInit {
     opts: { level?: 'warn' | 'error'; requestId?: string } = {},
   ) {
     // Internal messages may include request data; record only safe diagnostic fields.
+    const grpcCode = this.rpcCode(error);
     const line = JSON.stringify({
       operation,
       requestId: opts.requestId,
-      grpcCode: this.rpcCode(error),
+      grpcCode,
       reason:
         error instanceof TimeoutError
           ? 'timeout'
           : error instanceof InvalidGrantError
             ? 'invalid_grant'
-            : 'service_error',
+            : grpcCode === status.NOT_FOUND
+              ? 'not_found'
+              : 'service_error',
     });
     if (opts.level === 'error') this.logger.error(line);
     else this.logger.warn(line);
@@ -528,7 +531,13 @@ export class AuthService implements OnModuleInit {
         );
         hrm = response.data;
       } catch (error) {
-        this.logFailure('GET_EMPLOYEE', error);
+        if (this.rpcCode(error) === status.NOT_FOUND) {
+          this.logger.debug?.(
+            `No HRM employee record found for code: ${user.employeeCode}`,
+          );
+        } else {
+          this.logFailure('GET_EMPLOYEE', error);
+        }
       }
     }
 

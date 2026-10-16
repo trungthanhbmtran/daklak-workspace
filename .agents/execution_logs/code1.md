@@ -1,5 +1,32 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-16] Khắc Phục Cảnh Báo AuthService GET_EMPLOYEE grpcCode: 5 Khi Truy Cập Dashboard Tasks
+
+### 1. Bối Cảnh & Nguyên Nhân Gốc Rễ
+- **Hiện tượng**: Khi người dùng đăng nhập tài khoản quản trị `superadmin` truy cập trang `/admin/services/hrm/work-plans/tasks/dashboard`, log API Gateway bắn cảnh báo:
+  `[Nest] 8 - 10/16/2026, 6:11:28 PM WARN [AuthService] {"operation":"GET_EMPLOYEE","grpcCode":5,"reason":"service_error"}`
+- **Nguyên nhân**:
+  1. Tài khoản `superadmin` (user id: 2) trong CSDL `admin_systems` có `employee_code: 'SUPERADMIN'`, nhưng trong CSDL nhân sự HRM (`admin_hrm.employees`) chưa tồn tại hồ sơ nhân sự tương ứng.
+  2. Khi người dùng nạp trang, frontend gọi `/auth/me` để lấy thông tin phiên. `AuthService.me` kiểm tra `user.employeeCode` và gọi `this.employeeGrpcService.GetEmployeeByCode({ code: 'SUPERADMIN' })`.
+  3. Microservice HRM tìm kiếm không thấy nhân sự nên trả về gRPC code `5` (`status.NOT_FOUND`).
+  4. Tại `AuthService`, catch block không phân biệt mã lỗi `NOT_FOUND` mà đẩy toàn bộ vào `logFailure`, mặc định gán `reason: 'service_error'` và bắn `WARN`, gây hiểu lầm là lỗi sập dịch vụ.
+
+### 2. Giải Pháp Triển Khai
+1. **Chuẩn hóa Xử lý Lỗi tại `apps/api-gateway/src/modules/auth/auth.service.ts`**:
+   - Trong `logFailure`: Phân loại chính xác mã `grpcCode === status.NOT_FOUND` thành `reason: 'not_found'` thay vì gán nhầm thành `'service_error'`.
+   - Trong `me()`: Nếu `this.rpcCode(error) === status.NOT_FOUND`, đây là trường hợp bình thường đối với các tài khoản quản trị hệ thống / tài khoản kỹ thuật không thuộc biên chế HRM -> ghi nhận `debug` log, không bắn cảnh báo `WARN` sai lệch.
+2. **Khởi tạo Hồ sơ Nhân sự HRM Cho `superadmin`**:
+   - Tạo bản ghi nhân sự liên kết trong `admin_hrm.employees` cho `user_id: 2`, `employee_code: 'SUPERADMIN'`, `full_name: 'Super Administrator'`, `department_id: 32` (Ban Tổ chức Tỉnh ủy Đắk Lắk).
+   - Đảm bảo `GetEmployeeByCode` tìm thấy trực tiếp nhân sự và trả về thông tin đầy đủ cho Dashboard.
+
+### 3. Bằng Chứng Kiểm Chứng Máy Thực Tế
+- **Jest Unit Test**: `npx jest src/modules/auth/auth.service.spec.ts` -> **34/34 tests passed** (100% PASS).
+- **Biên dịch Gateway**: `npm run build` tại `apps/api-gateway` -> **Exit code 0**.
+- **Runtime Container**: Restart `daklak-workspace-api-gateway-1` -> Khởi động sạch, lắng nghe tại `http://localhost:8080/api/v1`.
+- **Dọn rác & Encoding**: 0 console.log, UTF-8 không BOM.
+
+---
+
 ## [2026-10-16] Rà Soát Toàn Bộ Dự Án: Triệt Tiêu Monolithic Mega-Fetch, Áp Dụng Lazy Mount On-Demand và Bounded Queries Toàn Diện
 
 ### 1. Bối Cảnh & Mục Tiêu Rà Soát Toàn Diện
