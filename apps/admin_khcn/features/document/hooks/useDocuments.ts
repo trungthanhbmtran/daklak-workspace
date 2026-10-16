@@ -43,7 +43,7 @@ export const useListConsultations = (params?: any) => {
 };
 
 /** Lấy chi tiết 1 đợt lấy ý kiến — trả về entity thẳng (đã bóc .data) */
-export const useGetConsultation = (id: string) => {
+export const useGetConsultation = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['consultation', id],
     queryFn: async (): Promise<any> => {
@@ -51,12 +51,12 @@ export const useGetConsultation = (id: string) => {
       const res = await apiClient.get(`${API_BASE}/consultations/${id}`) as any as ApiResponse<any>;
       return res.data ?? null;
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   });
 };
 
 /** Lấy danh sách phản hồi theo đợt — trả về array thẳng */
-export const useListResponses = (id: string) => {
+export const useListResponses = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['consultation-responses', id],
     queryFn: async (): Promise<any[]> => {
@@ -64,7 +64,7 @@ export const useListResponses = (id: string) => {
       const res = await apiClient.get(`${API_BASE}/consultations/${id}/responses`) as any as ApiResponse<any[]>;
       return res.data ?? [];
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   });
 };
 
@@ -79,7 +79,7 @@ export const useListMinutes = (params?: any) => {
 };
 
 /** Lấy chi tiết 1 tài liệu — trả về entity thẳng */
-export const useGetDocument = (id: string) => {
+export const useGetDocument = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['document', id],
     queryFn: async (): Promise<any> => {
@@ -87,7 +87,7 @@ export const useGetDocument = (id: string) => {
       const res = await apiClient.get(`${API_BASE}/${id}`) as any as ApiResponse<any>;
       return res.data ?? null;
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   });
 };
 
@@ -103,7 +103,7 @@ export const useDocumentStats = () => {
 };
 
 /** Lấy logs của tài liệu — trả về array thẳng */
-export const useDocumentLogs = (id: string) => {
+export const useDocumentLogs = (id: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['document-logs', id],
     queryFn: async (): Promise<any[]> => {
@@ -111,12 +111,12 @@ export const useDocumentLogs = (id: string) => {
       const res = await apiClient.get(`${API_BASE}/${id}/logs`) as any as ApiResponse<any[]>;
       return res.data ?? [];
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   });
 };
 
 /** Lấy danh sách góp ý công chúng — trả về array thẳng */
-export const usePublicComments = (consultationId?: string, status?: string) => {
+export const usePublicComments = (consultationId?: string, status?: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['public-comments', consultationId, status],
     queryFn: async (): Promise<any[]> => {
@@ -126,6 +126,7 @@ export const usePublicComments = (consultationId?: string, status?: string) => {
       const res = await apiClient.get(url, { params: { status } }) as any as ApiResponse<any[]>;
       return res.data ?? [];
     },
+    enabled: options?.enabled ?? true,
   });
 };
 

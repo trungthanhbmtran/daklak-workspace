@@ -1,7 +1,7 @@
  
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Info, AlertCircle, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,21 @@ interface Props {
 }
 
 export function ConsultationDetailClient({ consultationId }: Props) {
-  const { useGetConsultation, useListResponses } = useDocuments();
+  const { useGetConsultation } = useDocuments();
   const { data: consultation, isLoading } = useGetConsultation(consultationId);
-  const { data: responses, isLoading: isLoadingResponses } = useListResponses(consultationId);
+
+  const [activeTab, setActiveTab] = useState<string>("moderation");
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(["moderation"]));
+
+  const handleTabChange = (nextTab: string) => {
+    setActiveTab(nextTab);
+    setVisitedTabs((prev: Set<string>) => {
+      if (prev.has(nextTab)) return prev;
+      const next = new Set(prev);
+      next.add(nextTab);
+      return next;
+    });
+  };
 
   if (isLoading) return <div className="p-10 text-center text-muted-foreground animate-pulse">Đang tải thông tin chi tiết...</div>;
 
@@ -44,23 +56,28 @@ export function ConsultationDetailClient({ consultationId }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Tabs defaultValue="moderation" className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="bg-muted/50 p-1 rounded-xl h-11 mb-4">
               <TabsTrigger value="moderation" className="rounded-lg font-bold px-6">Kiểm duyệt công chúng</TabsTrigger>
-              <TabsTrigger value="internal" className="rounded-lg font-bold px-6">Phản hồi đơn vị ({responses?.length || 0})</TabsTrigger>
+              <TabsTrigger value="internal" className="rounded-lg font-bold px-6">Phản hồi đơn vị</TabsTrigger>
               <TabsTrigger value="info" className="rounded-lg font-bold px-6">Thông tin chung</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="moderation" className="mt-0">
-              <PublicCommentModeration consultationId={consultationId} />
+            <TabsContent value="moderation" className={`mt-0 ${activeTab === "moderation" ? "block" : "hidden"}`}>
+              {visitedTabs.has("moderation") && (
+                <PublicCommentModeration consultationId={consultationId} />
+              )}
             </TabsContent>
 
-            <TabsContent value="internal" className="mt-0">
-              <InternalResponsesTab responses={responses} isLoadingResponses={isLoadingResponses} />
+            <TabsContent value="internal" className={`mt-0 ${activeTab === "internal" ? "block" : "hidden"}`}>
+              {visitedTabs.has("internal") && (
+                <InternalResponsesTab consultationId={consultationId} active={activeTab === "internal"} />
+              )}
             </TabsContent>
 
-            <TabsContent value="info" className="mt-0">
-              <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+            <TabsContent value="info" className={`mt-0 ${activeTab === "info" ? "block" : "hidden"}`}>
+              {visitedTabs.has("info") && (
+                <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-primary/10 rounded-xl text-primary"><Info className="h-5 w-5" /></div>
@@ -83,6 +100,7 @@ export function ConsultationDetailClient({ consultationId }: Props) {
                   </div>
                 </CardContent>
               </Card>
+              )}
             </TabsContent>
           </Tabs>
         </div>

@@ -526,7 +526,7 @@ export class ExecutionService {
     return instance;
   }
   
-  async getTasks() { return this.prisma.workflowTask.findMany({ orderBy: { createdAt: 'desc' }, include: { instance: { include: { version: { include: { definition: true } } } } } }); }
+  async getTasks() { return this.prisma.workflowTask.findMany({ take: 100, orderBy: { createdAt: 'desc' }, include: { instance: { include: { version: { include: { definition: true } } } } } }); }
   async getInitialNode(workflowId: string) { return { initialNodeId: 'node-1', nodeData: '{}' }; }
   async getNextNode(payload: any) { return { nextNodeId: 'node-2', nextNodeData: '{}', type: 'userTask' }; }
   
@@ -544,6 +544,7 @@ export class ExecutionService {
     const transitions = await this.prisma.workflowTransition.findMany({
       where,
       orderBy: { performedAt: 'asc' },
+      take: 100,
     });
 
     return transitions.map((t: any) => ({

@@ -3,13 +3,28 @@ import { Users, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useListResponses } from "../../hooks/useDocuments";
 
 interface Props {
-  responses: any[] | undefined;
-  isLoadingResponses: boolean;
+  consultationId?: string;
+  active?: boolean;
+  responses?: any[];
+  isLoadingResponses?: boolean;
 }
 
-export function InternalResponsesTab({ responses, isLoadingResponses }: Props) {
+export function InternalResponsesTab({
+  consultationId,
+  active = true,
+  responses: propResponses,
+  isLoadingResponses: propIsLoading,
+}: Props) {
+  const { data: fetchedResponses, isLoading: isQueryLoading } = useListResponses(consultationId || "", {
+    enabled: Boolean(consultationId) && active && propResponses === undefined,
+  });
+
+  const responses = propResponses !== undefined ? propResponses : fetchedResponses;
+  const isLoadingResponses = propIsLoading !== undefined ? propIsLoading : isQueryLoading;
+
   return (
     <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
       <CardHeader className="bg-muted/10 border-b">

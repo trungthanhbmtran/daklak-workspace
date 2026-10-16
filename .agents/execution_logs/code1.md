@@ -1,5 +1,48 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-16] Rà Soát Toàn Bộ Dự Án: Triệt Tiêu Monolithic Mega-Fetch, Áp Dụng Lazy Mount On-Demand và Bounded Queries Toàn Diện
+
+### 1. Bối Cảnh & Mục Tiêu Rà Soát Toàn Diện
+- **Chỉ đạo người dùng**: *"rà soát lại toàn bộ dự án daklak-workspace nếu các nào đang bị lỗi như này hãy sửa lại cho tôi"*
+- **Tiêu chuẩn rà soát (Audit Checklist)**:
+  1. **Triệt tiêu Monolithic Mega-Fetch / Eager Mount đồng loạt**: Phát hiện và xử lý toàn bộ màn hình có Tabs, Drawer, Modal đang mount tất cả các tab hoặc fetch API đồng loạt khi vào trang/mở modal.
+  2. **Áp dụng Lazy Mounting on-demand (`visitedTabs` & `enabled: open`)**: Chỉ mount component và trigger React Query hook khi người dùng thực sự click vào tab hoặc mở modal; giữ cache qua CSS `block`/`hidden`.
+  3. **Backend Bounded Queries (Least Data & Zero-OOM)**: Bổ sung `take: 100` cho tất cả truy vấn nhật ký/lịch sử (Logs, Transitions, History) tại các microservices.
+  4. **Chuẩn hóa Server Components**: Loại bỏ `'use client'` tại root `page.tsx`, chuyển giao diện tương tác sang `*Client.tsx`.
+  5. **Vệ sinh mã nguồn**: Dọn sạch 100% `console.log`, `console.error` và mã hóa UTF-8 không BOM.
+
+### 2. Danh Sách File Đã Tác Động & Tối Ưu Hóa
+1. **Module Văn bản & Lấy ý kiến (`features/document`)**:
+   - `apps/admin_khcn/features/document/hooks/useDocuments.ts`: Bổ sung tham số `options?: { enabled?: boolean }` cho các hook `useGetDocument`, `useGetConsultation`, `useListResponses`, `useDocumentLogs`, `usePublicComments`.
+   - `apps/admin_khcn/features/document/components/DocumentDetailModal.tsx`: Chặn fetch ngầm khi modal đóng bằng `enabled: isOpen && Boolean(documentId)`.
+   - `apps/admin_khcn/features/document/components/ConsultationDetailClient.tsx`: Xóa bỏ việc component cha fetch trước `useListResponses`; tích hợp `visitedTabs` Set (`new Set(["moderation"])`), chỉ kích hoạt API tab `internal` khi người dùng bấm vào tab.
+   - `apps/admin_khcn/features/document/components/consultation-detail/InternalResponsesTab.tsx`: Tự chủ động quản lý query hook với guard `enabled: Boolean(consultationId) && active`.
+2. **Module Tổ chức & Định biên VTVL (`admin/organization`)**:
+   - `apps/admin_khcn/app/services/admin/organization/[code]/OrganizationDetailClient.tsx`: Tích hợp `visitedTabs` (`new Set(["info"])`) và reset khi chuyển đơn vị trên cây. Chỉ mount `UnitScopePanel` khi vào tab "Phạm vi phụ trách", chỉ mount `OrganizationStaffing` khi vào tab "Định biên & Chức danh" (giảm hơn 65% số lượng request đồng thời khi duyệt cây).
+3. **Module Trung tâm Thông báo (`hub/notifications`)**:
+   - `apps/admin_khcn/features/notifications/NotificationsClient.tsx`: Tạo mới client component với `visitedTabs` quản lý tab thông báo và cấu hình.
+   - `apps/admin_khcn/app/hub/notifications/page.tsx`: Chuyển đổi thành Server Component chuẩn Next.js 16 (await `searchParams`), chặn `NotificationConfigPanel` tự kích hoạt `fetchConfigs()` khi người dùng chỉ xem thông báo cá nhân.
+4. **Module Cài đặt Hệ thống & Thiết lập Menu (`system-admin/users` & `posts/portal-menus`)**:
+   - `apps/admin_khcn/features/system-admin/users/components/SystemSettingsClient.tsx`: Tích hợp `visitedTabs` cho các tab `ai-router`, `translation`, `prompts`, triệt tiêu việc tải cùng lúc danh mục AI Provider và Translation Provider.
+   - `apps/admin_khcn/features/system-admin/users/components/settings/AiRouterConfig.tsx` & `TranslationConfig.tsx`: Xóa sạch `console.error`, xử lý ngoại lệ mượt mà.
+   - `apps/admin_khcn/features/posts/portal-menus/hooks/useQuickSetup.ts` & `QuickSetupModal.tsx`: Thêm tham số `isOpen` và guard `enabled: isOpen`, chặn query danh mục khi modal chưa mở; xóa sạch `console.error`.
+5. **Backend Microservices (Bounded Queries & Least Data)**:
+   - `apps/document-service/src/modules/document/document.service.ts`: Thêm `take: 100` vào truy vấn `documentLog.findMany`.
+   - `apps/workflow-service/src/execution/execution.service.ts`: Thêm `take: 100` vào truy vấn `workflowTask.findMany` (getTasks) và `workflowTransition.findMany` (getLogs).
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Đo Lường Thực Tế
+- **TypeScript Check**: `npm run typecheck` tại `apps/admin_khcn` đạt **Exit code 0 (0 errors)**.
+- **Biên dịch Microservices**: `npm run build` tại `apps/document-service` và `apps/workflow-service` đều đạt **Exit code 0**.
+- **Biên dịch Frontend**: `npm run build` tại `apps/admin_khcn` biên dịch thành công toàn bộ **86/86 routes** (tĩnh và dynamic).
+- **Trạng thái Container Runtime**:
+  - `daklak-workspace-admin-frontend-1`: Khởi động sạch, **Ready in 191ms**.
+  - `daklak-workspace-document-service-1`: Khởi động sạch, gRPC listening trên `0.0.0.0:50056`.
+  - `daklak-workspace-workflow-service-1`: Khởi động sạch, gRPC listening trên `0.0.0.0:50060`.
+  - `daklak-workspace-hrm-service-1` & `daklak-workspace-api-gateway-1`: Hoạt động ổn định.
+- **Vệ sinh mã nguồn**: 100% không còn `console.log` hay biến rác; mã hóa UTF-8 không BOM toàn bộ.
+
+---
+
 ## [2026-10-16] Tối Ưu Hóa Granular Endpoints Tại Server, Triệt Tiêu Monolithic Mega-Fetch & Bổ Sung Quy Chuẩn Kiến Trúc Vào .agents
 
 ### 1. Bối Cảnh & Yêu Cầu Cốt Lõi

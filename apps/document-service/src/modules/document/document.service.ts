@@ -254,7 +254,7 @@ export class DocumentService {
   }
 
   async getLogs(documentId: string) {
-    const logs = await this.prisma.documentLog.findMany({ where: { documentId }, orderBy: { createdAt: 'desc' } });
+    const logs = await this.prisma.documentLog.findMany({ where: { documentId }, orderBy: { createdAt: 'desc' }, take: 100 });
     return { data: logs.map(log => ({ ...log, createdAt: log.createdAt?.toISOString() || new Date().toISOString(), userId: log.userId || "", userName: log.userName || "", note: log.note || "" })) };
   }
 

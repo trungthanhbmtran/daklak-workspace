@@ -7,13 +7,14 @@ import { Category } from "@/features/posts/types";
 import { toast } from "sonner";
 
 interface UseQuickSetupProps {
+  isOpen?: boolean;
   activeTab: string;
   menusLength: number;
   onSuccess: () => void;
   onClose: () => void;
 }
 
-export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: UseQuickSetupProps) {
+export function useQuickSetup({ isOpen = true, activeTab, menusLength, onSuccess, onClose }: UseQuickSetupProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [docGroups, setDocGroups] = useState<any[]>([]);
   const [complianceModules, setComplianceModules] = useState<any[]>([]);
@@ -22,9 +23,10 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!isOpen) return;
     fetchQuickSetupData();
     fetchCategories();
-  }, []);
+  }, [isOpen]);
 
   const fetchQuickSetupData = async () => {
     try {
@@ -36,7 +38,6 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
       setComplianceModules(Array.isArray(complianceModules) ? complianceModules : []);
       setSystemPages(Array.isArray(defaultPages) ? defaultPages : []);
     } catch (error) {
-      console.error("Error fetching quick setup data:", error);
       toast.error((error as any)?.response?.data?.message || "Không thể tải dữ liệu thiết lập từ hệ thống");
     }
   };
@@ -45,8 +46,8 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
     try {
       const { data } = await postsApi.getCategories();
       setCategories(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+    } catch {
+      // Ignore or handled via UI state
     }
   };
 

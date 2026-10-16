@@ -17,6 +17,19 @@ export interface AiProviderConfig {
 }
 
 export function SystemSettingsClient() {
+  const [activeTab, setActiveTab] = React.useState("ai-router");
+  const [visitedTabs, setVisitedTabs] = React.useState<Set<string>>(() => new Set(["ai-router"]));
+
+  const handleTabChange = (val: string) => {
+    setActiveTab(val);
+    setVisitedTabs((prev) => {
+      if (prev.has(val)) return prev;
+      const next = new Set(prev);
+      next.add(val);
+      return next;
+    });
+  };
+
   return (
     <div className="w-full flex-1 mx-auto space-y-8 pb-20 animate-in fade-in">
       <div className="border-b border-border pb-6">
@@ -29,7 +42,7 @@ export function SystemSettingsClient() {
         </p>
       </div>
 
-      <Tabs defaultValue="ai-router" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="w-full h-auto flex-col sm:flex-row bg-muted p-1.5 mb-6 rounded-2xl sm:rounded-full shadow-inner border border-border">
           <TabsTrigger value="ai-router" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-md data-[state=active]:text-primary text-muted-foreground transition-all">
             <Bot className="w-4 h-4" />
@@ -45,21 +58,27 @@ export function SystemSettingsClient() {
           </TabsTrigger>
         </TabsList>
 
-          <TabsContent value="ai-router" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+        <TabsContent value="ai-router" className={`mt-0 focus-visible:outline-none focus-visible:ring-0 ${activeTab === "ai-router" ? "block" : "hidden"}`}>
+          {visitedTabs.has("ai-router") && (
             <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
               <AiRouterConfig />
             </div>
-          </TabsContent>
-          <TabsContent value="translation" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+          )}
+        </TabsContent>
+        <TabsContent value="translation" className={`mt-0 focus-visible:outline-none focus-visible:ring-0 ${activeTab === "translation" ? "block" : "hidden"}`}>
+          {visitedTabs.has("translation") && (
             <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
               <TranslationConfig />
             </div>
-          </TabsContent>
-          <TabsContent value="prompts" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+          )}
+        </TabsContent>
+        <TabsContent value="prompts" className={`mt-0 focus-visible:outline-none focus-visible:ring-0 ${activeTab === "prompts" ? "block" : "hidden"}`}>
+          {visitedTabs.has("prompts") && (
             <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
               <AiPromptConfig />
             </div>
-          </TabsContent>
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );

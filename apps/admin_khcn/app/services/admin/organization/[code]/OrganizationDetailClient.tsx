@@ -34,6 +34,23 @@ export function OrganizationDetailClient({ initialCode }: OrganizationDetailClie
   const parentUnit = unit?.parentId != null ? flatUnits.find((u) => u.id === unit.parentId) : null;
 
   const [activeTab, setActiveTab] = useState("info");
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(["info"]));
+  const [prevCode, setPrevCode] = useState(code);
+
+  if (code !== prevCode) {
+    setPrevCode(code);
+    setVisitedTabs(new Set([activeTab]));
+  }
+
+  const handleTabChange = (nextTab: string) => {
+    setActiveTab(nextTab);
+    setVisitedTabs((prev) => {
+      if (prev.has(nextTab)) return prev;
+      const next = new Set(prev);
+      next.add(nextTab);
+      return next;
+    });
+  };
 
   if (isError || (!isQueryLoading && !unit && code)) {
     return (
@@ -74,7 +91,7 @@ export function OrganizationDetailClient({ initialCode }: OrganizationDetailClie
         ) : null}
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 h-full w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col min-h-0 h-full w-full">
         {/* Tab bar */}
         <div className="shrink-0 border-b bg-muted/30 px-4 pt-3 pb-2">
           <TabsList className="flex h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1 justify-start">
@@ -104,18 +121,22 @@ export function OrganizationDetailClient({ initialCode }: OrganizationDetailClie
 
         {/* Content area */}
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col focus-visible:outline-none h-full">
-          <TabsContent value="info" className="flex-1 min-h-0 m-0 overflow-hidden outline-none data-[state=inactive]:hidden data-[state=active]:flex data-[state=active]:flex-col h-full">
-            <OrganizationUnitEdit />
+          <TabsContent value="info" className={`flex-1 min-h-0 m-0 overflow-hidden outline-none ${activeTab === "info" ? "flex flex-col" : "hidden"} h-full`}>
+            {visitedTabs.has("info") && <OrganizationUnitEdit />}
           </TabsContent>
-          <TabsContent value="scope" className="flex-1 min-h-0 m-0 outline-none data-[state=inactive]:hidden data-[state=active]:flex data-[state=active]:flex-col h-full">
-            <div className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 flex flex-col focus-visible:outline-none h-full">
-              <UnitScopePanel />
-            </div>
+          <TabsContent value="scope" className={`flex-1 min-h-0 m-0 outline-none ${activeTab === "scope" ? "flex flex-col" : "hidden"} h-full`}>
+            {visitedTabs.has("scope") && (
+              <div className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 flex flex-col focus-visible:outline-none h-full">
+                <UnitScopePanel />
+              </div>
+            )}
           </TabsContent>
-          <TabsContent value="staffing" className="flex-1 min-h-0 m-0 outline-none data-[state=inactive]:hidden data-[state=active]:flex data-[state=active]:flex-col h-full">
-            <div className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 flex flex-col focus-visible:outline-none h-full">
-              <OrganizationStaffing />
-            </div>
+          <TabsContent value="staffing" className={`flex-1 min-h-0 m-0 outline-none ${activeTab === "staffing" ? "flex flex-col" : "hidden"} h-full`}>
+            {visitedTabs.has("staffing") && (
+              <div className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 flex flex-col focus-visible:outline-none h-full">
+                <OrganizationStaffing />
+              </div>
+            )}
           </TabsContent>
         </div>
       </Tabs>

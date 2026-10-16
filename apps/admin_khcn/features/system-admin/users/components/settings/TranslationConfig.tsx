@@ -30,8 +30,7 @@ export function TranslationConfig() {
         description: 'Dịch vụ dịch thuật'
       });
       toast.success(`Đã cập nhật cấu hình Dịch thuật thành công!`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Lỗi cập nhật cấu hình');
     }
   };

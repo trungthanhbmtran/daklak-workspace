@@ -21,7 +21,7 @@ interface DocumentDetailModalProps {
 }
 
 export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDetailModalProps) {
-  const { data: doc, isLoading } = useGetDocument(documentId || "");
+  const { data: doc, isLoading } = useGetDocument(documentId || "", { enabled: isOpen && Boolean(documentId) });
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return "---";

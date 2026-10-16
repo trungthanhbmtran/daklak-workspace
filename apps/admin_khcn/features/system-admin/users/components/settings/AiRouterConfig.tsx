@@ -22,8 +22,8 @@ export function AiRouterConfig() {
       try {
         const parsed = JSON.parse(configs['AI_PROVIDERS']);
         setAiProviders(Array.isArray(parsed) ? parsed.sort((a, b) => a.priority - b.priority) : []);
-      } catch (e) {
-        console.error("Failed to parse AI_PROVIDERS", e);
+      } catch {
+        // Handle invalid JSON gracefully
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

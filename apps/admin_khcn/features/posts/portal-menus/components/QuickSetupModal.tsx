@@ -35,7 +35,7 @@ export function QuickSetupModal({ isOpen, onClose, activeTab, menusLength, onSuc
     importDocumentGroup,
     handleImportCompliance,
     addDefaultPages,
-  } = useQuickSetup({ activeTab, menusLength, onSuccess, onClose });
+  } = useQuickSetup({ isOpen, activeTab, menusLength, onSuccess, onClose });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
