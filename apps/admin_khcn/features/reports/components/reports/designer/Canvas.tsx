@@ -40,12 +40,16 @@ import {
   X,
   Sliders,
   CheckCircle2,
+  Calculator,
 } from 'lucide-react';
 import {
   getFriendlyFieldLabel,
   inferFieldType,
   AGGREGATE_OPTIONS,
   TYPE_OPTIONS,
+  findSmartJoinMatches,
+  SmartJoinRule,
+  evaluateFormulaClient,
 } from '@/features/reports/utils/fieldHelpers';
 import { toast } from 'sonner';
 
@@ -97,6 +101,44 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
       }
     }
   }, [sources, leftSource, rightSource]);
+
+  // ───────────────────────── Gợi ý Smart-Join Tự Động ─────────────────────────
+  const smartJoinSuggestions = useMemo(() => {
+    const matches = findSmartJoinMatches(sources);
+    return matches.filter((rule) => {
+      return !joins.some(
+        (j) =>
+          ((j.leftSource.toUpperCase() === rule.source1.toUpperCase() &&
+            j.rightSource.toUpperCase() === rule.source2.toUpperCase()) ||
+           (j.leftSource.toUpperCase() === rule.source2.toUpperCase() &&
+            j.rightSource.toUpperCase() === rule.source1.toUpperCase())) &&
+          j.conditions?.some(
+            (c) =>
+              (c.leftField === rule.field1 && c.rightField === rule.field2) ||
+              (c.leftField === rule.field2 && c.rightField === rule.field1),
+          ),
+      );
+    });
+  }, [sources, joins]);
+
+  const handleApplySmartJoin = (rule: SmartJoinRule) => {
+    const s1 = sources.find((s) => (s.endpoint || s.id).toUpperCase() === rule.source1.toUpperCase());
+    const s2 = sources.find((s) => (s.endpoint || s.id).toUpperCase() === rule.source2.toUpperCase());
+    if (!s1 || !s2) return;
+
+    const newJoin: JoinDef = {
+      leftSource: s1.id,
+      rightSource: s2.id,
+      type: rule.joinType,
+      conditions: [{ leftField: rule.field1, rightField: rule.field2 }],
+    };
+
+    setConfig({
+      ...config,
+      joins: [...joins, newJoin],
+    });
+    toast.success(`Đã tự động áp dụng Smart-Join: ${rule.description}`);
+  };
 
   // Danh sách trường của nguồn trái
   const leftSourceObj = useMemo(
@@ -390,15 +432,19 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
     label: string;
     type: ColumnType;
     aggregate: AggregateFunction;
+    formula: string;
+    isCalculated: boolean;
   }>({
     source: '',
     field: '',
     label: '',
     type: 'string',
     aggregate: 'none',
+    formula: '',
+    isCalculated: false,
   });
 
-  // Mở Sheet thêm cột mới
+  // Mở Sheet thêm cột mới từ nguồn dữ liệu
   const handleOpenAddColumn = () => {
     const defaultSource = sources[0]?.id || '';
     const srcObj = sources.find((s) => s.id === defaultSource);
@@ -415,6 +461,24 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
       label: firstField ? getFriendlyFieldLabel(firstField) : 'Cột mới',
       type: firstField ? inferFieldType(firstField) : 'string',
       aggregate: 'none',
+      formula: '',
+      isCalculated: false,
+    });
+    setIsColumnSheetOpen(true);
+  };
+
+  // Mở Sheet thêm cột tính toán tùy biến (Calculated Field / Formula fx)
+  const handleOpenAddCalculatedColumn = () => {
+    setEditingIndex(null);
+    const idSuffix = Date.now().toString().slice(-4);
+    setColForm({
+      source: sources[0]?.id || 'CALCULATED',
+      field: `calc_${idSuffix}`,
+      label: 'Cột tính toán mới',
+      type: 'number',
+      aggregate: 'none',
+      formula: '',
+      isCalculated: true,
     });
     setIsColumnSheetOpen(true);
   };
@@ -428,6 +492,8 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
       label: col.label || col.field || col.key,
       type: col.type || 'string',
       aggregate: col.aggregate || 'none',
+      formula: col.formula || '',
+      isCalculated: Boolean(col.isCalculated || col.formula),
     });
     setIsColumnSheetOpen(true);
   };
@@ -463,13 +529,19 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
       label: trimmedLabel,
       type: colForm.type,
       aggregate: colForm.aggregate,
+      formula: colForm.formula?.trim() || undefined,
+      isCalculated: Boolean(colForm.isCalculated || colForm.formula?.trim()),
     };
 
     let updatedCols = [...columns];
     if (editingIndex === null) {
       // Thêm mới
       updatedCols.push(newColDef);
-      toast.success(`Đã thêm cột "${trimmedLabel}" vào cấu hình báo cáo.`);
+      toast.success(
+        newColDef.isCalculated
+          ? `Đã thêm cột tính toán "${trimmedLabel}".`
+          : `Đã thêm cột "${trimmedLabel}" vào cấu hình báo cáo.`,
+      );
     } else {
       // Cập nhật
       updatedCols[editingIndex] = newColDef;
@@ -568,10 +640,35 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
   const availableFieldsInForm = useMemo(() => {
     const srcObj = sources.find((s) => s.id === colForm.source);
     if (!srcObj || !Array.isArray(srcObj.fields)) return [];
-    return srcObj.fields.map((f: any) =>
-      typeof f === 'string' ? f : f?.name || f?.field || f?.key || f?.path || '',
-    ).filter(Boolean);
+    return srcObj.fields
+      .map((f: any) =>
+        typeof f === 'string' ? f : f?.name || f?.field || f?.key || f?.path || '',
+      )
+      .filter(Boolean);
   }, [sources, colForm.source]);
+
+  // Danh sách các trường từ tất cả các nguồn phục vụ chèn token vào công thức tính toán [field]
+  const allAvailableTokens = useMemo(() => {
+    const tokens = new Map<string, string>();
+    sources.forEach((s) => {
+      const srcName = s.name || s.id;
+      if (Array.isArray(s.fields)) {
+        s.fields.forEach((f: any) => {
+          const name = typeof f === 'string' ? f : f?.name || f?.field || f?.key || '';
+          if (name && !tokens.has(name)) {
+            tokens.set(name, `${name} (${getFriendlyFieldLabel(name)} - ${srcName})`);
+          }
+        });
+      }
+    });
+    columns.forEach((c) => {
+      const name = c.field || c.key;
+      if (name && !tokens.has(name)) {
+        tokens.set(name, `${name} (${c.label || getFriendlyFieldLabel(name)})`);
+      }
+    });
+    return Array.from(tokens.entries()).map(([field, label]) => ({ field, label }));
+  }, [sources, columns]);
 
   return (
     <div className="flex flex-col h-full gap-5 w-full min-w-0">
@@ -700,6 +797,37 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
               {joins.length} phép nối đang áp dụng
             </span>
           </div>
+
+          {/* Gợi ý Smart-Join Tự Động */}
+          {smartJoinSuggestions.length > 0 && (
+            <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-xl mb-3 flex flex-col gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                <Sparkles className="w-4 h-4 text-amber-600 animate-pulse" />
+                Gợi ý nối bảng tự động (Smart-Join)
+              </div>
+              <p className="text-[11px] text-amber-700">
+                Hệ thống phát hiện các mối quan hệ nghiệp vụ tương ứng giữa các nguồn dữ liệu bạn đã chọn. Bấm để tự động áp dụng:
+              </p>
+              <div className="flex flex-wrap gap-2 pt-0.5">
+                {smartJoinSuggestions.map((rule, idx) => (
+                  <Button
+                    key={idx}
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleApplySmartJoin(rule)}
+                    className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 text-xs h-7 px-2.5 font-medium flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <Link2 className="w-3.5 h-3.5 text-amber-600" />
+                    <span>{rule.description}</span>
+                    <Badge className="ml-1 bg-amber-200 text-amber-800 text-[10px] px-1 py-0 border-none font-bold">
+                      Áp dụng 1-click
+                    </Badge>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {sources.length < 2 ? (
             <div className="p-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-slate-500 text-xs flex items-center gap-2">
@@ -1196,6 +1324,17 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
 
             <Button
               size="sm"
+              variant="outline"
+              onClick={handleOpenAddCalculatedColumn}
+              className="text-amber-700 border-amber-300 bg-amber-50/60 hover:bg-amber-100 text-xs h-8 shadow-xs flex items-center gap-1.5"
+              title="Thêm cột tính toán tùy biến bằng công thức (fx) tự động ghép nối số liệu"
+            >
+              <Calculator className="w-3.5 h-3.5 text-amber-600" />
+              Thêm cột tính toán (fx)
+            </Button>
+
+            <Button
+              size="sm"
               onClick={handleOpenAddColumn}
               className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 shadow-xs flex items-center gap-1.5"
             >
@@ -1238,12 +1377,22 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
                   {/* Top: Nhãn & Nút sửa/xóa */}
                   <div className="min-w-0">
                     <div className="flex items-start justify-between gap-1.5 mb-1 min-w-0">
-                      <span
-                        className="text-xs font-bold text-slate-800 block truncate flex-1 min-w-0"
-                        title={col.label || col.field || col.key}
-                      >
-                        {col.label || col.field || col.key}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span
+                          className="text-xs font-bold text-slate-800 block truncate"
+                          title={col.label || col.field || col.key}
+                        >
+                          {col.label || col.field || col.key}
+                        </span>
+                        {(col.isCalculated || col.formula) && (
+                          <Badge
+                            variant="secondary"
+                            className="text-[9px] px-1 py-0 bg-amber-50 text-amber-700 border border-amber-200 shrink-0 font-mono"
+                          >
+                            fx
+                          </Badge>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="ghost"
@@ -1267,8 +1416,17 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
                     </div>
 
                     <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono truncate">
-                      <span className="truncate">Trường: {col.field || col.key}</span>
-                      {col.source && (
+                      {col.formula ? (
+                        <span
+                          className="truncate text-amber-700 bg-amber-50/70 px-1 rounded"
+                          title={`Công thức: ${col.formula}`}
+                        >
+                          fx: {col.formula}
+                        </span>
+                      ) : (
+                        <span className="truncate">Trường: {col.field || col.key}</span>
+                      )}
+                      {col.source && !col.isCalculated && (
                         <span className="bg-slate-200/70 text-slate-600 px-1 rounded text-[9px] truncate max-w-[80px]">
                           {srcName}
                         </span>
@@ -1377,70 +1535,221 @@ export const Canvas: React.FC<CanvasProps> = ({ config, setConfig }) => {
           </SheetHeader>
 
           <div className="space-y-4 py-4 flex-1">
-            {/* 1. Nguồn dữ liệu */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Nguồn Dữ Liệu
-              </label>
-              <select
-                value={colForm.source}
-                onChange={(e) =>
-                  setColForm((prev) => ({ ...prev, source: e.target.value }))
-                }
-                className="w-full border border-slate-200 text-xs p-2 rounded-xl bg-white text-slate-800 outline-none focus:border-indigo-500 font-medium"
-              >
-                {sources.map((s: any) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name || s.id} ({s.endpoint || s.id})
-                  </option>
-                ))}
-              </select>
+            {/* Chế độ: Trường dữ liệu gốc hoặc Cột tính toán bằng công thức (fx) */}
+            <div className="flex items-center justify-between p-3 bg-slate-50/90 rounded-xl border border-slate-200">
+              <div className="min-w-0 pr-2">
+                <span className="text-xs font-semibold text-slate-800 block">
+                  Cột tính toán bằng công thức (fx)
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Tự động ghép nối, tính tỷ lệ % hoặc biểu thức điều kiện từ các trường
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={colForm.isCalculated}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setColForm((prev) => ({
+                    ...prev,
+                    isCalculated: checked,
+                    type: checked ? 'number' : prev.type,
+                    field:
+                      checked && !prev.field.startsWith('calc_')
+                        ? `calc_${Date.now().toString().slice(-4)}`
+                        : prev.field,
+                  }));
+                }}
+                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
+              />
             </div>
 
-            {/* 2. Trường dữ liệu (Field) */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tên Trường Dữ Liệu (Field / Key)
-              </label>
-              {availableFieldsInForm.length > 0 ? (
-                <div className="space-y-1.5">
-                  <select
-                    value={colForm.field}
-                    onChange={(e) => handleSelectFieldInForm(e.target.value)}
-                    className="w-full border border-slate-200 text-xs p-2 rounded-xl bg-white text-slate-800 font-mono outline-none focus:border-indigo-500"
-                  >
-                    <option value="">-- Chọn trường từ nguồn --</option>
-                    {availableFieldsInForm.map((f) => (
-                      <option key={f} value={f}>
-                        {f} ({getFriendlyFieldLabel(f)})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[11px] text-slate-400">
-                    Hoặc nhập mã trường tùy biến bên dưới:
-                  </p>
+            {colForm.isCalculated ? (
+              <div className="space-y-3.5 bg-amber-50/40 p-3.5 rounded-xl border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-amber-900 flex items-center gap-1.5">
+                    <Calculator className="w-3.5 h-3.5 text-amber-700" />
+                    Biểu Thức Công Thức (Formula fx)
+                  </label>
+                  <span className="text-[10px] text-amber-700 font-mono">+, -, *, /, %</span>
+                </div>
+
+                <textarea
+                  value={colForm.formula}
+                  onChange={(e) =>
+                    setColForm((prev) => ({ ...prev, formula: e.target.value }))
+                  }
+                  rows={3}
+                  placeholder="Ví dụ: ([completedTasks] / ([totalTasks] || 1)) * 100"
+                  className="w-full text-xs font-mono p-2.5 bg-white border border-amber-300 rounded-lg text-slate-800 outline-none focus:ring-1 focus:ring-amber-500 shadow-xs"
+                />
+
+                {/* Token pills to insert */}
+                <div>
+                  <span className="text-[11px] font-medium text-amber-800 block mb-1">
+                    Nhấp vào trường để chèn vào công thức:
+                  </span>
+                  <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto p-1.5 bg-white/90 rounded-lg border border-amber-200/80">
+                    {allAvailableTokens.length > 0 ? (
+                      allAvailableTokens.map((t) => (
+                        <button
+                          key={t.field}
+                          type="button"
+                          onClick={() =>
+                            setColForm((prev) => ({
+                              ...prev,
+                              formula: `${prev.formula ? prev.formula + ' ' : ''}[${t.field}]`,
+                            }))
+                          }
+                          className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-100/70 hover:bg-amber-200 text-amber-900 border border-amber-200 transition-colors"
+                          title={t.label}
+                        >
+                          + [{t.field}]
+                        </button>
+                      ))
+                    ) : (
+                      <span className="text-[10px] text-slate-400 italic">
+                        Chưa có trường nào từ nguồn dữ liệu
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Quick Formula Templates */}
+                <div className="pt-2 border-t border-amber-200/70">
+                  <span className="text-[11px] font-medium text-amber-800 block mb-1">
+                    Mẫu công thức phổ biến:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setColForm((prev) => ({
+                          ...prev,
+                          formula: '([completedTasks] / ([totalTasks] || 1)) * 100',
+                          label: prev.label || 'Tỷ lệ hoàn thành nhiệm vụ (%)',
+                        }))
+                      }
+                      className="text-[10px] px-2 py-0.5 rounded bg-white border border-amber-300 hover:bg-amber-100 text-slate-700 font-medium"
+                    >
+                      Tỷ lệ hoàn thành %
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setColForm((prev) => ({
+                          ...prev,
+                          formula:
+                            '[totalScore] >= 90 ? "Xuất sắc" : [totalScore] >= 70 ? "Hoàn thành tốt" : "Chưa đạt"',
+                          type: 'string',
+                          label: prev.label || 'Xếp loại chất lượng',
+                        }))
+                      }
+                      className="text-[10px] px-2 py-0.5 rounded bg-white border border-amber-300 hover:bg-amber-100 text-slate-700 font-medium"
+                    >
+                      Xếp loại đánh giá
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setColForm((prev) => ({
+                          ...prev,
+                          formula:
+                            '([kpiScore] || 0) * 0.4 + ([qualityScore] || 0) * 0.6',
+                          label: prev.label || 'Điểm tổng hợp trọng số',
+                        }))
+                      }
+                      className="text-[10px] px-2 py-0.5 rounded bg-white border border-amber-300 hover:bg-amber-100 text-slate-700 font-medium"
+                    >
+                      Trọng số 40/60
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mã định danh trường tính toán */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Mã Định Danh Cột (Field Key)
+                  </label>
                   <input
                     type="text"
                     value={colForm.field}
                     onChange={(e) =>
                       setColForm((prev) => ({ ...prev, field: e.target.value }))
                     }
-                    placeholder="Ví dụ: employeeName, qualityScore..."
-                    className="w-full border border-slate-200 text-xs p-2 rounded-xl font-mono text-slate-800 outline-none focus:border-indigo-500"
+                    placeholder="calc_kpi_ratio"
+                    className="w-full border border-slate-200 text-xs p-2 rounded-xl font-mono text-slate-800 outline-none focus:border-indigo-500 bg-white"
                   />
                 </div>
-              ) : (
-                <input
-                  type="text"
-                  value={colForm.field}
-                  onChange={(e) =>
-                    setColForm((prev) => ({ ...prev, field: e.target.value }))
-                  }
-                  placeholder="Ví dụ: taskCount, ranking..."
-                  className="w-full border border-slate-200 text-xs p-2 rounded-xl font-mono text-slate-800 outline-none focus:border-indigo-500"
-                />
-              )}
-            </div>
+              </div>
+            ) : (
+              <>
+                {/* 1. Nguồn dữ liệu */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Nguồn Dữ Liệu
+                  </label>
+                  <select
+                    value={colForm.source}
+                    onChange={(e) =>
+                      setColForm((prev) => ({ ...prev, source: e.target.value }))
+                    }
+                    className="w-full border border-slate-200 text-xs p-2 rounded-xl bg-white text-slate-800 outline-none focus:border-indigo-500 font-medium"
+                  >
+                    {sources.map((s: any) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name || s.id} ({s.endpoint || s.id})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2. Trường dữ liệu (Field) */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tên Trường Dữ Liệu (Field / Key)
+                  </label>
+                  {availableFieldsInForm.length > 0 ? (
+                    <div className="space-y-1.5">
+                      <select
+                        value={colForm.field}
+                        onChange={(e) => handleSelectFieldInForm(e.target.value)}
+                        className="w-full border border-slate-200 text-xs p-2 rounded-xl bg-white text-slate-800 font-mono outline-none focus:border-indigo-500"
+                      >
+                        <option value="">-- Chọn trường từ nguồn --</option>
+                        {availableFieldsInForm.map((f) => (
+                          <option key={f} value={f}>
+                            {f} ({getFriendlyFieldLabel(f)})
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-[11px] text-slate-400">
+                        Hoặc nhập mã trường tùy biến bên dưới:
+                      </p>
+                      <input
+                        type="text"
+                        value={colForm.field}
+                        onChange={(e) =>
+                          setColForm((prev) => ({ ...prev, field: e.target.value }))
+                        }
+                        placeholder="Ví dụ: employeeName, qualityScore..."
+                        className="w-full border border-slate-200 text-xs p-2 rounded-xl font-mono text-slate-800 outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      value={colForm.field}
+                      onChange={(e) =>
+                        setColForm((prev) => ({ ...prev, field: e.target.value }))
+                      }
+                      placeholder="Ví dụ: taskCount, ranking..."
+                      className="w-full border border-slate-200 text-xs p-2 rounded-xl font-mono text-slate-800 outline-none focus:border-indigo-500"
+                    />
+                  )}
+                </div>
+              </>
+            )}
 
             {/* 3. Nhãn tiếng Việt */}
             <div>

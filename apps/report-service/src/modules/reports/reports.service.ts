@@ -191,6 +191,43 @@ function getSampleRowsForApi(endpointOrPath: string): any[] {
       { id: 4, dia_ban: 'Huyện Ea H\'leo', so_du_an_moi: 2, von_ngoai_ns_ty: 1600, tien_do_trien_khai: 'Đang lập quy hoạch chi tiết', ghi_chu: 'Cụm công nghiệp và điện gió' },
     ];
   }
+  if (p.includes('user_org') || p.includes('organization')) {
+    return [
+      { id: 56, code: 'A15.05', name: 'Ban Tổ chức Tỉnh ủy Đắk Lắk', parentId: null, order: 1, level: 1, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 57, code: 'A15.05.01', name: 'Phòng Tổ chức cán bộ', parentId: 56, order: 1, level: 2, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 58, code: 'A15.05.02', name: 'Phòng Bảo vệ chính trị nội bộ', parentId: 56, order: 2, level: 2, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 59, code: 'A15.05.03', name: 'Phòng Tổ chức đảng, đảng viên', parentId: 56, order: 3, level: 2, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 60, code: 'A15.05.04', name: 'Văn phòng Ban', parentId: 56, order: 4, level: 2, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 20, code: 'H15.20', name: 'Sở Khoa học và Công nghệ', parentId: null, order: 2, level: 1, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 3, code: 'H15.03', name: 'Sở Tài chính Đắk Lắk', parentId: null, order: 3, level: 1, status: 'Hoạt động', createdAt: '2026-01-01' },
+      { id: 1, code: 'H15.01', name: 'UBND Huyện Krông Pắc', parentId: null, order: 4, level: 1, status: 'Hoạt động', createdAt: '2026-01-01' },
+    ];
+  }
+  if (p.includes('user_cadre') || p.includes('cadre_stats')) {
+    return [
+      { id: 1, employeeCode: 'BTCTU_001', username: 'nam.hd', fullName: 'Hoàng Đức Nam', email: 'nam.hd@daklak.gov.vn', phone: '0912345678', unitId: 57, departmentName: 'Phòng Tổ chức cán bộ', jobTitle: 'Trưởng phòng TCCB', status: 'Chính thức', isActive: 'Hoạt động' },
+      { id: 2, employeeCode: 'BTCTU_002', username: 'mai.pt', fullName: 'Phạm Thị Mai', email: 'mai.pt@daklak.gov.vn', phone: '0912345679', unitId: 57, departmentName: 'Phòng Tổ chức cán bộ', jobTitle: 'Phó Trưởng phòng TCCB', status: 'Chính thức', isActive: 'Hoạt động' },
+      { id: 3, employeeCode: 'BTCTU_003', username: 'hung.vv', fullName: 'Vũ Văn Hùng', email: 'hung.vv@daklak.gov.vn', phone: '0912345680', unitId: 58, departmentName: 'Phòng Bảo vệ chính trị nội bộ', jobTitle: 'Trưởng phòng BVCTNB', status: 'Chính thức', isActive: 'Hoạt động' },
+      { id: 4, employeeCode: 'BTCTU_004', username: 'hoang.ld', fullName: 'Lê Đình Hoàng', email: 'hoang.ld@daklak.gov.vn', phone: '0912345681', unitId: 59, departmentName: 'Phòng Tổ chức đảng, đảng viên', jobTitle: 'Chuyên viên chính', status: 'Chính thức', isActive: 'Hoạt động' },
+      { id: 5, employeeCode: 'BTCTU_005', username: 'lan.dt', fullName: 'Đỗ Thị Lan', email: 'lan.dt@daklak.gov.vn', phone: '0912345682', unitId: 60, departmentName: 'Văn phòng Ban', jobTitle: 'Chánh Văn phòng', status: 'Chính thức', isActive: 'Hoạt động' },
+    ];
+  }
+  if (p.includes('staffing')) {
+    return [
+      { id: 1, unitId: 56, jobTitleId: 101, jobTitleName: 'Trưởng Ban Tổ chức Tỉnh ủy', quantity: 1, currentCount: 1, missingCount: 0, isOver: 'Đủ định biên' },
+      { id: 2, unitId: 56, jobTitleId: 102, jobTitleName: 'Phó Trưởng Ban Tổ chức Tỉnh ủy', quantity: 3, currentCount: 3, missingCount: 0, isOver: 'Đủ định biên' },
+      { id: 3, unitId: 57, jobTitleId: 103, jobTitleName: 'Trưởng phòng Tổ chức cán bộ', quantity: 1, currentCount: 1, missingCount: 0, isOver: 'Đủ định biên' },
+      { id: 4, unitId: 57, jobTitleId: 104, jobTitleName: 'Chuyên viên chính Phòng TCCB', quantity: 4, currentCount: 3, missingCount: 1, isOver: 'Thiếu định biên' },
+      { id: 5, unitId: 58, jobTitleId: 105, jobTitleName: 'Trưởng phòng Bảo vệ CTNB', quantity: 1, currentCount: 1, missingCount: 0, isOver: 'Đủ định biên' },
+    ];
+  }
+  if (p.includes('workflow')) {
+    return [
+      { id: 1, processDefinitionKey: 'QUY_TRINH_BO_NHIEM_CAN_BO', processInstanceId: 'PROC_2026_01', businessKey: 'HS_BTCTU_01', currentStep: 'Thẩm tra tiêu chuẩn chính trị', assignee: 'Vũ Văn Hùng', status: 'Đang xử lý', startedAt: '2026-10-01', endedAt: null, durationHours: 72 },
+      { id: 2, processDefinitionKey: 'QUY_TRINH_DANH_GIA_SOP_MAU05', processInstanceId: 'PROC_2026_02', businessKey: 'DG_QUY_3_2026', currentStep: 'Lãnh đạo Ban phê duyệt Mẫu 05', assignee: 'Trưởng Ban', status: 'Hoàn thành', startedAt: '2026-10-05', endedAt: '2026-10-12', durationHours: 168 },
+      { id: 3, processDefinitionKey: 'QUY_TRINH_LUU_CHUYEN_VAN_BAN', processInstanceId: 'PROC_2026_03', businessKey: 'VB_1288_UBND', currentStep: 'Phân công chuyên viên xử lý', assignee: 'Hoàng Đức Nam', status: 'Đang xử lý', startedAt: '2026-10-14', endedAt: null, durationHours: 24 },
+    ];
+  }
   return [
     { id: 1, code: 'API_ROW_01', name: 'Bản ghi liên thông dữ liệu số 01', status: 'COMPLETED', createdAt: '2026-10-15' },
     { id: 2, code: 'API_ROW_02', name: 'Bản ghi liên thông dữ liệu số 02', status: 'IN_PROGRESS', createdAt: '2026-10-15' },
@@ -199,14 +236,54 @@ function getSampleRowsForApi(endpointOrPath: string): any[] {
 
 const FALLBACK_CATALOG: CatalogEntry[] = [
   {
+    endpoint: 'BTCTU_KPI_STATS',
+    name: 'Đánh giá Cán bộ Ban Tổ chức Tỉnh ủy (SOP 4 bước & Mẫu 05)',
+    fields: ['id', 'cadreCode', 'fullName', 'departmentId', 'departmentName', 'jobTitle', 'sChung', 'sNhiemVu', 'sTong', 'proposedRank', 'approvedRank', 'hasMau04', 'sopStep', 'status', 'quarterYear'],
+  },
+  {
     endpoint: 'HRM_TASK_STATS',
-    name: 'Thống kê nhiệm vụ',
-    fields: ['taskId', 'employeeId', 'status', 'hours'],
+    name: 'Quản lý Công việc & Nhiệm vụ Toàn tỉnh',
+    fields: ['id', 'title', 'status', 'priority', 'progress', 'departmentId', 'departmentName', 'assigneeCode', 'assigneeName', 'dueDate', 'isOverdue', 'isCompleted'],
+  },
+  {
+    endpoint: 'USER_CADRE_STATS',
+    name: 'Hồ sơ Cán bộ & Tài khoản Công chức Hệ thống',
+    fields: ['id', 'employeeCode', 'username', 'fullName', 'email', 'phone', 'unitId', 'departmentName', 'jobTitle', 'status', 'isActive'],
+  },
+  {
+    endpoint: 'USER_ORG_STATS',
+    name: 'Cơ cấu Tổ chức & Danh mục Đơn vị Hành chính',
+    fields: ['id', 'code', 'name', 'parentId', 'order', 'level', 'status', 'createdAt'],
+  },
+  {
+    endpoint: 'USER_STAFFING_STATS',
+    name: 'Vị trí việc làm (VTVL) & Định biên Nhân sự Đơn vị',
+    fields: ['id', 'unitId', 'jobTitleId', 'jobTitleName', 'quantity', 'currentCount', 'missingCount', 'isOver'],
   },
   {
     endpoint: 'DOC_STATS',
-    name: 'Thống kê văn bản',
-    fields: ['docId', 'departmentId', 'type', 'issueDate'],
+    name: 'Lưu chuyển Văn bản Hành chính Đến / Đi',
+    fields: ['id', 'documentNumber', 'abstract', 'isIncoming', 'status', 'urgency', 'securityLevel', 'pageCount', 'isLate', 'issueDate', 'departmentId', 'departmentName'],
+  },
+  {
+    endpoint: 'WORKFLOW_STATS',
+    name: 'Theo dõi Tiến độ Quy trình Luồng duyệt (Workflow)',
+    fields: ['id', 'processDefinitionKey', 'processInstanceId', 'businessKey', 'currentStep', 'assignee', 'status', 'startedAt', 'endedAt', 'durationHours'],
+  },
+  {
+    endpoint: 'POST_STATS',
+    name: 'Hoạt động Xuất bản Tin bài Cổng Thông tin Điện tử',
+    fields: ['id', 'title', 'categoryName', 'status', 'viewCount', 'authorName', 'isFeatured', 'publishedDate'],
+  },
+  {
+    endpoint: 'EMPLOYEE_QUALITY',
+    name: 'Đánh giá Năng suất & Chất lượng Cán bộ Toàn tỉnh',
+    fields: ['id', 'employeeName', 'departmentName', 'taskCount', 'completedCount', 'qualityScore', 'ranking'],
+  },
+  {
+    endpoint: 'HRM_PERSONAL_STATS',
+    name: 'Bàn làm việc & Thống kê Cá nhân Cán bộ',
+    fields: ['month', 'score', 'completedTasks', 'status', 'departmentName', 'workload', 'title', 'progress', 'role', 'dueDate', 'cadreCode', 'fullName'],
   },
 ];
 
@@ -398,6 +475,123 @@ export class ReportsService implements OnModuleInit {
     }
   }
 
+  private evaluateFormula(formula: string, row: Record<string, any>): any {
+    if (!formula || typeof formula !== 'string') return null;
+    try {
+      // Thay thế các token [field_name] bằng giá trị tương ứng trong row
+      const cleanExpr = formula.replace(/\[([a-zA-Z0-9_.]+)\]/g, (_, field) => {
+        const val = row[field];
+        if (val === undefined || val === null) return '0';
+        if (typeof val === 'number') return String(val);
+        if (typeof val === 'boolean') return String(val);
+        return JSON.stringify(String(val));
+      });
+
+      // Kiểm tra an toàn: ngăn chặn các từ khóa can thiệp hệ thống
+      if (
+        /(process|require|import|global|window|document|eval|Function|constructor|prototype|__proto__|this)/i.test(
+          cleanExpr,
+        )
+      ) {
+        return null;
+      }
+
+      // Thực thi an toàn biểu thức toán học hoặc điều kiện ternary
+      const fn = new Function(`"use strict"; return (${cleanExpr});`);
+      const result = fn();
+      if (typeof result === 'number' && !isNaN(result)) {
+        return Math.round(result * 100) / 100;
+      }
+      return result ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private async fetchSourceRows(
+    sourceDef: any,
+    config: any,
+    payloadParams: any,
+    metadata?: Metadata,
+  ): Promise<any[]> {
+    const sourceCode = sourceDef?.endpoint || sourceDef?.id || '';
+    const queryParams = { ...(sourceDef?.params || {}), ...(payloadParams || {}) };
+    const queryMeta = metadata || new Metadata();
+    let rows: any[] = [];
+
+    try {
+      let statsRes: any;
+      if (sourceCode === 'HRM_TASK_STATS' || sourceCode.includes('TASK')) {
+        statsRes = await this.statsService.getTaskStatistics(queryParams, null, queryMeta);
+      } else if (sourceCode === 'DOC_STATS' || sourceCode.includes('DOC')) {
+        statsRes = await this.statsService.getDocumentStatistics(queryParams, queryMeta);
+      } else if (sourceCode === 'POST_STATS' || sourceCode.includes('POST')) {
+        statsRes = await this.statsService.getPostStatistics(queryParams, queryMeta);
+      } else if (
+        sourceCode === 'BTCTU_KPI_STATS' ||
+        sourceCode.includes('BTCTU') ||
+        sourceCode.includes('KPI_EVAL')
+      ) {
+        statsRes = await this.statsService.getBtctuKpiStatistics(queryParams, null, queryMeta);
+      } else if (sourceCode === 'EMPLOYEE_QUALITY' || sourceCode.includes('EMP')) {
+        statsRes = await this.statsService.getEmployeeQualityStatistics(queryParams, null, queryMeta);
+      } else if (sourceCode === 'KPI_STATS') {
+        statsRes = await this.statsService.getKpiStatistics(queryParams, null, queryMeta);
+      } else if (sourceCode === 'HRM_PERSONAL_STATS') {
+        statsRes = await this.statsService.getPersonalWorkbenchStatistics(queryParams, null, queryMeta);
+      } else if (sourceCode === 'USER_ORG_STATS' || sourceCode.includes('ORG')) {
+        const unitMap = await this.statsService['getUnitMap']?.();
+        if (unitMap && Object.keys(unitMap).length > 0) {
+          statsRes = { data: Object.values(unitMap) };
+        }
+      } else if (sourceCode === 'USER_CADRE_STATS' || sourceCode.includes('CADRE')) {
+        statsRes = await this.statsService.getEmployeeQualityStatistics(queryParams, null, queryMeta);
+      } else if (sourceCode.includes('|')) {
+        const [uCode, uPath] = sourceCode.split('|');
+        statsRes = await this.fetchDynamicApiSource(
+          { ...sourceDef, upstream: uCode, path: uPath },
+          config,
+          queryParams,
+          queryMeta,
+        );
+      } else if (sourceDef?.upstream && sourceDef?.path) {
+        statsRes = await this.fetchDynamicApiSource(
+          sourceDef,
+          config,
+          queryParams,
+          queryMeta,
+        );
+      }
+
+      const rawData: any = statsRes?.data;
+      if (Array.isArray(rawData)) {
+        rows = rawData;
+      } else if (Array.isArray(rawData?.rows)) {
+        rows = rawData.rows;
+      } else if (Array.isArray(rawData?.items)) {
+        rows = rawData.items;
+      }
+      if (rows.length > 0) {
+        return rows.map(normalizeRow);
+      }
+    } catch (err: any) {
+      this.logger.warn(`Truy vấn thời gian thực cho ${sourceCode} qua gRPC: ${err?.message}`);
+    }
+
+    // Fallback 1: snapshot trong database
+    const latestSnapshot = await this.prisma.statisticsSnapshot.findFirst({
+      where: { dataSourceCode: sourceCode },
+      orderBy: { recordedAt: 'desc' },
+    });
+    if (latestSnapshot && Array.isArray(latestSnapshot.data) && (latestSnapshot.data as any[]).length > 0) {
+      return (latestSnapshot.data as any[]).map(normalizeRow);
+    }
+
+    // Fallback 2: Sample data
+    const sampleData = getSampleRowsForApi(sourceCode || sourceDef?.path || sourceDef?.endpoint);
+    return (sampleData || []).map(normalizeRow);
+  }
+
   async runReport(payloadStr: string, _userDataStr: string, metadata?: Metadata) {
     try {
       const payload = JSON.parse(payloadStr);
@@ -422,103 +616,77 @@ export class ReportsService implements OnModuleInit {
 
       // Sinh snapshot dữ liệu thực tế dựa trên nguồn cấu hình
       const config = definition.configuration as any;
-      let sourceRows: any[] = [];
-      const primarySource = config?.sources?.[0];
-      const sourceCode = primarySource?.endpoint || primarySource?.id || definition.code;
+      const configuredSources =
+        Array.isArray(config?.sources) && config.sources.length > 0
+          ? config.sources
+          : [
+              {
+                id: definition.code,
+                endpoint: definition.code,
+                fields: [],
+              },
+            ];
 
-      let targetCode = 'HRM_TASK_STATS';
-      if (definition.code === 'REP_DOC_STATS' || definition.code?.includes('DOC')) {
-        targetCode = 'DOC_STATS';
-      } else if (definition.code === 'REP_POST_STATS' || definition.code?.includes('POST')) {
-        targetCode = 'POST_STATS';
-      } else if (definition.code === 'REP_EMP_QUALITY' || definition.code?.includes('EMP')) {
-        targetCode = 'EMPLOYEE_QUALITY';
-      } else if (
-        definition.code === 'REP_BTCTU_SOP_KPI' ||
-        definition.code?.includes('BTCTU') ||
-        definition.id === 5
-      ) {
-        targetCode = 'BTCTU_KPI_STATS';
-      } else if (definition.code === 'REP_HRM_TASKS' || definition.code?.includes('HRM') || definition.code?.includes('TASK')) {
-        targetCode = 'HRM_TASK_STATS';
-      } else if (sourceCode && sourceCode !== definition.code) {
-        targetCode = sourceCode;
+      // ────────────────── TRUY VẤN DỮ LIỆU ĐA NGUỒN (MULTI-SOURCE REALTIME FETCH) ──────────────────
+      const sourcesDataMap: Record<string, any[]> = {};
+      await Promise.all(
+        configuredSources.map(async (src: any) => {
+          const sKey = src.id || src.endpoint;
+          const rows = await this.fetchSourceRows(src, config, payload.params, metadata);
+          sourcesDataMap[sKey] = rows;
+        }),
+      );
+
+      // In-Memory Multi-source JOIN execution:
+      const primarySource = configuredSources[0];
+      const primaryKey = primarySource?.id || primarySource?.endpoint;
+      let sourceRows: any[] = sourcesDataMap[primaryKey] || [];
+
+      if (Array.isArray(config?.joins) && config.joins.length > 0 && sourceRows.length > 0) {
+        for (const join of config.joins) {
+          const rightRows = sourcesDataMap[join.rightSource] || [];
+          if (rightRows.length === 0) continue;
+
+          const joined: any[] = [];
+          for (const lRow of sourceRows) {
+            const matches = rightRows.filter((rRow) => {
+              return (join.conditions || []).every((cond: any) => {
+                const lVal = String(lRow[cond.leftField] ?? '').trim().toLowerCase();
+                const rVal = String(rRow[cond.rightField] ?? '').trim().toLowerCase();
+                return lVal && rVal && lVal === rVal;
+              });
+            });
+
+            if (matches.length > 0) {
+              for (const m of matches) {
+                joined.push({ ...m, ...lRow });
+              }
+            } else if (join.type === 'LEFT') {
+              joined.push({ ...lRow });
+            }
+          }
+          if (joined.length > 0) {
+            sourceRows = joined;
+          }
+        }
       }
 
-      // ────────────────── TRUY VẤN DỮ LIỆU HỆ THỐNG THỜI GIAN THỰC (REALTIME SYSTEM QUERY VIA gRPC) ──────────────────
-      try {
-        const queryMeta = metadata || new Metadata();
-        const queryParams = { ...(config?.sources?.[0]?.params || {}), ...(payload.params || {}) };
-        let liveRows: any[] = [];
-
-        let statsRes: any;
-        if (targetCode === 'HRM_TASK_STATS' || targetCode.includes('TASK')) {
-          statsRes = await this.statsService.getTaskStatistics(queryParams, null, queryMeta);
-        } else if (targetCode === 'DOC_STATS' || targetCode.includes('DOC')) {
-          statsRes = await this.statsService.getDocumentStatistics(queryParams, queryMeta);
-        } else if (targetCode === 'POST_STATS' || targetCode.includes('POST')) {
-          statsRes = await this.statsService.getPostStatistics(queryParams, queryMeta);
-        } else if (targetCode === 'BTCTU_KPI_STATS' || targetCode.includes('BTCTU')) {
-          statsRes = await this.statsService.getBtctuKpiStatistics(queryParams, null, queryMeta);
-        } else if (targetCode === 'EMPLOYEE_QUALITY' || targetCode.includes('EMP')) {
-          statsRes = await this.statsService.getEmployeeQualityStatistics(queryParams, null, queryMeta);
-        } else if (targetCode === 'KPI_STATS') {
-          statsRes = await this.statsService.getKpiStatistics(queryParams, null, queryMeta);
-        } else if (targetCode === 'HRM_PERSONAL_STATS') {
-          statsRes = await this.statsService.getPersonalWorkbenchStatistics(queryParams, null, queryMeta);
-        } else if (targetCode.includes('|')) {
-          const [uCode, uPath] = targetCode.split('|');
-          statsRes = await this.fetchDynamicApiSource(
-            { ...primarySource, upstream: uCode, path: uPath },
-            config,
-            queryParams,
-            queryMeta,
-          );
-        } else if (primarySource?.upstream && primarySource?.path) {
-          statsRes = await this.fetchDynamicApiSource(
-            primarySource,
-            config,
-            queryParams,
-            queryMeta,
-          );
-        }
-
-        const rawData: any = statsRes?.data;
-        if (Array.isArray(rawData)) {
-          liveRows = rawData;
-        } else if (Array.isArray(rawData?.rows)) {
-          liveRows = rawData.rows;
-        } else if (Array.isArray(rawData?.items)) {
-          liveRows = rawData.items;
-        } else {
-          liveRows = [];
-        }
-
-        if (Array.isArray(liveRows) && liveRows.length > 0) {
-          sourceRows = liveRows.map(normalizeRow);
-        }
-      } catch (liveErr: any) {
-        this.logger.warn(`Truy vấn thời gian thực cho ${targetCode} qua gRPC: ${liveErr?.message}. Sử dụng snapshot fallback.`);
-      }
-
-      // Nếu gRPC upstream chưa có bản ghi hoặc lỗi, sử dụng bản snapshot gần nhất trong CSDL
-      if (sourceRows.length === 0) {
-        const latestSnapshot = await this.prisma.statisticsSnapshot.findFirst({
-          where: { dataSourceCode: targetCode },
-          orderBy: { recordedAt: 'desc' },
+      // Evaluated Calculated Fields / Formulas:
+      const calculatedCols = (config?.columns || []).filter(
+        (c: any) => c.formula || c.isCalculated,
+      );
+      if (calculatedCols.length > 0 && sourceRows.length > 0) {
+        sourceRows = sourceRows.map((row) => {
+          const updatedRow = { ...row };
+          for (const col of calculatedCols) {
+            if (!col.formula) continue;
+            const resVal = this.evaluateFormula(col.formula, updatedRow);
+            if (resVal !== null && resVal !== undefined) {
+              updatedRow[col.key || col.field] = resVal;
+            }
+          }
+          return updatedRow;
         });
-
-        if (latestSnapshot && Array.isArray(latestSnapshot.data)) {
-          sourceRows = (latestSnapshot.data as any[]).map(normalizeRow);
-        }
-      }
-
-      // Fallback cuối cùng nếu chưa có snapshot
-      if (sourceRows.length === 0) {
-        const sampleData = getSampleRowsForApi(targetCode || primarySource?.path || primarySource?.endpoint || definition.code);
-        if (sampleData.length > 0) {
-          sourceRows = sampleData.map(normalizeRow);
-        }
       }
 
       // ────────────────── BỘ LỌC ĐA CHIỀU & THAM SỐ ĐỘNG (DYNAMIC PARAMETERS & FILTERS) ──────────────────
@@ -625,6 +793,8 @@ export class ReportsService implements OnModuleInit {
             key: c.key || c.field,
             label: c.label && c.label !== (c.key || c.field) ? c.label : getFriendlyFieldLabel(c.key || c.field),
             type: c.type || 'string',
+            formula: c.formula,
+            isCalculated: Boolean(c.isCalculated || c.formula),
           }))
         : (primarySource?.fields || []).map((f: string) => ({
             key: f,

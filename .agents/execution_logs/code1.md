@@ -1,5 +1,88 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-16] Triển Khai Toàn Diện Kiến Trúc Semantic Data Catalog, Dynamic Execution Engine & Trực Quan Hóa Tự Phục Vụ (Self-Service BI) Cho Report Service
+
+### 1. Bối Cảnh & Yêu Cầu Người Dùng
+- **Chỉ đạo từ người dùng**:
+  1. *http://113.184.220.82/admin/services/reports/12/design giải thích cho tôi mô hình dữ liệu => hệ thống các luồng này từ đầu ra định nghĩa code định nghĩa sẵn trong code rồi ở đây chỉ hiển thị ra ?*
+  2. *giải pháp xử lý để hệ thống nội bộ của tôi luôn động gắn rõ với hệ thống để người dùng có thể tự số liệu để xây dựng báo cáo hoàn chỉnh thay vì phải nhờ coder code trước trong backend api*
+  3. *tự động thực hiện hết tất cả giai đoạn sau đó kiểm thử và lưu vết thực hiện cho tôi. Tuân thủ tuyệt đối quy trình phát triển phần mềm đã đề ra*
+- **Nguyên nhân và thực trạng ban đầu**:
+  - `report-service` trước đây chỉ chứa 2 nguồn mẫu (`DOC_STATS` và `HRM_TASK_STATS`), thiếu hoàn toàn từ điển ngữ nghĩa (Semantic Catalog) của các dịch vụ cốt lõi (User, Organization, Cadre, Staffing VTVL, BTCTU KPI, Workflow, Post).
+  - Khối thực thi báo cáo (`runReport`) chỉ truy vấn đơn lẻ 1 nguồn, chưa hỗ trợ ghép nối liên bảng (JOIN) giữa các domain services khác nhau mà không vi phạm nguyên tắc Service Data Sovereignty (Rule 6).
+  - Chưa hỗ trợ cột tính toán động (`Calculated Fields` / `formula fx`) khiến người dùng nghiệp vụ khi muốn tính tỷ lệ %, xếp loại hay điểm trọng số đều phải phụ thuộc vào lập trình viên can thiệp backend.
+
+### 2. Các Giai Đoạn Triển Khai Kỹ Thuật
+1. **Giai Đoạn 1: Semantic Data Catalog & Entity Registry**:
+   - `apps/report-service/prisma/seed.ts` & `src/modules/reports/reports.service.ts`: Khởi tạo và đồng bộ 10 thực thể dữ liệu nghiệp vụ chuẩn hóa toàn tỉnh:
+     * `BTCTU_KPI_STATS`: Thống kê KPI & Đánh giá công vụ theo Đề án 01-BTCTU.
+     * `HRM_TASK_STATS`: Thống kê nhiệm vụ cơ quan & tiến độ xử lý.
+     * `USER_CADRE_STATS`: Hồ sơ cán bộ & Đảng viên tỉnh Đắk Lắk.
+     * `USER_ORG_STATS`: Cơ cấu tổ chức & Phòng ban hành chính.
+     * `USER_STAFFING_STATS`: Vị trí việc làm (VTVL) & Định biên biên chế.
+     * `DOC_STATS`: Văn bản chỉ đạo, điều hành & Tỷ lệ xử lý đúng hạn.
+     * `WORKFLOW_STATS`: Quy trình số hóa & Vết luồng công vụ.
+     * `POST_STATS`: Tin bài, truyền thông chính sách & Cổng TTĐT.
+     * `EMPLOYEE_QUALITY`: Chất lượng & Xếp loại cán bộ công chức.
+     * `HRM_PERSONAL_STATS`: Bàn làm việc & Hiệu suất cá nhân.
+   - `apps/report-service/src/modules/reports/utils/normalization.ts` & `apps/admin_khcn/features/reports/utils/fieldHelpers.ts`: Mở rộng từ điển ánh xạ nhãn tiếng Việt (`FIELD_LABEL_VIETNAMESE_MAP`) và tự động suy luận kiểu dữ liệu (`inferFieldType`).
+2. **Giai Đoạn 2: Universal Multi-source Execution Engine (In-Memory JOIN & Dynamic Formula Engine)**:
+   - `apps/report-service/src/modules/reports/engine/types.ts` & `apps/admin_khcn/features/reports/types/index.ts`: Bổ sung `formula?: string` và `isCalculated?: boolean` vào `ColumnDef`.
+   - `apps/report-service/src/modules/reports/reports.service.ts`:
+     * Triển khai hàm sandbox công thức an toàn `evaluateFormula(formula, row)`: Chặn đứng tấn công prototype pollution/code injection (`eval`, `process`, `require`, `window`), hỗ trợ toán tử số học (`+`, `-`, `*`, `/`, `%`), toán tử điều kiện ternary (`a ? b : c`) và token thay thế `[field]`.
+     * Nâng cấp `runReport()`: Truy vấn song song đa nguồn qua gRPC delegation/snapshot data, thực hiện ghép nối quan hệ liên microservices theo cơ chế In-Memory JOIN (`INNER` / `LEFT JOIN`), tính toán các cột công thức `calculatedCols`, và gom nhóm số liệu `aggregations`.
+3. **Giai Đoạn 3: Trực Quan Hóa Tự Phục Vụ (Self-Service BI Visual Canvas)**:
+   - `apps/admin_khcn/features/reports/utils/fieldHelpers.ts`: Xây dựng ma trận phát hiện quan hệ tự động `findSmartJoinMatches(sources)` và `SMART_JOIN_RULES`.
+   - `apps/admin_khcn/features/reports/components/reports/designer/Canvas.tsx`:
+     * Bổ sung banner đề xuất Smart-Join 1-click tự động ghép nối các bảng nguồn (như `departmentId` giữa Đơn vị và Nhiệm vụ, `employeeCode` giữa Cán bộ và KPI).
+     * Bổ sung nút "Thêm cột tính toán (fx)" trên thanh công cụ cột kết quả.
+     * Hiển thị huy hiệu `fx` và xem trước công thức trên các thẻ cột dữ liệu.
+     * Nâng cấp `ColumnSheet` tích hợp bộ soạn thảo công thức với các mẫu công thức phổ biến (Tỷ lệ hoàn thành %, Xếp loại chất lượng, Trọng số 40/60) cùng danh sách token pills nhấp để chèn trường tự động `[field]`.
+
+### 3. Danh Sách File Đã Tác Động
+1. `apps/report-service/prisma/seed.ts` (Mở rộng 10 thực thể Semantic Data Sources)
+2. `apps/report-service/src/modules/reports/engine/types.ts` (Bổ sung formula, isCalculated vào ColumnDef)
+3. `apps/report-service/src/modules/reports/reports.service.ts` (Formula Sandbox, Realtime gRPC fetch, In-Memory JOIN Engine)
+4. `apps/report-service/src/modules/reports/utils/normalization.ts` (Cập nhật từ điển nhãn tiếng Việt & bảo toàn formula)
+5. `apps/admin_khcn/features/reports/types/index.ts` (Đồng bộ kiểu ColumnDef cho frontend)
+6. `apps/admin_khcn/features/reports/utils/fieldHelpers.ts` (Smart-Join Matrix & Client formula evaluator)
+7. `apps/admin_khcn/features/reports/components/reports/designer/Canvas.tsx` (Visual Canvas: Smart-Join banner, nút fx, Formula Sheet)
+
+### 4. Bằng Chứng Kiểm Chứng Máy Thực Tế
+- **TypeScript Check Frontend (`apps/admin_khcn`)**: `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`) -> **Exit code 0 (0 errors)**.
+- **Biên dịch Microservice Backend (`apps/report-service`)**: `npm --prefix apps/report-service run build` (`prisma generate && nest build && tsc-alias`) -> **Exit code 0**.
+- **Kiểm tra Vệ sinh Mã nguồn**: 0 `console.log`, 0 `debugger`, 100% định dạng UTF-8 không BOM.
+
+---
+
+## [2026-10-16] Khắc Phục Cảnh Báo LegacyRouteConverter Unsupported Route Path Trong API Gateway
+
+### 1. Bối Cảnh & Nguyên Nhân Gốc Rễ
+- **Hiện tượng**: Khi khởi động container API Gateway, NestJS ghi nhận 2 cảnh báo:
+  ```
+  [Nest] 9 - 10/16/2026, 6:20:58 PM WARN [LegacyRouteConverter] Unsupported route path: "/api/v1/execute/:code/*"...
+  [Nest] 9 - 10/16/2026, 6:20:58 PM WARN [LegacyRouteConverter] Unsupported route path: "/api/v1/partner-api/:code/*"...
+  ```
+- **Nguyên nhân**: Trong phiên bản NestJS 11 và thư viện `path-to-regexp` v8, cú pháp wildcard không tên `/*` là cú pháp legacy và yêu cầu phải đặt tên tham số đại diện, ví dụ `/*path` thay vì `/*`. Khi gặp cú pháp cũ, NestJS phải kích hoạt bộ chuyển đổi tương thích ngược `LegacyRouteConverter` để tự động parse và bắn cảnh báo WARN.
+
+### 2. Giải Pháp Triển Khai
+- Cập nhật [`executor.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/api-management/executor.controller.ts):
+  - Chuyển `@All('execute/:code/*')` -> `@All('execute/:code/*path')`.
+  - Chuyển `@All('partner-api/:code/*')` -> `@All('partner-api/:code/*path')`.
+  - Bổ sung trích xuất tham số `@Param('path') pathParam: string` kết hợp fallback `@Param('0') legacyParam: string` để tương thích 100%.
+  - Chuẩn hóa việc ghép nối URL proxy sạch qua `(pathParams || '').replace(/^\/+/, '')`.
+
+### 3. Bằng Chứng Kiểm Chứng Máy Thực Tế
+- **Biên dịch Gateway**: `npm run build` tại `apps/api-gateway` -> **Exit code 0**.
+- **Runtime Container**: Cập nhật bản build vào `daklak-workspace-api-gateway-1` và khởi động lại.
+- **Log kiểm tra**:
+  - `Mapped {/api/v1/execute/:code/*path, ALL} route +1ms`
+  - `Mapped {/api/v1/partner-api/:code/*path, ALL} route +1ms`
+  - **100% cảnh báo `LegacyRouteConverter` đã biến mất hoàn toàn**.
+- **Dọn rác & Encoding**: 0 console.log, UTF-8 không BOM.
+
+---
+
 ## [2026-10-16] Khắc Phục Cảnh Báo AuthService GET_EMPLOYEE grpcCode: 5 Khi Truy Cập Dashboard Tasks
 
 ### 1. Bối Cảnh & Nguyên Nhân Gốc Rễ

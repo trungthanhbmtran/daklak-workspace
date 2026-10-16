@@ -40,6 +40,8 @@ export interface ColumnDef {
   type: ColumnType;
   aggregate: AggregateFunction;
   label: string;
+  formula?: string;
+  isCalculated?: boolean;
 }
 
 export interface ChartConfig {

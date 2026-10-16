@@ -144,6 +144,27 @@ export const FIELD_LABEL_VIETNAMESE_MAP: Record<string, string> = {
   so_du_an_moi: 'Số dự án mới',
   von_ngoai_ns_ty: 'Vốn ngoài NS (Tỷ VNĐ)',
   tien_do_trien_khai: 'Tiến độ triển khai',
+  // Các thực thể VTVL, Tổ chức, Nhân sự & Quy trình
+  employeeCode: 'Mã công chức',
+  username: 'Tên đăng nhập',
+  parentId: 'Đơn vị cấp trên',
+  order: 'Thứ tự hiển thị',
+  level: 'Cấp quản lý',
+  jobTitleId: 'Mã VTVL',
+  jobTitleName: 'Tên vị trí việc làm',
+  quantity: 'Số lượng định biên',
+  currentCount: 'Hiện có',
+  missingCount: 'Còn thiếu',
+  isOver: 'Thừa / Thiếu định biên',
+  processDefinitionKey: 'Mã quy trình BPMN',
+  processInstanceId: 'Mã phiên quy trình',
+  businessKey: 'Hồ sơ liên kết',
+  currentStep: 'Bước xử lý hiện tại',
+  startedAt: 'Thời điểm bắt đầu',
+  endedAt: 'Thời điểm kết thúc',
+  durationHours: 'Thời gian thực hiện (giờ)',
+  isCalculated: 'Cột tính toán',
+  formula: 'Công thức tính',
 };
 
 /**
@@ -271,8 +292,20 @@ export function normalizeRow(row: any): any {
  * Chuẩn hóa schema báo cáo, đảm bảo 100% cột có nhãn tiếng Việt thân thiện
  */
 export function normalizeSchema(
-  schema: Array<{ key: string; label?: string; type?: string }> = [],
-): Array<{ key: string; label: string; type: string }> {
+  schema: Array<{
+    key: string;
+    label?: string;
+    type?: string;
+    formula?: string;
+    isCalculated?: boolean;
+  }> = [],
+): Array<{
+  key: string;
+  label: string;
+  type: string;
+  formula?: string;
+  isCalculated?: boolean;
+}> {
   if (!Array.isArray(schema)) return [];
   return schema.map((col) => ({
     key: col.key,
@@ -281,6 +314,8 @@ export function normalizeSchema(
         ? col.label
         : getFriendlyFieldLabel(col.key),
     type: col.type || 'string',
+    formula: col.formula,
+    isCalculated: col.isCalculated,
   }));
 }
 

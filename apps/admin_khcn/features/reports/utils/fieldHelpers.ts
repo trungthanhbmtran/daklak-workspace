@@ -86,6 +86,27 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
   so_du_an_moi: 'Số dự án mới',
   von_ngoai_ns_ty: 'Vốn ngoài NS (Tỷ VNĐ)',
   tien_do_trien_khai: 'Tiến độ triển khai',
+  // Các thực thể VTVL, Tổ chức, Nhân sự & Quy trình
+  employeeCode: 'Mã công chức',
+  username: 'Tên đăng nhập',
+  parentId: 'Đơn vị cấp trên',
+  order: 'Thứ tự hiển thị',
+  level: 'Cấp quản lý',
+  jobTitleId: 'Mã VTVL',
+  jobTitleName: 'Tên vị trí việc làm',
+  quantity: 'Số lượng định biên',
+  currentCount: 'Hiện có',
+  missingCount: 'Còn thiếu',
+  isOver: 'Thừa / Thiếu định biên',
+  processDefinitionKey: 'Mã quy trình BPMN',
+  processInstanceId: 'Mã phiên quy trình',
+  businessKey: 'Hồ sơ liên kết',
+  currentStep: 'Bước xử lý hiện tại',
+  startedAt: 'Thời điểm bắt đầu',
+  endedAt: 'Thời điểm kết thúc',
+  durationHours: 'Thời gian thực hiện (giờ)',
+  isCalculated: 'Cột tính toán',
+  formula: 'Công thức tính',
 };
 
 export const STATUS_LABEL_MAP: Record<string, string> = {
@@ -279,3 +300,109 @@ export function getShortChartLabel(label: string): string {
   if (!clean) return '';
   return SHORT_CHART_LABELS[clean] || clean;
 }
+
+export interface SmartJoinRule {
+  source1: string;
+  source2: string;
+  field1: string;
+  field2: string;
+  joinType: 'INNER' | 'LEFT';
+  description: string;
+}
+
+export const SMART_JOIN_RULES: SmartJoinRule[] = [
+  {
+    source1: 'HRM_TASK_STATS',
+    source2: 'USER_CADRE_STATS',
+    field1: 'assigneeCode',
+    field2: 'employeeCode',
+    joinType: 'LEFT',
+    description: 'Nhiệm vụ ↔ Hồ sơ Cán bộ (theo Mã cán bộ)',
+  },
+  {
+    source1: 'HRM_TASK_STATS',
+    source2: 'USER_ORG_STATS',
+    field1: 'departmentId',
+    field2: 'id',
+    joinType: 'LEFT',
+    description: 'Nhiệm vụ ↔ Cơ cấu Đơn vị (theo Mã đơn vị)',
+  },
+  {
+    source1: 'BTCTU_KPI_STATS',
+    source2: 'USER_CADRE_STATS',
+    field1: 'cadreCode',
+    field2: 'employeeCode',
+    joinType: 'INNER',
+    description: 'Đánh giá KPI ↔ Hồ sơ Cán bộ (theo Mã cán bộ)',
+  },
+  {
+    source1: 'BTCTU_KPI_STATS',
+    source2: 'USER_ORG_STATS',
+    field1: 'departmentId',
+    field2: 'id',
+    joinType: 'LEFT',
+    description: 'Đánh giá KPI ↔ Phòng ban (theo Mã đơn vị)',
+  },
+  {
+    source1: 'USER_STAFFING_STATS',
+    source2: 'USER_ORG_STATS',
+    field1: 'unitId',
+    field2: 'id',
+    joinType: 'INNER',
+    description: 'Vị trí việc làm VTVL ↔ Cơ cấu Đơn vị (theo Mã đơn vị)',
+  },
+  {
+    source1: 'DOC_STATS',
+    source2: 'USER_ORG_STATS',
+    field1: 'departmentId',
+    field2: 'code',
+    joinType: 'LEFT',
+    description: 'Lưu chuyển Văn bản ↔ Đơn vị tiếp nhận/ban hành',
+  },
+];
+
+export function findSmartJoinMatches(
+  sources: Array<{ id: string; endpoint?: string }>,
+): SmartJoinRule[] {
+  if (!Array.isArray(sources) || sources.length < 2) return [];
+  const srcIds = new Set(sources.map((s) => (s.endpoint || s.id).toUpperCase()));
+  return SMART_JOIN_RULES.filter(
+    (rule) =>
+      srcIds.has(rule.source1.toUpperCase()) &&
+      srcIds.has(rule.source2.toUpperCase()),
+  );
+}
+
+export function evaluateFormulaClient(
+  formula: string,
+  row: Record<string, any>,
+): any {
+  if (!formula || typeof formula !== 'string') return null;
+  try {
+    const cleanExpr = formula.replace(/\[([a-zA-Z0-9_.]+)\]/g, (_, field) => {
+      const val = row[field];
+      if (val === undefined || val === null) return '0';
+      if (typeof val === 'number') return String(val);
+      if (typeof val === 'boolean') return String(val);
+      return JSON.stringify(String(val));
+    });
+
+    if (
+      /(process|require|import|global|window|document|eval|Function|constructor|prototype|__proto__|this)/i.test(
+        cleanExpr,
+      )
+    ) {
+      return null;
+    }
+
+    const fn = new Function(`"use strict"; return (${cleanExpr});`);
+    const result = fn();
+    if (typeof result === 'number' && !isNaN(result)) {
+      return Math.round(result * 100) / 100;
+    }
+    return result ?? null;
+  } catch {
+    return null;
+  }
+}
+

@@ -33,6 +33,8 @@ export interface ColumnDef {
   type: ColumnType;
   aggregate: AggregateFunction;
   label: string;
+  formula?: string;    // Custom calculated expression
+  isCalculated?: boolean; // Indicates if this column is computed via formula
 }
 
 export interface ReportConfigAST {
