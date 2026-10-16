@@ -466,6 +466,21 @@ export class ReportsService implements OnModuleInit {
           statsRes = await this.statsService.getKpiStatistics(queryParams, null, queryMeta);
         } else if (targetCode === 'HRM_PERSONAL_STATS') {
           statsRes = await this.statsService.getPersonalWorkbenchStatistics(queryParams, null, queryMeta);
+        } else if (targetCode.includes('|')) {
+          const [uCode, uPath] = targetCode.split('|');
+          statsRes = await this.fetchDynamicApiSource(
+            { ...primarySource, upstream: uCode, path: uPath },
+            config,
+            queryParams,
+            queryMeta,
+          );
+        } else if (primarySource?.upstream && primarySource?.path) {
+          statsRes = await this.fetchDynamicApiSource(
+            primarySource,
+            config,
+            queryParams,
+            queryMeta,
+          );
         }
 
         const rawData: any = statsRes?.data;
@@ -1239,6 +1254,77 @@ export class ReportsService implements OnModuleInit {
       message: 'Lấy danh mục dữ liệu thành công',
       data: JSON.stringify(catalog),
     };
+  }
+
+  private async fetchDynamicApiSource(
+    source: any,
+    config: any,
+    params: any,
+    metadata: Metadata,
+  ): Promise<any> {
+    try {
+      const authHeader = (metadata.get('authorization')?.[0] as string) || '';
+      const gatewayUrl =
+        process.env.API_GATEWAY_URL ||
+        process.env.GATEWAY_URL ||
+        'http://api-gateway:3000';
+      const previewUrl = `${gatewayUrl}/api/v1/admin/reports/table/preview`;
+
+      const response = await fetch(previewUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body: JSON.stringify({
+          source: {
+            upstream: source.upstream,
+            path: source.path,
+            method: source.method || 'GET',
+            params: params || {},
+          },
+          config: {
+            version: 1,
+            dataPath: config?.dataPath || '',
+            columns: (config?.columns || []).map((c: any) => ({
+              key: c.key || c.field,
+              path: c.path || c.key || c.field,
+              label: c.label || c.key,
+              type: c.type || 'string',
+              aggregate: c.aggregate || 'none',
+            })),
+            groupBy: config?.groupBy || [],
+            filters: config?.filters || [],
+            page: 1,
+            pageSize: 2000,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const json: any = await response.json();
+        const resData = json?.data;
+        if (resData && Array.isArray(resData.rows)) {
+          return { success: true, data: resData.rows };
+        }
+        if (Array.isArray(resData)) {
+          return { success: true, data: resData };
+        }
+        if (resData && Array.isArray(resData.items)) {
+          return { success: true, data: resData.items };
+        }
+      } else {
+        this.logger.warn(
+          `Dynamic API source preview returned status ${response.status}`,
+        );
+      }
+      return { success: false, data: [] };
+    } catch (err: any) {
+      this.logger.warn(
+        `Failed to dynamically fetch API source ${source.upstream}${source.path}: ${err?.message}`,
+      );
+      return { success: false, data: [] };
+    }
   }
 
   private async loadDbCatalog(): Promise<CatalogEntry[]> {

@@ -50,7 +50,7 @@ import {
   Scale,
   AlertCircle,
 } from "lucide-react";
-import { useCreateTask, useCreateSubTask } from "../../hooks/useTasks";
+import { useCreateTask, useCreateSubTask, useTaskContext, useBalancePercentages } from "../../hooks/useTasks";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { useTaskTemplatesList } from "../../hooks/useTaskTemplates";
@@ -186,88 +186,51 @@ export function CreateTaskDialog({
     );
   }, [templates, templateSearch]);
 
-  // ── Tự động nhận diện Lãnh đạo thẩm định theo VTVL và phân công ──
+  // ── Lấy bối cảnh giao việc, phân loại nhân sự & tính điểm chuẩn hóa từ server ──
+  const coordinatorIdsParam = useMemo(
+    () => coordinators.map((c) => c.id).join(","),
+    [coordinators]
+  );
+
+  const { data: contextData } = useTaskContext(
+    {
+      departmentId: selectedDepartmentId && selectedDepartmentId !== "ALL" ? selectedDepartmentId : undefined,
+      assignee: assignee || undefined,
+      coordinatorIds: coordinatorIdsParam || undefined,
+      priority,
+    },
+    { enabled: open }
+  );
+
+  const serverContext = contextData?.data;
+  const deptLeaders = serverContext?.deptLeaders ?? [];
+  const deptStaff = serverContext?.deptStaff ?? [];
+  const stepAssigneeOptions = serverContext?.stepAssigneeOptions ?? { label: "", list: [] };
+
+  // Đồng bộ kết quả chuẩn hóa từ server vào state form
   useEffect(() => {
-    if (!assignee) {
+    if (serverContext?.supervisor) {
+      setAutoDetectedSupervisor({
+        ...serverContext.supervisor,
+        reason: serverContext.supervisor.reason || "Lãnh đạo thẩm định theo VTVL tuyến báo cáo & phân công quản lý",
+      });
+      if (supervisorCode === "DEFAULT" || !supervisorCode) {
+        setSupervisorCode(serverContext.supervisor.code);
+      }
+    } else if (!assignee) {
       setAutoDetectedSupervisor(null);
-      return;
     }
 
-    let deptId: number | undefined;
-    let empCode: string | undefined;
-
-    if (assignee.startsWith("DEPT_")) {
-      deptId = parseInt(assignee.replace("DEPT_", ""), 10);
-    } else {
-      const emp = employees.find((e: any) => e.employeeCode === assignee);
-      deptId = emp?.departmentId;
-      empCode = assignee;
+    if (serverContext?.formulaDomainCode) {
+      setFormulaDomainCode(serverContext.formulaDomainCode);
     }
 
-    if (deptId || empCode) {
-      hrmTasksApi
-        .getSupervisorByScope({ departmentId: deptId, assigneeCode: empCode })
-        .then((res: any) => {
-          const sup = res?.data;
-          if (sup?.supervisorCode) {
-            const detected = {
-              code: sup.supervisorCode,
-              name: sup.supervisorName || sup.supervisorCode,
-              jobTitle: sup.supervisorJobTitle,
-              unitName: sup.supervisorUnitName,
-              reason: sup.reason || "Lãnh đạo thẩm định theo VTVL tuyến báo cáo & phân công quản lý",
-            };
-            setAutoDetectedSupervisor(detected);
-            // Tự động gán ngay lãnh đạo thẩm định chuẩn VTVL
-            setSupervisorCode(sup.supervisorCode);
-          } else {
-            setAutoDetectedSupervisor(null);
-          }
-        })
-        .catch(() => {
-          setAutoDetectedSupervisor(null);
-        });
+    if (serverContext?.kpiDefaults) {
+      setBaseScore(serverContext.kpiDefaults.baseScore);
+      setDifficultyK(serverContext.kpiDefaults.difficultyK);
+      setIsKpiTarget(true);
     }
-
-    // Tự động chuẩn hóa mã nhóm công thức VTVL theo phòng ban của nhân sự
-    let deptName = "";
-    if (assignee.startsWith("DEPT_")) {
-      const d = departments.find((x: any) => x.id === deptId);
-      deptName = d?.name || "";
-    } else {
-      const emp = employees.find((e: any) => e.employeeCode === assignee);
-      const d = departments.find((x: any) => x.id === emp?.departmentId);
-      deptName = d?.name || emp?.unitName || emp?.jobTitleName || "";
-    }
-
-    const upper = deptName.toUpperCase();
-    if (upper.includes("TỔ CHỨC") || upper.includes("CÁN BỘ") || upper.includes("TCCB")) {
-      setFormulaDomainCode("THAM_DINH_TCCB");
-    } else if (upper.includes("BẢO VỆ CHÍNH TRỊ") || upper.includes("BVCTNB")) {
-      setFormulaDomainCode("BVCTNB");
-    } else if (upper.includes("TIẾP CÔNG DÂN") || upper.includes("ĐƠN THƯ")) {
-      setFormulaDomainCode("TCD_DV");
-    } else if (upper.includes("VĂN PHÒNG")) {
-      setFormulaDomainCode("VAN_PHONG");
-    } else {
-      setFormulaDomainCode("VTVL_CHUNG");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignee, employees, departments]);
-
-  // ── Tự động tính điểm cơ sở và độ khó KPI theo mức độ ưu tiên ──
-  useEffect(() => {
-    const scoreMap: Record<string, { base: number; diff: number }> = {
-      LOW: { base: 50, diff: 1 },
-      NORMAL: { base: 100, diff: 2 },
-      HIGH: { base: 150, diff: 3 },
-      URGENT: { base: 200, diff: 4 },
-    };
-    const target = scoreMap[priority] || scoreMap.NORMAL;
-    setBaseScore(target.base);
-    setDifficultyK(target.diff);
-    setIsKpiTarget(true);
-  }, [priority]);
+  }, [serverContext, assignee, supervisorCode]);
 
   // ── Phân cấp Đơn vị / Phòng ban & Nhân sự ──
   // Tự động đồng bộ selectedDepartmentId khi assignee thay đổi từ preset hoặc template
@@ -292,34 +255,6 @@ export function CreateTaskDialog({
     return departments.find((d: any) => String(d.id) === selectedDepartmentId);
   }, [departments, selectedDepartmentId]);
 
-  const departmentEmployees = useMemo(() => {
-    if (!selectedDepartmentId || selectedDepartmentId === "ALL") {
-      return employees;
-    }
-    const numId = Number(selectedDepartmentId);
-    return employees.filter(
-      (e: any) => e.departmentId === numId || e.department?.id === numId
-    );
-  }, [employees, selectedDepartmentId]);
-
-  const { deptLeaders, deptStaff } = useMemo(() => {
-    const leaders: any[] = [];
-    const staff: any[] = [];
-    departmentEmployees.forEach((emp: any) => {
-      const title = (emp.jobTitleName || emp.jobTitle?.name || "").toLowerCase();
-      const isLeader =
-        title.includes("trưởng") ||
-        title.includes("phó") ||
-        title.includes("giám đốc") ||
-        title.includes("chi cục trưởng");
-      if (isLeader) {
-        leaders.push(emp);
-      } else {
-        staff.push(emp);
-      }
-    });
-    return { deptLeaders: leaders, deptStaff: staff };
-  }, [departmentEmployees]);
 
   const handleDepartmentChange = (deptId: string) => {
     setSelectedDepartmentId(deptId);
@@ -374,17 +309,33 @@ export function CreateTaskDialog({
     );
   };
 
-  const handleAutoBalancePercentage = () => {
+  const balancePercentagesMutation = useBalancePercentages();
+
+  const handleAutoBalancePercentage = async () => {
     if (coordinators.length === 0) {
       setAssigneePercentage(100);
       return;
     }
-    const coorCount = coordinators.length;
-    const coorPct = Math.max(5, Math.floor(30 / coorCount));
-    const leadPct = 100 - coorPct * coorCount;
-    setAssigneePercentage(leadPct);
-    setCoordinators(coordinators.map((c) => ({ ...c, percentage: coorPct })));
-    toast.success("Đã tự động cân bằng tỷ lệ đóng góp về 100%");
+    try {
+      const res = await balancePercentagesMutation.mutateAsync({
+        coordinatorCodes: coordinators.map((c) => c.id),
+      });
+      if (res?.data) {
+        setAssigneePercentage(res.data.assigneePercentage);
+        setCoordinators((prev) =>
+          prev.map((c) => {
+            const found = res.data.coordinators?.find((x) => x.id === c.id);
+            return {
+              ...c,
+              percentage: found ? found.percentage : res.data.coordinatorPercentage,
+            };
+          })
+        );
+        toast.success("Đã tự động cân bằng tỷ lệ đóng góp về 100%");
+      }
+    } catch {
+      // Handled in mutation
+    }
   };
 
   const totalPercentage = useMemo(() => {
@@ -395,62 +346,6 @@ export function CreateTaskDialog({
     );
     return (Number(assigneePercentage) || 0) + coorsSum;
   }, [assigneePercentage, coordinators]);
-
-  // ── Step management (Gắn với nhóm người tham gia việc, tránh hiển thị dư thừa) ──
-  const stepAssigneeOptions = useMemo(() => {
-    // 1. Nếu công việc có nhóm người phối hợp cụ thể, CHỈ hiển thị nhóm người này
-    const coordEmps: any[] = [];
-    coordinators.forEach((c) => {
-      if (!c.id.startsWith("DEPT_")) {
-        const emp = employees.find((e: any) => e.employeeCode === c.id);
-        if (emp && !coordEmps.find((x) => x.employeeCode === emp.employeeCode)) {
-          coordEmps.push(emp);
-        }
-      } else {
-        const dId = parseInt(c.id.replace("DEPT_", ""), 10);
-        employees.forEach((emp: any) => {
-          if (
-            (emp.departmentId === dId || emp.department?.id === dId) &&
-            !coordEmps.find((x) => x.employeeCode === emp.employeeCode)
-          ) {
-            coordEmps.push(emp);
-          }
-        });
-      }
-    });
-
-    if (coordEmps.length > 0) {
-      return {
-        label: `Nhân sự phối hợp trong nhiệm vụ (${coordEmps.length})`,
-        list: coordEmps.filter(
-          (e) => e.employeeCode !== currentUser?.employeeCode && e.employeeCode !== assignee
-        ),
-      };
-    }
-
-    // 2. Nếu không có người phối hợp riêng nhưng có phòng ban chủ trì
-    const dId = assignee.startsWith("DEPT_")
-      ? parseInt(assignee.replace("DEPT_", ""), 10)
-      : selectedDepartmentId && selectedDepartmentId !== "ALL"
-      ? Number(selectedDepartmentId)
-      : undefined;
-
-    if (dId) {
-      const dept = departments.find((d: any) => d.id === dId);
-      const deptEmps = employees.filter(
-        (e: any) =>
-          (e.departmentId === dId || e.department?.id === dId) &&
-          e.employeeCode !== currentUser?.employeeCode &&
-          e.employeeCode !== assignee
-      );
-      return {
-        label: `Nhân sự ${dept?.name || "phòng ban"} (${deptEmps.length})`,
-        list: deptEmps,
-      };
-    }
-
-    return { label: "", list: [] };
-  }, [coordinators, employees, currentUser, assignee, selectedDepartmentId, departments]);
 
   const handleAddStep = () => {
     if (!stepInput.trim()) return;
@@ -468,11 +363,11 @@ export function CreateTaskDialog({
         const dept = departments.find((d: any) => d.id === dId);
         assignedName = dept ? `🏢 ${dept.name} (Chủ trì)` : "Phòng ban chủ trì";
       } else {
-        const emp = employees.find((e: any) => e.employeeCode === assignee);
+        const emp = [...deptLeaders, ...deptStaff, ...employees].find((e: any) => e.employeeCode === assignee);
         assignedName = emp?.fullName ? `${emp.fullName} (Chủ trì)` : `Chủ trì (${assignee})`;
       }
     } else {
-      const emp = employees.find((e: any) => e.employeeCode === assignedCode);
+      const emp = [...deptLeaders, ...deptStaff, ...(stepAssigneeOptions.list || []), ...employees].find((e: any) => e.employeeCode === assignedCode);
       assignedName = emp?.fullName ? `${emp.fullName}` : assignedCode;
     }
 
@@ -1023,7 +918,7 @@ export function CreateTaskDialog({
                         </SelectGroup>
                       )}
 
-                      {departmentEmployees.length === 0 && selectedDepartmentId && (
+                      {deptLeaders.length === 0 && deptStaff.length === 0 && selectedDepartmentId && (
                         <div className="p-3 text-center text-xs text-slate-500">
                           Chưa có dữ liệu nhân sự thuộc phòng ban này. Bạn có thể giao trực tiếp cho cả phòng.
                         </div>

@@ -20,7 +20,8 @@ export class TaskHistoryService {
   async getTaskHistory(taskId: number) {
     const history = await this.prisma.taskHistory.findMany({
       where: { taskId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 100
     });
 
     const employeeCodes = new Set<string>();

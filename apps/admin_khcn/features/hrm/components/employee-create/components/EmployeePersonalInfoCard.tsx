@@ -73,12 +73,15 @@ function FullNamePreviewBadge({ control }: { control: Control<EmployeeCreateForm
 
 export function EmployeePersonalInfoCard({ control, setValue }: EmployeePersonalInfoCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarValue = useWatch({ control, name: "avatar" });
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
-    onSuccess: (fileId) => {
-      setValue("avatar", fileId, { shouldDirty: true });
+    onSuccess: (fileId, downloadUrl) => {
+      setValue("avatar", downloadUrl || fileId, { shouldDirty: true });
     },
   });
+
+  const displayImage = previewUrl || (avatarValue || null);
 
   return (
     <Card className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-w-0">
@@ -118,10 +121,10 @@ export function EmployeePersonalInfoCard({ control, setValue }: EmployeePersonal
                     Đang tải...
                   </span>
                 </div>
-              ) : previewUrl ? (
+              ) : displayImage ? (
                 <>
                   <Image
-                    src={previewUrl}
+                    src={displayImage}
                     alt="Ảnh thẻ"
                     fill
                     unoptimized
@@ -150,7 +153,7 @@ export function EmployeePersonalInfoCard({ control, setValue }: EmployeePersonal
               onChange={handleImageUpload}
             />
 
-            {previewUrl && (
+            {displayImage && (
               <button
                 type="button"
                 onClick={(e) => {

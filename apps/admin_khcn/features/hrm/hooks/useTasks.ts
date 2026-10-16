@@ -50,6 +50,7 @@ export function useTaskDetail(taskId: number | undefined, options?: { enabled?: 
     queryFn: isEnabled && taskId ? () => hrmTasksApi.getTask(taskId) : skipToken,
     enabled: isEnabled,
     staleTime: TASKS_STALE_TIME,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -502,3 +503,58 @@ export function useTaskRecommendations(params: {
     gcTime: 2 * 60_000,
   });
 }
+
+/** Lấy bối cảnh giao việc chuẩn hóa tại server (Lãnh đạo, nhân viên, bước thực hiện, domain VTVL, điểm KPI) */
+export function useTaskContext(
+  params: {
+    departmentId?: number | string;
+    assignee?: string;
+    coordinatorIds?: string;
+    priority?: string;
+  },
+  options?: { enabled?: boolean },
+) {
+  const isEnabled = options?.enabled ?? true;
+  return useQuery({
+    queryKey: [...hrmKeys.tasks(), 'context', params],
+    queryFn: () => hrmTasksApi.getTaskContext(params),
+    enabled: isEnabled,
+    staleTime: 10_000,
+    gcTime: 60_000,
+  });
+}
+
+/** Tự động cân bằng tỷ lệ % đóng góp chuẩn hóa tại server */
+export function useBalancePercentages() {
+  return useMutation({
+    mutationFn: (payload: { coordinatorCount?: number; coordinatorCodes?: string[] }) =>
+      hrmTasksApi.balancePercentages(payload),
+    onError: (error: any) => {
+      const message = error.response?.data?.message || "Cân bằng tỷ lệ đóng góp thất bại";
+      toast.error(message);
+    },
+  });
+}
+
+/** Dữ liệu Bàn làm việc Cá nhân (6 chỉ số, việc cần làm, việc gần đây, tải phòng ban) tính toán tại server */
+export function usePersonalWorkbench(
+  params?: {
+    startDate?: string;
+    endDate?: string;
+    unitScope?: string;
+    search?: string;
+    category?: string;
+  },
+  options?: { enabled?: boolean },
+) {
+  const isEnabled = options?.enabled ?? true;
+  return useQuery({
+    queryKey: [...hrmKeys.tasks(), 'personal-workbench', params],
+    queryFn: () => hrmTasksApi.getPersonalWorkbench(params),
+    enabled: isEnabled,
+    staleTime: 15_000,
+    gcTime: 2 * 60_000,
+    placeholderData: keepPreviousData,
+  });
+}
+

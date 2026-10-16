@@ -49,13 +49,6 @@ export const DASHBOARD_TARGETS: DashboardTarget[] = [
     href: "/services/admin",
     defaultReport: "REP_BTCTU_SOP_KPI",
   },
-  {
-    key: "hub",
-    name: "Cổng Ứng dụng Nội bộ (Hub Tổng quan)",
-    description: "Bức tranh tổng quan điều hành toàn cơ quan khi đăng nhập",
-    href: "/hub",
-    defaultReport: "REP_BTCTU_SOP_KPI",
-  },
 ];
 
 const STORAGE_KEY = "daklak_dashboard_report_assignments";

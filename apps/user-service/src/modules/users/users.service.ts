@@ -918,7 +918,9 @@ export class UsersService implements OnModuleInit {
     const firstPosition = user.jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;
     const unitCode = firstPosition?.unit?.code ?? null;
+    const unitName = firstPosition?.unit?.name ?? '';
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
+    const jobTitleName = firstPosition?.jobTitle?.name ?? '';
 
     return {
       ...base,
@@ -933,6 +935,10 @@ export class UsersService implements OnModuleInit {
       job_title_code: jobTitleCode,
       unitCode,
       unit_code: unitCode,
+      unitName,
+      unit_name: unitName,
+      jobTitleName,
+      job_title_name: jobTitleName,
     };
   }
 

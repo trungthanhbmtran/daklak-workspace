@@ -45,6 +45,7 @@ interface EmployeeOrganizationCardProps {
   isLoadingJobs: boolean;
   staffingReport: any;
   errors: FieldErrors<EmployeeCreateFormValues>;
+  currentEmployeeCode?: string;
 }
 
 /**
@@ -63,6 +64,7 @@ export function EmployeeOrganizationCard({
   isLoadingJobs,
   staffingReport,
   errors,
+  currentEmployeeCode,
 }: EmployeeOrganizationCardProps) {
   const departmentId = useWatch({ control, name: "departmentId" });
   const selectedJobTitleId = useWatch({ control, name: "jobTitleId" });
@@ -395,6 +397,7 @@ export function EmployeeOrganizationCard({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1 custom-scrollbar min-w-0">
                 {Array.from({ length: activeStaffingRow.quantity }, (_, i) => i + 1).map((slotNum) => {
                   const slotData = (activeStaffingRow.slots || []).find((s: any) => s.slotOrder === slotNum);
+                  const isMySlot = !!(currentEmployeeCode && slotData?.assignedEmployeeCode === currentEmployeeCode);
                   const isAssigned = !!(slotData?.assignedEmployeeCode || slotData?.assignedEmployeeName);
                   const isSelected = selectedSlotOrder === slotNum;
 
@@ -422,7 +425,14 @@ export function EmployeeOrganizationCard({
                             #{slotNum}
                           </span>
 
-                          {isAssigned ? (
+                          {isMySlot ? (
+                            <Badge
+                              variant="outline"
+                              className="bg-blue-50 text-blue-800 border-blue-300 text-[10px] font-semibold px-1.5 py-0 shrink-0"
+                            >
+                              Đang đảm nhiệm
+                            </Badge>
+                          ) : isAssigned ? (
                             <Badge
                               variant="outline"
                               className="bg-amber-50 text-amber-800 border-amber-300 text-[10px] font-semibold px-1.5 py-0 shrink-0"
@@ -446,6 +456,7 @@ export function EmployeeOrganizationCard({
                         {isAssigned && (
                           <div className="text-[10px] text-amber-800 font-medium truncate mt-0.5">
                             CB: <strong>{slotData.assignedEmployeeName || slotData.assignedEmployeeCode}</strong>
+                            {isMySlot && <span className="text-blue-700 ml-1 font-semibold">(Hiện tại)</span>}
                           </div>
                         )}
                       </div>

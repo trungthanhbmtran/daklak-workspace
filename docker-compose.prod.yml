@@ -331,6 +331,8 @@ services:
       dockerfile: ./apps/admin_khcn/Dockerfile
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    user: nextjs
+    command: ["node", "apps/admin_khcn/server.js"]
     logging:
       driver: "json-file"
       options:

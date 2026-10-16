@@ -28,6 +28,47 @@ export class TasksController {
     return this.tasksService.create(req, body);
   }
 
+  @Get('task-context')
+  async getTaskContext(
+    @Req() req: any,
+    @Query('departmentId') departmentId?: string,
+    @Query('assignee') assignee?: string,
+    @Query('coordinatorIds') coordinatorIds?: string,
+    @Query('priority') priority?: string,
+  ) {
+    return this.tasksService.getTaskContext(req, {
+      departmentId: departmentId && departmentId !== 'ALL' ? parseInt(departmentId, 10) : undefined,
+      assignee,
+      coordinatorIds,
+      priority,
+    });
+  }
+
+  @Post('balance-percentages')
+  async balancePercentages(
+    @Body() body: { coordinatorCount?: number; coordinatorCodes?: string[] },
+  ) {
+    return this.tasksService.balancePercentages(body);
+  }
+
+  @Get('personal-workbench')
+  async getPersonalWorkbench(
+    @Req() req: any,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('unitScope') unitScope?: string,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.tasksService.getPersonalWorkbench(req, {
+      startDate,
+      endDate,
+      unitScope,
+      search,
+      category,
+    });
+  }
+
   @Get('supervisor-by-scope')
   async getSupervisorByScope(
     @Req() req: any,

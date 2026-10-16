@@ -5,12 +5,12 @@ import { useState, useRef, useEffect } from "react";
 import { useTaskComments, useAddComment } from "../../hooks/useTasks";
 import { useChatSocket } from "../../hooks/useChatSocket";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Text } from "@/components/ui/typography";
+import { Heading, Text } from "@/components/ui/typography";
 import { MentionInput } from "../MentionInput";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, MessageSquare, User, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { useUser } from "@/hooks/useUser";
+import { useHrmPermissions } from "../../hooks/useHrmPermissions";
 
 const safeFormatDate = (date: any, fmt: string) => {
   if (!date) return "Chưa xác định";
@@ -32,14 +32,16 @@ const parseMessageContent = (content: string, isCurrentUser: boolean) => {
     }
     const name = match[1];
     parts.push(
-      <Text
+      <span
         key={match.index}
-        as="span"
-        weight="bold"
-        className={isCurrentUser ? "text-blue-100 bg-blue-700/50 px-1 rounded mx-0.5" : "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 rounded mx-0.5"}
+        className={
+          isCurrentUser
+            ? "text-blue-100 bg-blue-700/60 font-semibold px-1.5 py-0.5 rounded mx-0.5 text-xs inline-block"
+            : "text-blue-700 bg-blue-100/80 font-semibold px-1.5 py-0.5 rounded mx-0.5 text-xs inline-block"
+        }
       >
         @{name}
-      </Text>
+      </span>
     );
     lastIndex = mentionRegex.lastIndex;
   }
@@ -49,19 +51,40 @@ const parseMessageContent = (content: string, isCurrentUser: boolean) => {
   return parts.length > 0 ? parts : content;
 };
 
-export function TaskDiscussionTab({ conversationId, allowedActions, participants }: { conversationId?: string; allowedActions?: string[]; participants?: any[] }) {
+export function TaskDiscussionTab({
+  taskId,
+  conversationId,
+  allowedActions,
+  participants,
+  task,
+}: {
+  taskId?: number;
+  conversationId?: string;
+  allowedActions?: string[];
+  participants?: any[];
+  task?: any;
+}) {
   const [commentText, setCommentText] = useState("");
-  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(conversationId);
-  const addComment = useAddComment(conversationId);
-  const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(conversationId);
-  const { user } = useUser();
+  const activeConversationId = conversationId || (taskId ? String(taskId) : task?.id ? String(task.id) : undefined);
+  const { data: commentsData, isLoading: commentsLoading } = useTaskComments(activeConversationId, {
+    enabled: Boolean(activeConversationId),
+  });
+  const addComment = useAddComment(activeConversationId);
+  const { typingUsers, emitTyping, emitStopTyping } = useChatSocket(activeConversationId);
+  const { user, canChatTask, canManageTask } = useHrmPermissions();
 
   const getSenderName = (senderId: string) => {
     const participant = participants?.find((p: any) => p.employeeCode === senderId);
-    return participant?.employeeName || senderId;
+    return participant?.fullName || participant?.employeeName || senderId;
   };
 
-  const comments: any[] = Array.isArray((commentsData as any)?.data) ? (commentsData as any).data : ((commentsData as any)?.data?.items ?? []);
+  const rawComments = (commentsData as any)?.data;
+  const comments: any[] = Array.isArray(rawComments)
+    ? rawComments
+    : Array.isArray(rawComments?.items)
+    ? rawComments.items
+    : [];
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -76,19 +99,18 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
     if (!commentText.trim() || !conversationId) return;
 
     let textToSend = commentText;
-    if (participants) {
-      // Sort participants by name length descending to avoid partial replacements
+    if (participants && Array.isArray(participants)) {
       const sortedParticipants = [...participants].sort((a, b) => {
         const nameA = a.employeeName || a.fullName || "";
         const nameB = b.employeeName || b.fullName || "";
         return nameB.length - nameA.length;
       });
 
-      sortedParticipants.forEach(p => {
+      sortedParticipants.forEach((p) => {
         const name = p.employeeName || p.fullName;
         const code = p.employeeCode;
         if (name && code) {
-          const regex = new RegExp(`@${name.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'g');
+          const regex = new RegExp(`@${name.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}`, "g");
           textToSend = textToSend.replace(regex, `@[${name}](${code})`);
         }
       });
@@ -99,7 +121,9 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
       addComment.mutateAsync(textToSend).then(() => {
         setCommentText("");
       });
-    } catch { /* handled in hook */ }
+    } catch {
+      // handled in hook
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -111,53 +135,94 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
     }
   };
 
+  const canChat = canChatTask(
+    task || {
+      status: (commentsData as any)?.taskStatus,
+      allowedActions,
+      participants,
+    }
+  );
+
   if (commentsLoading) {
     return (
-      <div className="flex-1 space-y-3 mb-4 h-full flex flex-col">
-        {[1, 2].map(i => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}
+      <div className="space-y-4 h-full flex flex-col p-4">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+        ))}
       </div>
     );
   }
 
-  // Reverse comments array if backend returns newest first
   const displayComments = [...comments].reverse();
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 space-y-4 mb-4 overflow-y-auto pr-2 custom-scrollbar">
+    <div className="h-full flex flex-col space-y-4">
+      {/* Discussion Header */}
+      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+            <MessageSquare className="w-4 h-4" />
+          </div>
+          <div>
+            <Heading level="h4" className="font-bold text-slate-900 text-sm">
+              Trao đổi & Phối hợp nghiệp vụ
+            </Heading>
+            <span className="text-[11px] text-slate-400">
+              Kênh trao đổi nội bộ giữa người giao, người chủ trì và người phối hợp
+            </span>
+          </div>
+        </div>
+        <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full font-medium">
+          {displayComments.length} tin nhắn
+        </span>
+      </div>
+
+      {/* Messages Stream */}
+      <div className="flex-1 space-y-3.5 overflow-y-auto pr-2 custom-scrollbar min-h-0">
         {displayComments.length === 0 ? (
-          <div className="text-center text-slate-500 italic py-8">
-            Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
+          <div className="text-center text-slate-400 italic py-12 space-y-2">
+            <MessageSquare className="w-8 h-8 text-slate-300 mx-auto" />
+            <p className="text-xs font-medium text-slate-500">Chưa có trao đổi nào</p>
+            <p className="text-[11px]">Hãy gửi ý kiến, đính kèm thông tin hoặc gõ @ để nhắc tên đồng nghiệp.</p>
           </div>
         ) : (
           displayComments.map((comment: any) => {
-            const isCurrentUser = comment.senderId === user?.employeeCode;
+            const isCurrentUser = comment.senderId === user?.employeeCode || comment.senderId === user?.username;
+            const senderDisplayName = comment.senderName || getSenderName(comment.senderId) || "Cán bộ";
+
             return (
-              <div key={comment.id || comment.createdAt} className={`flex gap-3 ${isCurrentUser ? "justify-end" : ""}`}>
+              <div key={comment.id || comment.createdAt} className={`flex gap-2.5 ${isCurrentUser ? "justify-end" : "justify-start"}`}>
                 {!isCurrentUser && (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-blue-100 text-blue-700">
-                    {(comment.senderName || getSenderName(comment.senderId) || "U")?.[0]?.toUpperCase()}
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-indigo-100 text-indigo-700 shadow-2xs">
+                    {senderDisplayName[0]?.toUpperCase() || "U"}
                   </div>
                 )}
-                <div className={`max-w-[85%] p-3 rounded-xl ${isCurrentUser ? "rounded-tr-sm bg-blue-600 text-white" : "rounded-tl-sm bg-slate-100 text-slate-900"} ${comment.isOptimistic ? "opacity-60" : ""}`}>
+
+                <div
+                  className={`max-w-[80%] p-3.5 rounded-2xl shadow-2xs ${
+                    isCurrentUser
+                      ? "rounded-tr-xs bg-blue-600 text-white"
+                      : "rounded-tl-xs bg-white border border-slate-200/90 text-slate-800"
+                  } ${comment.isOptimistic ? "opacity-60" : ""}`}
+                >
                   {!isCurrentUser && (
-                    <div className="flex items-center gap-3 mb-1 justify-between">
-                      <Text as="span" variant="small" weight="medium" className="text-slate-900">
-                        {comment.senderName || getSenderName(comment.senderId) || "Người dùng"}
-                      </Text>
-                      <Text as="span" className="text-slate-500 text-[11px] shrink-0">
-                        {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
-                      </Text>
+                    <div className="flex items-center gap-2 mb-1 justify-between text-xs">
+                      <span className="font-bold text-slate-900 truncate">{senderDisplayName}</span>
+                      <span className="text-slate-400 text-[10px] shrink-0">
+                        {safeFormatDate(comment.createdAt, "dd/MM HH:mm")}
+                      </span>
                     </div>
                   )}
-                  <Text variant="small" className={`whitespace-pre-wrap font-normal ${isCurrentUser ? "text-white" : "text-slate-700"}`}>
+
+                  <div className={`text-xs whitespace-pre-wrap leading-relaxed ${isCurrentUser ? "text-white" : "text-slate-700"}`}>
                     {parseMessageContent(comment.content, isCurrentUser)}
-                  </Text>
+                  </div>
+
                   {isCurrentUser && (
                     <div className="text-right mt-1">
-                      <Text as="span" className="text-blue-200 text-[10px]">
+                      <span className="text-blue-200 text-[10px] font-mono">
                         {safeFormatDate(comment.createdAt, "dd/MM/yyyy HH:mm")}
-                      </Text>
+                      </span>
                     </div>
                   )}
                 </div>
@@ -167,41 +232,42 @@ export function TaskDiscussionTab({ conversationId, allowedActions, participants
         )}
 
         {typingUsers.length > 0 && (
-          <div className="flex gap-3 items-center text-slate-400 italic text-sm">
-            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-              <Loader2 className="w-4 h-4 animate-spin" />
-            </div>
-            Ai đó đang soạn tin...
+          <div className="flex gap-2.5 items-center text-slate-400 italic text-xs pl-2">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+            Có cán bộ đang soạn tin nhắn...
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="mt-auto flex gap-2 pt-2 border-t">
-        {allowedActions?.includes('CHAT') ? (
-          <>
-            <MentionInput
-              placeholder="Nhập nội dung trao đổi (gõ @ để gắn thẻ)..."
-              className="min-h-[40px] max-h-[120px]"
-              value={commentText}
-              onChange={handleInputChange}
-              onSend={handleSendComment}
-              onBlur={emitStopTyping}
-              participants={participants}
-            />
+      {/* Input area */}
+      <div className="mt-auto pt-3 border-t border-slate-200 bg-white p-3 rounded-2xl shadow-2xs">
+        {canChat ? (
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <MentionInput
+                placeholder="Nhập nội dung trao đổi (gõ @ để gắn thẻ cán bộ)..."
+                className="min-h-[42px] max-h-[120px] text-xs"
+                value={commentText}
+                onChange={handleInputChange}
+                onSend={handleSendComment}
+                onBlur={emitStopTyping}
+                participants={participants}
+              />
+            </div>
             <Button
-              size="icon"
-              className="shrink-0"
+              size="sm"
               onClick={handleSendComment}
               disabled={addComment.isPending || !commentText.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-white h-[42px] px-4 rounded-xl shadow-xs shrink-0"
             >
               {addComment.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
-          </>
+          </div>
         ) : (
-          <div className="w-full text-center text-slate-400 text-sm py-2 italic border border-dashed rounded-md bg-slate-50">
-            Bạn không có quyền tham gia thảo luận ở bước này.
+          <div className="w-full text-center text-slate-400 text-xs py-2.5 italic border border-dashed rounded-xl bg-slate-50">
+            Bạn không thuộc danh sách phân công tham gia trao đổi ở nhiệm vụ này.
           </div>
         )}
       </div>

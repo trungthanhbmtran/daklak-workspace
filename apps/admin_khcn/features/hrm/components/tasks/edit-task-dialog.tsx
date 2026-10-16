@@ -27,13 +27,19 @@ export function EditTaskDialog({ open, onOpenChange, task, onSuccess }: EditTask
 
   const updateMutation = useUpdateTask();
 
+  const toInputDate = (d: any) => {
+    if (!d) return "";
+    const date = new Date(d);
+    return isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 16);
+  };
+
   useEffect(() => {
     if (task && open) {
       setTitle(task.title || "");
       setDescription(task.description || "");
       setPriority(task.priority || "MEDIUM");
-      setStartDate(task.startDate ? new Date(task.startDate).toISOString().slice(0, 16) : "");
-      setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : "");
+      setStartDate(toInputDate(task.startDate));
+      setDueDate(toInputDate(task.dueDate));
     }
   }, [task, open]);
 

@@ -17,6 +17,7 @@ import { clientIp } from '../../core/client-ip';
 import { randomUUID } from 'crypto';
 import { Metadata } from '@grpc/grpc-js';
 import { normalizeTask } from '../../common/utils/language-normalization.util';
+import { EmployeeService } from './employee.service';
 
 @Injectable()
 export class TasksService implements OnModuleInit {
@@ -45,6 +46,7 @@ export class TasksService implements OnModuleInit {
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
     private readonly issuer: TokenIssuerService,
+    private readonly employeeService: EmployeeService,
   ) {}
 
   onModuleInit() {
@@ -239,6 +241,23 @@ export class TasksService implements OnModuleInit {
       delete body.supervisor;
     }
 
+    // Server auto-balance percentage logic
+    const coorCount = (body.coassigneeCodes || body.coordinators || []).length;
+    if (coorCount > 0) {
+      if (
+        body.assigneePercentage === undefined ||
+        !body.coassigneePercentages ||
+        body.coassigneePercentages.length === 0 ||
+        body.coassigneePercentages.every((p: number) => p === 0)
+      ) {
+        const coorPct = Math.max(5, Math.floor(30 / coorCount));
+        body.assigneePercentage = 100 - coorPct * coorCount;
+        body.coassigneePercentages = (body.coassigneeCodes || body.coordinators).map(() => coorPct);
+      }
+    } else {
+      body.assigneePercentage = 100;
+    }
+
     if (body.baseScore !== undefined) {
       body.baseScore = typeof body.baseScore === 'number' ? body.baseScore : parseFloat(body.baseScore) || 0;
     }
@@ -261,6 +280,20 @@ export class TasksService implements OnModuleInit {
       ...(body.sourceDocumentRef ? { sourceDocumentRef: body.sourceDocumentRef } : {}),
       ...(body.initialSteps ? { initialSteps: body.initialSteps } : {}),
     };
+
+    // Auto calculate baseScore and difficultyK if priority is provided
+    if (body.priority && (!metadataObj.difficultyK || !body.baseScore)) {
+      const scoreDefaults: Record<string, { baseScore: number; difficultyK: number }> = {
+        LOW: { baseScore: 50, difficultyK: 1 },
+        NORMAL: { baseScore: 100, difficultyK: 2 },
+        HIGH: { baseScore: 150, difficultyK: 3 },
+        URGENT: { baseScore: 200, difficultyK: 4 },
+      };
+      const def = scoreDefaults[String(body.priority).toUpperCase()] || scoreDefaults.NORMAL;
+      if (!body.baseScore) body.baseScore = def.baseScore;
+      if (!metadataObj.difficultyK) metadataObj.difficultyK = def.difficultyK;
+    }
+
     body.metadataJson = JSON.stringify(metadataObj);
     body.sourceDocumentRef = body.sourceDocumentRef || '';
 
@@ -284,6 +317,505 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) this.translateTaskData(response.data);
     return response;
+  }
+
+  async getTaskContext(
+    req: any,
+    query: {
+      departmentId?: number;
+      assignee?: string;
+      coordinatorIds?: string;
+      priority?: string;
+    },
+  ) {
+    const departmentId = query.departmentId;
+    const assignee = query.assignee;
+    const priority = query.priority || 'NORMAL';
+    const currentUserCode = req.user?.employeeCode;
+
+    // 1. Lấy danh sách nhân sự từ EmployeeService
+    let employees: any[] = [];
+    try {
+      const empRes = await this.employeeService.list(req.user, {
+        departmentId: departmentId || undefined,
+        pageSize: 200,
+        assignableOnly: true,
+      });
+      employees = empRes?.data || [];
+    } catch {
+      employees = [];
+    }
+
+    // 2. Phân loại Lãnh đạo và Chuyên viên bằng quy tắc nghiệp vụ tại server
+    const deptLeaders: any[] = [];
+    const deptStaff: any[] = [];
+
+    const isLeader = (emp: any): boolean => {
+      const code = (emp.jobTitle?.code || '').toUpperCase();
+      const name = (emp.jobTitleName || emp.jobTitle?.name || '').toLowerCase();
+      if (
+        code.includes('TRUONG') ||
+        code.includes('PHO') ||
+        code.includes('GIAM_DOC') ||
+        code.includes('LANH_DAO')
+      ) {
+        return true;
+      }
+      return (
+        name.includes('trưởng') ||
+        name.includes('phó') ||
+        name.includes('giám đốc') ||
+        name.includes('chi cục trưởng')
+      );
+    };
+
+    employees.forEach((emp) => {
+      const item = {
+        employeeCode: emp.employeeCode,
+        fullName: emp.fullName,
+        jobTitleName: emp.jobTitleName || emp.jobTitle?.name || '',
+        departmentName: emp.departmentName || emp.department?.name || '',
+        departmentId: emp.departmentId,
+      };
+      if (isLeader(emp)) {
+        deptLeaders.push({ ...item, isLeader: true });
+      } else {
+        deptStaff.push({ ...item, isLeader: false });
+      }
+    });
+
+    // 3. Chuẩn hóa nhóm người thực hiện các bước (stepAssigneeOptions)
+    let stepAssigneeOptions = { label: '', list: [] as any[] };
+    const rawCoordinators = query.coordinatorIds
+      ? query.coordinatorIds.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+
+    if (rawCoordinators.length > 0) {
+      const coordEmps: any[] = [];
+      const coordCodes = new Set<string>();
+
+      for (const cId of rawCoordinators) {
+        if (!cId.startsWith('DEPT_')) {
+          const emp = employees.find((e) => e.employeeCode === cId);
+          if (emp && !coordCodes.has(emp.employeeCode)) {
+            coordCodes.add(emp.employeeCode);
+            coordEmps.push({
+              employeeCode: emp.employeeCode,
+              fullName: emp.fullName,
+              jobTitleName: emp.jobTitleName || emp.jobTitle?.name || '',
+              departmentName: emp.departmentName || emp.department?.name || '',
+            });
+          }
+        } else {
+          const dId = parseInt(cId.replace('DEPT_', ''), 10);
+          employees.forEach((emp) => {
+            if (
+              (emp.departmentId === dId || emp.department?.id === dId) &&
+              !coordCodes.has(emp.employeeCode)
+            ) {
+              coordCodes.add(emp.employeeCode);
+              coordEmps.push({
+                employeeCode: emp.employeeCode,
+                fullName: emp.fullName,
+                jobTitleName: emp.jobTitleName || emp.jobTitle?.name || '',
+                departmentName: emp.departmentName || emp.department?.name || '',
+              });
+            }
+          });
+        }
+      }
+
+      const filtered = coordEmps.filter(
+        (e) => e.employeeCode !== currentUserCode && e.employeeCode !== assignee,
+      );
+      stepAssigneeOptions = {
+        label: `Nhân sự phối hợp trong nhiệm vụ (${filtered.length})`,
+        list: filtered,
+      };
+    } else if (departmentId || (assignee && assignee.startsWith('DEPT_'))) {
+      const dId = departmentId || parseInt(assignee!.replace('DEPT_', ''), 10);
+      const deptEmps = employees
+        .filter(
+          (e) =>
+            (e.departmentId === dId || e.department?.id === dId) &&
+            e.employeeCode !== currentUserCode &&
+            e.employeeCode !== assignee,
+        )
+        .map((emp) => ({
+          employeeCode: emp.employeeCode,
+          fullName: emp.fullName,
+          jobTitleName: emp.jobTitleName || emp.jobTitle?.name || '',
+          departmentName: emp.departmentName || emp.department?.name || '',
+        }));
+
+      const deptName =
+        employees.find((e) => e.departmentId === dId)?.departmentName || 'phòng ban';
+      stepAssigneeOptions = {
+        label: `Nhân sự ${deptName} (${deptEmps.length})`,
+        list: deptEmps,
+      };
+    }
+
+    // 4. Chuẩn hóa mã nhóm công thức VTVL
+    let deptName = '';
+    if (assignee && assignee.startsWith('DEPT_')) {
+      const dId = parseInt(assignee.replace('DEPT_', ''), 10);
+      deptName = employees.find((e) => e.departmentId === dId)?.departmentName || '';
+    } else if (assignee) {
+      const emp = employees.find((e) => e.employeeCode === assignee);
+      deptName = emp?.departmentName || emp?.unitName || '';
+    } else if (departmentId) {
+      deptName = employees.find((e) => e.departmentId === departmentId)?.departmentName || '';
+    }
+
+    const upper = deptName.toUpperCase();
+    let formulaDomainCode = 'VTVL_CHUNG';
+    if (upper.includes('TỔ CHỨC') || upper.includes('CÁN BỘ') || upper.includes('TCCB')) {
+      formulaDomainCode = 'THAM_DINH_TCCB';
+    } else if (upper.includes('BẢO VỆ CHÍNH TRỊ') || upper.includes('BVCTNB')) {
+      formulaDomainCode = 'BVCTNB';
+    } else if (upper.includes('TIẾP CÔNG DÂN') || upper.includes('ĐƠN THƯ') || upper.includes('TCD')) {
+      formulaDomainCode = 'TCD_DV';
+    } else if (upper.includes('VĂN PHÒNG') || upper.includes('VP')) {
+      formulaDomainCode = 'VAN_PHONG';
+    }
+
+    // 5. Mặc định KPI theo mức độ ưu tiên
+    const scoreMap: Record<string, { baseScore: number; difficultyK: number }> = {
+      LOW: { baseScore: 50, difficultyK: 1 },
+      NORMAL: { baseScore: 100, difficultyK: 2 },
+      HIGH: { baseScore: 150, difficultyK: 3 },
+      URGENT: { baseScore: 200, difficultyK: 4 },
+    };
+    const kpiDefaults = scoreMap[priority.toUpperCase()] || scoreMap.NORMAL;
+
+    // 6. Nhận diện Lãnh đạo thẩm định theo VTVL
+    let supervisor: any = null;
+    if (assignee) {
+      try {
+        const supRes = await this.getSupervisorByScope(req, {
+          departmentId: departmentId || (assignee.startsWith('DEPT_') ? parseInt(assignee.replace('DEPT_', ''), 10) : undefined),
+          assigneeCode: !assignee.startsWith('DEPT_') ? assignee : undefined,
+        });
+        if (supRes?.data?.supervisorCode) {
+          supervisor = {
+            code: supRes.data.supervisorCode,
+            name: supRes.data.supervisorName || supRes.data.supervisorCode,
+            jobTitle: supRes.data.supervisorJobTitle,
+            unitName: supRes.data.supervisorUnitName,
+            reason: supRes.data.reason || 'Lãnh đạo thẩm định theo VTVL tuyến báo cáo & phân công quản lý',
+          };
+        }
+      } catch {}
+    }
+
+    return {
+      success: true,
+      data: {
+        deptLeaders,
+        deptStaff,
+        stepAssigneeOptions,
+        formulaDomainCode,
+        kpiDefaults,
+        supervisor,
+      },
+    };
+  }
+
+  async balancePercentages(body: { coordinatorCount?: number; coordinatorCodes?: string[] }) {
+    const codes = body.coordinatorCodes || [];
+    const count = codes.length > 0 ? codes.length : (body.coordinatorCount || 0);
+
+    if (count === 0) {
+      return {
+        success: true,
+        data: {
+          assigneePercentage: 100,
+          coordinatorPercentage: 0,
+          coordinators: [],
+        },
+      };
+    }
+
+    const coorPct = Math.max(5, Math.floor(30 / count));
+    const leadPct = 100 - coorPct * count;
+
+    return {
+      success: true,
+      data: {
+        assigneePercentage: leadPct,
+        coordinatorPercentage: coorPct,
+        coordinators: codes.map((id) => ({ id, percentage: coorPct })),
+      },
+    };
+  }
+
+  async getPersonalWorkbench(
+    req: any,
+    query: {
+      startDate?: string;
+      endDate?: string;
+      unitScope?: string;
+      search?: string;
+      category?: string;
+    },
+  ) {
+    const user = req.user;
+    const userEmpCode = user?.employeeCode || '';
+    const isAdmin = Boolean(
+      user?.isAdmin ||
+      user?.username === 'admin' ||
+      user?.employeeCode === 'ADMIN001' ||
+      (Array.isArray(user?.permissionsFlatten) &&
+        (user.permissionsFlatten.includes('TASK:MANAGE') ||
+          user.permissionsFlatten.includes('TASK.*') ||
+          user.permissionsFlatten.includes('*') ||
+          user.permissionsFlatten.includes('*:*') ||
+          user.permissionsFlatten.includes('SYSTEM:*') ||
+          user.permissionsFlatten.some((p: string) => typeof p === 'string' && p.startsWith('SYSTEM'))))
+    );
+
+    // 1. Fetch personal tasks from hrm-service via ListTasks with filter: 'MY_TASKS'
+    const requestPayload: any = {
+      currentEmployeeCode: userEmpCode,
+      currentUserId: user?.id,
+      currentUserDept: query.unitScope ? parseInt(query.unitScope, 10) : user?.unitId,
+      currentUserPermissions: user?.permissionsFlatten || [],
+      isAdmin,
+      filter: 'MY_TASKS',
+      status: 'ALL',
+      limit: 200,
+      page: 1,
+      summary: false,
+    };
+
+    if (query.startDate) requestPayload.referenceDate = query.startDate;
+
+    const grpcRes: any = await executeGrpcCall(
+      this.taskService.ListTasks(requestPayload, this.getGrpcMetadata(req)),
+      10000,
+      'TasksService.ListTasks (PersonalWorkbench)',
+    ).catch((e) => this.handleRpcError(e));
+
+    const rawTasks = grpcRes?.data || [];
+    const tasks = Array.isArray(rawTasks) ? rawTasks : [rawTasks].filter(Boolean);
+    await this.populateUsers(tasks);
+
+    // Lọc theo khoảng ngày nếu có
+    let myTasks = tasks;
+    if (query.startDate || query.endDate) {
+      const start = query.startDate ? new Date(query.startDate).getTime() : 0;
+      const end = query.endDate ? new Date(query.endDate + 'T23:59:59.999Z').getTime() : Infinity;
+      myTasks = myTasks.filter((t: any) => {
+        const d = t.dueDate ? new Date(t.dueDate).getTime() : (t.createdAt ? new Date(t.createdAt).getTime() : 0);
+        return d >= start && d <= end;
+      });
+    }
+
+    // 2. Tính toán 6 Thẻ chỉ số cá nhân thực tế tại server
+    const total = myTasks.length;
+    const now = new Date();
+    const in3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    let completed = 0;
+    let overdue = 0;
+    let completedOverdue = 0;
+    let dueSoon = 0;
+
+    myTasks.forEach((t: any) => {
+      const isDone =
+        t.isCompleted === true ||
+        t.status === 'COMPLETED' ||
+        t.status === 'Hoàn thành' ||
+        Number(t.progress || 0) >= 100;
+
+      const due = t.dueDate ? new Date(t.dueDate) : null;
+      const completedAt = t.completedAt ? new Date(t.completedAt) : null;
+
+      if (isDone) {
+        completed++;
+        if (due && completedAt && completedAt > due) {
+          completedOverdue++;
+        }
+      } else {
+        if (due) {
+          if (due < now) {
+            overdue++;
+          } else if (due <= in3Days) {
+            dueSoon++;
+          }
+        }
+      }
+    });
+
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 100;
+
+    const metrics = {
+      total,
+      completed,
+      overdue,
+      completedOverdue,
+      dueSoon,
+      completionRate,
+    };
+
+    // 3. List việc cần làm tại server (Ưu tiên các việc chưa hoàn thành)
+    const actionItems = myTasks
+      .filter((t: any) => {
+        const isDone =
+          t.isCompleted === true ||
+          t.status === 'COMPLETED' ||
+          t.status === 'Hoàn thành' ||
+          Number(t.progress || 0) >= 100;
+        return !isDone;
+      })
+      .map((t: any) => {
+        const d = t.dueDate ? new Date(t.dueDate) : null;
+        const dueFormatted = d
+          ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
+          : 'Trong tuần';
+        let actionStatus = 'Đang xử lý';
+        if (t.status === 'PENDING_ACCEPTANCE') actionStatus = 'Chờ tiếp nhận';
+        else if (t.status === 'PENDING_REVIEW') actionStatus = 'Chờ duyệt / thẩm định';
+        return {
+          id: t.id,
+          title: t.title,
+          status: actionStatus,
+          dueDate: dueFormatted,
+          priority: t.priority || 'MEDIUM',
+        };
+      })
+      .slice(0, 5);
+
+    // 4. Công việc gần đây nhất định dạng sẵn tại server
+    let recentList = myTasks.map((t: any) => {
+      const isDone =
+        t.isCompleted === true ||
+        t.status === 'COMPLETED' ||
+        t.status === 'Hoàn thành' ||
+        Number(t.progress || 0) >= 100;
+
+      const d = t.dueDate ? new Date(t.dueDate) : null;
+      const dueFormatted = d
+        ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
+        : 'Trong tháng';
+
+      const isOverdue = !isDone && d && d < now;
+
+      let statusLabel = 'Đang xử lý';
+      if (isDone) statusLabel = 'Hoàn thành';
+      else if (isOverdue) statusLabel = 'Quá hạn';
+      else if (t.status === 'PENDING_ACCEPTANCE') statusLabel = 'Chờ tiếp nhận';
+      else if (t.status === 'PENDING_REVIEW') statusLabel = 'Chờ thẩm định';
+
+      const participants = Array.isArray(t.participants) ? t.participants : [];
+      const myPart = participants.find((p: any) => p.employeeCode === userEmpCode);
+      let roleLabel = 'Chủ trì';
+      if (myPart) {
+        if (myPart.role === 'OWNER') roleLabel = 'Người giao';
+        else if (myPart.role === 'ASSIGNEE') roleLabel = 'Chủ trì';
+        else if (myPart.role === 'COORDINATOR') roleLabel = 'Phối hợp';
+        else if (myPart.role === 'APPROVER') roleLabel = 'Thẩm định';
+      } else if (t.creatorEmployeeCode === userEmpCode || t.assignerCode === userEmpCode) {
+        roleLabel = 'Người giao';
+      } else if (t.assigneeCode === userEmpCode) {
+        roleLabel = 'Chủ trì';
+      } else if (Array.isArray(t.coassigneeCodes) && t.coassigneeCodes.includes(userEmpCode)) {
+        roleLabel = 'Phối hợp';
+      }
+
+      return {
+        id: t.id,
+        title: t.title,
+        docRef: t.metadata?.documentNumber || t.metadata?.documentRef || `[${t.id}/QĐ-UBND]`,
+        status: statusLabel,
+        priority: t.priority === 'URGENT' || t.priority === 'HIGH' ? 'Cao' : 'Trung bình',
+        dueDate: dueFormatted,
+        role: roleLabel,
+        progress: Number(t.progress || (isDone ? 100 : 35)),
+        completedAt: t.completedAt ? new Date(t.completedAt) : null,
+      };
+    });
+
+    if (query.search && query.search.trim()) {
+      const q = query.search.toLowerCase();
+      recentList = recentList.filter(
+        (t) => t.title.toLowerCase().includes(q) || t.docRef.toLowerCase().includes(q),
+      );
+    }
+
+    if (query.category === 'LEAD') {
+      recentList = recentList.filter((t) => t.role === 'Chủ trì' || t.role === 'Người giao');
+    } else if (query.category === 'COORDINATE') {
+      recentList = recentList.filter((t) => t.role === 'Phối hợp');
+    } else if (query.category === 'IN_PROGRESS') {
+      recentList = recentList.filter((t) => t.status === 'Đang xử lý' || t.status === 'Chờ thẩm định');
+    } else if (query.category === 'DONE') {
+      recentList = recentList.filter((t) => t.status === 'Hoàn thành');
+    }
+
+    const recentTasks = recentList.slice(0, 8);
+
+    // 5. Workload Benchmark tính toán động theo dữ liệu thực
+    let personalScore = 0;
+    myTasks.forEach((t: any) => {
+      const score = Number(t.baseScore || t.metadata?.baseScore || 0);
+      const weight = Number(t.weight || t.metadata?.weight || 1);
+      personalScore += score > 0 ? (score * weight) / 100 : 1;
+    });
+    personalScore = Math.max(1, Math.round(personalScore));
+
+    let departmentAverage = 10;
+    try {
+      const deptId = query.unitScope ? parseInt(query.unitScope, 10) : user?.unitId;
+      if (deptId) {
+        const deptPayload: any = {
+          departmentId: deptId,
+          status: 'ALL',
+          limit: 100,
+          page: 1,
+          summary: true,
+        };
+        const deptRes: any = await executeGrpcCall(
+          this.taskService.ListTasks(deptPayload, this.getGrpcMetadata(req)),
+          3000,
+          'TasksService.ListTasks (DeptBenchmark)',
+        ).catch(() => null);
+        const deptTasks = deptRes?.data || [];
+        if (Array.isArray(deptTasks) && deptTasks.length > 0) {
+          const totalDeptScore = deptTasks.reduce((acc: number, dt: any) => {
+            const sc = Number(dt.baseScore || dt.metadata?.baseScore || 1);
+            return acc + (sc > 0 ? sc : 1);
+          }, 0);
+          departmentAverage = Math.round((totalDeptScore / Math.max(1, deptTasks.length)) * 10) / 10;
+        }
+      }
+    } catch {
+      departmentAverage = Math.round(personalScore * 1.1 * 10) / 10;
+    }
+
+    const diffPercent = Math.abs(
+      Math.round(((personalScore - departmentAverage) / (departmentAverage || 1)) * 100),
+    );
+    const isLower = personalScore <= departmentAverage;
+
+    const workloadBenchmark = {
+      personalScore,
+      departmentAverage,
+      diffPercent,
+      isLower,
+      evaluation: isLower ? 'Tải cân bằng · Đáp ứng tốt' : 'Khối lượng cao · Cần hỗ trợ',
+    };
+
+    return {
+      success: true,
+      data: {
+        metrics,
+        actionItems,
+        recentTasks,
+        workloadBenchmark,
+      },
+    };
   }
 
   async getSupervisorByScope(req: any, query: { departmentId?: number; domainId?: number; assigneeCode?: string }) {
@@ -788,20 +1320,34 @@ export class TasksService implements OnModuleInit {
 
   async getSubTasks(req: any, id: number) {
     const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE') || false;
+    const perms = user?.permissionsFlatten || [];
+    const isAdmin = Boolean(
+      user?.isAdmin ||
+      user?.username === 'admin' ||
+      user?.employeeCode === 'ADMIN001' ||
+      (Array.isArray(perms) &&
+        (perms.includes('TASK:MANAGE') ||
+          perms.includes('TASK.*') ||
+          perms.includes('*') ||
+          perms.includes('*:*') ||
+          perms.includes('SYSTEM:*') ||
+          perms.some((p: string) => typeof p === 'string' && p.startsWith('SYSTEM'))))
+    );
     const isLeader =
       isAdmin ||
-      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
-      user?.permissionsFlatten?.includes('TASK.*');
+      perms.includes('TASK.ASSIGN') ||
+      perms.includes('TASK.*');
 
     const response: any = await executeGrpcCall(
       this.taskService.GetSubTasks(
         {
           taskId: id,
-          currentEmployeeCode: user?.employeeCode,
+          currentUserId: user?.id,
+          currentEmployeeCode: user?.employeeCode || user?.username,
           isAdmin,
           isLeader,
           currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+          currentUserPermissions: perms,
         },
         this.getGrpcMetadata(req),
       ),
@@ -835,12 +1381,18 @@ export class TasksService implements OnModuleInit {
   async getTask(req: any, id: number) {
     const user = req.user;
     const perms = user?.permissionsFlatten || [];
-    const isAdmin =
-      perms.includes('TASK:MANAGE') ||
-      perms.includes('TASK.*') ||
-      perms.includes('SYSTEM:*') ||
-      perms.some((p: string) => p.startsWith('SYSTEM')) ||
-      false;
+    const isAdmin = Boolean(
+      user?.isAdmin ||
+      user?.username === 'admin' ||
+      user?.employeeCode === 'ADMIN001' ||
+      (Array.isArray(perms) &&
+        (perms.includes('TASK:MANAGE') ||
+          perms.includes('TASK.*') ||
+          perms.includes('*') ||
+          perms.includes('*:*') ||
+          perms.includes('SYSTEM:*') ||
+          perms.some((p: string) => typeof p === 'string' && p.startsWith('SYSTEM'))))
+    );
     const isLeader =
       isAdmin ||
       perms.includes('TASK.ASSIGN') ||
@@ -863,7 +1415,10 @@ export class TasksService implements OnModuleInit {
       'TasksService.GetTask',
     ).catch((e) => this.handleRpcError(e))) as any;
     const target = response?.data ? response.data : response;
-    if (target) this.translateTaskData(target);
+    if (target) {
+      await this.populateUsers([target]);
+      this.translateTaskData(target);
+    }
     return response;
   }
 

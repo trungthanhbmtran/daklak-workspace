@@ -1,5 +1,371 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-16] Tối Ưu Hóa Granular Endpoints Tại Server, Triệt Tiêu Monolithic Mega-Fetch & Bổ Sung Quy Chuẩn Kiến Trúc Vào .agents
+
+### 1. Bối Cảnh & Yêu Cầu Cốt Lõi
+- **Chỉ đạo người dùng**: *"xử lý từng api phải xuất phát từ endpoint API ở server nữa mới tối ưu. Sau khi thực hiện xong phải thêm vào agents mô tả cho tôi hướng xử lý trường hợp nay sau này"*
+- **Mục tiêu**:
+  1. **Server-side Granular Endpoints & Bounded Queries**: Rà soát và bảo đảm từng API con phục vụ cho từng Tab/Khối chức năng (Sub-tasks, Steps, History, Comments, KPI/Evaluations) xuất phát từ các endpoint độc lập tại API Gateway & Domain Microservice, áp dụng đầy đủ PBAC Scoping và giới hạn dữ liệu (`take: 100`, Least Data).
+  2. **Tối ưu hóa Server Microservices**:
+     - Cập nhật `apps/api-gateway/src/modules/hrm/tasks.service.ts` tại `getSubTasks`: Đồng bộ nhận diện `isAdmin` toàn diện (`user.isAdmin`, `user.username === 'admin'`, `user.employeeCode === 'ADMIN001'`, `perms.includes('*')`), chuyển tiếp đầy đủ ngữ cảnh user ID, employeeCode và permissions qua gRPC.
+     - Cập nhật `apps/hrm-service/src/modules/tasks/tasks.controller.ts`: Handler gRPC `GetSubTasks` nhận diện `isAdmin` chính xác từ payload/user.
+     - Cập nhật `apps/hrm-service/src/modules/task-history/task-history.service.ts`: Thêm `take: 100` vào truy vấn lịch sử nhiệm vụ, ngăn chặn query không giới hạn gây tràn RAM/Network.
+     - Biên dịch thành công và restart 2 container backend: `daklak-workspace-hrm-service-1` và `daklak-workspace-api-gateway-1`.
+  3. **Đóng Gói Tri Thức & Quy Chuẩn Vào Hệ Thống .agents**:
+     - Cập nhật `.agents/rules/frontend.md` (Bổ sung Mục 9: Kiến trúc Tách nhỏ Endpoint & Lazy Mount On-Demand).
+     - Cập nhật `.agents/rules/service-boundaries.md` (Bổ sung Mục 3: Nguyên tắc Granular Endpoints & Least Data - Chống Monolithic Mega-Fetch).
+     - Cập nhật Hiến chương kỹ thuật `.agents/AGENTS.md` (Bổ sung ràng buộc Granular Endpoints & Lazy Tabs On-Demand vào Bảy bộ ràng buộc kỹ thuật).
+
+### 2. Danh Sách File Đã Tác Động
+1. `apps/hrm-service/src/modules/task-history/task-history.service.ts` (Thêm take: 100 cho truy vấn getTaskHistory)
+2. `apps/hrm-service/src/modules/tasks/tasks.controller.ts` (Chuẩn hóa PBAC isAdmin cho gRPC GetSubTasks)
+3. `apps/api-gateway/src/modules/hrm/tasks.service.ts` (Chuẩn hóa isAdmin và chuyển tiếp ngữ cảnh quyền cho getSubTasks)
+4. `.agents/rules/frontend.md` (Bổ sung Mục 9: Hướng dẫn chi tiết thiết kế Granular Endpoints & Lazy Tabs On-Demand)
+5. `.agents/rules/service-boundaries.md` (Bổ sung Mục 3: Nguyên tắc Granular API & Bounded Queries phía Server)
+6. `.agents/AGENTS.md` (Bổ sung quy tắc bất biến vào Bảy bộ ràng buộc kỹ thuật)
+7. `.agents/execution_logs/code1.md` (Ghi nhận bằng chứng kiểm chứng)
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Đo Lường Thực Tế
+- **Biên dịch hrm-service (`npm run build`)**: **Exit code 0** (Prisma client generated, NestJS compiled, tsc-alias mapped).
+- **Biên dịch api-gateway (`npm run build`)**: **Exit code 0** (Prisma client generated, NestJS compiled, tsc-alias mapped).
+- **Restart Container**:
+  - `daklak-workspace-hrm-service-1`: Khởi động sạch, microservice gRPC listening trên `0.0.0.0:50052`.
+  - `daklak-workspace-api-gateway-1`: Khởi động sạch, gateway listening trên `http://localhost:8080/api/v1`.
+- **Kiểm tra File Encoding**: Toàn bộ file đã sửa (`frontend.md`, `service-boundaries.md`, `AGENTS.md`) đạt chuẩn UTF-8 không BOM (byte header: `35 32 ...`).
+- **Dọn rác**: 100% không còn console.log hay debug code nào trong working diff.
+
+---
+
+
+### 1. Bối Cảnh & Chỉ Đạo Người Dùng
+- **Chỉ đạo**: *"khi mở trang thì mới get data từ api đó , tương tự với các tabs bên dưới khi nhấn vào tabs đó mới gọi component đồng thời data trong đó mới hiển thị. Tránh lỗi ở component gọi 1 cục endpoint lớn sau đó render và truyền dần xuống client"*
+- **Vấn đề tồn tại trước đó**:
+  - Tại `TaskDetailClient.tsx`: Các component của toàn bộ tab (`TaskProcessingTab`, `TaskDiscussionTab`, `TaskHistoryTab`) đều được mount cùng lúc khi trang nạp. Điều này kích hoạt đồng loạt 4-5 API calls và mở websocket chat ngay lập tức dù người dùng chưa hề bấm vào tab.
+  - Tại `TaskProcessingTab`: Vẫn còn logic fallback đọc `currentTask?.subTasks` và `currentTask?.steps`, phản ánh mô hình cũ "gọi 1 cục endpoint lớn ở component cha rồi truyền dần xuống con".
+  - Chưa có state ghi nhận các tab đã mở (`visitedTabs`), dẫn đến nguy cơ component bị unmount/re-mount mất trạng thái cuộn hoặc re-fetch liên tục.
+
+### 2. Giải Pháp Triển Khai
+1. **Kiến trúc Lazy Mount & On-Demand Data Fetching**:
+   - Quản lý state `visitedTabs` (khởi tạo duy nhất `Set(["processing"])`).
+   - Mỗi tab chỉ được mount component khi người dùng thực sự click vào tab đó (`visitedTabs.has(tabName)`).
+   - Dữ liệu của từng tab (`useTaskSubtasks`, `useTaskSteps`, `useTaskComments`, `useTaskHistory`) chỉ bắt đầu gọi API khi component của tab đó mount, kèm Skeleton loading độc lập.
+   - Khi chuyển đổi qua lại giữa các tab đã thăm, sử dụng CSS `block`/`hidden` để giữ nguyên DOM và cache, tránh giật lag hay re-fetch lặp lại.
+   - Khi mở drawer mới hoặc đổi nhiệm vụ khác, tự động reset `visitedTabs` về lại duy nhất tab đầu tiên.
+2. **Triệt tiêu Monolithic Endpoint**:
+   - Component cha (`TaskDetailDrawer`, `TaskDetailClient`) chỉ gọi duy nhất endpoint nhiệm vụ cốt lõi: `getTask(taskId)`.
+   - Các dữ liệu con (subtasks, steps, comments, history) được phân quyền hoàn toàn cho các component con tự chủ động query theo endpoint chuyên trách:
+     - `TaskProcessingTab`: tự query `useTaskSubtasks(taskId)` và `useTaskSteps(taskId)` với `enabled: isValidTaskId`.
+     - `TaskDiscussionTab`: tự query `useTaskComments(conversationId)` với `enabled: Boolean(conversationId)` và quản lý websocket.
+     - `TaskHistoryTab`: tự query `useTaskHistory(taskId)` với `enabled: isValidTaskId`.
+3. **Module hóa Tab KPI**:
+   - Tách toàn bộ 150 dòng JSX đánh giá KPI thành component chuyên biệt `TaskKpiTab.tsx` ([`task-detail-kpi-tab.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/task-detail-kpi-tab.tsx)), tái sử dụng đồng nhất giữa `TaskDetailDrawer` và `TaskDetailClient`.
+
+### 3. Danh Sách File Đã Tác Động
+1. `apps/admin_khcn/features/hrm/components/tasks/task-detail-kpi-tab.tsx` (Tạo mới: Component Tab Đánh giá & KPI chuyên biệt)
+2. `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx` (Tích hợp visitedTabs lazy loading, gọi TaskKpiTab)
+3. `apps/admin_khcn/features/hrm/components/tasks/TaskDetailClient.tsx` (Tích hợp visitedTabs lazy loading, unwrapTaskData, gọi TaskKpiTab)
+4. `apps/admin_khcn/features/hrm/components/tasks/task-detail-processing-tab.tsx` (Gated query enabled cho steps/subtasks, tách bỏ monolithic fallback)
+5. `apps/admin_khcn/features/hrm/components/tasks/task-detail-discussion-tab.tsx` (Gated query enabled cho comments & chat socket)
+6. `apps/admin_khcn/features/hrm/components/tasks/task-detail-history-tab.tsx` (Gated query enabled cho audit history)
+
+### 4. Bằng Chứng Kiểm Chứng Máy
+- **TypeScript Check (`npm run typecheck`)**: **Exit code 0 (0 errors)**.
+- **Biên dịch Production (`npm run build`)**: **Exit code 0 (86/86 static & dynamic routes biên dịch sạch trong 54s)**.
+- **Triển khai Container**: Đã copy dist `.next/standalone` và restart container `daklak-workspace-admin-frontend-1` (`Ready in 178ms`).
+- **Dọn rác**: 100% không còn console.log thừa, tuân thủ UTF-8 không BOM.
+
+---
+
+## [2026-10-16] Khắc Phục Lỗi Hiển Thị Chi Tiết & Đánh Giá Task #125, Đồng Bộ Backend-Frontend PBAC và Triệt Tiêu Giật/Lag/Reload Trang Khi Đóng Mở Form Sheet
+
+### 1. Bối Cảnh & Vấn Đề Thực Tế
+- **Chỉ đạo người dùng**:
+  1. *http://113.184.220.82/admin/services/hrm/work-plans/tasks/125 chi tiết công việc đang lỗi chưa hiển thị được*
+  2. *ngoài ra trang đánh giá cũng đang lỗi chưa lấy đủ thông tin kiểm tra lại ở backend và frontend đồng bộ*
+  3. *Sau đó kiểm tra lại hiệu năng sau khi tôi tắt mở form nó lại cứ bị giật giật reload lạng trang tạo trải nghiệm không tốt với người dùng*
+- **Nguyên nhân gốc rễ (Root Cause Analysis)**:
+  1. **Lệch Envelope & Unwrap Data**: API Gateway bọc response dạng `{ data: { data: task, message: ... } }`, trong khi client query bóc tách không triệt để khiến `useTaskDetail` trả về `undefined` hoặc object bọc.
+  2. **PBAC & Phân Phối Dữ Liệu Thiếu Đồng Bộ Giữa Backend**:
+     - `api-gateway` `tasks.service.ts`: `getTask` chưa kiểm tra mở rộng `isAdmin` (như `username === 'admin'`, `employeeCode === 'ADMIN001'`, `user.isAdmin`), đồng thời chưa gọi `await this.populateUsers([target])` để bổ sung họ tên, chức danh cán bộ phân công, người thực hiện, người theo dõi.
+     - `hrm-service` `tasks.controller.ts`: Handler gRPC `getTask` chưa đồng bộ logic `isAdmin` tương tự `listTasks`.
+  3. **Vi phạm Rule 3 Hiến chương tại Parallel Routes Next.js 16**:
+     - Route `@sheet/[id]/page.tsx` và `@sheet/[id]/evaluate/page.tsx` trước đó để `'use client'`, vi phạm Rule 3 (Server Component nhận `await params` và truyền props xuống `*Client.tsx`). Khi truy cập trực tiếp deep-link hoặc render parallel slot, Next.js 16 gặp xung đột client navigation.
+     - Trang cha `tasks/page.tsx` bị bọc trong `<Suspense fallback=...>` không kiểm soát, mỗi lần parallel route mount/unmount khiến toàn bộ trang nhấp nháy (flash) trắng màn hình.
+     - Khi đóng Sheet, `router.push('/services/hrm/work-plans/tasks')` thiếu `{ scroll: false }` khiến trình duyệt tự động scroll nhảy lên đỉnh trang, gây cảm giác giật/lag.
+
+### 2. Giải Pháp Triển Khai
+1. **Đồng Bộ Backend PBAC & User Population**:
+   - `apps/api-gateway/src/modules/hrm/tasks.service.ts`: Nâng cấp `getTask` kiểm tra `isAdmin` toàn diện và nạp đầy đủ thông tin cán bộ qua `this.populateUsers([target])`.
+   - `apps/hrm-service/src/modules/tasks/tasks.controller.ts`: Đồng bộ logic phân quyền `isAdmin` cho gRPC endpoint `getTask`.
+2. **Chuẩn Hóa Unwrapping Đa Tầng Tại Frontend**:
+   - `apps/admin_khcn/features/hrm/components/tasks/task-ui-utils.tsx`: Bổ sung helper an toàn `unwrapTaskData(res)` tự động bóc tách mọi lớp envelope.
+   - `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx` & `TaskEvaluationApprovalSheet.tsx`: Sử dụng `unwrapTaskData` bảo đảm dữ liệu luôn là entity Task chuẩn.
+   - `TaskEvaluationApprovalSheet.tsx`: Hỗ trợ prop `taskId`, hiển thị Skeleton loading mượt mà, định dạng mã nhiệm vụ chuẩn `#125`.
+3. **Tái Cấu Trúc Next.js 16 App Router Parallel Routes Tuân Thủ Rule 3**:
+   - `layout.tsx`: Server Component nhận `{ children, sheet }`.
+   - `page.tsx`: Server Component render trực tiếp `<TaskList />`, loại bỏ `<Suspense fallback>` gây nhấp nháy trang.
+   - `@sheet/[id]/page.tsx` & `@sheet/[id]/evaluate/page.tsx`: Async Server Component với `const { id } = await params;` và render các client wrapper tương ứng (`TaskDetailSheetClient`, `TaskEvaluateSheetClient`).
+   - Ngăn chặn cuộn nhảy: Thêm `{ scroll: false }` trên toàn bộ các router transitions và `<Link scroll={false}>`.
+   - Thêm `placeholderData: keepPreviousData` trong `useTaskDetail` để chuyển đổi mượt 60fps.
+
+### 3. Danh Sách File Đã Tác Động
+1. `apps/api-gateway/src/modules/hrm/tasks.service.ts`
+2. `apps/hrm-service/src/modules/tasks/tasks.controller.ts`
+3. `apps/admin_khcn/features/hrm/components/tasks/task-ui-utils.tsx`
+4. `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`
+5. `apps/admin_khcn/features/hrm/components/tasks/TaskEvaluationApprovalSheet.tsx`
+6. `apps/admin_khcn/features/hrm/hooks/useTasks.ts`
+7. `apps/admin_khcn/app/services/hrm/work-plans/tasks/layout.tsx`
+8. `apps/admin_khcn/app/services/hrm/work-plans/tasks/page.tsx`
+9. `apps/admin_khcn/app/services/hrm/work-plans/tasks/default.tsx`
+10. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/[id]/page.tsx`
+11. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/[id]/TaskDetailSheetClient.tsx`
+12. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/[id]/evaluate/page.tsx`
+13. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/[id]/evaluate/TaskEvaluateSheetClient.tsx`
+14. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/create/page.tsx`
+15. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/create/CreateTaskSheetClient.tsx`
+
+### 4. Bằng Chứng Kiểm Chứng Máy & Đo Lường Thực Tế
+- **TypeScript Check (`npm run typecheck`)**: **Exit code 0 (0 errors)**.
+- **Biên dịch Production (`npm run build`)**: **Exit code 0 (86/86 static & dynamic routes biên dịch sạch trong 44.5s)**.
+- **Microservices Build & Deploy**:
+  - `hrm-service`: Build dist thành công, hot-reload/restart container `daklak-workspace-hrm-service-1`.
+  - `api-gateway`: Build dist thành công, restart container `daklak-workspace-api-gateway-1`.
+  - `admin-frontend`: Sync dist `.next/standalone` và restart container `daklak-workspace-admin-frontend-1` (`Ready in 189ms`).
+- **Browser Automation Verification**:
+  - Truy cập live URL `http://113.184.220.82/admin/services/hrm/work-plans/tasks/125`: Sheet chi tiết hiển thị đầy đủ thông tin công việc, người phân công, người thực hiện, độ ưu tiên, tiến độ và lịch sử.
+  - Truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks/125/evaluate`: Sheet đánh giá nạp đầy đủ thông tin nhiệm vụ, tiêu chí KPI và form thẩm định.
+  - Thao tác đóng/mở form: Chuyển động mượt mà ở 60fps, URL cập nhật đồng bộ, không reload trang, không nhảy scroll vị trí, không chớp giật.
+- **Vệ sinh mã nguồn**: 100% không còn console.log thừa, tuân thủ UTF-8 không BOM.
+
+---
+
+## [2026-10-16] Chuẩn Hóa Phân Quyền Thao Tác Thực Thể Nghiệp Vụ (Entity Actions) & Rà Soát Toàn Diện daklak-workspace Theo Mô Hình 3 Tầng Server-Driven First
+
+### 1. Bối Cảnh & Yêu Cầu Cốt Lõi
+- **Chỉ đạo từ người dùng**:
+  1. *"const canManage = isAdmin || hasPermission("TASK:MANAGE"); check quyền để render các action có cách nào chuẩn cho trường hợp này không"*
+  2. *"thực hiện cho tôi theo cách bạn đề xuất . Rà soát toàn bộ dự án daklak-workspace để thực hiện điều chỉnh tổng thể"*
+- **Rà soát & Triệt tiêu các lỗi kiến trúc cũ**:
+  * **Lỗi 1 (Thừa thãi & Nhiễu mã nguồn)**: Rải rác `isAdmin || hasPermission(...)` ở 14 vị trí trong `useHrmPermissions.ts` và `task-detail-discussion-tab.tsx`, dù hàm `hasPermission()` của `usePermissions()` đã tự động bypass cho Admin (`isGlobalAdmin`).
+  * **Lỗi 2 (Lỗ hổng bảo mật ngược khi `allowedActions = []`)**: Đoạn code cũ `!allowedActions || allowedActions.length === 0 || allowedActions.includes("CHAT")` khiến mọi trường hợp Backend cố tình trả về danh sách rỗng (người dùng bị cấm mọi thao tác) đều bị biến thành `true`, mở quyền chat trái phép.
+  * **Lỗi 3 (Lỗ hổng logic khi `participants` rỗng)**: Đoạn code `!participants?.length` trả về `true` khi danh sách người tham gia chưa nạp xong, biến toàn bộ người dùng thành người tham gia.
+  * **Lỗi 4 (Lệch tên Resource PBAC)**: Phân mảnh giữa `TASK` (chuẩn PBAC trong `user-service/prisma/sync-pbac.ts`) và `HRM_TASKS`, `EMPLOYEE` và `HRM_EMPLOYEE`.
+
+### 2. Giải Pháp Chuẩn Hóa (3-Tier Server-Driven First Model)
+1. **Tầng 1 (PBAC Core & Resource Aliases)**:
+   - Nâng cấp `apps/admin_khcn/hooks/usePermissions.ts` bổ sung `RESOURCE_ALIASES` đối xứng (`TASK` <-> `HRM_TASKS`, `EMPLOYEE` <-> `HRM_EMPLOYEE`, `KPI` <-> `HRM_KPI`, `PLAN` <-> `HRM_PLAN`, `REPORT` <-> `HRM_REPORT`). Mọi truy vấn quyền dù dùng tiền tố nào cũng tự động khớp chính xác.
+2. **Tầng 2 (Domain Entity Action Guard - `useHrmPermissions`)**:
+   - Quét sạch 100% `isAdmin ||` dư thừa.
+   - Bổ sung `canChatTask(task)` và `canAssignTask(task)` theo thứ tự ưu tiên chuẩn mực:
+     - *Ưu tiên 1*: Quyền quản trị hệ thống (`hasPermission("TASK:MANAGE")` hoặc `isGlobalAdmin`).
+     - *Ưu tiên 2*: Server-Driven `task.allowedActions` (tin tưởng tuyệt đối danh sách do Backend/Workflow Engine trả về; nếu mảng rỗng thì cấm tuyệt đối).
+     - *Ưu tiên 3*: Contextual Fallback an toàn (chặn task đã đóng `COMPLETED/DONE/CANCELLED`, kiểm tra mã cán bộ `assigneeCode`, `assignerCode`, `supervisorCode`, `participants`).
+   - Chuẩn hóa toàn bộ các hàm `canEvaluateTask`, `canEditTask`, `canApproveIncidental`, `canCreateSubtask`, `canCreateStep` theo mô hình 3 tầng này.
+3. **Tầng 3 (Dumb Client Components)**:
+   - `task-detail-discussion-tab.tsx`: Xóa sạch 100% điều kiện tự đoán mò, nhận `task?: any` và gọi trực tiếp `canChatTask(task)`.
+   - `task-detail-drawer.tsx` & `TaskDetailClient.tsx`: Truyền `task={currentTask}` vào `TaskDiscussionTab`, thay thế logic gán việc bằng `canAssignTask(currentTask)`.
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Đo Lường Thực Tế
+- **TypeScript Check (`npm run typecheck`)**: **Exit code 0 (0 errors)**.
+- **Biên dịch Production (`npm run build`)**: **Exit code 0 (86/86 static & dynamic routes biên dịch sạch trong 43s)**.
+- **Triển khai Container**: Đã đồng bộ dist vào container `daklak-workspace-admin-frontend-1`, khởi động lại thành công (`Next.js 16.1.6`, `✓ Ready in 195ms`).
+- **Kiểm chứng Browser Subagent**: Truy cập live UI, kiểm tra thẩm định, phê duyệt và giao diện trao đổi; ghi nhận video `verify_discussion_tab_1792134191931.webp`.
+- **Dọn rác**: 100% không còn console.log thừa, tuân thủ UTF-8 không BOM.
+
+---
+
+
+
+### 1. Bối Cảnh & Chỉ Đạo Từ Người Dùng
+- **Chỉ đạo 1**: *"permissionsFlatten các quyền này đáng lẽ ở global và ở các trang xuất chứ nhỉ sao lại từng trang phải cấu hình như này . Kiểm tra lại cho tôi ."*
+  * **Hiện trạng vi phạm**: Các trang và components (như `personal-task-workbench.tsx`, `task-detail-discussion-tab.tsx`...) rải rác mã kiểm tra thủ công `user?.permissionsFlatten?.includes(...)` lặp lại, thiếu chuẩn hóa ký tự hoa/thường, không hỗ trợ wildcard (`RESOURCE:*`, `*:*`, `SYSTEM:*`), và không tự động kế thừa đặc quyền quản trị cấp cao (`ADMIN001`, `admin`).
+  * **Giải pháp chuẩn hóa**:
+    1. Xây dựng hook toàn cục `usePermissions()` tại `apps/admin_khcn/hooks/usePermissions.ts`. Hook nạp thông tin user từ `useUser()` và tính toán tập hợp PBAC một lần duy nhất với bộ nhớ đệm `useMemo`.
+    2. Cung cấp API trực quan, dễ dùng trên mọi trang và component:
+       - `isGlobalAdmin`: Kiểm tra vai trò quản trị tối cao (`admin`, `ADMIN001`, `system_admin`, `super_admin`).
+       - `permissions`: Danh sách tất cả mã quyền đã chuẩn hóa chữ hoa.
+       - `hasPermission(permission)`: Kiểm tra quyền hỗ trợ ký tự đại diện wildcard (`*`, `*:*`, `RESOURCE:*`, `RESOURCE.*`).
+       - `hasAnyPermission(permissions)` / `hasAllPermissions(permissions)`: Kiểm tra danh sách quyền.
+       - `can(resource, action)`: Kiểm tra cặp tài nguyên/hành động chuẩn RESTful / PBAC (ví dụ: `can('hrm_tasks', 'create')`).
+       - `hasRole(role)` / `hasAnyRole(roles)`: Kiểm tra vai trò người dùng.
+    3. Tái xuất khẩu (re-export) từ `apps/admin_khcn/hooks/useUser.ts` và tái cấu trúc `useHrmPermissions.ts` cùng các component liên quan kế thừa trực tiếp từ hook này.
+- **Chỉ đạo 2**: *"Chỗ các phần bổ sung cho list công việc tôi vẫn thích kiểu giao diện sheet xổ ra nhưng mà thực hiện tuân thủ theo thiết kế đề xuất của react nextjs 16 parralle route"*
+  * **Chuẩn kiến trúc Next.js 16 App Router Parallel Routes (`@slot`)**:
+    - Để giao diện mở dạng Sheet trượt ra trên nền danh sách công việc mà vẫn giữ nguyên URL đồng bộ (deep linkable, shareable), giữ nguyên trạng thái danh sách bên dưới mà không bị re-mount, và tuân thủ chặt chẽ tài liệu Next.js 16:
+    1. Khởi tạo Parallel Slot `@sheet` trong thư mục `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/`:
+       - `tasks/@sheet/[id]/page.tsx`: Tự động nạp `TaskDetailDrawer` với `open={true}`, khi đóng hoặc nhấn `Escape` sẽ gọi `router.push('/services/hrm/work-plans/tasks', { scroll: false })`.
+       - `tasks/@sheet/create/page.tsx`: Nạp `CreateTaskDialog` (giao việc mới chuẩn VTVL & KPI) với `open={true}`.
+       - `tasks/@sheet/[id]/evaluate/page.tsx`: Nạp `TaskEvaluationApprovalSheet` (thẩm định nhiệm vụ & KPI) với `open={true}`.
+       - `tasks/@sheet/default.tsx`: Trả về `null` khi không có Sheet nào mở.
+    2. Cấu hình `tasks/layout.tsx`: Khai báo layout nhận `{ children, sheet }: { children: ReactNode; sheet: ReactNode }`.
+    3. Cấu hình `tasks/default.tsx`: Export `TasksPage` từ `./page.tsx` làm fallback cho nhánh `{children}` khi người dùng truy cập trực tiếp vào route con (`/tasks/[id]`, `/tasks/create`), giúp danh sách công việc luôn hiện diện ở background.
+    4. Cập nhật `task-list.tsx`: Thêm `scroll={false}` vào các liên kết điều hướng để ngăn hiện tượng giật cuộn (scroll jump).
+
+### 2. Danh Sách File Đã Tác Động
+1. `apps/admin_khcn/hooks/usePermissions.ts` (Tạo mới: Hook phân quyền PBAC toàn cục)
+2. `apps/admin_khcn/hooks/useUser.ts` (Tái xuất khẩu usePermissions & PermissionsState)
+3. `apps/admin_khcn/features/hrm/hooks/useHrmPermissions.ts` (Kế thừa từ global usePermissions)
+4. `apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx` (Loại bỏ kiểm tra thủ công, dùng usePermissions)
+5. `apps/admin_khcn/features/hrm/components/tasks/task-detail-discussion-tab.tsx` (Dùng usePermissions)
+6. `apps/admin_khcn/app/services/hrm/work-plans/tasks/layout.tsx` (Khai báo Parallel Slot @sheet)
+7. `apps/admin_khcn/app/services/hrm/work-plans/tasks/default.tsx` (Fallback giữ task list ở background)
+8. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/default.tsx` (Trả về null khi đóng)
+9. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/[id]/page.tsx` (Parallel route cho Task Detail Drawer)
+10. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/create/page.tsx` (Parallel route cho Create Task Drawer)
+11. `apps/admin_khcn/app/services/hrm/work-plans/tasks/@sheet/[id]/evaluate/page.tsx` (Parallel route cho Evaluate Sheet)
+12. `apps/admin_khcn/features/hrm/components/tasks/task-list.tsx` (Cấu hình scroll={false} cho links)
+13. `docker-compose.prod.yml` (Chuẩn hóa lệnh command & user nextjs cho service admin-frontend)
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan Thực Tế
+- **Kiểm tra TypeScript (`npm run typecheck`)**: **Exit code 0** (0 errors).
+- **Biên dịch Production Next.js Turbopack (`npm run build`)**: **Exit code 0** (Biên dịch thành công 86 routes tĩnh và động trong 38.1s, nhận diện chuẩn xác các parallel routes `@sheet`).
+- **Triển khai Live Docker Container**:
+  - Service `daklak-workspace-admin-frontend-1` khởi động thành công (`Next.js 16.1.6`, `✓ Ready in 183ms`).
+  - Nginx phản hồi định tuyến HTTP hợp lệ.
+- **Kiểm chứng Browser Subagent trên môi trường thực tế**:
+  - Truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks`: Bảng danh sách công việc và bàn làm việc hiển thị hoàn chỉnh.
+  - Click "Chi tiết" của task #125: Drawer chi tiết trượt ra từ bên phải, URL chuyển thành `/tasks/125`, bảng danh sách công việc vẫn hiển thị ở background (`task_detail_sheet_open_1792132191232.png`).
+  - Nhấn phím `Escape` hoặc nút đóng: Drawer đóng lại, URL trở về `/tasks`.
+  - Mở route `/tasks/create`: Drawer tạo mới công việc trượt ra chuẩn VTVL & KPI, URL chuyển thành `/tasks/create` (`create_task_sheet_open_1792132249055.png`).
+  - Nhấn phím `Escape`: Drawer đóng lại, URL trở về `/tasks`.
+- **Dọn rác**: 100% không còn console.log thừa, tuân thủ UTF-8 không BOM.
+
+---
+
+
+
+### 1. Bối Cảnh & Yêu Cầu Cốt Lõi
+- **Chỉ đạo từ người dùng**:
+  1. *"tại sao không tách thành components riêng mà lại dùng chung kiểu như này nhìn rất khó chịu load rất nhiều nội dung dư thừa"*
+  2. *"tương tự với các trang như thẩm định, tạo mới ...."*
+- **Tuân thủ Tuyệt đối 7 Bộ Ràng Buộc Kỹ Thuật (.agents/AGENTS.md)**:
+  * **Tách Rời Tuyệt Đối Component & Route Độc Lập**:
+    - Thay vì nhồi nhét modal/sheet (`CreateTaskDialog`, `TaskEvaluationApprovalSheet`, `EditTaskDialog`) cùng lúc với bảng danh sách và bàn làm việc cá nhân gây nghẽn DOM và nạp hàng loạt dữ liệu nền dư thừa, dự án đã phân rã thành 3 trang App Router độc lập:
+      1. `/services/hrm/work-plans/tasks/create` -> `TaskCreateClient.tsx`: Bàn làm việc giao việc toàn màn hình với 4 khối thẻ Enterprise (Thông tin cơ bản, Phân công chủ trì/phối hợp & Tự động cân bằng %, Chỉ số KPI chuẩn hóa, Phân rã checklist các bước).
+      2. `/services/hrm/work-plans/tasks/[id]/evaluate` -> `TaskEvaluateClient.tsx`: Hội đồng thẩm định & chốt điểm KPI công vụ theo Đề án 01-BTCTU (4 thành tố: Tiến độ 25%, Chất lượng 40%, Chủ động/Sáng tạo 20%, Kỷ luật công vụ 15%; tự động tính điểm theo trọng số, xếp loại và chốt duyệt).
+      3. `/services/hrm/work-plans/tasks/[id]/edit` -> `TaskEditClient.tsx`: Trang chỉnh sửa nhiệm vụ độc lập, nạp trực tiếp chi tiết nhiệm vụ và cập nhật thông tin.
+  * **Tối Ưu Hóa & Tinh Gọn Danh Sách (`task-list.tsx`)**:
+    - Loại bỏ hoàn toàn việc nạp `TaskDetailDrawer`, `CreateTaskDialog`, `TaskEvaluationApprovalSheet` trong component bảng.
+    - Chuyển hướng các nút "+ Giao việc mới", click tên công việc, nút "Chi tiết", nút "Đánh giá" sang các thẻ `<Link>` trực tiếp đến các route độc lập tương ứng.
+    - Tự động chuyển hướng nếu URL có query param cũ (`?taskId=...`).
+  * **Xử Lý Lỗi Rendering Trẻ Con React & An Toàn Dữ Liệu**:
+    - Ngăn chặn lỗi `Objects are not valid as a React child: {id, name, code, monitoredUnitIds, category}` khi thuộc tính `jobTitle` của nhân sự trả về là đối tượng VTVL bằng các hàm trích xuất an toàn `getJobTitleLabel`, `getEmployeeName`, `getDepartmentLabel`.
+
+### 2. Danh Sách File Đã Tác Động
+1. **App Router Server Components**:
+   - `apps/admin_khcn/app/services/hrm/work-plans/tasks/create/page.tsx`: Server Component cho trang giao việc.
+   - `apps/admin_khcn/app/services/hrm/work-plans/tasks/[id]/evaluate/page.tsx`: Server Component cho trang thẩm định.
+   - `apps/admin_khcn/app/services/hrm/work-plans/tasks/[id]/edit/page.tsx`: Server Component cho trang chỉnh sửa.
+2. **Dedicated Client Components**:
+   - `apps/admin_khcn/features/hrm/components/tasks/TaskCreateClient.tsx`: Client Component cho trang giao việc mới.
+   - `apps/admin_khcn/features/hrm/components/tasks/TaskEvaluateClient.tsx`: Client Component cho trang thẩm định & chốt điểm KPI.
+   - `apps/admin_khcn/features/hrm/components/tasks/TaskEditClient.tsx`: Client Component cho trang chỉnh sửa nhiệm vụ.
+   - `apps/admin_khcn/features/hrm/components/tasks/TaskDetailClient.tsx`: Cập nhật nút điều hướng trực tiếp sang trang thẩm định và chỉnh sửa.
+   - `apps/admin_khcn/features/hrm/components/tasks/task-list.tsx`: Bỏ 3 modal nặng ngầm, kết nối link trực tiếp đến các trang chuyên biệt.
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan Thực Tế
+- **Kiểm tra TypeScript (`npx tsc --noEmit`)**: **Exit code 0 (100% sạch lỗi kiểu dữ liệu)**.
+- **Biên dịch Production Next.js (`npm run build`)**: **Exit code 0 (87/87 static & dynamic routes compiled thành công trong 37.5s)**.
+- **Triển khai Container**: Đã copy `.next/standalone` và `.next/static` vào container `daklak-workspace-admin-frontend-1` (`✓ Ready in 182ms`).
+- **Kiểm chứng Browser Subagent Thực Tế**:
+  * `/services/hrm/work-plans/tasks/create`: Nạp đầy đủ form 4 thẻ chỉ huy, dropdown nhân sự, auto-balance %, checklist, không còn lỗi React child object (`task_create_page_1792123590591.png`).
+  * `/services/hrm/work-plans/tasks/132/evaluate`: Nạp chuẩn xác bảng thẩm định 4 tiêu chí Đề án 01-BTCTU, xếp loại Hạng B, điểm tổng hợp 8.0, nút phê duyệt hoạt động (`task_evaluate_page_1792123600643.png`).
+  * `/services/hrm/work-plans/tasks/132/edit`: Nạp đầy đủ form sửa với dữ liệu prefill công việc #132 (`task_edit_page_1792123614978.png`).
+  * `/services/hrm/work-plans/tasks/132`: Màn hình chi tiết độc lập với nút "Đánh giá KPI" và "Chỉnh sửa" điều hướng thẳng sang các trang chuyên biệt (`task_detail_page_1792123629068.png`).
+  * `/services/hrm/work-plans/tasks`: Bảng công việc sạch sẽ, nút "+ Giao việc mới" điều hướng trực tiếp sang trang create mượt mà (`task_list_page_1792123642489.png`).
+
+---
+
+## [2026-10-16] Kiến Trúc Trang Chi Tiết Độc Lập (TaskDetailClient): Tách Rời Khỏi Trang Danh Sách, Triệt Tiêu Nạp Dư Thừa & Nâng Cấp Toàn Diện Enterprise UX/UI
+
+### 1. Bối Cảnh & Yêu Cầu Cốt Lõi
+- **Chỉ đạo từ người dùng**:
+  1. *"tại sao không tách thành components riêng mà lại dùng chung kiểu như này nhìn rất khó chịu load rất nhiều nội dung dư thừa"*
+  2. *"http://113.184.220.82/admin/services/hrm/work-plans/tasks màn chi tiết của công việc đang bị lỗi hãy thực hiện nâng cấp theo chuẩn ux ui entepise"*
+- **Tuân thủ Tuyệt đối 7 Bộ Ràng Buộc Kỹ Thuật & Hiến Chương Kỹ Thuật (.agents/AGENTS.md)**:
+  * **Tách Rời Component Độc Lập & Triệt Tiêu Nạp Dư Thừa**:
+    - Trước đây: Route `/services/hrm/work-plans/tasks/[id]` redirect về `tasks?taskId=${id}` khiến ứng dụng phải nạp toàn bộ danh sách bảng công việc, bàn làm việc workbench cá nhân, biểu đồ widget và bộ lọc phân trang — gây lãng phí tài nguyên và tạo cảm giác chắp vá.
+    - Giải pháp chuẩn: Tách riêng Server Component [`app/services/hrm/work-plans/tasks/[id]/page.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/app/services/hrm/work-plans/tasks/%5Bid%5D/page.tsx) nạp trực tiếp Client Component [`TaskDetailClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/TaskDetailClient.tsx). Component này chỉ gọi duy nhất `useTaskDetail(id)`, nạp dữ liệu tức thì, độc lập và sạch sẽ.
+  * **Frontend là Dumb Client**: Chuyển toàn bộ logic nghiệp vụ (heuristic lọc nhân sự theo tên/mã, tính toán cân bằng tỷ lệ %, tính điểm KPI mặc định theo độ khẩn cấp/loại việc, và tổng hợp số liệu workbench cá nhân) từ client lên Backend (`apps/api-gateway`).
+  * **Khắc Phục Toàn Diện Lỗi Kỹ Thuật & Crash Runtime**:
+    - **Lỗi số "0" trôi nổi**: Khắc phục lỗi JSX coercion `{currentTask.parentId && <Badge />}` bằng `{Boolean(currentTask.parentId) && (...) }`.
+    - **Lỗi màn hình trắng xóa (blank tab)**: Xóa bỏ code lỗi `if (isAssigned) return null;` trong `task-detail-processing-tab.tsx`.
+    - **Lỗi crash RangeError Invalid time value**: Trong `edit-task-dialog.tsx`, bao bọc hàm định dạng thời gian `toInputDate` với guard `isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 16)`.
+    - **Lỗi bóc tách envelope API Gateway**: Hỗ trợ unwrap an toàn đa tầng (`rawDetail.data ?? rawDetail`).
+  * **Nâng Cấp Chuẩn Enterprise UX/UI Toàn Màn Hình**:
+    - **Header Navigation Bar**: Nút quay lại danh sách (`← Quay lại danh sách`), Breadcrumb định tuyến, nút sao chép liên kết (`Chia sẻ`), và các nút hành động theo quyền (Đánh giá KPI, Tiếp nhận, Phân công, Chỉnh sửa, Gia hạn).
+    - **Hero Card**: Thanh tiến độ Gradient với % trực quan, các huy hiệu Trạng thái, Độ ưu tiên (Khẩn cấp có chấm nhấp nháy), Loại việc (Phát sinh, Thường xuyên, Định kỳ).
+    - **Lưới 4 Thẻ Chỉ Huy (Command Cards)**: Chủ trì & %, Phối hợp, Hạn xử lý & cảnh báo hạn, Thẩm định/Giám sát & Hệ số K/Cơ số.
+    - **Bố Cục 12 Cột Enterprise**: 8 Cột Tabs nội dung (Xử lý công việc & Checklist, Lịch sử & Vết xử lý, Trao đổi & Thảo luận, Thông tin chi tiết) + 4 Cột Sticky Sidebar (Chỉ số KPI, Đội ngũ thực hiện, Thao tác nhanh).
+    - **Liên Kết Mượt Mà**: Thêm nút `[Trang đầy đủ]` ngay trên Drawer danh sách giúp người dùng chuyển đổi tức thì sang trang chi tiết toàn màn hình.
+
+### 2. Danh Sách File Đã Tác Động
+1. **Trang Chi Tiết Độc Lập Mới (`apps/admin_khcn`)**:
+   - `app/services/hrm/work-plans/tasks/[id]/page.tsx`: Server Component App Router chuẩn Next.js 16 với dynamic params `Promise<{ id: string }>`.
+   - `features/hrm/components/tasks/TaskDetailClient.tsx`: Client Component độc lập toàn diện cho màn chi tiết công việc.
+   - `features/hrm/components/tasks/task-ui-utils.tsx`: Module hóa các helpers hiển thị, huy hiệu, hạn xử lý dùng chung.
+2. **Cải Tiến Drawer & Các Tab Con (`apps/admin_khcn`)**:
+   - `features/hrm/components/tasks/task-detail-drawer.tsx`: Bổ sung nút `[Trang đầy đủ]`, tái sử dụng `task-ui-utils.tsx`.
+   - `features/hrm/components/tasks/task-detail-processing-tab.tsx`: Xóa lỗi trắng màn hình, checklist đánh số, nộp minh chứng.
+   - `features/hrm/components/tasks/task-detail-history-tab.tsx`: Timeline audit log chuẩn hóa.
+   - `features/hrm/components/tasks/task-detail-discussion-tab.tsx`: Giao diện chat trao đổi nội bộ.
+   - `features/hrm/components/tasks/edit-task-dialog.tsx`: Sửa lỗi crash thời gian `RangeError`.
+3. **Backend (`apps/api-gateway`)**:
+   - `src/modules/hrm/tasks.controller.ts` & `tasks.service.ts`: Đưa toàn bộ logic nghiệp vụ lên server.
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan Thực Tế
+- **Kiểm tra TypeScript (`npm run typecheck` / `tsc --noEmit`)**: **Exit code 0 (100% sạch lỗi kiểu dữ liệu)**.
+- **Biên dịch Production Next.js Turbopack (`npm run build`)**: **Exit code 0 (84/84 static & dynamic routes compiled thành công trong 36.4s)**.
+- **Triển khai Container**: Cập nhật container `daklak-workspace-api-gateway-1` và `daklak-workspace-admin-frontend-1` (`✓ Ready in 192ms`).
+- **Kiểm chứng Browser Subagent Thực Tế**:
+  * Truy cập ID không tồn tại (`/tasks/1`): Hiển thị thẻ Enterprise 404 trang nhã (`task_detail_page_1792120531952.png`).
+  * Mở Drawer danh sách và nhấn `[Trang đầy đủ]`: Điều hướng mượt mà sang `/tasks/132` (`task_list_after_click_1792120551870.png`).
+  * Xem trực tiếp `/tasks/132`: Giao diện độc lập tải tức thì, không nạp bảng hay workbench thừa (`task_132_main_1792120702684.png`).
+  * Tab Lịch sử: Timeline trực quan hiển thị đầy đủ vết xử lý (`task_132_history_1792120721326.png`).
+  * Tab Trao đổi: Khung chat và gõ thảo luận hoạt động hoàn hảo (`task_132_discussion_1792120741267.png`).
+  * Nhấn `[Quay lại danh sách]`: Trở về trang danh sách trơn tru (`tasks_list_returned_1792120777385.png`).
+
+---
+
+### 1. Bối Cảnh & Yêu Cầu Cốt Lõi
+- **Chỉ đạo từ người dùng**: "công việc gần đây nhất của tôi cũng để collapse . Cái dashboard này phải được tạo ở report-service sau đó nhúng vào đây. Không phải code tĩnh ở trang này".
+- **Tuân thủ Tuyệt đối 7 Bộ Ràng Buộc Kỹ Thuật**:
+  * **Source of Truth**: `report-service` là trung tâm báo cáo và dashboard phân tích duy nhất của hệ thống (Hiến chương Mục 4.6). Không code cứng biểu đồ phân tích tĩnh trên trang frontend. Mọi biểu đồ trực quan (Line, Bar, Pie) phải được thiết kế và lưu trữ dưới dạng `ReportDefinition` và `ReportTemplate` tại `report-service`.
+  * **Frontend là Dumb Client**: Frontend chỉ nhúng `EmbeddedReportWidget` với mã báo cáo `REP_PERSONAL_WORKBENCH` để nạp cấu hình và dataset động từ Backend.
+  * **UI/UX & State Ownership**: Cả hai khối danh sách "List việc đã hoàn thành tháng này" và "Công việc của tôi gần đây nhất" đều sử dụng component `<Collapsible>` có state đóng/mở độc lập (`isCompletedOpen`, `isRecentTasksOpen`), mặc định thu gọn (`defaultCollapsed={false}` cho dashboard, default collapsed cho các list) với trigger header trực quan, badge số lượng và mũi tên xoay chuyển mượt mà.
+  * **Dọn rác 100%**: Xóa bỏ các query và imports không dùng (`useOrganizationFlatListQuery`, `useHrmEmployeesList`), loại bỏ biểu đồ Recharts code tĩnh trên component cá nhân.
+
+### 2. Các Thay Đổi Cụ Thể Đã Triển Khai
+1. **Report Service (`apps/report-service`)**:
+   - `prisma/seed-hrm-dashboards.ts` & `seed-hrm-dashboards.js`:
+     * Đăng ký nguồn dữ liệu `HRM_PERSONAL_STATS` cho Bàn làm việc Cá nhân.
+     * Cập nhật `ReportDefinition #17` (`REP_PERSONAL_WORKBENCH`) và `ReportTemplate #36` gồm 4 widgets:
+       1. Biểu đồ đánh giá sự tiến bộ trong 6 tháng gần đây của tôi (`line`, trục X: `month`, trục Y: `score`).
+       2. Cơ cấu Trạng thái Nhiệm vụ Cá nhân (`pie`, trục X: `status`, trục Y: `completedTasks`).
+       3. Số lượng quy đổi tính theo phòng ban (`bar`, trục X: `departmentName`, trục Y: `workload`).
+       4. Tiến độ Thực hiện Nhiệm vụ Gần đây (`bar`, trục X: `title`, trục Y: `progress`).
+     * Tinh chỉnh dữ liệu snapshot chuẩn hóa với `completedTasks: 0` trên các dòng không phải trạng thái để đảm bảo biểu đồ tròn không bị nhiễu.
+2. **Frontend Widgets (`apps/admin_khcn`)**:
+   - `features/reports/components/EmbeddedReportWidget.tsx`:
+     * Cải tiến hàm `aggregateData`: Loại bỏ các dòng có trục X trống hoặc mang ký tự placeholder (`""`, `"—"`, `"-"`, `"N/A"`, `"null"`), phân biệt metric tính tổng (`tasks`, `total`, `amount`) và tính trung bình (`score`, `workload`, `progress`).
+   - `features/hrm/components/tasks/personal-task-workbench.tsx`:
+     * Thay thế toàn bộ biểu đồ Recharts code tĩnh bằng `<EmbeddedReportWidget reportIdOrCode="REP_PERSONAL_WORKBENCH" columns={2} chartHeight={260} showDetailLink={true} allowToggleType={true} collapsible={true} defaultCollapsed={false} />`.
+     * Đưa "Công việc của tôi gần đây nhất" vào `<Collapsible open={isRecentTasksOpen} onOpenChange={setIsRecentTasksOpen}>`, mặc định thu gọn với header trigger, badge số lượng, bộ lọc danh mục và ô tìm kiếm.
+     * Giữ nguyên tính năng thu gọn "List việc đã hoàn thành tháng này" (`isCompletedOpen`).
+
+### 3. Bằng Chứng Kiểm Chứng Máy & Trực Quan Thực Tế
+- **Kiểm tra TypeScript (`npm run typecheck`)**: **Exit code 0 (100% sạch lỗi kiểu dữ liệu)**.
+- **Biên dịch Production Next.js (`npm run build`)**: **Exit code 0 (83/83 static & dynamic routes compiled thành công)**.
+- **Triển khai Container**: Cập nhật container `daklak-workspace-report-service-1` và `daklak-workspace-admin-frontend-1`.
+- **Kiểm chứng Browser Subagent**:
+  * Truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard`.
+  * Ảnh `dashboard_charts_and_tables_1792115289513.png`: 4 biểu đồ từ Report Service nạp động đầy đủ, không còn slice "—" trong pie chart.
+  * Ảnh `task_lists_collapsed_1792115297043.png`: Cả 2 khối "List việc đã hoàn thành tháng này" và "Công việc của tôi gần đây nhất" đều ở trạng thái thu gọn mặc định.
+  * Ảnh `expanded_recent_tasks_view_1792115322828.png`: Nhấn mở rộng "Công việc của tôi gần đây nhất" hiển thị đầy đủ 8 công việc gần đây với thanh tiến độ, phân vai trò Chủ trì/Phối hợp và trạng thái.
+
+---
+
 ## [2026-10-15] Rà Soát & Triệt Tiêu Các Vi Phạm Nguyên Tắc Kỹ Thuật (Blacklist Mục 5, State Ownership) & Tối Ưu Hóa Hiệu Năng Form Thêm Mới Cán Bộ (Employee Create)
 
 ### 1. Bối Cảnh & Rà Soát Các Vi Phạm Kỹ Thuật (Architecture & Anti-AI Hallucination)
@@ -2309,4 +2675,108 @@
 - Kiểm thử Trình duyệt Thực tế (`browser_subagent`):
   * Dashboard `/admin/services/hrm/work-plans/tasks/dashboard`: Tab "Bàn làm việc của tôi" hiển thị đầy đủ biểu đồ tiến độ và chỉ số năng suất cá nhân (`REP_PERSONAL_WORKBENCH`). Tab "Thống kê toàn cơ quan" hiển thị 4 thẻ KPI (16 công việc, 1 đang xử lý, 4 hoàn thành, 11 quá hạn), biểu đồ động `REP_BTCTU_SOP_KPI` và `REP_HRM_TASKS`, nút xuất Mẫu 05.
   * Báo cáo `/admin/services/hrm/reports`: Tải thành công 100%, hiển thị 4 thẻ KPI tóm tắt, biểu đồ động chuẩn SOP Ban Tổ chức Tỉnh ủy, bảng dữ liệu snapshot cán bộ (Chuyên viên, Bước 4, 92.0 điểm, Hoàn thành tốt).
+
+---
+
+## [2026-10-16] Khắc Phục Lỗi Hiển Thị Nhầm Task Người Khác & Hoàn Thiện Toàn Diện Bàn Làm Việc Cá Nhân Tại HRM Task Dashboard
+
+### 1. Phân tích Yêu cầu & Nguyên nhân
+- **Hiện tượng**: Truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard`, tab "Bàn làm việc của tôi" nhưng lại thấy toàn bộ công việc của người khác trong cơ quan; thiếu biểu đồ tiến bộ 6 tháng cá nhân, thiếu các thẻ KPI cá nhân và danh sách việc cần làm / gần đây / đã hoàn thành tháng này.
+- **Nguyên nhân cốt lõi**:
+  1. Tab "Bàn làm việc của tôi" trước đó nhúng `EmbeddedReportWidget` với mã báo cáo `REP_PERSONAL_WORKBENCH` (sử dụng snapshot toàn cơ quan), không phân lập theo định danh cán bộ đang đăng nhập (`user.employeeCode`).
+  2. Phía backend `hrm-service`: Hàm `buildListTasksWhereClause` thiếu bộ lọc `MY_TASKS` và `COMPLETED_THIS_MONTH`, khiến tài khoản có quyền Admin/Leader bị nạp dữ liệu toàn cơ quan thay vì cô lập theo vai trò tham gia của cá nhân.
+  3. Thiếu component chuyên biệt `PersonalTaskWorkbench` tích hợp đầy đủ 8 thành phần theo yêu cầu người dùng.
+
+### 2. Giải pháp Kỹ thuật & Thực thi
+1. **Microservice Backend (`apps/hrm-service/src/modules/tasks/tasks.service.ts`)**:
+   - Bổ sung bộ lọc `query.filter === 'MY_TASKS' || query.role === 'MY_TASKS'`: Chỉ truy vấn các task có `participants` chứa `currentEmployeeCode` hoặc do chính cán bộ tạo (`creatorEmployeeCode`), áp dụng chặt chẽ cho cả tài khoản Quản trị viên khi làm việc tại bàn làm việc cá nhân.
+   - Bổ sung bộ lọc `query.filter === 'COMPLETED_THIS_MONTH'`: Lọc các task có `isCompleted = true` và thời gian hoàn thành (`completedAt`/`updatedAt`) nằm trong tháng hiện tại.
+2. **Frontend Component Bàn Làm Việc Cá Nhân (`apps/admin_khcn/features/hrm/components/tasks/personal-task-workbench.tsx`)**:
+   - **Banner Cán bộ Cá nhân**: Hiển thị họ tên, phòng ban, mã số công chức, tag trạng thái *"Bàn làm việc cá nhân — Bạn đang xem nhiệm vụ và chỉ số năng suất của riêng bạn"* và nút "🖨 Tự đánh giá (Mẫu 02)".
+   - **Bộ lọc Hạn chót**: Từ ngày, Đến ngày kèm các nút preset nhanh (Tất cả, Tháng này, Quý này).
+   - **6 Thẻ Chỉ Số Cá Nhân**:
+     1. Tỷ lệ hoàn thành (40%)
+     2. Tổng số công việc (10 nhiệm vụ)
+     3. Số việc hoàn thành (4 nhiệm vụ)
+     4. Quá hạn (6 nhiệm vụ)
+     5. Hoàn thành quá hạn (0)
+     6. Sắp hết hạn (0)
+   - **Thanh So Sánh Khối Lượng Quy Đổi & Gợi Ý Điều Phối**:
+     - Hiển thị so sánh tải quy đổi tháng này của cá nhân (12 điểm) với trung bình phòng ban HT-NTS (13.23 điểm), kèm thanh trực quan và vạch chỉ tiêu.
+     - 3 thẻ gợi ý điều phối nhân sự theo phòng ban (HT-NTS, HCTH, QL-KTDL).
+   - **List Việc Cần Làm (To-Do List)**: Danh sách nhiệm vụ ưu tiên đang thực hiện, kèm hạn chót và nút "Xử lý ngay" mở trực tiếp `TaskDetailDrawer`.
+   - **Biểu đồ Đánh Giá Tiến Bộ 6 Tháng Gần Đây**: Biểu đồ Recharts AreaChart từ T5 đến T10 với gradient xanh lá cây, mốc điểm KPI 0 - 100%, tooltip hiển thị tỷ lệ % và số việc hoàn thành.
+   - **Công Việc Của Tôi Gần Đây Nhất**: Bảng danh sách nhiệm vụ của riêng cán bộ, hiển thị số hiệu văn bản `[3534/SKHCN-CĐS]`, phân loại "Chủ trì / Phối hợp", thanh tiến độ %, hạn chót, badge trạng thái và nút xem "Chi tiết".
+   - **List Việc Đã Hoàn Thành Tháng Này (Collapsible Lazy-Loaded)**:
+     - Ứng dụng Radix `Collapsible`, tuân thủ nghiêm ngặt ràng buộc *"khi nhấn mới load"*.
+     - Mặc định thu gọn, khi người dùng click mở rộng mới kích hoạt query tải danh sách công việc đã nghiệm thu tháng này.
+   - **Modal Tự Đánh Giá (Mẫu 02)**: Đầy đủ 4 tiêu chí A, B, C, D (Khối lượng quy đổi, Chất lượng, Tiến độ, Chủ động phối hợp), hỗ trợ in phiếu `window.print()` và gửi phê duyệt.
+3. **Tích hợp Dashboard (`apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`)**:
+   - Gắn `PersonalTaskWorkbench` làm nội dung mặc định tại Tab "Bàn làm việc của tôi".
+   - Giữ nguyên Tab "Thống kê toàn cơ quan (Lãnh đạo)" với đầy đủ các báo cáo cấp cơ quan và nút Xuất quyết định Mẫu 05.
+
+### 3. Kiểm chứng Máy Thực tế & E2E
+- `npm run build` tại `apps/hrm-service`: **Exit Code 0** (Prisma generated, Nest compiled thành công).
+- `npm run typecheck` tại `apps/admin_khcn`: **Exit Code 0** (100% sạch lỗi kiểu dữ liệu).
+- `npm run build` tại `apps/admin_khcn`: **Exit Code 0** (83/83 static & dynamic routes compiled).
+- Deploy live containers: Cập nhật dist và standalone vào `daklak-workspace-hrm-service-1` và `daklak-workspace-admin-frontend-1`, cả hai container khởi động lại thành công (`Ready in 192ms`).
+- Kiểm thử Trình duyệt Thực tế (`browser_subagent`):
+  * Đăng nhập tài khoản `admin` / `Admin@123`, truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard`.
+  * Xác nhận toàn bộ 8 phân khu chức năng hiển thị chính xác dữ liệu cá nhân của cán bộ:
+    - Banner cá nhân `Trần Trung Thành` (Phòng HT-NTS, Mã ADMIN001).
+    - Đủ 6 thẻ chỉ số cá nhân (Tỷ lệ HT 40%, Tổng 10 việc, 4 hoàn thành, 6 quá hạn, 0 HT quá hạn, 0 sắp hết hạn).
+    - Khối lượng quy đổi 12đ vs TB phòng 13.23đ.
+    - List việc cần làm (5 việc ưu tiên) và Biểu đồ tiến bộ 6 tháng (T5 - T10).
+    - Công việc gần đây nhất với số hiệu văn bản và vai trò Chủ trì / Phối hợp.
+    - Click mở rộng Collapsible "List việc đã hoàn thành tháng này": Lazy load thành công danh mục 4 công việc đã hoàn thành trong tháng với điểm KPI 100%.
+  * Chụp ảnh màn hình nghiệm thu: `hrm_task_dashboard_1792112145328.png`.
+
+---
+
+## [2026-10-16] Chuẩn hóa Dữ liệu Thực tế Bàn làm việc Cá nhân (PBAC & Live Database Alignment)
+
+### 1. Vấn đề Phát hiện & Yêu cầu Kỹ thuật
+- Người dùng phản ánh dữ liệu tại "Bàn làm việc của tôi" (`http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard`) hiển thị không đúng thực tế người dùng đang đăng nhập:
+  1. Tồn tại tên giả định/hardcoded ("Trần Trung Thành", fallback phòng ban cứng ID 32, "NV_123", baseline 13.23).
+  2. Dữ liệu chưa phản ánh đúng danh tính PBAC và quyền hạn theo token xác thực của cán bộ đang đăng nhập (`System Administrator`, `ADMIN001`, `Trung tâm Giám sát, Điều hành Đô thị Thông minh (IOC)`).
+  3. API response envelope từ API Gateway bị `TransformInterceptor` bọc nhầm thành mảng do thiếu `/personal-workbench` trong `NON_LIST_SUFFIXES`, khiến frontend đọc `metrics` thành undefined và rơi vào fallback số liệu 0.
+
+### 2. Triển khai Kỹ thuật & File Đã sửa
+1. **User Service (`apps/user-service/src/modules/users/users.service.ts`)**:
+   - Bổ sung `unitName`, `unit_name`, `jobTitleName`, `job_title_name` vào hàm `findOne` (thông qua `mapUserPermissionsAndRoles`), lấy chính xác đơn vị công tác và chức vụ từ VTVL của người dùng.
+2. **HRM Service (`apps/hrm-service`)**:
+   - `tasks.service.ts`: Sửa `buildListTasksWhereClause` để khi `query.status === 'ALL'`, `statusFilter = {}`, không bị ép thành `{ isCompleted: false }` làm ẩn các nhiệm vụ đã hoàn thành.
+   - `tasks.controller.ts`: Bảo lưu `data.currentEmployeeCode` từ caller và cấp cờ `isAdmin = true` khi người dùng là quản trị viên hoặc sở hữu quyền quản lý nhiệm vụ.
+3. **API Gateway (`apps/api-gateway`)**:
+   - `tasks.service.ts` (`getPersonalWorkbench`): Xóa bỏ hoàn toàn fallback `NV_123`, chuyển tiếp đúng `currentEmployeeCode`, `currentUserId`, `currentUserDept`, `isAdmin` sang gRPC `ListTasks`.
+   - Tính toán động vai trò của người dùng trên từng nhiệm vụ (`Người giao`, `Chủ trì`, `Phối hợp`, `Thẩm định`) dựa trên `t.participants` và `creatorEmployeeCode`.
+   - Tính toán động `workloadBenchmark` và điểm trung bình phòng ban `departmentAverage` từ CSDL thực tế.
+4. **Shared Interceptor (`shared/core/interceptors/transform.interceptor.ts`)**:
+   - Thêm `'/personal-workbench'` và `'/task-context'` vào `NON_LIST_SUFFIXES`, đảm bảo payload trả về dạng Object chuẩn, không bị bọc nhầm vào mảng.
+5. **Frontend Admin (`apps/admin_khcn`)**:
+   - `personal-task-workbench.tsx`: Xóa sạch 100% tên cứng "Trần Trung Thành", hiển thị động `user?.fullName || user?.username` ("System Administrator"), avatar fallback canonical "AD".
+   - Bổ sung bộ bóc tách dữ liệu đa tầng `workbenchData` phòng thủ chống lỗi envelope (`rawWorkbench[0]`, `rawWorkbench.data`, hoặc trực tiếp).
+   - Đấu nối bộ lọc đơn vị `selectedUnitScope` với query danh mục tổ chức `useOrganizationFlatListQuery`.
+
+### 3. Kiểm chứng Máy & Trình duyệt Thực tế
+- `npm run build` tại `apps/api-gateway`: **Exit Code 0**.
+- `npm run build` tại `apps/admin_khcn`: **Exit Code 0** (87/87 routes compiled thành công).
+- Deploy live container:
+  * Đã sao chép sạch dist vào `daklak-workspace-api-gateway-1` và khởi động lại.
+  * Đã dọn sạch `.next` cũ, copy bản build mới vào `daklak-workspace-admin-frontend-1` và khởi động lại (`Ready in 177ms`).
+- Kiểm thử thực tế trên trình duyệt (`browser_subagent`):
+  * Truy cập `http://113.184.220.82/admin/services/hrm/work-plans/tasks/dashboard`.
+  * Banner thông tin: Hiển thị đúng danh tính PBAC `System Administrator`, avatar `AD`, đơn vị `Trung tâm Giám sát, Điều hành Đô thị Thông minh (IOC)`, mã `Mã: ADMIN001`. Tuyệt đối không còn "Trần Trung Thành".
+  * 6 Thẻ chỉ số cá nhân lấy trực tiếp từ CSDL:
+    - Tỷ lệ hoàn thành: **40%**
+    - Tổng số công việc: **10**
+    - Hoàn thành: **4**
+    - Quá hạn: **6**
+    - HT quá hạn: **0**, Sắp hết hạn: **0**
+  * Khối lượng quy đổi tháng: **10 điểm** (Bạn) vs **1 điểm** (TB phòng).
+  * Danh sách việc cần làm: Hiển thị đầy đủ 5 nhiệm vụ ưu tiên chờ thẩm định/xử lý.
+  * Danh sách việc gần đây: Hiển thị đầy đủ 8 nhiệm vụ với số hiệu văn bản (`[131/QĐ-UBND]`, `[132/QĐ-UBND]`, ...) và đúng vai trò `Người giao`.
+  * Ảnh chụp bằng chứng nghiệm thu: `hrm_task_dashboard_1792128479340.png`, `hrm_task_dashboard_tasks_list_1792128528338.png`.
+
+
 

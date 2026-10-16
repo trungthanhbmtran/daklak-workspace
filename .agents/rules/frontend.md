@@ -92,3 +92,32 @@ Ví dụ envelope JSON thường gặp:
     `@Get(':id') getById(@Param('id', ParseIntPipe) id: number)`
   - Gateway sẽ tự động chặn đứng và trả về `400 Bad Request` nếu client gửi các chuỗi rác như `"NaN"`, `"undefined"`, bảo vệ toàn diện các Microservices phía sau khỏi lỗi cú pháp CSDL (như Prisma P2022).
 
+## 9. Kiến trúc Tách nhỏ Endpoint & Lazy Mount On-Demand (Granular Decoupled Endpoints & Visited Tabs Lazy Loading)
+- **Bối cảnh & Vấn đề Cốt lõi (Anti-Pattern):**
+  - **Mega-fetch Anti-Pattern:** Gom toàn bộ dữ liệu của màn hình chi tiết (thông tin chính, danh sách công việc con, các bước quy trình, lịch sử xử lý, trao đổi bình luận, đánh giá KPI...) vào một endpoint duy nhất hoặc fetch đồng loạt tất cả các tabs ngay khi mở trang/drawer/modal.
+  - Hậu quả: Backend phải thực thi hàng loạt query nặng cùng lúc, gây nghẽn I/O, tăng TTFB, lãng phí tài nguyên cho các tabs người dùng không xem; phía Client bị giật giật, lag trang, re-render lặp vòng và flicker giao diện khi dữ liệu cha ghi đè dữ liệu con.
+- **Quy tắc Thiết kế Phía Server (Backend / Gateway / Microservice):**
+  1. **Granular Endpoints (Xuất phát từ endpoint chuyên biệt ở Server):**
+     - Endpoint chi tiết thực thể chính (`GET /entities/:id`) CHỈ query và trả về các trường thông tin cốt lõi (Metadata, Status, Basic Info, Participants chính). TUYỆT ĐỐI KHÔNG `include` hay bundle các bảng quan hệ nặng (Sub-tasks, Steps, History, Comments, KPIs).
+     - Mỗi Tab / Khối chức năng chuyên biệt BẮT BUỘC phải có một endpoint API riêng biệt từ Server:
+       * `GET /entities/:id/sub-items` (danh sách công việc con, dùng closure table hoặc flat query có phân trang)
+       * `GET /entities/:id/steps` (quy trình các bước)
+       * `GET /entities/:id/history` (lịch sử / audit log, BẮT BUỘC có `take: 100` hoặc pagination, không query toàn bộ)
+       * `GET /entities/:id/evaluations` (đánh giá KPI)
+       * `GET /chat/conversation/:id/messages` (bình luận / thảo luận)
+  2. **PBAC Scoping & Least Data:**
+     - Từng endpoint con phải tự kiểm tra phân quyền (PBAC scoping) qua `@CurrentUser() user` (xác định `isAdmin` chuẩn qua `user.isAdmin || user.employeeCode === 'ADMIN001' || user.permissionsFlatten.includes('*')`).
+     - Đảm bảo trả về đúng và đủ dữ liệu cần thiết của tab đó.
+- **Quy tắc Thiết kế Phía Frontend (Client & UI Components):**
+  1. **Decoupled Tab Components:**
+     - Mỗi Tab được tách thành một component độc lập (`EntityProcessingTab`, `EntityDiscussionTab`, `EntityHistoryTab`, `EntityKpiTab`).
+     - Component của Tab tự quản lý hook TanStack Query tương ứng, là single source of truth. TUYỆT ĐỐI KHÔNG lấy dữ liệu fallback chập chờn từ props của component cha (`currentTask.subTasks || []`).
+  2. **Pattern `visitedTabs` Lazy Mount On-Demand:**
+     - Quản lý tập hợp các tab người dùng đã tương tác: `const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set([defaultTab]))`.
+     - Khi người dùng click chuyển tab: `setVisitedTabs(prev => new Set(prev).add(tabKey))`.
+     - Chỉ mount component của tab khi tab đó đã được mở:
+       `{visitedTabs.has('discussion') && <DiscussionTab active={activeTab === 'discussion'} />}`.
+     - Trong hook TanStack Query của tab: Đặt guard `enabled: isValidId && (activeTab === 'discussion' || hasLoaded)`.
+     - Giữ DOM state đã tải sau lần click đầu tiên để tránh giật lag khi chuyển qua lại giữa các tab, nhưng không bao giờ tải dữ liệu trước khi người dùng click vào tab!
+
+

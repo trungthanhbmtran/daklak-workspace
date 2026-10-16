@@ -452,6 +452,13 @@ export const ReportWorkspace = () => {
                   Tất cả báo cáo ({allReports.length})
                 </TabsTrigger>
                 <TabsTrigger
+                  value="btctu-kpi"
+                  className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold flex items-center gap-1.5 text-blue-700 data-[state=active]:text-blue-600"
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  Dashboard Điều hành Toàn tỉnh (BTCTU)
+                </TabsTrigger>
+                <TabsTrigger
                   value="personal-workbench"
                   className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold flex items-center gap-1.5 text-indigo-700 data-[state=active]:text-indigo-600"
                 >
@@ -522,6 +529,190 @@ export const ReportWorkspace = () => {
               className="p-6 m-0 focus-visible:outline-none focus-visible:ring-0"
             >
               {renderReportGrid(filteredReports)}
+            </TabsContent>
+
+            <TabsContent
+              value="btctu-kpi"
+              className="p-6 m-0 space-y-6 focus-visible:outline-none focus-visible:ring-0"
+            >
+              {/* Provincial Executive Dashboard Banner */}
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50/90 via-white to-indigo-50/80 border border-blue-200/80 p-6 shadow-xs">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div className="space-y-2 max-w-3xl">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className="bg-blue-700 text-white hover:bg-blue-800 text-xs px-2.5 py-0.5 rounded-full font-medium shadow-xs">
+                        <Award className="w-3.5 h-3.5 mr-1" />
+                        Ban Tổ chức Tỉnh ủy Đắk Lắk
+                      </Badge>
+                      <Badge variant="outline" className="border-blue-200 text-blue-800 bg-white/80 text-xs font-medium">
+                        Mã thiết kế: REP_BTCTU_SOP_KPI (#12)
+                      </Badge>
+                      <Badge variant="outline" className="border-emerald-200 text-emerald-700 bg-emerald-50 text-xs flex items-center gap-1 font-medium">
+                        <Activity className="w-3 h-3 text-emerald-600" />
+                        Chuẩn SOP Bước 4 (QĐ 39-QĐ/TU & HD 05-HD/TU)
+                      </Badge>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                      Trung tâm Báo Cáo & Chỉ Số Điều Hành Toàn Tỉnh
+                    </h2>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      Phân hệ tổng hợp số liệu điều hành, đánh giá xếp loại thi đua cán bộ, giám sát tiến độ công việc và tỷ lệ hoàn thành nhiệm vụ theo chuẩn định lượng OKR/KPI Ban Tổ chức Tỉnh ủy. Khống chế áp trần tối đa 20% Hoàn thành xuất sắc nhiệm vụ.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                    <Button
+                      onClick={() => router.push('/services/reports/12')}
+                      className="bg-blue-700 hover:bg-blue-800 text-white text-xs h-9 px-4 rounded-xl shadow-xs flex items-center gap-1.5"
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                      Xem toàn màn hình (#12)
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => router.push('/services/reports/12/design')}
+                      className="bg-white hover:bg-slate-50 text-slate-700 border-slate-200 text-xs h-9 px-4 rounded-xl shadow-xs flex items-center gap-1.5"
+                    >
+                      <Settings2 className="w-4 h-4 text-slate-500" />
+                      Thiết kế & Tùy biến
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Provincial Executive Quick Stats Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="border border-slate-200/80 shadow-xs bg-white rounded-xl">
+                  <CardContent className="p-4 flex flex-col justify-between h-full">
+                    <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+                      <span>Tổng số Cán bộ theo dõi</span>
+                      <UserCheck className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-slate-900">23</span>
+                      <span className="text-xs text-slate-400 font-normal">cán bộ</span>
+                    </div>
+                    <div className="text-[11px] text-blue-700 font-semibold mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-blue-600" /> 05 phòng ban chuẩn QĐ 01
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-slate-200/80 shadow-xs bg-white rounded-xl">
+                  <CardContent className="p-4 flex flex-col justify-between h-full">
+                    <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+                      <span>Điểm KPI Trung bình cơ quan</span>
+                      <TrendingUp className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-emerald-600">91.8</span>
+                      <span className="text-xs text-slate-400 font-normal">/ 100 điểm</span>
+                    </div>
+                    <div className="text-[11px] text-emerald-600 font-semibold mt-1 truncate">
+                      Vượt mức trung bình chuẩn (≥85đ)
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-slate-200/80 shadow-xs bg-white rounded-xl">
+                  <CardContent className="p-4 flex flex-col justify-between h-full">
+                    <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+                      <span>Tỷ lệ Xuất sắc (Áp trần ≤20%)</span>
+                      <Award className="w-4 h-4 text-amber-500" />
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-amber-600">17.4%</span>
+                      <span className="text-xs text-slate-400 font-normal">(4/23 cán bộ)</span>
+                    </div>
+                    <div className="text-[11px] text-amber-700 font-semibold mt-1 truncate">
+                      Đạt chuẩn trần theo Hướng dẫn 05
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-slate-200/80 shadow-xs bg-white rounded-xl">
+                  <CardContent className="p-4 flex flex-col justify-between h-full">
+                    <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
+                      <span>Tiến độ Quy trình SOP</span>
+                      <Clock className="w-4 h-4 text-indigo-500" />
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-indigo-600">100%</span>
+                      <span className="text-xs text-slate-400 font-normal">Bước 4/4</span>
+                    </div>
+                    <div className="text-[11px] text-indigo-700 font-semibold mt-1 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-indigo-500" /> Đã ban hành QĐ chính thức
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Live Embedded Report Engine: 4 Charts for BTCTU SOP KPI */}
+              <div className="w-full min-w-0">
+                <EmbeddedReportWidget
+                  reportIdOrCode="REP_BTCTU_SOP_KPI"
+                  title="Biểu đồ Phân tích Đánh giá & Xếp loại Cán bộ (Ban Tổ chức Tỉnh ủy)"
+                  description="Dữ liệu tổng hợp từ 23 cán bộ: Phân bổ xếp loại thi đua, tiến độ SOP 4 bước, điểm trung bình theo 5 phòng ban và xếp hạng năng suất cá nhân."
+                  columns={2}
+                  chartHeight={280}
+                  showDetailLink={true}
+                  allowToggleType={true}
+                />
+              </div>
+
+              {/* Quick Navigation Cards to HRM & Services */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                <div
+                  onClick={() => router.push('/services/hrm/employees')}
+                  className="group p-4 bg-white rounded-xl border border-slate-200/80 hover:border-blue-300 hover:shadow-sm cursor-pointer transition-all flex items-start gap-3"
+                >
+                  <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <UserCheck className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                      Hồ sơ Cán bộ & Vị trí việc làm (HRM)
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                      Quản lý 22 VTVL định biên, phân công nhiệm vụ và thông tin lý lịch cán bộ 05 phòng ban.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => router.push('/services/hrm/work-plans/tasks/dashboard')}
+                  className="group p-4 bg-white rounded-xl border border-slate-200/80 hover:border-emerald-300 hover:shadow-sm cursor-pointer transition-all flex items-start gap-3"
+                >
+                  <div className="p-2.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <BarChart3 className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors">
+                      Dashboard Nhiệm vụ & Công việc
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                      Theo dõi tiến độ giao việc, rà soát văn bản chỉ đạo và nhật ký điều phối công tác.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => router.push('/services/reports/new')}
+                  className="group p-4 bg-white rounded-xl border border-slate-200/80 hover:border-indigo-300 hover:shadow-sm cursor-pointer transition-all flex items-start gap-3"
+                >
+                  <div className="p-2.5 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                      Thiết kế Báo cáo Mới
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                      Tạo mẫu báo cáo tùy chỉnh với nguồn dữ liệu liên thông từ HRM, Văn bản, Cổng thông tin.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent

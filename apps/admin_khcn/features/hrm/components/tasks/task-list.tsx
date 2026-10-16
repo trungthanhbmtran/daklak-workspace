@@ -8,14 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HrmTask } from "../../types/task";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Eye, Clock, ChevronRight, ChevronDown, Repeat, Briefcase, AlertTriangle, Award } from "lucide-react";
-import { TaskDetailDrawer } from "./task-detail-drawer";
-import { CreateTaskDialog } from "./create-task-dialog";
-import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
 import { Progress } from "@/components/ui/progress";
 import { useTasksList } from "../../hooks/useTasks";
-import { useSearchParams, useRouter } from "next/navigation";
 import { useHrmPermissions } from "../../hooks/useHrmPermissions";
 
 const safeFormatDate = (date: any, fmt: string) => {
@@ -162,13 +160,10 @@ export function TaskList() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const [evaluatingTask, setEvaluatingTask] = useState<HrmTask | null>(null);
-  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
 
   // ── API: danh sách task tóm tắt ──
-  const { data, isLoading, isError, refetch } = useTasksList({
+  const { data, isLoading, isError } = useTasksList({
     status: statusFilter === "ALL" ? undefined : statusFilter,
     search: debouncedSearch || undefined,
   });
@@ -181,10 +176,10 @@ export function TaskList() {
   const taskIdParam = searchParams?.get("taskId");
 
   React.useEffect(() => {
-    if (taskIdParam && !selectedTaskId) {
-      setSelectedTaskId(Number(taskIdParam));
+    if (taskIdParam) {
+      router.push(`/services/hrm/work-plans/tasks/${taskIdParam}`);
     }
-  }, [taskIdParam, selectedTaskId]);
+  }, [taskIdParam, router]);
 
   const toggleExpand = (taskId: string) => {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
@@ -238,7 +233,9 @@ export function TaskList() {
           </Select>
         </div>
         {canCreateTask && (
-          <Button onClick={() => setIsCreateTaskOpen(true)} className="bg-blue-600 hover:bg-blue-700 shadow-sm shrink-0">+ Giao việc mới</Button>
+          <Link href="/services/hrm/work-plans/tasks/create" scroll={false}>
+            <Button className="bg-blue-600 hover:bg-blue-700 shadow-sm shrink-0">+ Giao việc mới</Button>
+          </Link>
         )}
       </div>
 
@@ -277,15 +274,16 @@ export function TaskList() {
                         </div>
                       )}
                       <div className="flex flex-col py-0.5 min-w-0 w-full">
-                        <span
+                        <Link
+                          href={`/services/hrm/work-plans/tasks/${task.id}`}
+                          scroll={false}
                           title={task.title}
-                          onClick={() => setSelectedTaskId(Number(task.id))}
-                          className={`whitespace-normal break-words wrap-break-word line-clamp-2 sm:line-clamp-3 text-sm leading-snug cursor-pointer hover:text-blue-600 transition-colors ${
+                          className={`whitespace-normal break-words wrap-break-word line-clamp-2 sm:line-clamp-3 text-sm leading-snug hover:text-blue-600 transition-colors ${
                             depth > 0 ? "text-slate-700 font-medium" : "font-semibold text-slate-900"
                           }`}
                         >
                           {task.title}
-                        </span>
+                        </Link>
                         <div className="flex flex-wrap items-center gap-1.5 mt-1.5 min-w-0">
                           {task.metadata?.taskType === "REGULAR" && (
                             <Badge variant="outline" className="flex items-center px-1.5 py-0 bg-amber-50 text-amber-700 font-normal text-[10px] border-amber-200 shrink-0">
@@ -396,26 +394,28 @@ export function TaskList() {
                 return (
                   <div className="flex items-center justify-end gap-2 shrink-0">
                     {showEvaluateBtn && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setEvaluatingTask(task)}
-                        className="h-7 px-2.5 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 font-medium shadow-2xs shrink-0"
-                        title="Mở màn hình Thẩm định & Đánh giá công việc"
-                      >
-                        <Award className="w-3.5 h-3.5 mr-1 text-indigo-600 shrink-0" />
-                        Đánh giá
-                      </Button>
+                      <Link href={`/services/hrm/work-plans/tasks/${task.id}/evaluate`} scroll={false}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2.5 text-xs text-indigo-600 border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 font-medium shadow-2xs shrink-0"
+                          title="Mở màn hình Thẩm định & Đánh giá công việc"
+                        >
+                          <Award className="w-3.5 h-3.5 mr-1 text-indigo-600 shrink-0" />
+                          Đánh giá
+                        </Button>
+                      </Link>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedTaskId(Number(task.id))}
-                      className="h-7 px-2.5 text-xs text-slate-700 hover:text-slate-900 shrink-0"
-                    >
-                      <Eye className="w-3.5 h-3.5 mr-1 shrink-0" />
-                      Chi tiết
-                    </Button>
+                    <Link href={`/services/hrm/work-plans/tasks/${task.id}`} scroll={false}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2.5 text-xs text-slate-700 hover:text-slate-900 shrink-0"
+                      >
+                        <Eye className="w-3.5 h-3.5 mr-1 shrink-0" />
+                        Chi tiết
+                      </Button>
+                    </Link>
                   </div>
                 );
               }
@@ -428,37 +428,6 @@ export function TaskList() {
           </div>
         </div>
       </div>
-
-      {selectedTaskId && (
-        <TaskDetailDrawer
-          taskId={selectedTaskId}
-          open={!!selectedTaskId}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedTaskId(null);
-              if (taskIdParam) {
-                router.replace("/services/hrm/work-plans/tasks");
-              }
-            }
-          }}
-        />
-      )}
-
-      {isCreateTaskOpen && (
-        <CreateTaskDialog
-          open={isCreateTaskOpen}
-          onOpenChange={setIsCreateTaskOpen}
-        />
-      )}
-
-      {evaluatingTask && (
-        <TaskEvaluationApprovalSheet
-          task={evaluatingTask}
-          open={!!evaluatingTask}
-          onOpenChange={(open) => !open && setEvaluatingTask(null)}
-          onSuccess={() => refetch()}
-        />
-      )}
     </div>
   );
 }

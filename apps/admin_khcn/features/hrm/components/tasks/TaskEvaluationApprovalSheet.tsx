@@ -35,6 +35,7 @@ import {
   HelpCircle,
   Sparkles,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { HrmTask } from "../../types/task";
 import { useEvaluateTask, useTaskDetail, useTaskHistory, useTaskSteps, useTaskSubtasks } from "../../hooks/useTasks";
@@ -47,9 +48,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { unwrapTaskData } from "./task-ui-utils";
 
 interface TaskEvaluationApprovalSheetProps {
-  task: HrmTask;
+  task?: HrmTask | null;
+  taskId?: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
@@ -64,26 +67,39 @@ const safeFormatDate = (date: any, fmt: string) => {
 
 export function TaskEvaluationApprovalSheet({
   task,
+  taskId: propTaskId,
   open,
   onOpenChange,
   onSuccess,
 }: TaskEvaluationApprovalSheetProps) {
   const { user } = useUser();
-  const taskId = Number(task.id);
+  const activeTaskId = propTaskId ? Number(propTaskId) : task?.id ? Number(task.id) : undefined;
+  const isValidId = !Number.isNaN(activeTaskId) && (activeTaskId ?? 0) > 0;
 
   // ── Queries lấy dữ liệu đối chiếu & chi tiết đầy đủ (Lazy Gating khi Sheet mở) ──
-  const { data: detailData, isLoading: isLoadingDetail } = useTaskDetail(taskId, { enabled: open });
-  const currentTask: HrmTask = useMemo(() => {
-    return (detailData as any)?.data ?? task;
+  const { data: detailData, isLoading: isLoadingDetail } = useTaskDetail(isValidId ? activeTaskId : undefined, {
+    enabled: open && isValidId,
+  });
+  const currentTask: HrmTask | any = useMemo(() => {
+    return unwrapTaskData(detailData) || unwrapTaskData(task) || {};
   }, [detailData, task]);
 
-  const { data: historyData } = useTaskHistory(taskId, { enabled: open });
-  const { data: stepsData } = useTaskSteps(taskId, { enabled: open });
-  const { data: subtasksData } = useTaskSubtasks(taskId, { enabled: open });
+  const { data: historyData } = useTaskHistory(isValidId ? activeTaskId : undefined, { enabled: open && isValidId });
+  const { data: stepsData } = useTaskSteps(isValidId ? activeTaskId : undefined, { enabled: open && isValidId });
+  const { data: subtasksData } = useTaskSubtasks(isValidId ? activeTaskId : undefined, { enabled: open && isValidId });
 
-  const historyList: any[] = (historyData as any)?.data ?? [];
-  const stepsList: any[] = (stepsData as any)?.data ?? currentTask.steps ?? [];
-  const subtasksList: any[] = (subtasksData as any)?.data ?? currentTask.subTasks ?? [];
+  const historyList: any[] = useMemo(() => {
+    const res = unwrapTaskData(historyData);
+    return Array.isArray(res) ? res : [];
+  }, [historyData]);
+  const stepsList: any[] = useMemo(() => {
+    const res = unwrapTaskData(stepsData);
+    return Array.isArray(res) ? res : (currentTask?.steps || []);
+  }, [stepsData, currentTask?.steps]);
+  const subtasksList: any[] = useMemo(() => {
+    const res = unwrapTaskData(subtasksData);
+    return Array.isArray(res) ? res : (currentTask?.subTasks || []);
+  }, [subtasksData, currentTask?.subTasks]);
 
   // ── Thống kê Dữ liệu Hệ thống (System Metrics) ──
   const systemMetrics = useMemo(() => {
@@ -167,7 +183,7 @@ export function TaskEvaluationApprovalSheet({
       files.push(...metaSelf.files);
     }
     if (currentTask.attachments && Array.isArray(currentTask.attachments)) {
-      currentTask.attachments.forEach((att) => {
+      currentTask.attachments.forEach((att: any) => {
         files.push({ name: att.fileName || "Tài liệu minh chứng", url: att.fileUrl || "#" });
       });
     }
@@ -267,9 +283,10 @@ export function TaskEvaluationApprovalSheet({
   const evaluateTaskMutation = useEvaluateTask();
 
   const handleApprove = async () => {
+    if (!activeTaskId) return;
     try {
       await evaluateTaskMutation.mutateAsync({
-        id: taskId,
+        id: activeTaskId,
         payload: {
           action: "APPROVE",
           scores: {
@@ -294,12 +311,12 @@ export function TaskEvaluationApprovalSheet({
   };
 
   const handleReturn = async () => {
-    if (!returnReason.trim()) {
+    if (!returnReason.trim() || !activeTaskId) {
       return;
     }
     try {
       await evaluateTaskMutation.mutateAsync({
-        id: taskId,
+        id: activeTaskId,
         payload: {
           action: "RETURN",
           rejectReason: returnReason.trim(),
@@ -329,14 +346,14 @@ export function TaskEvaluationApprovalSheet({
                       Thẩm định & Phê duyệt Lãnh đạo
                     </Badge>
                     <span className="text-xs text-muted-foreground shrink-0 font-mono">
-                      Mã #{currentTask.id}
+                      Mã #{currentTask.id || activeTaskId}
                     </span>
                     {isLoadingDetail && (
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground shrink-0" />
                     )}
                   </div>
                   <SheetTitle className="text-lg sm:text-xl font-bold leading-tight wrap-break-word min-w-0 text-foreground pt-1">
-                    {currentTask.title}
+                    {currentTask.title || (isLoadingDetail ? "Đang tải thông tin nhiệm vụ..." : `Nhiệm vụ #${activeTaskId}`)}
                   </SheetTitle>
                   <SheetDescription className="text-xs text-muted-foreground leading-relaxed wrap-break-word">
                     Đối chiếu song song dữ liệu tự động từ hệ thống và báo cáo kết quả của chuyên viên để chốt điểm KPI.
@@ -365,10 +382,34 @@ export function TaskEvaluationApprovalSheet({
 
           {/* NỘI DUNG CUỘN CHÍNH (NATIVE SCROLLING, CHỐNG SCROLL TRAP) */}
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 min-w-0">
-            {/* ══════════════════════════════════════════════════════════════════
-                PHÂN VÙNG 1: BẢNG ĐỐI CHIẾU SONG SONG 2 NGUỒN DỮ LIỆU
-            ══════════════════════════════════════════════════════════════════ */}
-            <div className="space-y-3 min-w-0">
+            {isLoadingDetail && !currentTask?.title ? (
+              <div className="space-y-6 p-2">
+                <div className="space-y-3">
+                  <Skeleton className="h-6 w-48 rounded-md" />
+                  <Skeleton className="h-8 w-3/4 rounded-lg" />
+                  <Skeleton className="h-4 w-1/2 rounded-md" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t">
+                  <Skeleton className="h-36 w-full rounded-xl" />
+                  <Skeleton className="h-36 w-full rounded-xl" />
+                </div>
+                <div className="pt-6 space-y-4">
+                  <Skeleton className="h-28 w-full rounded-xl" />
+                  <Skeleton className="h-28 w-full rounded-xl" />
+                </div>
+              </div>
+            ) : !currentTask?.id && !isValidId ? (
+              <div className="p-16 text-center text-slate-500 flex flex-col items-center justify-center h-full">
+                <AlertCircle className="w-12 h-12 text-slate-400 mb-3" />
+                <p className="text-base font-semibold text-slate-700">Không tìm thấy thông tin công việc để thẩm định</p>
+                <p className="text-xs text-slate-400 mt-1">Dữ liệu có thể đã bị thay đổi hoặc bạn không có thẩm quyền truy cập.</p>
+              </div>
+            ) : (
+              <>
+                {/* ══════════════════════════════════════════════════════════════════
+                    PHÂN VÙNG 1: BẢNG ĐỐI CHIẾU SONG SONG 2 NGUỒN DỮ LIỆU
+                ══════════════════════════════════════════════════════════════════ */}
+                <div className="space-y-3 min-w-0">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <FileCheck2 className="w-4 h-4 text-primary shrink-0" />
@@ -755,6 +796,8 @@ export function TaskEvaluationApprovalSheet({
                 />
               </div>
             </div>
+              </>
+            )}
           </div>
 
           {/* FOOTER CỐ ĐỊNH VỚI HÀNH ĐỘNG RÕ RÀNG */}
@@ -764,7 +807,7 @@ export function TaskEvaluationApprovalSheet({
               variant="outline"
               size="sm"
               onClick={() => setIsReturnDialogOpen(true)}
-              disabled={evaluateTaskMutation.isPending}
+              disabled={evaluateTaskMutation.isPending || !currentTask?.id || !isValidId}
               className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 h-9 text-xs"
             >
               <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
@@ -786,7 +829,7 @@ export function TaskEvaluationApprovalSheet({
                 type="button"
                 size="sm"
                 onClick={handleApprove}
-                disabled={evaluateTaskMutation.isPending}
+                disabled={evaluateTaskMutation.isPending || !currentTask?.id || !isValidId}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground h-9 text-xs font-semibold shadow-sm"
               >
                 {evaluateTaskMutation.isPending ? (

@@ -8,7 +8,6 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { useUser } from "@/hooks/useUser";
-import { DashboardReportContainer } from "@/features/reports";
 
 type AppItem = {
   id: string;
@@ -83,32 +82,6 @@ export function HubClient() {
           ))}
         </div>
       )}
-
-      {/* Phân hệ Báo cáo & Thống kê Điều hành Thụ Hưởng */}
-      <div className="mt-12 space-y-4">
-        <div className="border-t pt-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Báo Cáo & Chỉ Số Điều Hành Toàn Tỉnh
-            </h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Dữ liệu phân tích điều hành được thiết kế và đồng bộ thời gian thực từ Hệ thống Báo cáo & Thống kê
-            </p>
-          </div>
-          <Link href="/services/reports">
-            <Button variant="ghost" size="sm" className="text-xs text-primary font-semibold">
-              Xem tất cả báo cáo &rarr;
-            </Button>
-          </Link>
-        </div>
-
-        <DashboardReportContainer
-          dashboardKey="hub"
-          defaultReportCode="REP_BTCTU_SOP_KPI"
-          defaultTitle="Báo cáo Xếp loại Đánh giá Thi đua Cán bộ (Ban Tổ chức Tỉnh ủy)"
-          defaultDescription="Thống kê cơ cấu xếp loại và tiến độ đánh giá cán bộ các cơ quan Đảng, Sở Ban Ngành tỉnh Đắk Lắk"
-        />
-      </div>
     </main>
   );
 }

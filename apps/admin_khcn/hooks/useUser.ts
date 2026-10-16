@@ -22,3 +22,5 @@ export function useUser() {
 
   return { user, isLoading, isError };
 }
+
+export { usePermissions, type PermissionsState } from "./usePermissions";

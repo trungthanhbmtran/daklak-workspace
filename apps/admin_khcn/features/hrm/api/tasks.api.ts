@@ -19,6 +19,106 @@ export const hrmTasksApi = {
     return apiClient.post('/hrm/tasks', payload) as any;
   },
 
+  getTaskContext(params: {
+    departmentId?: number | string;
+    assignee?: string;
+    coordinatorIds?: string;
+    priority?: string;
+  }): Promise<ApiResponse<{
+    deptLeaders: Array<{
+      employeeCode: string;
+      fullName: string;
+      jobTitleName: string;
+      departmentName: string;
+      isLeader: boolean;
+    }>;
+    deptStaff: Array<{
+      employeeCode: string;
+      fullName: string;
+      jobTitleName: string;
+      departmentName: string;
+      isLeader: boolean;
+    }>;
+    stepAssigneeOptions: {
+      label: string;
+      list: Array<{
+        employeeCode: string;
+        fullName: string;
+        jobTitleName: string;
+        departmentName: string;
+      }>;
+    };
+    formulaDomainCode: string;
+    kpiDefaults: {
+      baseScore: number;
+      difficultyK: number;
+    };
+    supervisor: {
+      code: string;
+      name: string;
+      jobTitle?: string;
+      unitName?: string;
+      reason?: string;
+    } | null;
+  }>> {
+    return apiClient.get('/hrm/tasks/task-context', { params }) as any;
+  },
+
+  balancePercentages(payload: {
+    coordinatorCount?: number;
+    coordinatorCodes?: string[];
+  }): Promise<ApiResponse<{
+    assigneePercentage: number;
+    coordinatorPercentage: number;
+    coordinators: Array<{ id: string; percentage: number }>;
+  }>> {
+    return apiClient.post('/hrm/tasks/balance-percentages', payload) as any;
+  },
+
+  getPersonalWorkbench(params?: {
+    startDate?: string;
+    endDate?: string;
+    unitScope?: string;
+    search?: string;
+    category?: string;
+  }): Promise<ApiResponse<{
+    metrics: {
+      total: number;
+      completed: number;
+      overdue: number;
+      completedOverdue: number;
+      dueSoon: number;
+      completionRate: number;
+    };
+    actionItems: Array<{
+      id: number;
+      title: string;
+      status: string;
+      dueDate: string;
+      priority: string;
+    }>;
+    recentTasks: Array<{
+      id: number;
+      title: string;
+      docRef: string;
+      status: string;
+      priority: string;
+      dueDate: string;
+      role: string;
+      progress: number;
+      completedAt: string | null;
+    }>;
+    workloadBenchmark: {
+      personalScore: number;
+      departmentAverage: number;
+      diffPercent: number;
+      isLower: boolean;
+      evaluation: string;
+    };
+  }>> {
+    return apiClient.get('/hrm/tasks/personal-workbench', { params }) as any;
+  },
+
   getSupervisorByScope(params: { departmentId?: number; domainId?: number; assigneeCode?: string }): Promise<ApiResponse<any>> {
     return apiClient.get('/hrm/tasks/supervisor-by-scope', { params }) as any;
   },

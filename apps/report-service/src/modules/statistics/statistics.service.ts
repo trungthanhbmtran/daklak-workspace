@@ -489,21 +489,34 @@ export class StatisticsService implements OnModuleInit {
         );
         const allPosts = res?.data || [];
 
-        rows = allPosts.map((p: any) => ({
-          id: p.id,
-          title: p.title || '',
-          status: translateStatus(p.status),
-          categoryName: p.category || p.categoryName || 'Tin tức chung',
-          authorName: p.authorName || p.authorId || 'Ban biên tập',
-          viewCount: Number(p.viewCount || 0),
-          isFeatured: p.isFeatured ? 'Nổi bật' : 'Bình thường',
-          publishedDate: p.publishedAt
-            ? new Date(p.publishedAt).toISOString().split('T')[0]
-            : '',
-          createdAt: p.createdAt
-            ? new Date(p.createdAt).toISOString().split('T')[0]
-            : '',
-        }));
+        rows = allPosts.map((p: any) => {
+          let categoryName = 'Tin tức chung';
+          if (p.category && typeof p.category === 'object' && p.category.name) {
+            categoryName = String(p.category.name);
+          } else if (p.categoryName && typeof p.categoryName === 'object' && p.categoryName.name) {
+            categoryName = String(p.categoryName.name);
+          } else if (typeof p.categoryName === 'string' && p.categoryName) {
+            categoryName = p.categoryName;
+          } else if (typeof p.category === 'string' && p.category) {
+            categoryName = p.category;
+          }
+
+          return {
+            id: p.id,
+            title: p.title || '',
+            status: translateStatus(p.status),
+            categoryName,
+            authorName: p.authorName || p.authorId || 'Ban biên tập',
+            viewCount: Number(p.viewCount || 0),
+            isFeatured: p.isFeatured ? 'Nổi bật' : 'Bình thường',
+            publishedDate: p.publishedAt
+              ? new Date(p.publishedAt).toISOString().split('T')[0]
+              : '',
+            createdAt: p.createdAt
+              ? new Date(p.createdAt).toISOString().split('T')[0]
+              : '',
+          };
+        });
 
         if (isGenericQuery) {
           await this.saveSnapshot('POST_STATS', rows);
@@ -625,9 +638,11 @@ export class StatisticsService implements OnModuleInit {
 
       if (!rows) {
         const listReq = this.getSafeListReq(filter);
+        listReq.isAdmin = true;
+        const callMeta = this.getInternalMeta(metadata);
 
         const res: any = await firstValueFrom(
-          this.documentService.ListDocuments(listReq, metadata),
+          this.documentService.ListDocuments(listReq, callMeta),
         );
         const allDocs = res?.data || [];
         const now = Date.now();
@@ -697,6 +712,7 @@ export class StatisticsService implements OnModuleInit {
 
       try {
         const listReq = this.getSafeListReq(filter);
+        listReq.isAdmin = true;
         const callMeta = this.getInternalMeta(metadata);
         const res: any = await firstValueFrom(
           this.kpiService.FindEvaluations(listReq, callMeta),
@@ -713,8 +729,9 @@ export class StatisticsService implements OnModuleInit {
         if (Array.isArray(allEvals) && allEvals.length > 0) {
           rows = allEvals.map((ev: any) => {
             const emp = ev.employee || {};
-            const deptId = Number(emp.departmentId || ev.departmentId || 56);
+            const deptId = Number(ev.departmentId || emp.departmentId || 56);
             const deptName =
+              ev.departmentName ||
               (unitMap[deptId] ? unitMap[deptId].name : null) ||
               (deptId === 56
                 ? 'Lãnh đạo Ban Tổ chức Tỉnh ủy'
@@ -761,9 +778,9 @@ export class StatisticsService implements OnModuleInit {
             return {
               id: ev.id,
               cadreCode: ev.employeeCode || emp.employeeCode || `BTCTU_${ev.id}`,
-              fullName: emp.fullName || ev.employeeName || ev.employeeCode || 'Cán bộ BTCTU',
+              fullName: ev.employeeName || emp.fullName || ev.employeeCode || 'Cán bộ BTCTU',
               departmentName: deptName,
-              jobTitle: emp.jobTitle?.name || emp.jobTitle || 'Cán bộ chuyên môn',
+              jobTitle: ev.jobTitle || emp.jobTitle?.name || emp.jobTitle || 'Cán bộ chuyên môn',
               sChung,
               sNhiemVu,
               sTong,
@@ -772,7 +789,7 @@ export class StatisticsService implements OnModuleInit {
               hasMau04: sTong >= 95 ? 'Có (Đề án 01-ĐA/TU)' : 'Không',
               sopStep,
               status: statusStr,
-              quarterYear: ev.period?.name || 'Quý I/2026',
+              quarterYear: ev.periodName || ev.period?.name || 'Quý I/2026',
             };
           });
 
@@ -825,8 +842,11 @@ export class StatisticsService implements OnModuleInit {
 
       try {
         const listReq = this.getSafeListReq(filter);
+        listReq.status = listReq.status || 'ALL';
+        listReq.isAdmin = true;
+        const callMeta = this.getInternalMeta(metadata);
         const res: any = await firstValueFrom(
-          this.taskService.ListTasks(listReq, metadata),
+          this.taskService.ListTasks(listReq, callMeta),
         );
         const allTasks = res?.data || [];
 

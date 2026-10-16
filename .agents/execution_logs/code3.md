@@ -240,5 +240,14 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - Kiểm tra rác thừa: 0 `console.log`, 0 `debugger`, mã hóa UTF-8 không BOM.
 - **Kết quả nghiệm thu**: Menu dư thừa đã được xóa bỏ triệt để từ CSDL đến cấu hình seed theo đúng quy định phân định ranh giới giữa các service.
 
-
-
+## [2026-10-16] Xuất Toàn văn Bài làm Trả lời 03 Câu hỏi Đề Kiểm tra Năng lực BTCTU Tỉnh ủy Đắk Lắk
+- **Tác vụ**: Đóng vai trò Chuyên gia Kiến trúc Phần mềm kiêm Chuyên viên Chuyên trách CNTT & Chuyển đổi số, đối chiếu hệ thống thực tế `daklak-workspace` và sinh toàn văn bài làm trả lời chính thức 03 câu hỏi trong "Đề kiểm tra năng lực BTCTU.docx" tại Ban Tổ chức Tỉnh ủy Đắk Lắk. Bám sát 100% căn cứ pháp lý (Quy định 01-QĐ/BTCTU, Hướng dẫn 05-HD/TU, Quy định 39-QĐ/TU, Nghị định 335/2025/NĐ-CP, Nghị quyết 11-NQ/TU, Quy định 348-QĐ/BTCTW, Quy định 308-QĐ/VPTW, Nghị định 85/2016/NĐ-CP và Nghị định 331/2026/NĐ-CP).
+- **Phạm vi file đã thực thi**:
+  - `docs/BAI_THI_KIEM_TRA_NANG_LUC_BTCTU_CHINH_THUC.md`: Toàn văn bài làm chính thức hoàn chỉnh (~55 KB, 100% UTF-8 không BOM), bao gồm:
+    + **Phần I (Câu 1):** Bảng 1.1 (05 phòng chuyên môn & 22 VTVL định biên chuẩn hóa theo QĐ 01-QĐ/BTCTU); Bảng 1.2 (Thang điểm 100: 30đ chung + 70đ KPI, công thức $KPI_i$, phân loại 05 nhóm độ khó $K \in [1.0, 5.0]$, tự động trừ 25% điểm $B\%$ và $C\%$ theo NĐ 335/2025/NĐ-CP); Bảng 1.3 (Ma trận trọng số 4 domain `DOM_THAM_DINH`, `DOM_VAN_THU`, `DOM_IT_ATTT`, `DOM_THAM_MUU`); Bảng 1.4 (Khung 4 mức xếp loại danh hiệu, quy tắc áp trần 20% Xuất sắc, trần người đứng đầu và chế tài điều chuyển cán bộ yếu kém 2 quý liên tiếp per khoản 8.3 HD 05-HD/TU).
+    + **Phần II (Câu 2):** Bảng 2.1 (Ma trận đối soát chứng minh phần mềm đáp ứng 100% 09 nhóm chức năng yêu cầu); Bảng 2.2 (Danh mục 05 tính năng nâng cao đột phá: AI OCR, Sổ tay Đảng viên v348, Webhook DVC, Ký số VGCA, Audit Trail Hash-Chain SHA-256); Sơ đồ 2.1 (ASCII Kiến trúc 3 lớp an toàn Cấp độ 3); Sơ đồ 2.2 (ASCII Phân làn Swimlane 4 cấp thẩm quyền); Sơ đồ 2.3 (ASCII Máy trạng thái 9 bước); Sơ đồ 2.4 (ASCII ERD CSDL); Bảng 2.3 (Danh mục 07 screenshots màn hình kèm route thực tế).
+    + **Phần III (Câu 3):** Bảng 3.1 (Thuyết minh căn cứ pháp lý và thực tiễn xác định Hệ thống Cấp độ 3); Bảng 3.2 (Giải pháp bảo mật kỹ thuật & quản lý toàn diện: PBAC, MFA, AES-256, TLS 1.3, Ký số VGCA, Sao lưu 3-2-1 Air-gapped); Sơ đồ 3.1 (ASCII Quy trình ứng cứu sự cố an ninh mạng 5 bước per Điều 28 Quy định 348-QĐ/BTCTW).
+- **Lệnh kiểm chứng máy thực tế**:
+  - Kiểm tra UTF-8 không BOM: `HasBOM = False`, Dung lượng: 54,798 bytes.
+  - Quét rác thừa: 0 console.log, 0 debug code.
+- **Kết quả nghiệm thu**: Bài làm trả lời trực diện, đầy đủ và sâu sắc toàn bộ 03 câu hỏi đề bài; tối ưu hóa triệt để Bảng biểu định lượng (Tables) và Sơ đồ Text ASCII chuẩn xác, sẵn sàng chuyển đổi sang Slide thuyết trình.

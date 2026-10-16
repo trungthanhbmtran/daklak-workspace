@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Text } from "@/components/ui/typography";
 import { Label } from "@/components/ui/label";
 import { UserCircle2, UserIcon, UsersIcon, X, Loader2, BriefcaseIcon } from "lucide-react";
-import { useAssignTask } from "../../hooks/useTasks";
+import { useAssignTask, useTaskContext } from "../../hooks/useTasks";
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { DepartmentWorkloadRecommendation } from "./department-workload-recommendation";
@@ -34,6 +34,16 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
   // ── Danh sách phòng ban từ API ──
   const { data: orgData } = useOrganizationFlatListQuery(undefined, { enabled: open });
   const departments = useMemo(() => orgData?.data ?? [], [orgData]);
+
+  const { data: contextData } = useTaskContext(
+    {
+      departmentId: selectedDepartmentId && selectedDepartmentId !== "ALL" ? selectedDepartmentId : undefined,
+      assignee: assignee || undefined,
+    },
+    { enabled: open }
+  );
+  const deptLeaders = contextData?.data?.deptLeaders ?? [];
+  const deptStaff = contextData?.data?.deptStaff ?? [];
 
   useEffect(() => {
     if (open) {
@@ -61,34 +71,6 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
     return departments.find((d: any) => String(d.id) === selectedDepartmentId);
   }, [departments, selectedDepartmentId]);
 
-  const departmentEmployees = useMemo(() => {
-    if (!selectedDepartmentId || selectedDepartmentId === "ALL") {
-      return employees;
-    }
-    const numId = Number(selectedDepartmentId);
-    return employees.filter(
-      (e: any) => e.departmentId === numId || e.department?.id === numId
-    );
-  }, [employees, selectedDepartmentId]);
-
-  const { deptLeaders, deptStaff } = useMemo(() => {
-    const leaders: any[] = [];
-    const staff: any[] = [];
-    departmentEmployees.forEach((emp: any) => {
-      const title = (emp.jobTitleName || emp.jobTitle?.name || "").toLowerCase();
-      const isLeader =
-        title.includes("trưởng") ||
-        title.includes("phó") ||
-        title.includes("giám đốc") ||
-        title.includes("chi cục trưởng");
-      if (isLeader) {
-        leaders.push(emp);
-      } else {
-        staff.push(emp);
-      }
-    });
-    return { deptLeaders: leaders, deptStaff: staff };
-  }, [departmentEmployees]);
 
   const handleDepartmentChange = (deptId: string) => {
     setSelectedDepartmentId(deptId);
@@ -279,7 +261,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                     </SelectGroup>
                   )}
 
-                  {departmentEmployees.length === 0 && selectedDepartmentId && (
+                  {deptLeaders.length === 0 && deptStaff.length === 0 && selectedDepartmentId && (
                     <div className="p-3 text-center text-xs text-slate-500">
                       Chưa có dữ liệu nhân sự thuộc phòng ban này. Bạn có thể giao trực tiếp cho cả phòng.
                     </div>

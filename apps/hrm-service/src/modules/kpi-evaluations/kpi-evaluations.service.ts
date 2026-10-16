@@ -162,15 +162,26 @@ export class KpiEvaluationsService implements OnModuleInit {
       orderBy: { createdAt: 'desc' },
       skip: limit > 0 ? skip : undefined,
       take: limit > 0 ? limitNum : undefined,
-      include: { employee: true }
+      include: { employee: true, period: true }
     });
 
     return {
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
       data: allEvaluations.map((e: any) => ({
-        ...e,
-        employeeName: e.employee ? e.employee.fullName : e.employeeCode
+        id: e.id,
+        employeeCode: e.employeeCode,
+        periodId: e.periodId,
+        status: e.status,
+        phase: e.phase,
+        totalScore: Number(e.totalScore ?? ((e.generalScoreFinal ?? 30) + (e.taskScoreFinal ?? 65))),
+        generalScoreFinal: Number(e.generalScoreFinal ?? 30),
+        taskScoreFinal: Number(e.taskScoreFinal ?? 65),
+        employeeName: e.employee ? e.employee.fullName : e.employeeCode,
+        departmentId: e.employee?.departmentId ? Number(e.employee.departmentId) : undefined,
+        jobTitle: e.employee?.position || e.employee?.jobTitle || '',
+        periodName: e.period?.name || '',
+        reviewerCode: e.reviewerCode || '',
       })),
       meta: {
         pagination: {

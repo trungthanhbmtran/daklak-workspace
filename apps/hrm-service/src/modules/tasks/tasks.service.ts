@@ -128,12 +128,39 @@ export class TasksService {
     let statusFilter: any = {};
     if (query.status && query.status !== 'ALL') {
       statusFilter = { status: query.status };
+    } else if (query.status === 'ALL') {
+      statusFilter = {};
     } else if (!query.statsFilter) {
       statusFilter = { isCompleted: false };
     }
 
-    if (query.role && query.currentEmployeeCode) {
+    if (query.role && query.currentEmployeeCode && query.role !== 'MY_TASKS') {
       conditions.push({ participants: { some: { employeeCode: query.currentEmployeeCode, participantRole: query.role } } });
+    }
+
+    if (query.filter === 'MY_TASKS' || query.role === 'MY_TASKS') {
+      const code = query.assigneeCode || query.currentEmployeeCode;
+      if (code) {
+        conditions.push({
+          OR: [
+            { participants: { some: { employeeCode: code } } },
+            { creatorEmployeeCode: code },
+          ],
+        });
+      }
+    }
+
+    if (query.filter === 'COMPLETED_THIS_MONTH') {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      statusFilter = { isCompleted: true };
+      conditions.push({
+        OR: [
+          { completedAt: { gte: firstDay, lte: lastDay } },
+          { updatedAt: { gte: firstDay, lte: lastDay } },
+        ],
+      });
     }
 
     if (query.assigneeCode === 'UNASSIGNED') {
@@ -145,7 +172,7 @@ export class TasksService {
       });
     }
 
-    if (query.assigneeCode && query.assigneeCode !== 'UNASSIGNED') {
+    if (query.assigneeCode && query.assigneeCode !== 'UNASSIGNED' && query.filter !== 'MY_TASKS' && query.role !== 'MY_TASKS') {
       conditions.push({ participants: { some: { employeeCode: query.assigneeCode, participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE } } });
     }
 

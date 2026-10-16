@@ -138,6 +138,16 @@ message EvaluationResponse {
   string employeeCode = 2;
   int32 periodId = 3;
   string status = 4;
+  optional float totalScore = 5;
+  optional float generalScoreFinal = 6;
+  optional float taskScoreFinal = 7;
+  optional string phase = 8;
+  optional string employeeName = 9;
+  optional string reviewerCode = 10;
+  optional int32 departmentId = 11;
+  optional string departmentName = 12;
+  optional string jobTitle = 13;
+  optional string periodName = 14;
 }
 
 message FindEvaluationsRequest {
@@ -146,6 +156,9 @@ message FindEvaluationsRequest {
   bool isAdmin = 3;
   bool isFetchingOwn = 4;
   repeated int32 callerDescendantUnitIds = 5;
+  optional int32 page = 6;
+  optional int32 limit = 7;
+  optional int32 periodId = 8;
 }
 
 message EvaluationsResponse {

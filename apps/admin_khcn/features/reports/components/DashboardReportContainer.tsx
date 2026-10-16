@@ -8,7 +8,7 @@ import {
 } from "../utils/dashboardAssignment";
 
 interface DashboardReportContainerProps {
-  dashboardKey: "documents" | "tasks" | "posts" | "admin" | "hub";
+  dashboardKey: "documents" | "tasks" | "posts" | "admin";
   defaultReportCode?: string;
   defaultTitle?: string;
   defaultDescription?: string;

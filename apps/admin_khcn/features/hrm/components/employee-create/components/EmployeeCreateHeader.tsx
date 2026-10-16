@@ -7,16 +7,26 @@ import { Heading } from "@/components/ui/typography";
 
 interface EmployeeCreateHeaderProps {
   isSubmitting: boolean;
-  isUploading: boolean;
+  isUploading?: boolean;
   onCancel: () => void;
   onSubmit: () => void;
+  title?: string;
+  subtitle?: string;
+  badgeText?: string;
+  submitButtonText?: string;
+  submitButtonLoadingText?: string;
 }
 
 export function EmployeeCreateHeader({
   isSubmitting,
-  isUploading,
+  isUploading = false,
   onCancel,
   onSubmit,
+  title = "Tạo mới Hồ sơ Cán bộ & Vị trí việc làm",
+  subtitle = "Thêm mới nhân sự",
+  badgeText = "HRM & KPI VTVL",
+  submitButtonText = "Lưu hồ sơ",
+  submitButtonLoadingText = "Đang lưu...",
 }: EmployeeCreateHeaderProps) {
   return (
     <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-8 py-3.5 shadow-xs transition-all">
@@ -38,16 +48,16 @@ export function EmployeeCreateHeader({
                 variant="outline"
                 className="text-[11px] font-semibold text-blue-700 bg-blue-50 border-blue-200 px-2 py-0.5 rounded-md shrink-0"
               >
-                HRM & KPI VTVL
+                {badgeText}
               </Badge>
               <span className="text-slate-300">/</span>
-              <span className="text-xs text-slate-500 font-medium truncate">Thêm mới nhân sự</span>
+              <span className="text-xs text-slate-500 font-medium truncate">{subtitle}</span>
             </div>
             <Heading
               level="h3"
               className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate flex items-center gap-2 mt-0.5"
             >
-              Tạo mới Hồ sơ Cán bộ & Vị trí việc làm
+              {title}
             </Heading>
           </div>
         </div>
@@ -71,12 +81,12 @@ export function EmployeeCreateHeader({
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Đang lưu...</span>
+                <span>{submitButtonLoadingText}</span>
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                <span>Lưu hồ sơ</span>
+                <span>{submitButtonText}</span>
               </>
             )}
           </Button>

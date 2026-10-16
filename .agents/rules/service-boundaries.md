@@ -15,3 +15,11 @@ Khi chạy song song, ownership phải được chốt trong kế hoạch đã d
   - Backend thường gồm apps/api-gateway/, apps/*-service/, prisma/, libs/ và packages/proto/.
   - Frontend thường gồm apps/admin_khcn/, apps/portal-goverment/ và packages/ui/.
 - Shared contract/code/config được nhiều phía sử dụng phải có đúng một owner trong plan. Không lane nào tự sửa file ngoài ownership đã duyệt; thay đổi ownership cần coordinator cập nhật plan và review lại.
+
+## 3. Nguyên tắc Kiến trúc Granular Endpoints & Least Data (Chống Monolithic Mega-Fetch)
+- **Granular API Design:** Mỗi microservice và API Gateway phải cung cấp các endpoint độc lập, tách nhỏ theo đúng phạm vi dữ liệu nghiệp vụ thay vì một monolithic endpoint gom tất cả quan hệ.
+- **Chi tiết thực thể vs Dữ liệu con/Tabs:**
+  - Endpoint chi tiết chính (`GET /entities/:id`): Chỉ trả về thông tin thực thể cốt lõi, không chứa các danh sách con có kích thước động hoặc lịch sử.
+  - Các danh sách con (Sub-items, Steps, History/Audit Log, Comments, KPI/Evaluations): Phải có endpoint độc lập riêng (`GET /entities/:id/sub-items`, `GET /entities/:id/history`...).
+- **Giới hạn truy vấn (Bounded Queries):** Mọi endpoint danh sách lịch sử/nhật ký phải có giới hạn (`take: 100`) hoặc phân trang rõ ràng, không bao giờ truy vấn `findMany` không giới hạn gây cạn kiệt bộ nhớ hoặc nghẽn I/O.
+

@@ -183,17 +183,31 @@ export function EmbeddedReportWidget({
       !yField ||
       yField === "id" ||
       yField === "count" ||
-      xField === "ranking" ||
-      xField === "approvedRank" ||
-      xField === "urgency" ||
-      xField === "status";
+      ((xField === "ranking" || xField === "approvedRank" || xField === "urgency" || xField === "status") &&
+        (!yField || yField === "id" || yField === "count" || yField === xField));
+
+    const isSumMetric =
+      Boolean(yField) &&
+      (yField.toLowerCase().includes("tasks") ||
+        yField.toLowerCase().includes("total") ||
+        yField.toLowerCase().includes("amount") ||
+        yField.toLowerCase().includes("quantity"));
 
     dataset.forEach((row) => {
       const rawKey = row[xField];
-      const key =
-        rawKey != null && String(rawKey).trim() !== ""
-          ? fixMojibake(String(rawKey))
-          : "Khác / Chưa phân loại";
+      if (rawKey == null) return;
+      const strRawKey = String(rawKey).trim();
+      if (
+        strRawKey === "" ||
+        strRawKey === "—" ||
+        strRawKey === "-" ||
+        strRawKey.toLowerCase() === "n/a" ||
+        strRawKey.toLowerCase() === "null"
+      ) {
+        return;
+      }
+
+      const key = fixMojibake(strRawKey);
 
       const current = map.get(key) || { value: 0, count: 0 };
       current.count += 1;
@@ -214,6 +228,8 @@ export function EmbeddedReportWidget({
     const result = Array.from(map.entries()).map(([label, stats]) => ({
       label,
       value: isCountMetric
+        ? stats.value
+        : isSumMetric
         ? stats.value
         : Math.round((stats.value / (stats.count || 1)) * 10) / 10,
       count: stats.count,

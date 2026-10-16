@@ -30,7 +30,7 @@ const CUID_TAIL_RE = /\/c[a-z0-9]{24}$/i;
 const STATS_RE = /\/(reports|stats|metrics|dashboard|kpis)/i;
 
 const NON_LIST_CONTAINS = ['/code/', '/detail/', '/staffing-report', '/kpi-forms/', '/snapshot'];
-const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles', '/global-settings', '/xml', '/snapshot'];
+const NON_LIST_SUFFIXES = ['/scope', '/staffing', '/subtree', '/info', '/job-titles', '/global-settings', '/xml', '/snapshot', '/personal-workbench', '/task-context'];
 
 /* -------------------------------------------------------------------------- */
 /* deepClean                                                                   */

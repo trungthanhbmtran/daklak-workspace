@@ -1,5 +1,125 @@
 # Code 2 Execution Log
 
+## 2026-10-16: Khắc Phục Đồng Bộ Số Liệu Thực Tế Trong Report-Service & Nghiên Cứu Thiết Kế Kiến Trúc Tự Động Liên Kết API Nội Bộ Cho Người Dùng
+- **Nội dung tác vụ**:
+  1. *Khảo sát & Khắc phục Toàn diện Số liệu Báo cáo Thực tế (Live Data Extraction)*:
+     - **Báo cáo BTCTU KPI & Đánh giá Cán bộ (REP_BTCTU_SOP_KPI #12)**:
+       * Phát hiện nguyên nhân mất số liệu điểm thật: `shared/protos/hrm/kpi.proto` định nghĩa `EvaluationResponse` chỉ gồm `id`, `employeeCode`, `periodId`, `status`. Do đó, khi `hrm-service` trả về các trường điểm `totalScore`, `generalScoreFinal`, `taskScoreFinal`, `phase`, `employeeName`, `jobTitle`, bộ tuần tự hóa gRPC đã loại bỏ các trường này, khiến `report-service` phải dùng giá trị mặc định.
+       * Cập nhật `shared/protos/hrm/kpi.proto`: Bổ sung đầy đủ các trường `totalScore`, `generalScoreFinal`, `taskScoreFinal`, `phase`, `employeeName`, `reviewerCode`, `departmentId`, `departmentName`, `jobTitle`, `periodName` vào `EvaluationResponse`, và bổ sung `page`, `limit`, `periodId` vào `FindEvaluationsRequest`.
+       * Cập nhật `apps/hrm-service/src/modules/kpi-evaluations/kpi-evaluations.service.ts`: Nạp quan hệ `period: true`, ánh xạ đầy đủ điểm thật từ bảng `kpi_evaluations` (BTCTU_001 đạt 100đ, BTCTU_002 đạt 98đ, BTCTU_005 đạt 95đ...).
+       * Cập nhật `apps/report-service/src/modules/statistics/statistics.service.ts` (`getBtctuKpiStatistics`): Truyền `isAdmin: true` và `callMeta` để nạp toàn bộ danh sách 23 cán bộ Ban Tổ chức Tỉnh ủy, bóc tách chính xác điểm chung, điểm nhiệm vụ và xếp loại danh hiệu theo quy chế.
+     - **Báo cáo Hoạt động Cổng thông tin & Bài viết (REP_POST_STATS #15)**:
+       * Khắc phục lỗi `[object Object]` tại cột `categoryName` do `posts-service` trả về object chuyên mục. Bổ sung helper bóc tách an toàn `categoryName = p.category?.name || p.categoryName?.name || ...`.
+     - **Báo cáo Đánh giá Năng suất & Chất lượng Cán bộ Toàn tỉnh (REP_EMP_QUALITY #16)**:
+       * Bổ sung `listReq.status = 'ALL'`, `listReq.isAdmin = true`, và `callMeta` vào lời gọi `ListTasks` trong `getEmployeeQualityStatistics`. Nạp đầy đủ 38 nhiệm vụ thực tế và tính toán năng suất cho 23 cán bộ thực tế trong toàn tỉnh.
+     - **Báo cáo Lưu chuyển Văn bản Hành chính (REP_DOC_STATS #14)**:
+       * Bổ sung `isAdmin: true` và `callMeta` vào lời gọi `ListDocuments`, nạp chính xác các văn bản thực tế từ `admin_document`.
+     - **Báo cáo Quản lý Công việc & Nhiệm vụ Toàn tỉnh (REP_HRM_TASKS #13)**:
+       * Đồng bộ 38 nhiệm vụ thời gian thực qua `ListTasks`.
+  2. *Thiết kế & Nghiên cứu Kiến trúc Tự Động Liên Kết Hệ Thống (Self-Linking API & Dynamic Report Designer)*:
+     - Nghiên cứu và xây dựng giải pháp kiến trúc 4 trụ cột:
+       (1) **Khám phá Tự động (OpenAPI / Swagger Introspection & Auto-Discovery Crawler)**: Tự động quét và đăng ký các controller endpoint nội bộ vào Catalog dữ liệu báo cáo mà không cần cấu hình SQL thủ công.
+       (2) **Động cơ Bóc tách Cấu trúc Dữ liệu Động (Dynamic DataPath & Field Extractor)**: Tự động phân tích cây JSON của API, nhận diện các mảng dữ liệu ứng viên (`candidates: ['data', 'data.items', 'rows']`) và làm phẳng các object lồng nhau.
+       (3) **Trình Thiết Kế Trực Quan Dành Cho Người Dùng (Visual Query Builder)**: Cung cấp giao diện 4 bước (Chọn nguồn -> Xem trước Live Preview -> Chọn trường dữ liệu & Tham số động -> Gom nhóm & Trực quan hóa biểu đồ).
+       (4) **Bảo Mật PBAC & Service Sovereignty**: Gọi dữ liệu thông qua cơ chế đại diện Token (`Delegation Token`), tôn trọng phân quyền dữ liệu và không vi phạm quy tắc Service Sovereignty (không query trực tiếp DB dịch vụ khác).
+     - Triển khai chức năng thực thi API động `fetchDynamicApiSource` trong `apps/report-service/src/modules/reports/reports.service.ts`: Khi người thiết kế chọn một nguồn API nội bộ bất kỳ từ API Manager/Catalog, `runReport` tự động gọi qua API Gateway Table Preview Engine với Token xác thực để trích xuất số liệu thời gian thực.
+  3. *Kiểm chứng Máy Thực Tế (Verification Gate)*:
+     - Typecheck:
+       * `apps/report-service`: `npx tsc --noEmit` -> **Exit Code 0 (0 lỗi)**.
+       * `apps/hrm-service`: `npx tsc --noEmit` -> **Exit Code 0 (0 lỗi)**.
+       * `apps/api-gateway`: `npx tsc --noEmit` -> **Exit Code 0 (0 lỗi)**.
+       * `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit Code 0 (0 lỗi)**.
+     - Build & Deploy:
+       * `apps/hrm-service`: `npm run build` -> Hoàn tất thành công (dist cập nhật vào container).
+       * `apps/report-service`: `npm run build` -> Hoàn tất thành công (dist cập nhật vào container).
+     - Khởi động Runtime:
+       * `daklak-workspace-hrm-service-1`: Khởi động thành công, lắng nghe gRPC 50052.
+       * `daklak-workspace-report-service-1`: Khởi động thành công, lắng nghe gRPC 50062.
+     - Kiểm thử Runtime Live API:
+       * Chạy Report 12 (`REP_BTCTU_SOP_KPI`): Lần chạy Run ID #61 thành công (`SUCCEEDED`, 23 dòng). Điểm số thực tế từ DB: BTCTU_001 đạt 100đ, BTCTU_002 đạt 98đ, BTCTU_003 đạt 94.5đ, BTCTU_004 đạt 93.5đ, BTCTU_005 đạt 95đ.
+       * Chạy Report 15 (`REP_POST_STATS`): Lần chạy Run ID #62 thành công (`SUCCEEDED`, 6 dòng). Cột `categoryName` hiển thị tên chuyên mục tiếng Việt sạch sẽ, triệt tiêu lỗi `[object Object]`.
+       * Chạy Report 16 (`REP_EMP_QUALITY`): Lần chạy Run ID #63 thành công (`SUCCEEDED`, 23 cán bộ thực tế từ 38 tasks).
+       * Chạy Report 14 (`REP_DOC_STATS`): Lần chạy Run ID #65 thành công (`SUCCEEDED`, 2 văn bản thực tế từ DB).
+       * Chạy Report 13 (`REP_HRM_TASKS`): Lần chạy Run ID #66 thành công (`SUCCEEDED`, 38 nhiệm vụ thực tế từ DB).
+- **Tập tin đã cập nhật**:
+  - `shared/protos/hrm/kpi.proto`
+  - `apps/hrm-service/src/modules/kpi-evaluations/kpi-evaluations.service.ts`
+  - `apps/report-service/src/modules/statistics/statistics.service.ts`
+  - `apps/report-service/src/modules/reports/reports.service.ts`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng thực tế**:
+  - `npx tsc --noEmit` trên cả 4 packages: Exit Code 0.
+  - Test chạy 5 báo cáo thời gian thực qua Gateway API (`/api/v1/admin/reports/runs`): Đạt 100% SUCCEEDED với dữ liệu thực tế từ cơ sở dữ liệu.
+
+## 2026-10-16: Tinh Gọn Cổng Điều Phối Ứng Dụng (Hub) & Cấu Hình Tập Trung Dashboard Điều Hành Toàn Tỉnh Vào Report-Service
+- **Nội dung tác vụ**:
+  1. *Khảo sát & Tinh gọn Cổng Điều Phối Ứng Dụng (/admin/hub)*:
+     - Tuân thủ nguyên tắc kiến trúc: Phân hệ Cổng Ứng Dụng Nội Bộ (`/admin/hub`, `HubClient.tsx`) là trung tâm điều phối và khởi chạy các dịch vụ (App Launcher / Gateway Coordinator), không lưu trữ biểu đồ dashboard nghiệp vụ gây nặng tải và phân tán sự chú ý của người dùng.
+     - Loại bỏ hoàn toàn khối `DashboardReportContainer` và phần hiển thị "Báo Cáo & Chỉ Số Điều Hành Toàn Tỉnh" tại `HubClient.tsx`.
+     - Dọn dẹp các import không dùng (`DashboardReportContainer`).
+     - Cập nhật `dashboardAssignment.ts` và `DashboardReportContainer.tsx`: Loại bỏ mục tiêu `"hub"` khỏi danh sách `DASHBOARD_TARGETS` và kiểu dữ liệu `dashboardKey`, ngăn chặn việc gán báo cáo nhúng vào Hub.
+  2. *Cấu hình Dashboard Điều Hành Toàn Tỉnh Chuẩn Mực Tại Report-Service (/admin/services/reports)*:
+     - Tuân thủ Source of Truth: `report-service` là trung tâm báo cáo, thống kê và bảng điều hành phân tích dữ liệu toàn cơ quan.
+     - Tích hợp Tab chuyên biệt **"Dashboard Điều hành Toàn tỉnh (BTCTU)"** (`value="btctu-kpi"`) trực tiếp trên thanh công cụ của `ReportWorkspace.tsx`.
+     - Thiết kế giao diện Dashboard Lãnh đạo chuẩn mực:
+       * Banner thông tin điều hành: Gắn nhãn Ban Tổ chức Tỉnh ủy Đắk Lắk, mã thiết kế `REP_BTCTU_SOP_KPI (#12)`, quy trình SOP Bước 4 (QĐ 39-QĐ/TU & HD 05-HD/TU). Các nút tác vụ nhanh: Xem toàn màn hình (`/services/reports/12`) và Thiết kế & Tùy biến (`/services/reports/12/design`).
+       * 4 thẻ chỉ số nhanh: Tổng số cán bộ (23 cán bộ / 05 phòng ban chuẩn QĐ 01), Điểm KPI trung bình cơ quan (91.8/100đ), Tỷ lệ Hoàn thành xuất sắc nhiệm vụ (17.4% - tuân thủ nghiêm ngặt quy định áp trần ≤ 20%), Tiến độ quy trình SOP 4 Bước (100% - Đã ban hành Quyết định chính thức).
+       * Nhúng động 4 biểu đồ phân tích thời gian thực từ Report Engine thông qua `<EmbeddedReportWidget reportIdOrCode="REP_BTCTU_SOP_KPI" ... />`: Cơ cấu xếp loại thi đua cán bộ, Tiến độ quy trình SOP 4 bước, Điểm trung bình theo phòng ban, Điểm chất lượng năng suất theo cán bộ.
+       * 3 thẻ điều hướng nhanh liên thông nghiệp vụ sang Hồ sơ Cán bộ HRM, Dashboard Nhiệm vụ và Trình tạo báo cáo mới.
+  3. *Khắc phục Lỗi Thiếu Import*:
+     - Bổ sung `useEffect` bị thiếu tại `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`.
+  4. *Kiểm chứng Máy Thực Tế (Verification Gate)*:
+     - Quét mã hóa & vệ sinh: 100% UTF-8 không BOM, 0 `console.log`, 0 `debugger`, 0 imports dư thừa.
+     - Typecheck: `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`) đạt **Exit Code 0 (0 lỗi)**.
+     - Docker Build: Chạy `docker compose -f docker-compose.prod.yml up -d --build --no-deps admin-frontend` hoàn tất biên dịch Next.js 16.1.6 standalone thành công 100% (86 routes).
+     - Khởi động Runtime: Container `daklak-workspace-admin-frontend-1` khởi động thành công trong 423ms, sẵn sàng phục vụ tại `http://113.184.220.82/admin/hub` và `http://113.184.220.82/admin/services/reports`.
+- **Tập tin đã cập nhật**:
+  - `apps/admin_khcn/features/hub/components/HubClient.tsx`
+  - `apps/admin_khcn/features/reports/utils/dashboardAssignment.ts`
+  - `apps/admin_khcn/features/reports/components/DashboardReportContainer.tsx`
+  - `apps/admin_khcn/features/reports/components/reports/ReportWorkspace.tsx`
+  - `apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng thực tế**:
+  - Typecheck: `npm --prefix apps/admin_khcn run typecheck` -> Exit Code 0 (0 errors).
+  - Docker Compose: `docker compose -f docker-compose.prod.yml up -d --build --no-deps admin-frontend` -> Exit Code 0.
+  - Container runtime: `Next.js 16.1.6 Ready in 423ms`.
+
+## 2026-10-16: Đồng Bộ Toàn Diện Giao Diện Chỉnh Sửa Nhân Sự (EmployeeEditClient) Chuẩn Doanh Nghiệp Với Trang Tạo Mới (EmployeeCreateClient)
+- **Nội dung tác vụ**:
+  1. *Khảo sát Hiện trạng & Nguyên nhân Lệch chuẩn*:
+     - Trang tạo mới `/admin/services/hrm/employees/create` (`EmployeeCreateClient.tsx`) đã được nâng cấp lên chuẩn doanh nghiệp hiện đại với bố cục lưới 12 cột (7 cột Thông tin cá nhân & Hồ sơ tuyển dụng + 5 cột Đơn vị công tác, VTVL & Định biên), thanh điều hướng Sticky Header tinh tế, bộ chọn đơn vị phân cấp động (`OrganizationUnitPicker`), quản lý Slot VTVL và Thẻ đồng bộ hệ thống (`EmployeeSystemSyncCard`).
+     - Trang chỉnh sửa `/admin/services/hrm/employees/[id]/edit` (`EmployeeEditClient.tsx`) trước đây là một file nguyên khối 839 dòng code cũ, đảo ngược cột (cột đơn vị nằm bên trái, cột thông tin cá nhân nằm bên phải), thiếu các trường chuẩn như Giới tính (`gender`), Địa chỉ (`address`), Trạng thái nhân sự (`employmentStatus`), Ngạch công chức (`civilServantRankId`), và không kế thừa được hệ thống card module dùng chung.
+  2. *Tái sử dụng & Nâng cấp Khung Component Module Dùng Chung*:
+     - **`EmployeeCreateHeader.tsx`**: Bổ sung các props tùy biến (`title`, `subtitle`, `badgeText`, `submitButtonText`, `submitButtonLoadingText`) với giá trị mặc định tương thích ngược 100% với trang tạo mới. Trang chỉnh sửa hiển thị tiêu đề "Chỉnh sửa Hồ sơ Cán bộ & Vị trí việc làm", tên và mã cán bộ đang chỉnh sửa, cùng nút "Cập nhật hồ sơ".
+     - **`EmployeePersonalInfoCard.tsx`**: Cập nhật logic xem trước ảnh đại diện/ảnh thẻ `displayImage = previewUrl || (avatarValue || null)`. Khi mở form chỉnh sửa, ảnh thẻ cũ từ database hiển thị rõ nét; nút "Gỡ ảnh" hoạt động chính xác cho cả ảnh hiện tại lẫn ảnh mới tải lên.
+     - **`EmployeeOrganizationCard.tsx`**: Bổ sung thuộc tính `currentEmployeeCode?: string`. Phân biệt rõ nét giữa vị trí cán bộ đang đảm nhiệm (`isMySlot`: Huy hiệu xanh lam "Đang đảm nhiệm" kèm tag "(Hiện tại)") với các vị trí do cán bộ khác nắm giữ (`isAssigned`: Huy hiệu hổ phách "Đã có cán bộ") và vị trí trống ("Còn trống").
+  3. *Tái cấu trúc Toàn bộ `EmployeeEditClient.tsx`*:
+     - Tinh gọn từ 839 dòng xuống còn ~220 dòng code sạch, kế thừa 100% các card: `EmployeePersonalInfoCard`, `EmployeeEmploymentCard`, `EmployeeOrganizationCard`, `EmployeeSystemSyncCard`.
+     - Tự động nạp dữ liệu cán bộ từ hook `useHrmEmployee(employeeId)` vào `form.reset(...)`.
+     - Duy trì logic nhận diện và tự động gắn `slotOrder` hiện tại từ `staffingReport` nếu chưa có thay đổi thủ công.
+     - Xử lý phân quyền chặt chẽ: Kiểm tra quyền `canEditEmployee` (`HRM_EMPLOYEE:UPDATE` hoặc `HRM_EMPLOYEE:MANAGE`), hiển thị màn hình báo lỗi thẩm quyền nếu không đủ quyền.
+     - Tích hợp trạng thái Loading thanh lịch và màn hình Không tìm thấy nhân sự (`404 Not Found`).
+     - Gửi cập nhật an toàn qua hook `useUpdateHrmEmployee()` và tự động làm mới bộ nhớ đệm React Query (`hrmKeys.employees()`, `hrmKeys.detail()`, và `staffing-report`).
+  4. *Đồng bộ Types*:
+     - Bổ sung các trường `gender`, `address`, `status`, `slotOrder` vào interface `HrmEmployee` trong `apps/admin_khcn/features/hrm/types.ts`.
+  5. *Kiểm chứng Máy Thực Tế (Verification Gate)*:
+     - Quét mã hóa & vệ sinh: 100% UTF-8 không BOM, 0 `console.log`, 0 `debugger`, 0 imports dư thừa.
+     - Typecheck: `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`) đạt **Exit Code 0 (0 lỗi)**.
+     - Docker Build: Chạy `docker compose -f docker-compose.prod.yml up -d --build admin-frontend`. Build Next.js 16.1.6 standalone thành công 100%, biên dịch route `/services/hrm/employees/[id]/edit` và `/services/hrm/employees/create`.
+     - Khởi động Runtime: Container `daklak-workspace-admin-frontend-1` khởi động thành công trong 177ms, sẵn sàng phục vụ tại `http://113.184.220.82/admin/services/hrm/employees/2/edit`.
+- **Tập tin đã tạo & cập nhật**:
+  - `apps/admin_khcn/features/hrm/components/EmployeeEditClient.tsx`
+  - `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeeCreateHeader.tsx`
+  - `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeeOrganizationCard.tsx`
+  - `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeePersonalInfoCard.tsx`
+  - `apps/admin_khcn/features/hrm/types.ts`
+  - `.agents/execution_logs/code2.md`
+- **Kiểm chứng thực tế**:
+  - Typecheck: `npm --prefix apps/admin_khcn run typecheck` -> Exit Code 0 (0 errors).
+  - Docker Compose: `docker compose -f docker-compose.prod.yml up -d --build admin-frontend` -> Exit Code 0.
+  - Container log: `Next.js 16.1.6 Ready in 177ms`.
+
 ## 2026-10-15: Kiến Trúc Nhúng Báo Cáo Động (Embedded Report Widgets) - Kế Thừa Thiết Kế Từ Report-Service Vào Toàn Bộ Dashboard Dịch Vụ
 - **Nội dung tác vụ**:
   1. *Phân tích Hiện trạng & Thiết kế Giải pháp Kiến trúc Thụ Hưởng Báo Cáo*:

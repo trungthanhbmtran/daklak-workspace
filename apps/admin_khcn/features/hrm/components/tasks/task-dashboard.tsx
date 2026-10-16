@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useTaskStats } from "../../hooks/useTasks";
 import { DashboardReportContainer, EmbeddedReportWidget } from "@/features/reports";
 import { downloadReportRunExport, useGetReportDefinitions } from "@/features/reports/api";
+import { PersonalTaskWorkbench } from "./personal-task-workbench";
 
 export function TaskDashboard() {
   const { data: statsResponse, isLoading } = useTaskStats({ status: undefined, search: undefined });
@@ -109,17 +110,7 @@ export function TaskDashboard() {
       </div>
 
       {activeView === "workbench" ? (
-        <div className="space-y-6 min-w-0">
-          <EmbeddedReportWidget
-            reportIdOrCode="REP_PERSONAL_WORKBENCH"
-            title="Bàn làm việc Nhiệm vụ Cá nhân & Điều phối"
-            description="Báo cáo phân tích động kế thừa từ Report Service: Chỉ số năng suất, xu hướng 6 tháng và cân đối tải phòng ban"
-            columns={2}
-            chartHeight={260}
-            showDetailLink={true}
-            allowToggleType={true}
-          />
-        </div>
+        <PersonalTaskWorkbench />
       ) : (
         <div className="space-y-6 min-w-0">
           {/* Quick Stat Cards */}
