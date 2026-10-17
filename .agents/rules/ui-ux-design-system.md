@@ -218,3 +218,63 @@ Mọi Coder Agent (Code 1, Code 2, Code 3) trước khi đóng task bắt buộc
 3. [ ] **Modal & Drawer:** Mở tất cả Modal và Sheet trên mobile; nút đóng (`X`) và nút thao tác lưu (`Lưu / Hủy`) có luôn nằm trong tầm nhìn của người dùng không?
 4. [ ] **Tabs:** Trên màn hình hẹp, tất cả các Tab có thể click/chạm vào được không? Chữ trong tab có bị bẻ gãy bung khỏi khung nền bo góc không?
 5. [ ] **Bảng biểu:** Bảng dữ liệu có thể cuộn ngang mượt mà mà không làm xô lệch các thành phần khác trên trang không?
+
+
+---
+
+## 6. TỐI ƯU HÓA TẢI MÃ NGUỒN GIAO DIỆN & TÁCH RỜI BUNDLE (ROUTE CODE-SPLITTING & DYNAMIC IMPORTS)
+
+Để đảm bảo hiệu năng tải trang nhanh, mượt mà trên cả thiết bị di động kết nối 4G ở vùng sâu vùng xa, hệ thống áp dụng nguyên tắc **"Màn hình nào chỉ tải phần code của màn hình đó"**.
+
+### A. Tách Rời Thư Viện Nặng Bằng `next/dynamic`
+Tuyệt đối không đóng gói (bundle) sẵn các thư viện nặng vào gói tải ban đầu nếu màn hình đó chỉ là danh sách tổng hợp. Bắt buộc dùng Dynamic Import có fallback Skeleton:
+
+```tsx
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// 1. Trình soạn thảo văn bản Rich Text (Lexical / TipTap / TinyMCE)
+const RichTextEditor = dynamic(() => import('@/components/shared/editor/RichTextEditor'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-64 w-full rounded-xl" />
+});
+
+// 2. Biểu đồ Dashboard & Thống kê (Recharts / ApexCharts)
+const AnalyticsChart = dynamic(() => import('@/features/reports/components/AnalyticsChart'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-72 w-full rounded-xl" />
+});
+
+// 3. Trình vẽ sơ đồ & Thiết kế quy trình (ReactFlow / Workflow Canvas)
+const WorkflowCanvas = dynamic(() => import('@/features/workflow/components/WorkflowCanvas'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[500px] w-full rounded-xl" />
+});
+```
+
+### B. Tải Hộp Thoại (Modal / Drawer / Sheet) Theo Tương Tác Người Dùng (Deferred Interaction Loading)
+Không import tĩnh các Modal tạo mới / sửa đổi phức tạp vào đầu trang danh sách. Chỉ tải gói mã nguồn của Modal khi người dùng thực sự click vào nút mở:
+
+```tsx
+// Khai báo Lazy Modal ở ngoài component
+const TaskCreateDialog = dynamic(
+  () => import('@/features/hrm/components/tasks/create-task-dialog').then(mod => mod.CreateTaskDialog),
+  { ssr: false }
+);
+
+// Trong Component Client:
+const [isOpen, setIsOpen] = useState(false);
+
+return (
+  <>
+    <Button onClick={() => setIsOpen(true)}>+ Giao việc mới</Button>
+    {isOpen && (
+      <TaskCreateDialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+      />
+    )}
+  </>
+);
+```
+*Lợi ích:* Giảm ngay từ 200KB - 500KB JavaScript tải lần đầu của trang danh sách, chỉ khi người dùng click "+ Giao việc mới" thì trình duyệt mới tải file JS chunk của hộp thoại về thực thi.

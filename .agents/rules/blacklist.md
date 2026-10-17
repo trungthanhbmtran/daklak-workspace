@@ -113,3 +113,14 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
 ---
 *(AI Agent lưu ý: Thường xuyên bổ sung các case thực tế vào file này trong quá trình làm việc)*
 
+
+
+## 7. Lỗi Đóng Gói Bundle & Tải Dư Thừa Mã Nguồn (Bundle Bloat & Mega-Bundle Anti-Pattern)
+### ❌ Vi phạm: Import tĩnh các thư viện hoặc hộp thoại nặng vào Layout/Page chính
+- **Mô tả:** Sử dụng import tĩnh (`import { RichTextEditor } ...`, `import { Recharts } ...`, `import { DocumentUploadModal } ...`, `import * as LucideIcons ...`) vào đầu file của các Page hoặc Component danh sách tổng hợp khi chưa cần dùng đến.
+- **Hậu quả:** Kéo hàng Megabyte JavaScript không cần thiết vào First Load JS của trang, khiến cán bộ cơ sở dùng mạng 4G bị tải trang chậm, giật lag, tốn băng thông và tăng thời gian phản hồi (TTI).
+- **Giải pháp:** Tuân thủ nguyên tắc "Màn hình nào chỉ tải phần code của màn hình đó":
+  1. Sử dụng `next/dynamic` với `{ ssr: false, loading: () => <Skeleton /> }` cho toàn bộ các thư viện nặng (> 30KB: Editor, Chart, Workflow Canvas, PDF Viewer).
+  2. Các Modal/Sheet tạo mới hoặc chỉnh sửa phức tạp BẮT BUỘC chỉ được nạp mã nguồn khi người dùng thực sự click vào nút mở (`open && <LazyModal ... />`).
+  3. Import icon đích danh từ `lucide-react`, cấm import wildcard `* as Icons`.
+  4. Duy trì First Load JS budget dưới **150 KB (gzipped)** cho mỗi route.

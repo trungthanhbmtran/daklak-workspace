@@ -40,6 +40,7 @@
 - [ ] `RUNTIME_VERIFICATION`: Đã kiểm tra behavior của flow/route/API bị sửa trên app/service chạy thật hoặc bằng focused test phù hợp; không chỉ dựa vào typecheck/build.
 - [ ] `REGRESSION_TEST_COVERAGE`: Logic nghiệp vụ mới/bug fix có test focused cho behavior vừa sửa; không dùng mock để bỏ qua logic đang cần kiểm chứng.
 - [ ] `LAZY_MODAL_SHEET`: Dialog/Sheet dùng controlled `open`/`onOpenChange`, có state riêng và mặc định đóng; nội dung nặng/query chỉ mount hoặc load sau khi mở, không fetch lúc page mount khi đang đóng.
+- [ ] `ROUTE_CODE_SPLITTING_DYNAMIC_IMPORT`: Màn hình nào chỉ tải phần code của màn hình đó; các component nặng (>30KB: Rich Text Editor, Biểu đồ Chart, Sơ đồ Workflow/BPMN, PDF Viewer) và các Modal/Sheet lớn bắt buộc dùng `next/dynamic` on-demand kèm Skeleton fallback.
 - [ ] `NO_API_DOUBLE_PREFIX`: Tuyệt đối không chèn thêm `/admin` vào string path gọi API trong `admin_khcn` vì axios đã có sẵn baseURL `/api/v1/admin`.
 
 ## 6. Vệ sinh Mã nguồn & Định dạng File

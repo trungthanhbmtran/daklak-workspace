@@ -171,3 +171,55 @@ API Gateway và Axios Interceptor đã chuẩn hóa 100% cả đầu vào và đ
      - Giữ DOM state đã tải sau lần click đầu tiên để tránh giật lag khi chuyển qua lại giữa các tab, nhưng không bao giờ tải dữ liệu trước khi người dùng click vào tab!
 
 
+
+
+## 10. Tối ưu Hóa Bundle & Tải Mã Nguồn Theo Nhu Cầu Từng Màn Hình (Route-Level Code-Splitting & Dynamic Imports)
+- **Bối cảnh & Vấn đề Cốt lõi (Bundle Bloat Anti-Pattern):**
+  - Mặc định nếu dùng static import (`import { HeavyEditor } from './HeavyEditor'`), Webpack/Turbopack sẽ đóng gói toàn bộ mã nguồn của component đó vào bundle chính của trang.
+  - Khi một màn hình chứa nhiều Modal (Upload, Sửa, Giao việc), biểu đồ (Recharts/ApexCharts), trình soạn thảo (Lexical/TipTap) hoặc Canvas (ReactFlow), người dùng chỉ mở trang danh sách để xem cũng bị ép tải hàng Megabyte mã nguồn JS/CSS không dùng đến. Gây lag trang, tốn băng thông 4G của cán bộ cơ sở và tăng thời gian Time-to-Interactive (TTI).
+- **Nguyên tắc "Màn hình nào chỉ tải phần code của màn hình đó" (Strict Route Isolation):**
+  1. **Page Server Component Mỏng Nhẹ:**
+     - Các file `app/**/page.tsx` giữ vai trò Server Component mỏng nhẹ nhất có thể: Chỉ làm nhiệm vụ đọc params, check auth server-side, nạp metadata và render component Client tương ứng.
+     - Tuyệt đối không import thư viện giao diện nặng hoặc CSS canvas vào `page.tsx`.
+  2. **Bắt Buộc Sử Dụng `next/dynamic` cho các Khối Giao Diện Nặng:**
+     - Mọi component sử dụng các thư viện bên thứ ba có dung lượng lớn (> 30KB) BẮT BUỘC phải được tải bất đồng bộ theo nhu cầu bằng `next/dynamic` kèm fallback Skeleton:
+       * **Trình soạn thảo văn bản phong phú (Rich Text Editors):** Lexical, TipTap, CKEditor, Quill.
+       * **Biểu đồ thống kê & Giám sát (Charts & Dashboards):** Recharts, ApexCharts, Chart.js.
+       * **Trình thiết kế quy trình & Sơ đồ động (BPMN / Flow):** ReactFlow, Canvas Designer, Mermaid renderer.
+       * **Trình đọc/xử lý tài liệu (Document Viewers):** PDF Viewer (PDF.js), Image Cropper, OCR highlighters.
+     - Cú pháp chuẩn hóa:
+       ```tsx
+       import dynamic from 'next/dynamic';
+       import { Skeleton } from '@/components/ui/skeleton';
+
+       const WorkflowCanvas = dynamic(
+         () => import('@/features/workflow/components/WorkflowCanvas'),
+         {
+           ssr: false,
+           loading: () => <div className="h-[600px] w-full animate-pulse bg-slate-100 rounded-xl" />
+         }
+       );
+       ```
+  3. **Tách Rời Mã Nguồn Modal / Drawer (Interaction-Driven Code Loading):**
+     - Các Dialog/Sheet tạo mới, chỉnh sửa phức tạp (như `DocumentUploadModal`, `JobTitleConfigDialog`, `TaskAssignDialog`, `EditMenuModal`) KHÔNG ĐƯỢC nạp sẵn vào bundle chính của trang danh sách.
+     - Sử dụng dynamic import kết hợp điều kiện mở (`open && <LazyModal ... />`):
+       ```tsx
+       const DocumentUploadModal = dynamic(
+         () => import('./DocumentUploadModal').then((mod) => mod.DocumentUploadModal),
+         { ssr: false }
+       );
+
+       // Trong JSX:
+       {isUploadOpen && (
+         <DocumentUploadModal
+           isOpen={isUploadOpen}
+           onClose={() => setIsUploadOpen(false)}
+         />
+       )}
+       ```
+       *Lợi ích:* Trình duyệt CHỈ tải file JS chunk của Modal khi người dùng thực sự click vào nút "Vào sổ / Tải lên", giảm ngay 40% - 60% dung lượng tải trang ban đầu!
+  4. **Kỷ Luật Tree-shaking & Tối Ưu Import Thư Viện:**
+     - Cấm import wildcard `import * as Icons from 'lucide-react'` (làm kéo toàn bộ hàng nghìn SVG icon vào bundle). Bắt buộc import đích danh: `import { FileText, CheckCircle2 } from 'lucide-react'`.
+     - Với thư viện ngày giờ: Dùng các hàm mô-đun hóa của `date-fns` (`format`, `parseISO`), tuyệt đối không dùng `moment.js` cồng kềnh.
+  5. **Ngưỡng Kiểm Soát Dung Lượng (Bundle Budget):**
+     - First Load JS của mỗi route không được vượt quá **150 KB (gzipped)**.
