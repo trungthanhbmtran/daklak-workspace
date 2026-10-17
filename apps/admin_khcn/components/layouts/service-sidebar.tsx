@@ -28,7 +28,7 @@ export function AppSidebar({
   const { menuItems, serviceName, serviceIcon: ServiceIcon, isLoading } = useServiceMenus();
 
   const items = menuItems ?? [];
-  const firstHref = items[0]?.href ?? "/";
+  const firstHref = items[0]?.href ?? "/hub";
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -37,7 +37,7 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href={firstHref}>
+              <Link href={firstHref} prefetch={false}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   {isLoading ? <Loader2 className="size-4 animate-spin" /> : <ServiceIcon className="size-4" />}
                 </div>
@@ -58,7 +58,7 @@ export function AppSidebar({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Đổi ứng dụng">
-                <Link href="/hub">
+                <Link href="/hub" prefetch={false}>
                   <Grid className="size-4" />
                   <span>Về trang Portal (Hub)</span>
                 </Link>
@@ -66,10 +66,10 @@ export function AppSidebar({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Xem Cổng Dân Cư (Portal)">
-                <Link href="/">
+                <a href="/" target="_blank" rel="noopener noreferrer">
                   <Globe className="size-4" />
                   <span>Xem Cổng Dân Cư (Portal)</span>
-                </Link>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

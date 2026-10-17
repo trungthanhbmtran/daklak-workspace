@@ -13,6 +13,7 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
   try {
     const res = await axios.get<T>(url, {
       headers: { Accept: "application/json", Cookie: cookieHeader },
+      timeout: 5000,
       validateStatus: (status) => status >= 200 && status < 300,
     });
     return res.data;

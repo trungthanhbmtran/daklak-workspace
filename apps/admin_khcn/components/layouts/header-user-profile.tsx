@@ -107,8 +107,12 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
           <DialogTitle>Cài đặt Cá nhân</DialogTitle>
         </DialogHeader>
         <div className="py-4 space-y-8">
-          <PersonalAiRouterConfig />
-          <PersonalAiAssistants />
+          {isSettingsOpen && (
+            <>
+              <PersonalAiRouterConfig />
+              <PersonalAiAssistants />
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
