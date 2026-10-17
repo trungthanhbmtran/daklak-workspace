@@ -2,18 +2,11 @@
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Repeat, Briefcase } from "lucide-react";
+import { unwrapData } from "@/lib/api-helper";
 export { translateTaskStatus, getTaskStatusColor } from "./task-utils";
 
 export function unwrapTaskData(res: any): any {
-  if (!res) return null;
-  let target = res?.data ?? res;
-  if (target && typeof target === "object" && target.data && !Array.isArray(target.data)) {
-    target = target.data;
-  }
-  if (target && typeof target === "object" && target.data && !Array.isArray(target.data)) {
-    target = target.data;
-  }
-  return target;
+  return unwrapData(res, null);
 }
 
 export const safeFormatDate = (date: any, fmt: string) => {

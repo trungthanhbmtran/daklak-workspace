@@ -20,21 +20,37 @@
 
 ## 3. Đồng bộ chuẩn dữ liệu Frontend - Backend (API Response)
 
-API Gateway có TransformInterceptor và AllExceptionsFilter; trước khi dựa vào envelope hoặc error shape, kiểm tra implementation hiện tại cùng contract của endpoint bị sửa. TransformInterceptor thường trả success/data/meta/timestamp và có thể giữ message; file/stream không được bọc như JSON, và response có cấu trúc sẵn được normalize theo logic riêng.
+API Gateway sử dụng `TransformInterceptor` và `AllExceptionsFilter` để chuẩn hóa toàn bộ response ra ngoài client. Mọi response HTTP JSON từ Gateway tuân thủ nghiêm ngặt cấu trúc 5 trường chuẩn:
 
-- Axios client trả response body qua lớp Axios; không có response interceptor toàn cục bóc envelope trong axiosInstance hiện tại. Ở API/query layer, dùng unwrapData hoặc typed helper của feature khi contract trả envelope; chỉ unwrap một lần và giữ meta nếu flow cần. Không thêm unwrap vào component một cách ad hoc và không bọc/unwarp hai lần.
+```json
+{
+  "success": true,        // boolean: trạng thái thực thi thành công hay thất bại
+  "data": [...],          // T | T[]: Thực thể dữ liệu thuần túy - DỮ LIỆU LUÔN NẰM TRONG DATA, DÙNG ĐỂ RENDER
+  "meta": {               // PlainObject: Siêu dữ liệu phụ trợ
+    "pagination": { "total": 100, "page": 1, "pageSize": 20, "totalPages": 5 },
+    "actions": { "canEdit": true, "canDelete": false, "canApprove": true },
+    "permissions": [...]  // Danh sách quyền hạn thao tác trên tài nguyên hiện tại
+  },
+  "message": "...",       // string: Thông báo phản hồi cho người dùng (success message hoặc user notice)
+  "timestamp": "..."      // string: Thời gian ISO
+}
+```
+
+- **Quy tắc Phân Định Dữ Liệu Rõ Ràng & Trích Xuất Dữ Liệu 1 Cấp (Single-Level Direct Access):**
+  * **Lấy Data để Render:** Lấy trực tiếp từ `data` (hoặc biến đã unwrap qua custom hook). `data` luôn là thực thể hoặc mảng thực thể thuần túy, TUYỆT ĐỐI không bọc đúp `data.data`.
+  * **Lấy Quyền hành động (Action/Permissions):** Lấy trong `meta.actions` hoặc `meta.permissions` (ví dụ: `res.meta?.actions?.canEdit`, `res.meta?.actions?.canApprove`).
+  * **Lấy Thông tin phân trang:** Lấy trong `meta.pagination` (`meta.pagination.total`, `meta.pagination.page`, `meta.pagination.pageSize`, `meta.pagination.totalPages`).
+  * **Lấy Trạng thái thực thi:** Lấy ở `success` (`res.success === true`).
+  * **Lấy Thông báo phản hồi:** Lấy ở `message` (`res.message` để hiển thị toast notification hoặc alert).
+
+- **Response/Envelope Handling & Dumb Presentation:**
+  * **Axios & API Boundary:** Axios client (`apiClient`) chỉ bóc lớp vỏ thư viện `AxiosResponse`, trả về HTTP body (`ApiResponse = { success, data, meta, message, timestamp }`).
+  * **Custom Hooks / API Service là chốt chặn unwrap DUY NHẤT:** Toàn bộ việc bóc tách envelope phải hoàn thành tại tầng hook/API bằng `select: (res) => unwrapData(res)` hoặc helper chuẩn hóa. TUYỆT ĐỐI KHÔNG để lọt vỏ bọc `{ success, data }` xuống component UI.
+  * **Client UI Component KHÔNG ĐƯỢC bóc tách dữ liệu:** Component chỉ render dữ liệu (`data.map(...)`), cấm viết code phòng thủ ad-hoc như `(data as any)?.data ?? data` hay `Array.isArray(x?.data) ? x.data : ...` hay `res?.data?.data`. Dưới client, chỉ đúng 1 cấp là lấy được dữ liệu render!
+  * `unwrapData` từ `@/lib/api-helper` hỗ trợ unwrap đa tầng và tự động đính kèm getter `.data` cho các component cũ để duy trì tương thích 100%.
 - serverFetch trả JSON body cho caller xử lý theo contract; không mặc định response của serverFetch và apiClient được chuẩn hóa giống nhau.
 - Thất bại HTTP thường theo error payload success=false, message, errorType, code, statusCode, timestamp từ AllExceptionsFilter. Đọc errorType/message theo contract đã xác minh; không tự phân loại lỗi nghiệp vụ bằng statusCode. Với file download, proxy hoặc endpoint đặc biệt, kiểm tra response thực tế và kiểu Axios trước khi xử lý.
 - Kiểu dữ liệu trong api.types.ts là helper/contract phía client, không chứng minh mọi endpoint luôn trả cùng shape. Kiểm tra controller, interceptor, API helper và test của luồng liên quan.
-
-Ví dụ envelope JSON thường gặp:
-
-    {
-      "success": true,
-      "data": [],
-      "meta": {},
-      "timestamp": "..."
-    }
 
 ## 4. Chuẩn hóa Quản lý State
 - **Server State (Dữ liệu từ API)**: Bắt buộc dùng `React Query`. Không được lưu kết quả fetch API vào `Zustand` hay `useState`.

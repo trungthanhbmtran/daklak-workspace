@@ -94,12 +94,7 @@ export function PersonalTaskWorkbench() {
     category: activeCategory !== "ALL" ? activeCategory : undefined,
   });
 
-  const rawWorkbench: any = workbenchRes?.data ?? workbenchRes;
-  const workbenchData: any = Array.isArray(rawWorkbench)
-    ? rawWorkbench[0]
-    : (rawWorkbench?.data && !Array.isArray(rawWorkbench.data) && 'metrics' in rawWorkbench.data)
-      ? rawWorkbench.data
-      : (Array.isArray(rawWorkbench?.data) ? rawWorkbench.data[0] : rawWorkbench);
+  const workbenchData: any = workbenchRes;
 
   const personalMetrics = workbenchData?.metrics || {
     total: 0,

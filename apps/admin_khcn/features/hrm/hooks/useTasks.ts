@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData, skipToken } fr
 import { hrmTasksApi } from "../api";
 import { hrmKeys } from "../keys";
 import { toast } from "sonner";
+import { unwrapData } from "@/lib/api-helper";
 
 // ── Cấu hình cache toàn cục cho task queries ──────────────────────────────────
 const TASKS_STALE_TIME = 30_000;        // 30s: data vẫn fresh, không refetch ngầm
@@ -30,6 +31,7 @@ export function useTasksList(params: any = {}) {
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
+    select: (res) => unwrapData(res, []),
   });
 }
 
@@ -51,6 +53,7 @@ export function useTaskDetail(taskId: number | undefined, options?: { enabled?: 
     enabled: isEnabled,
     staleTime: TASKS_STALE_TIME,
     placeholderData: keepPreviousData,
+    select: (res) => unwrapData(res, null),
   });
 }
 
@@ -84,6 +87,7 @@ export function useTaskSubtasks(taskId: number | undefined, options?: { enabled?
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false,
+    select: (res) => unwrapData(res, []),
   });
 }
 
@@ -350,6 +354,7 @@ export function useTaskHistory(taskId: number | undefined, options?: { enabled?:
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false,
+    select: (res) => unwrapData(res, []),
   });
 }
 
@@ -362,6 +367,7 @@ export function useTaskSteps(taskId: number | undefined, options?: { enabled?: b
     enabled: isEnabled,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
+    select: (res) => unwrapData(res, []),
   });
 }
 
@@ -535,6 +541,7 @@ export function useTaskRecommendations(params: {
     enabled,
     staleTime: 15_000,
     gcTime: 2 * 60_000,
+    select: (res) => unwrapData(res, null),
   });
 }
 
@@ -555,6 +562,7 @@ export function useTaskContext(
     enabled: isEnabled,
     staleTime: 10_000,
     gcTime: 60_000,
+    select: (res) => unwrapData(res, null),
   });
 }
 
@@ -589,6 +597,7 @@ export function usePersonalWorkbench(
     staleTime: 15_000,
     gcTime: 2 * 60_000,
     placeholderData: keepPreviousData,
+    select: (res) => unwrapData(res, null),
   });
 }
 

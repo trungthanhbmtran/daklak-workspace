@@ -161,7 +161,7 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
     priority,
   });
 
-  const serverContext = contextData?.data;
+  const serverContext: any = (contextData as any)?.data ?? contextData;
   const deptLeaders = serverContext?.deptLeaders ?? [];
   const deptStaff = serverContext?.deptStaff ?? [];
 

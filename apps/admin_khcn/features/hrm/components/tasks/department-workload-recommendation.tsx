@@ -50,8 +50,9 @@ export function DepartmentWorkloadRecommendation({
     enabled: Boolean(numDeptId),
   });
 
-  const employees = recData?.data?.topEmployees ?? [];
-  const deptStats = recData?.data?.topDepartments?.[0];
+  const rawRec: any = (recData as any)?.data ?? recData;
+  const employees: any[] = rawRec?.topEmployees ?? [];
+  const deptStats: any = rawRec?.topDepartments?.[0];
 
   // Tính toán thống kê tải phòng ban nếu deptStats chưa đủ
   const stats = useMemo(() => {
@@ -60,7 +61,7 @@ export function DepartmentWorkloadRecommendation({
     let medium = 0;
     let heavy = 0;
 
-    employees.forEach((emp) => {
+    employees.forEach((emp: any) => {
       const load = emp.currentLoad || 0;
       if (load <= 2) light++;
       else if (load <= 5) medium++;
@@ -308,7 +309,7 @@ export function DepartmentWorkloadRecommendation({
 
           {isExpanded && (
             <div className="mt-2 space-y-1.5 max-h-56 overflow-y-auto pr-1 animate-in fade-in duration-150">
-              {employees.map((emp) => {
+              {employees.map((emp: any) => {
                 const isSelected = currentAssigneeCode === emp.employeeCode;
                 const isHeavy = (emp.currentLoad || 0) > 5;
                 const isMedium = (emp.currentLoad || 0) >= 3 && (emp.currentLoad || 0) <= 5;

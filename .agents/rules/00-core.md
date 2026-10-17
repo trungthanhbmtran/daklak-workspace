@@ -40,6 +40,12 @@ Khi thực hiện tác vụ, Lead Agent tuân thủ ranh giới cấu trúc đ�
 2. **Chất lượng thống nhất:** Ràng buộc UI, BaseURL, App Router theo phiên bản package, migration additive, PBAC và gRPC delegation áp dụng cho mọi lane trước nghiệm thu.
 3. **Hai vòng review:** Phản biện kế hoạch trước dispatch; review riêng từng lane sau thực thi, rồi review tích hợp. Typecheck/build đơn lẻ không chứng minh behavior hoạt động.
 ## 8. Nguyên tắc Đồng bộ Dữ liệu & Ràng buộc Boundary (Data Contract & Type Safety Boundary)
+- **Chuẩn hóa Response Envelope & Phân Định Trách Nhiệm Dữ Liệu:** Toàn bộ API trả về cấu trúc chuẩn 5 trường `{ success, data, meta, message, timestamp }`.
+  * `data`: Luôn là thực thể hoặc mảng thực thể thuần túy (Single-Level Flattened Data). Tuyệt đối cấm bọc đúp `data.data`.
+  * `meta`: Nơi duy nhất chứa quyền thao tác (`meta.actions`, `meta.permissions`) và phân trang (`meta.pagination`).
+  * `success`: Boolean xác định trạng thái thực thi.
+  * `message`: Thông báo phản hồi người dùng.
+- **Quy tắc Client 1 Cấp Lấy Data Render:** Dưới client UI component, chỉ cần đúng 1 cấp là lấy được dữ liệu để render (`res.data` hoặc biến unwrap từ custom hook). Tuyệt đối cấm viết code phòng thủ chắp vá `res.data.data` hay `data?.data`.
 - **Boundary Validation tại Gateway:** Mọi controller tại API Gateway tiếp nhận tham số số nguyên (IDs) BẮT BUỘC dùng Pipe chuẩn (`ParseIntPipe`). Tuyệt đối không để chuỗi rác (`NaN`, `undefined`, chuỗi ký tự) lọt vào tầng gRPC/Microservices làm lỗi Prisma.
 - **Hook Encapsulation:** Các hook gọi API (React Query) phải tự bao bọc điều kiện thực thi (`enabled: Number.isInteger(numId) && numId > 0`). Component gọi hook chỉ truyền trực tiếp ID dạng number, KHÔNG ĐƯỢC viết code phòng thủ chắp vá (`validIdStr = ...`, `!isNaN(...)`, ép kiểu chuỗi tạm bợ).
 - **Trách nhiệm Phân giải Route:** Trong Next.js App Router, Page Component (`[id]/page.tsx`) là nơi duy nhất phân giải và kiểm tra tính hợp lệ của route params trước khi truyền xuống UI components.
@@ -47,5 +53,11 @@ Khi thực hiện tác vụ, Lead Agent tuân thủ ranh giới cấu trúc đ�
 ## 9. Phân phối Tài nguyên theo Quyền Hạn (PBAC Resource-Driven Scoping & gRPC Defensive Safety)
 - **Cơ chế Phân phối Tài nguyên:** Sau khi User được chứng thực thành công qua Guard (`GrpcAuthGuard` / `PbacGuard`), hệ thống BẮT BUỘC sử dụng quyền hạn (`permissionsFlatten`, `unitId`, `employeeCode`) để phân phối và giới hạn đúng tài nguyên mà người dùng đó được phép xem/sửa (Scope Filtering: Chuyên viên xem việc của mình, Lãnh đạo phòng xem phòng mình, Lãnh đạo Ban xem toàn cơ quan).
 - **Tuyệt đối không gán thuộc tính mù quáng:** Không được tự ý nhồi nhét thuộc tính người dùng vào payload `data` nếu không kiểm tra khởi tạo hoặc không dùng thông tin đó để phân quyền dữ liệu. Mọi handler gRPC BẮT BUỘC khởi tạo phòng thủ `data = data || {};` ngay dòng đầu tiên để chống lỗi crash `TypeError: Cannot set properties of undefined`.
+
+## 10. Cửa ải Đồng bộ Kiến trúc Hệ thống (Architecture Synchronization Gate)
+- **Quy tắc bất biến:** Tài liệu tại `.agents/architecture/` (`service-map.md`, `source-of-truth.md`, `dependency-map.md`, `request-response-flow.md`, `workflow-map.md`) là Source of Truth tài liệu kỹ thuật duy nhất.
+- **Bắt buộc đồng bộ khi có thay đổi:** Bất kỳ thay đổi nào về CSDL (Prisma), API Gateway, gRPC method, RabbitMQ event hay quy trình nghiệp vụ (Workflow) BẮT BUỘC phải cập nhật ngay vào file kiến trúc tương ứng trước khi kết thúc tác vụ.
+- **Tiêu chuẩn nghiệm thu:** Tác vụ có thay đổi mã nguồn mà không cập nhật tài liệu kiến trúc tương ứng sẽ bị coi là **VI PHẠM CỬA ẢI NGHIỆM THU (GATE REJECTED)**. Tham chiếu chi tiết tại [`.agents/architecture/SYNC-GUIDELINES.md`](../architecture/SYNC-GUIDELINES.md).
+
 
 

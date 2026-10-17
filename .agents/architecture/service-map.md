@@ -46,7 +46,8 @@ Dự án Đắk Lắk Government Platform được thiết kế theo kiến trú
 ## 3. Communication & Integration Services (Tương tác & Tích hợp)
 
 - **`chat-service`** (DB: `admin_chat`)
-  - **Chức năng**: Xử lý tin nhắn nội bộ, chat trực tuyến (real-time). 
+  - **Chức năng**: Xử lý tin nhắn nội bộ, chat trực tuyến (real-time), phòng chat công việc và hội thoại dự án.
+  - **Quản lý**: `conversation` (Cuộc hội thoại DIRECT/GROUP/TASK), `message` (Tin nhắn văn bản, hệ thống, tệp đính kèm), `participant` (Thành viên tham gia, phân quyền ADMIN/MEMBER, kiểm tra IDOR an toàn qua composite key `conversationId_userId`), `read_receipt` (Trạng thái đọc tin nhắn), `presence` (Trạng thái trực tuyến Redis với TTL 60s tự phục hồi). 
 
 - **`notification-service`** (DB: `admin_notification`)
   - **Chức năng**: Nhận Event/Message từ RabbitMQ để phát thông báo (In-app, Push, Email). Không tự sinh ra sự kiện nghiệp vụ.

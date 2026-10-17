@@ -17,6 +17,17 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
 - **Hậu quả:** Gateway không nhận diện được lỗi, trả về HTTP 200 thay vì 400/500, Frontend không bắt được exception.
 - **Giải pháp:** Microservice phải dùng `throw new RpcException(...)`. API Gateway sẽ có ExceptionFilter ánh xạ tự động sang mã lỗi HTTP.
 
+### ❌ Vi phạm: Trộn lẫn quyền thao tác (Actions/Permissions) hoặc phân trang vào trong ruột Data
+- **Mô tả:** Nhét `actions`, `permissions`, `pagination` trực tiếp vào trong ruột của từng record `data` hoặc trả về `data: { items: [...], actions: [...] }` khiến `data` bị bọc tầng lồng nhau.
+- **Hậu quả:** Gây mất đồng bộ giữa các hệ thống, Client không thể lấy `data` 1 cấp để render trực tiếp, phải chọc nhiều tầng (`data.items`, `data.data`), dễ vỡ giao diện khi thay đổi model.
+- **Giải pháp:** Tuân thủ phân định nghiêm ngặt: `data` CHỈ chứa danh sách hoặc thực thể dữ liệu thuần túy để render; toàn bộ quyền thao tác (`meta.actions`, `meta.permissions`) và phân trang (`meta.pagination`) BẮT BUỘC nằm trong `meta`.
+
+### ❌ Vi phạm: Client viết code phòng thủ chọc nhiều cấp (`res.data.data`, `data?.data`)
+- **Mô tả:** Viết code phòng thủ chắp vá trong Component kiểu `res?.data?.data`, `(data as any)?.data ?? data` hay `Array.isArray(x?.data) ? x.data : ...`.
+- **Hậu quả:** Dung túng cho lỗi bọc đúp envelope ở Backend, làm code UI rườm rà, dễ crash khi cấu trúc dữ liệu chuẩn hóa.
+- **Giải pháp:** Tuân thủ nguyên tắc "Chỉ 1 cấp để lấy Data render": Hook API sử dụng `unwrapData` làm chốt chặn duy nhất, Component chỉ nhận data thuần và render trực tiếp (`data.map(...)`). Lấy quyền thao tác từ `meta.actions`, lấy trạng thái ở `success`, lấy thông báo ở `message`.
+
+
 ---
 
 ## 2. Lỗi gRPC & Protobuf
@@ -52,6 +63,12 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
 - **Mô tả:** Viết câu lệnh `prisma.entity.findMany()` không có khối `select: {}`.
 - **Hậu quả:** Gây tắc nghẽn bộ nhớ, sập RAM Node.js khi dữ liệu lớn.
 - **Giải pháp:** Bắt buộc query chỉ những trường thực sự cần.
+
+### ❌ Vi phạm: Quên cập nhật tài liệu kiến trúc khi sửa đổi hệ thống (Architecture Drift)
+- **Mô tả:** Sửa đổi hoặc thêm mới bảng CSDL (Prisma), gRPC method, API route, RabbitMQ event, workflow hay routing nhưng không cập nhật các file trong `.agents/architecture/`.
+- **Hậu quả:** Gây lệch pha giữa mã nguồn và kiến trúc (Architecture Drift). Các AI Agent ở các lượt làm việc tiếp theo đọc phải tài liệu cũ dẫn đến ảo giác (hallucination), duplicate model, vi phạm Source of Truth hoặc phá vỡ cấu trúc microservices.
+- **Giải pháp:** Bắt buộc tuân thủ Ràng buộc số 8 và [`.agents/architecture/SYNC-GUIDELINES.md`](../architecture/SYNC-GUIDELINES.md): Rà soát `git diff --name-only`, cập nhật 100% các file kiến trúc tương ứng (`service-map.md`, `source-of-truth.md`, `dependency-map.md`, `request-response-flow.md`, `workflow-map.md`) trước khi nghiệm thu task.
+
 
 ---
 

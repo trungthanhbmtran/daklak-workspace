@@ -164,6 +164,17 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
   private buildStructured(raw: PlainObject, isList: boolean, timestamp: string): ApiResponse {
     let data = deepClean('data' in raw ? raw.data : raw);
 
+    // Triệt tiêu lỗi bọc lồng nhau (Double-wrapped envelope): Nếu data bên trong vẫn chứa vỏ envelope
+    while (
+      data !== null &&
+      typeof data === 'object' &&
+      !Array.isArray(data) &&
+      'data' in (data as PlainObject) &&
+      (('success' in (data as PlainObject)) || ('status' in (data as PlainObject)))
+    ) {
+      data = (data as PlainObject).data;
+    }
+
     if (data === undefined) {
       data = isList ? [] : {};
     } else if (isList && !Array.isArray(data)) {
@@ -176,10 +187,18 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
       }
     }
 
+    const metaObj = this.normalizeMeta(deepClean(raw.meta));
+    if (raw.actions && !metaObj.actions) {
+      metaObj.actions = deepClean(raw.actions);
+    }
+    if (raw.permissions && !metaObj.permissions) {
+      metaObj.permissions = deepClean(raw.permissions);
+    }
+
     const result: ApiResponse = {
       success: raw.success !== false && raw.status !== 'error',
       data,
-      meta: this.normalizeMeta(deepClean(raw.meta)),
+      meta: metaObj,
       timestamp,
     };
 

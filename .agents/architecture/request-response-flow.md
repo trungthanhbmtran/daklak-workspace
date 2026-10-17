@@ -67,5 +67,11 @@ Bên dưới Gateway, giao tiếp nội bộ giữa Gateway và các Microservic
 - **KHÔNG BẮT LỖI RỒI TRẢ VỀ HTTP 200**: Nếu có lỗi nghiệp vụ (Business Error), phải throw `RpcException` ngay lập tức. KHÔNG ĐƯỢC catch lỗi rồi `return { status: "error", message: "..." }` qua gRPC. Việc map lỗi gRPC sang HTTP (400, 500) là trách nhiệm tự động của Gateway Exception Filter.
 
 ### Tại Frontend (Client):
-- **TẬP TRUNG VÀO `response.data`**: Dữ liệu thực sự luôn nằm ở `response.data`. Frontend không cần viết thêm các Adapter hay Interceptor phức tạp để đoán cấu trúc trả về.
-- **TẬN DỤNG `meta.pagination` CHUẨN**: Mọi danh sách phân trang từ Gateway đều đã được chuẩn hoá với các thuộc tính: `total`, `page`, `pageSize`, `totalPages`. Frontend chỉ việc bám vào giao thức này để bind thẳng vào Table component mà không cần tự tính toán lại các tham số dư thừa.
+- **NGUYÊN TẮC "CHỈ 1 CẤP ĐỂ LẤY DATA RENDER"**: Dưới client UI component, chỉ cần đúng 1 cấp là lấy được dữ liệu để render:
+  * **Lấy dữ liệu hiển thị (Render):** Lấy trực tiếp từ `data` (hoặc biến đã unwrap từ hook: `const { data: list = [] } = useList()`). `data` luôn là thực thể hoặc mảng thực thể thuần túy, tuyệt đối CẤM chọc nhiều cấp `res.data.data` hay `data?.data`.
+  * **Lấy quyền hành động (Actions/Permissions):** Lấy trong `meta.actions` hoặc `meta.permissions` (`res.meta?.actions?.canEdit`).
+  * **Lấy thông tin phân trang:** Lấy trong `meta.pagination` (`total`, `page`, `pageSize`, `totalPages`).
+  * **Lấy trạng thái thực thi:** Lấy ở `success` (`res.success`).
+  * **Lấy thông báo hiển thị:** Lấy ở `message` (`res.message`).
+- **TRIỆT TIÊU CODE PHÒNG THỦ CHẮP VÁ**: Không viết `(data as any)?.data ?? data` hay `Array.isArray(x?.data) ? x.data : ...`. Tầng hook API dùng `unwrapData` làm chốt chặn duy nhất, component chỉ việc render dữ liệu thuần túy.
+

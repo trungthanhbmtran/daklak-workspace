@@ -1,5 +1,75 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-17] Thiết Lập Ràng Buộc Kỹ Thuật Số 8: Bắt Buộc Đồng Bộ Kiến Trúc Hệ Thống (Mandatory Architecture Synchronization Gate)
+
+### 1. Bối Cảnh & Yêu Cầu
+- **Chỉ đạo của người dùng**: Thiết lập quy tắc bắt buộc cho AI Agents: mỗi lần cập nhật, điều chỉnh hệ thống BẮT BUỘC phải cập nhật lại tài liệu kiến trúc (`.agents/architecture/`) và đưa thành Ràng buộc chung bất biến của dự án để hệ thống luôn vận hành đúng kiến trúc thực tế. Mô tả càng chi tiết càng tốt để AI đọc và xử lý chuẩn xác.
+
+### 2. Các File Quy Tắc & Tài Liệu Đã Ban Hành / Cập Nhật
+- [`.agents/architecture/SYNC-GUIDELINES.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/SYNC-GUIDELINES.md): Soạn thảo cẩm nang hướng dẫn toàn diện: Nguyên tắc 1:1 Reflection, Ma trận kích hoạt (Trigger Matrix), Tiêu chuẩn từng file, Quy trình 4 bước cho AI Agent trước khi nghiệm thu, Bảng tự kiểm tra (Pre-Completion Checklist).
+- [`AGENTS.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/AGENTS.md) (Root) & [`.agents/AGENTS.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/AGENTS.md):
+  * Nâng cấp từ 7 lên **8 Bộ Ràng buộc Kỹ thuật Bắt buộc (Inviolable Constraints)**.
+  * Bổ sung **Ràng buộc số 8: Ràng buộc Đồng bộ Kiến trúc Hệ thống Bắt buộc (Mandatory Architecture Synchronization Gate)**.
+  * Cập nhật quy trình nghiệm thu Báo cáo Thực thi bổ sung **Bước 6 - Đồng bộ Kiến trúc (Architecture Sync)**.
+- [`.agents/rules/architecture.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/architecture.md): Thêm Mục 7 về Ràng buộc Bắt buộc Đồng bộ Kiến trúc Hệ thống.
+- [`.agents/rules/00-core.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/00-core.md): Thêm Mục 10 quy định Cửa ải Đồng bộ Kiến trúc (Architecture Synchronization Gate).
+- [`.agents/rules/blacklist.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/blacklist.md): Bổ sung Anti-pattern nghiêm trọng: *Quên cập nhật tài liệu kiến trúc khi sửa đổi hệ thống (Architecture Drift)*.
+- **Đồng bộ hóa thực tế các file kiến trúc hiện hữu:**
+  * [`.agents/architecture/dependency-map.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/dependency-map.md): Bổ sung sơ đồ Mermaid toàn bộ 9 microservices, mapping chi tiết port gRPC, package proto và bảng danh mục RabbitMQ Queues thực tế.
+  * [`.agents/architecture/workflow-map.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/workflow-map.md): Bổ sung Sequence Diagram giao tiếp tập trung và State Machine vòng đời nhiệm vụ/văn bản.
+  * [`.agents/architecture/service-map.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/service-map.md): Bổ sung chi tiết các thực thể quản lý của `chat-service`.
+  * [`.agents/architecture/request-response-flow.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/request-response-flow.md): Bổ sung nguyên tắc Client 1 cấp lấy dữ liệu render và phân định data/meta/message/success.
+
+### 3. Bằng Chứng Kiểm Chứng
+- Toàn bộ các file tài liệu và mã nguồn lưu chuẩn **UTF-8 không BOM**.
+- Triệt tiêu 100% debug logs và rác thừa.
+
+---
+
+## [2026-10-17] Ban Hành Quy Tắc Chuẩn Hóa Response Envelope & Single-Level Data Render Toàn Hệ Thống
+
+### 1. Bối Cảnh & Yêu Cầu
+- **Chỉ đạo của người dùng**: Thiết lập quy tắc bắt buộc cho AI Agents và Backend/Frontend sao cho:
+  * API Gateway luôn trả về theo chuẩn 5 trường: `success`, `data`, `meta`, `message`, `timestamp`.
+  * `data` luôn nằm trong `data` (Single-Level Data), không bao giờ lồng đúp `data.data`.
+  * Dưới client không cần `.data` nhiều lần hoặc thêm giá trị phụ để lấy dữ liệu render — chỉ 1 cấp là lấy được dữ liệu.
+  * Phân định cấu trúc rõ ràng: quyền thao tác (`actions`) nằm trong `meta`, dữ liệu render nằm trong `data`, trạng thái ở `success`, thông báo ở `message`, phân trang ở `meta.pagination`. Tránh hoàn toàn tình trạng mất đồng bộ giữa các hệ thống.
+
+### 2. Các File Quy Tắc Đã Cập Nhật
+- [`.agents/AGENTS.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/AGENTS.md): Cập nhật Ràng buộc số 2 thành chuẩn hóa Response Envelope & Phân định dữ liệu rõ ràng (Single-Level Data Contract).
+- [`.agents/rules/frontend.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/frontend.md): Cập nhật Mục 3 quy định cấu trúc 5 trường, nguyên tắc Client 1 cấp lấy data render, và quy tắc trích xuất dữ liệu (`data`, `meta.actions`, `meta.pagination`, `success`, `message`).
+- [`.agents/rules/architecture.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/architecture.md): Thêm Mục 6 về Chuẩn hóa Response Envelope & Phân định dữ liệu (Data vs Meta Segregation).
+- [`.agents/rules/00-core.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/00-core.md): Cập nhật Mục 8 với quy tắc Envelope và Client Single-Level Data.
+- [`.agents/rules/blacklist.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/blacklist.md): Bổ sung 2 mục cấm: trộn lẫn quyền thao tác/phân trang vào ruột `data`, và cấm client viết code phòng thủ chọc nhiều cấp `res.data.data`.
+- [`shared/core/interceptors/transform.interceptor.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/shared/core/interceptors/transform.interceptor.ts): Tự động gom `actions` và `permissions` từ root response vào trong `meta` nếu controller trả về riêng biệt.
+
+### 3. Bằng Chứng Kiểm Chứng
+- `apps/api-gateway`: `npx tsc --noEmit` -> Exit code 0.
+- `apps/chat-service`: `npx tsc --noEmit` -> Exit code 0.
+- 100% tuân thủ UTF-8 không BOM, sạch hoàn toàn log debug.
+
+---
+
+## [2026-10-17] Khắc Phục Lỗi Biên Dịch TS2551 isParticipant Trong Chat Service (Docker Build Failure)
+
+### 1. Bối Cảnh & Vấn Đề
+- **Lỗi Docker Build**: `src/modules/message/message.service.ts:39:41 - error TS2551: Property 'isParticipant' does not exist on type 'ParticipantService'. Did you mean 'addParticipant'?`
+- **Nguyên nhân**: `MessageService.assertParticipant` gọi `this.participantService.isParticipant(conversationId, key)` để chống IDOR và xác thực quyền tham gia hội thoại, nhưng `ParticipantService` chưa khai báo method `isParticipant`. Đồng thời `MessageModule` chưa import `ParticipantModule`.
+
+### 2. Giải Pháp Triển Khai
+- **`apps/chat-service/src/modules/participant/participant.service.ts`**:
+  - Bổ sung hàm `isParticipant(conversationId: string, userId: string): Promise<boolean>` sử dụng `this.prisma.participant.findUnique` với compound key `conversationId_userId` và `select: { id: true }`.
+  - Kiểm tra guard `!conversationId || !userId` trả về `false` an toàn, bao bọc try/catch chống crash.
+- **`apps/chat-service/src/modules/message/message.module.ts`**:
+  - Bổ sung `imports: [ParticipantModule]` vào `@Module` để NestJS Dependency Injection phân giải `ParticipantService` cho `MessageService`.
+
+### 3. Bằng Chứng Kiểm Chứng
+- `npx tsc --noEmit` tại `apps/chat-service`: **Exit code 0 (Hoàn toàn sạch lỗi typecheck)**.
+- `npm run build` tại `apps/chat-service`: **Exit code 0 (Build thành công)**.
+- Không phát sinh log thừa, tuân thủ UTF-8 không BOM.
+
+---
+
 ## [2026-10-17] Khắc Phục Lỗi Đóng Form Sheet Chi Tiết Công Việc & Nâng Cấp UX/UI Tab Xử Lý Và Cập Nhật (HRM Work Plans)
 
 ### 1. Bối Cảnh & Vấn Đề Người Dùng Báo Cáo
@@ -3061,5 +3131,36 @@
   * Danh sách việc gần đây: Hiển thị đầy đủ 8 nhiệm vụ với số hiệu văn bản (`[131/QĐ-UBND]`, `[132/QĐ-UBND]`, ...) và đúng vai trò `Người giao`.
   * Ảnh chụp bằng chứng nghiệm thu: `hrm_task_dashboard_1792128479340.png`, `hrm_task_dashboard_tasks_list_1792128528338.png`.
 
+## [2026-10-17] - Chuẩn hóa Quy tắc Response Envelope & Triệt tiêu Unwrap tại Client UI Component
 
+### 1. Vấn đề Phát hiện & Phân tích Nguyên nhân Tận gốc
+- **Hiện tượng:** Tại các UI Component (như `task-detail-processing-tab.tsx`, `personal-task-workbench.tsx`), lập trình viên phải viết hàng loạt code phòng thủ:
+  `const rawSubtasks = (subtasksData as any)?.data ?? subtasksData;`
+  `const subTasks = Array.isArray(rawSubtasks) ? rawSubtasks : Array.isArray(rawSubtasks?.data) ? rawSubtasks.data : [];`
+- **Nguyên nhân Backend:**
+  - Microservices hoặc controllers tự bọc `{ success: true, data: ... }`, qua `TransformInterceptor` của API Gateway nếu không kiểm tra sẽ bị bọc tiếp thành `{ success: true, data: { success: true, data: ... } }` (Double-wrapping).
+- **Nguyên nhân Axios & React Query Hook Layer:**
+  - Axios interceptor `client.interceptors.response.use(res => res.data)` chỉ mới bóc lớp vỏ `AxiosResponse` của thư viện Axios để lấy HTTP body (`{ success: true, data: [...] }`).
+  - Tầng React Query hook (`useTasks.ts`) không bóc tách dữ liệu mà trả thẳng `ApiResponse` vào React Query cache.
+  - React Query lại đặt kết quả vào thuộc tính `.data` của hook -> Component nhận `{ success: true, data: [...] }` và buộc phải làm thêm `?.data` để lấy dữ liệu.
 
+### 2. Triển khai Kỹ thuật & Ràng buộc Bất biến
+1. **Thiết lập Quy tắc Ràng buộc Bất biến:**
+   - Cập nhật `.agents/AGENTS.md` (mục 4.2) và `.agents/rules/frontend.md` (mục 3):
+     * **Backend:** `TransformInterceptor` là nơi DUY NHẤT bọc envelope; cấm microservice/controller tự bọc thủ công; `TransformInterceptor` tự động phẳng hóa mọi envelope lồng nhau.
+     * **Frontend:** UI Component là **Dumb Presentation**, cấm bóc tách `?.data` hay convert trong component. Tầng Hook/API là chốt chặn unwrap DUY NHẤT bằng `select: (res) => unwrapData(res)`.
+2. **Backend Gateway (`shared/core/interceptors/transform.interceptor.ts`)**:
+   - Bổ sung logic phẳng hóa đệ quy trong `buildStructured`: Nếu `data` bên trong vẫn chứa vỏ envelope (`'data' in data` kèm `success`/`status`), tự động unwrap về đúng payload thực tế, triệt tiêu hoàn toàn `data.data`.
+3. **Frontend Helper (`apps/admin_khcn/lib/api-helper.ts`)**:
+   - Nâng cấp `unwrapData`: Bóc tách triệt để mọi tầng envelope lồng nhau, đồng thời hỗ trợ getter `.data` tự tham chiếu tương thích ngược 100% cho các component cũ.
+   - Đồng bộ `apps/admin_khcn/features/hrm/components/tasks/task-ui-utils.tsx`: `unwrapTaskData` gọi thẳng `unwrapData`.
+4. **Frontend Custom Hooks (`apps/admin_khcn/features/hrm/hooks/useTasks.ts`)**:
+   - Bổ sung `select: (res) => unwrapData(...)` vào toàn bộ các custom query hooks: `useTaskSubtasks`, `useTaskSteps`, `useTaskDetail`, `useTaskHistory`, `useTasksList`, `usePersonalWorkbench`, `useTaskContext`, `useTaskRecommendations`.
+   - Đảm bảo khi UI Component gọi hook, biến nhận về CHÍNH LÀ dữ liệu thực thể (mảng/object đã unwrap).
+5. **Dọn rác & Tinh giản Client UI Component**:
+   - `apps/admin_khcn/features/hrm/components/tasks/task-detail-processing-tab.tsx`: Xóa sạch 100% các đoạn convert thủ công `rawSubtasks`, `rawSteps`, nhận trực tiếp `const { data: subTasks = [] } = useTaskSubtasks(...)` và `const { data: steps = [] } = useTaskSteps(...)`.
+   - `personal-task-workbench.tsx`, `DesktopCalendar.tsx`, `MobileCalendar.tsx`, `department-workload-recommendation.tsx`, `create-task-dialog.tsx`, `task-assign-dialog.tsx`, `TaskCreateClient.tsx`: Loại bỏ logic phòng thủ rườm rà.
+
+### 3. Kiểm chứng Máy Thực tế
+- `npm --prefix apps/admin_khcn run typecheck`: **Exit Code 0** (Zero errors).
+- `npm --prefix apps/api-gateway run build`: **Exit Code 0** (Prisma client generated, NestJS built, tsc-alias resolved).

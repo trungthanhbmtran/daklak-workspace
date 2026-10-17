@@ -37,4 +37,24 @@ export class ParticipantService {
       return false;
     }
   }
+
+  async isParticipant(
+    conversationId: string,
+    userId: string,
+  ): Promise<boolean> {
+    if (!conversationId || !userId) {
+      return false;
+    }
+
+    try {
+      const participant = await this.prisma.participant.findUnique({
+        where: { conversationId_userId: { conversationId, userId } },
+        select: { id: true },
+      });
+      return !!participant;
+    } catch (e) {
+      this.logger.error("Error checking participant", e);
+      return false;
+    }
+  }
 }

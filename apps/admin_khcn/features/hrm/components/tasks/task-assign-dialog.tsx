@@ -42,8 +42,9 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
     },
     { enabled: open }
   );
-  const deptLeaders = contextData?.data?.deptLeaders ?? [];
-  const deptStaff = contextData?.data?.deptStaff ?? [];
+  const context: any = (contextData as any)?.data ?? contextData;
+  const deptLeaders = context?.deptLeaders ?? [];
+  const deptStaff = context?.deptStaff ?? [];
 
   useEffect(() => {
     if (open) {

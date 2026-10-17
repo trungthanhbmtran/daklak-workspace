@@ -95,26 +95,12 @@ export function TaskProcessingTab({
   }, [currentTask?.progress, currentTask?.metadata?.attachments]);
 
   const isValidTaskId = Boolean(taskId && Number(taskId) > 0);
-  const { data: subtasksData, isLoading: subtasksLoading } = useTaskSubtasks(isValidTaskId ? Number(taskId) : undefined, {
+  const { data: subTasks = [], isLoading: subtasksLoading } = useTaskSubtasks(isValidTaskId ? Number(taskId) : undefined, {
     enabled: isValidTaskId,
   });
-  const { data: stepsData, isLoading: stepsLoading } = useTaskSteps(isValidTaskId ? Number(taskId) : undefined, {
+  const { data: steps = [], isLoading: stepsLoading } = useTaskSteps(isValidTaskId ? Number(taskId) : undefined, {
     enabled: isValidTaskId,
   });
-
-  const rawSubtasks = (subtasksData as any)?.data ?? subtasksData;
-  const subTasks: HrmTask[] = Array.isArray(rawSubtasks)
-    ? rawSubtasks
-    : Array.isArray(rawSubtasks?.data)
-    ? rawSubtasks.data
-    : [];
-
-  const rawSteps = (stepsData as any)?.data ?? stepsData;
-  const steps: any[] = Array.isArray(rawSteps)
-    ? rawSteps
-    : Array.isArray(rawSteps?.data)
-    ? rawSteps.data
-    : [];
 
   const updateStep = useUpdateStep(taskId);
   const updateStatus = useUpdateStatus(taskId);

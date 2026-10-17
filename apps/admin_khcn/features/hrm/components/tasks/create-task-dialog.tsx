@@ -202,7 +202,7 @@ export function CreateTaskDialog({
     { enabled: open }
   );
 
-  const serverContext = contextData?.data;
+  const serverContext: any = (contextData as any)?.data ?? contextData;
   const deptLeaders = serverContext?.deptLeaders ?? [];
   const deptStaff = serverContext?.deptStaff ?? [];
   const stepAssigneeOptions = serverContext?.stepAssigneeOptions ?? { label: "", list: [] };

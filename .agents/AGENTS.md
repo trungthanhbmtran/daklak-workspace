@@ -1,6 +1,6 @@
 # AGENT CHARTER - DAKLAK GOVERNMENT WORKFLOW PLATFORM
 
-File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 / Code 3 hoặc gọi trực tiếp) tuân thủ quy trình điều phối và 7 bộ ràng buộc kỹ thuật dưới đây.
+File này là Hiến chương kỹ thuật và tài liệu vận hành duy nhất của dự án. Mọi tác vụ lập trình (Code 1 / Code 2 / Code 3 hoặc gọi trực tiếp) tuân thủ quy trình điều phối và 8 bộ ràng buộc kỹ thuật dưới đây.
 
 ---
 
@@ -58,7 +58,7 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 
 ---
 
-## 4. BẢY BỘ RÀNG BUỘC KỸ THUẬT BẮT BUỘC (INVIOLABLE CONSTRAINTS)
+## 4. TÁM BỘ RÀNG BUỘC KỸ THUẬT BẮT BUỘC (INVIOLABLE CONSTRAINTS)
 *(Các ranh giới bảo mật, dữ liệu và contract là bắt buộc. Các hướng dẫn UI/CSS nêu kết quả cần đạt; lựa chọn triển khai phải dựa trên component, container và design system thực tế.)*
 
 ### 1. Ràng buộc UI/UX & CSS Layout (theo ngữ cảnh thực tế)
@@ -84,7 +84,38 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 ### 2. Ràng buộc BaseURL & Routing Frontend (`admin_khcn`)
 - Instance `apiClient` và `serverFetch` đã cấu hình sẵn `baseURL = "/api/v1/admin"`.
 - **CẤM TUYỆT ĐỐI thêm tiền tố `/admin` vào string path gọi API:** Ví dụ gọi `/integration/routes`, CẤM gọi `/admin/integration/routes` vì sẽ bị double prefix thành `/api/v1/admin/admin/...` gây lỗi 404!
-- **Response/envelope handling:** apiClient hiện trả response body sau lớp Axios nhưng không gỡ Gateway envelope toàn cục. Dùng unwrapData hoặc typed helper của feature một lần tại API/query boundary khi contract yêu cầu; kiểm tra ngoại lệ file/stream và tránh unwrap hai lần.
+- **Ràng buộc Chuẩn hóa Response Envelope & Phân Định Dữ Liệu Rõ Ràng (Single-Level Data Contract - BẮT BUỘC):**
+  * **Cấu trúc Response Envelope chuẩn duy nhất của API Gateway:**
+    ```json
+    {
+      "success": true,        // boolean: trạng thái thực thi thành công hay thất bại
+      "data": [...],          // T | T[]: Thực thể dữ liệu thuần túy - DỮ LIỆU LUÔN NẰM TRONG DATA, DÙNG ĐỂ RENDER TRỰC TIẾP
+      "meta": {               // PlainObject: Toàn bộ thông tin bổ trợ, phân quyền, phân trang, ngữ cảnh
+        "pagination": { "total": 100, "page": 1, "pageSize": 20, "totalPages": 5 },
+        "actions": { "canEdit": true, "canDelete": false, "canApprove": true },
+        "permissions": [...]  // Danh sách quyền hạn thao tác trên tài nguyên hiện tại
+      },
+      "message": "...",       // string: Thông báo phản hồi cho người dùng (success message hoặc user notice)
+      "timestamp": "..."      // string (ISO Date)
+    }
+    ```
+  * **Tại Backend (API Gateway & Microservices):**
+    - **Data luôn nằm trong data (Single-Level Flattened Data):** Microservices và API Gateway controllers chỉ trả về thực thể thuần túy (entity hoặc list entities). CẤM TUYỆT ĐỐI các microservices hoặc controllers tự ý gói thủ công `{ success: true, data: { data: ... } }` hay `{ data: { items: ... } }` khiến dữ liệu bị bọc đúp thành `data.data`.
+    - **Phân định ranh giới dữ liệu nghiêm ngặt (Strict Data vs Meta Segregation):**
+      + `data`: CHỈ chứa dữ liệu nghiệp vụ chính dùng để hiển thị/render. Tuyệt đối KHÔNG nhồi nhét thông tin phân trang, quyền hạn thao tác (action permissions) lẫn lộn vào trong ruột `data` của từng record.
+      + `meta`: Nơi DUY NHẤT chứa toàn bộ siêu dữ liệu phụ trợ: phân trang (`meta.pagination`: `total`, `page`, `pageSize`, `totalPages`), quyền hành động (`meta.actions`, `meta.permissions`, `meta.allowed_paths`), và các số liệu thống kê/tổng hợp.
+      + `success`: Trạng thái thực thi boolean (`true` / `false`).
+      + `message`: Thông báo phản hồi cho người dùng (nếu có thông báo thao tác thành công hoặc cảnh báo).
+    - `TransformInterceptor` tại API Gateway là Source of Truth DUY NHẤT chịu trách nhiệm đóng gói envelope chuẩn `{ success, data, meta, message, timestamp }` và tự động phẳng hóa (flatten) mọi envelope lồng nhau để đảm bảo response HTTP body luôn là chuẩn envelope 1 tầng duy nhất.
+  * **Tại Frontend (Hook / API Boundary vs UI Component):**
+    - **Nguyên tắc "Chỉ 1 cấp để lấy Data render":** Dưới client UI component TUYỆT ĐỐI KHÔNG phải làm nhiệm vụ bóc tách envelope (`?.data`, `res?.data?.data`, `Array.isArray(x?.data)...`). Client UI CHỈ CẦN gọi hook (`const { data: subTasks = [] } = useTaskSubtasks(id)`) và dùng trực tiếp biến `subTasks` để render (`subTasks.map(...)`). Chỉ đúng 1 cấp là lấy được dữ liệu render!
+    - **Quy tắc trích xuất dữ liệu có cấu trúc tại Client:**
+      + **Lấy Data render:** Lấy trực tiếp từ `data` (hoặc biến đã unwrap từ custom hook).
+      + **Lấy quyền hành động (Actions/Permissions):** Lấy trong `meta.actions` hoặc `meta.permissions`.
+      + **Lấy thông tin phân trang:** Lấy trong `meta.pagination` (`meta.pagination.total`, `meta.pagination.page`...).
+      + **Lấy trạng thái thực thi:** Lấy ở `success`.
+      + **Lấy thông báo người dùng:** Lấy ở `message`.
+    - **Tầng Custom Hook / React Query là nơi unwrap DUY NHẤT:** Mọi custom query hook trả về entity/list BẮT BUỘC sử dụng `select: (res) => unwrapData(res)` (hoặc unwrap tại API boundary qua `unwrapData` từ `@/lib/api-helper`). `unwrapData` tự động bóc sạch mọi lớp envelope và cung cấp getter `.data` tương thích ngược. TUYỆT ĐỐI KHÔNG để lọt vỏ bọc `{ success, data }` xuống tầng UI component. CẤM viết code phòng thủ chắp vá dạng `res?.data?.data` hay `data?.data?.map(...)`.
 
 ### 3. Ràng buộc Next.js App Router theo phiên bản khai báo trong package & Server Components
 - Dùng đúng APIs của phiên bản Next.js khai báo trong package bị ảnh hưởng. Với route params/searchParams được khai báo là Promise, phải await trước khi đọc; xác minh kiểu từ code/config hiện có.
@@ -118,6 +149,17 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 - **Xóa sạch 100% debug logs:** Không để lại bất kỳ `console.log`, `debugger`, import dư thừa hay mã giả tạm thời nào.
 - **Mã hóa UTF-8 (không BOM):** Tất cả các file phải lưu chuẩn UTF-8 không BOM. Tiếng Việt có dấu hiển thị nguyên vẹn, không bị lỗi font hay crash trình biên dịch.
 
+### 8. Ràng buộc Đồng bộ Kiến trúc Hệ thống Bắt buộc (Mandatory Architecture Synchronization Gate)
+- **Quy tắc "Code thay đổi, Kiến trúc phải đồng bộ" (1:1 Reflection):** Tài liệu kiến trúc tại `.agents/architecture/` (`service-map.md`, `source-of-truth.md`, `dependency-map.md`, `request-response-flow.md`, `workflow-map.md`) là Source of Truth tài liệu kỹ thuật duy nhất của toàn hệ thống. Mọi thay đổi mã nguồn làm biến động cấu trúc hệ thống BẮT BUỘC phải được cập nhật đồng bộ ngay vào các file kiến trúc tương ứng trước khi báo cáo hoàn thành.
+- **Các trường hợp bắt buộc kích hoạt đồng bộ (Trigger Events):**
+  * **Database/Prisma:** Thêm bảng mới, sửa quan hệ, thêm cột khóa ngoại, sửa enum -> Cập nhật `service-map.md` và `source-of-truth.md`.
+  * **API Gateway & Routing:** Thêm/sửa route path, method, DTO, vai trò PBAC -> Cập nhật `request-response-flow.md` và `service-map.md`.
+  * **gRPC & Protobuf:** Thêm/sửa RPC method, message definition, streaming contract trong file `.proto` -> Cập nhật `dependency-map.md` và `service-map.md`.
+  * **RabbitMQ & Events:** Thêm/sửa event name, queue name, routing key, publisher/consumer -> Cập nhật `dependency-map.md` và `request-response-flow.md`.
+  * **Workflow & State Machine:** Thêm/sửa trạng thái duyệt (states), điều kiện chuyển bước (transitions), sơ đồ phân làn (swimlanes) -> Cập nhật `workflow-map.md` và `source-of-truth.md`.
+  * **Frontend Feature/Route:** Thêm phân hệ trang mới, parallel route `@sheet`, drawer/dialog chính -> Cập nhật `service-map.md`.
+- **Cửa ải Nghiệm thu (Architecture Gate):** Một tác vụ chỉ được coi là hoàn tất khi diff mã nguồn đã được phản chiếu chính xác vào `.agents/architecture/`. Tác vụ có code thay đổi mà bỏ qua việc cập nhật kiến trúc sẽ bị **TỪ CHỐI NGHIỆM THU (GATE REJECTED)**. Tham chiếu chi tiết hướng dẫn thực thi tại [`.agents/architecture/SYNC-GUIDELINES.md`](.agents/architecture/SYNC-GUIDELINES.md).
+
 ---
 
 ## 5. Báo cáo Thực thi (Execution Report)
@@ -127,10 +169,11 @@ Kết thúc bất kỳ tác vụ nào, agent xuất báo cáo nghiệm thu theo 
 ## Báo cáo Thực thi
 - **Bước 1 - Kiến trúc & Kiểm tra Trùng lặp:** [Xác nhận Source of Truth của service chủ quản, kiểm tra trùng lặp chức năng/entity]
 - **Bước 2 - Khảo sát Thực tế & Chống Ảo giác:** [Danh sách file schema/proto/code thực tế đã đọc, danh sách file khóa phạm vi]
-- **Bước 3 - Giải pháp Kỹ thuật:** [Giải pháp thiết kế bám sát 7 Bộ ràng buộc kỹ thuật]
-- **Bước 4 - Thực thi Chuẩn xác:** [Mã nguồn đã triển khai theo yêu cầu, tuân thủ 7 Bộ ràng buộc kỹ thuật]
+- **Bước 3 - Giải pháp Kỹ thuật:** [Giải pháp thiết kế bám sát 8 Bộ ràng buộc kỹ thuật]
+- **Bước 4 - Thực thi Chuẩn xác:** [Mã nguồn đã triển khai theo yêu cầu, tuân thủ 8 Bộ ràng buộc kỹ thuật]
 - **Bước 5 - Kiểm chứng:** [Lệnh typecheck/lint/build và test đã chạy; runtime smoke route/API hoặc migration; kết quả PASS/FAIL/UNVERIFIED, blocker và phần chưa kiểm tra; phản biện diff/edge cases.]
-- **Bước 6 - Dọn rác & Hoàn tất:** [Xác nhận đã dọn rác 100%, ghi execution log]
+- **Bước 6 - Đồng bộ Kiến trúc (Architecture Sync):** [Danh sách file trong .agents/architecture/ đã cập nhật phản ánh đúng mã nguồn thực tế]
+- **Bước 7 - Dọn rác & Hoàn tất:** [Xác nhận đã dọn rác 100%, ghi execution log]
 ```
 
 ---
