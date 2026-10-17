@@ -193,18 +193,34 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
-    const isMau01 = result.formCode === 'MAU_01' || doc.getElementsByTagName('RegisteredTasks').length > 0;
-    const isMau02 = result.formCode === 'MAU_02' || doc.getElementsByTagName('SectionA_GeneralCriteria').length > 0;
-    const isMau03 = result.formCode === 'MAU_03' || doc.getElementsByTagName('CollectiveFeedback').length > 0;
-    const isMau04 = result.formCode === 'MAU_04' || doc.getElementsByTagName('StaffSummaryTable').length > 0;
+    // 4. Nhận diện loại biểu mẫu theo formCode hoặc root tag
+    const code = (result.formCode || '').toUpperCase();
+    const isMau01 = code === 'MAU_01' || doc.getElementsByTagName('RegisteredTasks').length > 0;
+    const isMau02 = code === 'MAU_02' || (doc.getElementsByTagName('SectionA_GeneralCriteria').length > 0 && !code.includes('M03'));
+    const isMau03 = code === 'MAU_03' || doc.getElementsByTagName('CollectiveFeedback').length > 0;
+    const isMau04 = code === 'MAU_04' || doc.getElementsByTagName('StaffSummaryTable').length > 0;
+    const isM01Totrinh = code === 'M01_TOTRINH' || doc.getElementsByTagName('Form01_SubmissionHeader').length > 0;
+    const isM02KiemDiem = code === 'M02_TUKIEMDIEM' || doc.getElementsByTagName('Form02_SelfReviewForm').length > 0;
+    const isM03Scorecard = code === 'M03_SCORECARD_KPI' || doc.getElementsByTagName('Form03_QuarterlyKPIScorecard').length > 0;
+    const isM04TongHopQuy = code === 'M04_TONGHOP_QUY' || doc.getElementsByTagName('Form04_SummaryEvaluationTable').length > 0;
     const isMau05 =
-      result.formCode === 'MAU_05' ||
-      result.formCode.includes('M05') ||
-      result.formCode.includes('MAU_05') ||
+      code === 'MAU_05' ||
+      code === 'M05_BAOCAO_QUYETDINH' ||
+      code.includes('M05') ||
+      code.includes('MAU_05') ||
       doc.getElementsByTagName('IndividualFinalRankings').length > 0 ||
       doc.getElementsByTagName('Form05_FinalEvaluationReport').length > 0 ||
       doc.getElementsByTagName('DecisionTerms').length > 0;
 
+    const isHd05Full = code === 'HD05_QD39_TU' || doc.getElementsByTagName('OfficialEvaluationSystem').length > 0;
+    const isM01KhaiThac = code === 'M01_KHAI_THAC' || doc.getElementsByTagName('Form01_DataConnectionRequest').length > 0;
+    const isM02ChapThuan = code === 'M02_CHAP_THUAN' || doc.getElementsByTagName('Form02_ConnectionApprovalDecision').length > 0;
+    const isM03XungDot = code === 'M03_XUNG_DOT' || doc.getElementsByTagName('Form03_DataConflictReport').length > 0;
+    const isM04TamNgung = code === 'M04_TAM_NGUNG' || doc.getElementsByTagName('Form04_SuspensionNotice').length > 0;
+    const isM05BaoCaoNam = code === 'M05_BAOCAO_NAM' || doc.getElementsByTagName('Form05_AnnualIntegrationReport').length > 0;
+    const isQd348Full = code === 'QD348_BTCTW' || doc.getElementsByTagName('PartyDataIntegrationSystem').length > 0;
+
+    // --- MẪU 01: KHUNG DANH MỤC SẢN PHẨM / NHIỆM VỤ ĐĂNG KÝ ĐẦU KỲ ---
     if (isMau01) {
       const taskNodes = Array.from(doc.getElementsByTagName('TaskItem'));
       if (taskNodes.length > 0) {
@@ -257,6 +273,7 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
+    // --- MẪU 02: TỰ ĐÁNH GIÁ, CHẤM ĐIỂM KPI CÁ NHÂN ---
     if (isMau02) {
       const criteriaNodes = Array.from(doc.getElementsByTagName('Criterion'));
       if (criteriaNodes.length > 0) {
@@ -313,6 +330,7 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
+    // --- MẪU 03: BẢN NHẬN XÉT CỦA CHI BỘ VÀ TẬP THỂ LÃNH ĐẠO ---
     if (isMau03) {
       const fbEl = doc.getElementsByTagName('CollectiveFeedback')[0];
       if (fbEl) {
@@ -341,6 +359,7 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
+    // --- MẪU 04: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ TẬP THỂ PHÒNG ---
     if (isMau04) {
       const staffNodes = Array.from(doc.getElementsByTagName('StaffRecord'));
       if (staffNodes.length > 0) {
@@ -371,6 +390,198 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       }
     }
 
+    // --- M01_TOTRINH: TỜ TRÌNH ĐỀ NGHỊ ĐÁNH GIÁ, XẾP LOẠI QUÝ ---
+    if (isM01Totrinh) {
+      result.signatureType = 'DECISION';
+      result.documentTitle = 'TỜ TRÌNH';
+      result.subTitle = 'Về việc đề nghị đánh giá, xếp loại chất lượng cán bộ lãnh đạo, quản lý Quý III năm 2026';
+      if (!result.decisionNumber) result.decisionNumber = '123-TTr/BTCTU';
+
+      const sumEl = doc.getElementsByTagName('SummaryContent')[0];
+      const totalOfficials = sanitizeText(getDirectTagText(sumEl, 'TotalEvaluatedOfficials'), '15');
+      const propExc = sanitizeText(getDirectTagText(sumEl, 'ProposedExcellent'), '3');
+      const propGood = sanitizeText(getDirectTagText(sumEl, 'ProposedGood'), '11');
+      const propSat = sanitizeText(getDirectTagText(sumEl, 'ProposedSatisfactory'), '1');
+      const propUnsat = sanitizeText(getDirectTagText(sumEl, 'ProposedUnsatisfactory'), '0');
+
+      result.tables.push({
+        title: 'BẢNG TỔNG HỢP SỐ LƯỢNG ĐỀ XUẤT XẾP LOẠI CHẤT LƯỢNG (Khống chế trần xuất sắc <= 20%)',
+        columns: [
+          { key: 'stt', label: 'STT', widthPct: 8, align: 'center' },
+          { key: 'grade', label: 'Mức xếp loại đề xuất', widthPct: 52, bold: true },
+          { key: 'count', label: 'Số lượng cán bộ', widthPct: 20, align: 'center' },
+          { key: 'ratio', label: 'Tỷ lệ %', widthPct: 20, align: 'center', bold: true },
+        ],
+        rows: [
+          { stt: '1', grade: 'Hoàn thành xuất sắc nhiệm vụ (Tối đa 20%)', count: `${propExc} người`, ratio: `${((Number(propExc) || 3) / (Number(totalOfficials) || 15) * 100).toFixed(1)}%` },
+          { stt: '2', grade: 'Hoàn thành tốt nhiệm vụ', count: `${propGood} người`, ratio: `${((Number(propGood) || 11) / (Number(totalOfficials) || 15) * 100).toFixed(1)}%` },
+          { stt: '3', grade: 'Hoàn thành nhiệm vụ', count: `${propSat} người`, ratio: `${((Number(propSat) || 1) / (Number(totalOfficials) || 15) * 100).toFixed(1)}%` },
+          { stt: '4', grade: 'Không hoàn thành nhiệm vụ', count: `${propUnsat} người`, ratio: '0.0%' },
+          { stt: '-', grade: 'TỔNG CỘNG CÁN BỘ ĐƯỢC ĐÁNH GIÁ', count: `${totalOfficials} người`, ratio: '100.0%' },
+        ],
+      });
+
+      result.textBlocks.push({
+        title: 'NỘI DUNG TỜ TRÌNH',
+        items: [
+          { prefix: 'Kính gửi: ', content: 'Ban Thường vụ Tỉnh ủy Đắk Lắk' },
+          { prefix: '1. Căn cứ đánh giá: ', content: 'Thực hiện Hướng dẫn số 05-HD/TU và Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy Đắk Lắk về việc đánh giá, xếp loại cán bộ hằng quý;' },
+          { prefix: '2. Tình hình triển khai: ', content: `Tập thể Lãnh đạo Ban Tổ chức Tỉnh ủy đã tiến hành họp thẩm định, rà soát kết quả thực hiện nhiệm vụ và chấm điểm KPI thang 100 đối với toàn thể ${totalOfficials} đồng chí cán bộ thuộc diện quản lý.` },
+          { prefix: '3. Đề nghị: ', content: 'Kính trình Ban Thường vụ Tỉnh ủy xem xét, phê duyệt kết quả đánh giá, xếp loại quý theo quy định.' },
+        ],
+      });
+
+      result.signers.leftTitle = 'Nơi nhận:';
+      result.signers.leftSubtitle = '- Như Kính gửi;\n- Thường trực Tỉnh ủy;\n- Lưu: VT, TC-CB.';
+      result.signers.rightTitle = 'TRƯỞNG BAN';
+      result.signers.rightName = 'Nguyễn Thượng Hải';
+    }
+
+    // --- M02_TUKIEMDIEM: BẢN TỰ KIỂM ĐIỂM CÁ NHÂN ---
+    if (isM02KiemDiem) {
+      result.documentTitle = 'BẢN TỰ KIỂM ĐIỂM CÁ NHÂN';
+      result.subTitle = '(Dành cho cán bộ lãnh đạo, quản lý và công chức - Mẫu 2A)';
+
+      const selfContentEl = doc.getElementsByTagName('SelfReviewContent')[0];
+      const ideology = sanitizeText(getDirectTagText(selfContentEl, 'PoliticalIdeology'), 'Tuyệt đối trung thành với Đảng, bản lĩnh chính trị vững vàng');
+      const lifestyle = sanitizeText(getDirectTagText(selfContentEl, 'MoralLifestyle'), 'Trong sáng, khiêm tốn, chấp hành nghiêm chuẩn mực đạo đức');
+      const discipline = sanitizeText(getDirectTagText(selfContentEl, 'WorkDiscipline'), 'Chấp hành nghiêm sự phân công, quy chế làm việc');
+      const selfCorrection = sanitizeText(getDirectTagText(selfContentEl, 'SelfCorrection'), 'Thực hiện nghiêm túc tự soi, tự sửa, khắc phục hạn chế kỳ trước');
+
+      result.textBlocks.push({
+        title: 'NỘI DUNG TỰ KIỂM ĐIỂM, ĐÁNH GIÁ',
+        items: [
+          { prefix: '1. Về tư tưởng chính trị: ', content: ideology },
+          { prefix: '2. Về phẩm chất đạo đức, lối sống: ', content: lifestyle },
+          { prefix: '3. Về tác phong, lề lối làm việc và ý thức tổ chức kỷ luật: ', content: discipline },
+          { prefix: '4. Kết quả tự soi, tự sửa và khắc phục hạn chế: ', content: selfCorrection },
+          { prefix: '5. Tự nhận mức xếp loại chất lượng: ', content: 'Hoàn thành xuất sắc nhiệm vụ' },
+        ],
+      });
+
+      result.signers.leftTitle = '';
+      result.signers.leftSubtitle = '';
+      result.signers.rightTitle = 'NGƯỜI TỰ KIỂM ĐIỂM';
+      result.signers.rightSubtitle = '(Ký, ghi rõ họ và tên)';
+    }
+
+    // --- M03_SCORECARD_KPI: BẢN TỰ ĐÁNH GIÁ & SCORECARD KPI HẰNG QUÝ ---
+    if (isM03Scorecard) {
+      result.documentTitle = 'BẢN TỰ ĐÁNH GIÁ VÀ SCORECARD KPI HẰNG QUÝ';
+      result.subTitle = '(Thang điểm 100: 30 điểm Tiêu chí chung + 70 điểm Kết quả nhiệm vụ)';
+
+      const critNodes = Array.from(doc.getElementsByTagName('Criterion'));
+      if (critNodes.length > 0) {
+        const rows: Array<Record<string, string>> = [];
+        critNodes.forEach((node, idx) => {
+          rows.push({
+            stt: node.getAttribute('id') || String(idx + 1),
+            name: sanitizeText(node.getAttribute('name') || getDirectTagText(node, 'Name'), `Tiêu chí ${idx + 1}`),
+            maxScore: node.getAttribute('max') || node.getAttribute('maxScore') || '10.0',
+            score: node.getAttribute('score') || sanitizeText(getDirectTagText(node, 'Score'), '10.0'),
+            status: node.getAttribute('status') === 'Ensured' ? 'Đạt chuẩn' : 'Bảo đảm',
+          });
+        });
+        result.tables.push({
+          title: 'PHẦN A: NHÓM TIÊU CHÍ CHUNG (TỐI ĐA 30 ĐIỂM)',
+          columns: [
+            { key: 'stt', label: 'Mã số', widthPct: 8, align: 'center' },
+            { key: 'name', label: 'Nội dung tiêu chí chung', widthPct: 52, bold: true },
+            { key: 'maxScore', label: 'Điểm tối đa', widthPct: 12, align: 'center' },
+            { key: 'score', label: 'Điểm đạt', widthPct: 12, align: 'center', bold: true },
+            { key: 'status', label: 'Trạng thái', widthPct: 16, align: 'center' },
+          ],
+          rows,
+        });
+      }
+
+      const taskList = Array.from(doc.getElementsByTagName('TaskItem'));
+      if (taskList.length > 0) {
+        const rows: Array<Record<string, string>> = [];
+        taskList.forEach((node, idx) => {
+          rows.push({
+            stt: node.getAttribute('id') || String(idx + 1),
+            name: sanitizeText(getDirectTagText(node, 'TaskName'), `Nhiệm vụ KPI ${idx + 1}`),
+            deliverable: sanitizeText(getDirectTagText(node, 'OutputProduct'), 'Báo cáo / Tờ trình'),
+            planned: sanitizeText(getDirectTagText(node, 'PlannedQuantity'), '1'),
+            completed: sanitizeText(getDirectTagText(node, 'CompletedQuantity'), '1'),
+            quality: sanitizeText(getDirectTagText(node, 'QualityFactor'), '1.00'),
+            sla: sanitizeText(getDirectTagText(node, 'SLAFactor'), '1.00'),
+            score: sanitizeText(getDirectTagText(node, 'CalculatedScore'), '70.0'),
+          });
+        });
+        result.tables.push({
+          title: 'PHẦN B: KẾT QUẢ THỰC HIỆN NHIỆM VỤ - KPI (TỐI ĐA 70 ĐIỂM)',
+          columns: [
+            { key: 'stt', label: 'Mã', widthPct: 6, align: 'center' },
+            { key: 'name', label: 'Tên nhiệm vụ chuyên môn', widthPct: 34, bold: true },
+            { key: 'deliverable', label: 'Sản phẩm đầu ra', widthPct: 20 },
+            { key: 'completed', label: 'Số lượng', widthPct: 10, align: 'center' },
+            { key: 'quality', label: 'Chất lượng', widthPct: 10, align: 'center' },
+            { key: 'sla', label: 'Tiến độ', widthPct: 10, align: 'center' },
+            { key: 'score', label: 'Điểm', widthPct: 10, align: 'center', bold: true },
+          ],
+          rows,
+        });
+      }
+
+      result.textBlocks.push({
+        title: 'TỔNG HỢP ĐIỂM SỐ & XẾP LOẠI',
+        items: [
+          { prefix: '• Tổng điểm đánh giá: ', content: '100.0 / 100 điểm' },
+          { prefix: '• Mức tự đề xuất xếp loại: ', content: 'HOÀN THÀNH XUẤT SẮC NHIỆM VỤ' },
+          { prefix: '• Sản phẩm nổi trội: ', content: 'Hoàn thành Đề án chuyển đổi số CSDL Đảng viên vượt tiến độ 05 ngày (Được thưởng điểm nổi trội per Hướng dẫn 05-HD/TU).' },
+        ],
+      });
+
+      result.signers.leftTitle = 'NGƯỜI TỰ ĐÁNH GIÁ';
+      result.signers.rightTitle = 'TRƯỞNG PHÒNG CHUYÊN MÔN';
+    }
+
+    // --- M04_TONGHOP_QUY: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ VÀ ĐỀ XUẤT XẾP LOẠI QUÝ ---
+    if (isM04TongHopQuy) {
+      result.signatureType = 'DEPARTMENT';
+      result.documentTitle = 'BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ VÀ ĐỀ XUẤT XẾP LOẠI CÁN BỘ QUÝ';
+      result.subTitle = 'Kỳ đánh giá: Quý III năm 2026 - Ban Tổ chức Tỉnh ủy Đắk Lắk';
+
+      const records = Array.from(doc.getElementsByTagName('SummaryRecord'));
+      if (records.length > 0) {
+        const rows: Array<Record<string, string>> = [];
+        records.forEach((node, idx) => {
+          rows.push({
+            stt: node.getAttribute('stt') || String(idx + 1),
+            fullName: sanitizeText(getDirectTagText(node, 'FullName'), `Cán bộ ${idx + 1}`),
+            position: sanitizeText(getDirectTagText(node, 'Position'), 'Trưởng phòng Tổ chức Cán bộ'),
+            selfScore: sanitizeText(getDirectTagText(node, 'SelfScore'), '100.0'),
+            appraisalScore: sanitizeText(getDirectTagText(node, 'AppraisalScore'), '100.0'),
+            grade: sanitizeText(getDirectTagText(node, 'AuthorityProposedGrade'), 'Hoàn thành xuất sắc nhiệm vụ'),
+            quotaCheck: sanitizeText(getDirectTagText(node, 'ExceedingQuotaCheck'), 'Đạt trần 20%'),
+            notes: sanitizeText(getDirectTagText(node, 'Notes'), '-'),
+          });
+        });
+
+        result.tables.push({
+          title: 'DANH SÁCH TỔNG HỢP ĐÁNH GIÁ, XẾP LOẠI CÁN BỘ, CÔNG CHỨC',
+          columns: [
+            { key: 'stt', label: 'STT', widthPct: 5, align: 'center' },
+            { key: 'fullName', label: 'Họ và tên cán bộ', widthPct: 22, bold: true },
+            { key: 'position', label: 'Chức danh / VTVL', widthPct: 18 },
+            { key: 'selfScore', label: 'Tự chấm', widthPct: 9, align: 'center' },
+            { key: 'appraisalScore', label: 'Thẩm định', widthPct: 9, align: 'center', bold: true },
+            { key: 'grade', label: 'Xếp loại đề xuất', widthPct: 18, align: 'center' },
+            { key: 'quotaCheck', label: 'Kiểm tra trần 20%', widthPct: 19, align: 'center' },
+          ],
+          rows,
+        });
+      }
+
+      result.signers.leftTitle = 'NGƯỜI TỔNG HỢP';
+      result.signers.leftSubtitle = '(Ký, ghi rõ họ và tên)';
+      result.signers.rightTitle = 'TẬP THỂ LÃNH ĐẠO BAN';
+      result.signers.rightSubtitle = '(Ký, ghi rõ họ và tên)';
+    }
+
+    // --- MẪU 05 & M05_BAOCAO_QUYETDINH: QUYẾT ĐỊNH PHÊ DUYỆT XẾP LOẠI CHẤT LƯỢNG ---
     if (isMau05) {
       result.signatureType = 'DECISION';
       result.documentTitle = 'QUYẾT ĐỊNH';
@@ -442,6 +653,153 @@ export function parseKpiXml(xmlContent: string, templateTitleFallback?: string):
       result.signers.rightTitle = 'TRƯỞNG BAN';
       result.signers.rightName = 'Nguyễn Thượng Hải';
       result.signers.leftSubtitle = '- Như Điều 3;\n- Ban Thường vụ Tỉnh ủy (để b/c);\n- Lãnh đạo Ban;\n- 05 Phòng chuyên môn;\n- Lưu: VT, TC-CB.';
+    }
+
+    // --- BỘ 2 (QĐ 348-QĐ/BTCTW - PHỤ LỤC VIII KẾT NỐI, CHIA SẺ DỮ LIỆU) ---
+    if (isM01KhaiThac) {
+      result.documentTitle = 'PHIẾU ĐỀ NGHỊ KẾT NỐI, CHIA SẺ DỮ LIỆU';
+      result.subTitle = '(Ban hành kèm theo Quyết định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương)';
+      const reqAgency = doc.getElementsByTagName('RequestingAgency')[0];
+      const head = sanitizeText(getDirectTagText(reqAgency, 'HeadOfAgency'), 'Lương Nguyễn Minh Triết');
+      const contact = doc.getElementsByTagName('TechnicalContact')[0];
+
+      result.textBlocks.push({
+        title: 'NỘI DUNG ĐỀ NGHỊ KẾT NỐI DỮ LIỆU',
+        items: [
+          { prefix: '1. Đơn vị đề nghị: ', content: sanitizeText(getDirectTagText(reqAgency, 'AgencyName'), 'Tỉnh ủy Đắk Lắk') },
+          { prefix: '2. Địa chỉ: ', content: sanitizeText(getDirectTagText(reqAgency, 'Address'), 'Số 14 Lê Duẩn, TP. Buôn Ma Thuột') },
+          { prefix: '3. Thủ trưởng cơ quan: ', content: head },
+          { prefix: '4. Cán bộ kỹ thuật phụ trách: ', content: `${contact?.getAttribute('name') || 'Nguyễn Văn B'} • SĐT: ${contact?.getAttribute('phone') || '0912345678'} • Email: ${contact?.getAttribute('email') || 'cntt@btctu.daklak.gov.vn'}` },
+          { prefix: '5. Mục đích kết nối: ', content: sanitizeText(getDirectTagText(doc, 'Purpose'), 'Đối soát CSDL Đảng viên & CSDL Cán bộ công chức khối Đảng') },
+          { prefix: '6. Hạ tầng & Giao thức: ', content: 'Mạng TSLCD • Giao thức REST API HTTPS per Cấp độ 3 an toàn thông tin' },
+        ],
+      });
+
+      result.signers.rightTitle = 'THỦ TRƯỞNG CƠ QUAN ĐỀ NGHỊ';
+      result.signers.rightSubtitle = '(Ký, đóng dấu)';
+      result.signers.rightName = head;
+    }
+
+    if (isM02ChapThuan) {
+      result.signatureType = 'DECISION';
+      result.documentTitle = 'QUYẾT ĐỊNH';
+      result.subTitle = 'Về việc chấp thuận kết nối, chia sẻ dữ liệu với Cơ quan Tỉnh ủy Đắk Lắk';
+      result.agencyName = 'BAN TỔ CHỨC TRUNG ƯƠNG';
+      result.organizationName = 'CỤC CÔNG NGHỆ THÔNG TIN';
+      if (!result.decisionNumber) result.decisionNumber = '567-QĐ/BTCTW';
+
+      const apis = Array.from(doc.getElementsByTagName('API'));
+      if (apis.length > 0) {
+        const rows: Array<Record<string, string>> = [];
+        apis.forEach((node, idx) => {
+          rows.push({
+            stt: String(idx + 1),
+            id: node.getAttribute('id') || `API_${idx + 1}`,
+            path: node.getAttribute('path') || '/api/v1/service',
+            level: node.getAttribute('level') || 'Mức 2',
+          });
+        });
+        result.tables.push({
+          title: 'DANH MỤC API DỊCH VỤ DỮ LIỆU ĐƯỢC CẤP QUYỀN KẾT NỐI',
+          columns: [
+            { key: 'stt', label: 'STT', widthPct: 10, align: 'center' },
+            { key: 'id', label: 'Mã dịch vụ', widthPct: 20, align: 'center', bold: true },
+            { key: 'path', label: 'Endpoint đường dẫn API', widthPct: 50 },
+            { key: 'level', label: 'Cấp độ an toàn', widthPct: 20, align: 'center' },
+          ],
+          rows,
+        });
+      }
+
+      result.signers.rightTitle = 'TRƯỞNG BAN TỔ CHỨC TRUNG ƯƠNG';
+      result.signers.rightSubtitle = '(Ký, đóng dấu)';
+      result.signers.leftTitle = 'Nơi nhận:';
+      result.signers.leftSubtitle = '- Tỉnh ủy Đắk Lắk;\n- Trung tâm Dữ liệu Quốc gia;\n- Lưu: VT, CNTT.';
+    }
+
+    if (isM03XungDot) {
+      result.documentTitle = 'BIÊN BẢN PHÁT HIỆN VÀ XỬ LÝ XUNG ĐỘT DỮ LIỆU';
+      result.subTitle = '(Đối soát giữa CSDL Tổ chức Đảng, Đảng viên với CSDL Cán bộ, công chức)';
+
+      const conflictEl = doc.getElementsByTagName('ConflictDetails')[0];
+      const citizenId = sanitizeText(getDirectTagText(conflictEl, 'CitizenID'), '066095001234');
+      const partyVal = sanitizeText(getDirectTagText(conflictEl, 'PartyDBValue'), '2018-05-19');
+      const civilVal = sanitizeText(getDirectTagText(conflictEl, 'NationalCivilDBValue'), '2018-05-20');
+      const singleSource = sanitizeText(getDirectTagText(conflictEl, 'SingleSourceOfTruthRef'), 'CSDL Tổ chức Đảng, Đảng viên');
+
+      result.tables.push({
+        title: 'BẢNG ĐỐI SOÁT CHI TIẾT TRƯỜNG DỮ LIỆU SAI LỆCH',
+        columns: [
+          { key: 'item', label: 'Thông tin kiểm tra', widthPct: 35, bold: true },
+          { key: 'party', label: 'Giá trị trong CSDL Đảng viên', widthPct: 25, align: 'center' },
+          { key: 'civil', label: 'Giá trị trong CSDL Quốc gia', widthPct: 25, align: 'center' },
+          { key: 'sot', label: 'Nguồn chuẩn (Source of Truth)', widthPct: 15, align: 'center', bold: true },
+        ],
+        rows: [
+          { item: `Số CCCD: ${citizenId} (Trường: Ngày vào Đảng chính thức)`, party: partyVal, civil: civilVal, sot: singleSource },
+        ],
+      });
+
+      result.signers.leftTitle = 'BỘ PHẬN ĐỐI SOÁT';
+      result.signers.leftSubtitle = '(Ký, ghi rõ họ và tên)';
+      result.signers.rightTitle = 'ĐẠI DIỆN VẬN HÀNH HỆ THỐNG';
+      result.signers.rightSubtitle = '(Ký, ghi rõ họ và tên)';
+    }
+
+    if (isM04TamNgung) {
+      result.signatureType = 'DECISION';
+      result.documentTitle = 'THÔNG BÁO';
+      result.subTitle = 'Về việc tạm ngừng / kết nối kỹ thuật phục vụ bảo trì hệ thống mạng diện rộng của Đảng';
+      result.agencyName = 'BAN TỔ CHỨC TRUNG ƯƠNG';
+      result.organizationName = 'BAN QUẢN TRỊ MẠNG DIỆN RỘNG CỦA ĐẢNG';
+      if (!result.decisionNumber) result.decisionNumber = '89-TB/BTCTW';
+
+      result.textBlocks.push({
+        title: 'NỘI DUNG THÔNG BÁO BẢO TRÌ',
+        items: [
+          { prefix: '1. Hành động kỹ thuật: ', content: 'Tạm ngừng kết nối giao thức API' },
+          { prefix: '2. Lý do: ', content: 'Bảo trì hệ thống mạng diện rộng của Đảng per Kế hoạch An toàn thông tin Cấp độ 3' },
+          { prefix: '3. Thời điểm bắt đầu: ', content: '00:00 ngày 01/11/2026' },
+          { prefix: '4. Thời điểm khôi phục dự kiến: ', content: '06:00 ngày 02/11/2026' },
+        ],
+      });
+
+      result.signers.rightTitle = 'TRƯỞNG BAN QUẢN TRỊ MẠNG';
+      result.signers.rightSubtitle = '(Ký, đóng dấu)';
+      result.signers.leftTitle = 'Nơi nhận:';
+      result.signers.leftSubtitle = '- Các Tỉnh ủy, Thành ủy;\n- Đơn vị kết nối LGSP;\n- Lưu: VT.';
+    }
+
+    if (isM05BaoCaoNam) {
+      result.documentTitle = 'BÁO CÁO KẾT QUẢ KẾT NỐI, CHIA SẺ DỮ LIỆU HẰNG NĂM';
+      result.subTitle = 'Năm đánh giá: 2026 - Ban Tổ chức Tỉnh ủy Đắk Lắk';
+
+      const metricsEl = doc.getElementsByTagName('Metrics')[0];
+      const calls = sanitizeText(getDirectTagText(metricsEl, 'TotalAPICalls'), '125,000');
+      const syncRate = sanitizeText(getDirectTagText(metricsEl, 'SuccessfulSyncRate'), '99.8');
+      const cleanRate = sanitizeText(getDirectTagText(metricsEl, 'DataCleanlinessRate'), '98.5');
+      const incidents = sanitizeText(getDirectTagText(metricsEl, 'SecurityIncidentsCount'), '0');
+
+      result.tables.push({
+        title: 'CÁC CHỈ SỐ HOẠT ĐỘNG VÀ ĐỘ TIN CẬY DỮ LIỆU',
+        columns: [
+          { key: 'stt', label: 'STT', widthPct: 10, align: 'center' },
+          { key: 'metric', label: 'Chỉ số đo lường hiệu năng kỹ thuật', widthPct: 55, bold: true },
+          { key: 'val', label: 'Kết quả ghi nhận', widthPct: 35, align: 'center', bold: true },
+        ],
+        rows: [
+          { stt: '1', metric: 'Tổng lưu lượng cuộc gọi kết nối API (API Calls)', val: `${calls} lượt` },
+          { stt: '2', metric: 'Tỷ lệ đồng bộ dữ liệu thành công', val: `${syncRate}%` },
+          { stt: '3', metric: 'Chỉ số độ sạch dữ liệu (Nguyên tắc: Đúng, Đủ, Sạch, Sống)', val: `${cleanRate}%` },
+          { stt: '4', metric: 'Số sự cố mất an toàn thông tin Cấp độ 3', val: `${incidents} sự cố` },
+        ],
+      });
+
+      result.signers.leftTitle = '';
+      result.signers.leftSubtitle = '';
+      result.signers.rightTitle = 'ĐẠI DIỆN CƠ QUAN BÁO CÁO';
+      result.signers.rightSubtitle = '(Ký, đóng dấu)';
+      result.signers.rightName = 'Nguyễn Thượng Hải';
     }
 
     const sigEl = doc.getElementsByTagName('Signatures')[0] || doc.getElementsByTagName('SigningBlock')[0];
@@ -758,17 +1116,9 @@ export function generatePrintDocumentHtml(data: ParsedXmlDocumentData): string {
           `}
         </td>
         <td style="text-align: center;">
-          <div class="sig-title">${(data.signers.rightTitle || 'TRƯỞNG PHÒNG CHUYÊN MÔN').toUpperCase()}</div>
-          ${data.signatureType === 'DECISION' ? `
-            <div style="margin: 14px auto; display: flex; align-items: center; justify-content: center;">
-              <div style="width: 76px; height: 76px; border: 2px solid rgba(220, 38, 38, 0.45); border-radius: 50%; color: #dc2626; font-size: 9.5px; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; transform: rotate(12deg); user-select: none;">
-                Ban Tổ chức Tỉnh ủy Đắk Lắk
-              </div>
-            </div>
-          ` : `
-            <div class="sig-sub">${data.signers.rightSubtitle || '(Ký, ghi rõ họ và tên)'}</div>
-            <div class="sig-space"></div>
-          `}
+          <div class="sig-title">${(data.signers.rightTitle || (data.signatureType === 'DECISION' ? 'TRƯỞNG BAN' : 'TRƯỞNG PHÒNG CHUYÊN MÔN')).toUpperCase()}</div>
+          <div class="sig-sub">${data.signers.rightSubtitle || (data.signatureType === 'DECISION' ? '(Ký, đóng dấu)' : '(Ký, ghi rõ họ và tên)')}</div>
+          <div class="sig-space" style="height: 75px;"></div>
           <div class="sig-name">${data.signers.rightName || ''}</div>
         </td>
       </tr>

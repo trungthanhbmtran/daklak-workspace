@@ -207,18 +207,43 @@ export class EmployeeService implements OnModuleInit {
         return s.toLowerCase().includes('admin') || s.toLowerCase().includes('quản trị viên hệ thống');
       });
 
-    if (req.callerUnitId && !isAdmin) {
+    if (isAdmin) {
+      delete req.callerUnitId;
+    } else if (req.callerUnitId) {
       const callerUnitId = parseInt(req.callerUnitId, 10);
       try {
-        const resOrg: any = await firstValueFrom(
-          this.orgService.GetOrganizations({ ids: [callerUnitId] }, metadata),
+        const descRes: any = await firstValueFrom(
+          this.orgService.GetDescendants({ id: callerUnitId }, metadata),
         );
-        if (resOrg?.nodes?.[0]?.hierarchyPath) {
-          req.departmentPathPrefix = resOrg.nodes[0].hierarchyPath;
+        const allowedIds: number[] =
+          Array.isArray(descRes?.ids) && descRes.ids.length > 0
+            ? descRes.ids.map((id: any) => parseInt(id, 10))
+            : [callerUnitId];
+
+        // Lãnh đạo có thể được phân công theo dõi thêm đơn vị khác (monitoredUnitIds)
+        if (Array.isArray(user?.monitoredUnitIds) && user.monitoredUnitIds.length > 0) {
+          user.monitoredUnitIds.forEach((mId: any) => {
+            const parsed = parseInt(mId, 10);
+            if (!isNaN(parsed) && !allowedIds.includes(parsed)) {
+              allowedIds.push(parsed);
+            }
+          });
+        }
+
+        req.descendantUnitIds = allowedIds;
+
+        // Nếu client có truyền lọc departmentId cụ thể:
+        if (req.departmentId) {
+          const reqDeptId = parseInt(req.departmentId, 10);
+          if (!allowedIds.includes(reqDeptId)) {
+            // Không thuộc thẩm quyền quản lý -> bỏ filter để trả về toàn bộ phạm vi được phép
+            delete req.departmentId;
+          }
         }
       } catch (e) {
-        // Fallback
+        req.descendantUnitIds = [callerUnitId];
       }
+
       if (req.assignableOnly) {
         req.excludeEmployeeCode = req.callerEmployeeCode;
       }

@@ -70,7 +70,7 @@ graph TD
 
 | Tên Microservice | Port gRPC Mặc định | Package Symbol | Proto Path | Trách nhiệm chính phục vụ Gateway |
 |---|---|---|---|---|
-| **`user-service`** | `50051` | `USER_PACKAGE`<br>`AUTH_PACKAGE`<br>`PBAC_PACKAGE`<br>`ORGANIZATION_PACKAGE` | `users/user.proto`<br>`users/auth.proto`<br>`users/pbac.proto`<br>`users/organization.proto` | Xác thực JWT, cấp quyền PBAC, cây tổ chức & cấu trúc Vị trí việc làm (VTVL) định biên. |
+| **`user-service`** | `50051` | `USER_PACKAGE`<br>`AUTH_PACKAGE`<br>`PBAC_PACKAGE`<br>`ORGANIZATION_PACKAGE` | `users/user.proto`<br>`users/auth.proto`<br>`users/pbac.proto`<br>`users/organization.proto` | Xác thực JWT, cấp quyền PBAC, cây tổ chức & cấu trúc Vị trí việc làm (VTVL) định biên, phân giải danh sách đơn vị con cháu (GetDescendants) cho PBAC scoping liên service. |
 | **`hrm-service`** | `50052` | `EMPLOYEE_PACKAGE`<br>`TASK_PACKAGE`<br>`KPI_PACKAGE`<br>`MASTER_PLAN_PACKAGE` | `hrm/employee.proto`<br>`hrm/task.proto`<br>`hrm/kpi.proto`<br>`hrm/master_plan.proto` | Hồ sơ nhân sự, phân công công việc, thẩm định tiến độ và đánh giá xếp loại KPI. |
 | **`document-service`** | `50056` | `DOCUMENT_PACKAGE`<br>`DOSSIER_PACKAGE`<br>`CABINET_PACKAGE`<br>`MINUTES_PACKAGE` | `document/document.proto`<br>`document/dossier.proto`<br>`document/cabinet.proto`<br>`document/minutes.proto` | Văn bản đến/đi, hồ sơ lưu trữ, biên bản họp số hóa. |
 | **`posts-service`** | `50055` | `POST_PACKAGE`<br>`BANNER_PACKAGE`<br>`PORTAL_MENU_PACKAGE` | `posts/post.proto`<br>`posts/banner.proto`<br>`posts/portal_menu.proto` | Tin tức, chuyên mục, banner, cấu hình cổng thông tin điện tử. |

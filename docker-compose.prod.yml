@@ -109,6 +109,9 @@ services:
       - ./shared/protos:/app/protos:ro
 
   user-service:
+    build:
+      context: .
+      dockerfile: ./apps/user-service/Dockerfile
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     logging:
@@ -138,6 +141,9 @@ services:
       - ./shared/protos:/app/protos:ro
 
   hrm-service:
+    build:
+      context: .
+      dockerfile: ./apps/hrm-service/Dockerfile
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     logging:

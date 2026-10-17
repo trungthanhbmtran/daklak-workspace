@@ -411,21 +411,46 @@ export class OrganizationsService {
 
   // Lấy tất cả IDs của con cháu (bao gồm chính nó)
   async getDescendants(rootId: number) {
-    const root = await this.prisma.organizationUnit.findUnique({
-      where: { id: rootId },
-      select: { code: true, hierarchyPath: true },
+    const allUnits = await this.prisma.organizationUnit.findMany({
+      select: { id: true, parentId: true, code: true, hierarchyPath: true },
     });
+
+    const root = allUnits.find((u) => u.id === rootId);
     if (!root) return { data: [] };
 
-    const prefix = (root.code || root.hierarchyPath || '') + '.';
-    const units = await this.prisma.organizationUnit.findMany({
-      where: {
-        OR: [{ id: rootId }, { hierarchyPath: { startsWith: prefix } }],
-      },
-      select: { id: true },
-    });
+    const descendantIds = new Set<number>([rootId]);
+    let added = true;
+    while (added) {
+      added = false;
+      for (const u of allUnits) {
+        if (!descendantIds.has(u.id) && u.parentId && descendantIds.has(u.parentId)) {
+          descendantIds.add(u.id);
+          added = true;
+        }
+      }
+    }
 
-    return { data: units.map((u) => u.id) };
+    // Kết hợp kiểm tra code prefix và hierarchyPath nếu có
+    const prefixes: string[] = [];
+    if (root.code) prefixes.push(root.code + '.');
+    if (root.hierarchyPath) prefixes.push(root.hierarchyPath + '.');
+
+    if (prefixes.length > 0) {
+      for (const u of allUnits) {
+        if (!descendantIds.has(u.id)) {
+          const match = prefixes.some(
+            (p) =>
+              (u.code && u.code.startsWith(p)) ||
+              (u.hierarchyPath && u.hierarchyPath.startsWith(p)),
+          );
+          if (match) {
+            descendantIds.add(u.id);
+          }
+        }
+      }
+    }
+
+    return { data: Array.from(descendantIds) };
   }
 
   // --- 2. QUẢN LÝ ĐỊNH BIÊN (STAFFING) ---

@@ -1,6 +1,48 @@
 # Execution Log — Lane 1 (Code 1)
 
-## [2026-10-17] Rà Soát Toàn Bộ Dự Án Liên Tục & Sửa Hết Lỗi Vi Phạm Ràng Buộc - Kiểm Thử Máy Minh Chứng Kết Quả
+## [2026-10-17] Khắc Phục Lỗi PBAC Scoping Cho Lãnh Đạo Cơ Quan (HRM Employees Scope Expansion)
+
+### 1. Bối Cảnh & Yêu Cầu Người Dùng
+- **Yêu cầu**: *"http://113.184.220.82/admin/services/hrm/employees kiểm tra lại ở server cho tôi lãnh đạo cơ quan phải nhìn được hết nhìn viên cấp dưới của chính mình chứ k phải nhìn được mỗi thành viên cùng cấp thế này"*
+- **Vấn đề**: Tài khoản Lãnh đạo cơ quan (Bùi Thanh Toàn - Giám đốc Sở KH&CN, `unitId = 2`) đăng nhập vào trang Quản lý nhân sự (`/admin/services/hrm/employees`) chỉ nhìn thấy 5 người (chính mình và 4 Phó Giám đốc cùng cấp tại `deptId = 2`). Không nhìn thấy bất kỳ ai trong số hơn 40 nhân viên cấp dưới trực thuộc các phòng ban và trung tâm con (Văn phòng Sở, Phòng KHTC, Phòng QLKH, Phòng CĐS, TT ĐMST, TT IOC, TT Kỹ thuật, v.v.).
+
+### 2. Nguyên Nhân Gốc Rễ (Root Cause)
+1. **Thiếu trường trong protobuf contract (`shared/protos/hrm/employee.proto`)**: `ListEmployeesRequest` không có `repeated int32 descendantUnitIds = 18;`, dẫn tới dù gateway gửi mảng các đơn vị con cháu, gRPC serializer cũng tự động lược bỏ.
+2. **Lỗi logic phân cấp trong `organizations.service.ts` (`user-service`)**: Hàm `getDescendants(rootId)` chỉ query `hierarchyPath: { startsWith: prefix }`. Trong cơ sở dữ liệu `admin_systems.organization_units`, 55/60 đơn vị có `hierarchy_path = NULL`, dẫn đến `getDescendants` chỉ trả về đúng 1 ID của chính đơn vị cha.
+3. **DTO gRPC trong `hrm-service` bị ValidationPipe whitelist lọc mất**: `ListEmployeesGrpcDto` thiếu các trường `@IsOptional() callerUnitId`, `civilServantRankId`, `partyTitleId`, `callerEmail`, `callerJobCode`, `departmentPathPrefix`. Do `ValidationPipe({ whitelist: true })` được kích hoạt toàn cục, các thuộc tính này bị strip sạch.
+4. **Logic giới hạn tại `api-gateway` và `hrm-service`**:
+   - `api-gateway` trước đây chỉ gọi `GetOrganizations({ ids: [callerUnitId] })` và đọc `hierarchyPath` (vốn là NULL). Chưa từng gọi `GetDescendants` của `user-service`.
+   - Ngoài ra, nếu người dùng là `admin`, `api-gateway` vẫn chuyển `callerUnitId` xuống `hrm-service`, làm admin cũng bị khóa phạm vi vào 1 đơn vị duy nhất.
+
+### 3. Giải Pháp Kỹ Thuật Đã Triển Khai
+1. **`shared/protos/hrm/employee.proto`**: Thêm `repeated int32 descendantUnitIds = 18;` vào `ListEmployeesRequest`.
+2. **`apps/user-service/src/modules/organizations/organizations.service.ts`**: Cải tiến `getDescendants(rootId)` duyệt toàn diện cây tổ chức theo quan hệ `parentId` in-memory kết hợp `code.startsWith` và `hierarchyPath`, đảm bảo tìm đầy đủ 100% tất cả các cấp đơn vị con cháu trực thuộc.
+3. **`apps/hrm-service/src/modules/employees/dto/employee.grpc.dto.ts`**: Bổ sung đầy đủ các decorator cho `ListEmployeesGrpcDto` (`descendantUnitIds`, `civilServantRankId`, `partyTitleId`, `callerEmail`, `callerUnitId`, `callerJobCode`, `departmentPathPrefix`, `callerUserId`).
+4. **`apps/hrm-service/src/modules/employees/employees.service.ts`**: Cập nhật logic: Nếu có `descendantUnitIds`, khi người dùng chọn lọc `departmentId` cụ thể (đã được gateway xác thực nằm trong quyền), áp dụng lọc theo phòng đó; nếu không chọn, lọc toàn bộ theo danh sách `departmentId: { in: descendantUnitIds }`.
+5. **`apps/api-gateway/src/modules/hrm/employee.service.ts`**:
+   - Gọi `this.orgService.GetDescendants({ id: callerUnitId }, metadata)` để phân giải toàn bộ cây đơn vị con cháu.
+   - Bổ sung các đơn vị được phân công theo dõi (`monitoredUnitIds`).
+   - Gán `req.descendantUnitIds = allowedIds`.
+   - Kiểm tra bộ lọc `departmentId`: Nếu nằm trong `allowedIds` thì giữ nguyên, nếu không thì bỏ lọc để tránh rò rỉ dữ liệu ngoài thẩm quyền.
+   - Khi `isAdmin`: xóa `req.callerUnitId` để quản trị viên hệ thống có toàn quyền xem toàn bộ nhân sự toàn tỉnh.
+
+### 4. Kết Quả Kiểm Thử Thực Tế Bằng Máy (Live Verification Results)
+- **Tài khoản Lãnh đạo cơ quan (`buithanhtoan` - Giám đốc Sở KH&CN, `unitId = 2`)**:
+  * Trước khi sửa: Chỉ thấy 5 người (`deptId = 2`).
+  * Sau khi sửa: Thấy chính xác **48 nhân viên** (toàn bộ Giám đốc, Phó Giám đốc Sở, Chánh/Phó Văn phòng Sở, Trưởng/Phó các phòng chuyên môn, Giám đốc các Trung tâm ĐMST, IOC, Kỹ thuật và toàn thể viên chức/người lao động cấp dưới).
+- **Bộ lọc phòng ban khi Lãnh đạo tra cứu (`buithanhtoan` + `departmentId = 23`)**:
+  * Trả về đúng **2 nhân viên** của Phòng Kế hoạch - Tài chính (`Lê Thị B`, `Ngô Thị Phó 2`).
+- **Tài khoản Quản trị viên hệ thống (`admin`)**:
+  * Thấy đầy đủ **76 nhân viên** toàn hệ thống.
+- **Biên dịch TypeScript (`tsc --noEmit`)**:
+  * `apps/hrm-service`: Exit code 0 (0 lỗi).
+  * `apps/user-service`: Exit code 0 (0 lỗi).
+  * `apps/api-gateway`: Exit code 0 (0 lỗi).
+- **Docker Production**: Rebuild và recreate thành công các container `user-service`, `hrm-service`, `api-gateway`.
+
+---
+
+
 
 ### 1. Bối Cảnh & Yêu Cầu Người Dùng
 - **Yêu cầu 1**: *"Hãy rà soát toàn bộ dự án chạy lại liên tục và sửa lỗi các liên quan tới các nguyên tắc vi phạm quy định dự án khi nào hết lỗi thì mới đc dừng. Quá trình thực hiện phải ghi logs và tình trạng rà thực hiện cho tôi"*

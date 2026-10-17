@@ -40,8 +40,14 @@ export class ListEmployeesGrpcDto {
   @IsInt() @IsOptional() jobTitleId?: number;
   @IsString() @IsOptional() status?: string;
   @IsBoolean() @IsOptional() includeChildren?: boolean;
+  @IsInt() @IsOptional() civilServantRankId?: number;
+  @IsInt() @IsOptional() partyTitleId?: number;
   @IsBoolean() @IsOptional() assignableOnly?: boolean;
+  @IsString() @IsOptional() callerEmail?: string;
+  @IsInt() @IsOptional() callerUnitId?: number;
+  @IsString() @IsOptional() callerJobCode?: string;
   @IsInt() @IsOptional() callerUserId?: number;
+  @IsString() @IsOptional() departmentPathPrefix?: string;
   @IsArray() @IsOptional() descendantUnitIds?: number[];
   @IsString() @IsOptional() excludeEmployeeCode?: string;
   @IsArray() @IsOptional() ids?: number[];

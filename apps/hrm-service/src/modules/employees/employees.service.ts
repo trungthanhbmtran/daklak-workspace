@@ -366,7 +366,11 @@ export class EmployeesService {
         andConditions.push({ OR: scopeOrs });
       }
     } else if (params.descendantUnitIds && params.descendantUnitIds.length > 0) {
-      andConditions.push({ departmentId: { in: params.descendantUnitIds } });
+      if (params.departmentId != null && params.departmentId > 0) {
+        andConditions.push({ departmentId: params.departmentId });
+      } else {
+        andConditions.push({ departmentId: { in: params.descendantUnitIds } });
+      }
     } else if (params.departmentId != null && params.departmentId > 0) {
       andConditions.push({ departmentId: params.departmentId });
     } else if (params.callerUnitId && params.callerUnitId > 0) {
