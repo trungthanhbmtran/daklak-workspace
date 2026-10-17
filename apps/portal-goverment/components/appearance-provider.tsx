@@ -117,8 +117,8 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
               branding: { ...DEFAULT_THEME_CONFIG.branding, ...parsed.branding },
             };
           }
-        } catch (e) {
-          console.error("Failed to parse appearance config", e);
+        } catch {
+          // Fallback theme config handled
         }
       }
     }

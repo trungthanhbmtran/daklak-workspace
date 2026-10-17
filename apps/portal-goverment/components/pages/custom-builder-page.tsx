@@ -44,8 +44,7 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
     if (!found || !found.description) return []
     try {
       return JSON.parse(found.description)
-    } catch (e) {
-      console.error("Failed to parse custom page list", e)
+    } catch {
       return []
     }
   }, [portalConfigData])
@@ -74,8 +73,7 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
     if (!found || !found.description) return null
     try {
       return JSON.parse(found.description)
-    } catch (e) {
-      console.error(`Failed to parse custom page layout for ${id}`, e)
+    } catch {
       return null
     }
   }, [portalConfigData, id])

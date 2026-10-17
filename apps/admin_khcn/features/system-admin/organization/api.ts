@@ -10,33 +10,26 @@ import type {
   SetStaffingPayload,
   SetStaffingSlotPayload,
   UpdateJobTitlePayload,
-  UnitTypeItem,
 } from "./types";
 
-/**
- * Unwrap payload từ gateway envelope chính thức.
- * Sử dụng unwrapData chuẩn hóa từ api-helper để bóc tách envelope an toàn.
- */
-const unwrapOrgEnvelope = (res: any): any => unwrapData(res, []);
-
 export const organizationApi = {
-  getOrganizations: (q?: string): Promise<OrganizationUnitNode[] & { data: OrganizationUnitNode[] }> =>
-    apiClient.get("/organizations", { params: { q: q || undefined } }).then((r: any) => unwrapData<any>(r, [])),
+  getOrganizations: (q?: string): Promise<OrganizationUnitNode[]> =>
+    apiClient.get("/organizations", { params: { q: q || undefined } }).then((r: any) => unwrapData<OrganizationUnitNode[]>(r, [])),
 
-  getTree: (q?: string): Promise<OrganizationUnitNode[] & { data: OrganizationUnitNode[] }> =>
-    apiClient.get("/organizations/tree", { params: { q: q || undefined } }).then((r: any) => unwrapData<any>(r, [])),
+  getTree: (q?: string): Promise<OrganizationUnitNode[]> =>
+    apiClient.get("/organizations/tree", { params: { q: q || undefined } }).then((r: any) => unwrapData<OrganizationUnitNode[]>(r, [])),
 
-  getDetail: (identifier: string): Promise<OrganizationUnitNode & { data: OrganizationUnitNode }> =>
-    apiClient.get(`/organizations/detail/${encodeURIComponent(identifier)}`).then((r: any) => unwrapData<any>(r, {})),
+  getDetail: (identifier: string): Promise<OrganizationUnitNode> =>
+    apiClient.get(`/organizations/detail/${encodeURIComponent(identifier)}`).then((r: any) => unwrapData<OrganizationUnitNode>(r, {} as OrganizationUnitNode)),
 
-  getScope: (id: number): Promise<{ data: { domains: { id: number; name: string }[], domainIds: number[], scope: string } }> =>
+  getScope: (id: number): Promise<{ domains: { id: number; name: string }[]; domainIds: number[]; scope: string }> =>
     apiClient.get(`/organizations/${id}/scope`).then((r: any) => {
       const d = unwrapData<any>(r, {});
-      return unwrapData<any>({
+      return {
         domains: d?.domains ?? [],
         domainIds: d?.domainIds ?? [],
         scope: d?.scope,
-      });
+      };
     }),
 
   createUnit: (payload: CreateUnitPayload) =>
@@ -76,18 +69,18 @@ export const organizationApi = {
       .then((r: any) => unwrapData(r, [])),
 
   updateScope: (id: number, payload: { domainIds?: number[] }) =>
-    apiClient.put(`/organizations/${id}/scope`, payload).then((r: any) => r?.data ?? r),
+    apiClient.put(`/organizations/${id}/scope`, payload).then((r: any) => unwrapData(r, r)),
 
-  getJobTitles: (unitId?: number): Promise<{ partyTitles: JobTitleItem[]; govTitles: JobTitleItem[]; allTitles: JobTitleItem[] } & { data: any }> =>
+  getJobTitles: (unitId?: number): Promise<{ partyTitles: JobTitleItem[]; govTitles: JobTitleItem[]; allTitles: JobTitleItem[] }> =>
     apiClient
       .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
       .then((r: any) => {
         const data = unwrapData<any>(r, {});
-        return unwrapData<any>({
+        return {
           partyTitles: data.partyTitles || [],
           govTitles: data.govTitles || [],
           allTitles: data.allTitles || [],
-        });
+        };
       }),
 
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
@@ -125,11 +118,11 @@ export const organizationApi = {
     apiClient.get(`/organizations/${unitId}/staffing-report`).then((r: any) => {
       const d = unwrapData<any>(r, {});
       const all = d?.allReport || (Array.isArray(d) ? d : []);
-      return unwrapData<any>({
+      return {
         data: all,
         partyReport: d?.partyReport || [],
         govReport: d?.govReport || [],
         allReport: all,
-      });
+      };
     }),
 };

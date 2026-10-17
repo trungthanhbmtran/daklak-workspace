@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         setAccessToken(token);
         setUser(JSON.parse(userInfoStr));
-      } catch (e) {
-        console.error("Failed to parse user info", e);
+      } catch {
+        // Fallback user info handled
       }
     }
     setIsInitialized(true);

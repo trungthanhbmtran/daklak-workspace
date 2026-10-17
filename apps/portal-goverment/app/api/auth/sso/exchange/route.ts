@@ -53,8 +53,8 @@ export async function POST(request: Request) {
           },
         });
         userInfo = userResponse.data;
-      } catch (err) {
-        console.error('Failed to fetch user info', err);
+      } catch {
+        // Fallback user info handled
       }
     }
 
@@ -62,8 +62,7 @@ export async function POST(request: Request) {
       access_token,
       userInfo,
     });
-  } catch (error: any) {
-    console.error('SSO Exchange error:', error.response?.data || error.message);
+  } catch {
     return NextResponse.json(
       { error: 'Failed to exchange token' },
       { status: 500 }

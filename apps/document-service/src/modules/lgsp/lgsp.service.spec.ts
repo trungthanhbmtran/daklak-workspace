@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import axios from 'axios';
 import { LgspService } from './lgsp.service';
 import { LgspConfigService } from './lgsp.config';
 import { LgspTokenService } from './lgsp-token.service';
@@ -138,21 +139,20 @@ describe('LGSP Interoperability Module', () => {
     });
 
     it('4.1.1 getAgenciesList: phải gửi đúng SystemCode và token', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
+      const mockPost = jest.spyOn(axios, 'post').mockResolvedValue({
+        status: 200,
+        data: {
           status: 'success',
           ErrorCode: '0',
           data: [{ code: '000.00.00.G11', name: 'Văn phòng UBND Tỉnh' }],
-        }),
-      });
-      global.fetch = mockFetch;
+        },
+      } as any);
 
       const result = await lgspService.getAgenciesList({ limit: 10, offset: 0 });
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         expect.stringContaining('getAgenciesList?limit=10&offset=0'),
+        null,
         expect.objectContaining({
-          method: 'POST',
           headers: expect.objectContaining({
             SystemCode: '0400101394-CTDL-012',
             Authorization: 'Bearer mock_bearer_token',
@@ -163,15 +163,14 @@ describe('LGSP Interoperability Module', () => {
     });
 
     it('4.1.2 sendEdoc: phải gửi octet-stream với SystemCode và X-lgsp-requestId', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
+      const mockPost = jest.spyOn(axios, 'post').mockResolvedValue({
+        status: 200,
+        data: {
           status: 'success',
           ErrorCode: '0',
           DocId: 'LGSP_DOC_9999',
-        }),
-      });
-      global.fetch = mockFetch;
+        },
+      } as any);
 
       const dummyBuffer = Buffer.from('<xml>test</xml>', 'utf-8');
       const res = await lgspService.sendEdoc({
@@ -180,10 +179,10 @@ describe('LGSP Interoperability Module', () => {
         messageType: 'edoc',
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         expect.stringContaining('/guivb/1.0.0/sendEdoc'),
+        dummyBuffer,
         expect.objectContaining({
-          method: 'POST',
           headers: expect.objectContaining({
             'Content-Type': 'application/octet-stream',
             SystemCode: '0400101394-CTDL-012',
@@ -197,15 +196,15 @@ describe('LGSP Interoperability Module', () => {
     });
 
     it('4.1.6 updateStatus: cập nhật trạng thái done gói tin', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ status: 'success', ErrorCode: '0' }),
-      });
-      global.fetch = mockFetch;
+      const mockPost = jest.spyOn(axios, 'post').mockResolvedValue({
+        status: 200,
+        data: { status: 'success', ErrorCode: '0' },
+      } as any);
 
       const res = await lgspService.updateStatus('LGSP_DOC_111', 'done');
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         expect.stringContaining('/guivb/1.0.0/updateStatus'),
+        null,
         expect.objectContaining({
           headers: expect.objectContaining({
             SystemCode: '0400101394-CTDL-012',
@@ -263,26 +262,25 @@ describe('LGSP Interoperability Module', () => {
     });
 
     it('testConnection: probe kết nối SSO và Gateway thành công', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({
+      const mockPost = jest.spyOn(axios, 'post').mockResolvedValue({
         status: 200,
-        ok: true,
-      });
-      global.fetch = mockFetch;
+        data: {},
+      } as any);
 
       const res = await lgspService.testConnection();
 
       expect(res.success).toBe(true);
       expect(res.isVpnReachable).toBe(true);
-      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockPost).toHaveBeenCalledTimes(2);
       expect(res.message).toContain('Kết nối thành công tới toàn bộ hạ tầng LGSP Đắk Lắk');
     });
 
     it('testConnection: nhận diện và cảnh báo khi hạ tầng VPN Đắk Lắk bị timeout', async () => {
-      const mockFetch = jest.fn().mockRejectedValue({
+      jest.spyOn(axios, 'post').mockRejectedValue({
+        code: 'ECONNABORTED',
         name: 'TimeoutError',
         message: 'The operation was aborted due to timeout',
       });
-      global.fetch = mockFetch;
 
       const res = await lgspService.testConnection();
 

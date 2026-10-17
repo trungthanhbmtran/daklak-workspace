@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axiosInstance';
 import type { ApiResponse } from '@/lib/api.types';
+import { unwrapData } from '@/lib/api-helper';
 import { toast } from 'sonner';
 
 export interface AiAssistant {
@@ -19,7 +20,7 @@ export const useGetAiAssistants = () => {
     queryKey: ['aiAssistants'],
     queryFn: async () => {
       const res = await apiClient.get<any, ApiResponse<AiAssistant[]>>('/ai-assistants');
-      return res.data;
+      return unwrapData<AiAssistant[]>(res, []);
     },
   });
 };
@@ -29,7 +30,7 @@ export const useCreateAiAssistant = () => {
   return useMutation({
     mutationFn: async (payload: { name: string; description?: string; system_prompt: string; is_public: boolean }) => {
       const res = await apiClient.post<any, ApiResponse<AiAssistant>>('/ai-assistants', payload);
-      return res.data;
+      return unwrapData<AiAssistant>(res, {} as AiAssistant);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });
@@ -46,7 +47,7 @@ export const useUpdateAiAssistant = () => {
   return useMutation({
     mutationFn: async (payload: { id: string; name: string; description?: string; system_prompt: string; is_public: boolean }) => {
       const res = await apiClient.put<any, ApiResponse<AiAssistant>>(`/ai-assistants/${payload.id}`, payload);
-      return res.data;
+      return unwrapData<AiAssistant>(res, {} as AiAssistant);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });
@@ -79,7 +80,7 @@ export const useAddKnowledgeSource = () => {
   return useMutation({
     mutationFn: async (payload: { assistantId: string; type: string; title: string; content: string }) => {
       const res = await apiClient.post<any, ApiResponse<any>>(`/ai-assistants/${payload.assistantId}/knowledge-sources`, payload);
-      return res.data;
+      return unwrapData<any>(res, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['aiAssistants'] });

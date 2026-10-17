@@ -23,15 +23,16 @@ export function usePreviewSimulator(activeLangTab: string) {
 
     const isMultiLang = portalConfigDefaults[key]?.multiLang;
     if (isMultiLang) {
+      if (!configItem.description) return portalConfigDefaults[key]?.[activeLangTab as "vi" | "en"] || "";
       try {
         const parsed = JSON.parse(configItem.description);
         return parsed[activeLangTab] || "";
       // eslint-disable-next-line unused-imports/no-unused-vars
       } catch (e) {
-        return activeLangTab === "vi" ? configItem.description : "";
+        return activeLangTab === "vi" ? (configItem.description || "") : "";
       }
     }
-    return configItem.description;
+    return configItem.description || "";
   };
 
   const getLogo = (key: string) => {

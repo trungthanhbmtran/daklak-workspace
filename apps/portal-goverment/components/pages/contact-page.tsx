@@ -104,16 +104,16 @@ export default function ContactPage() {
             if (typeof val === "string") {
               try {
                 return JSON.parse(val)
-              } catch (e) {
-                console.error("Inner array parse issue", e)
+              } catch {
+                // Parse fallback
               }
             } else if (Array.isArray(val)) {
               return val
             }
           }
         }
-      } catch (e) {
-        console.error("Outer translation list parse issue", e)
+      } catch {
+        // Parse fallback
       }
     }
     return fallback

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { portalLanguagesApi } from "@/features/portal-config/api";
+import { unwrapData } from "@/lib/api-helper";
 import { Text } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
 
@@ -51,8 +52,8 @@ export function BannerBasicInfo({
   const { data: languages = [] } = useQuery({
     queryKey: ['portal-languages'],
     queryFn: async () => {
-      const res: any = await portalLanguagesApi.getActive();
-      return res.data;
+      const res = await portalLanguagesApi.getActive();
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 5 * 60_000,
     placeholderData: [],

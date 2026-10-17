@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { unwrapData } from "@/lib/api-helper"
 import {
   MessageSquare,
   Send,
@@ -57,9 +58,8 @@ export default function InteractionsPage() {
     queryFn: async () => {
       try {
         const res: any = await apiClient.get("/public/interactions/questions?limit=50")
-        return res.data
-      } catch (e) {
-        console.error("Failed to fetch questions", e)
+        return unwrapData<any[]>(res, [])
+      } catch {
         return []
       }
     }
@@ -135,8 +135,7 @@ export default function InteractionsPage() {
 
       setSubject("")
       setContent("")
-    } catch (e) {
-      console.error("Failed to submit citizen question", e)
+    } catch {
       alert("Gửi câu hỏi thất bại, vui lòng thử lại sau.")
     }
   }

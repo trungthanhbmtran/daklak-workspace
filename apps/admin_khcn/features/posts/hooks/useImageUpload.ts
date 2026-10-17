@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import axios from "axios";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { toast } from "sonner";
 
 export const useImageUpload = (options?: { onSuccess?: (id: string, url: string) => void; onRemove?: () => void }) => {
@@ -23,13 +23,12 @@ export const useImageUpload = (options?: { onSuccess?: (id: string, url: string)
         size: compressed.size,
       });
 
-      // Gateway wraps everything in { success: true, data: ... }
-      const uploadInfo = res.data;
+      const uploadInfo = unwrapData<any>(res, {});
 
       await axios.put(uploadInfo.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
 
       const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId: uploadInfo.fileId });
-      const conf = confirmRes.data;
+      const conf = unwrapData<any>(confirmRes, {});
 
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(uploadInfo.fileId, conf.downloadUrl);

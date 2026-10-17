@@ -1,5 +1,60 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-17] Rà Soát Toàn Bộ Dự Án Liên Tục & Sửa Hết Lỗi Vi Phạm Ràng Buộc - Kiểm Thử Máy Minh Chứng Kết Quả
+
+### 1. Bối Cảnh & Yêu Cầu Người Dùng
+- **Yêu cầu 1**: *"Hãy rà soát toàn bộ dự án chạy lại liên tục và sửa lỗi các liên quan tới các nguyên tắc vi phạm quy định dự án khi nào hết lỗi thì mới đc dừng. Quá trình thực hiện phải ghi logs và tình trạng rà thực hiện cho tôi"*
+- **Yêu cầu 2**: *"Kiểm thử toàn bộ dự án cho tôi minh chứng bằng kết quả"*
+
+### 2. Các Hạng Mục Rà Soát & Khắc Phục Lỗi Vi Phạm Ràng Buộc (8 Inviolable Constraints)
+1. **Ràng buộc 2: Thống Nhất Duy Nhất Axios, Envelope 1 Tầng & Direct Render (BẮT BUỘC)**:
+   - Sửa lỗi đọc sai dữ liệu trạng thái công việc tại [`apps/admin_khcn/components/shared/badges/TaskBadges.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/components/shared/badges/TaskBadges.tsx): Chuyển từ cố đọc sai `statusRes?.data` sang trực tiếp `const { data: categories = [] } = useGetCategoryByGroup(...)`.
+   - Chuẩn hóa unwrap dữ liệu và xóa bỏ bọc lồng đa tầng:
+     * [`apps/api-gateway/src/modules/workflow/workflow.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/workflow/workflow.service.ts): Xóa bỏ việc tự bọc thủ công `{ data: result, message: ... }` làm lồng envelope đúp.
+     * [`apps/admin_khcn/features/portal-config/components/hooks/usePreviewSimulator.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/portal-config/components/hooks/usePreviewSimulator.ts): Chuẩn hóa `unwrapData` và sửa type guard an toàn `configItem.description`.
+     * [`apps/admin_khcn/features/document/hooks/useDocuments.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/hooks/useDocuments.ts): Chuẩn hóa `extractMetadataMutation` qua `unwrapData`.
+     * [`apps/admin_khcn/features/system-admin/users/hooks/useAiAssistants.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/users/hooks/useAiAssistants.ts): Chuẩn hóa các mutation và query qua `unwrapData`.
+     * [`apps/admin_khcn/features/posts/hooks/useImageUpload.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/hooks/useImageUpload.ts): Chuẩn hóa `unwrapData` cho request/confirm upload MinIO.
+     * [`apps/admin_khcn/features/posts/portal-menus/components/EditMenuModal.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/portal-menus/components/EditMenuModal.tsx): Chuẩn hóa query `postsApi.getCategories`, `postsApi.getPosts`, `organizationApi.getOrganizations`, `portalConfigApi.getAll` qua `unwrapData`.
+     * [`apps/admin_khcn/features/posts/components/LgspClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/LgspClient.tsx): Chuẩn hóa đồng bộ tài liệu LGSP với `unwrapData`.
+     * [`apps/admin_khcn/features/posts/components/PostForm.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/PostForm.tsx): Chuẩn hóa query chuyên mục và chi tiết bài viết với `unwrapData`.
+     * [`apps/admin_khcn/features/posts/components/banner/BannerBasicInfo.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/banner/BannerBasicInfo.tsx): Chuẩn hóa `portalLanguagesApi.getActive()` với `unwrapData`.
+     * [`apps/admin_khcn/features/posts/components/post-list/PostListFilters.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/post-list/PostListFilters.tsx): Chuẩn hóa `postsApi.getCategories()` với `unwrapData`.
+     * [`apps/admin_khcn/features/system-admin/organization/api.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/organization/api.ts): Làm sạch 100% kiểu nối chuỗi `& { data: ... }` cũ, xóa bỏ hàm unwrap giả lập `unwrapOrgEnvelope`, trả về thực thể thuần túy chuẩn xác.
+     * [`apps/portal-goverment/components/pages/feedback-page.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/components/pages/feedback-page.tsx): Chuẩn hóa query câu hỏi công dân với `unwrapData`.
+     * [`apps/portal-goverment/components/pages/home-client.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/components/pages/home-client.tsx): Chuẩn hóa query banner với `unwrapData`.
+
+2. **Ràng buộc 3: Next.js App Router & Server Components**:
+   - Tách [`apps/portal-goverment/app/[lang]/auth/callback/page.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/app/%5Blang%5D/auth/callback/page.tsx) thành:
+     * Server Component: `page.tsx` (gọn gàng, không có directive `'use client'`).
+     * Client Component: [`AuthCallbackClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/app/%5Blang%5D/auth/callback/AuthCallbackClient.tsx) có directive `'use client'`, đảm bảo 100% tuân thủ quy tắc Server Component.
+
+3. **Ràng buộc 7: Vệ sinh Mã Nguồn (Xóa 100% Debug Logs & Mã hóa UTF-8 Không BOM)**:
+   - Quét sạch toàn bộ 20 vị trí `console.error` trong `apps/portal-goverment`:
+     * `app/api/auth/sso/exchange/route.ts` (xóa 2 điểm)
+     * `components/DynamicPageRenderer.tsx` (xóa 2 điểm)
+     * `components/appearance-provider.tsx` (xóa 1 điểm)
+     * `components/header.tsx` (xóa 1 điểm)
+     * `components/pages/about-page.tsx` (xóa 2 điểm)
+     * `components/pages/contact-page.tsx` (xóa 2 điểm)
+     * `components/pages/custom-builder-page.tsx` (xóa 2 điểm)
+     * `components/pages/feedback-page.tsx` (xóa 2 điểm)
+     * `components/pages/home-client.tsx` (xóa 1 điểm)
+     * `lib/axiosInstance.ts` (xóa 4 điểm)
+     * `providers/auth-provider.tsx` (xóa 1 điểm)
+   - Kiểm tra mã hóa UTF-8 không BOM: 100% file đã sửa đổi đều đạt tiêu chuẩn UTF-8 không BOM.
+
+### 3. Kết Quả Kiểm Thử Toàn Diện Máy (Machine Verification Proof)
+- **TypeScript Typecheck (`tsc --noEmit`)**: 11/11 modules/services đều vượt qua (Exit Code: 0).
+- **Inviolable Constraints Machine Grep Verification**:
+  * Kiểm tra `fetch(`: 0 kết quả vi phạm (100% native fetch đã bị loại bỏ).
+  * Kiểm tra `console.(log|error|warn|debug)` và `debugger`: 0 kết quả trong mã nguồn thực thi.
+  * Kiểm tra `res?.data?.data` / `\.data\.data`: 0 kết quả vi phạm.
+  * Kiểm tra `"use client"` trong `page.tsx`: 0 kết quả vi phạm (100% `page.tsx` là Server Component).
+  * Kiểm tra UTF-8 BOM / UTF-16: 0 file lỗi (Tất cả 100% UTF-8 không BOM).
+
+---
+
 ## [2026-10-17] Cập Nhật Toàn Bộ .agents: Thống Nhất Duy Nhất Axios, Chuẩn Hóa Đầu Vào - Đầu Ra & Lược Bỏ Toàn Bộ Xử Lý Dư Thừa
 
 ### 1. Bối Cảnh & Chỉ Đạo Người Dùng

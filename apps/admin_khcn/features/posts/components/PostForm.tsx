@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
 import { categoryApi } from "@/features/system-admin/categories/api";
+import { unwrapData } from "@/lib/api-helper";
 
 import { postsApi } from "../api";
 import { PostFormHeader } from "./post-form/PostFormHeader";
@@ -90,20 +91,22 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     }
   }, [languages, form]);
 
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["posts-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return res.data;
+      return unwrapData<any[]>(res, []);
     },
   });
 
-  const { data: postResponse, isLoading: isFetching } = useQuery({
+  const { data: postData, isLoading: isFetching } = useQuery({
     queryKey: ["post", editId],
-    queryFn: async () => await postsApi.getPost(editId!),
+    queryFn: async () => {
+      const res = await postsApi.getPost(editId!);
+      return unwrapData<any>(res, null);
+    },
     enabled: isEdit,
   });
-  const postData = postResponse?.data;
 
   useEffect(() => {
     if (postData && languages.length > 0) {

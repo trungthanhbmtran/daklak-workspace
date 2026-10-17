@@ -471,8 +471,7 @@ export default function Header() {
           temp: Math.round(temp),
           emoji
         }
-      } catch (e) {
-        console.error("Failed to fetch weather from Open-Meteo", e)
+      } catch {
         return null
       }
     },

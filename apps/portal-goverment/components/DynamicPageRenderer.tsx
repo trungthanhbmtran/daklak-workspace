@@ -938,8 +938,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     if (trimmed.startsWith("[")) {
       try {
         return JSON.parse(trimmed)
-      } catch (e) {
-        console.error(`Failed to parse array portal config ${code}:`, e)
+      } catch {
         return fallback
       }
     }
@@ -955,7 +954,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
             if (typeof val === "string") {
               try {
                 return JSON.parse(val)
-              } catch (e) {
+              } catch {
                 return val
               }
             }
@@ -963,8 +962,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
           }
           return parsed
         }
-      } catch (e) {
-        console.error(`Failed to parse object portal config ${code}:`, e)
+      } catch {
         return fallback
       }
     }

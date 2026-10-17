@@ -9,8 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, Send, FileText, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { Heading, Text } from "@/components/ui/typography";
-
 
 export function LgspClient() {
   const queryClient = useQueryClient();
@@ -23,13 +23,10 @@ export function LgspClient() {
   } = useQuery({
     queryKey: ["lgsp-documents"],
     queryFn: async () => {
-      const res: any = await apiClient.get("/integrations/documents/sync", {
+      const res = await apiClient.get("/integrations/documents/sync", {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" },
       });
-      if (res.success) {
-        return res.data;
-      }
-      throw new Error(res.message || "Không thể đồng bộ văn bản.");
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 60_000,
   });

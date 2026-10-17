@@ -9,6 +9,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { postsApi } from "../../api";
+import { unwrapData } from "@/lib/api-helper";
 
 interface PostListFiltersProps {
   onNavigateToCreate: () => void;
@@ -36,7 +37,7 @@ export function PostListFilters({ onNavigateToCreate }: PostListFiltersProps) {
     queryKey: ["post-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return res.data;
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 5 * 60 * 1000
   });

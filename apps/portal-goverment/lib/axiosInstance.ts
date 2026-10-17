@@ -55,28 +55,9 @@ apiClient.interceptors.request.use(
 
 
 // 3. XỬ LÝ LỖI (Error Handler)
-function showError(error: AxiosError) {
-  if (!error.response) {
-    console.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền.");
-    return;
-  }
-
-  const data = error.response.data as { message?: string } | undefined;
-  const status = error.response.status;
-
-  switch (status) {
-    case 403:
-      console.error("Bạn không có quyền truy cập tài nguyên này.");
-      return;
-    case 500:
-      console.error(data?.message || "Lỗi hệ thống (500).");
-      return;
-    default:
-      if (data?.message) {
-        console.error(data.message);
-      }
-      return;
-  }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function showError(_error: AxiosError) {
+  // Lỗi mạng/auth được xử lý tập trung qua React Query hoặc UI state
 }
 
 // 4. CÀI ĐẶT SESSION RECOVERY

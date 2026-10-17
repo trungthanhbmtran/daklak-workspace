@@ -245,8 +245,7 @@ export default function AboutPage() {
     if (trimmed.startsWith("[")) {
       try {
         return JSON.parse(trimmed)
-      } catch (e) {
-        console.error(`Failed to parse array portal config ${code}:`, e)
+      } catch {
         return fallback
       }
     }
@@ -262,7 +261,7 @@ export default function AboutPage() {
             if (typeof val === "string") {
               try {
                 return JSON.parse(val)
-              } catch (e) {
+              } catch {
                 return val
               }
             }
@@ -270,8 +269,7 @@ export default function AboutPage() {
           }
           return parsed
         }
-      } catch (e) {
-        console.error(`Failed to parse object portal config ${code}:`, e)
+      } catch {
         return fallback
       }
     }

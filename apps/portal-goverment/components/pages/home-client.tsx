@@ -201,9 +201,8 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
     queryFn: async () => {
       try {
         const res: any = await apiClient.get("/public/categories?group=BANNER_POSITION");
-        return res.data;
-      } catch (e) {
-        console.error("Failed to fetch public categories for banner positions", e);
+        return unwrapData<any[]>(res, []);
+      } catch {
         return [];
       }
     },
