@@ -386,6 +386,7 @@ export class TasksService {
   }
 
   async getTask(id: number, query: any) {
+    await this.autoComputeTaskProgress(id);
     await this.shared.populateQueryHierarchy(query);
     const t = await this.findTaskOrFail(id);
     const [enriched] = await this.shared.enrichTasks([t]);
@@ -1537,10 +1538,50 @@ export class TasksService {
   }
 
   private parseUpdateTaskData(data: any) {
-    const { baseScore, weight, scoringMethod, bonusPerDay, penaltyPerDay, kpiCriteriaId, isCrossDomain, crossDomainMultiplier, id: _id, ...taskData } = data;
+    const {
+      baseScore,
+      weight,
+      scoringMethod,
+      bonusPerDay,
+      penaltyPerDay,
+      kpiCriteriaId,
+      isCrossDomain,
+      crossDomainMultiplier,
+      id: _id,
+      currentEmployeeCode,
+      currentUserId,
+      currentUserDept,
+      currentUserPermissions,
+      actorCode,
+      ...taskData
+    } = data;
 
-    if (taskData.startDate) taskData.startDate = new Date(taskData.startDate);
-    if (taskData.dueDate) taskData.dueDate = new Date(taskData.dueDate);
+    if (taskData.startDate) {
+      const d = new Date(taskData.startDate);
+      if (!isNaN(d.getTime())) taskData.startDate = d;
+      else delete taskData.startDate;
+    } else {
+      delete taskData.startDate;
+    }
+
+    if (taskData.dueDate) {
+      const d = new Date(taskData.dueDate);
+      if (!isNaN(d.getTime())) taskData.dueDate = d;
+      else delete taskData.dueDate;
+    } else {
+      delete taskData.dueDate;
+    }
+
+    if (taskData.completedAt) {
+      const d = new Date(taskData.completedAt);
+      if (!isNaN(d.getTime())) taskData.completedAt = d;
+      else delete taskData.completedAt;
+    } else if (taskData.completedAt === '') {
+      delete taskData.completedAt;
+    }
+
+    // Tiến độ được tự động tính toán theo checklist và công việc con, cấm can thiệp thủ công
+    delete taskData.progress;
 
     return { taskData };
   }

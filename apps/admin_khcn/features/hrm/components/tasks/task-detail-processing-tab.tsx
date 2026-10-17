@@ -34,7 +34,6 @@ import {
   Copy,
   Check,
   TrendingUp,
-  SlidersHorizontal,
   ArrowUpRight,
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
@@ -64,12 +63,6 @@ export function TaskProcessingTab({
   const [isCreateSubTaskOpen, setIsCreateSubTaskOpen] = useState(false);
   const [isCreateStepOpen, setIsCreateStepOpen] = useState(false);
 
-  // Quick progress update state
-  const [isEditingProgress, setIsEditingProgress] = useState(false);
-  const [progressInput, setProgressInput] = useState<number>(currentTask?.progress ?? 0);
-  const [progressNote, setProgressNote] = useState("");
-  const [isSavingProgress, setIsSavingProgress] = useState(false);
-
   // Evidence modal for completing items
   const [completingItem, setCompletingItem] = useState<{ type: "step" | "subtask"; data: any } | null>(null);
   const [evidenceText, setEvidenceText] = useState("");
@@ -86,13 +79,10 @@ export function TaskProcessingTab({
   );
 
   useEffect(() => {
-    if (currentTask?.progress !== undefined) {
-      setProgressInput(currentTask.progress);
-    }
     if (currentTask?.metadata?.attachments) {
       setTaskAttachments(currentTask.metadata.attachments);
     }
-  }, [currentTask?.progress, currentTask?.metadata?.attachments]);
+  }, [currentTask?.metadata?.attachments]);
 
   const isValidTaskId = Boolean(taskId && Number(taskId) > 0);
   const { data: subTasks = [], isLoading: subtasksLoading } = useTaskSubtasks(isValidTaskId ? Number(taskId) : undefined, {
@@ -126,37 +116,6 @@ export function TaskProcessingTab({
     }
   };
 
-  const handleSaveProgress = async (newProgress?: number) => {
-    const targetProgress = newProgress !== undefined ? newProgress : progressInput;
-    setIsSavingProgress(true);
-    try {
-      await updateTask.mutateAsync({
-        id: Number(taskId),
-        payload: { progress: targetProgress },
-      });
-
-      if (progressNote.trim()) {
-        await updateStatus.mutateAsync({
-          status: targetProgress >= 100 ? "REVIEWING" : (currentTask.status === "ASSIGNED" ? "IN_PROGRESS" : currentTask.status),
-          evidence: progressNote.trim(),
-          evidenceData: {
-            itemType: "progress_update",
-            itemTitle: `Cập nhật tiến độ: ${targetProgress}%`,
-            text: progressNote.trim(),
-            progress: targetProgress,
-          },
-        });
-      }
-
-      toast.success(`Đã cập nhật tiến độ công việc lên ${targetProgress}%`);
-      setIsEditingProgress(false);
-      setProgressNote("");
-    } catch {
-      // handled in hook
-    } finally {
-      setIsSavingProgress(false);
-    }
-  };
 
   const handleCopyDocRef = (ref: string) => {
     if (!ref) return;
@@ -305,7 +264,7 @@ export function TaskProcessingTab({
                   ? `Đã hoàn thành ${completedStepsCount}/${totalStepsCount} bước checklist (${stepsProgressPct}%) • ${totalSubtasksCount} việc con`
                   : totalSubtasksCount > 0
                   ? `Đã hoàn thành ${completedSubtasksCount}/${totalSubtasksCount} nhiệm vụ con`
-                  : "Cập nhật tiến độ xử lý và nộp kết quả công việc để ghi nhận điểm KPI"}
+                  : "Tiến độ được hệ thống tự động tính toán dựa trên checklist và nhiệm vụ con"}
               </p>
             </div>
           </div>
@@ -322,25 +281,18 @@ export function TaskProcessingTab({
                 Bắt đầu thực hiện
               </Button>
             )}
-
-            {!isCompleted && (
-              <Button
-                variant={isEditingProgress ? "secondary" : "outline"}
-                size="sm"
-                onClick={() => setIsEditingProgress((prev) => !prev)}
-                className="text-xs h-8 px-3 gap-1.5 border-slate-200 text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
-                <span>{isEditingProgress ? "Thu gọn cập nhật" : "Cập nhật tiến độ"}</span>
-              </Button>
-            )}
           </div>
         </div>
 
         {/* Linear Progress Bar with Milestones */}
         <div className="space-y-2 pt-1">
           <div className="flex justify-between items-center text-xs">
-            <span className="font-semibold text-slate-700">Tỷ lệ hoàn thành công việc</span>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700">Tỷ lệ hoàn thành công việc</span>
+              <span className="text-[11px] text-slate-500 font-normal italic">
+                (Tự động tính theo checklist & việc con)
+              </span>
+            </div>
             <span className="font-mono font-bold text-sm text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/60">
               {currentProgress}%
             </span>
@@ -367,73 +319,6 @@ export function TaskProcessingTab({
             <span className={currentProgress >= 100 ? "text-emerald-700 font-semibold" : ""}>100% Hoàn thành</span>
           </div>
         </div>
-
-        {/* ── Expandable Quick Progress Updater ── */}
-        {isEditingProgress && !isCompleted && (
-          <div className="mt-4 pt-4 border-t border-slate-100 space-y-3.5 bg-slate-50/80 p-4 rounded-xl border border-slate-200/70 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
-                Chọn nhanh mức tiến độ:
-              </span>
-              <span className="text-xs text-slate-500">Mức chọn: <strong className="text-blue-700 font-bold">{progressInput}%</strong></span>
-            </div>
-
-            {/* Quick Chips */}
-            <div className="flex flex-wrap gap-2">
-              {[25, 50, 75, 100].map((pct) => (
-                <button
-                  key={pct}
-                  type="button"
-                  onClick={() => setProgressInput(pct)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                    progressInput === pct
-                      ? pct === 100
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-2xs"
-                        : "bg-blue-600 text-white border-blue-600 shadow-2xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                  }`}
-                >
-                  {pct === 100 ? "🎉 100% (Hoàn thành)" : `${pct}%`}
-                </button>
-              ))}
-            </div>
-
-            {/* Progress Note */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-700 block">
-                Nội dung cập nhật / Báo cáo tóm tắt:
-              </label>
-              <Textarea
-                placeholder="Ví dụ: Đã hoàn thành thẩm định bước 1, dự thảo báo cáo đã gửi các đơn vị liên quan..."
-                value={progressNote}
-                onChange={(e) => setProgressNote(e.target.value)}
-                rows={2}
-                className="text-xs bg-white resize-none"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditingProgress(false)}
-                className="h-8 text-xs text-slate-600 bg-white"
-              >
-                Đóng
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleSaveProgress()}
-                disabled={isSavingProgress}
-                className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 shadow-xs"
-              >
-                {isSavingProgress && <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
-                Lưu cập nhật tiến độ
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── 2. Các bước thực hiện (Internal Checklist) ── */}

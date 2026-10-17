@@ -12,6 +12,7 @@ Xem chi tiết nguyên tắc bất biến trong `rules/source-of-truth.md` và `
    - Cơ cấu tổ chức: `OrganizationUnit` (Cây phân cấp đơn vị, phòng ban).
    - **Cấu trúc Vị trí việc làm (VTVL) & Định biên**: `JobTitle` (Chức danh VTVL), `OrganizationStaffing` (Đề án định biên phòng ban), `StaffingSlot` (Suất biên chế).
    - **Phân công nghiệp vụ theo dõi**: `StaffingSlotDomain` (Phân công lĩnh vực), `StaffingSlotGeographicArea` (Phân công địa bàn), `StaffingSlotMonitoredUnit` (Phân công phòng ban theo dõi).
+   - **Cấu hình Trí tuệ Nhân tạo & Trợ lý cá nhân**: `AiConfig` (Cấu hình Smart Router đa nhà cung cấp OpenAI, Anthropic, Gemini, DeepSeek, Local LLM), `AiAssistant` (Danh sách Custom Prompt AI Bots chuyên biệt cho cán bộ), `AiAssistantKnowledge` (Kho tri thức RAG gắn kết trợ lý).
    - *Lưu ý*: `hrm-service` khi giao việc hoặc đánh giá KPI phải tham chiếu cấu trúc VTVL và thông tin phân công này từ `user-service`.
 
 2. **`workflow-service`**:
@@ -26,7 +27,7 @@ Xem chi tiết nguyên tắc bất biến trong `rules/source-of-truth.md` và `
    - Nơi thiết kế báo cáo hệ thống, xây dựng các Dashboard phân quyền sử dụng báo cáo cho từng cá nhân, đơn vị; là nơi các đơn vị truy cập theo dõi tiến độ, hiệu suất và số liệu toàn diện.
 
 5. **`hrm-service`**:
-   - Hồ sơ nhân viên (`employee`), Giao việc và kiểm soát chất lượng (`task`), Đánh giá KPI & Mẫu biểu (Mẫu 01 - 05), Kế hoạch năm/quý (`master_plan`, `rank_quota`).
+   - Hồ sơ nhân viên (`employee`), Giao việc và kiểm soát chất lượng (`task` - Tiến độ `progress` được tự động tính toán từ các bước checklist `task_steps` và nhiệm vụ con `subtasks`, cấm can thiệp thủ công), Đánh giá KPI & Mẫu biểu (Mẫu 01 - 05), Kế hoạch năm/quý (`master_plan`, `rank_quota`).
 
 6. **`document-service`**:
    - Văn bản điện tử (`document`), Hồ sơ công việc (`dossier`), Tủ tài liệu (`cabinet`), Biên bản họp (`minutes`).
