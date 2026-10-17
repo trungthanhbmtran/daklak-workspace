@@ -23,3 +23,17 @@ Khi chạy song song, ownership phải được chốt trong kế hoạch đã d
   - Các danh sách con (Sub-items, Steps, History/Audit Log, Comments, KPI/Evaluations): Phải có endpoint độc lập riêng (`GET /entities/:id/sub-items`, `GET /entities/:id/history`...).
 - **Giới hạn truy vấn (Bounded Queries):** Mọi endpoint danh sách lịch sử/nhật ký phải có giới hạn (`take: 100`) hoặc phân trang rõ ràng, không bao giờ truy vấn `findMany` không giới hạn gây cạn kiệt bộ nhớ hoặc nghẽn I/O.
 
+## 4. Ranh giới Kiến trúc của API Gateway (`apps/api-gateway`)
+Tuân thủ chi tiết tại [`.agents/rules/services/api-gateway.md`](services/api-gateway.md):
+- **Trách nhiệm:** Lớp tiếp nhận và điều phối giao tiếp từ bên ngoài vào hệ thống. Công bố REST endpoints, xác thực/phân quyền, validate request tại ranh giới (Pipes/DTOs), chuyển đổi HTTP sang gRPC, điều phối microservices, tổng hợp dữ liệu (BFF) khi cần thiết, chuẩn hóa status code và format lỗi/envelope (`TransformInterceptor`), xử lý resilience/timeout/upstream errors, trả về đúng dữ liệu cần thiết (Least Data).
+- **Ranh giới bất biến (CẤM):**
+  1. Không trở thành nơi lưu trữ nghiệp vụ cốt lõi của các microservice domain.
+  2. Không truy cập trực tiếp database của microservice khác.
+  3. Không tự triển khai lại toàn bộ nghiệp vụ đã thuộc domain service.
+  4. Không tạo bản sao dữ liệu hoặc bảng nghiệp vụ chỉ để tiện gọi API.
+  5. Không tự đặt ra quy trình nghiệp vụ song song với `workflow-service`.
+  6. Không tạo thêm service hoặc tầng abstraction nếu chưa chứng minh được nhu cầu.
+  7. Không chuyển tiếp mù quáng mọi request mà không có mapping, validation và xử lý lỗi phù hợp.
+- **Tái sử dụng:** Ưu tiên tối đa sử dụng các module, controller, guard, decorator, client và cấu hình microservice hiện có.
+
+

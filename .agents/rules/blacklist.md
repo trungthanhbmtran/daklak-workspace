@@ -124,3 +124,18 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
   2. Các Modal/Sheet tạo mới hoặc chỉnh sửa phức tạp BẮT BUỘC chỉ được nạp mã nguồn khi người dùng thực sự click vào nút mở (`open && <LazyModal ... />`).
   3. Import icon đích danh từ `lucide-react`, cấm import wildcard `* as Icons`.
   4. Duy trì First Load JS budget dưới **150 KB (gzipped)** cho mỗi route.
+
+---
+
+## 8. Lỗi Tự Ý Hardcode Danh Mục / Master Data ở Client (Client-Side Hardcoded Master Data Anti-Pattern)
+### ❌ Vi phạm: Tự khai báo mảng tĩnh hoặc fallback Master Data / Categories ở Frontend
+- **Mô tả:** Tự ý khai báo các mảng hằng số (constants) hoặc fallback data tĩnh tại Client UI (ví dụ: `const DEFAULT_AI_PROVIDERS = [...]`, `const DEFAULT_TRANSLATE_SERVICES = [...]`, `const currentModels = [...]`, `const TASK_CATEGORIES = [...]`) để cấp dữ liệu cho Combobox, Select, Dropdown thay vì lấy từ Backend.
+- **Hậu quả:**
+  1. **Vi phạm nghiêm trọng nguyên tắc Dumb Client và Single Source of Truth:** Frontend tự biến mình thành "nguồn sự thật giả định", phá vỡ tính tập trung của hệ thống Master Data dùng chung.
+  2. **Dữ liệu bị lệch pha (Data Drift) giữa Frontend và CSDL:** Khi Quản trị viên cập nhật, đổi tên, thêm mới hoặc vô hiệu hóa danh mục trong CSDL (`admin_systems.sys_categories` trong `user-service`), Frontend vẫn cố chấp hiển thị dữ liệu tĩnh cũ hoặc bị ghi đè dữ liệu sai lệch.
+  3. **Nguy cơ crash và lỗi đồng bộ gRPC/REST:** Các mã code (provider code, model ID, category code) bị hardcode ở client có thể không khớp với cấu hình runtime, enum hoặc backend credentials dẫn đến lỗi 400 Bad Request / RpcException.
+- **Giải pháp BẮT BUỘC:**
+  1. **100% Master Data / Danh mục dùng chung phải do `user-service` quản lý tập trung** (bảng `admin_systems.sys_categories`). Các danh mục này đã được chuẩn hóa theo nhóm (`AI_PROVIDER_TYPE`, `TRANSLATION_SERVICE_TYPE`, `TASK_PRIORITY`, `DOCUMENT_SECURITY_LEVEL`, ...).
+  2. **Frontend CHỈ ĐƯỢC PHÉP gọi API hook chuẩn hóa** (ví dụ: `useGetCategoryByGroup('AI_PROVIDER_TYPE')`, `useGetCategoryByGroup('TRANSLATION_SERVICE_TYPE')`, hoặc endpoint chuyên biệt như `/api/v1/admin/ai/models`).
+  3. **CẤM TUYỆT ĐỐI mảng fallback tĩnh ở Client UI:** Khi chưa có dữ liệu, hiển thị Skeleton, Spinner hoặc Empty State. Không được tự ý "bịa" ra mảng fallback tĩnh ở UI. Nếu hệ thống cần danh sách giá trị mặc định khi người dùng chưa cấu hình API Key, chính Backend Service (như `ai.service.ts` trong `user-service`) là nơi cung cấp các models mặc định chuẩn.
+

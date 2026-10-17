@@ -27,22 +27,26 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
   const { fetchedModels, isFetching, fetchModels } = useAiFetchModels();
   const [showApiKey, setShowApiKey] = useState(false);
 
+  // Tự động tải danh sách Model từ Backend khi mount nếu chưa có
   React.useEffect(() => {
-    if (provider.apiKey && !fetchedModels[provider.id]) {
+    if (!fetchedModels[provider.id]) {
       fetchModels(provider.id, provider.provider, provider.apiKey, false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFetchModels = () => {
-    fetchModels(provider.id, provider.provider, provider.apiKey);
+    fetchModels(provider.id, provider.provider, provider.apiKey, true);
   };
 
-  const currentModels = fetchedModels[provider.id] || (
-    provider.provider === 'OPENAI' ? [{ id: 'gpt-4o', name: 'gpt-4o', contextWindow: 128000 }, { id: 'gpt-4o-mini', name: 'gpt-4o-mini', contextWindow: 128000 }, { id: 'o1', name: 'o1', contextWindow: 200000 }, { id: 'o3-mini', name: 'o3-mini', contextWindow: 200000 }] :
-    provider.provider === 'GEMINI' ? [{ id: 'gemini-1.5-pro', name: 'gemini-1.5-pro', contextWindow: 2097152 }, { id: 'gemini-1.5-flash', name: 'gemini-1.5-flash', contextWindow: 1048576 }, { id: 'gemini-2.0-flash', name: 'gemini-2.0-flash', contextWindow: 1048576 }] :
-    provider.provider === 'CLAUDE' ? [{ id: 'claude-3-7-sonnet-20250219', name: 'claude-3-7-sonnet-20250219', contextWindow: 200000 }, { id: 'claude-3-5-sonnet-20241022', name: 'claude-3-5-sonnet-20241022', contextWindow: 200000 }, { id: 'claude-3-5-haiku-20241022', name: 'claude-3-5-haiku-20241022', contextWindow: 200000 }, { id: 'claude-3-opus-20240229', name: 'claude-3-opus-20240229', contextWindow: 200000 }] : []
-  );
+  const handleProviderSelect = (val: string) => {
+    onChange('provider', val);
+    // Tự động nạp danh sách model chuẩn từ Backend khi chuyển đổi nhà cung cấp
+    fetchModels(provider.id, val, provider.apiKey, false);
+  };
+
+  // Dữ liệu model nhận 100% từ Backend, không hardcode ở Client
+  const currentModels = fetchedModels[provider.id] || [];
 
   return (
     <div className={`flex flex-col gap-4 p-4 sm:p-5 bg-card rounded-xl border transition-colors ${provider.enabled ? 'border-border shadow-sm' : 'border-border/40 opacity-70 bg-muted/30'}`}>
@@ -92,15 +96,15 @@ export function AiProviderCard({ provider, aiProviderCategories, onChange, onRem
           </label>
           <Select 
             value={provider.provider} 
-            onValueChange={(val) => onChange('provider', val)}
+            onValueChange={handleProviderSelect}
           >
             <SelectTrigger className="h-10 bg-background border-input w-full">
-              <SelectValue placeholder="Chọn..." />
+              <SelectValue placeholder="Chọn nhà cung cấp AI..." />
             </SelectTrigger>
             <SelectContent>
               {aiProviderCategories.map((cat: any) => (
                 <SelectItem key={cat.code} value={cat.code}>
-                  {cat.nameVi || cat.name}
+                  {cat.nameVi || cat.name || cat.code}
                 </SelectItem>
               ))}
             </SelectContent>

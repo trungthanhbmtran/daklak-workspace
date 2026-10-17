@@ -95,7 +95,7 @@ export const NewsListEditor: React.FC<NewsListEditorProps> = ({ widget, onChange
           max={20}
           value={widget.data?.limit ?? 6}
           onChange={(e) => handleLimitChange(e.target.value)}
-          className="h-12 px-5 rounded-2xl border-slate-100 dark:border-slate-800 text-[13px] font-bold bg-white dark:bg-slate-900 focus:ring-4 focus:ring-indigo-50/50"
+          className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-50/50"
         />
       </div>
 

@@ -1,2 +1,2 @@
-import { WorkflowEditorScreen } from "@/features/workflow/screens/WorkflowEditorScreen";
-export default function Page() { return <WorkflowEditorScreen />; }
+import { DynamicWorkflowEditor } from "../WorkflowEditorClient";
+export default function Page() { return <DynamicWorkflowEditor />; }

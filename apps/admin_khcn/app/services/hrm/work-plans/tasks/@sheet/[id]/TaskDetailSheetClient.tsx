@@ -2,7 +2,12 @@
 
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { TaskDetailDrawer } from "@/features/hrm/components/tasks/task-detail-drawer";
+import dynamic from "next/dynamic";
+
+const TaskDetailDrawer = dynamic(
+  () => import("@/features/hrm/components/tasks/task-detail-drawer").then((m) => m.TaskDetailDrawer),
+  { ssr: false }
+);
 
 export function TaskDetailSheetClient({ taskId }: { taskId?: number }) {
   const router = useRouter();

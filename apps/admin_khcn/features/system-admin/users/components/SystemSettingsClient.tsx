@@ -32,12 +32,12 @@ export function SystemSettingsClient() {
 
   return (
     <div className="w-full flex-1 mx-auto space-y-8 pb-20 animate-in fade-in">
-      <div className="border-b border-border pb-6">
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
-          <Settings2 className="w-8 h-8 text-primary" />
+      <div className="border-b border-border pb-5">
+        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5 sm:gap-3">
+          <Settings2 className="w-6 h-6 sm:w-7 sm:h-7 text-primary shrink-0" />
           Cấu hình Hệ thống & Dịch vụ Nền tảng
         </h1>
-        <p className="text-muted-foreground mt-2 font-medium">
+        <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
           Quản lý các thông số cốt lõi, dịch vụ AI, dịch thuật và định tuyến thông minh.
         </p>
       </div>

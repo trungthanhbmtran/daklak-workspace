@@ -60,8 +60,8 @@ export default function InteractionsDashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-10">
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-2">Tương tác công dân & Hệ thống</h1>
-        <p className="text-muted-foreground text-lg max-w-3xl">
+        <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground mb-1.5">Tương tác công dân & Hệ thống</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm max-w-3xl">
           Khu vực quản lý các kênh giao tiếp từ người dân (Nghị định 42 & 147) cũng như cấu hình bảo mật kết nối API và Trục liên thông quốc gia.
         </p>
       </div>

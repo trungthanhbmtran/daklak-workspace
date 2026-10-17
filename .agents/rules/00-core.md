@@ -63,5 +63,15 @@ Khi thực hiện tác vụ, Lead Agent tuân thủ ranh giới cấu trúc đ�
 - **Bắt buộc đồng bộ khi có thay đổi:** Bất kỳ thay đổi nào về CSDL (Prisma), API Gateway, gRPC method, RabbitMQ event hay quy trình nghiệp vụ (Workflow) BẮT BUỘC phải cập nhật ngay vào file kiến trúc tương ứng trước khi kết thúc tác vụ.
 - **Tiêu chuẩn nghiệm thu:** Tác vụ có thay đổi mã nguồn mà không cập nhật tài liệu kiến trúc tương ứng sẽ bị coi là **VI PHẠM CỬA ẢI NGHIỆM THU (GATE REJECTED)**. Tham chiếu chi tiết tại [`.agents/architecture/SYNC-GUIDELINES.md`](../architecture/SYNC-GUIDELINES.md).
 
+## 11. Quy chuẩn Đặt tên Thống nhất (Naming Conventions)
+Toàn bộ codebase (TypeScript, NestJS, React, Prisma, Protobuf, SQL, Files/Folders) tuân thủ quy chuẩn đặt tên chi tiết tại [`.agents/rules/naming-conventions.md`](naming-conventions.md):
+- **`camelCase`:** Biến, thuộc tính TS/JS, function/method/params, NestJS DTO properties, object/REST response JSON fields, domain objects, frontend request/response fields. CẤM dùng `snake_case` cho thuộc tính TS mới chỉ vì tên cột DB hoặc proto dùng `snake_case`.
+- **`PascalCase`:** Class, Interface, Type alias, Enum type, NestJS components (Controller, Service, Module, Guard, Pipe, Interceptor, Exception), DTO/Entity class, Protobuf message/service/RPC method. CẤM đặt tên class bằng `snake_case` hoặc `camelCase`.
+- **`snake_case`:** Field trong file `.proto`, package name Protobuf, tên cột DB vật lý, tên bảng DB (nếu schema đang dùng snake_case), migration & raw SQL fields, external integration schemas. CẤM đổi tên field REST JSON hoặc thuộc tính TypeScript sang `snake_case` chỉ để đồng nhất hình thức với Proto/DB.
+- **`kebab-case`:** Tên file/folder TypeScript theo NestJS convention (`user.service.ts`, `create-user.dto.ts`), tên file rule/doc (`naming-conventions.md`). Không tự ý đổi tên hàng loạt file đang hoạt động nếu không cần thiết.
+- **`UPPER_SNAKE_CASE`:** Biến môi trường (`DATABASE_URL`, `JWT_SECRET`), global config constants, Protobuf enum values. Không dùng cho biến thông thường hoặc thuộc tính object TypeScript.
+- **Quy tắc ưu tiên:** Tuân thủ convention chính thức của tool > contract công bố đang chạy > convention ổn định của module > quy tắc chung trong `.agents/`. Tuyệt đối không dùng quy tắc chung để phá vỡ contract hoặc làm hỏng code đang chạy.
+
+
 
 

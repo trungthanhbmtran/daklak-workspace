@@ -2,7 +2,12 @@
 
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { CreateTaskDialog } from "@/features/hrm/components/tasks/create-task-dialog";
+import dynamic from "next/dynamic";
+
+const CreateTaskDialog = dynamic(
+  () => import("@/features/hrm/components/tasks/create-task-dialog").then((m) => m.CreateTaskDialog),
+  { ssr: false }
+);
 
 export function CreateTaskSheetClient() {
   const router = useRouter();

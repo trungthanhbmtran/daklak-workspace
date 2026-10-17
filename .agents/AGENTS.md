@@ -150,10 +150,25 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 - Giữ file `page.tsx` là Server Component gọn gàng, chuyển toàn bộ UI tương tác và React hooks vào `*Client.tsx` có chỉ thị `'use client'`.
 
 ### 4. Ràng buộc Quản lý gRPC & File `.proto`
+- **Nguồn Hợp đồng Protobuf Dùng Chung (`shared/protos`):** `shared/protos` là nguồn hợp đồng Protobuf dùng chung duy nhất của toàn bộ hệ thống. Tuân thủ chi tiết [`.agents/rules/grpc.md`](rules/grpc.md).
+- **Quy tắc Contract & Naming:**
+  * Message và Enum type dùng `PascalCase`.
+  * Field trong `.proto` dùng `snake_case`. Không đổi tên field REST JSON hoặc thuộc tính TypeScript sang `snake_case` chỉ để đồng nhất hình thức với `.proto`.
+  * RPC method và Service dùng `PascalCase`.
+  * Enum values dùng `UPPER_SNAKE_CASE`, bắt buộc có prefix phù hợp để tránh trùng tên.
+- **Tính Bất biến của Field Number & Tương thích Ngược:**
+  * Giữ nguyên ý nghĩa, kiểu dữ liệu và ngữ nghĩa của contract.
+  * Sử dụng field number đúng quy tắc Protobuf (số nguyên dương tăng dần).
+  * **TUYỆT ĐỐI KHÔNG tái sử dụng field number đã bị xóa.**
+  * Nếu cần loại bỏ field, bắt buộc sử dụng `reserved` phù hợp.
+  * Không đổi kiểu field, số field hoặc ý nghĩa field một cách tùy tiện.
+  * Đánh giá tính tương thích ngược và tác động đến mọi consumer trước khi thay đổi contract. Chỉ sửa hoặc tạo proto khi nghiệp vụ hoặc contract thực sự cần thay đổi.
+  * Không sửa code generated bằng tay nếu công cụ sinh code có thể tạo lại từ proto. Phải sử dụng đúng proto hiện có và đúng cấu hình loader/code generator của repository.
 - Khi sửa đổi file `.proto`: Sử dụng công cụ ghi đè an toàn, kiểm tra kỹ cú pháp đóng mở `{ }`. Ngay sau khi sửa, PHẢI build/chạy microservice tương ứng để xác nhận bộ tải gRPC không văng `illegal token` hay `InvalidProtoDefinitionException`.
 - **Chống lỗi corrupted JSON `[object Object]`:** Dữ liệu JSON phức tạp lồng nhau khi truyền qua gRPC bắt buộc serialize thành chuỗi (`metadataJson`, `schemaJson`) và parse bằng helper an toàn `safeParse`.
 - **Payload gRPC:** Nếu request có thể vắng mặt và handler cần đọc/ghi field object, kiểm tra/khởi tạo object trước khi truy cập. Giữ đúng kiểu contract và không ép mọi payload thành object rỗng.
 - **Ràng buộc Phân phối Tài nguyên theo Ngữ cảnh Quyền (PBAC Context Scoping):** Mọi thông tin chứng thực/phân quyền (`id`, `employeeCode`, `unitId`, `permissionsFlatten`) trích xuất từ `@CurrentUser() user` chỉ dùng để: (1) Kiểm tra quyền truy cập tài nguyên (authorization check), (2) Giới hạn phạm vi dữ liệu theo đúng thẩm quyền được cấp (`where: { departmentId: user.unitId }`, `where: { employeeCode: user.employeeCode }` hoặc phân cấp Ban/Phòng/Chuyên viên), (3) Ghi nhận vết kiểm toán (Audit Trail). TUYỆT ĐỐI KHÔNG gán cẩu thả các trường user vào payload `data` mà không kiểm tra khởi tạo hoặc không dùng quyền để phân phối tài nguyên.
+
 
 ### 5. Ràng buộc An toàn CSDL & Additive Migrations
 - **Nguyên tắc Additive Migration (Zero-Downtime):** Mọi cột mới thêm vào bảng đang chạy BẮT BUỘC là `nullable` (`type?`) hoặc có `@default(...)`.
@@ -167,15 +182,16 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 - **Ràng buộc Source of Truth của các Service nền tảng (BẮT BUỘC TUÂN THỦ TRƯỚC KHI CODE):**
   * **`user-service` là Source of Truth DUY NHẤT** cho: User, Account, PBAC, Organization và **Cấu trúc Vị trí việc làm (VTVL) định biên** (`job_titles`, `org_staffing`, `staffing_slots`), kèm **Phân công theo dõi** (lĩnh vực `staffing_slot_domains`, địa bàn `staffing_slot_geographic_areas`, phòng ban theo dõi `staffing_slot_monitored_units`). Các coder agents khi làm việc tại `hrm-service` hay bất kỳ service nào TUYỆT ĐỐI KHÔNG được tự ý bỏ qua hoặc dựng lại khung VTVL rời rạc; bắt buộc phải tích hợp và tham chiếu dữ liệu từ `user-service`.
   * **`workflow-service` là trung tâm quy trình:** Nơi lưu trữ, cấu hình và mô tả toàn bộ các nghiệp vụ hệ thống (BPMN Definitions, State Machines, Swimlanes, Transitions). Các service domain chỉ lưu dữ liệu nghiệp vụ và phải ủy quyền điều phối luồng duyệt cho `workflow-service`.
-  * **`api-gateway` (API Manager):** Quản lý tập trung các nguồn kết nối chính của toàn hệ thống, xây dựng các API nội bộ và các API liên thông (LGSP, DVC, bên ngoài). Không chứa business logic domain.
+  * **`api-gateway` (API Manager):** Lớp tiếp nhận và điều phối giao tiếp từ bên ngoài vào hệ thống. Tuân thủ chi tiết [`.agents/rules/services/api-gateway.md`](rules/services/api-gateway.md). Chịu trách nhiệm công bố REST endpoints, xác thực/phân quyền, validate request ranh giới (Pipes/DTOs), chuyển đổi HTTP sang gRPC, điều phối microservices, tổng hợp dữ liệu (BFF) khi cần, chuẩn hóa status code và format lỗi/envelope (`TransformInterceptor`), xử lý resilience/timeout, và Least Data. CẤM: lưu trữ nghiệp vụ domain cốt lõi, truy cập DB microservice khác, tự dựng quy trình song song với workflow-service, tạo bản sao dữ liệu/bảng nghiệp vụ, tự chế tầng abstraction thừa, hoặc chuyển tiếp mù quáng request. Ưu tiên tối đa tái sử dụng module/controller/guard/client hiện có.
   * **`report-service`:** Nơi thiết kế báo cáo hệ thống, xây dựng các Dashboard phân quyền sử dụng báo cáo cho từng cá nhân, đơn vị; là nơi các đơn vị truy cập theo dõi tiến độ, hiệu suất và số liệu toàn diện. Thu thập số liệu qua gRPC/RabbitMQ, không query chéo CSDL.
 - **gRPC Metadata Delegation:** Mọi lời gọi gRPC giữa API Gateway và microservices bắt buộc phải đính kèm `GatewayContextToken` (`this.getGrpcMetadata(req)`). Cấm gọi gRPC rỗng metadata (nguyên nhân gây lỗi 401 Infinite Logout Loop).
 - **PBAC Tenant Scope:** Với entity thuộc tenant, mọi truy vấn phải áp dụng organization/tenant scope từ user đã xác thực. Dữ liệu dùng chung/toàn cục tuân theo chính sách truy cập tương ứng; không thêm scope giả định khi model không thuộc tenant.
 - **Least Data:** Chỉ query và trả về đúng những trường dữ liệu cần thiết.
 
-### 7. Ràng buộc Vệ sinh Mã nguồn & Encoding
+### 7. Ràng buộc Vệ sinh Mã nguồn, Encoding & Quy chuẩn Đặt tên
 - **Xóa sạch 100% debug logs:** Không để lại bất kỳ `console.log`, `debugger`, import dư thừa hay mã giả tạm thời nào.
 - **Mã hóa UTF-8 (không BOM):** Tất cả các file phải lưu chuẩn UTF-8 không BOM. Tiếng Việt có dấu hiển thị nguyên vẹn, không bị lỗi font hay crash trình biên dịch.
+- **Quy chuẩn Đặt tên Thống nhất (Naming Conventions):** Bắt buộc tuân thủ chi tiết tại [`.agents/rules/naming-conventions.md`](rules/naming-conventions.md): camelCase (TS/JS variables, methods, DTO properties, REST JSON fields), PascalCase (Classes, Interfaces, Types, Enums, gRPC RPC methods), snake_case (.proto fields, DB physical columns/tables), kebab-case (filenames), UPPER_SNAKE_CASE (env vars, global constants, Protobuf enum values).
 
 ### 8. Ràng buộc Đồng bộ Kiến trúc Hệ thống Bắt buộc (Mandatory Architecture Synchronization Gate)
 - **Quy tắc "Code thay đổi, Kiến trúc phải đồng bộ" (1:1 Reflection):** Tài liệu kiến trúc tại `.agents/architecture/` (`service-map.md`, `source-of-truth.md`, `dependency-map.md`, `request-response-flow.md`, `workflow-map.md`) là Source of Truth tài liệu kỹ thuật duy nhất của toàn hệ thống. Mọi thay đổi mã nguồn làm biến động cấu trúc hệ thống BẮT BUỘC phải được cập nhật đồng bộ ngay vào các file kiến trúc tương ứng trước khi báo cáo hoàn thành.

@@ -350,7 +350,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
 
               <FormField control={form.control} name="linkedResourceCode" render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-[12px] font-bold text-foreground">
+                  <FormLabel className="text-xs font-semibold text-foreground">
                     Tài nguyên PBAC bảo vệ Menu này
                   </FormLabel>
                   <Text variant="muted" className="mb-1 text-[11px]">
@@ -394,7 +394,7 @@ export function MenuForm({ menuId }: MenuFormProps) {
                   )}
 
                   {/* Thông tin giải thích */}
-                  <div className={`mt-2 p-3 rounded-lg text-[12px] border leading-relaxed ${field.value
+                  <div className={`mt-2 p-3 rounded-lg text-xs border leading-relaxed ${field.value
                     ? "bg-primary/5 border-primary/20 text-primary"
                     : "bg-muted/30 border-border text-muted-foreground"
                     }`}>

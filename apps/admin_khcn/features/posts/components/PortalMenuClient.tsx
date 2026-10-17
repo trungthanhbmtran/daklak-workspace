@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePortalMenu, MenuTable, EditMenuModal, QuickSetupModal } from "@/features/posts/portal-menus";
+import dynamic from "next/dynamic";
+import { usePortalMenu, MenuTable } from "@/features/posts/portal-menus";
+
+const EditMenuModal = dynamic(
+  () => import("@/features/posts/portal-menus/components/EditMenuModal").then((mod) => mod.EditMenuModal),
+  { ssr: false }
+);
+const QuickSetupModal = dynamic(
+  () => import("@/features/posts/portal-menus/components/QuickSetupModal").then((mod) => mod.QuickSetupModal),
+  { ssr: false }
+);
 import { Button } from "@/components/ui/button";
 import { Globe, Plus, Zap, Languages } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

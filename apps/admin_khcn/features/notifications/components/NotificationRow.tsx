@@ -37,7 +37,7 @@ export function NotificationRow({
         {item.type === 'SYSTEM' ? <FileText className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
       </div>
       <div className="flex flex-1 flex-col gap-1 pr-6">
-        <p className={`text-[14px] leading-snug ${item.read ? 'font-normal text-muted-foreground' : 'font-semibold text-foreground'}`}>
+        <p className={`text-sm leading-snug ${item.read ? 'font-normal text-muted-foreground' : 'font-semibold text-foreground'}`}>
           {item.title}
         </p>
         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">

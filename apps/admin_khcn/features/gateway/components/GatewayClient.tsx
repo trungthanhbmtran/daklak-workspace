@@ -34,10 +34,10 @@ export function GatewayClient() {
             </span>
             <span>Gateway Control Plane Is Healthy</span>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground mb-3">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-2">
             Enterprise API Management
           </h1>
-          <p className="text-muted-foreground text-base leading-relaxed max-w-xl wrap-break-word">
+          <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-xl wrap-break-word">
             Quản trị luồng dữ liệu (Traffic), cấu hình định tuyến (Routing) và giám sát quyền truy cập thông qua Gateway tập trung chuyên dụng.
           </p>
         </div>
@@ -48,7 +48,7 @@ export function GatewayClient() {
               <Server className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-3xl font-black text-foreground">{services.length}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground">{services.length}</span>
               <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Upstreams</p>
             </div>
           </div>
@@ -57,7 +57,7 @@ export function GatewayClient() {
               <ArrowRightLeft className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-3xl font-black text-foreground">{routes.length}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-foreground">{routes.length}</span>
               <p className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider mt-1">Routes</p>
             </div>
           </div>
@@ -66,7 +66,7 @@ export function GatewayClient() {
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{apiKeys.filter(k => k.isActive).length}</span>
+              <span className="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400">{apiKeys.filter(k => k.isActive).length}</span>
               <p className="text-[11px] text-emerald-600 dark:text-emerald-400 uppercase font-bold tracking-wider mt-1">Active Keys</p>
             </div>
           </div>
@@ -77,7 +77,7 @@ export function GatewayClient() {
                 <Zap className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-3xl font-black text-primary">&lt;10</span>
+                <span className="text-2xl sm:text-3xl font-bold text-primary">&lt;10</span>
                 <span className="text-sm font-semibold text-primary ml-1">ms</span>
                 <p className="text-[11px] text-primary/80 uppercase font-bold tracking-wider mt-1">Latency</p>
               </div>

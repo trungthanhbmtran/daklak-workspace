@@ -1326,3 +1326,16 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Package chưa có test script, test config hoặc component test hiện hữu; regression test UI `UNVERIFIED`.
   - `git diff --check`: không có lỗi whitespace; `header-user-profile.tsx` UTF-8 không BOM.
 - **Trạng thái nghiệm thu:** Chưa `AGENT_ACCEPTED` vì runtime/regression test và build còn `UNVERIFIED` do môi trường truy cập.
+
+## 2026-10-17: Thông báo quyền tham gia trao đổi nhiệm vụ
+- **Phạm vi:** `apps/chat-service/src/modules/message/message.service.ts`, regression test mới `apps/chat-service/src/modules/message/message.service.spec.ts`.
+- **Thay đổi:** Guard participant trả message `Bạn không có quyền tham gia đoạn chat này.` cho `GetMessages`, `SendMessage` và `MarkRead`. Giữ gRPC `NOT_FOUND` / HTTP 404 để bảo toàn cơ chế không tiết lộ sự tồn tại của hội thoại. Ghi rõ mapping trong `.agents/architecture/request-response-flow.md`.
+- **Kiểm chứng:**
+  - `npm test -- --runInBand modules/message/message.service.spec.ts` tại `apps/chat-service`: PASS, 5 tests.
+  - `npx eslint src/modules/message/message.service.ts src/modules/message/message.service.spec.ts` tại `apps/chat-service`: PASS, không warning.
+  - `npm run build` tại `apps/chat-service`: PASS (Prisma generate, Nest build, tsc-alias).
+  - Prisma generate làm thay đổi client sinh tự động; đã khôi phục các file `src/generated/prisma` về nội dung trước build và xác nhận chúng không còn trong git diff.
+  - Runtime smoke trên API thật: UNVERIFIED, không có phiên/credential để gọi endpoint nhiệm vụ có xác thực.
+- **Đồng bộ kiến trúc:** `.agents/architecture/request-response-flow.md` phản ánh message và mã lỗi gRPC/HTTP thực tế.
+- **Vệ sinh:** Các file nguồn mới/sửa lưu UTF-8 không BOM; lint sạch. Không thêm debug log.
+- **Trạng thái:** Regression, lint và build đạt; runtime trên môi trường triển khai chưa xác minh.

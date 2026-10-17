@@ -3,7 +3,24 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ReportDesigner } from '@/features/reports/components/reports/designer/ReportDesigner';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const ReportDesigner = dynamic(
+  () => import('@/features/reports/components/reports/designer/ReportDesigner').then((m) => m.ReportDesigner),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full p-6 space-y-4">
+        <Skeleton className="h-10 w-48 rounded-lg" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[500px]">
+          <Skeleton className="h-full rounded-xl" />
+          <Skeleton className="h-full md:col-span-2 rounded-xl" />
+        </div>
+      </div>
+    ),
+  }
+);
 import { useCreateReportDefinition } from '@/features/reports/api';
 import { ReportConfigAST } from '@/features/reports/types';
 import { toast } from 'sonner';

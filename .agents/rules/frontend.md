@@ -15,6 +15,7 @@
   - UI + Client State + API consumption + Presentation.
   - Frontend KHÔNG ĐƯỢC trở thành *source of truth* hay thực thi các business rules nhạy cảm (như quyết định quyền hạn cuối cùng, logic tính toán số liệu cốt lõi). Tất cả những logic này do Backend sở hữu.
   - **Dumb Client Boundary (BẮT BUỘC):** Frontend chỉ render/present dữ liệu, quản lý interaction state cục bộ, định dạng hiển thị và gửi thao tác theo API contract/hook. Quyền cuối cùng, workflow transitions, business rules, KPI/số liệu cốt lõi, validation bảo vệ dữ liệu và dữ liệu chuẩn thuộc Backend/service source of truth. Client validation chỉ hỗ trợ UX; không dùng để thay validation Backend. Render quyền/nút/trạng thái theo response từ API. Nếu thiếu contract/API, nêu rõ gap cho backend owner/lane; không mock hoặc tự dựng business rule trong UI.
+  - **CẤM Tự Ý Hardcode Master Data / Categories ở Frontend (Zero Hardcoded Static Data):** Tuyệt đối không khai báo các mảng dữ liệu tĩnh (như danh sách nhà cung cấp AI, danh sách model, dịch thuật, độ ưu tiên, danh mục văn bản...) ở Client để làm fallback hay cấp option cho Select/Combobox. Mọi danh mục dùng chung (Master Data) bắt buộc phải do `user-service` quản lý và trả về qua API. Client chỉ gọi hook (`useGetCategoryByGroup`, `useAiFetchModels`) và render trực tiếp kết quả.
 - **Data-Driven UI**:
   - Dựa hoàn toàn vào kết quả trả về từ Backend (permission, workflowState, allowed, denied) để render giao diện (ẩn/hiện nút bấm, điều hướng).
 

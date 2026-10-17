@@ -62,9 +62,9 @@ export function HubClient() {
 
   return (
     <main className="container mx-auto py-12 px-4 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {displayName}!</h1>
-        <p className="text-muted-foreground mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-foreground">Xin chào, {displayName}!</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm mt-1 sm:mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
       </div>
       {isLoading ? (
         <div className="flex items-center justify-center py-16 text-muted-foreground">

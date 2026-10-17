@@ -167,17 +167,18 @@ export function ConsultationManageClient() {
   return (
     <div className="p-6 lg:p-8 space-y-8 bg-muted/5 min-h-screen">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-wider">
-            <Activity className="h-4 w-4" /> TRUNG TÂM ĐIỀU HÀNH
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-primary font-semibold text-xs uppercase tracking-wider">
+            <Activity className="h-3.5 w-3.5" /> TRUNG TÂM ĐIỀU HÀNH
           </div>
-          <h2 className="text-3xl font-black tracking-tight text-foreground">Quản lý Luồng Lấy Ý Kiến</h2>
-          <p className="text-muted-foreground font-medium max-w-2xl">Hệ thống giám sát và đôn đốc tiến độ góp ý các văn bản dự thảo do đơn vị chủ trì.</p>
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">Quản lý Luồng Lấy Ý Kiến</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">Hệ thống giám sát và đôn đốc tiến độ góp ý các văn bản dự thảo do đơn vị chủ trì.</p>
         </div>
         <Button
-        onClick={handleOpenModal}
-          className="flex-1 md:flex-none shadow-xl shadow-primary/20 h-12 px-8 font-black rounded-2xl bg-primary hover:bg-primary/90 transition-all active:scale-95"
-         iconStart={<Plus className="h-5 w-5  stroke-[3px]" />}>KHỞI TẠO LUỒNG MỚI</Button>
+          onClick={handleOpenModal}
+          size="sm"
+          className="flex-1 md:flex-none shadow-xs h-9 sm:h-10 px-4 sm:px-6 font-semibold rounded-xl bg-primary hover:bg-primary/90 text-xs sm:text-sm"
+          iconStart={<Plus className="h-4 w-4" />}>Khởi tạo luồng mới</Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

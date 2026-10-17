@@ -43,7 +43,7 @@ export class MessageService {
 
     throw new RpcException({
       code: status.NOT_FOUND,
-      message: "Conversation not found",
+      message: "Bạn không có quyền tham gia đoạn chat này.",
     });
   }
 
@@ -90,7 +90,7 @@ export class MessageService {
     try {
       const msg = await this.messageRepository.create(payload);
 
-      this.rabbitmqService.publishEvent("message.created", msg);
+      void this.rabbitmqService.publishEvent("message.created", msg);
 
       return new MessageResponseDto({
         id: msg.id,
@@ -106,7 +106,11 @@ export class MessageService {
     }
   }
 
-  async markRead(messageId: string, requestedUserId: string, actor?: ChatActor) {
+  async markRead(
+    messageId: string,
+    requestedUserId: string,
+    actor?: ChatActor,
+  ) {
     const conversationId =
       await this.messageRepository.findConversationIdById(messageId);
     if (!conversationId) {
@@ -118,9 +122,7 @@ export class MessageService {
     await this.assertParticipant(conversationId, actor);
 
     // userId trong payload chỉ được tin với lời gọi nội bộ hệ thống
-    const userId = actor?.isSystem
-      ? requestedUserId
-      : this.actorKeys(actor)[0];
+    const userId = actor?.isSystem ? requestedUserId : this.actorKeys(actor)[0];
 
     try {
       await this.messageRepository.upsertReadReceipt(messageId, userId);

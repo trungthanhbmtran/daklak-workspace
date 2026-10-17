@@ -128,12 +128,12 @@ export function ProcedureConfigClient() {
 
   return (
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Cấu hình Mẫu hồ sơ (TTHC)</h2>
-          <p className="text-sm sm:text-base text-muted-foreground mt-2">Định nghĩa danh sách các thủ tục và biểu mẫu, thành phần file yêu cầu.</p>
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">Cấu hình Mẫu hồ sơ (TTHC)</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Định nghĩa danh sách các thủ tục và biểu mẫu, thành phần file yêu cầu.</p>
         </div>
-        <Button onClick={openCreateModal} className="bg-primary hover:bg-primary/90 text-primary-foreground" iconStart={<Plus className="h-4 w-4" />}>Thêm Mẫu mới</Button>
+        <Button size="sm" onClick={openCreateModal} className="bg-primary hover:bg-primary/90 text-primary-foreground h-9 text-xs" iconStart={<Plus className="h-3.5 w-3.5" />}>Thêm Mẫu mới</Button>
       </div>
 
       {loading ? (

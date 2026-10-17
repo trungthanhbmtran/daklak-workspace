@@ -407,7 +407,7 @@ export function KpiFormulasClient() {
                   Phiên bản v{savedSettings?.version || 1}
                 </Badge>
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl truncate">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground truncate">
                 Công thức Tính điểm KPI & Đánh giá Cán bộ
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-4xl leading-relaxed">

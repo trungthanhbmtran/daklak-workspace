@@ -66,7 +66,7 @@ export function BannerImageUpload({ form }: BannerImageUploadProps) {
             className="aspect-21/9 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
           >
             <ImagePlus className="h-8 w-8 text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
-            <Text as="span" className="text-[13px] font-semibold text-slate-500">Tải lên ảnh Banner</Text>
+            <Text as="span" className="text-xs font-semibold text-slate-500">Tải lên ảnh Banner</Text>
           </div>
         )}
       </CardContent>

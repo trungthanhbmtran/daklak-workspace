@@ -295,7 +295,7 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
                             {isSelected && <Check className="h-3 w-3 font-black" />}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[13px] font-bold truncate leading-none mb-1">{u.name}</p>
+                            <p className="text-xs font-semibold truncate leading-none mb-1">{u.name}</p>
                             <p className={cn("text-[9px] truncate opacity-70 font-medium", isSelected ? "text-primary-foreground" : "text-muted-foreground")}>
                               {u.fullPath}
                             </p>

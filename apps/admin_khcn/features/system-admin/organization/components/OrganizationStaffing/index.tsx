@@ -22,9 +22,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useStaffingData, useStaffingActions } from "./hooks/useStaffingData";
 import { StaffingTable } from "./StaffingTable";
-import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
+
+const JobTitleConfigDialog = dynamic(
+  () => import("./JobTitleConfigDialog").then((mod) => mod.JobTitleConfigDialog),
+  { ssr: false }
+);
 import { organizationApi } from "../../api";
 import { organizationQueryKeys } from "../../constants/queryKeys";
 import { unwrapData } from "@/lib/api-helper";

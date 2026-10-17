@@ -53,11 +53,12 @@ export class AiController {
   }
 
   @GrpcMethod('AiService', 'ListModels')
-  async listModels(data: { provider: string; api_key: string }) {
+  async listModels(data: { provider: string; api_key?: string; apiKey?: string }) {
     try {
+      const apiKey = data.api_key || data.apiKey || '';
       const models = await this.aiService.listModels(
         data.provider,
-        data.api_key,
+        apiKey,
       );
       return { success: true, data: models };
     } catch (err: any) {

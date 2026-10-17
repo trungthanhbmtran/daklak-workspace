@@ -36,7 +36,7 @@ export function NotificationList({
     <div className="flex flex-col pb-2">
       {reminders.length > 0 && (
         <div className="mt-1">
-          <h5 className="px-3 sm:px-4 py-1.5 text-[15px] font-bold text-foreground">
+          <h5 className="px-3 sm:px-4 py-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Nhắc việc
           </h5>
           {reminders.map((item) => (
@@ -51,7 +51,7 @@ export function NotificationList({
       )}
       {today.length > 0 && (
         <div className="mt-1">
-          <h5 className="px-3 sm:px-4 py-1.5 text-[15px] font-bold text-foreground">
+          <h5 className="px-3 sm:px-4 py-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Hôm nay
           </h5>
           {today.map((item) => (
@@ -66,7 +66,7 @@ export function NotificationList({
       )}
       {earlier.length > 0 && (
         <div className="mt-1">
-          <h5 className="px-3 sm:px-4 py-1.5 text-[15px] font-bold text-foreground">
+          <h5 className="px-3 sm:px-4 py-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Trước đó
           </h5>
           {earlier.map((item) => (

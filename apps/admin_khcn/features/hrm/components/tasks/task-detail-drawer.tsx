@@ -37,13 +37,30 @@ import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
 import { TaskHistoryTab } from "./task-detail-history-tab";
 import { TaskKpiTab } from "./task-detail-kpi-tab";
-import { TaskEvaluationApprovalSheet } from "./TaskEvaluationApprovalSheet";
-import { EditTaskDialog } from "./edit-task-dialog";
+import dynamic from "next/dynamic";
 import { useUser } from "@/hooks/useUser";
 import { useHrmPermissions } from "../../hooks/useHrmPermissions";
-import { TaskAssignDialog } from "./task-assign-dialog";
-import { TaskRespondDialog } from "./task-respond-dialog";
-import { TaskExtendDialog } from "./task-extend-dialog";
+
+const TaskEvaluationApprovalSheet = dynamic(
+  () => import("./TaskEvaluationApprovalSheet").then((m) => m.TaskEvaluationApprovalSheet),
+  { ssr: false }
+);
+const EditTaskDialog = dynamic(
+  () => import("./edit-task-dialog").then((m) => m.EditTaskDialog),
+  { ssr: false }
+);
+const TaskAssignDialog = dynamic(
+  () => import("./task-assign-dialog").then((m) => m.TaskAssignDialog),
+  { ssr: false }
+);
+const TaskRespondDialog = dynamic(
+  () => import("./task-respond-dialog").then((m) => m.TaskRespondDialog),
+  { ssr: false }
+);
+const TaskExtendDialog = dynamic(
+  () => import("./task-extend-dialog").then((m) => m.TaskExtendDialog),
+  { ssr: false }
+);
 import {
   safeFormatDate,
   getDeadlineStatus,

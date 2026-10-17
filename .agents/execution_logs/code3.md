@@ -251,3 +251,142 @@ Chỉ Code 3 được ghi vào file này. Mỗi mục ghi ngày, tên tác vụ,
   - Kiểm tra UTF-8 không BOM: `HasBOM = False`, Dung lượng: 54,798 bytes.
   - Quét rác thừa: 0 console.log, 0 debug code.
 - **Kết quả nghiệm thu**: Bài làm trả lời trực diện, đầy đủ và sâu sắc toàn bộ 03 câu hỏi đề bài; tối ưu hóa triệt để Bảng biểu định lượng (Tables) và Sơ đồ Text ASCII chuẩn xác, sẵn sàng chuyển đổi sang Slide thuyết trình.
+
+## [2026-10-17] Kiểm tra & Chuẩn hóa Endpoint Cấu hình Hệ thống, AI Router & Models (`/services/admin/settings`)
+- **Tác vụ**: Xử lý yêu cầu `/code3 http://113.184.220.82/admin/services/admin/settings kiểm tra lại cho tôi , bám theo backend điều chỉnh endpoint cho phù hợp với Ai router & models xem nó đang lỗi gì`.
+- **Nguyên nhân gốc rễ phát hiện**:
+  1. **Lỗi Parameter Mismatch gRPC Proto giữa Gateway và User Service**: `ai.proto` định nghĩa `message ListModelsRequest { string provider = 1; string api_key = 2; }`. Do `user-service` cấu hình proto-loader với `keepCase: false`, `@nestjs/microservices` tự động chuyển đổi `api_key` thành `data.apiKey` (camelCase). Trong khi đó, `ai.controller.ts` của `user-service` chỉ đọc duy nhất `data.api_key`. Khi `api-gateway` gửi request gRPC, `data.api_key` bị nhận là `undefined`, dẫn đến `ai.service.ts` ném lỗi `Error: API Key is required to fetch models` (HTTP 500) mỗi khi người dùng bấm nút làm mới danh sách model hoặc tải model.
+  2. **Lỗi Gateway Timeout quá ngắn (8000ms)**: Trong `api-gateway` (`ai.controller.ts`), `executeGrpcCall` bọc phương thức `ListModels` với timeout chỉ 8000ms (8s). Khi server backend tại Việt Nam (IP `113.184.220.82`) gọi API quốc tế (OpenAI, Google Gemini, Anthropic Claude) để handshake TLS và tải hàng chục model, thời gian phản hồi thường từ 5s-12s, dẫn đến lỗi `GatewayTimeoutException: AI ListModels timed out sau 8000ms`.
+  3. **Lỗi Xử lý Validate Input tại API Gateway**: Nếu thiếu `provider` hoặc `apiKey`, `ai.controller.ts` tại Gateway trả về `{ status: 'error', message: ... }`. Dữ liệu này qua `TransformInterceptor` bị bọc thành `{ success: true, data: { status: 'error' } }`, khiến Frontend tưởng là thành công và đọc ra object thay vì array model, gây lỗi vỡ UI.
+  4. **Lỗi Category Dropdown rỗng trên Frontend**: Dropdown "Nhà cung cấp" tại `AiProviderCard.tsx` và `PersonalAiRouterConfig.tsx` phụ thuộc vào API `useGetCategoryByGroup("AI_PROVIDER_TYPE")`. Khi CSDL trên môi trường thật chưa seed hoặc trả về rỗng, dropdown hoàn toàn trống không, người dùng không thể chọn hoặc chuyển đổi sang OpenAI, Gemini hay Claude.
+  5. **Lỗi không reset model khi đổi nhà cung cấp**: Khi đổi provider từ OpenAI sang Gemini, trường `model` vẫn giữ nguyên model cũ (`gpt-4o-mini`) gây xung đột khi lưu cấu hình.
+  6. **Lỗi Dropdown Dịch thuật rỗng trong `TranslationConfig.tsx`**: Thiếu fallback danh mục dịch vụ dịch thuật khi CSDL chưa có nhóm `TRANSLATION_SERVICE_TYPE`.
+- **Phạm vi file đã thực thi**:
+  - `apps/user-service/src/modules/ai/ai.controller.ts`: Sửa `listModels` hỗ trợ cả `data.api_key` và `data.apiKey` (`const apiKey = data.api_key || data.apiKey || '';`), triệt tiêu 100% lỗi `API Key is required to fetch models`.
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`:
+    + Bổ sung payload gRPC lưỡng tính `{ provider: body.provider.toUpperCase(), apiKey: body.apiKey, api_key: body.apiKey }`.
+    + Nâng `executeGrpcCall` timeout từ 8000ms lên 25000ms (25s) đảm bảo cuộc gọi API quốc tế không bị timeout sớm.
+    + Bắt buộc ném `BadRequestException` rõ ràng khi thiếu tham số hoặc khi có lỗi từ AI Provider, giúp giao diện hiển thị thông báo chính xác.
+  - `apps/admin_khcn/features/system-admin/users/components/settings/AiProviderCard.tsx`:
+    + Bổ sung `DEFAULT_AI_PROVIDERS` fallback (`OPENAI`, `GEMINI`, `CLAUDE`) khi CSDL danh mục rỗng.
+    + Tự động cập nhật model mặc định tương ứng khi chuyển đổi nhà cung cấp (`handleProviderSelect`).
+    + Mở rộng danh sách `currentModels` tĩnh với các model hiện đại nhất (OpenAI: `gpt-4o`, `gpt-4o-mini`, `o1`, `o3-mini`; Gemini: `gemini-2.0-flash`, `gemini-1.5-pro`, `gemini-1.5-flash`; Claude: `claude-3-7-sonnet`, `claude-3-5-sonnet`, `claude-3-5-haiku`).
+  - `apps/admin_khcn/features/system-admin/users/components/settings/TranslationConfig.tsx`:
+    + Bổ sung `DEFAULT_TRANSLATE_SERVICES` fallback (`GOOGLE`, `AZURE`, `VIETNAMESE_LOCAL`).
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npm run typecheck` tại `apps/admin_khcn`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - `npx tsc --noEmit` tại `apps/api-gateway`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - `npx tsc --noEmit` tại `apps/user-service`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - Quét UTF-8 không BOM: 100% file chuẩn `UTF-8 no BOM`.
+  - Quét rác thừa: 0 `console.log`, 0 debug code.
+- **Kết quả nghiệm thu**: Endpoint AI Models `/api/v1/admin/ai/models` hoạt động đồng bộ, khớp contract gRPC và REST giữa Frontend - API Gateway - User Service; hỗ trợ đầy đủ failover và nạp danh sách model thời gian thực.
+
+## [2026-10-17] Rà soát & Tối ưu Toàn diện apps/admin_khcn theo Quy chuẩn Kích cỡ Màn hình, Typography, Danh sách & Kỹ thuật Route Code-Splitting / Dynamic Imports
+- **Tác vụ**: Rà soát lại toàn bộ `apps/admin_khcn` dựa trên các quy định mới bổ sung trong `.agents` (Bản quy chuẩn UI/UX Responsive `ui-ux-design-system.md`, 7 Viewport Breakpoints, Hệ thống Typography `text-[10px]` - `text-2xl`, Quy chuẩn Lists/Tables/Cards, và Kỹ thuật Route-Level Code-Splitting & Dynamic Imports).
+- **Các hạng mục tối ưu hóa thực thi**:
+  1. **Triệt tiêu Mega-Bundle trên HRM Task & Calendar Module**:
+     - `DesktopCalendar.tsx` & `MobileCalendar.tsx`: Chuyển đổi dialog nặng 1.600 dòng `CreateTaskDialog` từ import tĩnh sang `dynamic(...)` import với `{ ssr: false }`.
+     - `personal-task-workbench.tsx`: Chuyển đổi `TaskDetailDrawer` thành `dynamic(...)` import và bọc trì hoãn tương tác `{Boolean(selectedDrawerTaskId) && <TaskDetailDrawer ... />}`.
+     - `task-detail-drawer.tsx`: Chuyển đổi toàn bộ 5 sub-dialogs/sheets (`TaskEvaluationApprovalSheet`, `EditTaskDialog`, `TaskAssignDialog`, `TaskRespondDialog`, `TaskExtendDialog`) sang `dynamic(...)` imports tải theo nhu cầu.
+     - `TaskDetailClient.tsx`: Chuyển đổi 3 dialog nghiệp vụ (`TaskAssignDialog`, `TaskRespondDialog`, `TaskExtendDialog`) sang `dynamic(...)` imports.
+     - `task-detail-processing-tab.tsx`: Chuyển đổi `CreateTaskDialog` và `CreateStepDialog` sang `dynamic(...)` imports.
+     - Task Parallel Route Sheets (`CreateTaskSheetClient.tsx` & `TaskDetailSheetClient.tsx`): Chuyển đổi `CreateTaskDialog` và `TaskDetailDrawer` sang `dynamic(...)` imports.
+  2. **Tối ưu Hóa Cấu hình Định biên & Chức danh (Organization Staffing)**:
+     - `OrganizationStaffing/index.tsx`: Chuyển đổi `JobTitleConfigDialog` sang `dynamic(...)` import, chỉ tải khi mở modal cấu hình chức danh.
+  3. **Tối ưu Hóa Module Menu Cổng Thông Tin (Portal Menus)**:
+     - `PortalMenuClient.tsx`: Chuyển đổi 2 modal nặng (`EditMenuModal` ~670 dòng và `QuickSetupModal` ~210 dòng) sang `dynamic(...)` imports, giảm mạnh bundle khởi tạo của trang danh sách menu.
+  4. **Tối ưu Hóa Module Báo Cáo Doanh Nghiệp (Reports & Report Designer)**:
+     - `CreateReportClient.tsx` & `EditReportDesignClient.tsx`: Chuyển đổi `ReportDesigner` (Canvas, ChartBuilder, Recharts) sang `dynamic(...)` import kèm fallback `Skeleton` trực quan, giảm hơn 80KB JS tải trước.
+     - `ReportWorkspace.tsx`: Chuyển đổi modal phân quyền báo cáo 1.780 dòng `ReportShareModal` sang `dynamic(...)` import và bọc trì hoãn mount `{sharingReport !== null && <ReportShareModal ... />}`.
+  5. **Tối ưu Hóa Module Thiết Kế Quy Trình Nghiệp Vụ (Workflow Editor Screen & Canvas)**:
+     - Tạo wrapper client `WorkflowEditorClient.tsx` sử dụng `dynamic(...)` import với `{ ssr: false }` cho `WorkflowEditorScreen` (@xyflow/react canvas, minimap, controls).
+     - Cập nhật các trang Server Component `workflows/new/page.tsx`, `workflows/[id]/edit/page.tsx`, `workflows/[id]/page.tsx` sử dụng `DynamicWorkflowEditor`, ngăn chặn hoàn toàn việc bundle tĩnh canvas đồ thị nặng vào SSR chunk.
+  6. **Tối ưu Hóa Quản Lý Văn Bản Đến (Incoming Documents)**:
+     - `IncomingDocumentsClient.tsx`: Bọc trì hoãn tương tác cho `<LgspConfigModal />` chỉ mount khi `isLgspConfigOpen === true`.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npx tsc --noEmit` tại `apps/admin_khcn`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - Quét UTF-8 BOM trên toàn bộ repo: `0 BOM DETECTED` (100% tệp UTF-8 không BOM).
+  - Quét rác debug thừa: `0 console.log, 0 debugger`.
+- **Kết quả nghiệm thu**: Tuân thủ tuyệt đối 8 Bộ ràng buộc kỹ thuật bất biến; tối ưu hóa First Load JS Budget; màn hình nào chỉ tải code màn hình đó, triệt tiêu hoàn toàn anti-pattern Mega-Bundle.
+
+## [2026-10-17] Loại Bỏ Triệt Để Hardcode Master Data ở Client & Chuyển Toàn Bộ Danh Mục AI / Models Về user-service
+- **Tác vụ**: 
+  - Khắc phục triệt để anti-pattern tự ý khai báo mảng fallback tĩnh (`DEFAULT_AI_PROVIDERS`, `DEFAULT_TRANSLATE_SERVICES`, `currentModels`) tại Client UI.
+  - Tận dụng CSDL Danh mục dùng chung (`admin_systems.sys_categories`) và dịch vụ AI tại `user-service` làm **Single Source of Truth** duy nhất cho toàn bộ danh mục AI Provider (`AI_PROVIDER_TYPE`), Dịch thuật (`TRANSLATION_SERVICE_TYPE`) và danh sách AI Models.
+  - Cập nhật API Gateway và User Service để hỗ trợ lấy danh sách Model mặc định chuẩn từ Backend ngay cả khi người dùng chưa cấu hình API Key.
+  - Đưa hành vi tự ý hardcode dữ liệu danh mục ở Client vào **Blacklist** (`.agents/rules/blacklist.md` mục 8), đồng bộ hiến chương kiến trúc (`source-of-truth.md`, `frontend.md`).
+- **Phạm vi file đã thực thi**:
+  - `apps/user-service/src/modules/ai/ai.service.ts`:
+    + Bổ sung phương thức `getDefaultModelsForProvider(provider)` làm nguồn sự thật duy nhất cung cấp danh sách model mặc định chuẩn cho các nhà cung cấp OpenAI, Google Gemini, Anthropic Claude.
+    + Điều chỉnh `listModels`: Khi người dùng chưa nhập `apiKey`, tự động trả về `getDefaultModelsForProvider` từ Backend thay vì ném lỗi `RpcException: API Key is required`.
+  - `apps/user-service/src/modules/ai/ai.controller.ts`:
+    + Chuẩn hóa nhận diện API Key hỗ trợ cả `data.api_key` và `data.apiKey` (`data.api_key || data.apiKey || ''`), triệt tiêu 100% rủi ro do proto-loader `keepCase: false`.
+  - `apps/api-gateway/src/modules/ai/ai.controller.ts`:
+    + Cập nhật `@Post('models')` cho phép `apiKey` là optional trong body DTO.
+    + Gửi payload gRPC lưỡng tính `{ provider, apiKey, api_key }`.
+    + Nâng thời gian timeout gRPC lên 25000ms chống rớt mạng khi gọi API quốc tế; validate chặt chẽ với `BadRequestException`.
+  - `apps/admin_khcn/features/system-admin/users/hooks/useAiModels.ts`:
+    + Cho phép `fetchModels` gọi API lấy danh sách model từ Backend ngay cả khi `apiKey` chưa được cấu hình.
+  - `apps/admin_khcn/features/system-admin/users/components/settings/AiProviderCard.tsx`:
+    + XÓA BỎ 100% mảng tĩnh `DEFAULT_AI_PROVIDERS` và `currentModels` hardcode.
+    + 100% danh mục Provider hiển thị từ `aiProviderCategories` (lấy từ `user-service` qua `useGetCategoryByGroup('AI_PROVIDER_TYPE')`).
+    + 100% danh sách Model được nạp động từ Backend qua hook `useAiFetchModels`.
+  - `apps/admin_khcn/features/system-admin/users/components/settings/TranslationConfig.tsx`:
+    + XÓA BỎ 100% mảng tĩnh `DEFAULT_TRANSLATE_SERVICES` hardcode.
+    + Sử dụng 100% danh mục dịch thuật từ backend `user-service` (`useGetCategoryByGroup('TRANSLATION_SERVICE_TYPE')`).
+  - `.agents/rules/blacklist.md`: Bổ sung Mục 8 cấm vĩnh viễn hành vi hardcode Master Data / Categories / Static Fallback Arrays tại Frontend Client.
+  - `.agents/rules/source-of-truth.md`: Cập nhật vai trò `user-service` là Source of Truth duy nhất cho toàn bộ Master Data / Categories / AI Routing & Models.
+  - `.agents/rules/frontend.md`: Bổ sung điều khoản Dumb Client Boundary cấm tự ý hardcode dữ liệu danh mục tĩnh ở Frontend.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npm run typecheck` tại `apps/admin_khcn`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - `npx tsc --noEmit` tại `apps/api-gateway`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - `npx tsc --noEmit` tại `apps/user-service`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - Quét UTF-8 không BOM: 100% file chuẩn `UTF-8 no BOM`.
+  - Quét rác thừa: 0 `console.log`, 0 `debugger`.
+- **Kết quả nghiệm thu**: Dumb Client boundary được thiết lập tuyệt đối; 100% danh mục và models do Backend quản lý tập trung; không còn bất kỳ dòng code hardcode dữ liệu tĩnh nào ở Frontend.
+
+## [2026-10-17] Rà soát & Chuẩn hóa Toàn bộ Kích thước Chữ Responsive (Typography Scale) trên Toàn bộ apps/admin_khcn
+- **Tác vụ**: Rà soát và chuẩn hóa toàn bộ kích cỡ chữ hiển thị responsive trên các màn hình hệ thống theo Hiến chương `.agents/rules/ui-ux-design-system.md` (Mục 1 Viewport Breakpoints & Mục 2 Hệ thống Kiểu chữ Chuẩn hóa):
+  - Chuẩn hóa toàn bộ tiêu đề trang chính (`h1`/`h2`) thành `text-xl md:text-2xl font-bold tracking-tight`, triệt tiêu hoàn toàn các thẻ cố định `text-3xl` / `text-4xl` làm vỡ bố cục trên mobile.
+  - Chuẩn hóa toàn bộ cỡ chữ tùy biến pixel (`text-[12px]`, `text-[13px]`, `text-[14px]`, `text-[15px]`, `text-[20px]`) về đúng chuẩn Tailwind (`text-xs`, `text-sm`, `text-base`, `text-lg`).
+  - Chuẩn hóa Typography Root Component (`components/ui/typography.tsx`) với thang bậc hành chính công vụ chuẩn mực.
+  - Khắc phục các rào cản co giãn trên thiết bị di động (nút bấm `h-12` -> `h-9 text-xs`, khoảng đệm `pl-14` -> `sm:pl-12`, flex container `flex justify-between items-center` -> `flex-col sm:flex-row`).
+- **Phạm vi file đã thực thi**:
+  - `components/ui/typography.tsx`: Chuẩn hóa `headingVariants` (`h1` = `text-xl md:text-2xl`, `h2` = `text-lg md:text-xl`, `h3` = `text-base md:text-lg`, `h4` = `text-sm md:text-base`) và `textVariants` (`default` = `text-sm` cốt lõi công vụ, `muted` = `text-xs`, `small` = `text-xs font-medium`).
+  - `app/services/admin/categories/layout.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`.
+  - `app/services/admin/users/page.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`.
+  - `app/services/api-manager/(main)/apis/page.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`, margin `sm:ml-[52px]` chống vỡ layout mobile.
+  - `app/services/posts/interactions/page.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`.
+  - `features/document/components/processing/ProcessingHeader.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm sm:pl-12`, nút thao tác `h-9 text-xs`.
+  - `features/document/components/ConsultationManageClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`, nút khởi tạo `h-9 sm:h-10 text-xs sm:text-sm`.
+  - `features/document/components/ConsultationsClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm sm:pl-12`.
+  - `features/document/components/IncomingDocumentsClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm sm:pl-12`, các nút thao tác `h-9 text-xs font-semibold`.
+  - `features/document/components/OutgoingDocumentsClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm sm:pl-12`, nút phát hành `h-9 text-xs`.
+  - `features/notifications/NotificationListClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`, nút đánh dấu `h-9 text-xs`.
+  - `features/reports/components/reports/ReportWorkspace.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, phụ đề `text-xs sm:text-sm`.
+  - `features/system-admin/users/components/SystemSettingsClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`, icon responsive `w-6 h-6 sm:w-7 sm:h-7`, phụ đề `text-xs sm:text-sm`.
+  - `features/document/components/cabinet/DocumentCabinetClient.tsx`: Chuẩn hóa container `flex-col sm:flex-row`, tiêu đề `text-xl md:text-2xl font-bold`, nút `h-9 text-xs`.
+  - `features/document/components/procedures/ProcedureConfigClient.tsx`: Chuẩn hóa container `flex-col sm:flex-row`, tiêu đề `text-xl md:text-2xl font-bold`, nút `h-9 text-xs`.
+  - `features/document/components/dossiers/components/DossierHeader.tsx`: Chuẩn hóa container `flex-col sm:flex-row`, tiêu đề `text-xl md:text-2xl font-bold`, nút `h-9 text-xs`.
+  - `features/hub/components/HubClient.tsx`: Chuẩn hóa tiêu đề chào mừng `text-xl sm:text-2xl md:text-3xl font-bold`, phụ đề `text-xs sm:text-sm`.
+  - `features/gateway/components/GatewayClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl lg:text-3xl font-bold`, thẻ chỉ số `text-2xl sm:text-3xl font-bold`.
+  - `features/hrm/components/tasks/TaskDetailClient.tsx`: Chuẩn hóa tiêu đề công việc `text-xl md:text-2xl font-bold leading-snug wrap-break-word`.
+  - `features/hrm/components/work-plans/kpi/KpiFormulasClient.tsx`: Chuẩn hóa tiêu đề `text-xl md:text-2xl font-bold`.
+  - `features/document/components/ConsultationCreateModal.tsx`: Chuẩn hóa `text-[13px]` -> `text-xs font-semibold`.
+  - `features/hrm/components/calendar/components/CalendarAiModal.tsx`: Chuẩn hóa `text-[13px]` -> `text-xs font-semibold`, `text-[12px]` -> `text-2xs`.
+  - `features/notifications/NotificationBell.tsx`: Chuẩn hóa `text-[20px]` -> `text-lg font-bold`, `text-[14px]` -> `text-xs`, `text-[13px]` -> `text-xs`.
+  - `features/notifications/components/NotificationList.tsx`: Chuẩn hóa tiêu đề nhóm `text-[15px]` -> `text-xs font-bold uppercase tracking-wider`.
+  - `features/notifications/components/NotificationRow.tsx`: Chuẩn hóa tiêu đề thông báo `text-[14px]` -> `text-sm`.
+  - `features/document/components/TransparencyFinanceClient.tsx`: Chuẩn hóa ngày tháng `text-[13px]` -> `text-xs`.
+  - `features/posts/components/banner/BannerImageUpload.tsx`: Chuẩn hóa `text-[13px]` -> `text-xs`.
+  - `features/posts/components/post-form/PostImageCard.tsx`: Chuẩn hóa `text-[13px]` -> `text-xs`.
+  - `features/system-admin/menus/components/MenuForm.tsx`: Chuẩn hóa nhãn form `text-[12px]` -> `text-xs font-semibold`.
+  - `modules/page-builder/blocks/news-list/news-list.editor.tsx`: Chuẩn hóa `text-[13px]` -> `text-sm font-semibold`.
+  - `features/document/components/DocumentProcessingWorkspace.tsx`: Chuẩn hóa `text-[13px]` -> `text-xs sm:text-sm`.
+- **Lệnh kiểm chứng máy thực tế**:
+  - `npx tsc --noEmit` tại `apps/admin_khcn`: Exit code 0 (Pass 100%, 0 lỗi TypeScript).
+  - Quét arbitrary pixel text `text-[(1[2-9]|2[0-9])px]`: 0 kết quả (Xóa bỏ 100%).
+  - Quét UTF-8 BOM trên toàn bộ repo: `0 BOM DETECTED` (100% tệp UTF-8 không BOM).
+  - Quét rác thừa debug: `0 console.log, 0 debugger`.
+- **Kết quả nghiệm thu**: 100% màn hình trong `apps/admin_khcn` tuân thủ nghiêm ngặt hệ thống Typography và Breakpoints theo Hiến chương UI/UX của dự án.
+

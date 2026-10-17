@@ -186,8 +186,8 @@ export function CalendarAiModal({ isOpen, onClose, currentEvents = [] }: { isOpe
                         <CalendarPlus className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
                       </div>
                       <div className="flex flex-col pt-0.5 min-w-0 flex-1">
-                        <p className="font-semibold text-[13px] text-foreground wrap-break-word">{evt.title}</p>
-                        <p className="text-[12px] text-muted-foreground mt-1 font-medium">{evt.time}</p>
+                        <p className="font-semibold text-xs text-foreground wrap-break-word">{evt.title}</p>
+                        <p className="text-2xs text-muted-foreground mt-0.5 font-medium">{evt.time}</p>
                       </div>
                     </div>
                   ))}

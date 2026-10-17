@@ -37,7 +37,10 @@ const CalendarEventModal = dynamic(
   { ssr: false }
 );
 
-import { CreateTaskDialog } from "../../tasks/create-task-dialog";
+const CreateTaskDialog = dynamic(
+  () => import("../../tasks/create-task-dialog").then((mod) => mod.CreateTaskDialog),
+  { ssr: false }
+);
 
 // ---- Types ----
 type TabType = "all" | "personal" | "unit" | "meeting";

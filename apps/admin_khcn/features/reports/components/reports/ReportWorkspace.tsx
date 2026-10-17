@@ -12,7 +12,12 @@ import {
   CardDescription,
 } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
-import { ReportShareModal } from './ReportShareModal';
+import dynamic from 'next/dynamic';
+
+const ReportShareModal = dynamic(
+  () => import('./ReportShareModal').then((m) => m.ReportShareModal),
+  { ssr: false }
+);
 import { Input } from '../../../../components/ui/input';
 import {
   Tabs,
@@ -343,11 +348,11 @@ export const ReportWorkspace = () => {
               <div className="p-2.5 bg-indigo-100 text-indigo-700 rounded-xl">
                 <BarChart3 className="w-6 h-6" />
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
                 Trung tâm Phân tích & Báo cáo
               </h1>
             </div>
-            <p className="text-slate-500 max-w-2xl text-sm lg:text-base">
+            <p className="text-slate-500 max-w-2xl text-xs sm:text-sm">
               Nền tảng BI (Business Intelligence) hợp nhất tỉnh Đắk Lắk. Tự định
               nghĩa cấu trúc dữ liệu, thiết kế biểu đồ động và phân tích số liệu
               thực tế từ các phân hệ chính quyền.
@@ -961,15 +966,17 @@ export const ReportWorkspace = () => {
       </div>
 
       {/* Enterprise Report Share Modal */}
-      <ReportShareModal
-        report={currentSharingReport}
-        open={sharingReport !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSharingReport(null);
-          }
-        }}
-      />
+      {sharingReport !== null && (
+        <ReportShareModal
+          report={currentSharingReport}
+          open={sharingReport !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSharingReport(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

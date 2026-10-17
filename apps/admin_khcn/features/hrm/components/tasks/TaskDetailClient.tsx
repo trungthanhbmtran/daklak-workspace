@@ -41,13 +41,24 @@ import { toast } from "sonner";
 import { useTaskDetail, useRespondTask, useUpdateTaskStatus } from "../../hooks/useTasks";
 import { useUser } from "@/hooks/useUser";
 import { useHrmPermissions } from "../../hooks/useHrmPermissions";
+import dynamic from "next/dynamic";
 import { TaskProcessingTab } from "./task-detail-processing-tab";
 import { TaskDiscussionTab } from "./task-detail-discussion-tab";
 import { TaskHistoryTab } from "./task-detail-history-tab";
 import { TaskKpiTab } from "./task-detail-kpi-tab";
-import { TaskAssignDialog } from "./task-assign-dialog";
-import { TaskRespondDialog } from "./task-respond-dialog";
-import { TaskExtendDialog } from "./task-extend-dialog";
+
+const TaskAssignDialog = dynamic(
+  () => import("./task-assign-dialog").then((mod) => mod.TaskAssignDialog),
+  { ssr: false }
+);
+const TaskRespondDialog = dynamic(
+  () => import("./task-respond-dialog").then((mod) => mod.TaskRespondDialog),
+  { ssr: false }
+);
+const TaskExtendDialog = dynamic(
+  () => import("./task-extend-dialog").then((mod) => mod.TaskExtendDialog),
+  { ssr: false }
+);
 import {
   safeFormatDate,
   getDeadlineStatus,
@@ -408,7 +419,7 @@ export function TaskDetailClient({ id }: TaskDetailClientProps) {
 
             {/* Task Title */}
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-snug">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 leading-snug wrap-break-word">
                 {currentTask.title}
               </h1>
               {currentTask.description && (

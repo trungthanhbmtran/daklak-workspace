@@ -133,7 +133,7 @@ export function NotificationBell() {
         <div className="flex flex-col border-b border-border/40 bg-muted/30 px-3 sm:px-4 py-3 gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h4 className="font-bold text-[20px] text-foreground tracking-tight">Thông báo</h4>
+              <h4 className="font-bold text-lg text-foreground tracking-tight">Thông báo</h4>
               {unreadCount > 0 && (
                 <span className="bg-[#e41e3f]/10 text-[#e41e3f] text-[11px] font-semibold px-2 py-0.5 rounded-full mt-0.5">
                   {unreadCount} mới
@@ -156,13 +156,13 @@ export function NotificationBell() {
           <div className="flex items-center gap-1.5 -mb-1">
             <button 
               onClick={() => setFilter('ALL')}
-              className={`px-3 py-1.5 rounded-full text-[14px] font-semibold transition-colors ${filter === 'ALL' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${filter === 'ALL' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
             >
               Tất cả
             </button>
             <button 
               onClick={() => setFilter('UNREAD')}
-              className={`px-3 py-1.5 rounded-full text-[14px] font-semibold transition-colors ${filter === 'UNREAD' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${filter === 'UNREAD' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
             >
               Chưa đọc
             </button>
@@ -196,7 +196,7 @@ export function NotificationBell() {
           {hasNextPage ? (
             <Button 
               variant="ghost" 
-              className="w-full h-9 text-[13px] font-semibold text-primary hover:text-primary hover:bg-primary/5 rounded-lg"
+              className="w-full h-9 text-xs font-semibold text-primary hover:text-primary hover:bg-primary/5 rounded-lg"
               onClick={(e) => {
                 e.preventDefault();
                 fetchNextPage();

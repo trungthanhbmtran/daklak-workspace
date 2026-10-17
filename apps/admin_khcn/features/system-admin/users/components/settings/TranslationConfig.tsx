@@ -54,7 +54,7 @@ export function TranslationConfig() {
             onChange={(e) => setTranslateService(e.target.value)}
           >
             {translationCategories.map((cat: any) => (
-              <option key={cat.code} value={cat.code}>{cat.nameVi || cat.name}</option>
+              <option key={cat.code} value={cat.code}>{cat.nameVi || cat.name || cat.code}</option>
             ))}
           </select>
         </div>

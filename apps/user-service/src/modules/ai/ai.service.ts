@@ -405,15 +405,44 @@ export class AiService {
     return data.content?.[0]?.text || '';
   }
 
+  private getDefaultModelsForProvider(provider: string): { id: string; name: string; contextWindow?: number }[] {
+    const p = (provider || '').toUpperCase();
+    switch (p) {
+      case 'OPENAI':
+        return [
+          { id: 'gpt-4o', name: 'GPT-4o (Đa phương thức tối ưu)', contextWindow: 128000 },
+          { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Nhanh & kinh tế)', contextWindow: 128000 },
+          { id: 'o1', name: 'o1 (Suy luận chuyên sâu)', contextWindow: 200000 },
+          { id: 'o3-mini', name: 'o3-mini (Suy luận nhanh gọn)', contextWindow: 200000 },
+        ];
+      case 'GEMINI':
+        return [
+          { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Thế hệ mới siêu tốc)', contextWindow: 1048576 },
+          { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro (Ngữ cảnh 2 triệu token)', contextWindow: 2097152 },
+          { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Phổ thông hiệu năng cao)', contextWindow: 1048576 },
+        ];
+      case 'CLAUDE':
+        return [
+          { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet (Mới nhất, tư duy lai)', contextWindow: 200000 },
+          { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (Chuẩn mực lập luận)', contextWindow: 200000 },
+          { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Tốc độ cao)', contextWindow: 200000 },
+          { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus (Văn bản phức tạp)', contextWindow: 200000 },
+        ];
+      default:
+        return [];
+    }
+  }
+
   async listModels(
     provider: string,
-    apiKey: string,
+    apiKey?: string,
   ): Promise<{ id: string; name: string; contextWindow?: number }[]> {
+    const normalizedProvider = (provider || '').toUpperCase();
     if (!apiKey) {
-      throw new Error('API Key is required to fetch models');
+      return this.getDefaultModelsForProvider(normalizedProvider);
     }
 
-    const cacheKey = `${provider}_${apiKey}`;
+    const cacheKey = `${normalizedProvider}_${apiKey}`;
     const cached = this.modelCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.data;
@@ -421,7 +450,7 @@ export class AiService {
 
     let result: { id: string; name: string; contextWindow?: number }[] = [];
 
-    switch (provider) {
+    switch (normalizedProvider) {
       case 'OPENAI': {
         const res = await this.fetchWithTimeout(
           'https://api.openai.com/v1/models',

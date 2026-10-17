@@ -264,7 +264,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                       <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-primary/10 text-primary shadow-sm shrink-0 z-10">
                         <CheckCheck className="h-4 w-4" />
                       </div>
-                      <div className="flex-1 p-3 rounded-lg border bg-background shadow-sm text-[13px]">
+                      <div className="flex-1 p-3 rounded-lg border bg-background shadow-xs text-xs sm:text-sm">
                         <div className="flex justify-between items-start mb-1">
                           <span className="font-bold text-primary text-xs">{log.userName || "Hệ thống"}</span>
                           <span className="text-[10px] text-muted-foreground">{new Date(log.createdAt).toLocaleString('vi-VN')}</span>

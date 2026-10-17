@@ -46,10 +46,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
+import dynamic from "next/dynamic";
 import { useTasksList, usePersonalWorkbench } from "../../hooks/useTasks";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 
-import { TaskDetailDrawer } from "./task-detail-drawer";
+const TaskDetailDrawer = dynamic(
+  () => import("./task-detail-drawer").then((mod) => mod.TaskDetailDrawer),
+  { ssr: false }
+);
 
 export function PersonalTaskWorkbench() {
   const { user, isGlobalAdmin } = usePermissions();
@@ -902,13 +906,15 @@ export function PersonalTaskWorkbench() {
       </Dialog>
 
       {/* 10. TaskDetailDrawer for inspecting task on click */}
-      <TaskDetailDrawer
-        taskId={selectedDrawerTaskId}
-        open={Boolean(selectedDrawerTaskId)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedDrawerTaskId(null);
-        }}
-      />
+      {Boolean(selectedDrawerTaskId) && (
+        <TaskDetailDrawer
+          taskId={selectedDrawerTaskId}
+          open={Boolean(selectedDrawerTaskId)}
+          onOpenChange={(open) => {
+            if (!open) setSelectedDrawerTaskId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

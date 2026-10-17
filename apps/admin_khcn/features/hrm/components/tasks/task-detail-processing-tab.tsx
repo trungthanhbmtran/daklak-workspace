@@ -39,8 +39,17 @@ import {
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CreateTaskDialog } from "./create-task-dialog";
-import { CreateStepDialog } from "./create-step-dialog";
+import dynamic from "next/dynamic";
+
+const CreateTaskDialog = dynamic(
+  () => import("./create-task-dialog").then((mod) => mod.CreateTaskDialog),
+  { ssr: false }
+);
+const CreateStepDialog = dynamic(
+  () => import("./create-step-dialog").then((mod) => mod.CreateStepDialog),
+  { ssr: false }
+);
+
 import { useUser } from "@/hooks/useUser";
 import { useHrmPermissions } from "../../hooks/useHrmPermissions";
 import { getTaskStatusColor, translateTaskStatus, safeFormatDate, getDeadlineStatus } from "./task-ui-utils";

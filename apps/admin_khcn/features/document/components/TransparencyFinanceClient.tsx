@@ -69,7 +69,7 @@ const FinanceReportRow = React.memo(function FinanceReportRow({ report }: Financ
 
       {/* Date */}
       <TableCell className="px-5 py-4 text-muted-foreground font-medium">
-        <div className="flex items-center gap-1.5 text-[13px]">
+        <div className="flex items-center gap-1.5 text-xs">
           <Calendar className="h-3.5 w-3.5" />
           {report.issueDate ? new Date(report.issueDate).toLocaleDateString("vi-VN") : "---"}
         </div>

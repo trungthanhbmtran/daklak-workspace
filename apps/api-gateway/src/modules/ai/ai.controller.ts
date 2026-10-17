@@ -341,28 +341,30 @@ export class AiGatewayController implements OnModuleInit {
 
   @Post('models')
   @UseGuards(JwtAuthGuard)
-  async listModels(@Req() req: any, @Body() body: { provider: string; apiKey: string }) {
-    if (!body.provider || !body.apiKey) {
-      return { status: 'error', message: 'Provider and apiKey are required' };
+  async listModels(@Req() req: any, @Body() body: { provider: string; apiKey?: string }) {
+    if (!body.provider) {
+      throw new BadRequestException('Vui lòng cung cấp nhà cung cấp (provider)');
     }
 
     try {
       const response = (await executeGrpcCall(
         this.aiService.ListModels(
           {
-            provider: body.provider,
-            apiKey: body.apiKey,
+            provider: body.provider.toUpperCase(),
+            apiKey: body.apiKey || '',
+            api_key: body.apiKey || '',
           },
           this.getGrpcMetadata(req),
         ),
-        8000,
+        25000,
         'AI ListModels',
       )) as any;
       return response.data || [];
     } catch (e: any) {
       this.logger.error(`ListModels failed: ${e.message}`);
       if (e.status) throw e;
-      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+      const errorMsg = e?.details || e?.message || 'Không thể tải danh sách model từ nhà cung cấp';
+      throw new BadRequestException(`Lỗi từ ${body.provider}: ${errorMsg}`);
     }
   }
 }

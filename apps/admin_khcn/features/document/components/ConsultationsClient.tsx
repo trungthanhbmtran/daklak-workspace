@@ -55,13 +55,13 @@ export function ConsultationsClient() {
          {/* HEADER SECTION */}
          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="space-y-1">
-               <h2 className="text-3xl font-black tracking-tight flex items-center gap-3 text-foreground">
-                  <div className="p-2.5 bg-primary/10 rounded-2xl text-primary shadow-sm">
-                     <MessageSquareShare className="h-8 w-8" />
+               <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2.5 sm:gap-3 text-foreground">
+                  <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl text-primary shadow-xs shrink-0">
+                     <MessageSquareShare className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
                   Lấy ý kiến dự thảo
                </h2>
-               <p className="text-muted-foreground font-medium pl-14">
+               <p className="text-muted-foreground text-xs sm:text-sm font-normal sm:pl-12">
                   Theo dõi tiến độ và tổng hợp phản hồi từ các đơn vị phối hợp.
                </p>
             </div>

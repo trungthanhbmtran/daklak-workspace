@@ -24,8 +24,8 @@ export function useAiFetchModels() {
   const [isFetchingMap, setIsFetchingMap] = useState<Record<string, boolean>>({});
 
   const mutation = useMutation({
-    mutationFn: async ({ providerType, apiKey, showToast }: { providerId: string; providerType: string; apiKey: string, showToast?: boolean }) => {
-      const res = await apiClient.post("/ai/models", { provider: providerType, apiKey }) as any;
+    mutationFn: async ({ providerType, apiKey, showToast }: { providerId: string; providerType: string; apiKey?: string, showToast?: boolean }) => {
+      const res = await apiClient.post("/ai/models", { provider: providerType, apiKey: apiKey || undefined }) as any;
       if (res?.success === false) throw new Error(res.message || "Lỗi tải danh sách Model");
       const models = unwrapData<AiModelInfo[]>(res, []);
       return { models: Array.isArray(models) ? models : [], showToast };
@@ -35,11 +35,11 @@ export function useAiFetchModels() {
     },
     onSuccess: (result, variables) => {
       setFetchedModels(prev => ({ ...prev, [variables.providerId]: result.models }));
-      if (result.showToast !== false) {
+      if (result.showToast) {
         toast.success(`Đã tải ${result.models.length} model từ ${variables.providerType}!`);
       }
     },
-    onError: (err: any, variables) => {
+    onError: (err: any) => {
       toast.error(err.message || "Lỗi kết nối đến Backend");
     },
     onSettled: (_, __, variables) => {
@@ -48,11 +48,7 @@ export function useAiFetchModels() {
   });
 
   const fetchModels = useCallback(
-    (providerId: string, providerType: string, apiKey: string, showToast: boolean = true) => {
-      if (!apiKey) {
-        if (showToast) toast.error("Vui lòng nhập API Key trước khi tải danh sách Model!");
-        return;
-      }
+    (providerId: string, providerType: string, apiKey?: string, showToast: boolean = true) => {
       mutation.mutate({ providerId, providerType, apiKey, showToast });
     },
     [mutation]

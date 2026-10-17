@@ -8,16 +8,16 @@ interface Props {
 
 export function DossierHeader({ onOpenModal }: Props) {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
           Quản lý Hồ sơ TTHC
         </h2>
-        <p className="text-sm sm:text-base text-muted-foreground mt-2">
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
           Theo dõi tiến độ, tiếp nhận và yêu cầu bổ sung thành phần hồ sơ.
         </p>
       </div>
-      <Button onClick={onOpenModal} className="bg-primary hover:bg-primary/90 text-primary-foreground" iconStart={<Plus className="h-4 w-4" />}>Tiếp nhận hồ sơ mới</Button>
+      <Button size="sm" onClick={onOpenModal} className="bg-primary hover:bg-primary/90 text-primary-foreground h-9 text-xs" iconStart={<Plus className="h-3.5 w-3.5" />}>Tiếp nhận hồ sơ mới</Button>
     </div>
   );
 }

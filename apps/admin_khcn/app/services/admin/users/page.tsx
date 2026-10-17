@@ -9,8 +9,8 @@ export default function UsersPage() {
     <div className="flex flex-col flex-1 min-h-0 gap-4">
       <div className="flex items-center justify-between shrink-0">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Quản lý người dùng</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Quản lý người dùng</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Xem danh sách và quản lý chi tiết người dùng
           </p>
         </div>

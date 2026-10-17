@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 const headingVariants = cva("text-foreground", {
   variants: {
     level: {
-      h1: "text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight",
-      h2: "text-xl md:text-2xl font-semibold",
-      h3: "text-lg md:text-xl font-semibold",
-      h4: "text-base md:text-lg font-semibold",
+      h1: "text-xl md:text-2xl font-bold tracking-tight",
+      h2: "text-lg md:text-xl font-bold tracking-tight",
+      h3: "text-base md:text-lg font-semibold",
+      h4: "text-sm md:text-base font-semibold",
     },
   },
   defaultVariants: {
@@ -42,14 +42,14 @@ Heading.displayName = "Heading";
 const textVariants = cva("text-foreground", {
   variants: {
     variant: {
-      default: "text-sm md:text-base",
-      muted: "text-xs md:text-sm text-muted-foreground",
-      small: "text-xs font-medium leading-none",
-      large: "text-lg font-semibold",
-      lead: "text-xl text-muted-foreground",
-      error: "text-sm md:text-base text-destructive",
-      success: "text-sm md:text-base text-emerald-600 dark:text-emerald-400",
-      code: "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
+      default: "text-sm",
+      muted: "text-xs text-muted-foreground",
+      small: "text-xs font-medium",
+      large: "text-base font-semibold",
+      lead: "text-base md:text-lg text-muted-foreground",
+      error: "text-sm text-destructive",
+      success: "text-sm text-emerald-600 dark:text-emerald-400",
+      code: "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-xs font-semibold",
     },
     weight: {
       default: "",

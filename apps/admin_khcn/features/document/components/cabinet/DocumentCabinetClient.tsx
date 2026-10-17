@@ -71,20 +71,21 @@ export function DocumentCabinetClient() {
 
   return (
     <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Tủ văn bản số</h2>
-          <p className="text-sm sm:text-base text-muted-foreground mt-2">Kho lưu trữ tài liệu dùng chung, tái sử dụng cho các thủ tục hành chính.</p>
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">Tủ văn bản số</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Kho lưu trữ tài liệu dùng chung, tái sử dụng cho các thủ tục hành chính.</p>
         </div>
         <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
         <Button
+          size="sm"
           onClick={handleUpload}
           disabled={isUploading || addFile.isPending}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[150px]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground h-9 text-xs"
         >
           {(isUploading || addFile.isPending)
-            ? <Loader2 className="h-4 w-4 animate-spin" />
-            : <Upload className="h-4 w-4" />}
+            ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            : <Upload className="h-3.5 w-3.5 mr-1.5" />}
           {(isUploading || addFile.isPending) ? "Đang tải..." : "Tải tài liệu lên"}
         </Button>
       </div>

@@ -126,12 +126,12 @@ export function NotificationListClient() {
     <div className="flex-1 min-h-0 flex flex-col space-y-6 animate-in fade-in duration-500 overflow-hidden pb-4">
       <div className="shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Trung tâm Thông báo</h2>
-          <p className="text-muted-foreground mt-2">Quản lý và theo dõi toàn bộ thông báo từ tất cả các phân hệ trong hệ thống.</p>
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">Trung tâm Thông báo</h2>
+          <p className="text-muted-foreground mt-1 text-xs sm:text-sm">Quản lý và theo dõi toàn bộ thông báo từ tất cả các phân hệ trong hệ thống.</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="bg-background" onClick={() => markAllRead.mutate()} disabled={unreadCount === 0 || markAllRead.isPending}>
-            <Check className="h-4 w-4" /> Đánh dấu tất cả đã đọc
+        <div className="flex gap-2.5">
+          <Button variant="outline" size="sm" className="bg-background h-9 text-xs" onClick={() => markAllRead.mutate()} disabled={unreadCount === 0 || markAllRead.isPending}>
+            <Check className="h-3.5 w-3.5 mr-1.5" /> Đánh dấu tất cả đã đọc
           </Button>
         </div>
       </div>

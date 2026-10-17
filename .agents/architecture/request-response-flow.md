@@ -51,6 +51,7 @@ Bên dưới Gateway, giao tiếp nội bộ giữa Gateway và các Microservic
   "timestamp": "..."
 }
 ```
+- Riêng Chat `GetMessages`/`SendMessage`/`MarkRead`, actor không phải participant nhận gRPC `NOT_FOUND` (HTTP 404) với message `Bạn không có quyền tham gia đoạn chat này.`; giữ mã 404 để không tiết lộ hội thoại có tồn tại hay không.
 
 ## 3. Quy Tắc Chống Chuyển Đổi Dư Thừa (Anti-Redundancy Rules)
 

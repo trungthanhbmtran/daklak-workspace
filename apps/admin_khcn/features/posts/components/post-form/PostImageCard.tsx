@@ -54,7 +54,7 @@ export function PostImageCard() {
               <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
                 <ImagePlus className="h-6 w-6 text-muted-foreground" />
               </div>
-              <Text as="span" className="text-[13px] font-semibold text-muted-foreground">Tải lên ảnh tiêu đề</Text>
+              <Text as="span" className="text-xs font-semibold text-muted-foreground">Tải lên ảnh tiêu đề</Text>
             </div>
           )}
         </CardContent>

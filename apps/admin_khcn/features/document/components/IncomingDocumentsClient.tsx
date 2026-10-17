@@ -175,47 +175,51 @@ export function IncomingDocumentsClient() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
-            <div className="p-2.5 bg-blue-500/10 rounded-2xl text-blue-600 shadow-sm">
-              <Inbox className="h-8 w-8" />
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-blue-500/10 rounded-xl text-blue-600 shadow-xs shrink-0">
+              <Inbox className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             Sổ Văn bản Đến
           </h2>
-          <p className="text-muted-foreground font-medium pl-14">
+          <p className="text-muted-foreground text-xs sm:text-sm font-normal sm:pl-12">
             Quản lý và theo dõi các văn bản tiếp nhận từ cơ quan bên ngoài.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setIsLgspConfigOpen(true)}
-            className="rounded-xl border-slate-200 text-slate-700 font-bold px-4 h-12 hover:bg-slate-50 active:scale-95"
-            iconStart={<Settings className="h-4 w-4" />}
+            className="rounded-xl border-slate-200 text-slate-700 font-semibold px-3.5 h-9 text-xs hover:bg-slate-50"
+            iconStart={<Settings className="h-3.5 w-3.5" />}
           >
             Cấu hình LGSP
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleSyncLgsp}
             disabled={isSyncingLgsp || isFetching}
-            className="rounded-xl border-emerald-200 text-emerald-700 bg-emerald-50/40 hover:bg-emerald-100/50 font-bold px-5 h-12 active:scale-95"
-            iconStart={<CloudDownload className={`h-4 w-4 ${isSyncingLgsp ? "animate-bounce text-emerald-600" : ""}`} />}
+            className="rounded-xl border-emerald-200 text-emerald-700 bg-emerald-50/40 hover:bg-emerald-100/50 font-semibold px-3.5 h-9 text-xs"
+            iconStart={<CloudDownload className={`h-3.5 w-3.5 ${isSyncingLgsp ? "animate-bounce text-emerald-600" : ""}`} />}
           >
             {isSyncingLgsp ? "Đang đồng bộ..." : "Đồng bộ LGSP"}
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={isFetching}
-            className="rounded-xl border-blue-200 text-blue-600 font-bold px-5 h-12 hover:bg-blue-50 active:scale-95"
+            className="rounded-xl border-blue-200 text-blue-600 font-semibold px-3.5 h-9 text-xs hover:bg-blue-50"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isFetching ? "animate-spin" : ""}`} />
             {isFetching ? "Đang tải..." : "Tải lại"}
           </Button>
           <Button
+            size="sm"
             onClick={handleOpenModal}
-            className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 active:scale-95"
-            iconStart={<Plus className="h-4 w-4" />}>Vào sổ văn bản đến</Button>
+            className="rounded-xl shadow-xs bg-blue-600 hover:bg-blue-700 font-semibold px-4 h-9 text-xs"
+            iconStart={<Plus className="h-3.5 w-3.5" />}>Vào sổ văn bản đến</Button>
         </div>
       </div>
 
@@ -282,10 +286,12 @@ export function IncomingDocumentsClient() {
           documentId={selectedDocId}
         />
       )}
-      <LgspConfigModal
-        open={isLgspConfigOpen}
-        onOpenChange={setIsLgspConfigOpen}
-      />
+      {isLgspConfigOpen && (
+        <LgspConfigModal
+          open={isLgspConfigOpen}
+          onOpenChange={setIsLgspConfigOpen}
+        />
+      )}
     </div>
   );
 }

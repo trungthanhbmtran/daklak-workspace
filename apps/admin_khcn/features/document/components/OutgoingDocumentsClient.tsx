@@ -274,20 +274,21 @@ export function OutgoingDocumentsClient() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-500/10 rounded-2xl text-emerald-600 shadow-sm">
-              <Send className="h-8 w-8" />
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 bg-emerald-500/10 rounded-xl text-emerald-600 shadow-xs shrink-0">
+              <Send className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             Sổ Văn bản Đi
           </h2>
-          <p className="text-muted-foreground font-medium pl-14">
+          <p className="text-muted-foreground text-xs sm:text-sm font-normal sm:pl-12">
             Quản lý và phát hành các văn bản do Sở ban hành.
           </p>
         </div>
         <Button
+          size="sm"
           onClick={handleOpenModal}
-          className="rounded-xl shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 font-bold px-6 h-12 transition-all active:scale-95"
-         iconStart={<Plus className="h-4 w-4" />}>Phát hành văn bản mới</Button>
+          className="rounded-xl shadow-xs bg-emerald-600 hover:bg-emerald-700 font-semibold px-4 h-9 text-xs transition-all active:scale-95"
+          iconStart={<Plus className="h-3.5 w-3.5" />}>Phát hành văn bản mới</Button>
       </div>
 
       {/* Table — only re-renders when documents/loading/error changes */}
