@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from '@tanstack/react-query';
 import { portalLanguagesApi } from '../../api';
+import { unwrapData } from '@/lib/api-helper';
 
 /**
  * Hook lấy danh sách ngôn ngữ active — dùng React Query để cache.
@@ -11,7 +12,7 @@ export function useLanguages(initialLanguages: any[] = []) {
     queryKey: ['portal-languages'],
     queryFn: async () => {
       const res: any = await portalLanguagesApi.getActive();
-      const all = res.data;
+      const all = unwrapData<any[]>(res, []);
       const langs = all.filter((c: any) => c.active === 1);
       return langs.length > 0 ? langs : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }];
     },

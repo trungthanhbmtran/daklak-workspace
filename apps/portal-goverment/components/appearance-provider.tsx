@@ -4,6 +4,7 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { sanitizeCustomCss } from "@/lib/utils";
 
 export interface ThemeColors {
@@ -92,13 +93,8 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/portal-configs");
-        return Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response)
-            ? response
-            : [];
-      } catch (e) {
-        console.error("Failed to fetch public portal configs", e);
+        return unwrapData<any[]>(response, []);
+      } catch {
         return [];
       }
     },

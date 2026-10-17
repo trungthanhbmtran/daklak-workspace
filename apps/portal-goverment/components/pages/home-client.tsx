@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { unwrapData } from "@/lib/api-helper"
 import { resolveMediaUrl } from "@/lib/utils"
 import {
   ArrowRight,
@@ -327,19 +328,13 @@ interface HomeClientProps {
 export default function HomeClient({ initialPortalMenus, initialPosts, initialBanners }: HomeClientProps) {
   const pathname = usePathname()
 
-  // Normalize server-provided initial payloads to array shape (unwrap body.data) matching client queryFn
+  // Normalize server-provided initial payloads to array shape matching client queryFn
   const initialPostsList = React.useMemo(() => {
-    if (Array.isArray(initialPosts)) return initialPosts
-    return Array.isArray((initialPosts as any)?.data)
-      ? (initialPosts as any).data
-      : []
+    return unwrapData<any[]>(initialPosts, [])
   }, [initialPosts])
 
   const initialBannersList = React.useMemo(() => {
-    if (Array.isArray(initialBanners)) return initialBanners
-    return Array.isArray((initialBanners as any)?.data)
-      ? (initialBanners as any).data
-      : []
+    return unwrapData<any[]>(initialBanners, [])
   }, [initialBanners])
 
   const currentLang = React.useMemo(() => {
@@ -356,28 +351,26 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   const [currentGalleryIdx, setCurrentGalleryIdx] = React.useState(0)
 
   // 1. Fetch public questions
-  const { data: questionsData } = useQuery({
+  const { data: questionsData = [] } = useQuery({
     queryKey: ["public-questions", currentLang],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/interactions/questions?limit=5")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch public questions", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
   })
 
   // 2. Fetch public employees (leaders)
-  const { data: leadersData } = useQuery({
+  const { data: leadersData = [] } = useQuery({
     queryKey: ["public-employees", currentLang],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/hrm/employees?pageSize=10")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch public employees", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -393,14 +386,13 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     return obj[baseField] || ""
   }
 
-  const { data: postsData } = useQuery({
+  const { data: postsData = [] } = useQuery({
     queryKey: ["public-posts", currentLang],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/posts")
-        const body = response?.data ?? response
-        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -416,29 +408,26 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     initialData: initialPortalMenus,
   })
 
-  // Chuẩn hoá ledger#35: queryFn trả MẢNG (unwrap .data) — cùng shape header/DynamicPageRenderer
-  const { data: bannersData } = useQuery({
+  const { data: bannersData = [] } = useQuery({
     queryKey: ["public-banners"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/banners")
-        const body = response?.data ?? response
-        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
     initialData: initialBannersList,
   })
 
-  const { data: portalConfigData } = useQuery({
+  const { data: portalConfigData = [] } = useQuery({
     queryKey: ["public-portal-configs"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/portal-configs")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch portal configurations", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },

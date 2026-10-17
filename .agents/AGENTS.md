@@ -81,41 +81,40 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 - **Granular Endpoints & Lazy Tabs On-Demand (Chống Mega-fetch):** Từng API của các tab phải xuất phát từ endpoint chuyên biệt ở server (chống pattern gom 1 cục endpoint lớn "mega-fetch"). Modal/Drawer/Trang chi tiết chỉ fetch endpoint thực thể chính và tab mặc định khi mở; các tabs con (`Discussion`, `History`, `KPI`, `Subtasks`) dùng pattern `visitedTabs` để chỉ mount component và trigger React Query hook khi người dùng thực sự click vào tab đó (`enabled: activeTab === '...' && isValidId`). Tuyệt đối không lấy dữ liệu fallback chập chờn từ object cha truyền xuống làm giật lag giao diện.
 
 
-### 2. Ràng buộc BaseURL & Routing Frontend (`admin_khcn`)
-- Instance `apiClient` và `serverFetch` đã cấu hình sẵn `baseURL = "/api/v1/admin"`.
-- **CẤM TUYỆT ĐỐI thêm tiền tố `/admin` vào string path gọi API:** Ví dụ gọi `/integration/routes`, CẤM gọi `/admin/integration/routes` vì sẽ bị double prefix thành `/api/v1/admin/admin/...` gây lỗi 404!
-- **Ràng buộc Chuẩn hóa Response Envelope & Phân Định Dữ Liệu Rõ Ràng (Single-Level Data Contract - BẮT BUỘC):**
-  * **Cấu trúc Response Envelope chuẩn duy nhất của API Gateway:**
+### 2. Ràng buộc Thống Nhất Duy Nhất Axios, Chuẩn Hóa Đầu Vào - Đầu Ra & Client Gọi - Render Trực Tiếp (BẮT BUỘC)
+- **Thống nhất Tuyệt đối Dùng Duy Nhất `axios` — CẤM DÙNG `fetch`:** Toàn bộ hệ thống gọi tới API (bao gồm `apps/admin_khcn`, `apps/portal-goverment`, serverFetch và các microservices) BẮT BUỘC dùng **DUY NHẤT `axios`** (`apiClient` singleton tại Frontend, instance `axios` tại Server-side/Backend). CẤM TUYỆT ĐỐI việc sử dụng native `fetch` phân mảnh phương thức kết nối.
+- **Chuẩn Hóa Đầu Vào (Input Standardization):**
+  * Instance `apiClient` đã được cấu hình toàn diện tập trung: `baseURL` (`/api/v1/admin` cho Admin, `/api/v1` cho Portal), `timeout`, `withCredentials: true`, `headers: { 'Content-Type': 'application/json' }`, tự động gắn session, quản lý refresh token và xử lý lỗi tập trung.
+  * **CẤM TUYỆT ĐỐI thêm tiền tố `/admin` vào string path gọi API:** Ví dụ gọi `/integration/routes`, CẤM gọi `/admin/integration/routes` vì sẽ bị double prefix thành `/api/v1/admin/admin/...` gây lỗi 404!
+- **Chuẩn Hóa Đầu Ra (Output Standardization) & Response Envelope:**
+  * Đầu ra từ API Gateway và Axios đã được chuẩn hóa đồng bộ 100%. Response luôn đảm bảo cấu trúc Envelope 1 tầng duy nhất:
     ```json
     {
       "success": true,        // boolean: trạng thái thực thi thành công hay thất bại
-      "data": [...],          // T | T[]: Thực thể dữ liệu thuần túy - DỮ LIỆU LUÔN NẰM TRONG DATA, DÙNG ĐỂ RENDER TRỰC TIẾP
-      "meta": {               // PlainObject: Toàn bộ thông tin bổ trợ, phân quyền, phân trang, ngữ cảnh
+      "data": [...],          // T | T[]: Thực thể dữ liệu thuần túy - DÙNG ĐỂ RENDER TRỰC TIẾP
+      "meta": {               // PlainObject: Siêu dữ liệu phụ trợ
         "pagination": { "total": 100, "page": 1, "pageSize": 20, "totalPages": 5 },
         "actions": { "canEdit": true, "canDelete": false, "canApprove": true },
         "permissions": [...]  // Danh sách quyền hạn thao tác trên tài nguyên hiện tại
       },
-      "message": "...",       // string: Thông báo phản hồi cho người dùng (success message hoặc user notice)
-      "timestamp": "..."      // string (ISO Date)
+      "message": "...",       // string: Thông báo phản hồi cho người dùng (nếu có)
+      "timestamp": "..."      // string: Thời gian ISO
     }
     ```
   * **Tại Backend (API Gateway & Microservices):**
-    - **Data luôn nằm trong data (Single-Level Flattened Data):** Microservices và API Gateway controllers chỉ trả về thực thể thuần túy (entity hoặc list entities). CẤM TUYỆT ĐỐI các microservices hoặc controllers tự ý gói thủ công `{ success: true, data: { data: ... } }` hay `{ data: { items: ... } }` khiến dữ liệu bị bọc đúp thành `data.data`.
-    - **Phân định ranh giới dữ liệu nghiêm ngặt (Strict Data vs Meta Segregation):**
-      + `data`: CHỈ chứa dữ liệu nghiệp vụ chính dùng để hiển thị/render. Tuyệt đối KHÔNG nhồi nhét thông tin phân trang, quyền hạn thao tác (action permissions) lẫn lộn vào trong ruột `data` của từng record.
-      + `meta`: Nơi DUY NHẤT chứa toàn bộ siêu dữ liệu phụ trợ: phân trang (`meta.pagination`: `total`, `page`, `pageSize`, `totalPages`), quyền hành động (`meta.actions`, `meta.permissions`, `meta.allowed_paths`), và các số liệu thống kê/tổng hợp.
-      + `success`: Trạng thái thực thi boolean (`true` / `false`).
-      + `message`: Thông báo phản hồi cho người dùng (nếu có thông báo thao tác thành công hoặc cảnh báo).
-    - `TransformInterceptor` tại API Gateway là Source of Truth DUY NHẤT chịu trách nhiệm đóng gói envelope chuẩn `{ success, data, meta, message, timestamp }` và tự động phẳng hóa (flatten) mọi envelope lồng nhau để đảm bảo response HTTP body luôn là chuẩn envelope 1 tầng duy nhất.
-  * **Tại Frontend (Hook / API Boundary vs UI Component):**
-    - **Nguyên tắc "Chỉ 1 cấp để lấy Data render":** Dưới client UI component TUYỆT ĐỐI KHÔNG phải làm nhiệm vụ bóc tách envelope (`?.data`, `res?.data?.data`, `Array.isArray(x?.data)...`). Client UI CHỈ CẦN gọi hook (`const { data: subTasks = [] } = useTaskSubtasks(id)`) và dùng trực tiếp biến `subTasks` để render (`subTasks.map(...)`). Chỉ đúng 1 cấp là lấy được dữ liệu render!
-    - **Quy tắc trích xuất dữ liệu có cấu trúc tại Client:**
-      + **Lấy Data render:** Lấy trực tiếp từ `data` (hoặc biến đã unwrap từ custom hook).
-      + **Lấy quyền hành động (Actions/Permissions):** Lấy trong `meta.actions` hoặc `meta.permissions`.
-      + **Lấy thông tin phân trang:** Lấy trong `meta.pagination` (`meta.pagination.total`, `meta.pagination.page`...).
-      + **Lấy trạng thái thực thi:** Lấy ở `success`.
-      + **Lấy thông báo người dùng:** Lấy ở `message`.
-    - **Tầng Custom Hook / React Query là nơi unwrap DUY NHẤT:** Mọi custom query hook trả về entity/list BẮT BUỘC sử dụng `select: (res) => unwrapData(res)` (hoặc unwrap tại API boundary qua `unwrapData` từ `@/lib/api-helper`). `unwrapData` tự động bóc sạch mọi lớp envelope và cung cấp getter `.data` tương thích ngược. TUYỆT ĐỐI KHÔNG để lọt vỏ bọc `{ success, data }` xuống tầng UI component. CẤM viết code phòng thủ chắp vá dạng `res?.data?.data` hay `data?.data?.map(...)`.
+    - `data` CHỈ chứa thực thể dữ liệu nghiệp vụ thuần túy để render. Tuyệt đối không tự ý gói đúp `{ success: true, data: { data: ... } }` hay `{ data: { items: ... } }`.
+    - `TransformInterceptor` tại Gateway là Source of Truth đảm bảo phẳng hóa mọi envelope lồng nhau.
+    - Phân định rõ ràng: Dữ liệu render nằm ở `data`; quyền thao tác nằm ở `meta.actions` / `meta.permissions`; phân trang nằm ở `meta.pagination`; thông báo ở `message`; trạng thái ở `success`.
+- **Client Chỉ Việc Gọi và Render Kết Quả — Lược Bỏ Hoàn Toàn Phần Dư Thừa Cũ:**
+  * **Gọi là Render (Direct Call & Render):** Do đầu vào và đầu ra Axios đã được chuẩn hóa, dưới Client UI component CHỈ VIỆC gọi hook / API và render trực tiếp kết quả (`const { data: documents = [] } = useListDocuments(...)` -> `documents.map(...)`). Chỉ đúng 1 cấp là lấy được dữ liệu render!
+  * **Lược bỏ toàn bộ xử lý dư thừa cũ:** TUYỆT ĐỐI KHÔNG viết thêm các bước chuẩn hóa trung gian, các hàm convert cấu trúc ad-hoc, các vòng lặp bóc tách nhiều tầng hay getter monkey-patching cũ.
+  * **Triệt tiêu mã phòng thủ chắp vá:** CẤM viết code chọc nhiều cấp dạng `res?.data?.data`, `(data as any)?.data`, `data?.data?.map(...)` hay `Array.isArray(x?.data)...`.
+  * **Quy tắc trích xuất dữ liệu chuẩn:**
+    + **Dữ liệu Render:** Lấy trực tiếp từ `data` (hoặc biến unwrap từ custom hook).
+    + **Quyền hành động:** Lấy từ `meta.actions` hoặc `meta.permissions`.
+    + **Thông tin phân trang:** Lấy từ `meta.pagination` (`total`, `page`, `pageSize`, `totalPages`).
+    + **Trạng thái thực thi:** Lấy từ `success`.
+    + **Thông báo người dùng:** Lấy từ `message`.
 
 ### 3. Ràng buộc Next.js App Router theo phiên bản khai báo trong package & Server Components
 - Dùng đúng APIs của phiên bản Next.js khai báo trong package bị ảnh hưởng. Với route params/searchParams được khai báo là Promise, phải await trước khi đọc; xác minh kiểu từ code/config hiện có.

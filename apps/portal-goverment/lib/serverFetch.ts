@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import axios from "axios";
 
 export async function serverFetch<T>(path: string): Promise<T | null> {
   let lang = "vi";
@@ -8,7 +9,7 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
     if (cookieLang === "vi" || cookieLang === "en") {
       lang = cookieLang;
     }
-  } catch (e) {
+  } catch {
     // Graceful fallback during static compilation or static generation (ISR)
   }
 
@@ -22,40 +23,33 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
   const url = `${rawUrl}${separator}lang=${lang}`;
   
   try {
-    const res = await fetch(url, {
-      cache: "no-store",
+    const res = await axios.get<T>(url, {
       headers: {
         "x-lang": lang,
         "Accept-Language": lang,
-      }
+      },
+      validateStatus: (status) => status >= 200 && status < 300,
     });
-    if (!res.ok) {
-      console.error(`[serverFetch] Failed to fetch ${url}: ${res.statusText} (${res.status})`);
-      return null;
-    }
-    return await res.json() as T;
-  } catch (error) {
-    console.error(`[serverFetch] Error fetching from ${url}:`, error);
-    
+    return res.data;
+  } catch {
     if (!baseUrl.includes("localhost")) {
       const fallbackRawUrl = `http://localhost:8080/api/v1/${cleanPath}`;
       const fallbackSeparator = fallbackRawUrl.includes('?') ? '&' : '?';
       const fallbackUrl = `${fallbackRawUrl}${fallbackSeparator}lang=${lang}`;
       try {
-        const res = await fetch(fallbackUrl, {
-          cache: "no-store",
+        const res = await axios.get<T>(fallbackUrl, {
           headers: {
             "x-lang": lang,
             "Accept-Language": lang,
-          }
+          },
+          validateStatus: (status) => status >= 200 && status < 300,
         });
-        if (res.ok) {
-          return await res.json() as T;
-        }
-      } catch (fallbackError) {
-        console.error(`[serverFetch] Fallback failed:`, fallbackError);
+        return res.data;
+      } catch {
+        return null;
       }
     }
     return null;
   }
 }
+

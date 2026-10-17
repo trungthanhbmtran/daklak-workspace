@@ -1,4 +1,5 @@
 import { Injectable, Logger, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import axios from 'axios';
 import { LgspConfigService } from './lgsp.config';
 
 interface CachedToken {
@@ -51,30 +52,28 @@ export class LgspTokenService {
 
     try {
       this.logger.log(`Yêu cầu cấp access_token từ SSO: scope=${scope}`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      const response = await fetch(ssoUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Authorization: authHeader,
-        },
-        body: bodyParams.toString(),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        this.logger.error(`Lỗi xác thực OAuth2 LGSP (${response.status}): ${errorText}`);
+      let response: any;
+      try {
+        response = await axios.post(ssoUrl, bodyParams.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: authHeader,
+          },
+          timeout: 10000,
+        });
+      } catch (err: any) {
+        const errorText = typeof err.response?.data === 'string'
+          ? err.response.data
+          : JSON.stringify(err.response?.data || err.message);
+        const status = err.response?.status || 500;
+        this.logger.error(`Lỗi xác thực OAuth2 LGSP (${status}): ${errorText}`);
         throw new InternalServerErrorException(
-          `Không thể xác thực với hệ thống SSO LGSP (${response.status}): ${errorText}`,
+          `Không thể xác thực với hệ thống SSO LGSP (${status}): ${errorText}`,
         );
       }
 
-      const data = await response.json();
-      if (!data.access_token) {
+      const data = response.data;
+      if (!data?.access_token) {
         throw new InternalServerErrorException(
           `Phản hồi từ SSO LGSP không chứa access_token: ${JSON.stringify(data)}`,
         );

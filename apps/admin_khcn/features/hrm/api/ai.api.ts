@@ -1,27 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
-import type { ApiResponse } from "@/lib/api.types";
+import { unwrapData } from "@/lib/api-helper";
 
 export const aiApi = {
   /**
    * Sinh văn bản bằng AI (trả về jobId)
    */
   async generateText(prompt: string): Promise<any> {
-    const res = await apiClient.post(`/ai/generate`, { prompt }) as any as ApiResponse<any>;
-    if (!res.success) {
+    const res: any = await apiClient.post(`/ai/generate`, { prompt });
+    if (res?.success === false) {
       throw new Error(res.message || "Lỗi khi gọi AI sinh văn bản");
     }
-    return res.data;
+    return unwrapData(res);
   },
 
   /**
    * Truy vấn trạng thái của một AI Job đang chạy trong Background.
-   * Trả về entity job (đã bóc .data).
+   * Trả về entity job.
    */
   async getAiJobStatus(jobId: string): Promise<any> {
-    const res = await apiClient.get(`/ai/jobs/${jobId}`) as any as ApiResponse<any>;
-    if (res.success) return res.data;
-    throw new Error(res.message || "Lỗi khi truy vấn trạng thái AI Job");
+    const res: any = await apiClient.get(`/ai/jobs/${jobId}`);
+    if (res?.success === false) {
+      throw new Error(res.message || "Lỗi khi truy vấn trạng thái AI Job");
+    }
+    return unwrapData(res);
   },
 
   /**
@@ -29,12 +31,11 @@ export const aiApi = {
    * Backend sẽ trả về jobId.
    */
   async requestAiExecution(action: string, payload: any): Promise<any> {
-    const res = await apiClient.post(`/ai/execute`, { action, payload }) as any as ApiResponse<any>;
-    if (!res.success) {
+    const res: any = await apiClient.post(`/ai/execute`, { action, payload });
+    if (res?.success === false) {
       throw new Error(res.message || "Lỗi khi gọi AI");
     }
-    // Trả về object chứa jobId
-    return res.data;
+    return unwrapData(res);
   },
 };
 

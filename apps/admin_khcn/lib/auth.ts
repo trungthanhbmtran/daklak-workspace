@@ -2,6 +2,7 @@ import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { createHash } from "crypto";
+import axios from "axios";
 import { serverApiBase } from "./server-api-url";
 import { unwrapData } from "./api-helper";
 
@@ -26,13 +27,10 @@ export async function getServerUser() {
   if (!token) return null;
 
   try {
-    const res = await fetch(`${INTERNAL_API_URL}/auth/me`, {
+    const res = await axios.get(`${INTERNAL_API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
     });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return unwrapData(json);
+    return unwrapData(res.data);
   } catch {
     return null;
   }
@@ -63,28 +61,21 @@ function getCachedAllowedPaths(token: string) {
   return unstable_cache(
     async (): Promise<string[]> => {
       try {
-        const res = await fetch(`${INTERNAL_API_URL}/menus/me`, {
+        const res = await axios.get(`${INTERNAL_API_URL}/menus/me`, {
           headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
         });
-        if (res.status === 401) throw new SessionRefreshRequired();
-        if (res.status === 403) return [];
-        if (!res.ok) throw new Error("Không thể tải quyền truy cập lúc này");
-        const json = await res.json();
+        const json = res.data;
         const paths =
           json?.data?.allowedPaths ||
           json?.allowedPaths ||
           json?.allowed_paths ||
           [];
-        if (paths.length === 0) {
-          console.error(
-            `[fetch menus/me] SUCCESS but paths is empty. JSON:`,
-            JSON.stringify(json),
-          );
-        }
         return paths;
       } catch (err) {
-        // Failed auth/network lookups must not be cached as an empty permission list.
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 401) throw new SessionRefreshRequired();
+          if (err.response?.status === 403) return [];
+        }
         throw err;
       }
     },
@@ -111,7 +102,6 @@ export async function requireMenuAccess(pathname: string) {
   }
 
   if (allowedPaths.length === 0) {
-    console.error("[requireMenuAccess] No allowed menu paths for this session");
     notFound();
   }
 
@@ -137,9 +127,6 @@ export async function requireMenuAccess(pathname: string) {
   });
 
   if (!hasAccess) {
-    console.error(
-      `[requireMenuAccess] no access for pathname: ${normalizedPathname}. Allowed: ${allowedPaths}`,
-    );
     notFound();
   }
 }

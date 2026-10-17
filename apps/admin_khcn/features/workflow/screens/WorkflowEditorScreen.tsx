@@ -679,5 +679,5 @@ function WorkflowEditorLoader({ id, readOnly }: { id?: string; readOnly: boolean
     );
   }
 
-  return <WorkflowEditor key={id || "new"} id={id} workflow={detail.data} forceReadOnly={readOnly} />;
+  return <WorkflowEditor key={id || "new"} id={id} workflow={detail.data ?? undefined} forceReadOnly={readOnly} />;
 }

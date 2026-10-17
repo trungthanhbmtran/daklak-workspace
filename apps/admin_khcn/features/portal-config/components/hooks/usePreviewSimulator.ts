@@ -2,15 +2,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { portalConfigApi } from "../../api";
+import { portalConfigApi, type PortalConfigItem } from "../../api";
 import { portalConfigDefaults } from "../portalConfig.defaults";
+import { unwrapData } from "@/lib/api-helper";
 
 export function usePreviewSimulator(activeLangTab: string) {
-  const { data: dbConfigs } = useQuery({
+  const { data: dbConfigs } = useQuery<PortalConfigItem[]>({
     queryKey: ["portal-configs"],
     queryFn: async () => {
-      const res: any = await portalConfigApi.getAll();
-      return res.data;
+      const res = await portalConfigApi.getAll();
+      return unwrapData<PortalConfigItem[]>(res, []);
     },
     staleTime: 60_000,
   });

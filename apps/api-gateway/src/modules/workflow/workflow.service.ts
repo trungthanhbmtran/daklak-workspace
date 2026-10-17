@@ -68,32 +68,29 @@ export class WorkflowService implements OnModuleInit {
 
   // --- Process Catalog ---
   async registerProcessType(body: any, metadata?: any) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.RegisterProcessType(body, metadata),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'ProcessType registered' };
   }
 
   async listProcessTypes(activeOnly: boolean, metadata?: any) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListProcessTypes({ activeOnly }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { data: result?.data || [], message: 'OK' };
+    return result?.data ?? result?.processTypes ?? result ?? [];
   }
 
   async getProcessType(code: string, metadata?: any) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.GetProcessType({ code }, metadata),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'OK' };
   }
 
   // --- Process Bindings ---
   async createProcessBinding(body: any, metadata?: any) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.CreateProcessBinding(body, metadata),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'Binding created' };
   }
 
   async listProcessBindings(query: any, metadata?: any) {
@@ -103,15 +100,13 @@ export class WorkflowService implements OnModuleInit {
     return {
       data: result?.data || [],
       meta: result?.meta,
-      message: 'OK',
     };
   }
 
   async getProcessBinding(id: string, organizationId?: string, metadata?: any) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.GetProcessBinding({ id, organizationId }, metadata),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'OK' };
   }
 
   async deactivateProcessBinding(
@@ -121,7 +116,7 @@ export class WorkflowService implements OnModuleInit {
     organizationId?: string,
     metadata?: any,
   ) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.DeactivateProcessBinding(
         {
           id,
@@ -132,22 +127,19 @@ export class WorkflowService implements OnModuleInit {
         metadata,
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'Binding deactivated' };
   }
 
   // --- Process Execution ---
   async startByProcessType(body: any, metadata?: any) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.StartByProcessType(body, metadata),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'Workflow started' };
   }
 
   async submitAction(body: any, metadata?: any) {
-    const result = await firstValueFrom(
+    return await firstValueFrom(
       this.workflowGrpcService.SubmitAction(body, metadata),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result, message: 'Action submitted' };
   }
 
   // --- Backward Compatible (Legacy APIs) ---

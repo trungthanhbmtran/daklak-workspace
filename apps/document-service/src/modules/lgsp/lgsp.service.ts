@@ -1,4 +1,5 @@
 import { Injectable, Logger, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import axios from 'axios';
 import { LgspConfigService } from './lgsp.config';
 import { LgspTokenService } from './lgsp-token.service';
 import { LGSP_ENDPOINTS, LGSP_SCOPES } from './lgsp.constants';
@@ -52,16 +53,16 @@ export class LgspService {
 
     this.logger.log(`Gọi 4.1.1 getAgenciesList (SystemCode: ${systemCode})`);
     try {
-      const response = await fetch(url.toString(), {
-        method: 'POST',
+      const response = await axios.post(url.toString(), null, {
         headers: {
           SystemCode: systemCode,
           Authorization: `Bearer ${token}`,
         },
-        signal: AbortSignal.timeout(10000),
+        timeout: 10000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'getAgenciesList');
+      return this.handleJsonResponse(response, 'getAgenciesList');
     } catch (err: any) {
       this.handleFetchError(err, 'getAgenciesList', url.toString());
     }
@@ -84,8 +85,7 @@ export class LgspService {
     const endpoint = this.getEndpoint('/guivb/1.0.0/sendEdoc');
     this.logger.log(`Gọi 4.1.2 sendEdoc (requestId: ${reqId}, messageType: ${msgType})`);
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const response = await axios.post(endpoint, params.edxmlBuffer, {
         headers: {
           'Content-Type': 'application/octet-stream',
           Authorization: `Bearer ${token}`,
@@ -94,11 +94,11 @@ export class LgspService {
           messagetype: msgType,
           SystemCode: systemCode,
         },
-        body: new Uint8Array(params.edxmlBuffer),
-        signal: AbortSignal.timeout(15000),
+        timeout: 15000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'sendEdoc');
+      return this.handleJsonResponse(response, 'sendEdoc');
     } catch (err: any) {
       this.handleFetchError(err, 'sendEdoc', endpoint);
     }
@@ -118,18 +118,18 @@ export class LgspService {
     const endpoint = this.getEndpoint('/dhvb/1.0.0/getReceivedEdocList');
     this.logger.log(`Gọi 4.1.3 getReceivedEdocList (messageType: ${msgType}, SystemCode: ${systemCode})`);
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const response = await axios.post(endpoint, null, {
         headers: {
           Authorization: `Bearer ${token}`,
           servicetype: 'eDoc',
           messagetype: msgType,
           SystemCode: systemCode,
         },
-        signal: AbortSignal.timeout(10000),
+        timeout: 10000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'getReceivedEdocList');
+      return this.handleJsonResponse(response, 'getReceivedEdocList');
     } catch (err: any) {
       this.handleFetchError(err, 'getReceivedEdocList', endpoint);
     }
@@ -146,17 +146,17 @@ export class LgspService {
     const endpoint = this.getEndpoint('/dhvb/1.0.0/getEdoc');
     this.logger.log(`Gọi 4.1.4 getEdoc (docId: ${docId}, SystemCode: ${systemCode})`);
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const response = await axios.post(endpoint, null, {
         headers: {
           docId: docId,
           Authorization: `Bearer ${token}`,
           SystemCode: systemCode,
         },
-        signal: AbortSignal.timeout(10000),
+        timeout: 10000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'getEdoc');
+      return this.handleJsonResponse(response, 'getEdoc');
     } catch (err: any) {
       this.handleFetchError(err, 'getEdoc', endpoint);
     }
@@ -176,8 +176,7 @@ export class LgspService {
     const endpoint = this.getEndpoint('/guivb/1.0.0/getSentEdocList');
     this.logger.log(`Gọi 4.1.5 getSentEdocList (docid: ${docId}, SystemCode: ${systemCode})`);
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const response = await axios.post(endpoint, null, {
         headers: {
           servicetype: 'eDoc',
           messagetype: messageType,
@@ -185,10 +184,11 @@ export class LgspService {
           Authorization: `Bearer ${token}`,
           SystemCode: systemCode,
         },
-        signal: AbortSignal.timeout(10000),
+        timeout: 10000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'getSentEdocList');
+      return this.handleJsonResponse(response, 'getSentEdocList');
     } catch (err: any) {
       this.handleFetchError(err, 'getSentEdocList', endpoint);
     }
@@ -208,18 +208,18 @@ export class LgspService {
     const endpoint = this.getEndpoint('/guivb/1.0.0/updateStatus');
     this.logger.log(`Gọi 4.1.6 updateStatus (docid: ${docId}, status: ${status})`);
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const response = await axios.post(endpoint, null, {
         headers: {
           SystemCode: systemCode,
           docid: docId,
           status: status,
           Authorization: `Bearer ${token}`,
         },
-        signal: AbortSignal.timeout(10000),
+        timeout: 10000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'updateStatus');
+      return this.handleJsonResponse(response, 'updateStatus');
     } catch (err: any) {
       this.handleFetchError(err, 'updateStatus', endpoint);
     }
@@ -238,18 +238,17 @@ export class LgspService {
     const endpoint = this.getEndpoint('/dvlt/1.0.0/registerAgencies');
     this.logger.log(`Gọi 4.1.7 registerAgencies (Code: ${agencyData.code}, Name: ${agencyData.name})`);
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
+      const response = await axios.post(endpoint, agencyData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
           SystemCode: systemCode,
         },
-        body: JSON.stringify(agencyData),
-        signal: AbortSignal.timeout(10000),
+        timeout: 10000,
+        validateStatus: () => true,
       });
 
-      return await this.handleJsonResponse(response, 'registerAgencies');
+      return this.handleJsonResponse(response, 'registerAgencies');
     } catch (err: any) {
       this.handleFetchError(err, 'registerAgencies', endpoint);
     }
@@ -517,19 +516,23 @@ export class LgspService {
     // 1. Probe SSO
     const ssoStart = Date.now();
     try {
-      const res = await fetch(ssoUrl, {
-        method: 'POST',
+      const res = await axios.post(ssoUrl, 'grant_type=probe', {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'grant_type=probe',
-        signal: AbortSignal.timeout(4000),
+        timeout: 4000,
+        validateStatus: () => true,
       });
       ssoLatencyMs = Date.now() - ssoStart;
       ssoStatus = `Phản hồi HTTP ${res.status}`;
       ssoSuccess = true;
     } catch (err: any) {
       ssoLatencyMs = Date.now() - ssoStart;
-      const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError' || err.message?.includes('aborted');
-      ssoStatus = isTimeout ? 'Timeout (>4000ms)' : (err.message || 'Lỗi kết nối');
+      const isTimeout =
+        err.code === 'ECONNABORTED' ||
+        err.name === 'TimeoutError' ||
+        err.name === 'AbortError' ||
+        err.message?.includes('timeout') ||
+        err.message?.includes('aborted');
+      ssoStatus = isTimeout ? 'Timeout (>4000ms)' : err.message || 'Lỗi kết nối';
       ssoSuccess = false;
     }
 
@@ -541,18 +544,23 @@ export class LgspService {
     const gwStart = Date.now();
     try {
       const probeUrl = this.getEndpoint('/dhvb/1.0.0/getReceivedEdocList');
-      const res = await fetch(probeUrl, {
-        method: 'POST',
+      const res = await axios.post(probeUrl, null, {
         headers: { SystemCode: this.configService.systemCode },
-        signal: AbortSignal.timeout(4000),
+        timeout: 4000,
+        validateStatus: () => true,
       });
       gatewayLatencyMs = Date.now() - gwStart;
       gatewayStatus = `Phản hồi HTTP ${res.status}`;
       gatewaySuccess = true;
     } catch (err: any) {
       gatewayLatencyMs = Date.now() - gwStart;
-      const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError' || err.message?.includes('aborted');
-      gatewayStatus = isTimeout ? 'Timeout (>4000ms)' : (err.message || 'Lỗi kết nối');
+      const isTimeout =
+        err.code === 'ECONNABORTED' ||
+        err.name === 'TimeoutError' ||
+        err.name === 'AbortError' ||
+        err.message?.includes('timeout') ||
+        err.message?.includes('aborted');
+      gatewayStatus = isTimeout ? 'Timeout (>4000ms)' : err.message || 'Lỗi kết nối';
       gatewaySuccess = false;
     }
 
@@ -587,7 +595,12 @@ export class LgspService {
     if (err instanceof BadRequestException || err instanceof InternalServerErrorException || err instanceof NotFoundException) {
       throw err;
     }
-    const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError' || err.message?.includes('aborted');
+    const isTimeout =
+      err.code === 'ECONNABORTED' ||
+      err.name === 'TimeoutError' ||
+      err.name === 'AbortError' ||
+      err.message?.includes('timeout') ||
+      err.message?.includes('aborted');
     if (isTimeout) {
       this.logger.error(`LGSP API ${actionName} quá thời gian (10s): ${targetUrl}`);
       throw new InternalServerErrorException(
@@ -600,19 +613,22 @@ export class LgspService {
     );
   }
 
-  private async handleJsonResponse(response: Response, actionName: string): Promise<any> {
-    if (!response.ok) {
-      const errText = await response.text();
+  private handleJsonResponse(response: { status: number; data: any }, actionName: string): any {
+    if (response.status < 200 || response.status >= 300) {
+      const errText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
       this.logger.error(`LGSP API ${actionName} error (${response.status}): ${errText}`);
       throw new InternalServerErrorException(
         `Lỗi gọi LGSP ${actionName} (${response.status}): ${errText}`,
       );
     }
 
-    try {
-      return await response.json();
-    } catch {
-      throw new InternalServerErrorException(`Phản hồi từ LGSP ${actionName} không phải định dạng JSON hợp lệ.`);
+    if (typeof response.data === 'string') {
+      try {
+        return JSON.parse(response.data);
+      } catch {
+        return response.data;
+      }
     }
+    return response.data;
   }
 }

@@ -39,13 +39,17 @@ Khi thực hiện tác vụ, Lead Agent tuân thủ ranh giới cấu trúc đ�
 1. **Không bỏ gate vì tốc độ:** Dùng một lane cho tác vụ không thể chia an toàn; chia song song khi Backend/Frontend có ownership độc lập. Không có thời lượng cố định nào thay thế khảo sát, phê duyệt kế hoạch, verification hay review diff.
 2. **Chất lượng thống nhất:** Ràng buộc UI, BaseURL, App Router theo phiên bản package, migration additive, PBAC và gRPC delegation áp dụng cho mọi lane trước nghiệm thu.
 3. **Hai vòng review:** Phản biện kế hoạch trước dispatch; review riêng từng lane sau thực thi, rồi review tích hợp. Typecheck/build đơn lẻ không chứng minh behavior hoạt động.
-## 8. Nguyên tắc Đồng bộ Dữ liệu & Ràng buộc Boundary (Data Contract & Type Safety Boundary)
-- **Chuẩn hóa Response Envelope & Phân Định Trách Nhiệm Dữ Liệu:** Toàn bộ API trả về cấu trúc chuẩn 5 trường `{ success, data, meta, message, timestamp }`.
+## 8. Nguyên tắc Duy Nhất Axios & Chuẩn Hóa Đầu Vào - Đầu Ra (Client Gọi & Render Trực Tiếp)
+- **Thống nhất Duy Nhất Axios — CẤM TUYỆT ĐỐI Fetch:** Toàn bộ hệ thống gọi tới API (bao gồm Frontend, Server Components, serverFetch và Microservices) BẮT BUỘC dùng **DUY NHẤT `axios`** (`apiClient` singleton ở frontend, instance axios ở server-side). CẤM TUYỆT ĐỐI việc sử dụng native `fetch`.
+- **Chuẩn Hóa Đầu Vào & Đầu Ra Tập Trung:**
+  * Đầu vào được cấu hình toàn diện tại Axios (`baseURL`, timeout, headers, credentials, session recovery, auth token).
+  * Đầu ra được chuẩn hóa đồng bộ qua API Gateway `TransformInterceptor` và Axios Interceptor theo cấu trúc chuẩn 5 trường: `{ success, data, meta, message, timestamp }`.
   * `data`: Luôn là thực thể hoặc mảng thực thể thuần túy (Single-Level Flattened Data). Tuyệt đối cấm bọc đúp `data.data`.
   * `meta`: Nơi duy nhất chứa quyền thao tác (`meta.actions`, `meta.permissions`) và phân trang (`meta.pagination`).
-  * `success`: Boolean xác định trạng thái thực thi.
-  * `message`: Thông báo phản hồi người dùng.
-- **Quy tắc Client 1 Cấp Lấy Data Render:** Dưới client UI component, chỉ cần đúng 1 cấp là lấy được dữ liệu để render (`res.data` hoặc biến unwrap từ custom hook). Tuyệt đối cấm viết code phòng thủ chắp vá `res.data.data` hay `data?.data`.
+  * `success` / `message`: Trạng thái thực thi và thông báo phản hồi.
+- **Client Chỉ Việc Gọi và Render Trực Tiếp — Lược Bỏ Xử Lý Dư Thừa:**
+  * Dưới Client UI component CHỈ VIỆC gọi hook / API và lấy dữ liệu render trực tiếp (`data.map(...)`).
+  * Tuyệt đối KHÔNG viết thêm các bước chuẩn hóa trung gian, các hàm convert cấu trúc ad-hoc, hay code phòng thủ chắp vá `res?.data?.data` / `data?.data`.
 - **Boundary Validation tại Gateway:** Mọi controller tại API Gateway tiếp nhận tham số số nguyên (IDs) BẮT BUỘC dùng Pipe chuẩn (`ParseIntPipe`). Tuyệt đối không để chuỗi rác (`NaN`, `undefined`, chuỗi ký tự) lọt vào tầng gRPC/Microservices làm lỗi Prisma.
 - **Hook Encapsulation:** Các hook gọi API (React Query) phải tự bao bọc điều kiện thực thi (`enabled: Number.isInteger(numId) && numId > 0`). Component gọi hook chỉ truyền trực tiếp ID dạng number, KHÔNG ĐƯỢC viết code phòng thủ chắp vá (`validIdStr = ...`, `!isNaN(...)`, ép kiểu chuỗi tạm bợ).
 - **Trách nhiệm Phân giải Route:** Trong Next.js App Router, Page Component (`[id]/page.tsx`) là nơi duy nhất phân giải và kiểm tra tính hợp lệ của route params trước khi truyền xuống UI components.

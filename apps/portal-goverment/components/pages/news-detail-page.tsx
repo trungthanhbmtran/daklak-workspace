@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { unwrapData } from "@/lib/api-helper"
 import { usePublicPostBySlug, usePublicPostById } from "@/hooks/usePublicData"
 // Ledger #23: article CHỈ từ DB (public posts) — bỏ hoàn toàn ALL_NEWS/ALL_NEWS_EN mock
 import { resolveMediaUrl, stripUnsafeHtml } from "@/lib/utils"
@@ -133,14 +134,13 @@ export default function NewsDetailPage({ id }: Props) {
   }
 
   // Chuẩn hoá ledger#35: queryFn trả MẢNG (unwrap .data) — dùng cho panel tin liên quan
-  const { data: relatedPostsRaw } = useQuery({
+  const { data: relatedPostsRaw = [] } = useQuery({
     queryKey: ["public-posts", currentLang],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/posts", { params: { limit: 10 } })
-        const body = response?.data ?? response
-        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },

@@ -64,7 +64,7 @@ export default function ProceduresPage() {
   }, [dbDossier, dossierHasError, activeTrackCode])
 
   const filteredProcedures = React.useMemo(() => {
-    const list = Array.isArray(dbProceduresData) ? dbProceduresData : ((dbProceduresData as any)?.data || []);
+    const list = Array.isArray(dbProceduresData) ? dbProceduresData : [];
     if (list && list.length > 0) {
       return list.map((proc: any) => ({
         id: proc.id,

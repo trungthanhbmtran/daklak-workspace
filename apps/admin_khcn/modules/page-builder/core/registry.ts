@@ -27,9 +27,6 @@ class BlockRegistryClass {
    * Registers a new block structure in the CMS visual page builder registry.
    */
   public registerBlock<T = any>(block: RegisteredBlock<T>): void {
-    if (this.registry.has(block.type)) {
-      console.warn(`[BlockRegistry] Overwriting block registration for type: ${block.type}`);
-    }
     this.registry.set(block.type, block);
   }
 

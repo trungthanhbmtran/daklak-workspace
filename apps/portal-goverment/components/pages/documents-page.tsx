@@ -144,7 +144,7 @@ export default function DocumentsPage() {
 
 
   const filteredDocs = React.useMemo(() => {
-    const list = Array.isArray(dbDocumentsData) ? dbDocumentsData : ((dbDocumentsData as any)?.data || []);
+    const list = Array.isArray(dbDocumentsData) ? dbDocumentsData : [];
     if (!list || list.length === 0) return [];
     return list.map((doc: any) => ({
       id: doc.id,

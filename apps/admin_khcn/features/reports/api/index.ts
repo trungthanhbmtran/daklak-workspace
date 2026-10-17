@@ -42,16 +42,8 @@ export const useGetReportCatalog = () => {
     queryKey: reportKeys.catalog(),
     queryFn: async () => {
       type ReportCatalogItem = ReportSourceDef & { name: string };
-      const response = await axiosInstance.get<ApiResponse<ReportCatalogItem[]>>(
-        "/reports/catalog",
-      );
-      const envelope = response as unknown as ApiResponse<ReportCatalogItem[]>;
-      if (envelope?.success === false) {
-        throw new Error(
-          envelope.message || "Không thể tải danh mục nguồn báo cáo.",
-        );
-      }
-      return Array.isArray(envelope?.data) ? envelope.data : [];
+      const response = await axiosInstance.get("/reports/catalog");
+      return unwrapData<ReportCatalogItem[]>(response, []);
     },
   });
 };

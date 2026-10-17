@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import type { ApiResponse } from "@/lib/api.types";
 import type { HrmMasterPlan } from "../types";
 
@@ -13,8 +14,8 @@ export const hrmPlansApi = {
   },
 
   getOne(id: number): Promise<HrmMasterPlan | null> {
-    return (apiClient.get(`/hrm/master-plans/${id}`) as any as Promise<ApiResponse<HrmMasterPlan>>)
-      .then((res) => res.data ?? null);
+    return (apiClient.get(`/hrm/master-plans/${id}`) as any)
+      .then((res: any) => unwrapData<HrmMasterPlan | null>(res, null));
   },
 
   update(id: number, payload: Partial<HrmMasterPlan>): Promise<ApiResponse<HrmMasterPlan>> {

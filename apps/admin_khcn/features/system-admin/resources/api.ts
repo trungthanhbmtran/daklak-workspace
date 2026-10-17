@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import type { Resource } from "./types";
 
 export const resourceApi = {
   getResources: async (): Promise<Resource[]> => {
     const res: any = await apiClient.get("/resources");
-    return res.data || [];
+    return unwrapData<Resource[]>(res, []);
   },
 
   createResource: (payload: { code: string; name: string; serviceCode?: string }) =>

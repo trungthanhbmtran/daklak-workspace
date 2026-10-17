@@ -32,8 +32,8 @@ export const useFileUpload = (options?: UploadOptions) => {
             useWebWorker: true,
             fileType: "image/webp",
           });
-        } catch (error) {
-          console.warn("Lỗi nén ảnh, sử dụng ảnh gốc:", error);
+        } catch {
+          // Fallback to original image
         }
       }
 
@@ -78,7 +78,6 @@ export const useFileUpload = (options?: UploadOptions) => {
 
       return fileData;
     } catch (error: any) {
-      console.error("Upload error:", error);
       const msg = error.response?.data?.message || "Lỗi tải tệp tin";
       toast.error(msg);
       options?.onError?.(error);

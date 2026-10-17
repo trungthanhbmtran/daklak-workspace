@@ -87,7 +87,7 @@ export function useDeleteCategory() {
       queryClient.setQueriesData({ queryKey: CATEGORY_KEYS.all }, (oldData: any) => {
         if (!oldData) return oldData;
         if (Array.isArray(oldData)) return oldData.filter((item: any) => item.id !== id);
-        if (oldData.data && Array.isArray(oldData.data)) return { ...oldData, data: oldData.data.filter((item: any) => item.id !== id) };
+        if (Array.isArray(oldData?.data)) return { ...oldData, data: oldData.data.filter((item: any) => item.id !== id) };
         return oldData;
       });
 

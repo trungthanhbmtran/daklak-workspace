@@ -1,4 +1,5 @@
 import { Controller, Logger, Inject, OnModuleInit, UseGuards } from '@nestjs/common';
+import axios from 'axios';
 import { GrpcMethod, EventPattern } from '@nestjs/microservices';
 import { AiAssistantService } from './ai-assistant.service';
 import { AiService } from '../ai/ai.service';
@@ -224,10 +225,12 @@ export class AiAssistantController implements OnModuleInit {
           }
 
           if (fileUrl) {
-            const fileRes = await fetch(fileUrl);
-            if (fileRes.ok) {
-              const arrayBuffer = await fileRes.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
+            const fileRes = await axios.get(fileUrl, {
+              responseType: 'arraybuffer',
+              timeout: 30000,
+            });
+            if (fileRes.data) {
+              const buffer = Buffer.from(fileRes.data);
 
               if (!originalName) originalName = fileUrl.split('?')[0];
 

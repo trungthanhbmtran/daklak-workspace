@@ -2,8 +2,8 @@
 
 ## 1. Công nghệ cốt lõi (Tech Stack)
 - **Framework**: React / Next.js (Dự án đang sử dụng Next.js App Router hoặc Pages Router với React 18+).
-- **Data Fetching & State Management**: Sử dụng **TanStack Query (React Query)** kết hợp với **Axios**.
-  - `Axios`: Dùng để cấu hình base HTTP client (bao gồm interceptors để đính kèm Token, handle 401/refresh token, v.v.).
+- **Data Fetching & State Management**: Sử dụng **TanStack Query (React Query)** kết hợp với **Duy nhất Axios** (`apiClient`). **CẤM TUYỆT ĐỐI dùng `fetch`**.
+  - `apiClient` (Axios Singleton): Base HTTP client duy nhất cho toàn bộ Frontend, quản lý tập trung baseURL, session recovery, token và chuẩn hóa response.
   - Không tự xây server-state fetching bằng useEffect/useState nếu package đã có query client; theo convention của feature.
 - **UI Component Library**: Ưu tiên sử dụng **Shadcn UI** (`components/ui/*`) và Tailwind CSS cho giao diện.
   - Dialog, Select, Input, Button, Table và dropdown ưu tiên dùng component Shadcn đã có; không tự dựng overlay/dropdown thiếu keyboard, focus hoặc accessible behavior.
@@ -18,49 +18,48 @@
 - **Data-Driven UI**:
   - Dựa hoàn toàn vào kết quả trả về từ Backend (permission, workflowState, allowed, denied) để render giao diện (ẩn/hiện nút bấm, điều hướng).
 
-## 3. Đồng bộ chuẩn dữ liệu Frontend - Backend (API Response)
+## 3. Đồng bộ chuẩn dữ liệu Frontend - Backend (API Response & Direct Rendering)
 
-API Gateway sử dụng `TransformInterceptor` và `AllExceptionsFilter` để chuẩn hóa toàn bộ response ra ngoài client. Mọi response HTTP JSON từ Gateway tuân thủ nghiêm ngặt cấu trúc 5 trường chuẩn:
+API Gateway và Axios Interceptor đã chuẩn hóa 100% cả đầu vào và đầu ra. Mọi response HTTP JSON từ Gateway tuân thủ nghiêm ngặt cấu trúc 5 trường chuẩn:
 
 ```json
 {
   "success": true,        // boolean: trạng thái thực thi thành công hay thất bại
-  "data": [...],          // T | T[]: Thực thể dữ liệu thuần túy - DỮ LIỆU LUÔN NẰM TRONG DATA, DÙNG ĐỂ RENDER
+  "data": [...],          // T | T[]: Thực thể dữ liệu thuần túy - DÙNG ĐỂ RENDER TRỰC TIẾP
   "meta": {               // PlainObject: Siêu dữ liệu phụ trợ
     "pagination": { "total": 100, "page": 1, "pageSize": 20, "totalPages": 5 },
     "actions": { "canEdit": true, "canDelete": false, "canApprove": true },
     "permissions": [...]  // Danh sách quyền hạn thao tác trên tài nguyên hiện tại
   },
-  "message": "...",       // string: Thông báo phản hồi cho người dùng (success message hoặc user notice)
+  "message": "...",       // string: Thông báo phản hồi cho người dùng (nếu có)
   "timestamp": "..."      // string: Thời gian ISO
 }
 ```
 
 - **Quy tắc Phân Định Dữ Liệu Rõ Ràng & Trích Xuất Dữ Liệu 1 Cấp (Single-Level Direct Access):**
-  * **Lấy Data để Render:** Lấy trực tiếp từ `data` (hoặc biến đã unwrap qua custom hook). `data` luôn là thực thể hoặc mảng thực thể thuần túy, TUYỆT ĐỐI không bọc đúp `data.data`.
+  * **Lấy Data để Render:** Lấy trực tiếp từ `data` (hoặc biến trả về từ custom hook: `const { data = [] } = use...()`). `data` luôn là thực thể hoặc mảng thực thể thuần túy, TUYỆT ĐỐI không bọc đúp `data.data`.
   * **Lấy Quyền hành động (Action/Permissions):** Lấy trong `meta.actions` hoặc `meta.permissions` (ví dụ: `res.meta?.actions?.canEdit`, `res.meta?.actions?.canApprove`).
   * **Lấy Thông tin phân trang:** Lấy trong `meta.pagination` (`meta.pagination.total`, `meta.pagination.page`, `meta.pagination.pageSize`, `meta.pagination.totalPages`).
   * **Lấy Trạng thái thực thi:** Lấy ở `success` (`res.success === true`).
   * **Lấy Thông báo phản hồi:** Lấy ở `message` (`res.message` để hiển thị toast notification hoặc alert).
 
-- **Response/Envelope Handling & Dumb Presentation:**
-  * **Axios & API Boundary:** Axios client (`apiClient`) chỉ bóc lớp vỏ thư viện `AxiosResponse`, trả về HTTP body (`ApiResponse = { success, data, meta, message, timestamp }`).
-  * **Custom Hooks / API Service là chốt chặn unwrap DUY NHẤT:** Toàn bộ việc bóc tách envelope phải hoàn thành tại tầng hook/API bằng `select: (res) => unwrapData(res)` hoặc helper chuẩn hóa. TUYỆT ĐỐI KHÔNG để lọt vỏ bọc `{ success, data }` xuống component UI.
-  * **Client UI Component KHÔNG ĐƯỢC bóc tách dữ liệu:** Component chỉ render dữ liệu (`data.map(...)`), cấm viết code phòng thủ ad-hoc như `(data as any)?.data ?? data` hay `Array.isArray(x?.data) ? x.data : ...` hay `res?.data?.data`. Dưới client, chỉ đúng 1 cấp là lấy được dữ liệu render!
-  * `unwrapData` từ `@/lib/api-helper` hỗ trợ unwrap đa tầng và tự động đính kèm getter `.data` cho các component cũ để duy trì tương thích 100%.
-- serverFetch trả JSON body cho caller xử lý theo contract; không mặc định response của serverFetch và apiClient được chuẩn hóa giống nhau.
-- Thất bại HTTP thường theo error payload success=false, message, errorType, code, statusCode, timestamp từ AllExceptionsFilter. Đọc errorType/message theo contract đã xác minh; không tự phân loại lỗi nghiệp vụ bằng statusCode. Với file download, proxy hoặc endpoint đặc biệt, kiểm tra response thực tế và kiểu Axios trước khi xử lý.
-- Kiểu dữ liệu trong api.types.ts là helper/contract phía client, không chứng minh mọi endpoint luôn trả cùng shape. Kiểm tra controller, interceptor, API helper và test của luồng liên quan.
+- **Client Gọi và Render Trực Tiếp — Lược Bỏ Hoàn Toàn Xử Lý Chuẩn Hóa Dư Thừa:**
+  * **Đầu vào và đầu ra Axios đã được chuẩn hóa:** Toàn bộ việc xử lý session, refresh token, format envelope và unwrap đã được đảm bảo ở tầng Axios / API Gateway.
+  * **Client UI Component CHỈ VIỆC GỌI VÀ RENDER:** Component chỉ gọi hook / API và render trực tiếp dữ liệu (`data.map(...)`). TUYỆT ĐỐI KHÔNG viết thêm các hàm/bước chuẩn hóa dữ liệu thừa thãi, các vòng lặp bóc tách nhiều tầng hay các getter monkey-patching cũ.
+  * **Triệt tiêu mã phòng thủ chắp vá:** CẤM viết code phòng thủ ad-hoc như `(data as any)?.data ?? data` hay `Array.isArray(x?.data) ? x.data : ...` hay `res?.data?.data`. Dưới client, chỉ đúng 1 cấp là lấy được dữ liệu render!
+- Thất bại HTTP thường theo error payload `success=false, message, errorType, code, statusCode, timestamp` từ AllExceptionsFilter. Đọc errorType/message theo contract đã xác minh; không tự phân loại lỗi nghiệp vụ bằng statusCode. Với file download, proxy hoặc endpoint đặc biệt, kiểm tra response thực tế và kiểu Axios trước khi xử lý.
 
 ## 4. Chuẩn hóa Quản lý State
 - **Server State (Dữ liệu từ API)**: Bắt buộc dùng `React Query`. Không được lưu kết quả fetch API vào `Zustand` hay `useState`.
 - **Client State (Trạng thái UI toàn cục)**: Chỉ dùng global store theo pattern đã có khi nhiều khu vực thực sự cùng sở hữu state; không thêm store mới cho state của một màn hình.
 - **Local State**: Chỉ dùng `useState` hoặc `useReducer` cho các trạng thái nhỏ lẻ, cục bộ nằm gọn trong một component (như form chưa submit).
 
-## 5. Chuẩn hóa Axios Singleton
-- TUYỆT ĐỐI KHÔNG `import axios from 'axios'` và gọi `.get()` trực tiếp ở bất kỳ UI component hay file hook nào.
-- Mọi lệnh gọi API **bắt buộc** phải sử dụng thông qua một `axiosInstance` được khởi tạo duy nhất (singleton) trong cấu hình dự án.
-- Lý do: client hiện cài request/session interceptors; không mặc định có response interceptor unwrap envelope. API/query layer dùng helper phù hợp đúng một lần theo contract.
+## 5. Thống Nhất Duy Nhất Axios & Loại Bỏ Hoàn Toàn Xử Lý Chuẩn Hóa Dư Thừa
+- **CẤM TUYỆT ĐỐI dùng `fetch` trong toàn bộ dự án:** Toàn bộ frontend và các tác vụ server-side communication BẮT BUỘC thống nhất dùng **DUY NHẤT `axios`** (`apiClient` singleton ở frontend hoặc axios client ở server-side). Không để phân mảnh nhiều phương thức kết nối.
+- TUYỆT ĐỐI KHÔNG `import axios from 'axios'` và gọi `.get()` trực tiếp ở bất kỳ UI component hay file hook nào đối với API nội bộ; phải gọi qua `apiClient` hoặc service API module có sẵn.
+- Mọi lệnh gọi API nội bộ **bắt buộc** phải sử dụng thông qua `apiClient` được khởi tạo duy nhất (singleton) trong cấu hình dự án (`lib/axiosInstance.ts`).
+- Đối với các dịch vụ bên ngoài (như presigned MinIO/S3 PUT upload), được phép dùng instance `axios` độc lập để tránh gửi kèm Authorization Header nội bộ gây lỗi CORS.
+- **Không cần bước chuẩn hóa dữ liệu lặp lại ở Frontend:** Do API Gateway và Axios đã chuẩn hóa đầu vào và đầu ra thành Single-Level Data, Frontend chỉ việc nhận đúng cấu trúc thực thể từ `data` (hoặc thông qua custom hook) để render trực tiếp, KHÔNG viết thêm các hàm/bước chuẩn hóa dữ liệu cũ thừa thãi.
 
 ## 6. UI/UX & CSS Layout
 ### Nguyên tắc layout theo ngữ cảnh

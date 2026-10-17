@@ -257,12 +257,10 @@ export function OutgoingDocumentsClient() {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
-  const { data: response, isLoading, error } = useListDocuments({
+  const { data: documents = [], isLoading, error } = useListDocuments({
     search: searchTerm,
     isIncoming: false,
   });
-
-  const documents = useMemo(() => response?.data ?? [], [response]);
 
   const handleDelete = useCallback((id: string) => setItemToDelete(id), []);
   const handleCloseDelete = useCallback(() => setItemToDelete(null), []);

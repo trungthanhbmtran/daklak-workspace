@@ -875,8 +875,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/hrm/employees?pageSize=50")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -889,8 +889,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/org-units")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -1050,11 +1050,11 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     return null
   }
 
-  const bannersList = Array.isArray(bannersData) ? bannersData : ((bannersData as any)?.data || [])
-  const postsList = Array.isArray(postsData) ? postsData : ((postsData as any)?.data || [])
-  const questionsList = Array.isArray(questionsData) ? questionsData : ((questionsData as any)?.data || [])
-  const allEmployees = Array.isArray(employeesData) ? employeesData : ((employeesData as any)?.data || [])
-  const allOrgUnits = Array.isArray(orgUnitsData) ? orgUnitsData : ((orgUnitsData as any)?.data || [])
+  const bannersList = Array.isArray(bannersData) ? bannersData : []
+  const postsList = Array.isArray(postsData) ? postsData : []
+  const questionsList = Array.isArray(questionsData) ? questionsData : []
+  const allEmployees = Array.isArray(employeesData) ? employeesData : []
+  const allOrgUnits = Array.isArray(orgUnitsData) ? orgUnitsData : []
 
   const finalLayout = Array.isArray(layoutSchema) ? layoutSchema : (layoutSchema && typeof layoutSchema === 'object' && (layoutSchema as any).rows ? (layoutSchema as any).rows : [])
 

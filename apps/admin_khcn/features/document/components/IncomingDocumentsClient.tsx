@@ -142,13 +142,11 @@ export function IncomingDocumentsClient() {
 
   const { syncLgsp, isSyncingLgsp } = useDocuments();
 
-  const { data: response, isLoading, isFetching, refetch } = useListDocuments({
+  const { data: documents = [], isLoading, isFetching, refetch } = useListDocuments({
     isIncoming: true,
     search: searchTerm.length >= 2 ? searchTerm : undefined,
     pageSize: 50,
   });
-
-  const documents = useMemo(() => response?.data ?? [], [response]);
 
   const handleOpenDetail = useCallback((id: string) => {
     setSelectedDocId(id);

@@ -25,20 +25,21 @@
 - Cấu trúc kiểu dữ liệu (Types/Interfaces) cho các Response / Payload phải được chia sẻ từ Backend xuống Frontend thông qua thư mục `shared/types` hoặc sinh tự động (auto-generated) từ code gốc.
 - Frontend không được tự ý tái định nghĩa lại các kiểu dữ liệu của Backend bằng tay (hoặc lạm dụng `any`) để đảm bảo không gãy cấu trúc khi Backend thay đổi trường dữ liệu.
 
-## 6. Chuẩn hóa Response Envelope & Phân định Dữ liệu (Data vs Meta Segregation)
+## 6. Duy Nhất Axios & Chuẩn Hóa Đầu Vào - Đầu Ra (Single-Level Direct Output)
+- **Duy Nhất Axios — CẤM TUYỆT ĐỐI Fetch:** Toàn bộ hệ thống giao tiếp qua HTTP API sử dụng duy nhất `axios` (`apiClient` singleton ở frontend, instance axios ở server-side). Cấm hoàn toàn `fetch`.
 - **Chuẩn 5 trường duy nhất của API Gateway:** Mọi response JSON từ API Gateway tuân thủ cấu trúc `{ success, data, meta, message, timestamp }`.
 - **Nguyên tắc "Data luôn nằm trong Data" (Single-Level Flattened Data):**
   - Controllers của Microservices và Gateway chỉ trả về entity hoặc mảng entities thuần túy.
   - CẤM TUYỆT ĐỐI tự ý gói bọc lồng đúp `{ success: true, data: { data: ... } }`.
   - `TransformInterceptor` tại Gateway là chốt chặn đảm bảo phẳng hóa mọi tầng bọc đúp.
 - **Phân định rõ ràng trách nhiệm từng trường dữ liệu:**
-  - `data`: CHỈ chứa dữ liệu thực thể nghiệp vụ dùng để render. Tuyệt đối không nhồi nhét quyền hạn, phân trang vào trong ruột `data`.
+  - `data`: CHỈ chứa dữ liệu thực thể nghiệp vụ dùng để render trực tiếp. Tuyệt đối không nhồi nhét quyền hạn, phân trang vào trong ruột `data`.
   - `meta`: Nơi tập trung toàn bộ siêu dữ liệu phụ trợ:
     * `meta.pagination`: Chứa thông tin phân trang chuẩn hóa (`total`, `page`, `pageSize`, `totalPages`).
     * `meta.actions` / `meta.permissions`: Chứa cờ quyền hành động trên tài nguyên (`canEdit`, `canDelete`, `canApprove`...).
   - `success`: Boolean biểu thị trạng thái request (`true` / `false`).
   - `message`: Chuỗi thông báo người dùng (thông báo thành công hoặc cảnh báo).
-- **Phía Client:** Dữ liệu để render chỉ cần đúng 1 cấp là lấy được (`res.data` hoặc biến unwrap từ hook), không bao giờ phải viết `res.data.data` hoặc chọc nhiều cấp.
+- **Phía Client (Gọi là Render):** Đầu vào và đầu ra Axios đã được chuẩn hóa đồng bộ. Dưới client UI component chỉ việc gọi hook/API và lấy dữ liệu render trực tiếp. Lược bỏ hoàn toàn các bước bóc tách dữ liệu phức tạp, unwrap đa tầng, các hàm chuẩn hóa trung gian và mã phòng thủ chắp vá `res.data.data`.
 
 ## 7. Ràng buộc Bắt buộc: Đồng bộ Kiến trúc Hệ thống (Mandatory Architecture Synchronization Gate)
 - **Nguyên tắc bất biến:** Tài liệu kiến trúc tại `.agents/architecture/` (`service-map.md`, `source-of-truth.md`, `dependency-map.md`, `request-response-flow.md`, `workflow-map.md`) là **Source of Truth tài liệu kỹ thuật duy nhất**. Bất kỳ chỉnh sửa nào trong code làm thay đổi cấu trúc hệ thống BẮT BUỘC phải được cập nhật đồng bộ ngay vào các file kiến trúc tương ứng.

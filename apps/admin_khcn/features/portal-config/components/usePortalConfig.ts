@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { portalConfigApi, portalLanguagesApi } from "../api";
+import { unwrapData } from "@/lib/api-helper";
 import { EMPTY_TRANSLATION } from "./portalConfig.defaults";
 
 export type LangCode = string;
@@ -34,7 +35,7 @@ export function usePortalConfig() {
     queryKey: LANG_QUERY_KEY,
     queryFn: async () => {
       const res = await portalLanguagesApi.getActive() as any;
-      const all = res.data;
+      const all = unwrapData<any[]>(res, []);
       const langs = all.filter((c: any) => c.active === 1);
       return langs.length > 0 ? langs : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
     },
@@ -50,7 +51,7 @@ export function usePortalConfig() {
     queryKey: QUERY_KEY,
     queryFn: async () => {
       const res = await portalConfigApi.getAll() as any;
-      return res.data;
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 60_000,       // config ít thay đổi → cache 1 phút
     gcTime:    10 * 60_000,

@@ -168,7 +168,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       // 2. Upload to MinIO (via Nginx proxy /media)
       await axios.put(uploadInfo.uploadUrl, file, {
         headers: { "Content-Type": file.type },
-        onUploadProgress: (p) => setUploadProgress(Math.round((p.loaded * 100) / (p.total || 1))),
+        onUploadProgress: (p: any) => setUploadProgress(Math.round((p.loaded * 100) / (p.total || 1))),
       });
 
       // 3. Confirm

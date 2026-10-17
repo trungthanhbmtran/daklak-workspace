@@ -8,6 +8,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import axios from 'axios';
 import { ConfigsService } from '../../configs/configs.service';
 import { UserConfigsService } from '../user-configs/user-configs.service';
 
@@ -207,19 +208,50 @@ export class AiService {
 
   private async fetchWithTimeout(
     url: string,
-    options: any,
+    options: any = {},
     timeoutMs: number = 15000,
-  ): Promise<Response> {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeoutMs);
+  ): Promise<{
+    ok: boolean;
+    status: number;
+    text: () => Promise<string>;
+    json: () => Promise<any>;
+  }> {
     try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
+      let data = options.body;
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          // keep as string if not json
+        }
+      }
+
+      const response = await axios({
+        url,
+        method: options.method || 'GET',
+        headers: options.headers,
+        data,
+        timeout: timeoutMs,
+        validateStatus: () => true,
       });
-      return response;
-    } finally {
-      clearTimeout(id);
+
+      return {
+        ok: response.status >= 200 && response.status < 300,
+        status: response.status,
+        text: async () =>
+          typeof response.data === 'string'
+            ? response.data
+            : JSON.stringify(response.data),
+        json: async () =>
+          typeof response.data === 'object'
+            ? response.data
+            : JSON.parse(response.data),
+      };
+    } catch (err: any) {
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        throw new Error(`Request timeout after ${timeoutMs}ms`);
+      }
+      throw err;
     }
   }
 

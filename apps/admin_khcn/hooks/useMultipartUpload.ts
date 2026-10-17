@@ -1,5 +1,6 @@
 import { useState } from 'react';
-// Giả sử dùng apiClient cho API nội bộ
+import axios from 'axios';
+// Dùng apiClient cho API nội bộ
 import apiClient from "@/lib/axiosInstance";
 
 // Hằng số S3: Cắt mỗi cục 5MB
@@ -27,8 +28,8 @@ export const useMultipartUpload = () => {
             useWebWorker: true,
             fileType: "image/webp",
           });
-        } catch (error) {
-          console.warn("Lỗi nén ảnh, sử dụng ảnh gốc:", error);
+        } catch {
+          // Fallback to original file
         }
       }
 
@@ -56,20 +57,21 @@ export const useMultipartUpload = () => {
       const presignedUrls: string[] = urlsData.presignedUrls;
       let completedParts = 0;
 
-      // BƯỚC 3: Cắt file và bắn phá song song lên MinIO
-      // Dùng fetch (không dùng api instance) để tránh việc vô tình gửi kèm Token JWT lên MinIO gây lỗi CORS/Auth
+      // BƯỚC 3: Cắt file và bắn phá song song lên MinIO bằng axios thuần (không kèm JWT Authorization của apiClient)
       const uploadPromises = presignedUrls.map(async (url, index) => {
         const start = index * CHUNK_SIZE;
         const end = Math.min(start + CHUNK_SIZE, file.size);
         const chunk = file.slice(start, end);
 
-        const response = await fetch(url, {
-          method: 'PUT',
-          body: chunk,
+        const response = await axios.put(url, chunk, {
+          headers: { 'Content-Type': file.type || 'application/octet-stream' },
         });
 
-        // MinIO trả về một cái tem (ETag) nằm trong Headers
-        const eTag = response.headers.get('etag');
+        // MinIO trả về ETag nằm trong Headers
+        const eTag =
+          (response.headers['etag'] as string) ||
+          (response.headers['ETag'] as string) ||
+          '';
 
         // Cập nhật thanh tiến độ
         completedParts++;
@@ -98,7 +100,6 @@ export const useMultipartUpload = () => {
       return completeData;
 
     } catch (error) {
-      console.error('Lỗi quá trình Multipart Upload:', error);
       setIsUploading(false);
       setProgress(0);
       throw error;

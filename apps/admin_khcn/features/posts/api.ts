@@ -5,6 +5,7 @@
 // Consumer đọc res.data cho entity, res.meta cho pagination.
 
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import type { ApiResponse } from "@/lib/api.types";
 import { Post, Category, Banner, PortalMenu, Comment, CitizenQuestion, CitizenFeedback } from "./types";
 
@@ -98,7 +99,8 @@ export const postsApi = {
   translateTextSync: async (text: string, targetLang: string): Promise<string> => {
     if (!text.trim()) return "";
     const res = await apiClient.post<any, any>('/translate', { text, targetLang });
-    return res.data?.result?.translated_text || res.data?.translated_text || "";
+    const data = unwrapData<any>(res);
+    return data?.result?.translated_text || data?.translated_text || (typeof data === "string" ? data : "");
   },
 
   // ─── Interactions - Comments ──────────────────────────────
@@ -181,8 +183,8 @@ export const postsApi = {
             } else if (jobStatus.status === 'FAILED') {
               reject(new Error(jobStatus.error || "Lỗi trong quá trình dịch thuật"));
             }
-          } catch (e) {
-            console.warn("Parse SSE event error", e);
+          } catch {
+            // Ignore corrupted SSE chunk
           }
         },
         onerror(err: any) {

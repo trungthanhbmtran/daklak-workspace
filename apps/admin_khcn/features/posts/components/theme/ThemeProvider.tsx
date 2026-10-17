@@ -3,7 +3,6 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useTheme } from "next-themes";
-import axios from "axios";
 import { unwrapData } from "@/lib/api-helper";
 import { portalConfigApi } from "@/features/portal-config/api";
 
@@ -185,11 +184,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const localKey = `themeConfig:${stage}`;
     if (localStorage.getItem(localKey)) return;
 
-    // Gọi public endpoint qua axios trực tiếp (base path khác với admin apiClient)
-    axios
-      .get("/api/v1/public/portal-configs", { withCredentials: true })
+    // Gọi endpoint qua portalConfigApi (thống nhất apiClient)
+    portalConfigApi
+      .getAll()
       .then((res: any) => {
-        const configs = unwrapData<any[]>(res.data, []);
+        const configs = unwrapData<any[]>(res, []);
         const found = configs.find((c: any) => c.code === "theme_appearance");
         if (!found?.description) return;
 

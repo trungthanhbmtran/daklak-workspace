@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 const diagrams = {
   swimlane: `flowchart TD
@@ -183,13 +184,8 @@ async function downloadDiagram(name, code, filename) {
   const base64 = Buffer.from(JSON.stringify(payload)).toString('base64');
   const url = 'https://mermaid.ink/img/' + base64 + '?bgColor=white';
   console.log('Downloading diagram:', name, 'from mermaid.ink...');
-  const res = await fetch(url);
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error('Failed to fetch ' + name + ' (status ' + res.status + '): ' + txt.substring(0, 100));
-  }
-  const arrayBuf = await res.arrayBuffer();
-  const buffer = Buffer.from(arrayBuf);
+  const res = await axios.get(url, { responseType: 'arraybuffer', timeout: 30000 });
+  const buffer = Buffer.from(res.data);
   const outPath = path.resolve('docs/extracted_media', filename);
   fs.writeFileSync(outPath, buffer);
   console.log('Successfully saved:', outPath, 'size:', buffer.length, 'bytes');

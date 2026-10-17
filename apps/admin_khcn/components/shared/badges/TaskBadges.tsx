@@ -27,9 +27,8 @@ interface TaskStatusBadgeProps {
 }
 
 export function TaskStatusBadge({ code, fallbackLabel, className, showIcon = false }: TaskStatusBadgeProps) {
-  const { data: statusRes }: any = useGetCategoryByGroup('TASK_STATUS');
-  const categories = statusRes?.data || [];
-  const matched = categories.find((c: any) => c.code === code);
+  const { data: categories = [] } = useGetCategoryByGroup('TASK_STATUS');
+  const matched = (categories as any[]).find((c: any) => c.code === code);
   
   const config = TASK_STATUS_CONFIG[code] || TASK_STATUS_CONFIG.TODO;
   const label = fallbackLabel || matched?.name || config?.label || code;
@@ -69,9 +68,8 @@ interface TaskPriorityBadgeProps {
 }
 
 export function TaskPriorityBadge({ code, fallbackLabel, className }: TaskPriorityBadgeProps) {
-  const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
-  const categories = prioritiesRes?.data || [];
-  const matched = categories.find((c: any) => c.code === code);
+  const { data: categories = [] } = useGetCategoryByGroup('TASK_PRIORITY');
+  const matched = (categories as any[]).find((c: any) => c.code === code);
   const label = fallbackLabel || matched?.name || code;
 
   let colorCls = 'bg-slate-50 text-slate-600 border-slate-200';

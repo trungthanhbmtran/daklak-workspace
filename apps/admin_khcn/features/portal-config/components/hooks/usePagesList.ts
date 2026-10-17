@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { portalConfigApi } from "../../api";
+import { unwrapData } from "@/lib/api-helper";
 
 export interface CustomPageMeta {
   id: string;
@@ -19,7 +20,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
     queryKey: ["portal-configs"],
     queryFn: async () => {
       const res: any = await portalConfigApi.getAll();
-      return res.data;
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 60_000,
   });

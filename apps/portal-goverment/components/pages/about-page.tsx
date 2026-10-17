@@ -4,6 +4,7 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { unwrapData } from "@/lib/api-helper"
 import { DynamicPageRenderer } from "@/components/DynamicPageRenderer"
 import {
   Building2,
@@ -191,14 +192,13 @@ export default function AboutPage() {
   const t = translations[currentLang] || translations.vi
 
   // Query configurations dynamically
-  const { data: portalConfigData } = useQuery({
+  const { data: portalConfigData = [] } = useQuery({
     queryKey: ["public-portal-configs"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/portal-configs")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch portal configurations", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { hrmApi } from "@/features/hrm/api";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 
 // Cache stale time configuration: 5 minutes
 const STALE_TIME = 5 * 60 * 1000;
@@ -13,8 +14,7 @@ export const useOrganizationTreeQuery = () => {
     queryFn: async () => {
       try {
         return await organizationApi.getTree();
-      } catch (e) {
-        console.error("Failed to fetch organization tree, returning empty array", e);
+      } catch {
         return [];
       }
     },
@@ -28,9 +28,8 @@ export const useHrmEmployeesQuery = () => {
     queryFn: async () => {
       try {
         const res = await hrmApi.list({ pageSize: 1000 });
-        return res.data;
-      } catch (e) {
-        console.error("Failed to fetch HRM employees, returning empty array", e);
+        return unwrapData<any[]>(res, []);
+      } catch {
         return [];
       }
     },
@@ -44,9 +43,8 @@ export const useCategoriesQuery = () => {
     queryFn: async () => {
       try {
         const res: any = await apiClient.get("/categories");
-        return res.data;
-      } catch (error) {
-        console.error("Failed to fetch categories, returning empty array", error);
+        return unwrapData<any[]>(res, []);
+      } catch {
         return [];
       }
     },

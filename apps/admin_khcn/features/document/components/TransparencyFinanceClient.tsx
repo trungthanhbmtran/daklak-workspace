@@ -126,14 +126,12 @@ export function TransparencyFinanceClient() {
   const [yearFilter, setYearFilter] = useState("2026");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
 
-  const { data: response, isLoading } = useListDocuments({
+  const { data: reports = [], isLoading } = useListDocuments({
     isPublic: true,
     fiscalYear: yearFilter,
     transparencyCategory: categoryFilter === "ALL" ? undefined : categoryFilter,
     search: searchTerm,
   });
-
-  const reports = useMemo(() => response?.data ?? [], [response]);
 
   const publishedCount = useMemo(
     () => reports.filter((r: any) => r.status === "PUBLISHED").length,

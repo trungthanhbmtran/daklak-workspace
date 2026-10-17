@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import apiClient from '@/lib/axiosInstance';
+import { unwrapData } from '@/lib/api-helper';
 import type { ApiResponse } from '@/lib/api.types';
 import { toast } from 'sonner';
 import { useFileUpload } from '@/hooks/useFileUpload';
@@ -114,11 +115,12 @@ export function PersonalAiAssistants() {
     setIsChatting(true);
     
     try {
-      const res = await apiClient.post<any, ApiResponse<{ reply: string }>>(`/ai-assistants/${activeChatAssistant.id}/chat`, {
+      const res = await apiClient.post(`/ai-assistants/${activeChatAssistant.id}/chat`, {
         message: userMsg
       });
-      setChatLog(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
-    } catch (e) {
+      const data = unwrapData<{ reply: string }>(res);
+      setChatLog(prev => [...prev, { role: 'assistant', content: data?.reply || "Không có phản hồi từ AI." }]);
+    } catch {
       setChatLog(prev => [...prev, { role: 'assistant', content: "Lỗi kết nối tới AI hoặc hết quota." }]);
     } finally {
       setIsChatting(false);

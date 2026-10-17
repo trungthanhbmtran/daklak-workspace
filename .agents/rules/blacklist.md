@@ -25,7 +25,7 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
 ### ❌ Vi phạm: Client viết code phòng thủ chọc nhiều cấp (`res.data.data`, `data?.data`)
 - **Mô tả:** Viết code phòng thủ chắp vá trong Component kiểu `res?.data?.data`, `(data as any)?.data ?? data` hay `Array.isArray(x?.data) ? x.data : ...`.
 - **Hậu quả:** Dung túng cho lỗi bọc đúp envelope ở Backend, làm code UI rườm rà, dễ crash khi cấu trúc dữ liệu chuẩn hóa.
-- **Giải pháp:** Tuân thủ nguyên tắc "Chỉ 1 cấp để lấy Data render": Hook API sử dụng `unwrapData` làm chốt chặn duy nhất, Component chỉ nhận data thuần và render trực tiếp (`data.map(...)`). Lấy quyền thao tác từ `meta.actions`, lấy trạng thái ở `success`, lấy thông báo ở `message`.
+- **Giải pháp:** Tuân thủ nguyên tắc "Gọi là Render": Axios và API Gateway đã chuẩn hóa đầu vào và đầu ra, Component chỉ việc gọi hook/API và nhận data thuần để render trực tiếp (`data.map(...)`). Lược bỏ toàn bộ các bước bóc tách dữ liệu phức tạp, unwrap rườm rà hay convert cấu trúc thủ công. Lấy quyền thao tác từ `meta.actions`, lấy trạng thái ở `success`, lấy thông báo ở `message`.
 
 
 ---
@@ -96,6 +96,19 @@ BẤT CỨ KHI NÀO AI AGENT SỬA XONG MỘT BUG NGHIÊM TRỌNG DO HIỂU SAI 
   2. Mọi `<SelectTrigger>` dùng trong form BẮT BUỘC phải khai báo: `className="w-full min-w-0 ... truncate [&>span]:truncate"` và bổ sung thuộc tính `title` để hiển thị tooltip giải nghĩa khi hover.
   3. Cắt ngắn và chuẩn hóa nhãn hiển thị trong Select: Sử dụng nhãn súc tích cho trigger (ví dụ: `k = 2.0 (Tiêu chuẩn)`), đẩy phần diễn giải chi tiết vào option dropdown hoặc tooltip.
   4. Toàn bộ card / container bọc ngoài BẮT BUỘC phải có `min-w-0` (và `overflow-hidden` khi cần giới hạn đường biên).
+
+---
+
+## 6. Lỗi Kết Nối & Chuẩn Hóa Dữ Liệu Frontend
+### ❌ Vi phạm: Dùng native fetch phân mảnh phương thức kết nối thay vì axios/apiClient
+- **Mô tả:** Sử dụng `fetch()` tự do trong các components, hooks, hoặc serverFetch thay vì dùng chung instance `axios` / `apiClient` có cấu hình quản lý tập trung.
+- **Hậu quả:** Gây phân mảnh kết nối, thiếu cơ chế xử lý lỗi/refresh session tập trung, khó debug và kiểm soát cookie/tokens.
+- **Giải pháp:** 100% hệ thống thống nhất dùng duy nhất `axios` (`apiClient` ở frontend, instance axios ở server-side). CẤM TUYỆT ĐỐI dùng native `fetch`.
+
+### ❌ Vi phạm: Viết hàm chuẩn hóa, unwrap rườm rà hoặc bọc lồng convert cấu trúc ở Frontend
+- **Mô tả:** Tự tạo ra các hàm chuyển đổi cấu trúc phức tạp, các vòng lặp unwrap hoặc gán getter tự tham chiếu (như `Object.defineProperty(res, 'data', ...)`) ở Frontend khi API Gateway và Axios đã chuẩn hóa đầu vào và đầu ra 1 tầng.
+- **Hậu quả:** Gây ra nguy cơ vòng lặp vô tận (Infinite Loop / Infinite Loading) làm đơ Main Thread của trình duyệt và code thừa thãi khó bảo trì.
+- **Giải pháp:** Do API Backend và Axios Interceptor đã chuẩn hóa đầu vào và đầu ra, Frontend chỉ việc nhận đúng dữ liệu thực thể từ `data` (hoặc qua custom hook) để render trực tiếp ra giao diện (`client chỉ việc gọi và render`). Lược bỏ 100% các hàm chuẩn hóa trung gian và mã phòng thủ cũ dư thừa.
 
 ---
 *(AI Agent lưu ý: Thường xuyên bổ sung các case thực tế vào file này trong quá trình làm việc)*

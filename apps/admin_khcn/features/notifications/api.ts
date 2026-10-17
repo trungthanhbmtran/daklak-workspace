@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { pickData, pickOne, pickMeta, type ApiResponse } from "@/lib/api.types";
 
 export interface NotificationItem {
@@ -48,7 +49,8 @@ export async function markNotificationRead(id: string): Promise<{ success: boole
 
 export async function markAllNotificationsRead(): Promise<{ success: boolean, count?: number }> {
   const res = await apiClient.patch<any, ApiResponse<{ success?: boolean, count?: number }>>(`/notifications/read-all`);
-  return { success: res.success ?? false, count: res.data?.count };
+  const data = unwrapData<{ success?: boolean; count?: number }>(res);
+  return { success: res.success ?? true, count: data?.count };
 }
 
 export const notificationConfigApi = {

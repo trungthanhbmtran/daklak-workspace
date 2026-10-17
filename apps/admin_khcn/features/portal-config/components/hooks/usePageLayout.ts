@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { portalConfigApi } from "../../api";
+import { unwrapData } from "@/lib/api-helper";
 import { Row } from "@/modules/page-builder/core/types";
 
 export function usePageLayout(activePageId: string, pageIsActive: boolean, pageTitle: string) {
@@ -15,7 +16,7 @@ export function usePageLayout(activePageId: string, pageIsActive: boolean, pageT
     queryKey: ["portal-configs"],
     queryFn: async () => {
       const res: any = await portalConfigApi.getAll();
-      return res.data;
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 60_000,
   });

@@ -38,6 +38,7 @@ import {
   type AiSuggestedQuotaItem,
   type AiSuggestQuotaResult,
 } from "@/features/hrm/api/rank-quotas.api";
+import { unwrapData } from "@/lib/api-helper";
 import { useCreateMasterPlan } from "@/features/hrm/hooks";
 
 interface AiQuotaPlanModalProps {
@@ -91,8 +92,9 @@ export function AiQuotaPlanModal({
         headcount,
       });
 
-      if (res && res.data) {
-        setAiResult(res.data);
+      const data = unwrapData<AiSuggestQuotaResult>(res);
+      if (data) {
+        setAiResult(data);
         toast.success('AI đã hoàn tất tính toán định mức và xây dựng kế hoạch!');
       } else {
         toast.error('Không nhận được phản hồi từ AI, vui lòng thử lại.');

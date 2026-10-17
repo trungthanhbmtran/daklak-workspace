@@ -228,8 +228,8 @@ export function useDocuments() {
      
     onError: (error: any) => { toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra"); },
     mutationFn: async (fileId: string): Promise<any> => {
-      const res = await apiClient.post(`${API_BASE}/extract`, { fileId }) as any as ApiResponse<any>;
-      return res.data;
+      const res = await apiClient.post(`${API_BASE}/extract`, { fileId });
+      return unwrapData<any>(res, {});
     },
   });
 

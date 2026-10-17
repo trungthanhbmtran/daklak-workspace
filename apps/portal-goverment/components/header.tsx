@@ -5,7 +5,9 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
 import apiClient from "@/lib/axiosInstance"
+import { unwrapData } from "@/lib/api-helper"
 import { resolveMediaUrl } from "@/lib/utils"
 import { useAppearance } from "@/components/appearance-provider"
 import { useAuth } from "@/providers/auth-provider"
@@ -195,9 +197,8 @@ export default function Header() {
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/categories?group=LANGUAGE")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch languages", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -212,15 +213,13 @@ export default function Header() {
     },
   })
 
-  // Chuẩn hoá: queryFn trả MẢNG (unwrap .data) — cùng shape với home-client/DynamicPageRenderer (ledger #35)
   const { data: bannersData } = useQuery({
     queryKey: ["public-banners"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/banners")
-        const body = response?.data ?? response
-        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -394,23 +393,21 @@ export default function Header() {
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/categories?group=BANNER_POSITION")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch banner positions configurations", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
     staleTime: 5 * 60 * 1000,
   })
 
-  const { data: portalConfigData } = useQuery({
+  const { data: portalConfigData = [] } = useQuery({
     queryKey: ["public-portal-configs"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/portal-configs")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch portal configurations", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -451,11 +448,10 @@ export default function Header() {
     queryKey: ["online-weather"],
     queryFn: async () => {
       try {
-        const response = await fetch(
+        const response = await axios.get(
           "https://api.open-meteo.com/v1/forecast?latitude=12.6667&longitude=108.0500&current=temperature_2m,weather_code"
         )
-        if (!response.ok) throw new Error("Weather request failed")
-        const json = await response.json()
+        const json = response.data
         
         const temp = json?.current?.temperature_2m
         const code = json?.current?.weather_code

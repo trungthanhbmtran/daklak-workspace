@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, timeout, type Observable } from 'rxjs';
+import axios from 'axios';
 import { executeTable } from './table-engine';
 import { Metadata } from '@grpc/grpc-js';
 
@@ -1566,13 +1567,9 @@ export class ReportsService implements OnModuleInit {
         'http://api-gateway:3000';
       const previewUrl = `${gatewayUrl}/api/v1/admin/reports/table/preview`;
 
-      const response = await fetch(previewUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authHeader ? { Authorization: authHeader } : {}),
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        previewUrl,
+        {
           source: {
             upstream: source.upstream,
             path: source.path,
@@ -1594,25 +1591,27 @@ export class ReportsService implements OnModuleInit {
             page: 1,
             pageSize: 2000,
           },
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authHeader ? { Authorization: authHeader } : {}),
+          },
+          timeout: 15000,
+          validateStatus: (status) => status >= 200 && status < 300,
+        },
+      );
 
-      if (response.ok) {
-        const json: any = await response.json();
-        const resData = json?.data;
-        if (resData && Array.isArray(resData.rows)) {
-          return { success: true, data: resData.rows };
-        }
-        if (Array.isArray(resData)) {
-          return { success: true, data: resData };
-        }
-        if (resData && Array.isArray(resData.items)) {
-          return { success: true, data: resData.items };
-        }
-      } else {
-        this.logger.warn(
-          `Dynamic API source preview returned status ${response.status}`,
-        );
+      const json: any = response.data;
+      const resData = json?.data;
+      if (resData && Array.isArray(resData.rows)) {
+        return { success: true, data: resData.rows };
+      }
+      if (Array.isArray(resData)) {
+        return { success: true, data: resData };
+      }
+      if (resData && Array.isArray(resData.items)) {
+        return { success: true, data: resData.items };
       }
       return { success: false, data: [] };
     } catch (err: any) {

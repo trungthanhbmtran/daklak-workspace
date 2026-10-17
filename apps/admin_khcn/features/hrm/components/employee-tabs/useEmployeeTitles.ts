@@ -70,7 +70,7 @@ export function useEmployeeTitles(employee: any) {
 
   const assignedSlot = useMemo(() => {
     if (!employee?.employeeCode || !staffingReport) return null;
-    const reportList = Array.isArray(staffingReport) ? staffingReport : (staffingReport?.allReport ?? staffingReport?.data ?? []);
+    const reportList = Array.isArray(staffingReport) ? staffingReport : (staffingReport?.allReport ?? []);
     for (const reportItem of (reportList as any[])) {
       const match = reportItem.slots?.find(
         (s: any) => s.assignedEmployeeCode === employee.employeeCode

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/axiosInstance';
+import { unwrapData } from '@/lib/api-helper';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,11 +33,11 @@ export function PartnerManagement() {
   const [code, setCode] = useState('');
   const [search, setSearch] = useState('');
 
-  const { data: partners, isLoading } = useQuery({
+  const { data: partners = [], isLoading } = useQuery({
     queryKey: ['api-partners'],
     queryFn: async () => {
       const res = await apiClient.get('/api-management/partners');
-      return res.data;
+      return unwrapData<any[]>(res, []);
     },
   });
 
@@ -62,11 +63,13 @@ export function PartnerManagement() {
         name: 'Khóa mặc định',
         scopes: ['*'],
       }),
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
+      const data = unwrapData<any>(res);
+      const key = data?.oneTimeKey || res?.data?.oneTimeKey || res?.oneTimeKey || '';
       alert(
         'ĐÂY LÀ KHÓA BÍ MẬT DUY NHẤT.\n' +
         'HÃY LƯU LẠI VÌ KHÓA NÀY SẼ KHÔNG BAO GIỜ ĐƯỢC HIỂN THỊ LẠI.\n\n' +
-        res.data.oneTimeKey,
+        key,
       );
       qc.invalidateQueries({ queryKey: ['api-partners'] });
     },

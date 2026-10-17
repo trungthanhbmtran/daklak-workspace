@@ -3,6 +3,7 @@
 
 import { useCallback, useState } from "react";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { toast } from "sonner";
 
 /**
@@ -25,16 +26,17 @@ export function useAiFetchModels() {
   const mutation = useMutation({
     mutationFn: async ({ providerType, apiKey, showToast }: { providerId: string; providerType: string; apiKey: string, showToast?: boolean }) => {
       const res = await apiClient.post("/ai/models", { provider: providerType, apiKey }) as any;
-      if (!res.success) throw new Error(res.message || "Lỗi tải danh sách Model");
-      return { data: res.data, showToast };
+      if (res?.success === false) throw new Error(res.message || "Lỗi tải danh sách Model");
+      const models = unwrapData<AiModelInfo[]>(res, []);
+      return { models: Array.isArray(models) ? models : [], showToast };
     },
     onMutate: (variables) => {
       setIsFetchingMap(prev => ({ ...prev, [variables.providerId]: true }));
     },
     onSuccess: (result, variables) => {
-      setFetchedModels(prev => ({ ...prev, [variables.providerId]: result.data }));
+      setFetchedModels(prev => ({ ...prev, [variables.providerId]: result.models }));
       if (result.showToast !== false) {
-        toast.success(`Đã tải ${result.data.length} model từ ${variables.providerType}!`);
+        toast.success(`Đã tải ${result.models.length} model từ ${variables.providerType}!`);
       }
     },
     onError: (err: any, variables) => {

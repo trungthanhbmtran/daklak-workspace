@@ -1,10 +1,138 @@
 # Execution Log — Lane 1 (Code 1)
 
-## [2026-10-17] Tổng Tổ Chức Refactor Toàn Bộ Dự Án DakLak-Workspace Theo 8 Bộ Ràng Buộc Kỹ Thuật
+## [2026-10-17] Cập Nhật Toàn Bộ .agents: Thống Nhất Duy Nhất Axios, Chuẩn Hóa Đầu Vào - Đầu Ra & Lược Bỏ Toàn Bộ Xử Lý Dư Thừa
+
+### 1. Bối Cảnh & Chỉ Đạo Người Dùng
+- **Chỉ đạo của người dùng**: *"Cập nhật lại cho tôi .agents từ giờ hệ thống gọi tới api của dùng duy nhất axios . Tôi đã chuẩn hoá đầu và đầu ra axios giờ client chỉ việc gọi và render ra kết quả những phần dư thừa liên quan cũ lược bỏ ra cho tôi"*
+
+### 2. Các File Tài Liệu Quy Tắc Đã Cập Nhật
+1. [`.agents/AGENTS.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/AGENTS.md):
+   - Cập nhật Ràng buộc số 2: **Ràng buộc Thống Nhất Duy Nhất Axios, Chuẩn Hóa Đầu Vào - Đầu Ra & Client Gọi - Render Trực Tiếp (BẮT BUỘC)**.
+   - Thống nhất toàn hệ thống dùng duy nhất `axios` (`apiClient` singleton ở frontend, instance axios ở server-side), cấm tuyệt đối `fetch`.
+   - Chuẩn hóa đầu vào (Input): baseURL, credentials, headers, session recovery, refresh token.
+   - Chuẩn hóa đầu ra (Output): TransformInterceptor và Axios Interceptor đảm bảo response envelope 1 tầng duy nhất `{ success, data, meta, message, timestamp }`.
+   - Client chỉ việc gọi và render kết quả (`client chỉ việc gọi và render`): Lược bỏ toàn bộ các bước chuẩn hóa trung gian cũ, các vòng lặp bóc tách nhiều tầng hay getter monkey-patching cũ.
+2. [`.agents/rules/frontend.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/frontend.md):
+   - Mục 1: Data Fetching & State Management: TanStack Query + Duy nhất Axios (`apiClient`). Cấm dùng `fetch`.
+   - Mục 3: Cấu trúc dữ liệu & Direct Rendering: Client chỉ việc gọi hook/API và render trực tiếp kết quả. Xóa bỏ hoàn toàn mô tả unwrap đa tầng và getter `.data` cũ.
+   - Mục 5: Thống Nhất Duy Nhất Axios & Loại Bỏ Hoàn Toàn Xử Lý Chuẩn Hóa Dư Thừa.
+3. [`.agents/rules/00-core.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/00-core.md):
+   - Mục 8: Cập nhật nguyên tắc Duy Nhất Axios & Chuẩn Hóa Đầu Vào - Đầu Ra: Client Gọi và Render Trực Tiếp.
+4. [`.agents/rules/architecture.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/architecture.md):
+   - Mục 6: Duy Nhất Axios & Chuẩn Hóa Đầu Vào - Đầu Ra (Single-Level Direct Output).
+5. [`.agents/rules/blacklist.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/blacklist.md):
+   - Mục 6: Bổ sung/cập nhật vi phạm dùng native fetch và vi phạm viết hàm chuẩn hóa/convert/unwrap thừa thãi ở Frontend.
+6. [`.agents/architecture/request-response-flow.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/request-response-flow.md):
+   - Section 3: Quy tắc Client: Thống nhất duy nhất Axios, Client gọi là render trực tiếp, lược bỏ toàn bộ xử lý dư thừa cũ.
+7. [`.agents/skills/code1/SKILL.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/skills/code1/SKILL.md), [`.agents/skills/code2/SKILL.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/skills/code2/SKILL.md), [`.agents/skills/code3/SKILL.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/skills/code3/SKILL.md):
+   - Đồng bộ 8 Bộ ràng buộc kỹ thuật, duy nhất Axios, client gọi và render trực tiếp, và Architecture Gate.
+
+### 3. Kiểm Chứng Mã Hóa & Vệ Sinh
+- 100% file quy tắc đã lưu chuẩn UTF-8 không BOM.
+- Quét sạch mã giả và các mô tả cũ gây nhầm lẫn/xung đột.
+
+---
+
+## [2026-10-17] Xóa Bỏ Hoàn Toàn Fetch, Thống Nhất Axios Toàn Dự Án, Xóa Bỏ Chuẩn Hóa Thừa & Cập Nhật .agents Rules
+
+### 1. Bối Cảnh & Chỉ Đạo Người Dùng
+- **Chỉ đạo của người dùng**:
+  * *"bỏ hết fetch trong toàn bộ dự án của tôi thay thế bằng axios đồng update các code liên quan sau đó xoá hết các code cũ dư thừa."*
+  * *"Phần responsive từ api không cần phải bước chuẩn hoá nào nữa vì giờ đã được trả chuẩn từ backend api , giờ chi việc lấy đúng cấu trúc frontend render ra chỗ nào sau khi sửa phát sinh lỗi hãy thực hiện update như hướng dẫn trong .agents, cập nhật lại file agents theo hướng dẫn mới cho tôi"*
+
+### 2. Các Thay Đổi Kỹ Thuật Đã Triển Khai
+1. **Thay thế 100% native `fetch` bằng `axios` trên TOÀN BỘ REPOSITORY**:
+   - [`apps/admin_khcn/lib/serverFetch.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/lib/serverFetch.ts): Chuyển từ native `fetch` sang `axios.get` với headers cookie forwarding và validateStatus.
+   - [`apps/admin_khcn/lib/auth.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/lib/auth.ts): Chuyển các hàm `getServerUser` và `getCachedAllowedPaths` từ `fetch` sang `axios.get`.
+   - [`apps/admin_khcn/hooks/useMultipartUpload.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/hooks/useMultipartUpload.ts): Chuyển việc upload từng part lên MinIO từ `fetch` sang `axios.put` (không kèm Authorization header nội bộ để tránh lỗi CORS).
+   - [`apps/portal-goverment/lib/serverFetch.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/lib/serverFetch.ts): Chuyển từ `fetch` sang `axios.get`, xóa sạch toàn bộ `console.error` logs.
+   - [`apps/portal-goverment/components/header.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/components/header.tsx): Chuyển truy vấn API thời tiết Open-Meteo từ `fetch` sang `axios.get`.
+   - [`apps/user-service/src/modules/ai/ai.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/user-service/src/modules/ai/ai.service.ts): Chuyển toàn bộ `fetchWithTimeout` gọi OpenAI, Gemini, Claude và Embeddings sang dùng `axios`.
+   - [`apps/user-service/src/modules/ai-assistant/ai-assistant.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/user-service/src/modules/ai-assistant/ai-assistant.controller.ts): Chuyển tải file tri thức từ `fetch` sang `axios.get` với `responseType: 'arraybuffer'`.
+   - [`apps/report-service/src/modules/reports/reports.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/report-service/src/modules/reports/reports.service.ts): Chuyển `fetchDynamicApiSource` sang gọi API Gateway qua `axios.post`. Cài đặt `axios` vào `package.json`.
+   - [`apps/document-service/src/modules/lgsp/lgsp-token.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/document-service/src/modules/lgsp/lgsp-token.service.ts): Chuyển xin token OAuth2 SSO LGSP sang `axios.post`. Cài đặt `axios` vào `package.json`.
+   - [`apps/document-service/src/modules/lgsp/lgsp.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/document-service/src/modules/lgsp/lgsp.service.ts): Chuyển 9 điểm gọi LGSP API (`getAgenciesList`, `sendEdoc`, `getReceivedEdocList`, `getEdoc`, `getSentEdocList`, `updateStatus`, `registerAgencies`, `testConnection`) và response helper `handleJsonResponse` sang hoàn toàn `axios`.
+   - [`scripts/generate_diagram_images.js`](file:///c:/Users/Admin/Desktop/daklak-workspace/scripts/generate_diagram_images.js): Chuyển tải ảnh Mermaid diagram từ `fetch` sang `axios.get` với `responseType: 'arraybuffer'`. Cài đặt `axios` vào root `package.json`.
+   - [`apps/admin_khcn/lib/axiosInstance.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/lib/axiosInstance.ts): Cấu hình chuẩn `LOGIN_PATH = "/admin/login"` và request interceptor `normalizeUrl` ngăn chặn triệt để lỗi 404 double prefix.
+
+2. **Loại bỏ các bước chuẩn hóa và biến trung gian thừa thãi tại Frontend**:
+   - [`apps/admin_khcn/features/document/components/IncomingDocumentsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/IncomingDocumentsClient.tsx): Nhận trực tiếp `const { data: documents = [] } = useListDocuments(...)`, xóa bỏ hoàn toàn biến trung gian `response` và `useMemo` chuẩn hóa thừa.
+   - [`apps/admin_khcn/features/document/components/OutgoingDocumentsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/OutgoingDocumentsClient.tsx): Nhận trực tiếp `const { data: documents = [] } = useListDocuments(...)`, xóa biến `response` và `useMemo`.
+   - [`apps/admin_khcn/features/document/components/TransparencyFinanceClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/TransparencyFinanceClient.tsx): Nhận trực tiếp `const { data: reports = [] } = useListDocuments(...)`, xóa biến `response` và `useMemo`.
+
+3. **Cập nhật Hiến chương Kỹ thuật & Các Quy tắc `.agents`**:
+   - [`.agents/AGENTS.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/AGENTS.md):
+     * Cập nhật Ràng buộc số 2: Thống nhất tuyệt đối sử dụng `axios` (`apiClient` singleton ở frontend và axios client ở server-side). **CẤM TUYỆT ĐỐI dùng `fetch`**.
+     * Bổ sung nguyên tắc: Backend API Gateway đã trả chuẩn Single-Level Data, Frontend **không cần và không được viết thêm bất kỳ bước chuẩn hóa hay bọc lồng logic phòng thủ thừa thãi nào**.
+   - [`.agents/rules/frontend.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/frontend.md): Cập nhật Mục 3 và Mục 5 quy định cấm dùng native `fetch`, thống nhất Axios Singleton, và loại bỏ các bước chuẩn hóa trung gian.
+   - [`.agents/rules/blacklist.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/rules/blacklist.md): Bổ sung Mục 6 vào Blacklist về lỗi dùng `fetch` phân mảnh kết nối và lỗi bọc lồng hàm chuẩn hóa dữ liệu lặp lại ở frontend.
+   - [`.agents/architecture/request-response-flow.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/request-response-flow.md): Đồng bộ chi tiết cấu trúc Envelope, phân định data/meta/pagination/actions, và nguyên tắc Client direct-render.
+
+### 3. Bằng Chứng Kiểm Chứng Máy Thực Tế (Machine Verification)
+- **Kiểm tra `fetch(` trên toàn bộ mã nguồn (.ts, .tsx, .js)**:
+  * `git grep -n -E "\bfetch\(" -- "*.ts" "*.tsx" "*.js"`: **0 native fetch calls (chỉ còn class method `fetch(input, user)` trong report-source.service.ts và lời gọi method đó)**.
+- **Typecheck máy trên 100% các package & microservices**:
+  * `apps/admin_khcn`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/portal-goverment`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/user-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/document-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/report-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/api-gateway`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/chat-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/hrm-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/media-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+  * `apps/workflow-service`: `npx tsc --noEmit` -> **Exit code 0 (PASS)**.
+- **Vệ sinh & Debug logs**: Quét sạch 100% `console.log`, `debugger`, imports dư thừa.
+- **Mã hóa file**: **100% UTF-8 không BOM**.
+
+---
+
+## [2026-10-17] Thống Nhất Kết Nối apiClient/Axios, Triệt Tiêu Infinite Loading & Quét Lỗi Ràng Buộc Toàn Diện
 
 ### 1. Bối Cảnh & Yêu Cầu
-- **Chỉ đạo của người dùng**: Dựa vào các ràng buộc mới của `.agents` vừa ban hành (Đặc biệt là Ràng buộc 2 về Single-Level Data Contract, Phân định Data/Meta, Ràng buộc 1 về State/Lazy Tabs, Ràng buộc 7 về Vệ sinh mã nguồn, và Ràng buộc 8 về Đồng bộ Kiến trúc), tổ chức refactor lại toàn bộ dự án `daklak-workspace`. Tiếp tục: *"rà soát lại tiếp coi những lỗi vi phạm tới xử lý logic trả về client, phải convert cấu trúc .... những lỗi này phải sửa hết"*.
-- **Kế hoạch đã đóng băng**: [`.agents/current_plan.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/current_plan.md).
+- **Chỉ đạo của người dùng**:
+  * *"kiểm tra lại cho tôi. Khi tôi vào các module service đều đang bị lỗi infinitife loading"*
+  * *"giờ chỉ còn một kiểu trả về thống nhất rồi điều chỉnh lại cho đúng với cấp 1 cho tôi"*
+  * *"thống nhất dùng chung axios đi đừng để phải check nhiều lần nhiều phương thức kết nối trong dự án này . Chạy vòng lặp kiểm tra sửa những thứ liên quan tới code vi phạm nguyên tắc và rằng buộc đến khi hết lỗi cho tôi"*
+
+### 2. Nguyên Nhân Kỹ Thuật (Root Cause of Infinite Loading)
+1. **Vòng lặp tự tham chiếu (Circular Reference in unwrapData)**:
+   - Trước đây `unwrapData` sử dụng cơ chế defensive monkey-patching: `Object.defineProperty(result, 'data', { get() { return this; } })`.
+   - Khi dữ liệu đi qua 2 lần unwrap (ví dụ `menuApi.getServiceSidebar` unwrap lần 1 tạo getter `.data`, sau đó `useServiceMenus()` unwrap lần 2), biểu thức `target = target.data` lọt vào vòng lặp `while (target != null && 'data' in target)` chạy vô hạn trên Main Thread do `target.data === target`.
+   - Kết quả: CPU 100%, trình duyệt đơ và rơi vào trạng thái Infinite Loading trên toàn bộ các trang module service.
+2. **Phân mảnh kết nối**:
+   - Một số component gọi `axios` trực tiếp thay vì qua `apiClient` hoặc service API có sẵn (ví dụ `ThemeProvider.tsx` gọi `axios.get('/api/v1/public/portal-configs')` không qua `portalConfigApi`).
+
+### 3. Các Biện Pháp Khắc Phục Triển Khai
+1. **Thiết kế lại `unwrapData` chuẩn hóa, bất biến, lũy thừa (Idempotent Single-Level Extractor)**:
+   - File: [`apps/admin_khcn/lib/api-helper.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/lib/api-helper.ts) & [`apps/portal-goverment/lib/api-helper.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/portal-goverment/lib/api-helper.ts).
+   - Xóa bỏ hoàn toàn vòng lặp `while` và getter `.data` tự tham chiếu.
+   - Bóc tách tuần tự 2 tầng chuẩn:
+     * Tầng 1: AxiosResponse (`res.data` nếu là object AxiosResponse có `status` và `config`/`headers`).
+     * Tầng 2: API Gateway Envelope (`res.data` nếu là Gateway Envelope chuẩn có `success`, `meta`, hoặc `statusCode`).
+   - Trả về đúng thực thể cấp 1 `(current ?? fallback) as T`, triệt tiêu 100% rủi ro vòng lặp vô tận.
+2. **Thống nhất kết nối & Sửa các component gọi dư thừa `.data`**:
+   - [`apps/admin_khcn/features/document/components/IncomingDocumentsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/IncomingDocumentsClient.tsx): Chuyển `response?.data` sang `Array.isArray(response) ? response : []`.
+   - [`apps/admin_khcn/features/document/components/OutgoingDocumentsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/OutgoingDocumentsClient.tsx): Chuyển `response?.data` sang `Array.isArray(response) ? response : []`.
+   - [`apps/admin_khcn/features/document/components/TransparencyFinanceClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/TransparencyFinanceClient.tsx): Chuyển `response?.data` sang `Array.isArray(response) ? response : []`.
+   - [`apps/admin_khcn/features/workflow/screens/WorkflowEditorScreen.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/workflow/screens/WorkflowEditorScreen.tsx): Dùng `detail.data` trực tiếp từ React Query.
+   - [`apps/admin_khcn/features/posts/components/theme/ThemeProvider.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/theme/ThemeProvider.tsx): Thống nhất dùng `portalConfigApi.getAll()`, loại bỏ import `axios`.
+   - [`apps/admin_khcn/modules/page-builder/services/dataBinding.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/modules/page-builder/services/dataBinding.ts): Chuẩn hóa dùng `unwrapData` và loại bỏ `console.error`.
+3. **Quét sạch 100% debug logs theo Ràng buộc số 7**:
+   - `apps/admin_khcn/lib/auth.ts`: Xóa toàn bộ `console.error`.
+   - `apps/admin_khcn/lib/serverFetch.ts`: Xóa toàn bộ `console.error`.
+   - `apps/admin_khcn/features/posts/api.ts`: Xóa bỏ `console.warn`.
+   - `apps/admin_khcn/modules/page-builder/core/registry.ts`: Xóa bỏ `console.warn`.
+   - `apps/admin_khcn/hooks/useFileUpload.ts` & `useMultipartUpload.ts`: Xóa bỏ `console.warn`, `console.error`.
+   - `apps/admin_khcn/features/posts/components/CategoryForm.tsx`: Chuẩn hóa type handler `onUploadProgress: (p: any)`.
+
+### 4. Bằng Chứng Kiểm Chứng Máy Thực Tế (Machine Verification)
+- `npx tsc --noEmit` tại `apps/admin_khcn`: **Exit code 0 (100% type-safe, sạch lỗi)**.
+- `npx tsc --noEmit` tại `apps/portal-goverment`: **Exit code 0 (100% type-safe, sạch lỗi)**.
+- `npm run build` tại `apps/api-gateway`: **Exit code 0 (Build NestJS & Prisma thành công 100%)**.
+- Kiểm tra mã hóa: 100% file đã sửa đổi đều là **UTF-8 không BOM**.
+
+---
 
 ### 2. Các Hạng Mục Đã Refactor Chuẩn Hóa
 1. **API Gateway & TransformInterceptor (Căn nguyên gốc rễ & Single-Level Data Contract)**:
@@ -3261,3 +3389,62 @@
 ### 3. Kiểm chứng Máy Thực tế
 - `npm --prefix apps/admin_khcn run typecheck`: **Exit Code 0** (Zero errors).
 - `npm --prefix apps/api-gateway run build`: **Exit Code 0** (Prisma client generated, NestJS built, tsc-alias resolved).
+
+---
+
+## [2026-10-17] - Khắc Phục Khẩn Cấp Lỗi Infinite Loading Tại Toàn Bộ Các Module Service
+
+### 1. Phân Tích Nguyên Nhân Tận Gốc
+- **Hiện tượng:** Khi người dùng truy cập vào bất kỳ module service nào (`/services/hrm`, `/services/documents`, `/services/admin`, `/services/workflow`, v.v.), toàn bộ giao diện bị treo cứng tại spinner loading (Infinite Loading).
+- **Nguyên nhân cốt lõi:**
+  1. Trong đợt refactor trước, `unwrapData` tại `apps/admin_khcn/lib/api-helper.ts` (và `apps/portal-goverment/lib/api-helper.ts`) bổ sung getter `.data` tự tham chiếu (`get() { return this; }`) nhằm mục đích tương thích ngược với các component cũ.
+  2. Tuy nhiên, vòng lặp `while` bóc tách envelope của `unwrapData` kiểm tra `"data" in target && target.data !== undefined && typeof target.data === "object"`.
+  3. Khi một object đã qua `unwrapData` một lần (ví dụ: `menuApi.getServiceSidebar` bóc tách trước khi trả về), rồi truyền tiếp vào một hàm khác cũng gọi `unwrapData` (như `useServiceMenus`: `unwrapData(res)`):
+     - `target.data` kích hoạt getter tự tham chiếu, trả về chính `target`.
+     - `target = target.data` gán `target` cho chính nó mà không có điều kiện dừng chu kỳ.
+     - Vòng lặp `while` trở thành **VÒNG LẶP VÔ HẠN (Infinite While Loop)** trên Main Thread JavaScript của trình duyệt (100% CPU lock).
+  4. Vì mọi phân hệ service (`app/services/*`) đều sử dụng layout chung `<ServiceLayout>`, bên trong chứa `<AppSidebar>` và `<ServiceHeader>` đều kích hoạt `useServiceMenus()`, nên **TOÀN BỘ các module service đều bị crash/treo cứng tải vô hạn ngay khi mở trang**.
+
+### 2. Giải Pháp Kỹ Thuật & Khắc Phục
+1. **Bảo Vệ Đa Tầng Chống Vòng Lặp Vô Hạn tại `unwrapData` (`apps/admin_khcn/lib/api-helper.ts` & `apps/portal-goverment/lib/api-helper.ts`)**:
+   - **Tự phát hiện getter tương thích ngược:** Nếu `target.data === target`, dừng vòng lặp ngay lập tức (`break`).
+   - **Phát hiện chu trình (Cycle Detection):** Sử dụng `seen = new Set<any>()`. Nếu gặp lại object đã duyệt, dừng ngay lập tức.
+   - **Giới hạn số bước duyệt tối đa (Loop Guard):** Thêm biến `depth < MAX_DEPTH` (tối đa 5 bước lặp), đảm bảo 100% vòng lặp không bao giờ có thể chạy vô tận trong bất kỳ tình huống nào.
+   - **Xác thực Envelope Chặt Chẽ:** Chỉ unwrap khi đối tượng thực sự là envelope của Axios (`status`, `headers`, `config`) hoặc Gateway (`success`, `meta`, `statusCode`) hoặc wrapper dạng `{ data: ... }`. Không bóc nhầm các thuộc tính nghiệp vụ thông thường.
+   - **Kiểm tra descriptor an toàn:** Sử dụng `Object.getOwnPropertyDescriptor(result, "data")` trước khi gán getter `.data` để không ghi đè hoặc tạo chu kỳ lặp.
+
+### 3. Kiểm Chứng Máy Thực Tế
+- Chạy thử nghiệm reproduction script mô phỏng gọi kép `unwrapData(unwrapData(res))` -> **Pass tức thì 100%, 0ms, không còn treo thread**.
+- `npx tsc --noEmit` tại `apps/admin_khcn`: **Exit code 0**.
+- `npx tsc --noEmit` tại `apps/portal-goverment`: **Exit code 0**.
+- `npx tsc --noEmit` tại `apps/api-gateway`: **Exit code 0**.
+- Kiểm tra mã hóa: Cả 2 file chuẩn UTF-8 (BOM: false).
+
+---
+
+## [2026-10-17] - Chuẩn Hóa Triệt Để unwrapData Theo Hợp Đồng Dữ Liệu Cấp 1 (Single-Level Data Contract)
+
+### 1. Phân Tích & Yêu Cầu Người Dùng
+- Toàn bộ backend API Gateway và microservices đã được chuẩn hóa về một kiểu response envelope duy nhất (`{ success, data, meta, message, timestamp }`).
+- Không còn các tầng lồng ghép nhiều cấp dị biệt, do đó hàm `unwrapData` không cần các cơ chế phòng thủ phức tạp như vòng lặp `while` đệ quy hay getter `.data` tự tham chiếu (`Object.defineProperty`).
+- Yêu cầu: Đơn giản hóa `unwrapData` trả về dữ liệu thực thể thuần túy cấp 1 (`T`), loại bỏ kiểu lai tạp `T & { data?: any }`, đảm bảo UI Component nhận đúng thực thể cấp 1 để render trực tiếp.
+
+### 2. Triển Khai Kỹ Thuật
+1. **Tinh giản `unwrapData` (`apps/admin_khcn/lib/api-helper.ts` & `apps/portal-goverment/lib/api-helper.ts`)**:
+   - Trả về kiểu thuần túy `T` (không còn `T & { data?: any }`).
+   - Bóc tách chính xác 2 tầng chuẩn:
+     * Tầng 1: `AxiosResponse` (`status`, `headers`, `config`, `data`).
+     * Tầng 2: `ApiResponse` Gateway Envelope (`success`, `meta`, `statusCode`).
+   - Xóa bỏ 100% `while (depth < MAX_DEPTH)` và `Object.defineProperty(result, 'data', ...)`.
+2. **Chuẩn hóa các component còn gọi `.data` dư thừa**:
+   - `IncomingDocumentsClient.tsx`: `const documents = useMemo(() => (Array.isArray(response) ? response : []), [response]);`
+   - `OutgoingDocumentsClient.tsx`: `const documents = useMemo(() => (Array.isArray(response) ? response : []), [response]);`
+   - `TransparencyFinanceClient.tsx`: `const reports = useMemo(() => (Array.isArray(response) ? response : []), [response]);`
+   - `WorkflowEditorScreen.tsx`: `workflow={detail.data ?? undefined}`
+
+### 3. Kiểm Chứng Máy Thực Tế
+- `npx tsc --noEmit` tại `apps/admin_khcn`: **Exit code 0**.
+- `npx tsc --noEmit` tại `apps/portal-goverment`: **Exit code 0**.
+- Mã hóa: Chuẩn UTF-8 (BOM: false).
+
+
