@@ -1,8 +1,12 @@
-import { Controller, Logger, Inject, OnModuleInit } from '@nestjs/common';
+import { Controller, Logger, Inject, OnModuleInit, UseGuards } from '@nestjs/common';
 import { GrpcMethod, EventPattern } from '@nestjs/microservices';
 import { AiAssistantService } from './ai-assistant.service';
 import { AiService } from '../ai/ai.service';
 import { QdrantService } from '../ai/qdrant.service';
+import {
+  CurrentUser,
+  GrpcAuthGuard,
+} from '../../../../../shared/security/grpc-auth';
 
 @Controller()
 export class AiAssistantController implements OnModuleInit {
@@ -21,19 +25,26 @@ export class AiAssistantController implements OnModuleInit {
     this.mediaService = this.mediaClient.getService('MediaService');
   }
 
+  // Guard Identity gRPC áp dụng onSuccess từng handler @GrpcMethod
+  // (KHÔNG đặt ở class level vì @EventPattern worker RMQ không có gRPC metadata).
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'Chat')
-  async chat(data: any) {
+  async chat(data: any, @CurrentUser() user: { id: number }) {
+    data = data || ({} as any);
     const reply = await this.assistantService.chat(
-      data.assistant_id,
-      data.message,
-      data.user_id,
+      data.assistantId ?? data.assistant_id ?? '',
+      data.message ?? '',
+      Number(data.userId ?? data.user_id ?? user?.id ?? 0),
     );
     return { reply };
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'GetAssistants')
-  async getAssistants(data: { userId: number }) {
-    const assistants = await this.assistantService.getAssistants(data.userId);
+  async getAssistants(data: { userId: number }, @CurrentUser() user: { id: number }) {
+    const assistants = await this.assistantService.getAssistants(
+      Number(data?.userId ?? user?.id ?? 0),
+    );
     return {
       assistants: assistants.map((a) => ({
         id: a.id,
@@ -62,10 +73,14 @@ export class AiAssistantController implements OnModuleInit {
     };
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'GetAssistant')
-  async getAssistant(data: { id: string }) {
+  async getAssistant(data: { id: string }, @CurrentUser() user: { id: number }) {
     data = data || ({} as any);
-    const a = await this.assistantService.getAssistant(data.id || '');
+    const a = await this.assistantService.getAssistant(
+      data.id || '',
+      Number(user?.id ?? 0),
+    );
     return {
       assistant: {
         id: a.id,
@@ -94,43 +109,78 @@ export class AiAssistantController implements OnModuleInit {
     };
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'CreateAssistant')
-  async createAssistant(data: any) {
+  async createAssistant(data: any, @CurrentUser() user: { id: number }) {
     data = data || {};
     const a = await this.assistantService.createAssistant({
-      userId: data.user_id,
+      userId: Number(data.userId ?? data.user_id ?? user?.id ?? 0),
       name: data.name,
       description: data.description,
-      systemPrompt: data.system_prompt,
-      isPublic: data.is_public,
+      systemPrompt: data.system_prompt ?? data.systemPrompt,
+      isPublic: data.is_public ?? data.isPublic ?? false,
     });
-    return this.getAssistant({ id: a.id });
+    return this.getAssistant({ id: a.id }, user as { id: number });
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'UpdateAssistant')
-  async updateAssistant(data: any) {
+  async updateAssistant(data: any, @CurrentUser() user: { id: number }) {
     data = data || {};
-    const a = await this.assistantService.updateAssistant({
-      id: data.id,
-      name: data.name,
-      description: data.description,
-      systemPrompt: data.system_prompt,
-      isPublic: data.is_public,
-    });
-    return this.getAssistant({ id: a.id });
+    const a = await this.assistantService.updateAssistant(
+      {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        systemPrompt: data.system_prompt ?? data.systemPrompt,
+        isPublic: data.is_public ?? data.isPublic ?? false,
+      },
+      Number(user?.id ?? 0),
+    );
+    return this.getAssistant({ id: a.id }, user as { id: number });
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'DeleteAssistant')
-  async deleteAssistant(data: { id: string }) {
+  async deleteAssistant(
+    data: { id: string },
+    @CurrentUser() user: { id: number },
+  ) {
     data = data || ({} as any);
-    await this.assistantService.deleteAssistant(data.id || '');
+    await this.assistantService.deleteAssistant(
+      data.id || '',
+      Number(user?.id ?? 0),
+    );
     return { success: true };
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'AddKnowledgeSource')
-  async addKnowledgeSource(data: any) {
+  async addKnowledgeSource(data: any, @CurrentUser() user: { id: number }) {
     data = data || {};
-    this.queueClient.emit('knowledge_source_uploaded', data);
+    const ownerId = Number(user?.id ?? 0);
+    const payload = {
+      assistant_id: data.assistantId ?? data.assistant_id ?? '',
+      type: data.type ?? '',
+      title: data.title ?? '',
+      content: data.content ?? '',
+      metadata: data.metadata ?? '',
+      qdrant_id: data.qdrantId ?? data.qdrant_id ?? '',
+      user_id: ownerId,
+    };
+    // Kiểm tra ownership trước khi enqueue worker xử lý file/knowledge.
+    await this.assistantService.addKnowledgeSource(
+      {
+        assistantId: payload.assistant_id,
+        type: payload.type,
+        title: payload.title,
+        content: payload.content,
+        metadata: payload.metadata,
+        qdrantId: payload.qdrant_id,
+      },
+      ownerId,
+    );
+    this.queueClient.emit('knowledge_source_uploaded', payload);
     return { success: true };
   }
 
@@ -270,38 +320,59 @@ export class AiAssistantController implements OnModuleInit {
         );
       }
 
-      await this.assistantService.addKnowledgeSource({
-        assistantId: data.assistant_id,
-        type: data.type,
-        title: data.title,
-        content: finalContent,
-        metadata: data.metadata,
-        qdrantId: qdrantId,
-      });
+      await this.assistantService.addKnowledgeSource(
+        {
+          assistantId: data.assistant_id,
+          type: data.type,
+          title: data.title,
+          content: finalContent,
+          metadata: data.metadata,
+          qdrantId: qdrantId,
+        },
+        Number(data.user_id),
+      );
       this.logger.log(`Worker completed knowledge source: ${data.title}`);
     } catch (err: any) {
       this.logger.error(`Worker failed knowledge source task`, err);
     }
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'RemoveKnowledgeSource')
-  async removeKnowledgeSource(data: { id: string }) {
-    await this.assistantService.removeKnowledgeSource(data.id);
+  async removeKnowledgeSource(
+    data: { id: string },
+    @CurrentUser() user: { id: number },
+  ) {
+    await this.assistantService.removeKnowledgeSource(
+      data?.id ?? '',
+      Number(user?.id ?? 0),
+    );
     return { success: true };
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'AddAssistantTool')
-  async addAssistantTool(data: any) {
-    await this.assistantService.addAssistantTool({
-      assistantId: data.assistant_id,
-      toolName: data.tool_name,
-    });
+  async addAssistantTool(data: any, @CurrentUser() user: { id: number }) {
+    await this.assistantService.addAssistantTool(
+      {
+        assistantId: data?.assistantId ?? data?.assistant_id ?? '',
+        toolName: data?.toolName ?? data?.tool_name ?? '',
+      },
+      Number(user?.id ?? 0),
+    );
     return { success: true };
   }
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'RemoveAssistantTool')
-  async removeAssistantTool(data: { id: string }) {
-    await this.assistantService.removeAssistantTool(data.id);
+  async removeAssistantTool(
+    data: { id: string },
+    @CurrentUser() user: { id: number },
+  ) {
+    await this.assistantService.removeAssistantTool(
+      data?.id ?? '',
+      Number(user?.id ?? 0),
+    );
     return { success: true };
   }
 }

@@ -33,7 +33,11 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'TRANSLATE_MQ_CLIENT',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+          urls: process.env.RABBITMQ_URL
+            ? [process.env.RABBITMQ_URL]
+            : (() => {
+                throw new Error('RABBITMQ_URL is not set — refusing to connect (no credential fallback).');
+              })(),
           queue: 'translation_request',
           queueOptions: {
             durable: false,

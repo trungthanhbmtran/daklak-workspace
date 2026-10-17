@@ -1,4 +1,11 @@
-import { Controller, Get, Inject, OnModuleInit, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  Query,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -7,6 +14,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 @ApiTags('Public Portal Menus')
 @Controller('public/portal-menus')
 export class PublicPortalMenuController implements OnModuleInit {
+  private readonly logger = new Logger(PublicPortalMenuController.name);
   private portalMenuService: any;
 
   constructor(
@@ -23,7 +31,7 @@ export class PublicPortalMenuController implements OnModuleInit {
   async findAll(@Query() query: any) {
     return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         return null;
       },
     );
@@ -34,7 +42,7 @@ export class PublicPortalMenuController implements OnModuleInit {
     // The listPortalMenus RPC already returns a hierarchical tree structure O(N)
     return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         return null;
       },
     );

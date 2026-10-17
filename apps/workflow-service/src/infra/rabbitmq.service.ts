@@ -1,17 +1,33 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom, lastValueFrom, timeout } from 'rxjs';
+import { firstValueFrom, lastValueFrom, timeout, catchError, EMPTY } from 'rxjs';
 
 export const WORKFLOW_RMQ_CLIENT = 'WORKFLOW_RMQ_CLIENT';
 
 @Injectable()
 export class RabbitMQService {
+  private readonly logger = new Logger(RabbitMQService.name);
+
   constructor(
     @Inject(WORKFLOW_RMQ_CLIENT) private readonly client: ClientProxy,
   ) {}
 
-  public emit(pattern: string, data: any) {
-    return this.client.emit(pattern, data);
+  /**
+   * [P2 #28] Fire-and-forget emit: tự subscribe để message thực sự được
+   * publish vào broker (ClientProxy.emit là cold observable — trước đây caller bỏ qua return
+   * nên message không bao giờ rời service), và lỗi broker được Logger.error thay vì nuốt vô hình.
+   * Dùng cho event không phản hồi; publisher chính tắc vẫn là `publish()` (OutboxPublisher).
+   */
+  public emit(pattern: string, data: any): void {
+    this.client
+      .emit(pattern, data)
+      .pipe(
+        catchError((err: any) => {
+          this.logger.error(`RMQ emit '${pattern}' failed: ${err?.message ?? err}`);
+          return EMPTY;
+        }),
+      )
+      .subscribe();
   }
 
   /**

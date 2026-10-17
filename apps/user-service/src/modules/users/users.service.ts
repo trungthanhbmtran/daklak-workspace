@@ -998,7 +998,12 @@ export class UsersService implements OnModuleInit {
     ]);
 
     return {
-      data: allUsers.map((u: any) => this.toUserResponse(u)),
+      // Least Data: ListUsers chỉ dùng để gán tên/avatar/chức danh trên Gateway (hrm tasks/master-plans).
+      // Loại field nhạy cảm ra khỏi danh sách — giá trị rỗng giữ vững proto contract.
+      data: allUsers.map((u: any) => {
+        const base = this.toUserResponse(u);
+        return { ...base, phoneNumber: '', cccd: '' };
+      }),
       meta: {
         total,
         skip,
@@ -1133,7 +1138,7 @@ export class UsersService implements OnModuleInit {
         ...p,
         conditionsParsed: p.conditions
           ? typeof p.conditions === 'string'
-            ? JSON.parse(p.conditions)
+            ? this.safeParseJson(p.conditions)
             : p.conditions
           : {},
       }));
@@ -1606,6 +1611,16 @@ export class UsersService implements OnModuleInit {
     }
 
     return { employeeCodes: Array.from(employeeCodes) };
+  }
+
+  /** Parse JSON an toàn: trả null thay vì văng exception làm sập handler. */
+  private safeParseJson(raw: string): Record<string, unknown> | null {
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
   }
 
   private toUserResponse(user: {

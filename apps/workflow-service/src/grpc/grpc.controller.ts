@@ -1,6 +1,7 @@
-import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
 import { GrpcMethod, Payload, RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
+import { GrpcAuthGuard } from '../../../../shared/security/grpc-auth';
 import { DefinitionService } from '../definition/definition.service';
 import { ExecutionService } from '../execution/execution.service';
 import { ProcessCatalogService } from '../catalog/process-catalog.service';
@@ -9,6 +10,9 @@ import { BindingService } from '../catalog/binding.service';
 // In a real project, we should update the DTO file as well.
 
 @Controller()
+// [P0 #13] gRPC auth: mọi RPC phải đi qua GrpcAuthGuard (metadata delegation / x-internal-token).
+// Caller KO truyền `x-internal-token` (hoặc delegation token hợp lệ) sẽ bị UNAUTHENTICATED.
+@UseGuards(GrpcAuthGuard)
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class GrpcWorkflowController {
   constructor(
@@ -151,11 +155,26 @@ export class GrpcWorkflowController {
     return { data: types.map(pt => this.mapProcessTypeToResponse(pt)) };
   }
 
+  /**
+   * Safe JSON parse — dữ từ JSON phức tạp truyền gRPC bắt buộc parse an toàn; lỗi parse
+   * trả gRPC INVALID_ARGUMENT rõ ràng thay vì để lọt UNKNOWN (Hiến chương §4, P2 #26).
+   */
+  private safeParseJson(raw: string, field: string): any {
+    try {
+      return JSON.parse(raw);
+    } catch (err: any) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: `Invalid JSON in ${field}: ${err?.message ?? err}`,
+      });
+    }
+  }
+
   private mapProcessTypeToResponse(pt: any) {
     if (!pt) return {};
-    
-    const validTriggers = typeof pt.validTriggers === 'string' ? JSON.parse(pt.validTriggers) : pt.validTriggers || [];
-    const validActions = typeof pt.validActions === 'string' ? JSON.parse(pt.validActions) : pt.validActions || [];
+
+    const validTriggers = typeof pt.validTriggers === 'string' ? this.safeParseJson(pt.validTriggers, 'validTriggers') : pt.validTriggers || [];
+    const validActions = typeof pt.validActions === 'string' ? this.safeParseJson(pt.validActions, 'validActions') : pt.validActions || [];
     
     return {
       ...pt,
@@ -181,8 +200,9 @@ export class GrpcWorkflowController {
       pinnedVersionId: data.pinnedVersionId || undefined,
       organizationId: data.organizationId || undefined,
       trigger: data.trigger,
-      criteria: data.criteria ? (typeof data.criteria === 'string' ? JSON.parse(data.criteria) : data.criteria) : undefined,
-      priority: data.priority ? Number(data.priority) : undefined,
+      criteria: data.criteria ? (typeof data.criteria === 'string' ? this.safeParseJson(data.criteria, 'criteria') : data.criteria) : undefined,
+      // [P2 #36] priority=0 hợp lệ — chỉ bỏ qua khi field không được set (undefined/null)
+      priority: data.priority !== undefined && data.priority !== null ? Number(data.priority) : undefined,
       effectiveFrom: data.effectiveFrom ? new Date(data.effectiveFrom) : undefined,
       effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
       createdBy: data.createdBy,
@@ -250,13 +270,16 @@ export class GrpcWorkflowController {
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(@Payload() data: any) {
     data = data || {};
+    // [P2 #36] StartWorkflowRequest KHÔNG có field organizationId (proto: workflowId, initialContext,
+    // initiatorId, businessId, businessType). Trước đây map `organizationId = businessType` là SAI
+    // contract (lẫn loại business vào tenant scope). Bỏ set — ProcessInstance.organizationId sẽ
+    // dùng mặc định 'DEFAULT' cho đến khi proto bổ sung field organizationId thật.
     const instance = await this.executionService.startProcess(
       data.businessId || data.workflowId,
       {
         variables: data.initialContext,
         startedBy: data.initiatorId,
         businessKey: data.businessId,
-        organizationId: data.businessType || 'DEFAULT',
         commandId: data.commandId,
       } as any,
     );
@@ -265,6 +288,7 @@ export class GrpcWorkflowController {
 
   @GrpcMethod('WorkflowService', 'StartByProcessType')
   async startByProcessType(@Payload() data: any) {
+    data = data || {};
     const instance = await this.executionService.startByProcessType(data);
     return this.mapInstanceToResponse(instance);
   }
@@ -356,9 +380,10 @@ export class GrpcWorkflowController {
 
   private parseGraphPayload(data: any): any {
     data = data || {};
+    // [P2 #26] JSON phức tạp truyền gRPC phải parse an toàn — lỗi parse → INVALID_ARGUMENT
     if (data.bpmnLogic) {
-      const bpmnLogic = typeof data.bpmnLogic === 'string' ? JSON.parse(data.bpmnLogic) : data.bpmnLogic;
-      const uiMetadata = typeof data.uiMetadata === 'string' && data.uiMetadata ? JSON.parse(data.uiMetadata) : data.uiMetadata;
+      const bpmnLogic = typeof data.bpmnLogic === 'string' ? this.safeParseJson(data.bpmnLogic, 'bpmnLogic') : data.bpmnLogic;
+      const uiMetadata = typeof data.uiMetadata === 'string' && data.uiMetadata ? this.safeParseJson(data.uiMetadata, 'uiMetadata') : data.uiMetadata;
       return {
         nodes: bpmnLogic.nodes || [],
         edges: bpmnLogic.edges || [],
@@ -366,7 +391,7 @@ export class GrpcWorkflowController {
       };
     }
     if (data.definitionJson) {
-      return JSON.parse(data.definitionJson);
+      return this.safeParseJson(data.definitionJson, 'definitionJson');
     }
     return data.definition || {};
   }

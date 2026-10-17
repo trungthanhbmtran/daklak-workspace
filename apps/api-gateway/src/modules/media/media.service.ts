@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import type { Response } from 'express';
@@ -22,6 +22,7 @@ interface MediaGrpcService {
 
 @Injectable()
 export class MediaService implements OnModuleInit {
+  private readonly logger = new Logger(MediaService.name);
   private mediaGrpcService: MediaGrpcService;
 
   constructor(
@@ -55,7 +56,7 @@ export class MediaService implements OnModuleInit {
     return await firstValueFrom(
       this.mediaGrpcService.RequestUpload(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
@@ -64,7 +65,7 @@ export class MediaService implements OnModuleInit {
     return await firstValueFrom(
       this.mediaGrpcService.ConfirmUpload(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
@@ -75,7 +76,7 @@ export class MediaService implements OnModuleInit {
     return await firstValueFrom(
       this.mediaGrpcService.InitMultipartUpload(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
@@ -84,7 +85,7 @@ export class MediaService implements OnModuleInit {
     return await firstValueFrom(
       this.mediaGrpcService.GetMultipartPreSignedUrls(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
@@ -93,7 +94,7 @@ export class MediaService implements OnModuleInit {
     return await firstValueFrom(
       this.mediaGrpcService.CompleteMultipartUpload(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
@@ -102,7 +103,7 @@ export class MediaService implements OnModuleInit {
     return await firstValueFrom(
       this.mediaGrpcService.GetMedia({ fileId: id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }

@@ -15,15 +15,29 @@ export interface LgspConfigState {
 export class LgspConfigService {
   private readonly logger = new Logger(LgspConfigService.name);
 
-  private config: LgspConfigState = {
-    systemCode: process.env.LGSP_SYSTEM_CODE || LGSP_SYSTEM_CODE,
-    clientId: process.env.LGSP_CLIENT_ID || 'PYRJBx37SCeuDZR6zX0G6HMDidQa',
-    clientSecret: process.env.LGSP_CLIENT_SECRET || 'H2UckeTI6ArAVO7llaPpABxjnIEP0nGxH3x_OP0Gt0ga',
-    username: process.env.LGSP_USERNAME || '',
-    password: process.env.LGSP_PASSWORD || '',
-    ssoUrl: process.env.LGSP_SSO_URL || LGSP_ENDPOINTS.TOKEN,
-    baseUrl: process.env.LGSP_BASE_URL || LGSP_ENDPOINTS.BASE,
-  };
+  private config: LgspConfigState;
+
+  constructor() {
+    const clientId = process.env.LGSP_CLIENT_ID;
+    const clientSecret = process.env.LGSP_CLIENT_SECRET;
+
+    // Fail-fast: không còn fallback credentials hardcode (ledger #6).
+    if (!clientId || !clientSecret) {
+      throw new Error(
+        'LGSP configuration missing: LGSP_CLIENT_ID and LGSP_CLIENT_SECRET must be set as environment variables.',
+      );
+    }
+
+    this.config = {
+      systemCode: process.env.LGSP_SYSTEM_CODE || LGSP_SYSTEM_CODE,
+      clientId,
+      clientSecret,
+      username: process.env.LGSP_USERNAME || '',
+      password: process.env.LGSP_PASSWORD || '',
+      ssoUrl: process.env.LGSP_SSO_URL || LGSP_ENDPOINTS.TOKEN,
+      baseUrl: process.env.LGSP_BASE_URL || LGSP_ENDPOINTS.BASE,
+    };
+  }
 
   get systemCode(): string {
     return this.config.systemCode;

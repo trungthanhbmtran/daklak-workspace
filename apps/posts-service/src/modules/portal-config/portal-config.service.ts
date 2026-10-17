@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
+import { Prisma } from '../../generated/prisma/client';
 
 @Injectable()
 export class PortalConfigService {
@@ -38,8 +39,13 @@ export class PortalConfigService {
     });
   }
 
-  async upsertByCode(code: string, data: { name: string; description?: string }) {
-    return this.prisma.portalConfig.upsert({
+  async upsertByCode(
+    code: string,
+    data: { name: string; description?: string },
+    tx?: Prisma.TransactionClient,
+  ) {
+    const client = tx || this.prisma;
+    return client.portalConfig.upsert({
       where: { code },
       update: {
         name: data.name,
@@ -55,13 +61,19 @@ export class PortalConfigService {
 
   /**
    * Upsert nhiều config trong 1 lần — thay thế pattern client gọi N requests tuần tự.
-   * Dùng Promise.all để chạy song song, giảm latency 10-17x.
+   * Ledger #32: bọc trong 1 $transaction để các upsert là atomic (tránh partial-fail
+   * khi một code trùng/unique conflict ở giữa batch).
    */
   async batchUpsert(dataList: { code: string; name: string; description?: string }[]) {
     if (!dataList || dataList.length === 0) return { count: 0, data: [] };
-    const results = await Promise.all(
-      dataList.map(item => this.upsertByCode(item.code, { name: item.name, description: item.description }))
-    );
+    const results = await this.prisma.$transaction(async (tx) => {
+      const upserted = await Promise.all(
+        dataList.map(item =>
+          this.upsertByCode(item.code, { name: item.name, description: item.description }, tx as Prisma.TransactionClient),
+        ),
+      );
+      return upserted;
+    });
     return { count: results.length, data: results };
   }
 }

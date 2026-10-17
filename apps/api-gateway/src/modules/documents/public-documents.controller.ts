@@ -6,6 +6,7 @@ import {
   Query,
   Inject,
   OnModuleInit,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -14,6 +15,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 @ApiTags('Public Documents')
 @Controller('public/documents')
 export class PublicDocumentsController implements OnModuleInit {
+  private readonly logger = new Logger(PublicDocumentsController.name);
   private documentService: any;
 
   constructor(
@@ -36,7 +38,7 @@ export class PublicDocumentsController implements OnModuleInit {
     };
     return firstValueFrom(this.documentService.ListProcedures(req)).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
@@ -46,7 +48,7 @@ export class PublicDocumentsController implements OnModuleInit {
   async getProcedure(@Param('id') id: string) {
     return firstValueFrom(this.documentService.GetProcedure({ id })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
@@ -56,7 +58,7 @@ export class PublicDocumentsController implements OnModuleInit {
   async getDossierByCode(@Param('code') code: string) {
     return firstValueFrom(this.documentService.GetDossier({ code })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
@@ -84,7 +86,7 @@ export class PublicDocumentsController implements OnModuleInit {
       req.transparencyCategory = query.transparencyCategory;
     return firstValueFrom(this.documentService.ListDocuments(req)).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );
@@ -94,7 +96,7 @@ export class PublicDocumentsController implements OnModuleInit {
   async getDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.GetDocument({ id })).catch(
       (e) => {
-        console.error('RPC Call Failed', e.message);
+        this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
       },
     );

@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   Inject,
+  Logger,
   OnModuleInit,
   UseGuards,
   Req,
@@ -17,15 +18,19 @@ import {
   Ctx,
   RmqContext,
 } from '@nestjs/microservices';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { Observable, firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 import { ChatGateway } from './chat.gateway';
 
 interface ChatServiceClient {
-  createConversation(data: any): Observable<any>;
-  getConversation(data: any): Observable<any>;
-  getMessages(data: any): Observable<any>;
-  sendMessage(data: any): Observable<any>;
+  createConversation(data: any, metadata?: any): Observable<any>;
+  getConversation(data: any, metadata?: any): Observable<any>;
+  getMessages(data: any, metadata?: any): Observable<any>;
+  sendMessage(data: any, metadata?: any): Observable<any>;
 }
 
 interface EmployeeServiceClient {
@@ -36,6 +41,7 @@ interface EmployeeServiceClient {
 @Controller('admin/chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController implements OnModuleInit {
+  private readonly logger = new Logger(ChatController.name);
   private chatService: ChatServiceClient;
   private employeeService: EmployeeServiceClient;
 
@@ -43,7 +49,21 @@ export class ChatController implements OnModuleInit {
     @Inject('CHAT_PACKAGE') private client: ClientGrpc,
     @Inject('EMPLOYEE_PACKAGE') private employeeClient: ClientGrpc,
     private readonly chatGateway: ChatGateway,
+    private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   onModuleInit() {
     this.chatService = this.client.getService<ChatServiceClient>('ChatService');
@@ -62,34 +82,44 @@ export class ChatController implements OnModuleInit {
         this.chatGateway.broadcastMessage(data.conversationId, data);
       }
     } catch (err) {
-      console.error('Error broadcasting message:', err);
+      this.logger.error(
+        `Error broadcasting message: ${err?.message || err}`,
+        err?.stack,
+      );
     } finally {
       channel.ack(originalMsg);
     }
   }
 
   @Post('conversation')
-  createConversation(@Body() body: any) {
-    return this.chatService.createConversation(body);
+  createConversation(@Req() req: any, @Body() body: any) {
+    return this.chatService.createConversation(body, this.getGrpcMetadata(req));
   }
 
   @Get('conversation/:id')
-  getConversation(@Param('id') id: string) {
-    return this.chatService.getConversation({ id });
+  getConversation(@Req() req: any, @Param('id') id: string) {
+    return this.chatService.getConversation(
+      { id },
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('conversation/:id/messages')
   async getMessages(
+    @Req() req: any,
     @Param('id') conversationId: string,
     @Query('limit') limit: number,
     @Query('offset') offset: number,
   ) {
     const res = await firstValueFrom(
-      this.chatService.getMessages({
-        conversationId,
-        limit: limit ? Number(limit) : 20,
-        offset: offset ? Number(offset) : 0,
-      }),
+      this.chatService.getMessages(
+        {
+          conversationId,
+          limit: limit ? Number(limit) : 20,
+          offset: offset ? Number(offset) : 0,
+        },
+        this.getGrpcMetadata(req),
+      ),
     );
 
     if (res && res.data && Array.isArray(res.data)) {
@@ -129,10 +159,10 @@ export class ChatController implements OnModuleInit {
 
   @Post('message')
   sendMessage(@Req() req: any, @Body() body: any) {
-    // Tự động gán người gửi là user đang đăng nhập nếu chưa có
-    if (!body.senderId && req.user) {
+    // Chống spoofing: senderId LUÔN lấy từ user đã xác thực, bỏ qua giá trị client gửi lên
+    if (req.user) {
       body.senderId = req.user.employeeCode || req.user.username;
     }
-    return this.chatService.sendMessage(body);
+    return this.chatService.sendMessage(body, this.getGrpcMetadata(req));
   }
 }

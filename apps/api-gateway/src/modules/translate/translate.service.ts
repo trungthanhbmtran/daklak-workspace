@@ -27,6 +27,15 @@ interface TranslationService {
   }): Promise<{ translated_text: string }>;
 }
 
+/** Parse JSON an toàn: lỗi parse → null thay vì crash pipeline RxJS */
+function safeParseJson(raw: string): any {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 @Injectable()
 export class TranslateService implements OnModuleInit {
   private translateGrpcService: TranslationService;
@@ -76,7 +85,7 @@ export class TranslateService implements OnModuleInit {
       switchMap(() => from(this.redisService.get(`translate_job_${jobId}`))),
       map((jobData) => {
         if (!jobData) return null;
-        return JSON.parse(jobData);
+        return safeParseJson(jobData);
       }),
       filter((job) => job !== null),
       distinctUntilChanged(

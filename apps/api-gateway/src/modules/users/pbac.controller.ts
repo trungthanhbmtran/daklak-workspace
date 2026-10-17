@@ -8,6 +8,7 @@ import {
   Param,
   Inject,
   UseGuards,
+  Req,
   OnModuleInit,
   ParseIntPipe,
   InternalServerErrorException,
@@ -24,9 +25,13 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 
 @ApiTags('PBAC – Chính sách phân quyền')
 @Controller('admin/policys')
@@ -48,7 +53,21 @@ export class PbacController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.PBAC.SYMBOL) private readonly client: any,
+    private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   onModuleInit() {
     this.pbacService = this.client.getService(MICROSERVICES.PBAC.SERVICE);
@@ -60,9 +79,9 @@ export class PbacController implements OnModuleInit {
     status: 200,
     description: 'Danh sách nhóm quyền (cả số người dùng, số chính sách)',
   })
-  async findAll() {
+  async findAll(@Req() req: any) {
     const result: any = await firstValueFrom(
-      this.pbacService.FindAllUserGroups({}),
+      this.pbacService.FindAllUserGroups({}, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
     return { data: result?.userGroups || [] };
   }
@@ -75,9 +94,9 @@ export class PbacController implements OnModuleInit {
     status: 200,
     description: 'Nhóm quyền và danh sách chính sách',
   })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const result: any = await firstValueFrom(
-      this.pbacService.FindOneUserGroup({ id }),
+      this.pbacService.FindOneUserGroup({ id }, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
     if (result && result.policies) {
       result.policies = result.policies.map((p: any) => {
@@ -106,6 +125,7 @@ export class PbacController implements OnModuleInit {
   @ApiOperation({ summary: 'Tạo nhóm quyền mới' })
   @ApiResponse({ status: 201, description: 'Nhóm quyền vừa được tạo' })
   async create(
+    @Req() req: any,
     @Body()
     body: {
       name: string;
@@ -123,11 +143,14 @@ export class PbacController implements OnModuleInit {
       conditions: p.conditions ? JSON.stringify(p.conditions) : '',
     }));
     const result = await firstValueFrom(
-      this.pbacService.CreateUserGroup({
-        name: body.name,
-        description: body.description,
-        policies,
-      }),
+      this.pbacService.CreateUserGroup(
+        {
+          name: body.name,
+          description: body.description,
+          policies,
+        },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: result };
   }
@@ -139,6 +162,7 @@ export class PbacController implements OnModuleInit {
     description: 'Nhóm quyền sau khi cập nhật',
   })
   async update(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body()
     body: {
@@ -157,12 +181,15 @@ export class PbacController implements OnModuleInit {
       conditions: p.conditions ? JSON.stringify(p.conditions) : '',
     }));
     const result = await firstValueFrom(
-      this.pbacService.UpdateUserGroup({
-        id,
-        name: body.name,
-        description: body.description,
-        policies,
-      }),
+      this.pbacService.UpdateUserGroup(
+        {
+          id,
+          name: body.name,
+          description: body.description,
+          policies,
+        },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: result };
   }
@@ -172,9 +199,9 @@ export class PbacController implements OnModuleInit {
     summary: 'Xoá nhóm quyền',
   })
   @ApiResponse({ status: 200, description: 'Đã xoá' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  async delete(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
     const result = await firstValueFrom(
-      this.pbacService.DeleteUserGroup({ id }),
+      this.pbacService.DeleteUserGroup({ id }, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
     return { data: result };
   }

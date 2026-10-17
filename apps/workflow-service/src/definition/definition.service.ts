@@ -48,6 +48,16 @@ export class DefinitionService {
 
 
   async createProcess(dto: CreateDefinitionDto) {
+    // [P0 #12] Validate graph NGAY LÚC LƯU (giống publish): version DRAFT không hợp lệ
+    // phải bị chặn từ createProcess, không đợi đến publish — reused DefinitionValidatorService.
+    const validationResult = this.validator.validate(dto.graph || {});
+    if (!validationResult.valid) {
+      throw new BadRequestException({
+        message: 'Validation failed — process definition graph is invalid',
+        errors: validationResult.errors,
+      });
+    }
+
     return this.prisma.$transaction(async (tx) => {
       const def = await tx.processDefinition.create({
         data: {
@@ -99,6 +109,16 @@ export class DefinitionService {
 
       if (!dto.graph) {
         return { def: updatedDef, version: def.versions[0] };
+      }
+
+      // [P0 #12] Validate graph NGAY LÚC LƯU (giống publish) — reused DefinitionValidatorService.validate(),
+      // không viết logic mới; graph sai phải bị chặn trước khi vào DRAFT/PUBLISHED.
+      const validationResult = this.validator.validate(dto.graph);
+      if (!validationResult.valid) {
+        throw new BadRequestException({
+          message: 'Validation failed — process definition graph is invalid',
+          errors: validationResult.errors,
+        });
       }
 
       const latestVersion = def.versions[0];

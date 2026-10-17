@@ -31,6 +31,18 @@ export class PostsService implements OnModuleInit {
     }
   }
 
+  /**
+   * Ledger #26: safeParse thay JSON.parse nguyên thủy để payload hỏng không crash request.
+   */
+  private safeParseJson(value: string): any | null {
+    try {
+      return JSON.parse(value);
+    } catch (error: any) {
+      this.logger.warn(`safeParseJson failed: ${error?.message}`);
+      return null;
+    }
+  }
+
   public getPostStatusLabel(status: string | null | undefined): string {
     if (!status) return '—';
     const map: Record<string, string> = {
@@ -231,7 +243,8 @@ export class PostsService implements OnModuleInit {
 
     // 1. Lưu bản dịch vào bảng PostTranslation
     if (translations) {
-      const translationEntries = typeof translations === 'string' ? JSON.parse(translations) : translations;
+      const translationEntries =
+        typeof translations === 'string' ? (this.safeParseJson(translations) ?? {}) : translations;
       const targetLangs = await this.getTargetLanguages();
 
       const dataToInsert = Object.entries(translationEntries).map(([langCode, trans]) => {
@@ -294,7 +307,8 @@ export class PostsService implements OnModuleInit {
         tags: true,
         category: true,
         translations_rel: {
-          orderBy: { version: 'desc' }
+          orderBy: { version: 'desc' },
+          take: 1, // Ledger #33: tránh unbounded — only bản dịch mới nhất
         }
       },
     });
@@ -449,7 +463,8 @@ export class PostsService implements OnModuleInit {
         tags: true,
         category: true,
         translations_rel: {
-          orderBy: { version: 'desc' }
+          orderBy: { version: 'desc' },
+          take: 1, // Ledger #33: tránh unbounded
         }
       },
     });
@@ -464,7 +479,8 @@ export class PostsService implements OnModuleInit {
               tags: true,
               category: true,
               translations_rel: {
-                orderBy: { version: 'desc' }
+                orderBy: { version: 'desc' },
+                take: 1, // Ledger #33: tránh unbounded
               }
             }
           }
@@ -675,9 +691,11 @@ export class PostsService implements OnModuleInit {
   }
 
   async getHistory(id: string) {
+    // Ledger #33: giới hạn lịch sử phiên bản trả về (20 mới nhất)
     return this.prisma.postVersion.findMany({
       where: { postId: id },
       orderBy: { version: 'desc' },
+      take: 20,
     });
   }
 

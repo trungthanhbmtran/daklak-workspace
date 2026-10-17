@@ -33,6 +33,7 @@ export class MediaGatewayController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Get('download/:id')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Download media file by ID (Redirect)' })
   @ApiResponse({
     status: 302,

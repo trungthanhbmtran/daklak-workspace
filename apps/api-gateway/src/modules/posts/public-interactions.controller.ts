@@ -6,6 +6,7 @@ import {
   Inject,
   Query,
   OnModuleInit,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { type ClientGrpc } from '@nestjs/microservices';
@@ -15,6 +16,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 @ApiTags('Public Interactions')
 @Controller('public/interactions')
 export class PublicInteractionsController implements OnModuleInit {
+  private readonly logger = new Logger(PublicInteractionsController.name);
   private interactionService: any;
 
   constructor(
@@ -43,7 +45,7 @@ export class PublicInteractionsController implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.interactionService.listQuestions(req),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
     return {
@@ -62,7 +64,7 @@ export class PublicInteractionsController implements OnModuleInit {
     const res = await firstValueFrom(
       this.interactionService.createQuestion(dto),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
     return {

@@ -19,8 +19,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 
 @ApiTags('AI Assistants')
 @Controller('admin/ai-assistants')
@@ -41,7 +45,21 @@ export class AiAssistantGatewayController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.AI_ASSISTANT.SYMBOL) private readonly client: any,
+    private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   onModuleInit() {
     this.aiAssistantService = this.client.getService('AiAssistantService');
@@ -53,7 +71,10 @@ export class AiAssistantGatewayController implements OnModuleInit {
     if (!userId) return [];
     try {
       const response = (await firstValueFrom(
-        this.aiAssistantService.ListAssistants({ userId }),
+        this.aiAssistantService.ListAssistants(
+          { userId },
+          this.getGrpcMetadata(req),
+        ),
       )) as any;
       return response.assistants || [];
     } catch (e: any) {
@@ -62,10 +83,10 @@ export class AiAssistantGatewayController implements OnModuleInit {
   }
 
   @Get(':id')
-  async getAssistant(@Param('id') id: string) {
+  async getAssistant(@Req() req: any, @Param('id') id: string) {
     try {
       const response = (await firstValueFrom(
-        this.aiAssistantService.GetAssistant({ id }),
+        this.aiAssistantService.GetAssistant({ id }, this.getGrpcMetadata(req)),
       )) as any;
       return response.assistant;
     } catch (e: any) {
@@ -88,13 +109,16 @@ export class AiAssistantGatewayController implements OnModuleInit {
     if (!userId) throw new InternalServerErrorException('User ID missing');
     try {
       const response = (await firstValueFrom(
-        this.aiAssistantService.CreateAssistant({
-          userId,
-          name: body.name,
-          description: body.description,
-          systemPrompt: body.system_prompt,
-          isPublic: body.is_public,
-        }),
+        this.aiAssistantService.CreateAssistant(
+          {
+            userId,
+            name: body.name,
+            description: body.description,
+            systemPrompt: body.system_prompt,
+            isPublic: body.is_public,
+          },
+          this.getGrpcMetadata(req),
+        ),
       )) as any;
       return response.assistant;
     } catch (e: any) {
@@ -104,6 +128,7 @@ export class AiAssistantGatewayController implements OnModuleInit {
 
   @Put(':id')
   async updateAssistant(
+    @Req() req: any,
     @Param('id') id: string,
     @Body()
     body: {
@@ -115,13 +140,16 @@ export class AiAssistantGatewayController implements OnModuleInit {
   ) {
     try {
       const response = (await firstValueFrom(
-        this.aiAssistantService.UpdateAssistant({
-          id,
-          name: body.name,
-          description: body.description,
-          systemPrompt: body.system_prompt,
-          isPublic: body.is_public,
-        }),
+        this.aiAssistantService.UpdateAssistant(
+          {
+            id,
+            name: body.name,
+            description: body.description,
+            systemPrompt: body.system_prompt,
+            isPublic: body.is_public,
+          },
+          this.getGrpcMetadata(req),
+        ),
       )) as any;
       return response.assistant;
     } catch (e: any) {
@@ -130,9 +158,14 @@ export class AiAssistantGatewayController implements OnModuleInit {
   }
 
   @Delete(':id')
-  async deleteAssistant(@Param('id') id: string) {
+  async deleteAssistant(@Req() req: any, @Param('id') id: string) {
     try {
-      await firstValueFrom(this.aiAssistantService.DeleteAssistant({ id }));
+      await firstValueFrom(
+        this.aiAssistantService.DeleteAssistant(
+          { id },
+          this.getGrpcMetadata(req),
+        ),
+      );
       return { };
     } catch (e: any) {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
@@ -154,14 +187,17 @@ export class AiAssistantGatewayController implements OnModuleInit {
   ) {
     try {
       await firstValueFrom(
-        this.aiAssistantService.AddKnowledgeSource({
-          assistantId: id,
-          type: body.type,
-          title: body.title,
-          content: body.content || '',
-          metadata: body.metadata || '',
-          qdrantId: body.qdrant_id || '',
-        }),
+        this.aiAssistantService.AddKnowledgeSource(
+          {
+            assistantId: id,
+            type: body.type,
+            title: body.title,
+            content: body.content || '',
+            metadata: body.metadata || '',
+            qdrantId: body.qdrant_id || '',
+          },
+          this.getGrpcMetadata(req),
+        ),
       );
       return { };
     } catch (e: any) {
@@ -170,10 +206,16 @@ export class AiAssistantGatewayController implements OnModuleInit {
   }
 
   @Delete('knowledge-sources/:sourceId')
-  async removeKnowledgeSource(@Param('sourceId') sourceId: string) {
+  async removeKnowledgeSource(
+    @Req() req: any,
+    @Param('sourceId') sourceId: string,
+  ) {
     try {
       await firstValueFrom(
-        this.aiAssistantService.RemoveKnowledgeSource({ id: sourceId }),
+        this.aiAssistantService.RemoveKnowledgeSource(
+          { id: sourceId },
+          this.getGrpcMetadata(req),
+        ),
       );
       return { };
     } catch (e: any) {
@@ -192,11 +234,14 @@ export class AiAssistantGatewayController implements OnModuleInit {
 
     try {
       const response = (await firstValueFrom(
-        this.aiAssistantService.Chat({
-          assistantId: id,
-          message: body.message,
-          userId,
-        }),
+        this.aiAssistantService.Chat(
+          {
+            assistantId: id,
+            message: body.message,
+            userId,
+          },
+          this.getGrpcMetadata(req),
+        ),
       )) as any;
 
       return {

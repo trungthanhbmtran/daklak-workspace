@@ -8,6 +8,8 @@ import { Metadata } from '@grpc/grpc-js';
 export class GatewayRegistryService implements OnModuleInit {
   private readonly logger = new Logger(GatewayRegistryService.name);
   private grpcService: any;
+  /** Fail-fast: token nội bộ bắt buộc từ env, không fallback */
+  private readonly internalToken: string;
 
   // Local Memory Cache for Gateway
   private activeConnections = new Map<string, any>();
@@ -18,7 +20,13 @@ export class GatewayRegistryService implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
-  ) {}
+  ) {
+    const token = process.env.INTERNAL_TOKEN;
+    if (!token) {
+      throw new Error('INTERNAL_TOKEN env is required');
+    }
+    this.internalToken = token;
+  }
 
   async onModuleInit() {
     this.grpcService = this.client.getService('ApiManagementService');
@@ -33,10 +41,7 @@ export class GatewayRegistryService implements OnModuleInit {
   async initialSync() {
     try {
       const meta = new Metadata();
-      meta.add(
-        'x-internal-token',
-        process.env.INTERNAL_TOKEN || 'internal-secret-daklak',
-      );
+      meta.add('x-internal-token', this.internalToken);
       const res = (await firstValueFrom(
         this.grpcService.ListConnections({ limit: 100, offset: 0 }, meta),
       )) as any;
@@ -88,10 +93,15 @@ export class GatewayRegistryService implements OnModuleInit {
 
     try {
       // Pull full snapshot via gRPC
+      const meta = new Metadata();
+      meta.add('x-internal-token', this.internalToken);
       const res = (await firstValueFrom(
-        this.grpcService.GetSnapshot({
-          currentEtag: this.currentRevisionChecksum,
-        }),
+        this.grpcService.GetSnapshot(
+          {
+            currentEtag: this.currentRevisionChecksum,
+          },
+          meta,
+        ),
       )) as any;
 
       if (!res.connections || !Array.isArray(res.connections)) {

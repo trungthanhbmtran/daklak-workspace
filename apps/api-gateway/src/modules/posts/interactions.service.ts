@@ -1,10 +1,16 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
 export class InteractionsService implements OnModuleInit {
+  private readonly logger = new Logger(InteractionsService.name);
   private interactionGrpcService: any;
 
   constructor(
@@ -18,11 +24,11 @@ export class InteractionsService implements OnModuleInit {
   }
 
   // --- Comments Moderation ---
-  async listComments(query: any) {
+  async listComments(query: any, metadata?: any) {
     const response: any = await firstValueFrom(
-      this.interactionGrpcService.listComments(query),
+      this.interactionGrpcService.listComments(query, metadata),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
     return {
@@ -35,30 +41,30 @@ export class InteractionsService implements OnModuleInit {
     };
   }
 
-  async updateCommentStatus(id: string, status: string) {
+  async updateCommentStatus(id: string, status: string, metadata?: any) {
     return firstValueFrom(
-      this.interactionGrpcService.updateCommentStatus({ id, status }),
+      this.interactionGrpcService.updateCommentStatus({ id, status }, metadata),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
 
-  async deleteComment(id: string) {
+  async deleteComment(id: string, metadata?: any) {
     return firstValueFrom(
-      this.interactionGrpcService.deleteComment({ id }),
+      this.interactionGrpcService.deleteComment({ id }, metadata),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
 
   // --- Citizen Questions (Hỏi đáp) ---
-  async listQuestions(query: any) {
+  async listQuestions(query: any, metadata?: any) {
     const response: any = await firstValueFrom(
-      this.interactionGrpcService.listQuestions(query),
+      this.interactionGrpcService.listQuestions(query, metadata),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
     return {
@@ -71,34 +77,37 @@ export class InteractionsService implements OnModuleInit {
     };
   }
 
-  async answerQuestion(id: string, dto: any, req: any) {
+  async answerQuestion(id: string, dto: any, req: any, metadata?: any) {
     return firstValueFrom(
-      this.interactionGrpcService.answerQuestion({
-        id,
-        ...dto,
-        answeredById: req.user.id,
-      }),
+      this.interactionGrpcService.answerQuestion(
+        {
+          id,
+          ...dto,
+          answeredById: req.user.id,
+        },
+        metadata,
+      ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
 
-  async getQuestion(id: string) {
+  async getQuestion(id: string, metadata?: any) {
     return firstValueFrom(
-      this.interactionGrpcService.getQuestion({ id }),
+      this.interactionGrpcService.getQuestion({ id }, metadata),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }
 
   // --- Citizen Feedback (Góp ý) ---
-  async listFeedbacks(query: any) {
+  async listFeedbacks(query: any, metadata?: any) {
     const response: any = await firstValueFrom(
-      this.interactionGrpcService.listFeedbacks(query),
+      this.interactionGrpcService.listFeedbacks(query, metadata),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
     return {
@@ -111,11 +120,14 @@ export class InteractionsService implements OnModuleInit {
     };
   }
 
-  async updateFeedbackStatus(id: string, status: string) {
+  async updateFeedbackStatus(id: string, status: string, metadata?: any) {
     return firstValueFrom(
-      this.interactionGrpcService.updateFeedbackStatus({ id, status }),
+      this.interactionGrpcService.updateFeedbackStatus(
+        { id, status },
+        metadata,
+      ),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return null;
     });
   }

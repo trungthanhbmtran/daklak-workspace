@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException, Logger, ConflictException, BadRequestException } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { status } from '@grpc/grpc-js';
 import { PrismaService } from '../infra/prisma.service';
 import { DynamicIntegrationAction } from '../action/dynamic-integration.action';
 import { WorkflowContext } from '../action/action.interface';
@@ -20,6 +22,36 @@ export class ExecutionService {
     private readonly catalogService: ProcessCatalogService,
   ) {}
 
+  /**
+   * Prisma UniqueViolation (P2002) — dùng cho idempotency replay (#22).
+   */
+  private isUniqueViolation(e: any): boolean {
+    return e?.code === 'P2002';
+  }
+
+  /**
+   * Resolve node code đúng chuẩn như DefinitionValidatorService.compile()
+   * (`n.code ?? n.nodeKey ?? n.id`) — tránh state machine corrupt khi code ≠ id (#22).
+   */
+  private resolveNodeCode(node: any): string {
+    if (!node) return '';
+    return (node.code ?? node.nodeKey ?? node.id) ?? '';
+  }
+
+  /**
+   * Safe JSON parse — lỗi parse phải trả gRPC INVALID_ARGUMENT thay vì để lọt UNKNOWN (#26).
+   */
+  private parseJsonOrThrow(raw: string, field: string): any {
+    try {
+      return JSON.parse(raw);
+    } catch (err: any) {
+      throw new RpcException({
+        code: status.INVALID_ARGUMENT,
+        message: `Invalid JSON in ${field}: ${err?.message ?? err}`,
+      });
+    }
+  }
+
   private async getGraph(instanceId: string): Promise<any> {
     const cacheKey = `workflow:${instanceId}:graph`;
     let graph = await this.redisService.get<any>(cacheKey);
@@ -38,10 +70,14 @@ export class ExecutionService {
 
   // Backward-compatible StartProcess
   async startProcess(code: string, payload: any) {
+    // [P0 #12 — RCE] Chỉ dùng version có status PUBLISHED: graph của version DRAFT chưa qua
+    // DefinitionValidatorService.validate() và có thể chứa script/thành phần chưa kiểm soát
+    // ⇒ được thực thi qua `new Function` ở handleServiceTask (escape: variables.constructor.constructor).
     const def = await this.prisma.processDefinition.findUnique({
       where: { code },
       include: {
         versions: {
+          where: { status: 'PUBLISHED' },
           orderBy: { version: 'desc' },
           take: 1,
         },
@@ -49,49 +85,85 @@ export class ExecutionService {
     });
 
     if (!def || def.versions.length === 0) {
-      throw new NotFoundException(`Active process definition ${code} not found`);
-    }
-
-    if (payload.commandId) {
-      const existing = await this.prisma.processedCommand.findUnique({
-        where: { id: payload.commandId },
-      });
-      if (existing) {
-        throw new ConflictException(`Command already processed`);
-      }
-      await this.prisma.processedCommand.create({
-        data: { id: payload.commandId, status: 'PROCESSED' }
-      });
+      throw new BadRequestException(
+        `No PUBLISHED version for process definition ${code} — refusing to start from a DRAFT/unpublished version`,
+      );
     }
 
     const version = def.versions[0];
 
-    const instance = await this.prisma.$transaction(async tx => {
-      const inst = await tx.processInstance.create({
-        data: {
-          definitionId: def.id,
-          versionId: version.id,
-          businessKey: payload.businessKey,
-          organizationId: payload.organizationId || 'DEFAULT',
-          status: 'RUNNING',
-          startedBy: payload.startedBy || 'SYSTEM',
-          variables: payload.variables || {},
-        },
-      });
-
-      await tx.outboxEvent.create({
-        data: {
-          workflowInstanceId: inst.id,
-          processVersion: 1,
-          nodeId: 'start',
-          commandType: 'start',
-          eventType: 'workflow.instance.started',
-          payload: { instanceId: inst.id, businessKey: inst.businessKey }
+    // [P1 #22] idempotency: check-then-create PHẢI nằm trong MỘT $transaction.
+    // Race giữa 2 lệnh cùng commandId → P2002 UniqueViolation → re-read và trả về instance
+    // đã tồn tại (idempotent) thay vì 500. commandId được gán làm idempotencyKey duy nhất
+    // trên instance để replay có thể truy đúng instance đã tạo cho command đó.
+    let instance;
+    try {
+      instance = await this.prisma.$transaction(async tx => {
+        if (payload.commandId) {
+          const existing = await tx.processedCommand.findUnique({
+            where: { id: payload.commandId },
+          });
+          if (existing) {
+            // Command đã xử lý: trả về instance cũ của command này (idempotent replay)
+            const existingInstance = await tx.processInstance.findUnique({
+              where: { idempotencyKey: payload.commandId },
+              include: { version: true },
+            });
+            if (existingInstance) {
+              return existingInstance;
+            }
+            // Command cũ không gắn instance (dữ liệu trước khi có idempotencyKey)
+            throw new ConflictException(`Command already processed`);
+          }
+          await tx.processedCommand.create({
+            data: { id: payload.commandId, status: 'PROCESSED' }
+          });
         }
-      });
 
-      return inst;
-    });
+        const inst = await tx.processInstance.create({
+          data: {
+            definitionId: def.id,
+            versionId: version.id,
+            businessKey: payload.businessKey,
+            organizationId: payload.organizationId || 'DEFAULT',
+            status: 'RUNNING',
+            startedBy: payload.startedBy || 'SYSTEM',
+            variables: payload.variables || {},
+            // Liên kết bất biến command → instance phục vụ replay idempotent ở trên
+            ...(payload.commandId ? { idempotencyKey: payload.commandId } : {}),
+          },
+          include: { version: true },
+        });
+
+        await tx.outboxEvent.create({
+          data: {
+            workflowInstanceId: inst.id,
+            processVersion: 1,
+            nodeId: 'start',
+            commandType: 'start',
+            eventType: 'workflow.instance.started',
+            payload: { instanceId: inst.id, businessKey: inst.businessKey }
+          }
+        });
+
+        return inst;
+      });
+    } catch (e: any) {
+      if (this.isUniqueViolation(e)) {
+        // P2002 do race (command hoặc instance đã được tx song song tạo) → re-read idempotent
+        const replayed = payload.commandId
+          ? await this.prisma.processInstance.findUnique({
+              where: { idempotencyKey: payload.commandId },
+              include: { version: true },
+            })
+          : null;
+        if (replayed) {
+          this.logger.warn(`startProcess replay commandId=${payload.commandId} → reuse existing instance ${replayed.id}`);
+          return replayed;
+        }
+      }
+      throw e;
+    }
 
     await this.redisService.set(`workflow:${instance.id}:graph`, version.graph, 86400000);
     this.advanceProcess(instance.id, 'start').catch(err => this.logger.error(`Advance failed`, err));
@@ -117,27 +189,31 @@ export class ExecutionService {
       return null; // or empty response
     }
 
-    // Check idempotencyKey
-    if (req.idempotencyKey) {
-      const existingInstance = await this.prisma.processInstance.findUnique({
-        where: { idempotencyKey: req.idempotencyKey }
-      });
-      if (existingInstance) return existingInstance;
-    }
+    // Check idempotencyKey — [P1 #22] check PHẢI nằm trong cùng $transaction với create
+    // để tránh race check-then-create khi 2 request cùng key song song.
+    let instance;
+    try {
+      instance = await this.prisma.$transaction(async tx => {
+        if (req.idempotencyKey) {
+          const existingInstance = await tx.processInstance.findUnique({
+            where: { idempotencyKey: req.idempotencyKey },
+            include: { version: true },
+          });
+          if (existingInstance) return existingInstance;
+        }
 
-    // Get the pinned version or latest published
-    let versionId = resolverResult.pinnedVersionId;
-    if (!versionId) {
-      const latestPublished = await this.prisma.processVersion.findFirst({
-        where: { definitionId: resolverResult.definitionId, status: 'PUBLISHED' },
-        orderBy: { version: 'desc' }
-      });
-      if (!latestPublished) throw new NotFoundException(`No published version found for binding`);
-      versionId = latestPublished.id;
-    }
+        // Get the pinned version or latest published
+        let versionId = resolverResult.pinnedVersionId;
+        if (!versionId) {
+          const latestPublished = await tx.processVersion.findFirst({
+            where: { definitionId: resolverResult.definitionId, status: 'PUBLISHED' },
+            orderBy: { version: 'desc' }
+          });
+          if (!latestPublished) throw new NotFoundException(`No published version found for binding`);
+          versionId = latestPublished.id;
+        }
 
-    const instance = await this.prisma.$transaction(async tx => {
-      const inst = await tx.processInstance.create({
+        const inst = await tx.processInstance.create({
         data: {
           definitionId: resolverResult.definitionId!,
           versionId,
@@ -170,8 +246,28 @@ export class ExecutionService {
 
       return inst;
     });
+    } catch (e: any) {
+      if (this.isUniqueViolation(e)) {
+        // [P1 #22] P2002 trên idempotencyKey (race song song) → re-read và trả instance cũ
+        const replayed = req.idempotencyKey
+          ? await this.prisma.processInstance.findUnique({
+              where: { idempotencyKey: req.idempotencyKey },
+              include: { version: true },
+            })
+          : null;
+        if (replayed) {
+          this.logger.warn(`startByProcessType replay idempotencyKey=${req.idempotencyKey} → reuse existing instance ${replayed.id}`);
+          return replayed;
+        }
+      }
+      throw e;
+    }
 
-    await this.redisService.set(`workflow:${instance.id}:graph`, (instance.version as any).graph, 86400000);
+    // Instance cũ từ replay có thể không include version — chỉ cache khi có graph
+    const graphJson = (instance.version as any)?.graph;
+    if (graphJson) {
+      await this.redisService.set(`workflow:${instance.id}:graph`, graphJson, 86400000);
+    }
     this.advanceProcess(instance.id, 'start').catch(err => this.logger.error(`Advance failed`, err));
     return instance;
   }
@@ -201,7 +297,23 @@ export class ExecutionService {
     const pt = instance.processType ? await this.catalogService.findByCode(instance.processType) : null;
     const targetService = pt?.ownerService || 'default-service';
 
+    // [P1 #22 — OCC] Claim theo stateVersion: updateMany trả count=0 khi instance đã bị
+    // tx khác đổi trạng thái → ConflictException 409 (caller re-read và retry).
     const command = await this.prisma.$transaction(async tx => {
+      // Claim instance chỉ nếu stateVersion vẫn bằng version đã đọc
+      const claimed = await tx.processInstance.updateMany({
+        where: { id: instance.id, stateVersion: instance.stateVersion },
+        data: {
+          status: 'PENDING_ACK',
+          stateVersion: { increment: 1 }
+        }
+      });
+      if (claimed.count === 0) {
+        throw new ConflictException(
+          `OCC conflict: instance ${instance.id} was modified concurrently (stateVersion ${instance.stateVersion}) — re-read and retry`
+        );
+      }
+
       // Create WorkflowCommand
       const cmd = await tx.workflowCommand.create({
         data: {
@@ -211,15 +323,6 @@ export class ExecutionService {
           payload: req.actionData || {},
           correlationId: req.correlationId,
           status: 'PENDING'
-        }
-      });
-
-      // Update instance state to PENDING_ACK
-      await tx.processInstance.update({
-        where: { id: instance.id },
-        data: { 
-          status: 'PENDING_ACK',
-          stateVersion: { increment: 1 } 
         }
       });
 
@@ -249,8 +352,9 @@ export class ExecutionService {
 
   // Domain ACK processing
   async acknowledgeCommand(req: any) {
-    return this.prisma.$transaction(async tx => {
-      const ack = await tx.domainAck.create({
+    try {
+      return await this.prisma.$transaction(async tx => {
+        const ack = await tx.domainAck.create({
         data: {
           commandId: req.commandId,
           instanceId: req.instanceId,
@@ -297,7 +401,16 @@ export class ExecutionService {
       }
 
       return { accepted: true };
-    });
+      });
+    } catch (e: any) {
+      // [P1 #22] DomainAck.commandId là @unique — ACK trùng (at-least-once retry từ domain service)
+      // phải trả idempotent theo proto AcknowledgeCommandResponse.duplicate=true thay vì 500/UNKNOWN.
+      if (this.isUniqueViolation(e)) {
+        this.logger.warn(`Duplicate ACK for command=${req.commandId} — returning duplicate=true`);
+        return { accepted: true, duplicate: true };
+      }
+      throw e;
+    }
   }
 
   async advanceProcess(
@@ -317,7 +430,10 @@ export class ExecutionService {
     const instance = await this.prisma.processInstance.findUnique({ where: { id: instanceId } });
     if (!instance) return;
 
-    let currentNode = graph.nodes?.find((n: any) => n.id === instance.currentNodeCode);
+    // [P1 #22] currentNodeCode có thể là node.code (chuẩn compile()) hoặc node.id — match cả hai
+    let currentNode = graph.nodes?.find(
+      (n: any) => n.id === instance.currentNodeCode || this.resolveNodeCode(n) === instance.currentNodeCode,
+    );
     let targetNodeId: string | null = null;
 
     if (nodeIdOrAction === 'start') {
@@ -348,7 +464,8 @@ export class ExecutionService {
       data: {
         instanceId,
         fromNodeCode: instance.currentNodeCode,
-        toNodeCode: node.code || node.id,
+        // [P1 #22] resolve node code đúng chuẩn compile() (n.code ?? n.nodeKey ?? n.id)
+        toNodeCode: this.resolveNodeCode(node),
         action: nodeIdOrAction,
         performedBy: 'SYSTEM',
       },
@@ -356,7 +473,8 @@ export class ExecutionService {
 
     await this.prisma.processInstance.update({
       where: { id: instanceId },
-      data: { currentNodeCode: node.code || node.id },
+      // [P1 #22] resolve node code đúng chuẩn compile() (n.code ?? n.nodeKey ?? n.id)
+      data: { currentNodeCode: this.resolveNodeCode(node) },
     });
 
     switch (node.type) {
@@ -381,15 +499,41 @@ export class ExecutionService {
   }
 
   private async handleServiceTask(instance: any, node: any, graph: any, depth: number, visited: any) {
+    // Tự động đi tiếp (Auto-advance) sang node kế tiếp không yêu cầu action
+    const advanceToNext = async () => {
+      const nextEdges = graph.edges?.filter((e: any) => e.source === node.id && !e.action) || [];
+      if (nextEdges.length > 0) {
+        await this.advanceProcess(instance.id, nextEdges[0].target, depth + 1, visited);
+      }
+    };
     try {
       const script = node.data?.script;
       const action = node.data?.action || node.data?.commandType;
 
       if (script) {
+        // [P0 #12 — RCE gate] Script task chạy nội dung editor-provided thông qua `new Function` +
+        // `with(context)` — KHÔNG có sandbox thật: chuỗi escape
+        // `variables.constructor.constructor("return process")()` truy cập được process/global.
+        // Vì vậy mặc định TẮT (`WORKFLOW_ENABLE_SCRIPT_TASK !== 'true'`):
+        //  - Khi TẮT: log warn rồi SKIP node (auto-advance) — chọn behavior skip thay vì throw để
+        //    instance không crash, vì nhiều serviceTask không script vẫn phải chạy tiếp bình thường.
+        //  - Khi BẬT flag: chạy như cũ — đây là documented risk mà operator phải chủ ý bật.
+        const scriptEnabled = process.env.WORKFLOW_ENABLE_SCRIPT_TASK === 'true';
+        if (!scriptEnabled) {
+          this.logger.warn(
+            `Script task ${node.id} for instance ${instance.id} SKIPPED: WORKFLOW_ENABLE_SCRIPT_TASK is not 'true' (RCE protection — scripts run unsandboxed via new Function when enabled)`,
+          );
+          await advanceToNext();
+          return;
+        }
+
         // 1. Thực thi Workflow Rule Engine Script cục bộ
         this.logger.log(`Executing Script Node ${node.id} for instance ${instance.id}`);
-        const variables = typeof instance.variables === 'string' ? JSON.parse(instance.variables) : (instance.variables || {});
-        
+        // [P2 #26] parse JSON an toàn — lỗi parse trả INVALID_ARGUMENT thay vì UNKNOWN
+        const variables = typeof instance.variables === 'string'
+          ? this.parseJsonOrThrow(instance.variables, 'instance.variables')
+          : (instance.variables || {});
+
         const vmContext = { variables: { ...variables }, Math, Number, Date, String };
         // eslint-disable-next-line no-new-func
         const fn = new Function('context', `
@@ -399,21 +543,17 @@ export class ExecutionService {
           }
           return context.variables;
         `);
-        
+
         const newVars = fn(vmContext);
-        
+
         // Cập nhật lại variables
         await this.prisma.processInstance.update({
           where: { id: instance.id },
           data: { variables: newVars }
         });
         instance.variables = newVars;
-        
-        // Tự động đi tiếp (Auto-advance)
-        const nextEdges = graph.edges?.filter((e: any) => e.source === node.id && !e.action) || [];
-        if (nextEdges.length > 0) {
-          await this.advanceProcess(instance.id, nextEdges[0].target, depth + 1, visited);
-        }
+
+        await advanceToNext();
       } else if (action) {
         // 2. Gọi Domain Service (Saga / Outbox)
         this.logger.log(`Emitting Service Command ${action} for instance ${instance.id}`);
@@ -442,11 +582,8 @@ export class ExecutionService {
         });
         // Không gọi advanceProcess ở đây, đợi DOMAIN_ACK từ Outbox
       } else {
-        // Fallback: Skip
-        const nextEdges = graph.edges?.filter((e: any) => e.source === node.id && !e.action) || [];
-        if (nextEdges.length > 0) {
-          await this.advanceProcess(instance.id, nextEdges[0].target, depth + 1, visited);
-        }
+        // Fallback: Skip (không script, không action)
+        await advanceToNext();
       }
     } catch (e: any) {
       this.logger.error(`Error executing serviceTask ${node.id} in instance ${instance.id}: ${e.message}`);
@@ -466,7 +603,8 @@ export class ExecutionService {
     const task = await this.prisma.workflowTask.create({
       data: {
         instanceId: instance.id,
-        nodeCode: node.code || node.id,
+        // [P1 #22] resolve node code đúng chuẩn compile() (n.code ?? n.nodeKey ?? n.id)
+        nodeCode: this.resolveNodeCode(node),
         title: node.name || 'User Task',
         status: 'PENDING',
       },
@@ -482,7 +620,16 @@ export class ExecutionService {
   async validateAction(payload: any): Promise<{ allowed: boolean; reason: string }> {
     const graph = await this.getGraph(payload.instanceId);
     if (!graph) return { allowed: false, reason: 'Workflow graph not found' };
-    const edges = graph.edges?.filter((e: any) => e.source === payload.currentNodeId && (e.label === payload.actionName || e.action === payload.actionName || e.data?.action === payload.actionName));
+    // [P1 #22] currentNodeId do caller truyền có thể là node.id OR node.code — resolve đúng chuẩn
+    // compile() (`n.code ?? n.nodeKey ?? n.id`) rồi match edge source theo cả hai.
+    const current = graph.nodes?.find(
+      (n: any) => n.id === payload.currentNodeId || this.resolveNodeCode(n) === payload.currentNodeId,
+    );
+    if (!current) {
+      return { allowed: false, reason: `Node ${payload.currentNodeId} not found in workflow graph` };
+    }
+    const sourceCodes = new Set<string>([current.id, this.resolveNodeCode(current)]);
+    const edges = graph.edges?.filter((e: any) => sourceCodes.has(e.source) && (e.label === payload.actionName || e.action === payload.actionName || e.data?.action === payload.actionName));
     if (!edges || edges.length === 0) return { allowed: false, reason: 'Action not allowed' };
     return { allowed: true, reason: '' };
   }
@@ -500,10 +647,13 @@ export class ExecutionService {
         { correlationId: { contains: filters.search } }
       ];
     }
+    // [P2 #33] Clamp pagination: take tối đa 100, tối thiểu 1, mặc định 20 — chống unbounded query.
+    const skip = Math.max(0, Number(filters?.skip) || 0);
+    const take = Math.min(100, Math.max(1, Number(filters?.take) || 20));
     return this.prisma.processInstance.findMany({
       where,
-      skip: filters?.skip,
-      take: filters?.take,
+      skip,
+      take,
       include: { version: { include: { definition: true } } },
       orderBy: { startedAt: 'desc' }
     });
@@ -627,7 +777,10 @@ export class ExecutionService {
       this.logger.log(`Auto-triggering workflow via resolver for ${data.entity}.${data.eventTrigger}`);
       return await this.startByProcessType({
         processTypeCode: data.eventTrigger, // Fallback processType = eventTrigger
-        organizationId: data.entity,
+        // [P2 #36] KHÔNG map organizationId = data.entity: `entity` là LOẠI thực thể nghiệp vụ
+        // (vd 'document'), không phải organization. StartByProcessTypeRequest có field organizationId
+        // nhưng triggerAutoBinding không nhận organizationId thật từ caller — để unset và service
+        // dùng mặc định ('DEFAULT') thay vì nhiễm tenant scope sai.
         trigger: data.eventTrigger,
         businessId: data.payloadData?.id,
         businessType: 'ENTITY', // Or derive from entity type

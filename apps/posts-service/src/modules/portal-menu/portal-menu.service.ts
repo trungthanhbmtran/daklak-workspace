@@ -61,9 +61,28 @@ export class PortalMenuService {
     if (onlyActive) where.isActive = true;
 
     // Lấy toàn bộ mảng phẳng
+    // Ledger #33: select tối thiểu theo đúng field mà mapToProto() trả lên gRPC;
+    // giữ nguyên full tree (diễn biến cây theo parentId), không take.
     const allMenus = await this.prisma.portalMenu.findMany({
       where,
       orderBy: { order: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        translations: true,
+        icon: true,
+        link: true,
+        order: true,
+        parentId: true,
+        isActive: true,
+        target: true,
+        type: true,
+        referenceId: true,
+        position: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     const menuMap = new Map<string, any>();

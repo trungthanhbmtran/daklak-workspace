@@ -20,6 +20,11 @@ const protoPath = [
   join(postsDir, 'portal_config.proto'),
 ];
 
+// Mask credentials khi log URL (ledger #9): amqp://user:password@host → amqp://user:***@host
+function maskRabbitUrl(url: string): string {
+  return url.replace(/:\/\/([^:@/]+):[^@]+@/, '://$1:***@');
+}
+
 async function bootstrap() {
   try {
     // 1. Tạo app dưới dạng Hybrid
@@ -50,8 +55,11 @@ async function bootstrap() {
       },
     });
 
-    // 3. Kết nối RabbitMQ (Translation)
-    const rabbitUrl = process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672';
+    // 3. Kết nối RabbitMQ (Translation) — fail-fast, không có fallback credential
+    const rabbitUrl = process.env.RABBITMQ_URL;
+    if (!rabbitUrl) {
+      throw new Error('RABBITMQ_URL is not set — refusing to start (no credential fallback).');
+    }
     app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.RMQ,
       options: {
@@ -86,7 +94,7 @@ async function bootstrap() {
 
     logger.log(`🚀 Post Service is running:`);
     logger.log(`- gRPC: ${process.env.GRPC_URL ?? '0.0.0.0:50055'}`);
-    logger.log(`- RabbitMQ: connected to ${rabbitUrl}`);
+    logger.log(`- RabbitMQ: connected to ${maskRabbitUrl(rabbitUrl)}`);
     logger.log(`- HTTP (Internal): ${port}`);
   } catch (error) {
     logger.error('❌ Error during bootstrap:', error);

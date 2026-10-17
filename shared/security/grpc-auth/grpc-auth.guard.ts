@@ -25,8 +25,23 @@ export class GrpcAuthGuard implements CanActivate {
     }
 
     const internalToken = metadata.get('x-internal-token')?.[0];
-    const expectedInternalToken = process.env.INTERNAL_TOKEN || 'internal-secret-daklak';
-    if (typeof internalToken === 'string' && internalToken === expectedInternalToken) {
+    // KHÔNG fallback secret công khai ('internal-secret-daklak'): nếu thiếu env
+    // INTERNAL_TOKEN, đây là lỗi cấu hình server — từ chối thay vì mở khoá impersonate
+    // systemUser với toàn quyền ['*'] cho bất kỳ caller nào biết chuỗi fallback.
+    if (typeof internalToken === 'string') {
+      const expectedInternalToken = process.env.INTERNAL_TOKEN;
+      if (!expectedInternalToken) {
+        throw new RpcException({
+          code: GrpcStatus.INTERNAL,
+          message: 'INTERNAL_TOKEN env is required',
+        });
+      }
+      if (internalToken !== expectedInternalToken) {
+        throw new RpcException({
+          code: GrpcStatus.UNAUTHENTICATED,
+          message: 'Invalid internal token',
+        });
+      }
       const systemUser = {
         id: 1,
         employeeCode: 'SYSTEM',

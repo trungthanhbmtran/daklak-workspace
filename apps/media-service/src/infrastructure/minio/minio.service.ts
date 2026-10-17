@@ -19,12 +19,22 @@ export class MinioService {
 
   constructor(private configService: ConfigService) {
     this.bucketName = this.configService.get<string>('MINIO_BUCKET') || 'daklak-media';
+
+    // Fail-fast: không còn fallback minioadmin/minioadmin (ledger #9)
+    const accessKey = this.configService.get<string>('MINIO_ACCESS_KEY');
+    const secretKey = this.configService.get<string>('MINIO_SECRET_KEY');
+    if (!accessKey || !secretKey) {
+      throw new Error(
+        'MINIO_ACCESS_KEY and MINIO_SECRET_KEY must be set — refusing to start (no credential fallback).',
+      );
+    }
+
     this.s3Client = new S3Client({
       endpoint: this.configService.get<string>('MINIO_ENDPOINT') || 'http://localhost:9000',
       region: this.configService.get<string>('MINIO_REGION') || 'us-east-1',
       credentials: {
-        accessKeyId: this.configService.get<string>('MINIO_ACCESS_KEY') || 'minioadmin',
-        secretAccessKey: this.configService.get<string>('MINIO_SECRET_KEY') || 'minioadmin',
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
       },
       forcePathStyle: true, // Needed for MinIO
     });

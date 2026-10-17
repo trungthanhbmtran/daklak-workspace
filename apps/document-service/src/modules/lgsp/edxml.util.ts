@@ -1,3 +1,7 @@
+import { Logger } from '@nestjs/common';
+
+const logger = new Logger('EdxmlUtil');
+
 export interface ParsedEdxmlDocument {
   documentNumber: string;
   notation?: string;
@@ -107,7 +111,8 @@ export function parseEdxml(rawPayload: string | Buffer): ParsedEdxmlDocument {
     if (!trimmed.startsWith('<') && !trimmed.startsWith('<?xml')) {
       try {
         xmlStr = Buffer.from(trimmed, 'base64').toString('utf-8');
-      } catch {
+      } catch (error: any) {
+        logger.warn(`parseEdxml: failed to decode base64 payload, falling back to raw text — ${error?.message}`);
         xmlStr = trimmed;
       }
     } else {

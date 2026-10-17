@@ -1,5 +1,56 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-17] Tích Hợp Toàn Diện Bộ Gõ & Bàn Phím Ảo AmaKey (Tiếng Êđê & Tiếng Việt Chuẩn Đắk Lắk) Vào Phân Hệ Quản Lý Nhân Sự (HRM)
+
+### 1. Bối Cảnh & Yêu Cầu Người Dùng
+- **Chỉ đạo người dùng**:
+  * "đọc https://github.com/thuyenvinh/AmaKey và tích hợp bàn phím này vào hệ thống cho tôi chỗ phần nhân sự".
+- **Khảo sát mã nguồn thực tế AmaKey (`thuyenvinh/AmaKey`)**:
+  * AmaKey là bộ gõ đa nền tảng độc lập (Rust core + Web adapter) hỗ trợ Tiếng Việt (Telex, VNI) và đặc biệt là **bộ gõ chữ viết Tiếng Êđê (Rhade) theo chuẩn Unicode** phục vụ đồng bào dân tộc thiểu số và văn bản hành chính tỉnh Đắk Lắk.
+  * Các ký tự đặc trưng Êđê: `Ƀ ƀ` (B gạch ngang), `Č č` (C caron/mũ ngược), `Đ đ`, `Ĕ ĕ` (E breve), `Ê̆ ê̆` (Ê breve), `Ĭ ĭ` (I breve), `Ñ ñ` (N tilde/dấu ngã), `Ŏ ŏ` (O breve), `Ô̆ ô̆` (Ô breve), `Ơ̆ ơ̆` (Ơ breve), `Ŭ ŭ` (U breve), `Ư̆ ư̆` (Ư breve).
+  * Quy tắc gõ:
+    - **Telex Êđê**: `bb` -> `ƀ`, `cc` -> `č`, `dd` -> `đ`, `nn` -> `ñ`, `ex` -> `ĕ`, `eex`/`exe` -> `ê̆`, `ix` -> `ĭ`, `ox` -> `ŏ`, `oox`/`oxo` -> `ô̆`, `owx`/`oxw` -> `ơ̆`, `ux` -> `ŭ`, `uwx`/`uxw` -> `ư̆`, `aa` -> `â`, `aw`/`ax` -> `ă`. Hỗ trợ biến đổi trễ (`mraoa` -> `mrâo`, `brubwx` -> `ƀrư̆`), và lặp phím để hoàn nguyên (`bbb` -> `bb`).
+    - **VNI Êđê**: Số 9 cho phụ âm (`b9` -> `ƀ`, `c9` -> `č`, `d9` -> `đ`, `n9` -> `ñ`); số 8 cho breve (`e8` -> `ĕ`, `e68` -> `ê̆`, `i8` -> `ĭ`, `o8` -> `ŏ`, `o68` -> `ô̆`, `o78` -> `ơ̆`, `u8` -> `ŭ`, `u78` -> `ư̆`); số 6 cho mũ (`a6` -> `â`, `e6` -> `ê`, `o6` -> `ô`); số 7 cho móc (`o7` -> `ơ`, `u7` -> `ư`).
+  * Thực tế nghiệp vụ HRM Đắk Lắk: Khi lập hồ sơ cán bộ công chức, tên riêng cán bộ (`Y Krô Čêč`, `H'Biê Niê`, `Ama Ƀuôn`, `H'Čam Ksor`...) và địa bàn công tác, buôn làng (`Ƀuôn Ma Thuột`, `Čư M'gar`, `Krông Ƀúk`, `Ea H'leo`...) bắt buộc phải sử dụng các ký tự này.
+
+### 2. Các Thành Phần Kỹ Thuật Đã Triển Khai
+1. **Lõi Engine AmaKey Web (`apps/admin_khcn/features/hrm/components/amakey/amakey-engine.ts`)**:
+   - Triển khai toàn bộ quy tắc `QUY_TAC_TELEX_EDE`, `QUY_TAC_VNI_EDE`, Telex Tiếng Việt, VNI Tiếng Việt và cơ chế xử lý hoàn nguyên phím lặp, biến đổi trễ không đồng bộ, chuẩn hóa Unicode NFC theo đúng spec kit của AmaKey.
+2. **Context & Provider Toàn Cục HRM (`amakey-context.tsx`)**:
+   - Quản lý trạng thái kiểu gõ hiện tại (`telexEde`, `vniEde`, `telexVi`, `vniVi`, `off`) lưu trữ bền vững trong `localStorage`.
+   - Interceptor sự kiện `beforeinput` và `keydown` toàn cục trên các phần tử `input` và `textarea` trong phân hệ HRM.
+   - Phím tắt toàn cục: `Alt + K` để chuyển đổi nhanh các kiểu gõ; `Alt + Shift + K` để bật/tắt Bàn phím ảo.
+3. **Thanh Trạng Thái Nổi Thông Minh (`AmaKeyFloatingBar.tsx`)**:
+   - Widget nổi góc phải màn hình hiển thị trực quan huy hiệu kiểu gõ hiện tại (`[ÊĐÊ TELEX]`, `[ÊĐÊ VNI]`, `[VIỆT TELEX]`, `[VIỆT VNI]`, `[TẮT]`).
+   - Nút bật bàn phím ảo, nút mở bảng hướng dẫn quy tắc gõ và nút thu nhỏ thanh điều khiển.
+4. **Bàn Phím Ảo Trực Quan Tiếng Ê Đê (`AmaKeyVirtualKeyboard.tsx`)**:
+   - Hiển thị đầy đủ hàng phím ký tự đặc trưng Ê Đê (`Ƀ ƀ`, `Č č`, `Đ đ`, `Ĕ ĕ`, `Ê̆ ê̆`, `Ĭ ĭ`, `Ñ ñ`, `Ŏ ŏ`, `Ô̆ ô̆`, `Ơ̆ ơ̆`, `Ŭ ŭ`, `Ư̆ ư̆`) và nguyên âm có dấu Tiếng Việt (`Ă ă`, `Â â`, `Ê ê`, `Ô ô`, `Ơ ơ`, `Ư ư`).
+   - Phím Caps/Shift in hoa, phím nháy đơn Ê Đê (`H'`), Space, Backspace và thanh mẹo gõ nhanh.
+   - Nhấp chuột/chạm trực tiếp để chèn ký tự vào vị trí con trỏ của trường dữ liệu đang focus và kích hoạt sự kiện `input` cho React Hook Form.
+5. **Bảng Hướng Dẫn & Tra Cứu Quy Tắc Gõ (`AmaKeyGuideModal.tsx`)**:
+   - Modal hiển thị bảng so sánh quy tắc gõ Telex Êđê vs VNI Êđê, ví dụ thực tế tên riêng và buôn làng tỉnh Đắk Lắk.
+6. **Tích Hợp Vào Cây DOM HRM & Form Thêm Cán Bộ**:
+   - `apps/admin_khcn/app/services/hrm/layout.tsx`: Bọc `AmaKeyIntegratedLayout` bao quát 100% các trang HRM (`employees`, `employees/create`, `employees/[id]`, `work-plans/tasks`...).
+   - `EmployeePersonalInfoCard.tsx`: Bổ sung nút mini "Phím Êđê AmaKey" ngay trên trường "Họ và tên đệm" để 1-click kích hoạt bàn phím ảo khi nhập tên đồng bào dân tộc thiểu số.
+
+### 3. Danh Sách File Đã Tác Động
+1. `apps/admin_khcn/features/hrm/components/amakey/amakey-engine.ts` (Tạo mới: Lõi thuật toán AmaKey)
+2. `apps/admin_khcn/features/hrm/components/amakey/amakey-context.tsx` (Tạo mới: AmaKey Context & input interceptor)
+3. `apps/admin_khcn/features/hrm/components/amakey/AmaKeyFloatingBar.tsx` (Tạo mới: Thanh điều khiển nổi)
+4. `apps/admin_khcn/features/hrm/components/amakey/AmaKeyVirtualKeyboard.tsx` (Tạo mới: Bàn phím ảo trực quan)
+5. `apps/admin_khcn/features/hrm/components/amakey/AmaKeyGuideModal.tsx` (Tạo mới: Modal hướng dẫn & tra cứu)
+6. `apps/admin_khcn/features/hrm/components/amakey/AmaKeyIntegratedLayout.tsx` (Tạo mới: Layout wrapper)
+7. `apps/admin_khcn/features/hrm/components/amakey/index.ts` (Tạo mới: Re-export module)
+8. `apps/admin_khcn/app/services/hrm/layout.tsx` (Tích hợp AmaKey vào layout nhân sự)
+9. `apps/admin_khcn/features/hrm/components/employee-create/components/EmployeePersonalInfoCard.tsx` (Tích hợp shortcut phím Êđê)
+
+### 4. Bằng Chứng Kiểm Chứng Máy Thực Tế
+- **TypeScript Check (`npm run typecheck`)**: **Exit code 0 (0 errors, 100% type-safe)**.
+- **Biên dịch Production (`npm run build`)**: **Exit code 0 (86/86 static & dynamic routes compiled sạch trong 69s)**.
+- **Kiểm tra Mã hóa & Vệ sinh**: 100% UTF-8 không BOM, 0 console.log, 0 debugger.
+
+---
+
 ## [2026-10-16] Triển Khai Toàn Diện Kiến Trúc Semantic Data Catalog, Dynamic Execution Engine & Trực Quan Hóa Tự Phục Vụ (Self-Service BI) Cho Report Service
 
 ### 1. Bối Cảnh & Yêu Cầu Người Dùng

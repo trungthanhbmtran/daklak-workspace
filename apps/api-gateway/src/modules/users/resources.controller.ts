@@ -8,6 +8,7 @@ import {
   Param,
   Inject,
   UseGuards,
+  Req,
   OnModuleInit,
   ParseIntPipe,
   InternalServerErrorException,
@@ -24,9 +25,13 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 
 @ApiTags('PBAC – Tài nguyên')
 @Controller('admin/resources')
@@ -49,7 +54,21 @@ export class ResourcesController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.PBAC.SYMBOL)
     private readonly client: any,
+    private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   onModuleInit() {
     this.pbacService = this.client.getService(MICROSERVICES.PBAC.SERVICE);
@@ -63,8 +82,10 @@ export class ResourcesController implements OnModuleInit {
   @Get()
   @ApiOperation({ summary: 'Danh sách PBAC Resource (dùng cho menu form)' })
   @ApiResponse({ status: 200, description: 'Mảng resources phẳng' })
-  async listResources() {
-    const res = (await firstValueFrom(this.pbacService.GetResources({})).catch(
+  async listResources(@Req() req: any) {
+    const res = (await firstValueFrom(
+      this.pbacService.GetResources({}, this.getGrpcMetadata(req)),
+    ).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
@@ -83,8 +104,10 @@ export class ResourcesController implements OnModuleInit {
   @Get('permission-matrix')
   @ApiOperation({ summary: 'Danh sách quyền phẳng (dùng cho form policies)' })
   @ApiResponse({ status: 200, description: 'Mảng permissions phẳng' })
-  async getPermissionMatrix() {
-    const res = (await firstValueFrom(this.pbacService.GetResources({})).catch(
+  async getPermissionMatrix(@Req() req: any) {
+    const res = (await firstValueFrom(
+      this.pbacService.GetResources({}, this.getGrpcMetadata(req)),
+    ).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
@@ -110,14 +133,18 @@ export class ResourcesController implements OnModuleInit {
   @ApiOperation({ summary: 'Tạo tài nguyên mới' })
   @ApiResponse({ status: 201, description: 'Tài nguyên vừa được tạo' })
   async createResource(
+    @Req() req: any,
     @Body() body: { code: string; name: string; serviceCode?: string },
   ) {
     const result = await firstValueFrom(
-      this.pbacService.CreateResource({
-        code: body.code,
-        name: body.name,
-        serviceCode: body.serviceCode,
-      }),
+      this.pbacService.CreateResource(
+        {
+          code: body.code,
+          name: body.name,
+          serviceCode: body.serviceCode,
+        },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: result };
   }
@@ -126,16 +153,20 @@ export class ResourcesController implements OnModuleInit {
   @ApiOperation({ summary: 'Cập nhật tài nguyên' })
   @ApiResponse({ status: 200, description: 'Tài nguyên sau khi cập nhật' })
   async updateResource(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { code?: string; name?: string; serviceCode?: string },
   ) {
     const result = await firstValueFrom(
-      this.pbacService.UpdateResource({
-        id,
-        code: body.code,
-        name: body.name,
-        serviceCode: body.serviceCode,
-      }),
+      this.pbacService.UpdateResource(
+        {
+          id,
+          code: body.code,
+          name: body.name,
+          serviceCode: body.serviceCode,
+        },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: result };
   }

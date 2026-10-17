@@ -1,13 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class DossiersService {
+  private readonly logger = new Logger(DossiersService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async getDossiers() {
+    // Ledger #29: proto DossierService.GetDossiers dùng common.EmptyRequest — chưa có
+    // tham số pagination trên contract. Cap mặc định 100 + sort mới nhất để tránh unbounded.
+    // TODO(proto): thêm pagination (skip/limit) vào dossier.proto khi được phép sửa contract.
     return this.prisma.oneStopDossier.findMany({
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   }
 
@@ -41,14 +48,19 @@ export class DossiersService {
     let requiredDocs: any[] = [];
     try {
       requiredDocs = typeof procedure.requiredDocs === 'string' ? JSON.parse(procedure.requiredDocs) : procedure.requiredDocs;
-    } catch {
+    } catch (error: any) {
+      // Ledger #27: không nuốt lặng lẽ lỗi parse — ghi log để truy vết dữ liệu rác
+      this.logger.warn(
+        `createDossierFromTemplate: failed to parse requiredDocs of procedure ${procedureId}, fallback to empty — ${error?.message}`,
+      );
       requiredDocs = [];
     }
 
-    // 2. Tạo Hồ sơ mới
+    // Ledger #29: mã hồ sơ dùng 8-hex từ randomUUID (ít nhất ~2^32 tổ hợp) thay
+    // Math.random()*9000 gây collision ~100 hồ sơ/năm. Giữ format HS-{year}-{suffix}.
     const dossier = await this.prisma.oneStopDossier.create({
       data: {
-        code: `HS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        code: this.generateDossierCode(),
         procedureName: procedure.name,
         senderName: senderName || "Người nộp",
         receiveDate: new Date(),
@@ -85,7 +97,7 @@ export class DossiersService {
   async createBlankDossier(procedureName: string, senderName: string) {
     const dossier = await this.prisma.oneStopDossier.create({
       data: {
-        code: `HS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        code: this.generateDossierCode(),
         procedureName: procedureName || "Hồ sơ mới",
         senderName: senderName || "Người nộp",
         receiveDate: new Date(),
@@ -104,6 +116,12 @@ export class DossiersService {
       status: dossier.status,
       createdAt: dossier.createdAt.toISOString()
     };
+  }
+
+  private generateDossierCode(): string {
+    // Ledger #29: 8-hex từ randomUUID — entropy đủ lớn, tránh collision của
+    // `Math.random()*9000` (~100 hồ sơ/năm). Format giữ theo comment: HS-{year}-{suffix}.
+    return `HS-${new Date().getFullYear()}-${randomUUID().replace(/-/g, '').slice(0, 8)}`;
   }
 
   async addComponentFromCabinet(dossierId: string, name: string, fileUrl: string) {

@@ -3,12 +3,14 @@ import {
   Injectable,
   Inject,
   OnModuleInit,
+  Logger,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
 export class ConsultationsService implements OnModuleInit {
+  private readonly logger = new Logger(ConsultationsService.name);
   private consultationGrpcService: any;
 
   constructor(
@@ -31,7 +33,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.ListConsultations(req),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -40,7 +42,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.ListPublicComments({ status }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -49,7 +51,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.GetConsultation({ id }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -58,7 +60,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.CreateConsultation(body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -68,7 +70,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.SubmitResponse(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -77,7 +79,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.ListResponses({ consultationId }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -89,7 +91,7 @@ export class ConsultationsService implements OnModuleInit {
         status,
       }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
@@ -99,7 +101,7 @@ export class ConsultationsService implements OnModuleInit {
     return firstValueFrom(
       this.consultationGrpcService.ModerateComment(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }

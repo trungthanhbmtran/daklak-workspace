@@ -14,6 +14,7 @@ import {
   MapPin,
   X,
   BadgeCheck,
+  Keyboard,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -33,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
+import { useAmaKey } from "../../amakey";
 import type { EmployeeCreateFormValues } from "../types";
 
 interface EmployeePersonalInfoCardProps {
@@ -74,6 +76,7 @@ function FullNamePreviewBadge({ control }: { control: Control<EmployeeCreateForm
 export function EmployeePersonalInfoCard({ control, setValue }: EmployeePersonalInfoCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarValue = useWatch({ control, name: "avatar" });
+  const { toggleVirtualKeyboard } = useAmaKey();
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId, downloadUrl) => {
@@ -175,9 +178,20 @@ export function EmployeePersonalInfoCard({ control, setValue }: EmployeePersonal
               name="lastname"
               render={({ field }) => (
                 <FormItem className="space-y-1.5 min-w-0">
-                  <FormLabel className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                    Họ và tên đệm <span className="text-red-500">*</span>
-                  </FormLabel>
+                  <div className="flex items-center justify-between gap-1">
+                    <FormLabel className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                      Họ và tên đệm <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <button
+                      type="button"
+                      onClick={toggleVirtualKeyboard}
+                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/60 px-1.5 py-0.5 rounded transition-colors"
+                      title="Mở bàn phím ảo AmaKey nhập chữ tiếng Êđê (Ƀ, Č, Ĕ, Ê̆, Ĭ, Ñ, Ŏ, Ô̆, Ơ̆, Ŭ, Ư̆...)"
+                    >
+                      <Keyboard className="h-3 w-3 text-indigo-600" />
+                      <span>Phím Êđê AmaKey</span>
+                    </button>
+                  </div>
                   <FormControl>
                     <Input
                       {...field}

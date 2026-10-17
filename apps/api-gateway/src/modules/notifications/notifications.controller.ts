@@ -6,6 +6,7 @@ import {
   Req,
   UseGuards,
   Query,
+  Logger,
 } from '@nestjs/common';
 import { EventPattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import {
@@ -22,6 +23,8 @@ import { NotificationsService } from './notifications.service';
 @Controller('admin/notifications')
 @ApiBearerAuth('JWT-auth')
 export class NotificationsController {
+  private readonly logger = new Logger(NotificationsController.name);
+
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
@@ -87,25 +90,33 @@ export class NotificationsController {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
     const email = req.user?.email;
-    const ok = this.notificationsService.markRead(
-      id,
-      userId,
-      employeeCode,
-      email,
-    );
-    return { };
+    return this.notificationsService
+      .markRead(id, userId, employeeCode, email)
+      .then((updated) => ({ success: !!updated }));
   }
 
   @EventPattern('send_inapp_notification')
   async handleInAppNotification(@Payload() data: any) {
     if (!data.recipients || !data.recipients.length) return;
-    for (const recipient of data.recipients) {
-      await this.notificationsService.push(
-        recipient,
-        data.title,
-        data.message || data.body,
-        data.metadata,
-      );
-    }
+    const results = await Promise.allSettled(
+      data.recipients.map((recipient: any) =>
+        this.notificationsService.push(
+          recipient,
+          data.title,
+          data.message || data.body,
+          data.metadata,
+        ),
+      ),
+    );
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        this.logger.error(
+          `In-app notification failed for recipient #${index}: ${
+            result.reason?.message || result.reason
+          }`,
+          result.reason?.stack,
+        );
+      }
+    });
   }
 }

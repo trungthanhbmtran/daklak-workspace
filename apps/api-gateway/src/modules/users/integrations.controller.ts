@@ -8,6 +8,7 @@ import {
   Param,
   Req,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { HttpService } from '@nestjs/axios';
@@ -21,6 +22,7 @@ import { RequirePermissions } from '../../core/decorators/permissions.decorator'
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class IntegrationsController {
+  private readonly logger = new Logger(IntegrationsController.name);
   private readonly notificationServiceUrl =
     'http://notification-service:50075/api/v1/integrations';
 
@@ -34,7 +36,7 @@ export class IntegrationsController {
     const { data } = await firstValueFrom(
       this.httpService.get(this.notificationServiceUrl, { params: { search } }),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
     });
     return data;
@@ -47,7 +49,7 @@ export class IntegrationsController {
     const { data } = await firstValueFrom(
       this.httpService.post(this.notificationServiceUrl, body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
     });
     return data;
@@ -60,7 +62,7 @@ export class IntegrationsController {
     const { data } = await firstValueFrom(
       this.httpService.put(`${this.notificationServiceUrl}/${id}`, body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
     });
     return data;
@@ -73,7 +75,7 @@ export class IntegrationsController {
     const { data } = await firstValueFrom(
       this.httpService.put(`${this.notificationServiceUrl}/${id}/active`, body),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
     });
     return data;
@@ -86,7 +88,7 @@ export class IntegrationsController {
     const { data } = await firstValueFrom(
       this.httpService.delete(`${this.notificationServiceUrl}/${id}`),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
     });
     return data;

@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { ChatService } from './chat.service';
 import { MICROSERVICES } from '../../core/constants/services';
 import { ChatGateway } from './chat.gateway';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -26,6 +27,10 @@ describe('ChatController', () => {
         },
         {
           provide: ChatGateway,
+          useValue: {},
+        },
+        {
+          provide: TokenIssuerService,
           useValue: {},
         },
       ],

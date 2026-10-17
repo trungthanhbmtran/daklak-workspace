@@ -13,7 +13,7 @@ export class AiAssistantService {
   ) {}
 
   async chat(assistantId: string, message: string, userId: number) {
-    const assistant = await this.getAssistant(assistantId);
+    const assistant = await this.getChatScopedAssistant(assistantId, userId);
     if (!assistant) throw new NotFoundException('Assistant not found');
 
     const questionEmbedding = await this.aiService.generateEmbedding(
@@ -63,9 +63,9 @@ export class AiAssistantService {
     return assistants;
   }
 
-  async getAssistant(id: string) {
+  async getAssistant(id: string, userId: number) {
     const assistant = await this.prisma.aiAssistant.findUnique({
-      where: { id },
+      where: { id, userId },
       include: {
         knowledgeSources: true,
         tools: true,
@@ -75,6 +75,19 @@ export class AiAssistantService {
       throw new NotFoundException('Assistant not found');
     }
     return assistant;
+  }
+
+  /**
+   * Chat cho phép assistant của chính người dùng hoặc assistant công khai (isPublic).
+   */
+  private getChatScopedAssistant(id: string, userId: number) {
+    return this.prisma.aiAssistant.findFirst({
+      where: {
+        id,
+        OR: [{ userId }, { isPublic: true }],
+      },
+      select: { id: true, userId: true, systemPrompt: true },
+    });
   }
 
   async createAssistant(data: {
@@ -99,13 +112,22 @@ export class AiAssistantService {
     });
   }
 
-  async updateAssistant(data: {
-    id: string;
-    name: string;
-    description?: string;
-    systemPrompt: string;
-    isPublic: boolean;
-  }) {
+  async updateAssistant(
+    data: {
+      id: string;
+      name: string;
+      description?: string;
+      systemPrompt: string;
+      isPublic: boolean;
+    },
+    userId: number,
+  ) {
+    const existing = await this.prisma.aiAssistant.findUnique({
+      where: { id: data.id, userId },
+      select: { id: true },
+    });
+    if (!existing) throw new NotFoundException('Assistant not found');
+
     return this.prisma.aiAssistant.update({
       where: { id: data.id },
       data: {
@@ -121,21 +143,37 @@ export class AiAssistantService {
     });
   }
 
-  async deleteAssistant(id: string) {
-    await this.prisma.aiAssistant.delete({
-      where: { id },
+  async deleteAssistant(id: string, userId: number) {
+    const deleted = await this.prisma.aiAssistant.deleteMany({
+      where: { id, userId },
     });
+    if (deleted.count === 0) {
+      throw new NotFoundException('Assistant not found');
+    }
     return true;
   }
 
-  async addKnowledgeSource(data: {
-    assistantId: string;
-    type: string;
-    title: string;
-    content?: string;
-    metadata?: string;
-    qdrantId?: string;
-  }) {
+  async addKnowledgeSource(
+    data: {
+      assistantId: string;
+      type: string;
+      title: string;
+      content?: string;
+      metadata?: string;
+      qdrantId?: string;
+    },
+    ownerId: number,
+  ) {
+    // Đảm bảo ownerId hợp lệ để tránh bỏ qua scope khi không xác định (filter undefined bị Prisma bỏ qua).
+    if (!Number.isInteger(ownerId)) {
+      throw new NotFoundException('Assistant not found');
+    }
+    const assistant = await this.prisma.aiAssistant.findUnique({
+      where: { id: data.assistantId, userId: ownerId },
+      select: { id: true },
+    });
+    if (!assistant) throw new NotFoundException('Assistant not found');
+
     await this.prisma.aiKnowledgeSource.create({
       data: {
         assistantId: data.assistantId,
@@ -149,14 +187,33 @@ export class AiAssistantService {
     return true;
   }
 
-  async removeKnowledgeSource(id: string) {
-    await this.prisma.aiKnowledgeSource.delete({
-      where: { id },
+  async removeKnowledgeSource(id: string, ownerId: number) {
+    // deleteMany + filter qua relation assistant: atomic và không rò rỉ sự tồn tại của bản ghi người khác.
+    const deleted = await this.prisma.aiKnowledgeSource.deleteMany({
+      where: {
+        id,
+        assistant: { userId: ownerId },
+      },
     });
+    if (deleted.count === 0) {
+      throw new NotFoundException('Knowledge source not found');
+    }
     return true;
   }
 
-  async addAssistantTool(data: { assistantId: string; toolName: string }) {
+  async addAssistantTool(
+    data: { assistantId: string; toolName: string },
+    ownerId: number,
+  ) {
+    if (!Number.isInteger(ownerId)) {
+      throw new NotFoundException('Assistant not found');
+    }
+    const assistant = await this.prisma.aiAssistant.findUnique({
+      where: { id: data.assistantId, userId: ownerId },
+      select: { id: true },
+    });
+    if (!assistant) throw new NotFoundException('Assistant not found');
+
     await this.prisma.aiAssistantTool.create({
       data: {
         assistantId: data.assistantId,
@@ -166,10 +223,16 @@ export class AiAssistantService {
     return true;
   }
 
-  async removeAssistantTool(id: string) {
-    await this.prisma.aiAssistantTool.delete({
-      where: { id },
+  async removeAssistantTool(id: string, ownerId: number) {
+    const deleted = await this.prisma.aiAssistantTool.deleteMany({
+      where: {
+        id,
+        assistant: { userId: ownerId },
+      },
     });
+    if (deleted.count === 0) {
+      throw new NotFoundException('Assistant tool not found');
+    }
     return true;
   }
 }

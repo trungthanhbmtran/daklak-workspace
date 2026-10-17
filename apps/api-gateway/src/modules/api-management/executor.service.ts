@@ -42,6 +42,8 @@ export class ExecutorService implements OnModuleInit {
   });
 
   private grpcService: any;
+  /** Fail-fast: token nội bộ bắt buộc từ env, không fallback */
+  private readonly internalToken: string;
   private tokenCache = new Map<
     string,
     { rawSecret: string; expiresAt: number }
@@ -59,7 +61,13 @@ export class ExecutorService implements OnModuleInit {
     private readonly registry: GatewayRegistryService,
     @Inject(MICROSERVICES.API_MANAGEMENT.SYMBOL)
     private readonly client: ClientGrpc,
-  ) {}
+  ) {
+    const token = process.env.INTERNAL_TOKEN;
+    if (!token) {
+      throw new Error('INTERNAL_TOKEN env is required');
+    }
+    this.internalToken = token;
+  }
 
   onModuleInit() {
     this.grpcService = this.client.getService('ApiManagementService');
@@ -75,8 +83,10 @@ export class ExecutorService implements OnModuleInit {
       return this.singleFlight.get(opaqueRef)!;
     }
 
+    const meta = new Metadata();
+    meta.add('x-internal-token', this.internalToken);
     const fetchPromise = firstValueFrom(
-      this.grpcService.ResolveCredential({ opaqueRef }),
+      this.grpcService.ResolveCredential({ opaqueRef }, meta),
     )
       .then((res: any) => {
         const rawSecret = res.rawSecret;
@@ -268,10 +278,7 @@ export class ExecutorService implements OnModuleInit {
     if (!conn) {
       try {
         const meta = new Metadata();
-        meta.add(
-          'x-internal-token',
-          process.env.INTERNAL_TOKEN || 'internal-secret-daklak',
-        );
+        meta.add('x-internal-token', this.internalToken);
         const res = (await firstValueFrom(
           this.grpcService.GetConnection({ id }, meta),
         )) as any;

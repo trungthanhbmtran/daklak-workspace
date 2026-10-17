@@ -40,10 +40,14 @@ async function bootstrap() {
   });
 
   // RMQ Transport
+  const rabbitUrl = process.env.RABBITMQ_URL;
+  if (!rabbitUrl) {
+    throw new Error('RABBITMQ_URL is not set — refusing to start (no credential fallback).');
+  }
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+      urls: [rabbitUrl],
       queue: 'workflow_events_queue',
       queueOptions: {
         durable: true,

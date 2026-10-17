@@ -6,8 +6,10 @@ import {
   Put,
   Param,
   Inject,
+  Req,
   UseGuards,
   ParseIntPipe,
+  OnModuleInit,
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
@@ -17,10 +19,14 @@ import {
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PbacGuard } from '../../common/guards/pbac.guard';
 import { RequirePolicy } from '../../common/decorators/require-policy.decorator';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 
 @Controller('admin/portal-configs')
 @UseGuards(JwtAuthGuard, PbacGuard)
@@ -40,7 +46,21 @@ export class PortalConfigController {
 
   constructor(
     @Inject(MICROSERVICES.PORTAL_CONFIG.SYMBOL) private client: ClientGrpc,
+    private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   onModuleInit() {
     this.configService = this.client.getService<any>(
@@ -51,34 +71,36 @@ export class PortalConfigController {
   @Post()
   @RequirePolicy('manage', 'portal_config')
   async create(
+    @Req() req: any,
     @Body() dto: { code: string; name: string; description?: string },
   ) {
-    const res: any = await firstValueFrom(this.configService.create(dto)).catch(
-      (e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      },
-    );
+    const res: any = await firstValueFrom(
+      this.configService.create(dto, this.getGrpcMetadata(req)),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
     return { data: res.data };
   }
 
   @Get()
-  async findAll() {
-    const res: any = await firstValueFrom(this.configService.getAll({})).catch(
-      (e) => {
-        throw new InternalServerErrorException(e.message || 'RPC Call Failed');
-      },
-    );
+  async findAll(@Req() req: any) {
+    const res: any = await firstValueFrom(
+      this.configService.getAll({}, this.getGrpcMetadata(req)),
+    ).catch((e) => {
+      throw new InternalServerErrorException(e.message || 'RPC Call Failed');
+    });
     return { data: res.data };
   }
 
   @Put(':id')
   @RequirePolicy('manage', 'portal_config')
   async update(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: { code?: string; name?: string; description?: string },
   ) {
     const res: any = await firstValueFrom(
-      this.configService.update({ id, ...dto }),
+      this.configService.update({ id, ...dto }, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
     return { data: res.data };
   }
@@ -86,14 +108,18 @@ export class PortalConfigController {
   @Post('upsert')
   @RequirePolicy('manage', 'portal_config')
   async upsert(
+    @Req() req: any,
     @Body() dto: { code: string; name: string; description?: string },
   ) {
     const res: any = await firstValueFrom(
-      this.configService.upsertByCode({
-        code: dto.code,
-        name: dto.name,
-        description: dto.description,
-      }),
+      this.configService.upsertByCode(
+        {
+          code: dto.code,
+          name: dto.name,
+          description: dto.description,
+        },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: res.data };
   }
@@ -105,13 +131,17 @@ export class PortalConfigController {
   @Post('batch-upsert')
   @RequirePolicy('manage', 'portal_config')
   async batchUpsert(
+    @Req() req: any,
     @Body()
     dto: {
       data: { code: string; name: string; description?: string }[];
     },
   ) {
     const res: any = await firstValueFrom(
-      this.configService.batchUpsert({ data: dto.data }),
+      this.configService.batchUpsert(
+        { data: dto.data },
+        this.getGrpcMetadata(req),
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: res.data };
   }

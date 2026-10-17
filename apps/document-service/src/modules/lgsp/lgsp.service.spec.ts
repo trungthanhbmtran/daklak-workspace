@@ -26,6 +26,9 @@ describe('LGSP Interoperability Module', () => {
   };
 
   beforeEach(async () => {
+    // Fail-fast: LGSP keys bắt buộc từ env (không còn fallback hardcode)
+    process.env.LGSP_CLIENT_ID = 'env_client_id';
+    process.env.LGSP_CLIENT_SECRET = 'env_client_secret';
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         LgspService,
@@ -50,10 +53,9 @@ describe('LGSP Interoperability Module', () => {
   });
 
   describe('LgspConfigService', () => {
-    it('phải có cấu hình mặc định sẵn sàng từ thông tin người dùng cung cấp', () => {
-      expect(configService.systemCode).toBe('0400101394-CTDL-012');
-      expect(configService.clientId).toBe('PYRJBx37SCeuDZR6zX0G6HMDidQa');
-      expect(configService.clientSecret).toBe('H2UckeTI6ArAVO7llaPpABxjnIEP0nGxH3x_OP0Gt0ga');
+    it('phải nạp clientId/clientSecret từ environment', () => {
+      expect(configService.clientId).toBe('env_client_id');
+      expect(configService.clientSecret).toBe('env_client_secret');
       expect(configService.isConfigured()).toBe(true);
 
       const updated = configService.updateConfig({
@@ -64,6 +66,14 @@ describe('LGSP Interoperability Module', () => {
       expect(configService.clientId).toBe('new_client_id_override');
       expect(configService.clientSecret).toBe('new_secret_key_override');
       expect(updated.isConfigured).toBe(true);
+    });
+
+    it('phải fail-fast khi thiếu LGSP_CLIENT_ID/LGSP_CLIENT_SECRET', () => {
+      delete process.env.LGSP_CLIENT_ID;
+      delete process.env.LGSP_CLIENT_SECRET;
+      expect(() => new LgspConfigService()).toThrow(
+       /LGSP_CLIENT_ID and LGSP_CLIENT_SECRET/,
+      );
     });
   });
 

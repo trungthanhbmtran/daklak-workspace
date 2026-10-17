@@ -6,6 +6,7 @@ import {
   Param,
   Inject,
   OnModuleInit,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -14,6 +15,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 @ApiTags('Public Consultations')
 @Controller('public/documents/consultations')
 export class PublicConsultationsController implements OnModuleInit {
+  private readonly logger = new Logger(PublicConsultationsController.name);
   private consultationService: any;
 
   constructor(
@@ -33,7 +35,7 @@ export class PublicConsultationsController implements OnModuleInit {
     return firstValueFrom(
       this.consultationService.SubmitPublicComment(payload),
     ).catch((e) => {
-      console.error('RPC Call Failed', e.message);
+      this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }

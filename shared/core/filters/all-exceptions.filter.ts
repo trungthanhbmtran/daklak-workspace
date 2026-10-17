@@ -10,6 +10,25 @@ import { RpcException } from '@nestjs/microservices';
 import { Observable, throwError } from 'rxjs';
 
 /**
+ * Map mã gRPC status (số) → HTTP statusCode + code chuỗi chuẩn hóa.
+ * Dùng chung cho: (a) RpcException có `code` là số, (b) exception thô có field `code`.
+ * (3→400, 4→503, 5→404, 6→409, 7→403, 8→429, 9→409, 12→501, 13→500, 14→503, 16→401)
+ */
+const GRPC_STATUS_HTTP_MAP: Record<number, { statusCode: number; code: string }> = {
+  3: { statusCode: HttpStatus.BAD_REQUEST, code: 'INVALID_ARGUMENT' },
+  4: { statusCode: HttpStatus.SERVICE_UNAVAILABLE, code: 'DEADLINE_EXCEEDED' },
+  5: { statusCode: HttpStatus.NOT_FOUND, code: 'NOT_FOUND' },
+  6: { statusCode: HttpStatus.CONFLICT, code: 'ALREADY_EXISTS' },
+  7: { statusCode: HttpStatus.FORBIDDEN, code: 'PERMISSION_DENIED' },
+  8: { statusCode: HttpStatus.TOO_MANY_REQUESTS, code: 'RESOURCE_EXHAUSTED' },
+  9: { statusCode: HttpStatus.CONFLICT, code: 'FAILED_PRECONDITION' },
+  12: { statusCode: HttpStatus.NOT_IMPLEMENTED, code: 'UNIMPLEMENTED' },
+  13: { statusCode: HttpStatus.INTERNAL_SERVER_ERROR, code: 'INTERNAL' },
+  14: { statusCode: HttpStatus.SERVICE_UNAVAILABLE, code: 'UNAVAILABLE' },
+  16: { statusCode: HttpStatus.UNAUTHORIZED, code: 'UNAUTHENTICATED' },
+};
+
+/**
  * Chuẩn hoá toàn bộ lỗi về dạng duy nhất.
  * - Loại bỏ các trường null/undefined (như data: null, meta: null).
  * - Xử lý cho cả HTTP Context (API Gateway) và RPC Context (Microservices).
@@ -40,53 +59,29 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof RpcException) {
       const err = exception.getError() as any;
       if (typeof err === 'object' && err !== null) {
-        statusCode = err.statusCode ?? err.code ?? statusCode;
-        code = err.code ?? 'RPC_ERROR';
+        // err.code là mã gRPC status (số) → map sang HTTP theo bảng chuẩn,
+        // tránh trả statusCode nonsense (ví dụ 5) cho client HTTP.
+        const grpcMapped =
+          typeof err.code === 'number' ? GRPC_STATUS_HTTP_MAP[err.code] : undefined;
+        statusCode = err.statusCode ?? grpcMapped?.statusCode ?? statusCode;
+        code = grpcMapped?.code ?? err.code ?? 'RPC_ERROR';
         message = err.message ?? message;
       } else if (typeof err === 'string') {
         message = err;
         code = 'RPC_ERROR';
       }
     } else if (exception?.code) {
-      // Map gRPC or other codes
+      // Map gRPC status code (số) từ exception thô theo bảng chuẩn hóa
       const grpcCode = Number(exception.code);
-      switch (grpcCode) {
-        case 3: // INVALID_ARGUMENT
-          statusCode = HttpStatus.BAD_REQUEST;
-          code = 'INVALID_ARGUMENT';
-          break;
-        case 5: // NOT_FOUND
-          statusCode = HttpStatus.NOT_FOUND;
-          code = 'NOT_FOUND';
-          break;
-        case 6: // ALREADY_EXISTS
-          statusCode = HttpStatus.CONFLICT;
-          code = 'ALREADY_EXISTS';
-          break;
-        case 7: // PERMISSION_DENIED
-          statusCode = HttpStatus.FORBIDDEN;
-          code = 'PERMISSION_DENIED';
-          break;
-        case 13: // INTERNAL - lỗi của chính internal service (metadata bị thiếu, v.v.)
-          // Dùng 503 thay vì 500 để phân biệt "upstream service error" với lỗi gateway
-          statusCode = HttpStatus.SERVICE_UNAVAILABLE;
-          code = 'SERVICE_UNAVAILABLE';
-          break;
-        case 16: // UNAUTHENTICATED
-          statusCode = HttpStatus.UNAUTHORIZED;
-          code = 'UNAUTHENTICATED';
-          break;
-        case 12: // UNIMPLEMENTED
-          statusCode = HttpStatus.NOT_IMPLEMENTED;
-          code = 'UNIMPLEMENTED';
-          break;
-        case 8: // RESOURCE_EXHAUSTED
-          statusCode = HttpStatus.TOO_MANY_REQUESTS;
-          code = 'RESOURCE_EXHAUSTED';
-          break;
-        default:
-          code = typeof exception.code === 'string' ? exception.code : 'UNKNOWN_ERROR';
-          break;
+      const grpcMapped = GRPC_STATUS_HTTP_MAP[grpcCode];
+      if (grpcMapped) {
+        statusCode = grpcMapped.statusCode;
+        code = grpcMapped.code;
+      } else {
+        code =
+          Number.isNaN(grpcCode) && typeof exception.code === 'string'
+            ? exception.code
+            : 'UNKNOWN_ERROR';
       }
     }
 

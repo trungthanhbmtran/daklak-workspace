@@ -16,11 +16,11 @@ export class TransactionalOutboxService {
   ): Promise<T> {
     return prismaClient.$transaction(async (tx: any) => {
       // 1. Thực thi nghiệp vụ Local (Cập nhật dữ liệu DB)
-      this.logger.debug(Executing business logic for command \);
+      this.logger.debug(`Executing business logic for command ${command.commandId}`);
       const result = await businessLogic(tx);
 
       // 2. Insert OutboxEvent trong cùng Transaction
-      this.logger.debug(Inserting OutboxEvent for command \);
+      this.logger.debug(`Inserting OutboxEvent for command ${command.commandId}`);
       await tx.outboxEvent.create({
         data: {
           workflowInstanceId: command.workflowInstanceId,

@@ -81,8 +81,31 @@ export class CategoriesService {
 
   async getTree() {
     // Thuật toán O(N) Adjacency List cho cây danh mục không giới hạn độ sâu
+    // Ledger #33: select tối thiểu theo đúng field mà sanitizeCategory() cắt xả lên gRPC
+    // (bỏ metaTitle/metaDescription không dùng); giữ nguyên full tree, không take.
     const allCategories = await this.prisma.category.findMany({
       orderBy: { orderIndex: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        parentId: true,
+        lft: true,
+        rgt: true,
+        depth: true,
+        status: true,
+        thumbnail: true,
+        attachmentId: true,
+        linkType: true,
+        customUrl: true,
+        target: true,
+        orderIndex: true,
+        description: true,
+        translations: true,
+        isGovStandard: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     const categoryMap = new Map<string, any>();

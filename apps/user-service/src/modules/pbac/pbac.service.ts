@@ -7,6 +7,25 @@ import { status as GrpcStatus } from '@grpc/grpc-js';
 export class PbacService {
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Parse policy conditions TRƯỚC khi vào $transaction — parse lỗi → RpcException InvalidArgument.
+   */
+  private parseConditionsSafe(
+    raw: unknown,
+    context: string,
+  ): Record<string, unknown> | undefined {
+    if (raw === undefined || raw === null || raw === '') return undefined;
+    if (typeof raw !== 'string') return raw as Record<string, unknown>;
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: `Field "conditions" (${context}) is not valid JSON`,
+      });
+    }
+  }
+
   async createUserGroup(data: any) {
     const exists = await this.prisma.userGroup.findUnique({
       where: { name: data.name },
@@ -18,28 +37,25 @@ export class PbacService {
       });
     }
 
+    // Validate + parse conditions trước khi mở transaction (chống JSON.parse crash trong tx)
+    const policyInputs = (data.policies ?? []).map((p: any) => ({
+      resourceId: p.resourceId ?? p.resource_id,
+      action: p.action,
+      effect: p.effect || 'ALLOW',
+      conditions: this.parseConditionsSafe(p.conditions, 'user group policy'),
+    }));
+
     const created = await this.prisma.$transaction(async (tx) => {
       const ug = await tx.userGroup.create({
         data: { name: data.name },
       });
 
-      if (data.policies && data.policies.length > 0) {
-        const policyCreates = data.policies.map((p: any) => ({
-          resourceId: p.resourceId ?? p.resource_id,
-          action: p.action,
-          effect: p.effect || 'ALLOW',
-          conditions: p.conditions
-            ? typeof p.conditions === 'string'
-              ? JSON.parse(p.conditions)
-              : p.conditions
-            : undefined,
-        }));
-
+      if (policyInputs.length > 0) {
         await tx.userGroup.update({
           where: { id: ug.id },
           data: {
             policies: {
-              create: policyCreates,
+              create: policyInputs,
             },
           },
         });
@@ -111,6 +127,19 @@ export class PbacService {
   }
 
   async updateUserGroup(id: number, data: any) {
+    // Validate + parse conditions trước khi mở transaction (chống JSON.parse crash giữa tx)
+    const newPolicies = Array.isArray(data.policies)
+      ? data.policies.map((p: any) => ({
+          resourceId: p.resourceId ?? p.resource_id,
+          action: p.action,
+          effect: p.effect || 'ALLOW',
+          conditions: this.parseConditionsSafe(
+            p.conditions,
+            'user group policy',
+          ),
+        }))
+      : [];
+
     // Transaction to update policies
     return this.prisma.$transaction(async (tx) => {
       let group = await tx.userGroup.findUnique({
@@ -145,23 +174,7 @@ export class PbacService {
           },
         });
 
-        // Delete orphaned policies if they are not used by anyone else?
-        // Let's just delete the ones that were connected to THIS group.
-        // Actually, in our architecture, does a Policy belong solely to one Group/User?
-        // Yes, implicit m:n usually means shared, but typically we just create new ones.
-        // Let's create new policies and connect them.
-        // Gom nhóm toàn bộ policies lại để batch insert trong 1 query duy nhất (Xóa bỏ N+1 query lặp qua từng await)
-        const newPolicies = data.policies.map((p: any) => ({
-          resourceId: p.resourceId ?? p.resource_id,
-          action: p.action,
-          effect: p.effect || 'ALLOW',
-          conditions: p.conditions
-            ? typeof p.conditions === 'string'
-              ? JSON.parse(p.conditions)
-              : p.conditions
-            : undefined,
-        }));
-
+        // Gom nhóm toàn bộ policies lại để batch insert trong 1 query duy nhất (Xóa bỏ N+1 query lặp qua từng await; đã parse conditions an toàn TRƯỚC tx)
         if (newPolicies.length > 0) {
           await tx.userGroup.update({
             where: { id },

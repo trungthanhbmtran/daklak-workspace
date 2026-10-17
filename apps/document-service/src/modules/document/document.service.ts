@@ -210,13 +210,24 @@ export class DocumentService {
 
   async update(id: string, data: any) {
     const updateData: any = {};
-    const allowedFields = ['documentNumber', 'notation', 'abstract', 'content', 'typeId', 'fieldId', 'issuingAuthorityId', 'issuerName', 'signerId', 'signerName', 'signerPosition', 'arrivalNumber', 'recipients', 'urgency', 'securityLevel', 'status', 'isPublic', 'isIncoming', 'fileId', 'signatureValid', 'pageCount', 'attachmentCount', 'linkedDocumentId', 'fiscalYear', 'transparencyCategory'];
+
+    // Single source of truth cho workflow status (ledger #20):
+    // client KHÔNG được set status trực tiếp qua UpdateDocument.
+    // Status chỉ được chuyển qua workflow (ProcessDocument/FinalizeDocument).
+    if (data.status !== undefined) {
+      this.logger.warn(
+        `[DocumentService] update(${id}) received client-supplied status '${String(data.status)}' — ignored. ` +
+        `Use ProcessDocument/FinalizeDocument (workflow-service) for status transitions.`,
+      );
+    }
+
+    const allowedFields = ['documentNumber', 'notation', 'abstract', 'content', 'typeId', 'fieldId', 'issuingAuthorityId', 'issuerName', 'signerId', 'signerName', 'signerPosition', 'arrivalNumber', 'recipients', 'urgency', 'securityLevel', 'isPublic', 'isIncoming', 'fileId', 'signatureValid', 'pageCount', 'attachmentCount', 'linkedDocumentId', 'fiscalYear', 'transparencyCategory'];
     allowedFields.forEach(field => { if (data[field] !== undefined) updateData[field] = data[field]; });
     if (data.issueDate) updateData.issueDate = new Date(data.issueDate);
     if (data.arrivalDate) updateData.arrivalDate = new Date(data.arrivalDate);
     if (data.processingDeadline) updateData.processingDeadline = new Date(data.processingDeadline);
     const document = await this.prisma.document.update({ where: { id }, data: updateData });
-    if (data.comment || data.status) await this.logRecord(id, data.status === 'PUBLISHED' ? "KẾT THÚC / LƯU HỒ SƠ" : "XỬ LÝ VĂN BẢN", data.comment || "Cập nhật thông tin văn bản.", data.userId, data.userName);
+    if (data.comment) await this.logRecord(id, "XỬ LÝ VĂN BẢN", data.comment, data.userId, data.userName);
     return { data: this.mapToProto(document) };
   }
 
@@ -227,14 +238,17 @@ export class DocumentService {
   }
 
   async processDocument(id: string, actorId: string, actorName: string, note?: string) {
-    // Không cho update trực tiếp nữa nếu enforced (hoặc gửi submitAction lên Gateway), tạm throw hoặc ignore
-    const doc = await this.prisma.document.findUnique({ where: { id } });
-    return this.mapToProto(doc);
+    // Ledger #20: wire lại đúng luồng workflow — resume qua workflow-service,
+    // status chỉ được cập nhật bởi WorkflowService.processDocument.
+    const updated = await this.workflowService.processDocument(id, actorId || 'system', actorName || '', note);
+    return this.mapToProto(updated);
   }
 
   async finalizeDocument(id: string, actorId: string, actorName: string, note?: string) {
-    const doc = await this.prisma.document.findUnique({ where: { id } });
-    return this.mapToProto(doc);
+    // Ledger #20: wire lại đúng luồng workflow — resume qua workflow-service,
+    // status chỉ được cập nhật bởi WorkflowService.finalizeDocument.
+    const updated = await this.workflowService.finalizeDocument(id, actorId || 'system', actorName || '', note);
+    return this.mapToProto(updated);
   }
 
   async remove(id: string) {
