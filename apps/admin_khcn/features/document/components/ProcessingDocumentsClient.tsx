@@ -21,12 +21,10 @@ export function ProcessingDocumentsClient() {
   const searchTerm = searchParams.get("search") || "";
   const [statusFilter, setStatusFilter] = useState("PROCESSING");
 
-  const { data: documentsData, isLoading } = useListDocuments({
+  const { data: docs = [], isLoading } = useListDocuments({
     status: statusFilter === "ALL" ? undefined : statusFilter,
     search: searchTerm,
   });
-
-  const docs = useMemo(() => documentsData?.data ?? [], [documentsData]);
 
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">

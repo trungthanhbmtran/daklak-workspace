@@ -86,7 +86,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
     try {
       return JSON.parse(found.description);
     } catch (e) {
-      console.error("Failed to parse custom page list for menu", e);
+      // error handled
       return [];
     }
   }, [portalConfigsForMenu]);

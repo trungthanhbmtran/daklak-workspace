@@ -18,6 +18,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import { safeParseJSON, formatDate } from "@/lib/utils";
+import { unwrapData } from "@/lib/api-helper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -131,19 +132,15 @@ export function PostListTable({ onNavigateToEdit }: PostListTableProps) {
         page,
         limit: pageSize,
       };
-      const res = await postsApi.getPosts(params);
-      return {
-        items: res.data,
-        meta: res.meta || {}
-      };
+      return postsApi.getPosts(params);
     },
     staleTime: 30_000,
     placeholderData: keepPreviousData,
   });
 
-  const posts = (data?.items) as Post[] || [];
-  const totalItems = Number((data?.meta as any)?.total || 0);
-  const totalPages = Number((data?.meta as any)?.totalPages || 1);
+  const posts = unwrapData<Post[]>(data, []);
+  const totalItems = Number(data?.meta?.pagination?.total ?? (data?.meta as any)?.total ?? 0);
+  const totalPages = Number(data?.meta?.pagination?.totalPages ?? (data?.meta as any)?.totalPages ?? 1);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deletePost(id),

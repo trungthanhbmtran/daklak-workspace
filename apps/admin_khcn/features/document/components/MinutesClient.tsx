@@ -172,8 +172,7 @@ export function MinutesClient() {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
-  const { data: minutesData, isLoading } = useListMinutes({ search: searchTerm });
-  const minutes = minutesData?.data ?? [];
+  const { data: minutes = [], isLoading } = useListMinutes({ search: searchTerm });
 
   const handleSwitchToCreate = useCallback(() => setView("CREATE"), []);
   const handleSwitchToList = useCallback(() => setView("LIST"), []);

@@ -168,7 +168,7 @@ export function TaskList() {
     search: debouncedSearch || undefined,
   });
 
-  const flatTasks: HrmTask[] = (data as any)?.data ?? [];
+  const flatTasks: HrmTask[] = (data as HrmTask[]) ?? [];
   const tasks = React.useMemo(() => buildTaskTree(flatTasks), [flatTasks]);
 
   const searchParams = useSearchParams();

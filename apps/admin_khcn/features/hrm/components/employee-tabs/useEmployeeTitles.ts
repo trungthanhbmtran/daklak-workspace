@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { organizationApi } from "@/features/system-admin/organization/api";
+import { unwrapData } from "@/lib/api-helper";
 
 export function flattenUnits(nodes: unknown[], acc: { id: number; name: string }[] = []): { id: number; name: string }[] {
   for (const n of nodes || []) {
@@ -13,13 +14,15 @@ export function flattenUnits(nodes: unknown[], acc: { id: number; name: string }
 }
 
 export function useEmployeeTitles(employee: any) {
-  const { data: treeNodes } = useQuery({
+  const { data: treeNodes = [] } = useQuery({
     queryKey: ["organizations", "tree"],
     queryFn: () => organizationApi.getTree(),
+    select: (res) => unwrapData<any[]>(res, []),
   });
   const { data: jobTitlesRes } = useQuery({
     queryKey: ["organizations", "job-titles"],
     queryFn: () => organizationApi.getJobTitles(),
+    select: (res) => unwrapData<any>(res, {}),
   });
 
   const { data: staffingReport } = useQuery({
@@ -27,47 +30,48 @@ export function useEmployeeTitles(employee: any) {
     queryFn: () => organizationApi.getStaffingReport(employee.departmentId),
     enabled: !!employee?.departmentId,
     staleTime: 60 * 1000,
+    select: (res) => unwrapData<any>(res, {}),
   });
 
   const unitName = useMemo(() => {
     if (!employee?.departmentId) return employee?.department?.name ?? "—";
-    const rawTree = Array.isArray(treeNodes) ? treeNodes : (treeNodes as any)?.data ?? [];
+    const rawTree = Array.isArray(treeNodes) ? treeNodes : [];
     if (!Array.isArray(rawTree) || rawTree.length === 0) return employee?.department?.name ?? "—";
     const flat = flattenUnits(rawTree);
     const found = flat.find((u) => u.id === employee.departmentId);
     return found?.name ?? employee?.department?.name ?? "—";
   }, [employee, treeNodes]);
 
+  const allTitles = jobTitlesRes?.allTitles ?? [];
+
   const govtTitleName = useMemo(() => {
     const title = employee?.jobTitle;
     if (title) return title.name;
     if (!employee?.jobTitleId) return "—";
-    const items = jobTitlesRes?.data?.allTitles ?? [];
-    const found = items.find((j: { id: number }) => j.id === employee.jobTitleId);
+    const found = allTitles.find((j: { id: number }) => j.id === employee.jobTitleId);
     return found?.name ?? "—";
-  }, [employee, jobTitlesRes]);
+  }, [employee, allTitles]);
 
   const rankTitleName = useMemo(() => {
     const rank = employee?.civilServantRank;
     if (rank) return rank.name;
     if (!employee?.civilServantRankId) return "—";
-    const items = jobTitlesRes?.data?.allTitles ?? [];
-    const found = items.find((j: { id: number }) => j.id === employee.civilServantRankId);
+    const found = allTitles.find((j: { id: number }) => j.id === employee.civilServantRankId);
     return found?.name ?? "—";
-  }, [employee, jobTitlesRes]);
+  }, [employee, allTitles]);
 
   const partyTitleName = useMemo(() => {
     const party = employee?.partyTitle;
     if (party) return party.name;
     if (!employee?.partyTitleId) return "—";
-    const items = jobTitlesRes?.data?.allTitles ?? [];
-    const found = items.find((j: { id: number }) => j.id === employee.partyTitleId);
+    const found = allTitles.find((j: { id: number }) => j.id === employee.partyTitleId);
     return found?.name ?? "—";
-  }, [employee, jobTitlesRes]);
+  }, [employee, allTitles]);
 
   const assignedSlot = useMemo(() => {
-    if (!employee?.employeeCode || !staffingReport?.data) return null;
-    for (const reportItem of (staffingReport.data as any[])) {
+    if (!employee?.employeeCode || !staffingReport) return null;
+    const reportList = Array.isArray(staffingReport) ? staffingReport : (staffingReport?.allReport ?? staffingReport?.data ?? []);
+    for (const reportItem of (reportList as any[])) {
       const match = reportItem.slots?.find(
         (s: any) => s.assignedEmployeeCode === employee.employeeCode
       );

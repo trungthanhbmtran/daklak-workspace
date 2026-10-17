@@ -35,18 +35,11 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
   const isValidId = !Number.isNaN(numericId) && numericId > 0;
 
   // Queries
-  const { data: detailData, isLoading, isError } = useTaskDetail(isValidId ? numericId : undefined, {
+  const { data: currentTask, isLoading, isError } = useTaskDetail(isValidId ? numericId : undefined, {
     enabled: isValidId,
   });
 
-  const rawDetail = (detailData as any)?.data ?? detailData;
-  const currentTask: any =
-    rawDetail && typeof rawDetail === "object" && rawDetail.data && typeof rawDetail.data === "object" && !Array.isArray(rawDetail.data)
-      ? rawDetail.data
-      : rawDetail;
-
-  const { data: stepsData } = useTaskSteps(isValidId ? numericId : 0, { enabled: isValidId });
-  const stepsList: any[] = (stepsData as any)?.data ?? currentTask?.steps ?? [];
+  const { data: stepsList = [] } = useTaskSteps(isValidId ? numericId : 0, { enabled: isValidId });
 
   // Thống kê gợi ý thời hạn từ hệ thống
   const systemTimeliness = useMemo(() => {

@@ -33,13 +33,12 @@ export function useGetKpiFormDetail(formCode: string | null) {
     queryFn: async () => {
       if (!formCode) return null;
       const res: any = await kpiFormsApi.getDetail(formCode);
-      if (!res) return null;
-      const rawData = Array.isArray(res.data) ? res.data[0] : res.data;
-      const inner = rawData && typeof rawData === 'object' ? rawData : res;
+      const data = unwrapData<any>(res);
+      if (!data) return null;
       return {
-        ...inner,
-        xmlContent: inner.xmlContent || res.xmlContent || '',
-        placeholders: inner.placeholders || res.placeholders || [],
+        ...data,
+        xmlContent: data.xmlContent || '',
+        placeholders: data.placeholders || [],
       };
     },
     enabled: Boolean(formCode),
@@ -53,14 +52,13 @@ export function useGetKpiFormXml(formCode: string | null) {
     queryFn: async () => {
       if (!formCode) return null;
       const res: any = await kpiFormsApi.getXml(formCode);
-      if (!res) return null;
-      const rawData = Array.isArray(res.data) ? res.data[0] : res.data;
-      const inner = rawData && typeof rawData === 'object' ? rawData : res;
+      const data = unwrapData<any>(res);
+      if (!data) return null;
       return {
-        formCode: inner.formCode || res.formCode || formCode,
-        xmlContent: inner.xmlContent || res.xmlContent || '',
-        placeholders: inner.placeholders || res.placeholders || [],
-        xmlSize: inner.xmlSize || res.xmlSize || 0,
+        formCode: data.formCode || formCode,
+        xmlContent: data.xmlContent || '',
+        placeholders: data.placeholders || [],
+        xmlSize: data.xmlSize || 0,
       };
     },
     enabled: Boolean(formCode),

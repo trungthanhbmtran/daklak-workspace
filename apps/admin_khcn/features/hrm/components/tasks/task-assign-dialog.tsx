@@ -29,20 +29,18 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
 
   // ── Danh sách nhân viên từ API (lazy query khi mở dialog) ──
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 150, assignableOnly: true }, { enabled: open });
-  const employees = useMemo(() => (employeesData as any)?.data ?? [], [employeesData]);
+  const employees = useMemo(() => employeesData?.data ?? [], [employeesData]);
 
   // ── Danh sách phòng ban từ API ──
-  const { data: orgData } = useOrganizationFlatListQuery(undefined, { enabled: open });
-  const departments = useMemo(() => orgData?.data ?? [], [orgData]);
+  const { data: departments = [] } = useOrganizationFlatListQuery(undefined, { enabled: open });
 
-  const { data: contextData } = useTaskContext(
+  const { data: context } = useTaskContext(
     {
       departmentId: selectedDepartmentId && selectedDepartmentId !== "ALL" ? selectedDepartmentId : undefined,
       assignee: assignee || undefined,
     },
     { enabled: open }
   );
-  const context: any = (contextData as any)?.data ?? contextData;
   const deptLeaders = context?.deptLeaders ?? [];
   const deptStaff = context?.deptStaff ?? [];
 
@@ -95,7 +93,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
       const emp = employees.find((e: any) => e.employeeCode === value);
       if (emp) {
         const d = departments.find((x: any) => x.id === emp.departmentId || x.id === emp.department?.id);
-        const deptTag = d?.name ? ` (${d.name})` : emp.unitName ? ` (${emp.unitName})` : "";
+        const deptTag = d?.name ? ` (${d.name})` : (emp as any).unitName ? ` (${(emp as any).unitName})` : "";
         name = `👤 ${emp.fullName}${deptTag}`;
       }
     }

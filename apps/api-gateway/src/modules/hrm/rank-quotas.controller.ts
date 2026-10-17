@@ -156,14 +156,11 @@ Chỉ trả về JSON hợp lệ không bọc trong markdown code fence. Tổng 
         const parsed = JSON.parse(cleaned);
         if (parsed && Array.isArray(parsed.suggestedQuotas) && parsed.suggestedQuotas.length > 0) {
           return {
-            success: true,
-            data: {
-              ...parsed,
-              targetScope,
-              goalOrientation,
-              unitName,
-              rankName,
-            },
+            ...parsed,
+            targetScope,
+            goalOrientation,
+            unitName,
+            rankName,
           };
         }
       } catch {
@@ -171,20 +168,17 @@ Chỉ trả về JSON hợp lệ không bọc trong markdown code fence. Tổng 
       }
     }
 
-    return {
-      success: true,
-      data: this.buildRuleBasedSuggestion({
-        unitName,
-        unitCode,
-        rankName,
-        rankCode,
-        classification,
-        domainCode,
-        targetScope,
-        goalOrientation,
-        headcount,
-      }),
-    };
+    return this.buildRuleBasedSuggestion({
+      unitName,
+      unitCode,
+      rankName,
+      rankCode,
+      classification,
+      domainCode,
+      targetScope,
+      goalOrientation,
+      headcount,
+    });
   }
 
   private buildRuleBasedSuggestion(params: {

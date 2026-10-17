@@ -30,7 +30,7 @@ export class SsoController {
   @Header('Referrer-Policy', 'no-referrer')
   @Get('providers')
   providers() {
-    return { providers: this.sso.list() };
+    return this.sso.list();
   }
   @Header('Cache-Control', 'no-store')
   @Header('Referrer-Policy', 'no-referrer')

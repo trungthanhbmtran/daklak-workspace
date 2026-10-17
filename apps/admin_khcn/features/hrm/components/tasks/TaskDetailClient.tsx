@@ -55,7 +55,6 @@ import {
   getTaskTypeBadge,
   translateTaskStatus,
   getTaskStatusColor,
-  unwrapTaskData,
 } from "./task-ui-utils";
 
 interface TaskDetailClientProps {
@@ -93,7 +92,7 @@ export function TaskDetailClient({ id }: TaskDetailClientProps) {
     enabled: isValidId,
   });
 
-  const currentTask: any = unwrapTaskData(detailData) || null;
+  const currentTask: any = detailData || null;
 
   const isCompleted = currentTask?.status?.toUpperCase() === "COMPLETED" || currentTask?.status?.toUpperCase() === "DONE";
   const isAssigned = currentTask?.allowedActions?.includes("RECEIVE") || currentTask?.allowedActions?.includes("ACCEPT");

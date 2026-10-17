@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { createHash } from "crypto";
 import { serverApiBase } from "./server-api-url";
+import { unwrapData } from "./api-helper";
 
 class SessionRefreshRequired extends Error {}
 
@@ -31,7 +32,7 @@ export async function getServerUser() {
     });
     if (!res.ok) return null;
     const json = await res.json();
-    return json?.data?.data || json?.data || json;
+    return unwrapData(json);
   } catch {
     return null;
   }

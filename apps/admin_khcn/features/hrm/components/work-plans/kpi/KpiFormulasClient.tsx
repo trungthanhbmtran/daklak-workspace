@@ -45,6 +45,7 @@ import {
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { unwrapData } from '@/lib/api-helper';
 import {
   taskKpiApi,
   VariableDef,
@@ -90,7 +91,7 @@ const FORMULA_PRESETS = [
 ];
 
 function responseData<T>(response: any): T {
-  return (response?.data?.data ?? response?.data ?? response) as T;
+  return unwrapData<T>(response, response);
 }
 
 function getRatingClassification(score: number): {

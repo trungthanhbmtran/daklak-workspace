@@ -33,7 +33,7 @@ export function usePagesList(selectedPageId: string, setSelectedPageId: (id: str
         const parsed = JSON.parse(listConfig.description);
         if (parsed.length > 0) return parsed;
       } catch (e) {
-        console.error("Failed to parse custom page list", e);
+        // error handled
       }
     }
     return [

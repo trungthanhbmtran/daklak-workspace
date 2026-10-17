@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 
 export interface AuthBinding {
   kind: 'none' | 'basic' | 'apiKey' | 'bearer' | 'oauth2' | 'lgsp' | 'mtls';
@@ -39,7 +40,7 @@ export const apiManagementApi = {
   getConnections: async (params?: { search?: string; limit?: number; offset?: number }) => {
     try {
       const res = await apiClient.get('/api-management/connections', { params }) as any;
-      return (res?.data || []) as ApiConnection[];
+      return unwrapData<ApiConnection[]>(res, []);
     } catch {
       return [] as ApiConnection[];
     }
@@ -47,47 +48,47 @@ export const apiManagementApi = {
   
   getConnection: async (id: string) => {
     const res = await apiClient.get("/api-management/connections/" + id) as any;
-    return res?.data as ApiConnection;
+    return unwrapData<ApiConnection>(res);
   },
 
   createConnection: async (data: Partial<ApiConnection>) => {
     const res = await apiClient.post('/api-management/connections', data) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   updateConnection: async (id: string, data: Partial<ApiConnection> & { expectedVersion?: number }) => {
     const res = await apiClient.put("/api-management/connections/" + id, data) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   deleteConnection: async (id: string) => {
     const res = await apiClient.delete("/api-management/connections/" + id) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   createEndpoint: async (connectionId: string, data: any) => {
     const res = await apiClient.post(`/api-management/connections/${connectionId}/endpoints`, data) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   updateEndpoint: async (endpointId: string, data: any) => {
     const res = await apiClient.put(`/api-management/connections/endpoints/${endpointId}`, data) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   deleteEndpoint: async (endpointId: string) => {
     const res = await apiClient.delete(`/api-management/connections/endpoints/${endpointId}`) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   disableConnection: async (id: string, expectedVersion: number) => {
     const res = await apiClient.put("/api-management/connections/" + id + "/disable", { expectedVersion }) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   publishRevision: async () => {
     const res = await apiClient.post('/api-management/connections/publish') as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   uploadImport: async (file: File, targetConnectionId?: string) => {
@@ -98,12 +99,12 @@ export const apiManagementApi = {
     const res = await apiClient.post('/api-management/connections/import/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }) as any;
-    return res?.data; // { sessionId, inputHash, diffs: [{ method, path, status }] }
+    return unwrapData(res); // { sessionId, inputHash, diffs: [{ method, path, status }] }
   },
 
   commitImport: async (sessionId: string, resolutions: { method: string, path: string, action: 'OVERWRITE' | 'SKIP' }[]) => {
     const res = await apiClient.post('/api-management/connections/import/commit', { sessionId, resolutions }) as any;
-    return res?.data;
+    return unwrapData(res);
   },
 
   testConnection: async (id: string): Promise<{
@@ -114,6 +115,6 @@ export const apiManagementApi = {
     authModel: string;
   }> => {
     const res = (await apiClient.post(`/api-management/connections/${id}/test-connection`)) as any;
-    return res?.data?.data || res?.data;
+    return unwrapData(res);
   },
 };

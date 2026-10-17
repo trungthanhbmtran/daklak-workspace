@@ -2,6 +2,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { unwrapData } from "@/lib/api-helper";
 import { postsApi } from "../api";
 
 export interface PostStats {
@@ -24,8 +25,7 @@ export function usePostStats(params?: { categoryId?: string; authorId?: string }
     queryKey: ["posts-stats", params],
     queryFn: async () => {
       const res = await postsApi.getPostStats(params);
-      // Interceptor đã bóc Axios wrapper → res là ApiResponse
-      const data = (res as any)?.data ?? res;
+      const data = unwrapData<any>(res, {});
       return {
         total:      Number(data?.total      ?? 0),
         published:  Number(data?.published  ?? 0),

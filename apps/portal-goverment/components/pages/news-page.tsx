@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { usePublicPosts } from "@/hooks/usePublicData"
+import { unwrapData } from "@/lib/api-helper"
 import { resolveMediaUrl } from "@/lib/utils"
 import { Calendar, Search, ArrowRight, Home, ChevronRight, Newspaper } from "lucide-react"
 
@@ -89,9 +90,7 @@ function NewsListPageContent() {
   const { data: postsData, isFetching: postsLoading } = usePublicPosts({ limit: 50 })
 
   const newsList = React.useMemo(() => {
-    const response: any = postsData
-    const body = response?.data ?? response
-    return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
+    return unwrapData<any[]>(postsData, [])
   }, [postsData])
 
   const getLocalizedField = (obj: any, baseField: string, lang: string): string => {

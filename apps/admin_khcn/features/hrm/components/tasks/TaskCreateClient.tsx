@@ -48,6 +48,7 @@ import { useCreateTask, useTaskContext, useBalancePercentages } from "../../hook
 import { useHrmEmployeesList } from "../../hooks/useHrmEmployees";
 import { useOrganizationFlatListQuery } from "@/features/system-admin/organization/hooks/useOrganizationQueries";
 import { useUser } from "@/hooks/useUser";
+import { unwrapData } from "@/lib/api-helper";
 import { DepartmentWorkloadRecommendation } from "./department-workload-recommendation";
 
 interface CoordinatorItem {
@@ -146,10 +147,9 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
     pageSize: 200,
     assignableOnly: true,
   });
-  const employees = (employeesData as any)?.data ?? [];
+  const employees = employeesData?.data ?? [];
 
-  const { data: orgData } = useOrganizationFlatListQuery();
-  const departments = orgData?.data ?? [];
+  const { data: departments = [] } = useOrganizationFlatListQuery();
 
   // Lấy bối cảnh giao việc & phân loại nhân sự từ server
   const coordinatorIdsParam = useMemo(() => coordinators.map((c) => c.id).join(","), [coordinators]);
@@ -199,7 +199,7 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
         coordinatorCount: coords.length,
         coordinatorCodes: coords.map((c) => c.id),
       });
-      const resData = (res as any)?.data ?? res;
+      const resData = unwrapData<any>(res);
       if (resData && typeof resData.assigneePercentage === "number") {
         setAssigneePercentage(resData.assigneePercentage);
         const coordList = Array.isArray(resData.coordinators) ? resData.coordinators : [];
@@ -307,7 +307,8 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
     try {
       const res = await createTask.mutateAsync(payload);
       toast.success(isDraft ? "Đã lưu bản nháp nhiệm vụ thành công" : "Đã ban hành và giao nhiệm vụ thành công!");
-      const createdId = (res as any)?.data?.id || (res as any)?.id;
+      const taskData = unwrapData<any>(res);
+      const createdId = taskData?.id;
       if (createdId) {
         router.push(`/services/hrm/work-plans/tasks/${createdId}`);
       } else {

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { organizationApi } from "../../../api";
 import { organizationQueryKeys } from "../../../constants/queryKeys";
+import { unwrapData } from "@/lib/api-helper";
 
 const STALE = 60 * 1000;
 const GC    = 5 * 60 * 1000;
@@ -23,15 +24,16 @@ export function useStaffingData(unitId: number | null) {
     enabled: unitId != null,
     staleTime: STALE,
     gcTime: GC,
+    select: (res) => unwrapData(res),
   });
 
   const report = reportQuery.data?.allReport ?? [];
   const partyReport = reportQuery.data?.partyReport ?? [];
   const govReport = reportQuery.data?.govReport ?? [];
   
-  const jobTitles = jobTitlesQuery.data?.data?.allTitles ?? [];
-  const partyTitles = jobTitlesQuery.data?.data?.partyTitles ?? [];
-  const govTitles = jobTitlesQuery.data?.data?.govTitles ?? [];
+  const jobTitles = jobTitlesQuery.data?.allTitles ?? [];
+  const partyTitles = jobTitlesQuery.data?.partyTitles ?? [];
+  const govTitles = jobTitlesQuery.data?.govTitles ?? [];
 
   return {
     report,

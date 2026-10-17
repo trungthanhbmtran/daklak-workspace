@@ -182,8 +182,6 @@ export const useGetDatasetSnapshot = (
         ? snapshot.data
         : Array.isArray(snapshot)
         ? snapshot
-        : Array.isArray(res?.data?.data)
-        ? res.data.data
         : [];
       return {
         schema: Array.isArray(snapshot?.schema) ? snapshot.schema : [],
@@ -346,7 +344,7 @@ export async function printReportRunExport(
     },
   );
 
-  const htmlContent = typeof response === 'string' ? response : (response?.data || '');
+  const htmlContent = typeof response === 'string' ? response : (unwrapData<string>(response, '') || '');
   if (!htmlContent) throw new Error('Không nhận được nội dung văn bản từ máy chủ');
 
   const iframe = document.createElement('iframe');

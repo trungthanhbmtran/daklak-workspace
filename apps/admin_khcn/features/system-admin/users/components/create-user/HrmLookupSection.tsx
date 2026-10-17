@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormDescription } from "@/components/ui/form";
 import { organizationApi } from "@/features/system-admin/organization/api";
+import { unwrapData } from "@/lib/api-helper";
 import {
   useHrmEmployeesSearch,
   type HrmEmployee,
@@ -37,12 +38,14 @@ export function HrmLookupSection({ isOpen }: Props) {
     queryKey: ["organizations", "tree"],
     queryFn: () => organizationApi.getTree(),
     enabled: isOpen,
+    select: (res) => unwrapData(res, []),
   });
 
   const { data: jobTitlesRes } = useQuery({
     queryKey: ["organizations", "job-titles"],
     queryFn: () => organizationApi.getJobTitles(),
     enabled: isOpen,
+    select: (res) => unwrapData(res, {}),
   });
 
   const unitNameMap = useMemo(() => {
@@ -54,7 +57,8 @@ export function HrmLookupSection({ isOpen }: Props) {
 
   const jobTitleNameMap = useMemo(() => {
     const m = new Map<number, string>();
-    (jobTitlesRes?.data?.allTitles ?? []).forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
+    const all = (jobTitlesRes as any)?.allTitles ?? [];
+    all.forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
     return m;
   }, [jobTitlesRes]);
 

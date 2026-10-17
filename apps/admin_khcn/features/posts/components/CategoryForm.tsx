@@ -13,6 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heading, Text } from "@/components/ui/typography";
@@ -99,22 +100,20 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     staleTime: 5 * 60_000,
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["posts-categories-simple"],
-    queryFn: async () => {
-      const res = await postsApi.getCategories();
-      return res.data;
-    },
+    queryFn: () => postsApi.getCategories(),
+    select: (res) => unwrapData<any[]>(res, []),
   });
 
-  const { data: categoryData, isLoading: isFetching } = useQuery({
+  const { data: categoryDetails, isLoading: isFetching } = useQuery({
     queryKey: ["category", editId],
-    queryFn: async () => await postsApi.getCategory(editId!),
+    queryFn: () => postsApi.getCategory(editId!),
+    select: (res) => unwrapData<any>(res, null),
     enabled: isEdit,
   });
 
   useEffect(() => {
-    const categoryDetails = categoryData?.data;
     if (categoryDetails) {
       // Parse translations if it's a string
       let parsedTranslations = categoryDetails.translations || {};
@@ -134,7 +133,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
         linkType: (categoryDetails.linkType === "external" ? "external" : "internal") as "internal" | "external",
       });
     }
-  }, [categoryData, form]);
+  }, [categoryDetails, form]);
 
   const mutation = useMutation({
      

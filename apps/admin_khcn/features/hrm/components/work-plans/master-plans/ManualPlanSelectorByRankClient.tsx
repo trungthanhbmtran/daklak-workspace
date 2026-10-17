@@ -29,6 +29,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { hrmRankQuotasApi, type AiSuggestedQuotaItem } from '@/features/hrm/api/rank-quotas.api';
 import { organizationApi } from "@/features/system-admin/organization/api";
+import { unwrapData } from "@/lib/api-helper";
 import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
 import { OrganizationUnitSelector, flattenUnitHierarchy } from '@/features/workflow/components/OrganizationUnitSelector';
 import { AiQuotaPlanModal } from './AiQuotaPlanModal';
@@ -77,12 +78,12 @@ export function ManualPlanSelectorByRankClient() {
 
     // 1. Cây cơ cấu tổ chức & Bộ phận đã chọn
     const [selectedUnitCode, setSelectedUnitCode] = useState<string>('BTCTU_DAKLAK');
-    const { data: orgTreeRes, isLoading: isLoadingOrgTree } = useQuery({
+    const { data: unitTree = [], isLoading: isLoadingOrgTree } = useQuery({
         queryKey: ['org-tree-manual-selector'],
         queryFn: () => organizationApi.getTree(),
+        select: (res) => unwrapData(res, []),
         staleTime: 5 * 60 * 1000,
     });
-    const unitTree = orgTreeRes?.data || [];
     const flatUnits = useMemo(() => flattenUnitHierarchy(unitTree), [unitTree]);
     const selectedUnit = useMemo(() => flatUnits.find(u => u.code === selectedUnitCode), [flatUnits, selectedUnitCode]);
     const selectedUnitId = selectedUnit?.id;
@@ -91,18 +92,20 @@ export function ManualPlanSelectorByRankClient() {
     const { data: unitStaffingReportRes, isLoading: isLoadingStaffing } = useQuery({
         queryKey: ['staffing-report-selector', selectedUnitId],
         queryFn: () => organizationApi.getStaffingReport(selectedUnitId!),
+        select: (res) => unwrapData(res),
         enabled: !!selectedUnitId,
         staleTime: 60 * 1000,
     });
     const unitStaffingList = useMemo(() => {
-        const raw = unitStaffingReportRes?.allReport || unitStaffingReportRes?.data || [];
+        const raw = unitStaffingReportRes?.allReport || unitStaffingReportRes || [];
         return Array.isArray(raw) ? raw : [];
     }, [unitStaffingReportRes]);
 
     // 3. Toàn bộ danh mục chức danh/VTVL hệ thống
     const { data: jobTitlesRes = { allTitles: [], govTitles: [], partyTitles: [] } } = useQuery({
         queryKey: ['job-titles-all'],
-        queryFn: async () => (await organizationApi.getJobTitles()).data,
+        queryFn: () => organizationApi.getJobTitles(),
+        select: (res) => unwrapData(res),
         staleTime: 5 * 60 * 1000,
     });
 
@@ -129,8 +132,7 @@ export function ManualPlanSelectorByRankClient() {
     }, [selectedUnitId, unitStaffingList, jobTitlesRes.allTitles, selectedUnitCode]);
 
     // 4. Thư viện nhiệm vụ mẫu
-    const { data: templatesData } = useTaskTemplatesList();
-    const serverTemplates = Array.isArray(templatesData) ? templatesData : (templatesData?.data || []);
+    const { data: serverTemplates = [] } = useTaskTemplatesList();
 
     const rankTasksRepository = useMemo(() => serverTemplates.map((t: any) => ({
         id: t.id.toString(),
@@ -265,16 +267,17 @@ export function ManualPlanSelectorByRankClient() {
     }, [unitPositionsList.length, selectedUnitId]);
 
     // 5. Nạp cấu trúc định biên đã lưu trong CSDL
-    const { data: existingQuotasData, refetch: refetchQuotas } = useQuery({
+    const { data: existingQuotas = [], refetch: refetchQuotas } = useQuery({
         queryKey: ['rank-quotas', activeRankFilter, activeDomainFilter, selectedUnitId],
         queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter, activeDomainFilter, selectedUnitId, selectedUnitCode),
+        select: (res) => unwrapData<any[]>(res, []),
         enabled: !!activeRankFilter,
         staleTime: 0,
     });
 
     useEffect(() => {
-        if (existingQuotasData?.data && Array.isArray(existingQuotasData.data)) {
-            setAddedPlans(existingQuotasData.data.map((q: any) => {
+        if (Array.isArray(existingQuotas) && existingQuotas.length > 0) {
+            setAddedPlans(existingQuotas.map((q: any) => {
                 const m = Number(q.monthlyTarget || q.targetValue || 1);
                 const qua = Number(q.quarterlyTarget || (m * 3));
                 const y = Number(q.yearlyTarget || (m * 12));
@@ -293,7 +296,7 @@ export function ManualPlanSelectorByRankClient() {
         } else {
             setAddedPlans([]);
         }
-    }, [existingQuotasData, activeRankFilter]);
+    }, [existingQuotas, activeRankFilter]);
 
     // Nhiệm vụ mẫu phù hợp từ kho thư viện
     const availableTasks = useMemo(() => {

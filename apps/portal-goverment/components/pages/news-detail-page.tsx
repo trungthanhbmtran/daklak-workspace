@@ -121,7 +121,7 @@ export default function NewsDetailPage({ id }: Props) {
 
   const isLoading = slugQuery.isFetching || idQuery.isFetching
   const dbPostRaw = slugQuery.data || idQuery.data;
-  const dbPost = dbPostRaw?.data || dbPostRaw;
+  const dbPost = (dbPostRaw as any)?.data || dbPostRaw;
 
   const getLocalizedField = (obj: any, baseField: string, lang: string): string => {
     if (!obj) return ""

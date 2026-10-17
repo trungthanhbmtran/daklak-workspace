@@ -12,17 +12,13 @@ import { downloadReportRunExport, useGetReportDefinitions } from "@/features/rep
 import { PersonalTaskWorkbench } from "./personal-task-workbench";
 
 export function TaskDashboard() {
-  const { data: statsResponse, isLoading } = useTaskStats({ status: undefined, search: undefined });
+  const { data: statsData, isLoading } = useTaskStats({ status: undefined, search: undefined });
   const { data: allReportDefs } = useGetReportDefinitions();
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rawData: any = (statsResponse as any)?.data ?? statsResponse ?? {};
+  const rawData: any = statsData ?? {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows: any[] = Array.isArray(rawData)
-    ? rawData
-    : (Array.isArray(rawData?.rows)
-      ? rawData.rows
-      : (Array.isArray(rawData?.items) ? rawData.items : []));
+  const rows: any[] = Array.isArray(rawData) ? rawData : (Array.isArray(rawData?.rows) ? rawData.rows : []);
 
   // Extract counts from backend API
   const totalTasks = Number(rawData?.totalTasks ?? rows.length);

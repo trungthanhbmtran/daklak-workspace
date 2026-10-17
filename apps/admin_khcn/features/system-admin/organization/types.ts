@@ -106,3 +106,12 @@ export interface SetStaffingSlotPayload {
   domainIds?: number[];
   monitoredUnitIds?: number[];
 }
+
+/** Phân loại loại hình tổ chức */
+export interface UnitTypeItem {
+  id: number;
+  code: string;
+  name: string;
+  categoryCode?: string;
+  description?: string;
+}

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 
 export interface GatewayService {
   id: number;
@@ -50,15 +51,15 @@ export const gatewayApi = {
   // Services
   getServices: async (): Promise<GatewayService[]> => {
     const res = await apiClient.get('/integration/services');
-    return (res as any)?.data || [];
+    return unwrapData<GatewayService[]>(res, []);
   },
   createService: async (data: Partial<GatewayService>): Promise<GatewayService> => {
     const res = await apiClient.post('/integration/services', data);
-    return (res as any)?.data;
+    return unwrapData<GatewayService>(res);
   },
   updateService: async (id: number, data: Partial<GatewayService>): Promise<GatewayService> => {
     const res = await apiClient.put(`/integration/services/${id}`, data);
-    return (res as any)?.data;
+    return unwrapData<GatewayService>(res);
   },
   deleteService: async (id: number): Promise<void> => {
     await apiClient.delete(`/integration/services/${id}`);
@@ -67,15 +68,15 @@ export const gatewayApi = {
   // Routes
   getRoutes: async (): Promise<GatewayRoute[]> => {
     const res = await apiClient.get('/integration/routes');
-    return (res as any)?.data || [];
+    return unwrapData<GatewayRoute[]>(res, []);
   },
   createRoute: async (data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
     const res = await apiClient.post('/integration/routes', data);
-    return (res as any)?.data;
+    return unwrapData<GatewayRoute>(res);
   },
   updateRoute: async (id: number, data: Partial<GatewayRoute>): Promise<GatewayRoute> => {
     const res = await apiClient.put(`/integration/routes/${id}`, data);
-    return (res as any)?.data;
+    return unwrapData<GatewayRoute>(res);
   },
   deleteRoute: async (id: number): Promise<void> => {
     await apiClient.delete(`/integration/routes/${id}`);
@@ -84,15 +85,15 @@ export const gatewayApi = {
   // ApiKeys
   getApiKeys: async (): Promise<ApiKey[]> => {
     const res = await apiClient.get('/integration/apikeys');
-    return (res as any)?.data || [];
+    return unwrapData<ApiKey[]>(res, []);
   },
   createApiKey: async (data: Partial<ApiKey>): Promise<ApiKey> => {
     const res = await apiClient.post('/integration/apikeys', data);
-    return (res as any)?.data;
+    return unwrapData<ApiKey>(res);
   },
   updateApiKey: async (id: number, data: Partial<ApiKey>): Promise<ApiKey> => {
     const res = await apiClient.put(`/integration/apikeys/${id}`, data);
-    return (res as any)?.data;
+    return unwrapData<ApiKey>(res);
   },
   deleteApiKey: async (id: number): Promise<void> => {
     await apiClient.delete(`/integration/apikeys/${id}`);
@@ -101,10 +102,10 @@ export const gatewayApi = {
   // Settings
   getSettings: async (): Promise<GatewaySettings> => {
     const res = await apiClient.get('/integration/settings');
-    return (res as any)?.data || {};
+    return unwrapData<GatewaySettings>(res, {} as GatewaySettings);
   },
   updateSettings: async (data: Partial<GatewaySettings>): Promise<GatewaySettings> => {
     const res = await apiClient.put('/integration/settings', data);
-    return (res as any)?.data;
+    return unwrapData<GatewaySettings>(res);
   }
 };

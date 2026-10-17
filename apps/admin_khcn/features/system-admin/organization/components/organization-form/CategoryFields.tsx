@@ -15,8 +15,7 @@ export function CategoryFields() {
   const selectedCat  = categoryItems.find((c) => c.code === categoryCode);
   const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
 
-  const { data: unitTypesRes } = useUnitTypesQuery();
-  const allUnitTypes = unitTypesRes?.data || [];
+  const { data: allUnitTypes = [] } = useUnitTypesQuery();
   
   return (
     <div className="space-y-4">

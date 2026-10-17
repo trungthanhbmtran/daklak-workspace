@@ -1,5 +1,102 @@
 # Execution Log — Lane 1 (Code 1)
 
+## [2026-10-17] Tổng Tổ Chức Refactor Toàn Bộ Dự Án DakLak-Workspace Theo 8 Bộ Ràng Buộc Kỹ Thuật
+
+### 1. Bối Cảnh & Yêu Cầu
+- **Chỉ đạo của người dùng**: Dựa vào các ràng buộc mới của `.agents` vừa ban hành (Đặc biệt là Ràng buộc 2 về Single-Level Data Contract, Phân định Data/Meta, Ràng buộc 1 về State/Lazy Tabs, Ràng buộc 7 về Vệ sinh mã nguồn, và Ràng buộc 8 về Đồng bộ Kiến trúc), tổ chức refactor lại toàn bộ dự án `daklak-workspace`. Tiếp tục: *"rà soát lại tiếp coi những lỗi vi phạm tới xử lý logic trả về client, phải convert cấu trúc .... những lỗi này phải sửa hết"*.
+- **Kế hoạch đã đóng băng**: [`.agents/current_plan.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/current_plan.md).
+
+### 2. Các Hạng Mục Đã Refactor Chuẩn Hóa
+1. **API Gateway & TransformInterceptor (Căn nguyên gốc rễ & Single-Level Data Contract)**:
+   - [`shared/core/interceptors/transform.interceptor.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/shared/core/interceptors/transform.interceptor.ts):
+     * Bổ sung cơ chế tự động trích xuất siêu dữ liệu phân trang từ `raw` (`total`, `page`, `pageSize`, `limit`) vào `meta.pagination: { total, page, pageSize, totalPages }` ngay cả khi service không gói sẵn vào `meta`.
+     * Nâng cấp vòng lặp triệt tiêu bọc lồng đúp: Tự động unwrap triệt để mọi vỏ bọc `data` bên trong mà không phụ thuộc vào `success`/`status`.
+     * Tự động nhận diện và phẳng hóa các container `{ items: [...], total }` hoặc `{ rows: [...], count }`: Đưa thực thể mảng trực tiếp vào `data: [...]` và đưa thông tin phân trang vào `meta.pagination`. Đảm bảo mọi GET List request LUÔN trả về `data: [...]` thuần túy.
+   - **Loại bỏ hơn 35 vị trí tự bọc thủ công `{ data: ... }` tại controllers & services của API Gateway**:
+     * [`apps/api-gateway/src/modules/api-management/api-management.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/api-management/api-management.controller.ts): Chuyển 11 endpoints (`getConnection`, `testConnection`, `createConnection`, `updateConnection`, `disableConnection`, `createEndpoint`, `updateEndpoint`, `deleteEndpoint`, `publishRevision`, `uploadImport`, `commitImport`) sang `return res` trực tiếp.
+     * [`apps/api-gateway/src/modules/api-management/partner.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/api-management/partner.controller.ts): Chuyển `createPartner`, `listPartners`, `issueKey` sang trả về thực thể thuần túy.
+     * [`apps/api-gateway/src/modules/posts/portal-config.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/posts/portal-config.controller.ts) & [`public-portal-config.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/posts/public-portal-config.controller.ts): Loại bỏ `{ data: res.data }`, trả về `res.data` trực tiếp.
+     * [`apps/api-gateway/src/modules/ai/ai.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/ai/ai.controller.ts): `listModels` trả về `response.data || []` trực tiếp.
+     * [`apps/api-gateway/src/modules/reports/reports.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/reports/reports.controller.ts): `tableSources` trả về `this.sources.list(req.user)` trực tiếp.
+     * [`apps/api-gateway/src/modules/translate/translate.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/translate/translate.service.ts): Trả về kết quả JSON/object trực tiếp.
+     * [`apps/api-gateway/src/modules/users/categories.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/categories.service.ts): `getGroups`, `updateGroup`, `create`, `update` trả về thực thể/danh sách trực tiếp.
+     * [`apps/api-gateway/src/modules/users/organizations.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/organizations.service.ts): Chuyển 14 methods (`create`, `getUnitTypes`, `getJobTitles`, `updateJobTitle`, `getOne`, `getOneByCode`, `getOneByCodeOrId`, `updateUnit`, `updateScope`, `getSubTree`, `setStaffing`, `setStaffingSlot`, `getPublicOrgUnits`, `getUnitTypeJobTemplates`) sang trả về thực thể thuần túy.
+     * [`apps/api-gateway/src/modules/users/pbac.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/pbac.controller.ts): Chuyển `findAll`, `findOne`, `create`, `update`, `delete` sang trả về thực thể trực tiếp.
+     * [`apps/api-gateway/src/modules/users/resources.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/resources.controller.ts): Chuyển `getResources`, `getPermissionMatrix`, `createResource`, `updateResource` sang trả về danh sách/thực thể trực tiếp.
+     * [`apps/api-gateway/src/modules/users/user.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/user.service.ts): Chuyển `getDetail`, `getUserPolicies`, `create`, `assignPosition`, `setActive`, `assignUserGroups`, `update` sang trả về thực thể thuần túy.
+     * [`apps/api-gateway/src/modules/auth/sso/sso.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/auth/sso/sso.controller.ts): `@Get('providers')` trả về trực tiếp danh sách entity `this.sso.list()`.
+     * [`apps/api-gateway/src/modules/hrm/tasks.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/hrm/tasks.service.ts): `recommendSupervisors`, `getTaskContext`, `balancePercentages`, `getPersonalWorkbench` trả về entity thuần túy (hoặc `null`).
+     * [`apps/api-gateway/src/modules/workflow/workflow.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/workflow/workflow.service.ts): `getMicroservices`, `getTriggers`, `getModules`, `getOrgRoles` trả về danh sách thuần.
+
+2. **Frontend `apps/admin_khcn` — Triệt tiêu 100% mã phòng thủ lồng nhiều cấp & mã convert cấu trúc ad-hoc:**
+   - **Loại bỏ hoàn toàn hàm unwrapping thủ công `unwrapTaskData` tại các UI components**:
+     * [`apps/admin_khcn/features/hrm/components/tasks/TaskDetailClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/TaskDetailClient.tsx): `currentTask = detailData || null;`
+     * [`apps/admin_khcn/features/hrm/components/tasks/TaskEvaluationApprovalSheet.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/TaskEvaluationApprovalSheet.tsx): Truy cập trực tiếp `detailData`, `historyData`, `stepsData`, `subtasksData` 1 cấp từ query hooks đã unwrap.
+     * [`apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/task-detail-drawer.tsx): `currentTask = detailData || task || null;`
+   - **Chuẩn hóa các custom query hooks trả về trực tiếp dữ liệu render**:
+     * [`apps/admin_khcn/features/hrm/hooks/useTasks.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/hooks/useTasks.ts): Thêm `select: (res) => unwrapData(res, {})` vào `useTaskStats`; thêm `select: (res) => unwrapData(res, null)` vào `useAttendanceStats`.
+     * [`apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/task-dashboard.tsx): Dùng trực tiếp `statsData` từ hook mà không cần bóc tách `statsResponse?.data`.
+     * [`apps/admin_khcn/features/hrm/components/tasks/task-detail-discussion-tab.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/task-detail-discussion-tab.tsx): Truy cập trực tiếp mảng `comments: any[] = Array.isArray(commentsData) ? commentsData : [];`.
+     * [`apps/admin_khcn/features/hrm/components/calendar/components/CalendarEventModal.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/calendar/components/CalendarEventModal.tsx): Sử dụng `stats` trực tiếp từ `useAttendanceStats` thay vì `data?.data`.
+   - **Loại bỏ việc queryFn tự đóng gói `{ items: res.data, meta: ... }` tại phân hệ Posts**:
+     * [`apps/admin_khcn/features/posts/components/BannerList.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/BannerList.tsx): `queryFn` trả về response trực tiếp, lấy dữ liệu qua `unwrapData<Banner[]>(bannersResponse, [])` và phân trang qua `bannersResponse?.meta?.pagination?.total`.
+     * [`apps/admin_khcn/features/posts/components/CategoryList.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/CategoryList.tsx): `queryFn` trả về response trực tiếp, lấy `unwrapData<Category[]>(categoriesResponse, [])` và `meta.pagination.total`.
+     * [`apps/admin_khcn/features/posts/components/post-list/PostListTable.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/post-list/PostListTable.tsx): `queryFn` trả về response trực tiếp, lấy `unwrapData<Post[]>(data, [])` và `meta.pagination.total`.
+   - **Toàn bộ các điểm bóc tách nhiều cấp khác đã hoàn thành ở Phase 1**:
+     * `task-list.tsx` (`flatTasks = (data as HrmTask[]) ?? []`)
+     * `LoginClient.tsx` (`unwrapData(res, [])`)
+     * `EvaluationFormsClient.tsx`, `KpiFormulasClient.tsx`
+     * `features/reports` (`EmbeddedReportWidget.tsx`, `ReportViewer.tsx`, `api/index.ts`)
+     * `system-admin/organization` (`OrganizationStaffing`, `useStaffingData.ts`, `api.ts`)
+     * `features/workflow` (`hooks.ts`, `WorkflowBindingsPage.tsx`, `WorkflowInstancesPage.tsx`, `WorkflowListPage.tsx`)
+     * `hooks/useUser.ts`, `lib/auth.ts`, `modules/page-builder/services/aiService.ts`, `api-management/api/index.ts`, `system-admin/users/api.ts`
+     * `apps/admin_khcn/hooks/useServiceMenus.ts`: Chuẩn hóa `useHubServices` và `useServiceMenus` qua `unwrapData`, loại bỏ hoàn toàn `res?.apps ?? res?.data?.apps` và `res?.sidebar ?? res?.data?.sidebar`.
+     * `apps/admin_khcn/features/system-admin/menus/api.ts` & `hooks/useMenuQueries.ts`: Sử dụng `unwrapData` cho `getMenuTree`, `getMyMenus`, `getHubApps`, `getServiceSidebar`, `useMenuFlatListQuery`, `fetchResources`.
+     * `apps/admin_khcn/features/system-admin/organization/api.ts`: Dùng `unwrapData` cho toàn bộ các hàm API (`getOrganizations`, `getTree`, `getDetail`, `getScope`, `getStaffingReport`...).
+     * `apps/admin_khcn/features/workflow/screens/WorkflowEditorScreen.tsx`: Đơn giản hóa `organizationTree` qua `select: (res) => unwrapData(res, [])` và `unitTree = organizationTree.data ?? []`, loại bỏ hoàn toàn logic ternary kiểm tra đúp mảng `unitTreeData`.
+     * `apps/admin_khcn/features/system-admin/categories/api.ts`: Chuẩn hóa qua `unwrapData` và quét sạch 100% `console.error` logs.
+   - **Đồng bộ chuẩn hóa ứng dụng Portal (`apps/portal-goverment`)**:
+     * Bổ sung helper chuẩn hóa `apps/portal-goverment/lib/api-helper.ts` (`unwrapData`).
+     * Chuẩn hóa `apps/portal-goverment/hooks/usePublicData.ts` unwrap data 1 cấp duy nhất cho tất cả hooks (`usePublicPosts`, `usePublicProcedures`, `usePublicDossier`, `usePublicDocuments`...).
+     * Chuẩn hóa `news-page.tsx`, `procedures-page.tsx`, `documents-page.tsx`, `DynamicPageRenderer.tsx` truy cập trực tiếp dữ liệu unwrap, loại bỏ logic phòng thủ chắp vá `response?.data ?? response`.
+
+3. **Backend API Gateway — Hoàn tất rà soát các endpoints còn sót bọc thủ công**:
+   - [`apps/api-gateway/src/modules/api-management/api-management.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/api-management/api-management.controller.ts): Chuyển `listConnections` từ `return { data: res.data || [], total: res.total || 0 }` sang trả về `res` trực tiếp để `TransformInterceptor` tự động phân rã vào `data` và `meta.pagination`.
+   - [`apps/api-gateway/src/modules/users/menus.service.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/users/menus.service.ts): `getHubApps` và `getServiceSidebar` trả về thực thể thuần túy (`this.buildHubApps(branches)` và `sidebar`) thay vì bọc `{ apps }` và `{ sidebar }`.
+
+4. **Đợt Rà Soát Sâu & Triệt Tiêu Toàn Diện (Phase 2 & 3 - Zero Violations Sweep)**:
+   - **Triệt tiêu bọc thủ công ở API Gateway**:
+     * [`apps/api-gateway/src/modules/hrm/rank-quotas.controller.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/api-gateway/src/modules/hrm/rank-quotas.controller.ts): Chuyển `suggestQuotas` trả về thực thể thuần túy (parsed AI result hoặc `buildRuleBasedSuggestion`) thay vì tự bọc `{ success: true, data: ... }`.
+   - **Triệt tiêu toàn bộ mã phòng thủ chắp vá và convert cấu trúc tại UI components**:
+     * [`MultiLangTitleSlug.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/components/shared/MultiLangTitleSlug.tsx): Dùng `unwrapData` bóc tách danh sách ngôn ngữ, loại bỏ `!Array.isArray(res?.data)`.
+     * [`DocumentPublishingPage.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/DocumentPublishingPage.tsx): Lấy trực tiếp `searchResults` từ `useListDocuments` (đã có `unwrapData`), loại bỏ `raw = (searchResults as any).data || searchResults` và `Array.isArray((raw as any)?.data)`.
+     * [`DesktopCalendar.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/calendar/components/DesktopCalendar.tsx) & [`MobileCalendar.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/calendar/components/MobileCalendar.tsx): Lấy trực tiếp `allTasks = []` từ `useTasksList()`, loại bỏ toàn bộ `Array.isArray((tasksRes as any)?.data)`.
+     * [`TaskEditClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/TaskEditClient.tsx): Lấy trực tiếp `currentTask` từ `useTaskDetail()`, loại bỏ chuỗi phòng thủ 3 tầng `rawDetail && typeof rawDetail === 'object' && rawDetail.data...`.
+     * [`TaskEvaluateClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/TaskEvaluateClient.tsx): Lấy trực tiếp `currentTask` và `stepsList = []` từ hooks, loại bỏ mã phòng thủ chắp vá.
+     * [`task-detail-history-tab.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/tasks/task-detail-history-tab.tsx): Lấy trực tiếp `history = []` từ `useTaskHistory()`, loại bỏ kiểm tra đúp `rawHistory?.data`.
+     * [`useEmployeeTitles.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/employee-tabs/useEmployeeTitles.ts): Dùng trực tiếp mảng cây đơn vị `treeNodes` và `staffingReport` đã unwrap.
+     * [`EvaluationFormsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/components/work-plans/evaluation-forms/EvaluationFormsClient.tsx): Dùng `unwrapData` trong `handleDownloadXml`, `handleExportDocx`, `handleOpenEditXml` và nút đồng bộ XML; loại bỏ hoàn toàn `Array.isArray(res?.data) ? res.data[0] : res?.data`.
+     * [`useKpiForms.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/hooks/useKpiForms.ts): Dùng `unwrapData` cho `useGetKpiFormDetail` và `useGetKpiFormXml`.
+     * [`useTasks.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/hrm/hooks/useTasks.ts): Bổ sung `useQuery<any>` cho `useTasksList`, `useTaskStats`, `useTaskDetail`, `useTaskComments`, `useTaskSubtasks`, `useTaskHistory`, `useTaskSteps`; dùng `unwrapData` cho `useRespondTask` và `useRequestCoordination`.
+     * [`ThemeProvider.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/posts/components/theme/ThemeProvider.tsx): Dùng `unwrapData` bóc cấu hình giao diện từ endpoint public.
+     * [`useSystemConfigs.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/users/hooks/useSystemConfigs.ts) & [`useUserConfigs.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/users/hooks/useUserConfigs.ts): Dùng `unwrapData` lấy dữ liệu cấu hình.
+     * [`api-management/api/index.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/api-management/api/index.ts): Chuẩn hóa toàn bộ 10 phương thức mutation sang dùng `unwrapData(res)`.
+     * [`unit-job-templates/page.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/app/services/admin/unit-job-templates/page.tsx): Dùng `unwrapData` cho cả 4 prefetch queries, loại bỏ hoàn toàn `{ data: Array.isArray(data) ? data : data?.data ?? [] }`.
+     * [`organization/api.ts`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/system-admin/organization/api.ts): Dùng `unwrapData` cho `getDomains`, `getGeographicAreas`, `updateScope`, `getStaffingReport`.
+     * [`ConsultationsClient.tsx`](file:///c:/Users/Admin/Desktop/daklak-workspace/apps/admin_khcn/features/document/components/ConsultationsClient.tsx): Lấy trực tiếp `consultations = []` từ `useListConsultations`.
+
+5. **Đồng Bộ Tài Liệu Kiến Trúc (Ràng buộc số 8)**:
+   - [`.agents/architecture/request-response-flow.md`](file:///c:/Users/Admin/Desktop/daklak-workspace/.agents/architecture/request-response-flow.md): Cập nhật quy tắc TransformInterceptor tự động phẳng hóa container (`items`, `rows`) và trích xuất `meta.pagination`, chuẩn hóa phân định dữ liệu và nguyên tắc 1 cấp lấy dữ liệu render tại Frontend.
+
+### 3. Bằng Chứng Kiểm Chứng Máy Thực Tế (Machine Verification)
+- `git grep -n -E "(\.data\?\.data|data\.data|res\?\.data\?\.data|\(data as any\)\?\.data|\(res as any\)\?\.data)" apps/admin_khcn`: **Exit code 1 (0 matches — Triệt tiêu 100%)**.
+- `git grep -n "res?.data" apps/admin_khcn`: **Exit code 1 (0 matches — Triệt tiêu 100%)**.
+- `npm --prefix apps/admin_khcn run typecheck` (`tsc --noEmit`): **Exit code 0 (PASS — 100% sạch lỗi typecheck)**.
+- `npm --prefix apps/portal-goverment run typecheck` (`tsc --noEmit`): **Exit code 0 (PASS — 100% sạch lỗi typecheck)**.
+- `npm --prefix apps/api-gateway run build`: **Exit code 0 (PASS — Build thành công 100%)**.
+- Toàn bộ file lưu chuẩn UTF-8 không BOM, quét sạch 100% debug logs (`console.log`, `debugger`, `console.error` trong UI).
+
+
 ## [2026-10-17] Thiết Lập Ràng Buộc Kỹ Thuật Số 8: Bắt Buộc Đồng Bộ Kiến Trúc Hệ Thống (Mandatory Architecture Synchronization Gate)
 
 ### 1. Bối Cảnh & Yêu Cầu

@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { MenuItem } from "./types";
 
 /** Chuẩn hóa payload gửi backend (PBAC) */
@@ -29,18 +29,18 @@ export interface MenuNode {
 
 export const menuApi = {
   getMenus: (q?: string) => apiClient.get<MenuItem[]>("/menus", { params: { q: q || undefined } }),
-  getMenuTree: (q?: string) => apiClient.get<{ data: MenuItem[] }>("/menus/tree", { params: { q: q || undefined } }).then((r: any) => r.data ?? []),
+  getMenuTree: (q?: string) => apiClient.get("/menus/tree", { params: { q: q || undefined } }).then((r) => unwrapData<MenuItem[]>(r, [])),
   /** Menu sidebar theo user đăng nhập (cây, chỉ mục user có quyền) */
   getMyMenus: (app = "ADMIN_PORTAL") =>
-    apiClient.get<{ data: MenuNode[] }>("/menus/me", { params: { app } }),
+    apiClient.get("/menus/me", { params: { app } }).then((r) => unwrapData<MenuNode[]>(r, [])),
 
   /** Hub Apps: Danh sách phân hệ (card Hub) theo PBAC của user */
   getHubApps: (app = "ADMIN_PORTAL") =>
-    apiClient.get<{ apps: any[] }>("/menus/hub", { params: { app } }),
+    apiClient.get("/menus/hub", { params: { app } }).then((r) => unwrapData<any[]>(r, [])),
 
   /** Sidebar: Lấy menu items của 1 service theo code (lazy load khi vào service) */
   getServiceSidebar: (code: string, app = "ADMIN_PORTAL") =>
-    apiClient.get<{ sidebar: any }>("/menus/sidebar", { params: { code, app } }),
+    apiClient.get("/menus/sidebar", { params: { code, app } }).then((r) => unwrapData<any>(r, null)),
 
   saveMenu: (data: Partial<MenuItem>) => {
     const payload = toMenuPayload(data);

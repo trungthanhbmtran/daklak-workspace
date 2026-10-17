@@ -57,6 +57,7 @@ import { useTaskTemplatesList } from "../../hooks/useTaskTemplates";
 import { useUser } from "@/hooks/useUser";
 import { hrmTasksApi } from "../../api";
 import { toast } from "sonner";
+import { unwrapData } from "@/lib/api-helper";
 import { DepartmentWorkloadRecommendation } from "./department-workload-recommendation";
 
 interface CoordinatorItem {
@@ -166,14 +167,11 @@ export function CreateTaskDialog({
     pageSize: 200,
     assignableOnly: true,
   }, { enabled: open });
-  const employees = (employeesData as any)?.data ?? [];
+  const employees = employeesData?.data ?? [];
 
-  const { data: orgData } = useOrganizationFlatListQuery(undefined, { enabled: open });
-  const departments = orgData?.data ?? [];
+  const { data: departments = [] } = useOrganizationFlatListQuery(undefined, { enabled: open });
 
-  const { data: templatesData } = useTaskTemplatesList(undefined, { enabled: open && showTemplateModal });
-  const rawTemplates = (templatesData as any)?.data ?? [];
-  const templates = Array.isArray(rawTemplates) ? rawTemplates : [];
+  const { data: templates = [] } = useTaskTemplatesList(undefined, { enabled: open && showTemplateModal });
 
   const filteredTemplates = useMemo(() => {
     if (!templateSearch.trim()) return templates.slice(0, 30);
@@ -277,7 +275,7 @@ export function CreateTaskDialog({
       const emp = employees.find((e: any) => e.employeeCode === value);
       if (emp) {
         const d = departments.find((x: any) => x.id === emp.departmentId || x.id === emp.department?.id);
-        const deptTag = d?.name ? ` (${d.name})` : emp.unitName ? ` (${emp.unitName})` : "";
+        const deptTag = d?.name ? ` (${d.name})` : (emp as any).unitName ? ` (${(emp as any).unitName})` : "";
         name = `👤 ${emp.fullName}${deptTag}`;
       }
     }
@@ -320,14 +318,17 @@ export function CreateTaskDialog({
       const res = await balancePercentagesMutation.mutateAsync({
         coordinatorCodes: coordinators.map((c) => c.id),
       });
-      if (res?.data) {
-        setAssigneePercentage(res.data.assigneePercentage);
+      const data = unwrapData<any>(res);
+      if (data) {
+        if (data.assigneePercentage !== undefined) {
+          setAssigneePercentage(data.assigneePercentage);
+        }
         setCoordinators((prev) =>
           prev.map((c) => {
-            const found = res.data.coordinators?.find((x) => x.id === c.id);
+            const found = data.coordinators?.find((x: any) => x.id === c.id);
             return {
               ...c,
-              percentage: found ? found.percentage : res.data.coordinatorPercentage,
+              percentage: found ? found.percentage : data.coordinatorPercentage,
             };
           })
         );

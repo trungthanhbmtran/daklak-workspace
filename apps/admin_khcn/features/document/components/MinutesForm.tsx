@@ -54,7 +54,7 @@ export function MinutesForm({ onComplete, onCancel }: { onComplete: () => void, 
       });
       onComplete();
     } catch (error) {
-      console.error(error);
+      // error handled
     }
   };
 

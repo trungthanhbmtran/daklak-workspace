@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import apiClient, { clearBrowserSession, loginBrowserSession } from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { safeAuthCallback } from "@/lib/auth-navigation";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -45,7 +46,11 @@ export function LoginClient() {
   const searchParams = useSearchParams();
   const { data: ssoProviders = [] } = useQuery<{ id: string; label: string }[]>({
     queryKey: ['sso-providers'], retry: false,
-    queryFn: async () => { const res = await apiClient.get('/auth/sso/providers', { skipSessionRecovery: true }); return res.data?.data?.providers ?? res.data?.providers ?? []; },
+    queryFn: async () => {
+      const res = await apiClient.get('/auth/sso/providers', { skipSessionRecovery: true });
+      const raw = unwrapData<any>(res, []);
+      return Array.isArray(raw) ? raw : (raw?.providers ?? []);
+    },
   });
   const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);

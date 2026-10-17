@@ -47,8 +47,8 @@ export default function ProceduresPage() {
   // Effect to sync dynamic dossier query with trackResult
   React.useEffect(() => {
     if (activeTrackCode) {
-      if (dbDossier?.data) {
-        const dossier = dbDossier.data;
+      const dossier = (dbDossier as any)?.data ?? dbDossier;
+      if (dossier && typeof dossier === "object" && ("title" in dossier || "name" in dossier || "status" in dossier)) {
         setTrackResult({
           title: dossier.title || dossier.name || "Giải quyết hồ sơ liên thông",
           applicant: dossier.senderName,
@@ -64,8 +64,9 @@ export default function ProceduresPage() {
   }, [dbDossier, dossierHasError, activeTrackCode])
 
   const filteredProcedures = React.useMemo(() => {
-    if (dbProceduresData?.data && dbProceduresData.data.length > 0) {
-      return dbProceduresData.data.map((proc: any) => ({
+    const list = Array.isArray(dbProceduresData) ? dbProceduresData : ((dbProceduresData as any)?.data || []);
+    if (list && list.length > 0) {
+      return list.map((proc: any) => ({
         id: proc.id,
         title: proc.name,
         time: proc.duration,

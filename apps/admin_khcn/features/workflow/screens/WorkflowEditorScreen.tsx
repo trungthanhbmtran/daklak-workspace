@@ -44,6 +44,7 @@ import type { Workflow, WorkflowGraph, WorkflowNodeData, WorkflowPhase } from "@
 import { WORKFLOW_ROUTES } from "@/features/workflow/routes";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import type { OrganizationUnitNode } from "@/features/system-admin/organization/types";
+import { unwrapData } from "@/lib/api-helper";
 import { WorkflowNodeCard } from "../components/WorkflowNodeCard";
 import { WorkflowCanvasOverlay } from "../components/WorkflowCanvasOverlay";
 import { WorkflowSidebarLeft } from "../components/WorkflowSidebarLeft";
@@ -104,13 +105,9 @@ function WorkflowEditor({
   const organizationTree = useQuery({
     queryKey: ["organizations", "tree"],
     queryFn: () => organizationApi.getTree(),
+    select: (res) => unwrapData<OrganizationUnitNode[]>(res, []),
   });
-  const unitTreeData = organizationTree.data as unknown;
-  const unitTree = Array.isArray(unitTreeData)
-    ? (unitTreeData as OrganizationUnitNode[])
-    : unitTreeData && typeof unitTreeData === "object" && Array.isArray((unitTreeData as { data?: unknown }).data)
-    ? (unitTreeData as { data: OrganizationUnitNode[] }).data
-    : [];
+  const unitTree = organizationTree.data ?? [];
 
   const initialNodes = useMemo(() => graphNodes(workflow), [workflow]);
   const initialEdges = useMemo(() => graphEdges(workflow, initialNodes), [workflow, initialNodes]);

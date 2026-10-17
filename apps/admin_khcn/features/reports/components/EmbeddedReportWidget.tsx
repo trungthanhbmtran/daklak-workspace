@@ -154,7 +154,6 @@ export function EmbeddedReportWidget({
   const rows = useMemo(() => {
     if (!snapshot) return [];
     if (Array.isArray(snapshot.data)) return snapshot.data;
-    if (Array.isArray((snapshot as any)?.data?.data)) return (snapshot as any).data.data;
     if (Array.isArray(snapshot)) return snapshot;
     return [];
   }, [snapshot]);

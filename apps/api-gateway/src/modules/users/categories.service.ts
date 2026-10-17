@@ -57,7 +57,7 @@ export class CategoriesService implements OnModuleInit {
       const res: any = await firstValueFrom(
         this.categoryService.GetAllGroups({}, metadata),
       );
-      return { data: res.groups };
+      return res.groups;
     } catch (error) {
       throw new InternalServerErrorException(
         'Chưa thể kết nối tới dịch vụ danh mục',
@@ -74,7 +74,7 @@ export class CategoriesService implements OnModuleInit {
           order: body.order ?? 0,
         }, metadata),
       );
-      return { data: res };
+      return res;
     } catch (error) {
       throw new InternalServerErrorException('Lỗi cập nhật nhóm danh mục');
     }
@@ -162,7 +162,7 @@ export class CategoriesService implements OnModuleInit {
     await this.redisService.delPattern(`category_group:${body.group}*`);
     await this.redisService.delPattern(`category_group:all*`);
 
-    return { data: toFrontendItem(res as any) };
+    return toFrontendItem(res as any);
   }
 
   async update(
@@ -193,7 +193,7 @@ export class CategoriesService implements OnModuleInit {
     // or we can just invalidate all to be safe.
     await this.redisService.delPattern(`category_group:*`);
 
-    return { data: toFrontendItem(res as any) };
+    return toFrontendItem(res as any);
   }
 
   async delete(id: number, metadata?: Metadata) {

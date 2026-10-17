@@ -319,8 +319,6 @@ export const ReportViewer: React.FC<ReportViewerProps> = ({
     }
     const rawRows = Array.isArray(rawData)
       ? rawData
-      : Array.isArray((snapshot as any)?.data?.data)
-      ? (snapshot as any).data.data
       : Array.isArray(snapshot)
       ? snapshot
       : [];

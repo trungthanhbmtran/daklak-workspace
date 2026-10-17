@@ -34,7 +34,7 @@ export function DocumentsDashboardClient() {
   // eslint-disable-next-line unused-imports/no-unused-vars
   const { data: stats, isLoading: statsLoading } = useDocumentStats();
   // eslint-disable-next-line unused-imports/no-unused-vars
-  const { data: pendingTasksData, isLoading: tasksLoading } = useListDocuments({
+  const { data: myPendingTasks = [], isLoading: tasksLoading } = useListDocuments({
     status: 'PROCESSING',
   });
 
@@ -48,8 +48,6 @@ export function DocumentsDashboardClient() {
       urgentTotal: s.urgentTotal || 0,
     };
   }, [stats]);
-
-  const myPendingTasks = useMemo(() => pendingTasksData?.data ?? [], [pendingTasksData]);
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">

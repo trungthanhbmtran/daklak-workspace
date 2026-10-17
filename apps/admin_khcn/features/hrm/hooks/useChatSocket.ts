@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { hrmKeys } from "../keys";
+import { unwrapData } from "@/lib/api-helper";
 
 // URL của API Gateway (giả sử là http://localhost:5000/chat, tuỳ vào cấu hình)
 // Bạn có thể đặt vào biến môi trường NEXT_PUBLIC_API_URL
@@ -47,9 +48,7 @@ export function useChatSocket(conversationId: string | undefined, userId?: strin
       queryClient.setQueryData(queryKey, (oldData: any) => {
         if (!oldData) return oldData;
         
-        // Thường API trả về cấu trúc: { success: true, data: { items: [...] } }
-        // Hoặc trả về mảng trực tiếp, tuỳ backend. (hrmTasksApi.getComments trả về mảng)
-        const oldItems = Array.isArray(oldData) ? oldData : oldData?.data?.items || oldData?.data || [];
+        const oldItems = Array.isArray(oldData) ? oldData : unwrapData<any[]>(oldData, []);
         
         // Tránh bị trùng lặp nếu API đã trả về
         if (oldItems.find((item: any) => item.id === message.id)) {
@@ -60,8 +59,6 @@ export function useChatSocket(conversationId: string | undefined, userId?: strin
 
         if (Array.isArray(oldData)) {
           return newItems;
-        } else if (oldData?.data?.items) {
-          return { ...oldData, data: { ...oldData.data, items: newItems } };
         } else {
           return { ...oldData, data: newItems };
         }

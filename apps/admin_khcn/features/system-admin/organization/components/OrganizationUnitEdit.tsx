@@ -37,7 +37,7 @@ export function OrganizationUnitEdit() {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data: detailResponse, isPending, isFetching, isPlaceholderData } = useOrganizationDetailQuery(code);
-  const unit = detailResponse?.data;
+  const unit = (detailResponse as any)?.data ?? detailResponse;
   // isPlaceholderData = true khi keepPreviousData đang giữ data cũ trong lúc fetch data mới
   const isDetailLoading = isPending || isFetching || isPlaceholderData;
   const selectedId = unit?.id;
@@ -65,8 +65,7 @@ export function OrganizationUnitEdit() {
 
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
   
-  const { data: unitTypesRes } = useUnitTypesQuery();
-  const allUnitTypes = unitTypesRes?.data || [];
+  const { data: allUnitTypes = [] } = useUnitTypesQuery();
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     if (selectedId == null) return;
@@ -149,7 +148,7 @@ export function OrganizationUnitEdit() {
                             field.onChange(numVal);
                             const selectedType = allUnitTypes.find((t: any) => t.id === numVal);
                             if (selectedType) {
-                              form.setValue("categoryCode", selectedType.categoryCode, { shouldDirty: true });
+                              form.setValue("categoryCode", selectedType.categoryCode || "", { shouldDirty: true });
                             }
                           }}
                         >

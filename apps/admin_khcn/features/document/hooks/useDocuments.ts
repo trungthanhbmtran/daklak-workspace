@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import apiClient from "@/lib/axiosInstance";
 import type { ApiResponse } from "@/lib/api.types";
+import { unwrapData } from "@/lib/api-helper";
 
 const API_BASE = '/documents';
 
@@ -15,30 +16,32 @@ export const useCategories = (groupCode: string) => {
   return useQuery({
     queryKey: ['document-categories', groupCode],
     queryFn: async (): Promise<any[]> => {
-      const res = await apiClient.get(`/categories`, { params: { group: groupCode } }) as any as ApiResponse<any[]>;
-      return res.data ?? [];
+      const res = await apiClient.get(`/categories`, { params: { group: groupCode } });
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 5 * 60 * 1000,
   });
 };
 
-/** Lấy danh sách tài liệu — trả về ApiResponse đầy đủ (consumer đọc .data + .meta) */
+/** Lấy danh sách tài liệu — trả về array thẳng, kèm getter .data cho backward-compat */
 export const useListDocuments = (params: any) => {
   return useQuery({
     queryKey: ['documents', params],
     queryFn: async (): Promise<ApiResponse<any[]>> => {
       return apiClient.get(API_BASE, { params }) as any;
     },
+    select: (res) => unwrapData<any[]>(res, []),
   });
 };
 
-/** Lấy danh sách đợt lấy ý kiến — trả về ApiResponse đầy đủ */
+/** Lấy danh sách đợt lấy ý kiến — trả về array thẳng, kèm getter .data */
 export const useListConsultations = (params?: any) => {
   return useQuery({
     queryKey: ['document-consultations', params],
     queryFn: async (): Promise<ApiResponse<any[]>> => {
       return apiClient.get(`${API_BASE}/consultations`, { params }) as any;
     },
+    select: (res) => unwrapData<any[]>(res, []),
   });
 };
 
@@ -48,8 +51,8 @@ export const useGetConsultation = (id: string, options?: { enabled?: boolean }) 
     queryKey: ['consultation', id],
     queryFn: async (): Promise<any> => {
       if (!id) return null;
-      const res = await apiClient.get(`${API_BASE}/consultations/${id}`) as any as ApiResponse<any>;
-      return res.data ?? null;
+      const res = await apiClient.get(`${API_BASE}/consultations/${id}`);
+      return unwrapData<any>(res, null);
     },
     enabled: !!id && (options?.enabled ?? true),
   });
@@ -61,20 +64,21 @@ export const useListResponses = (id: string, options?: { enabled?: boolean }) =>
     queryKey: ['consultation-responses', id],
     queryFn: async (): Promise<any[]> => {
       if (!id) return [];
-      const res = await apiClient.get(`${API_BASE}/consultations/${id}/responses`) as any as ApiResponse<any[]>;
-      return res.data ?? [];
+      const res = await apiClient.get(`${API_BASE}/consultations/${id}/responses`);
+      return unwrapData<any[]>(res, []);
     },
     enabled: !!id && (options?.enabled ?? true),
   });
 };
 
-/** Lấy danh sách biên bản — trả về ApiResponse đầy đủ */
+/** Lấy danh sách biên bản — trả về array thẳng, kèm getter .data */
 export const useListMinutes = (params?: any) => {
   return useQuery({
     queryKey: ['document-minutes', params],
     queryFn: async (): Promise<ApiResponse<any[]>> => {
       return apiClient.get(`${API_BASE}/minutes`, { params }) as any;
     },
+    select: (res) => unwrapData<any[]>(res, []),
   });
 };
 
@@ -84,8 +88,8 @@ export const useGetDocument = (id: string, options?: { enabled?: boolean }) => {
     queryKey: ['document', id],
     queryFn: async (): Promise<any> => {
       if (!id) return null;
-      const res = await apiClient.get(`${API_BASE}/${id}`) as any as ApiResponse<any>;
-      return res.data ?? null;
+      const res = await apiClient.get(`${API_BASE}/${id}`);
+      return unwrapData<any>(res, null);
     },
     enabled: !!id && (options?.enabled ?? true),
   });
@@ -96,8 +100,8 @@ export const useDocumentStats = () => {
   return useQuery({
     queryKey: ['document-stats'],
     queryFn: async (): Promise<any> => {
-      const res = await apiClient.get(`${API_BASE}/stats`) as any as ApiResponse<any>;
-      return res.data ?? null;
+      const res = await apiClient.get(`${API_BASE}/stats`);
+      return unwrapData<any>(res, null);
     },
   });
 };
@@ -108,8 +112,8 @@ export const useDocumentLogs = (id: string, options?: { enabled?: boolean }) => 
     queryKey: ['document-logs', id],
     queryFn: async (): Promise<any[]> => {
       if (!id) return [];
-      const res = await apiClient.get(`${API_BASE}/${id}/logs`) as any as ApiResponse<any[]>;
-      return res.data ?? [];
+      const res = await apiClient.get(`${API_BASE}/${id}/logs`);
+      return unwrapData<any[]>(res, []);
     },
     enabled: !!id && (options?.enabled ?? true),
   });
@@ -123,8 +127,8 @@ export const usePublicComments = (consultationId?: string, status?: string, opti
       const url = consultationId
         ? `${API_BASE}/consultations/${consultationId}/public-comments`
         : `${API_BASE}/consultations/public-comments`;
-      const res = await apiClient.get(url, { params: { status } }) as any as ApiResponse<any[]>;
-      return res.data ?? [];
+      const res = await apiClient.get(url, { params: { status } });
+      return unwrapData<any[]>(res, []);
     },
     enabled: options?.enabled ?? true,
   });
@@ -135,8 +139,8 @@ export const useLgspConfig = () => {
   return useQuery({
     queryKey: ['lgsp-config'],
     queryFn: async (): Promise<any> => {
-      const res = await apiClient.get(`${API_BASE}/lgsp/config`) as any;
-      return res?.data ?? res;
+      const res = await apiClient.get(`${API_BASE}/lgsp/config`);
+      return unwrapData<any>(res, null);
     },
   });
 };
@@ -146,8 +150,8 @@ export const useLgspAgencies = (params?: { limit?: number; offset?: number }) =>
   return useQuery({
     queryKey: ['lgsp-agencies', params],
     queryFn: async (): Promise<any[]> => {
-      const res = await apiClient.get(`${API_BASE}/lgsp/agencies`, { params }) as any;
-      return res?.data ?? [];
+      const res = await apiClient.get(`${API_BASE}/lgsp/agencies`, { params });
+      return unwrapData<any[]>(res, []);
     },
   });
 };
@@ -160,8 +164,8 @@ export const useLgspSentStatus = (documentId: string, lgspDocId?: string) => {
       if (!documentId) return null;
       const res = await apiClient.get(`${API_BASE}/${documentId}/lgsp-status`, {
         params: { lgspDocId },
-      }) as any;
-      return res?.data ?? res;
+      });
+      return unwrapData<any>(res, null);
     },
     enabled: !!documentId,
   });
@@ -171,8 +175,8 @@ export const useLgspSentStatus = (documentId: string, lgspDocId?: string) => {
 export const useTestLgspConnection = () => {
   return useMutation({
     mutationFn: async (): Promise<any> => {
-      const res = await apiClient.get(`${API_BASE}/lgsp/test-connection`) as any;
-      return res?.data ?? res;
+      const res = await apiClient.get(`${API_BASE}/lgsp/test-connection`);
+      return unwrapData<any>(res, null);
     },
   });
 };
@@ -180,8 +184,7 @@ export const useTestLgspConnection = () => {
 // ─── Helper: bóc array từ ApiResponse (cho backward-compat) ──────────────────
 /** @deprecated Dùng trực tiếp res.data thay vì hàm này */
 export const extractDataArray = (res: ApiResponse<any[]> | null | undefined): any[] => {
-  if (!res) return [];
-  return Array.isArray(res.data) ? res.data : [];
+  return unwrapData<any[]>(res, []);
 };
 
 // ─── Main Mutations Hook ──────────────────────────────────────────────────────
@@ -313,7 +316,7 @@ export function useDocuments() {
   const testLgspConnectionMutation = useMutation({
     mutationFn: async (): Promise<any> => {
       const res = await apiClient.get(`${API_BASE}/lgsp/test-connection`) as any;
-      return res?.data ?? res;
+      return unwrapData(res);
     },
   });
 

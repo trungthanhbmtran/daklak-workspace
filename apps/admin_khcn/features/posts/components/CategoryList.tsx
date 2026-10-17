@@ -7,6 +7,7 @@ import {
   MoreHorizontal, FileText
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { unwrapData } from "@/lib/api-helper";
 
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
@@ -63,25 +64,19 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     setPage(1);
   }, [searchTerm, pageSize]);
 
-  const { data: categoriesData, isLoading } = useQuery({
+  const { data: categoriesResponse, isLoading } = useQuery({
     queryKey: ["posts-categories", page, searchTerm],
-    queryFn: async () => {
-      const res = await postsApi.getCategories({
-        page,
-        limit: pageSize,
-        search: searchTerm || undefined,
-        mode: 'flat',
-      });
-      return {
-        items: res.data,
-        meta: res.meta || {},
-      };
-    },
+    queryFn: () => postsApi.getCategories({
+      page,
+      limit: pageSize,
+      search: searchTerm || undefined,
+      mode: 'flat',
+    }),
   });
 
-  const categories = categoriesData?.items || [];
-  const totalItems = Number(categoriesData?.meta?.total) || 0;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const categories = unwrapData<Category[]>(categoriesResponse, []);
+  const totalItems = Number(categoriesResponse?.meta?.pagination?.total ?? (categoriesResponse?.meta as any)?.total ?? 0);
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
 
   const deleteMutation = useMutation({
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

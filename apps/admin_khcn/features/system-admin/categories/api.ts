@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { CategoryItem, CategoryPayload } from "./types";
 
 export const categoryApi = {
@@ -7,11 +8,10 @@ export const categoryApi = {
     try {
       const res: any = await apiClient.get("/categories", { params });
       return {
-        data: res.data,
+        data: unwrapData<CategoryItem[]>(res, []),
         meta: res?.meta || {},
       };
-    } catch (error) {
-      console.error("[categoryApi] fetchAll error:", error);
+    } catch {
       return { data: [], meta: {} };
     }
   },
@@ -20,11 +20,10 @@ export const categoryApi = {
     try {
       const res: any = await apiClient.get(`/categories`, { params: { group, ...params } });
       return {
-        data: res.data,
+        data: unwrapData<CategoryItem[]>(res, []),
         meta: res?.meta || {},
       };
-    } catch (error) {
-      console.error(`[categoryApi] fetchByGroup ${group} error:`, error);
+    } catch {
       return { data: [], meta: {} };
     }
   },
@@ -44,10 +43,8 @@ export const categoryApi = {
   fetchGroups: async (): Promise<{ code: string; name: string }[]> => {
     try {
       const res: any = await apiClient.get("/categories/groups");
-
-      return res.data;
-    } catch (err) {
-      console.error("[categoryApi] fetchGroups error:", err);
+      return unwrapData<{ code: string; name: string }[]>(res, []);
+    } catch {
       return [];
     }
   },

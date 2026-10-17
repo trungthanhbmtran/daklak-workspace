@@ -1,5 +1,5 @@
-import type { AxiosResponse } from "axios";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 
 export interface WorkflowPosition { x: number; y: number }
 export interface WorkflowNodeData {
@@ -128,36 +128,34 @@ export interface WorkflowActionInput {
   note?: string;
 }
 
-type GatewayEnvelope<T> = T | { success?: boolean; data: T; meta?: PageMeta };
-function unwrap<T>(response: AxiosResponse<GatewayEnvelope<T>>): T {
-  const body = response.data;
-  return typeof body === "object" && body !== null && "data" in body ? body.data : body as T;
-}
-function page<T>(response: AxiosResponse<GatewayEnvelope<T[]>>): PageResult<T> {
-  const body = response.data;
-  if (typeof body === "object" && body !== null && "data" in body) {
-    return { data: body.data, meta: body.meta };
-  }
-  return { data: body as T[] };
-}
-
 export const workflowApi = {
   list: (params: { skip?: number; take?: number; search?: string } = {}) =>
-    apiClient.get<GatewayEnvelope<Workflow[]>>("/workflow", { params }).then(page<Workflow>),
-  getOne: (id: string) => apiClient.get<GatewayEnvelope<Workflow>>(`/workflow/${encodeURIComponent(id)}`).then(unwrap<Workflow>),
-  create: (data: SaveWorkflowInput) => apiClient.post<GatewayEnvelope<Workflow>>("/workflow", data).then(unwrap<Workflow>),
-  update: (id: string, data: SaveWorkflowInput) => apiClient.put<GatewayEnvelope<Workflow>>(`/workflow/${encodeURIComponent(id)}`, data).then(unwrap<Workflow>),
-  delete: (id: string) => apiClient.delete<GatewayEnvelope<{ success: boolean }>>(`/workflow/${encodeURIComponent(id)}`).then(unwrap),
-  publish: (id: string) => apiClient.post<GatewayEnvelope<Workflow>>(`/workflow/${encodeURIComponent(id)}/publish`).then(unwrap<Workflow>),
-  getModules: () => apiClient.get<GatewayEnvelope<WorkflowModule[]>>("/workflow/modules").then(unwrap<WorkflowModule[]>),
-  getOrgRoles: () => apiClient.get<GatewayEnvelope<WorkflowRole[]>>("/workflow/org-roles").then(unwrap<WorkflowRole[]>),
-  getProcessTypes: (activeOnly = true) => apiClient.get<GatewayEnvelope<ProcessType[]>>("/workflow/catalog/process-types", { params: { activeOnly } }).then(unwrap<ProcessType[]>),
-  getTriggers: () => apiClient.get<GatewayEnvelope<Array<{ code?: string; value?: string; name?: string; label?: string }>>>("/workflow/triggers").then(unwrap),
-  listBindings: (params: { processTypeCode?: string; status?: string; skip?: number; take?: number } = {}) => apiClient.get<GatewayEnvelope<WorkflowBinding[]>>("/workflow/bindings", { params }).then(page<WorkflowBinding>),
-  createBinding: (input: CreateBindingInput) => apiClient.post<GatewayEnvelope<WorkflowBinding>>("/workflow/bindings", input).then(unwrap<WorkflowBinding>),
-  deactivateBinding: (id: string, reason?: string) => apiClient.post<GatewayEnvelope<WorkflowBinding>>(`/workflow/bindings/${encodeURIComponent(id)}/deactivate`, { reason }).then(unwrap<WorkflowBinding>),
-  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string } = {}) => apiClient.get<GatewayEnvelope<WorkflowInstance[]>>("/workflow/instances", { params }).then(page<WorkflowInstance>),
-  getInstance: (id: string) => apiClient.get<GatewayEnvelope<WorkflowInstance>>(`/workflow/instances/${encodeURIComponent(id)}`).then(unwrap<WorkflowInstance>),
-  getLogs: (id: string) => apiClient.get<GatewayEnvelope<Array<Record<string, unknown>>>>(`/workflow/instances/${encodeURIComponent(id)}/logs`).then(unwrap),
-  submitAction: (instanceId: string, input: WorkflowActionInput) => apiClient.post<GatewayEnvelope<{ accepted: boolean; status: string; commandId: string; newVersion: number }>>(`/workflow/instances/${encodeURIComponent(instanceId)}/action`, input).then(unwrap),
+    apiClient.get<any>("/workflow", { params }).then((res: any) => ({
+      data: unwrapData<Workflow[]>(res, []),
+      meta: res?.meta?.pagination || res?.meta || {},
+    })),
+  getOne: (id: string) => apiClient.get<any>(`/workflow/${encodeURIComponent(id)}`).then((r) => unwrapData<Workflow>(r)),
+  create: (data: SaveWorkflowInput) => apiClient.post<any>("/workflow", data).then((r) => unwrapData<Workflow>(r)),
+  update: (id: string, data: SaveWorkflowInput) => apiClient.put<any>(`/workflow/${encodeURIComponent(id)}`, data).then((r) => unwrapData<Workflow>(r)),
+  delete: (id: string) => apiClient.delete<any>(`/workflow/${encodeURIComponent(id)}`).then((r) => unwrapData(r)),
+  publish: (id: string) => apiClient.post<any>(`/workflow/${encodeURIComponent(id)}/publish`).then((r) => unwrapData<Workflow>(r)),
+  getModules: () => apiClient.get<any>("/workflow/modules").then((r) => unwrapData<WorkflowModule[]>(r, [])),
+  getOrgRoles: () => apiClient.get<any>("/workflow/org-roles").then((r) => unwrapData<WorkflowRole[]>(r, [])),
+  getProcessTypes: (activeOnly = true) => apiClient.get<any>("/workflow/catalog/process-types", { params: { activeOnly } }).then((r) => unwrapData<ProcessType[]>(r, [])),
+  getTriggers: () => apiClient.get<any>("/workflow/triggers").then((r) => unwrapData<Array<{ code?: string; value?: string; name?: string; label?: string }>>(r, [])),
+  listBindings: (params: { processTypeCode?: string; status?: string; skip?: number; take?: number } = {}) =>
+    apiClient.get<any>("/workflow/bindings", { params }).then((res: any) => ({
+      data: unwrapData<WorkflowBinding[]>(res, []),
+      meta: res?.meta?.pagination || res?.meta || {},
+    })),
+  createBinding: (input: CreateBindingInput) => apiClient.post<any>("/workflow/bindings", input).then((r) => unwrapData<WorkflowBinding>(r)),
+  deactivateBinding: (id: string, reason?: string) => apiClient.post<any>(`/workflow/bindings/${encodeURIComponent(id)}/deactivate`, { reason }).then((r) => unwrapData<WorkflowBinding>(r)),
+  listInstances: (params: { skip?: number; take?: number; search?: string; workflowId?: string; status?: string } = {}) =>
+    apiClient.get<any>("/workflow/instances", { params }).then((res: any) => ({
+      data: unwrapData<WorkflowInstance[]>(res, []),
+      meta: res?.meta?.pagination || res?.meta || {},
+    })),
+  getInstance: (id: string) => apiClient.get<any>(`/workflow/instances/${encodeURIComponent(id)}`).then((r) => unwrapData<WorkflowInstance>(r)),
+  getLogs: (id: string) => apiClient.get<any>(`/workflow/instances/${encodeURIComponent(id)}/logs`).then((r) => unwrapData(r, [])),
+  submitAction: (instanceId: string, input: WorkflowActionInput) => apiClient.post<any>(`/workflow/instances/${encodeURIComponent(instanceId)}/action`, input).then((r) => unwrapData(r)),
 };

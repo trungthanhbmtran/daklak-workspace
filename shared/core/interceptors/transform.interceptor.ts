@@ -164,15 +164,82 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
   private buildStructured(raw: PlainObject, isList: boolean, timestamp: string): ApiResponse {
     let data = deepClean('data' in raw ? raw.data : raw);
 
+    // Bóc tách siêu dữ liệu pagination/meta từ raw nếu chưa được gói vào raw.meta
+    const rawMeta =
+      raw.meta ??
+      ('total' in raw
+        ? {
+            total: raw.total,
+            page: raw.page,
+            pageSize: raw.pageSize ?? raw.limit,
+            totalPages: raw.totalPages,
+          }
+        : undefined);
+    const metaObj = this.normalizeMeta(deepClean(rawMeta));
+
     // Triệt tiêu lỗi bọc lồng nhau (Double-wrapped envelope): Nếu data bên trong vẫn chứa vỏ envelope
     while (
       data !== null &&
       typeof data === 'object' &&
       !Array.isArray(data) &&
-      'data' in (data as PlainObject) &&
-      (('success' in (data as PlainObject)) || ('status' in (data as PlainObject)))
+      'data' in (data as PlainObject)
     ) {
-      data = (data as PlainObject).data;
+      const inner = data as PlainObject;
+      if (
+        'success' in inner ||
+        'status' in inner ||
+        Object.keys(inner).length === 1 ||
+        Array.isArray(inner.data)
+      ) {
+        if (!metaObj.pagination && 'total' in inner) {
+          const t = Number(inner.total ?? 0);
+          const ps = Number(inner.pageSize ?? inner.limit ?? 20);
+          metaObj.pagination = {
+            total: t,
+            page: Number(inner.page ?? 1),
+            pageSize: ps,
+            totalPages: Number(inner.totalPages ?? (ps > 0 ? Math.ceil(t / ps) : 1)),
+          };
+        }
+        data = inner.data;
+      } else {
+        break;
+      }
+    }
+
+    // Nếu endpoint là List hoặc data là danh sách được bọc trong container { items, rows }
+    if (
+      data !== null &&
+      typeof data === 'object' &&
+      !Array.isArray(data) &&
+      !('schema' in (data as PlainObject))
+    ) {
+      const dObj = data as PlainObject;
+      if (Array.isArray(dObj.items)) {
+        if (!metaObj.pagination && ('total' in dObj || 'count' in dObj)) {
+          const t = Number(dObj.total ?? dObj.count ?? dObj.items.length);
+          const ps = Number(dObj.pageSize ?? dObj.limit ?? 20);
+          metaObj.pagination = {
+            total: t,
+            page: Number(dObj.page ?? 1),
+            pageSize: ps,
+            totalPages: Number(dObj.totalPages ?? (ps > 0 ? Math.ceil(t / ps) : 1)),
+          };
+        }
+        data = dObj.items;
+      } else if (Array.isArray(dObj.rows)) {
+        if (!metaObj.pagination && ('total' in dObj || 'count' in dObj)) {
+          const t = Number(dObj.total ?? dObj.count ?? dObj.rows.length);
+          const ps = Number(dObj.pageSize ?? dObj.limit ?? 20);
+          metaObj.pagination = {
+            total: t,
+            page: Number(dObj.page ?? 1),
+            pageSize: ps,
+            totalPages: Number(dObj.totalPages ?? (ps > 0 ? Math.ceil(t / ps) : 1)),
+          };
+        }
+        data = dObj.rows;
+      }
     }
 
     if (data === undefined) {
@@ -187,7 +254,6 @@ export class TransformInterceptor<T> implements NestInterceptor<T, unknown> {
       }
     }
 
-    const metaObj = this.normalizeMeta(deepClean(raw.meta));
     if (raw.actions && !metaObj.actions) {
       metaObj.actions = deepClean(raw.actions);
     }

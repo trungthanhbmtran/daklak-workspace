@@ -77,7 +77,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = (await firstValueFrom(
       this.grpcService.ListConnections(payload, this.getGrpcMetadata(req)),
     )) as any;
-    return { data: res.data || [], total: res.total || 0 };
+    return res;
   }
 
   @Get(':id')
@@ -86,14 +86,14 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.GetConnection({ id }, this.getGrpcMetadata(req)),
     );
-    return { data: res };
+    return res;
   }
 
   @Post(':id/test-connection')
   @RequirePermissions('API_GATEWAY:VIEW')
   async testConnection(@Param('id') id: string) {
     const result = await this.executorService.testConnection(id);
-    return { data: result };
+    return result;
   }
 
   @Post()
@@ -102,7 +102,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.CreateConnection(dto, this.getGrpcMetadata(req)),
     );
-    return { data: res };
+    return res;
   }
 
   @Put(':id')
@@ -115,7 +115,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.UpdateConnection({ id, ...dto }, this.getGrpcMetadata(req)),
     );
-    return { data: res };
+    return res;
   }
 
   @Delete(':id')
@@ -142,7 +142,7 @@ export class ApiManagementController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { data: res };
+    return res;
   }
 
   @Post(':id/endpoints')
@@ -154,7 +154,7 @@ export class ApiManagementController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { data: res };
+    return res;
   }
 
   @Put('endpoints/:endpointId')
@@ -166,7 +166,7 @@ export class ApiManagementController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { data: res };
+    return res;
   }
 
   @Delete('endpoints/:endpointId')
@@ -178,7 +178,7 @@ export class ApiManagementController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { data: res };
+    return res;
   }
 
   @Post('publish')
@@ -187,7 +187,7 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.PublishRevision({}, this.getGrpcMetadata(req)),
     );
-    return { data: res };
+    return res;
   }
 
   @Post('import/upload')
@@ -226,7 +226,7 @@ export class ApiManagementController implements OnModuleInit {
         this.getGrpcMetadata(req)
       ),
     );
-    return { data: res }; 
+    return res; 
   }
 
   @Post('import/commit')
@@ -235,6 +235,6 @@ export class ApiManagementController implements OnModuleInit {
     const res = await firstValueFrom(
       this.grpcService.CommitImportSession(dto, this.getGrpcMetadata(req)),
     );
-    return { data: res };
+    return res;
   }
 }

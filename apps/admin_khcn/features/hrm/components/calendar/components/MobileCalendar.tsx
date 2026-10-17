@@ -117,11 +117,7 @@ export function MobileCalendar({ activeTab }: { activeTab: TabType }) {
     role: activeTab === "personal" ? "ASSIGNEE" : undefined,
   });
 
-  const allTasks: TaskDto[] = Array.isArray(tasksRes)
-    ? (tasksRes as any)
-    : Array.isArray((tasksRes as any)?.data)
-    ? (tasksRes as any).data
-    : [];
+  const allTasks: TaskDto[] = Array.isArray(tasksRes) ? (tasksRes as any) : [];
 
   // Map task -> event, bỏ qua task thiếu ngày hợp lệ
   const filteredEvents = useMemo<CalendarEventItem[]>(() => {

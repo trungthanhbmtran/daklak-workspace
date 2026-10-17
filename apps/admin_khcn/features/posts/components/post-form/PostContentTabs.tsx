@@ -86,7 +86,7 @@ export function PostContentTabs({ languages, categories, postData }: Props) {
 
       toast.success(`Đã dịch xong sang ${languages.find(l => l.code === langCode)?.name}`);
     } catch (error) {
-      console.error("Translation error:", error);
+      // error handled
       toast.error((error as any)?.response?.data?.message || "Lỗi khi dịch tự động");
     } finally {
       setIsTranslating(prev => ({ ...prev, [langCode]: false }));

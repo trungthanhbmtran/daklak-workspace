@@ -8,8 +8,9 @@ import { Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CategoryItem } from "../types";
 import { organizationApi } from "../../organization/api";
+import { unwrapData } from "@/lib/api-helper";
+import type { CategoryItem } from "../types";
 
 interface UnitTypeJobTemplateModalProps {
   isOpen: boolean;
@@ -22,33 +23,36 @@ export function UnitTypeJobTemplateModal({ isOpen, onClose, category }: UnitType
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   // 1. Fetch real UnitType id by matching code
-  const { data: unitTypesData, isLoading: isUnitTypesLoading } = useQuery({
+  const { data: unitTypesData = [], isLoading: isUnitTypesLoading } = useQuery({
     queryKey: ["admin_khcn", "unit-types"],
     queryFn: organizationApi.getUnitTypes,
     enabled: isOpen,
+    select: (res) => unwrapData<any[]>(res, []),
   });
 
-  const unitType = unitTypesData?.data?.find((u) => u.code === category.code);
+  const unitType = (unitTypesData as any[]).find((u) => u.code === category.code);
 
   // 2. Fetch all job titles
   const { data: jobTitlesData, isLoading: isJobTitlesLoading } = useQuery({
     queryKey: ["admin_khcn", "job-titles-all"],
     queryFn: () => organizationApi.getJobTitles(),
     enabled: isOpen,
+    select: (res) => unwrapData(res),
   });
 
   // 3. Fetch selected templates for this unit type
-  const { data: templatesData, isLoading: isTemplatesLoading } = useQuery({
+  const { data: templatesData = [], isLoading: isTemplatesLoading } = useQuery({
     queryKey: ["admin_khcn", "unit-type-job-templates", unitType?.id],
     queryFn: () => organizationApi.getUnitTypeJobTemplates(unitType!.id),
     enabled: !!unitType?.id && isOpen,
+    select: (res) => unwrapData<number[]>(res, []),
   });
 
   const [prevData, setPrevData] = useState<number[] | undefined>(undefined);
   
-  if (templatesData?.data && templatesData.data !== prevData) {
-    setPrevData(templatesData.data);
-    setSelectedIds(new Set(templatesData.data));
+  if (Array.isArray(templatesData) && templatesData.length > 0 && templatesData !== prevData) {
+    setPrevData(templatesData);
+    setSelectedIds(new Set(templatesData));
   }
 
   const updateMutation = useMutation({
@@ -76,7 +80,7 @@ export function UnitTypeJobTemplateModal({ isOpen, onClose, category }: UnitType
   };
 
   const isLoading = isUnitTypesLoading || isJobTitlesLoading || isTemplatesLoading;
-  const allJobTitles = jobTitlesData?.data?.allTitles || [];
+  const allJobTitles = jobTitlesData?.allTitles ?? [];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -107,7 +111,7 @@ export function UnitTypeJobTemplateModal({ isOpen, onClose, category }: UnitType
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4">
                 <div className="grid gap-3">
-                  {allJobTitles.map((job) => (
+                  {allJobTitles.map((job: any) => (
                     <div
                       key={job.id}
                       className="flex items-start space-x-3 rounded-md border p-3 cursor-pointer hover:bg-muted/50 transition-colors"

@@ -29,15 +29,9 @@ const safeFormatDate = (date: any, fmt: string) => {
 
 export function TaskHistoryTab({ taskId, currentTask }: { taskId: number; currentTask?: any }) {
   const isValidTaskId = Boolean(taskId && Number(taskId) > 0);
-  const { data: historyData, isLoading: historyLoading } = useTaskHistory(isValidTaskId ? Number(taskId) : undefined, {
+  const { data: history = [], isLoading: historyLoading } = useTaskHistory(isValidTaskId ? Number(taskId) : undefined, {
     enabled: isValidTaskId,
   });
-  const rawHistory = (historyData as any)?.data ?? historyData;
-  const history: any[] = Array.isArray(rawHistory)
-    ? rawHistory
-    : Array.isArray(rawHistory?.data)
-    ? rawHistory.data
-    : [];
 
   const getActionIcon = (actionStr: string) => {
     const act = (actionStr || "").toLowerCase();
@@ -200,7 +194,7 @@ export function TaskHistoryTab({ taskId, currentTask }: { taskId: number; curren
       </div>
 
       <div className="relative pl-6 border-l-2 border-slate-200 space-y-6 pb-4 ml-4">
-        {timelineEvents.map((event) => {
+        {timelineEvents.map((event: any) => {
           const Icon = event.icon;
           return (
             <div key={event.id} className="relative group">

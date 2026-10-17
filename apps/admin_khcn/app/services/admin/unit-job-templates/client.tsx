@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Building2, Save, Search, Users, Tags, ArrowRight } from "lucide-react";
 
 import { organizationApi } from "@/features/system-admin/organization/api";
+import { unwrapData } from "@/lib/api-helper";
 import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { UNIT_TYPE_CATEGORY_GROUP, parseUnitTypeCategoryMeta } from "@/features/system-admin/organization/hooks/useUnitTypeCategories";
 import { Button } from "@/components/ui/button";
@@ -26,33 +27,34 @@ export default function UnitJobTemplatesClient() {
   const { data: categoryItems = [], isLoading: isLoadingCategories } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
 
   // 2. Lấy danh sách Loại đơn vị
-  const { data: unitTypesRes, isLoading: isLoadingUnitTypes } = useQuery({
+  const { data: unitTypes = [], isLoading: isLoadingUnitTypes } = useQuery({
     queryKey: ["admin", "unit-types"],
     queryFn: () => organizationApi.getUnitTypes(),
+    select: (res) => unwrapData<any[]>(res, []),
   });
-  const unitTypes = unitTypesRes?.data || [];
 
   // 3. Lấy danh sách nhóm vị trí việc làm (Category)
-  const { data: groupsRes, isLoading: isLoadingGroups } = useQuery({
+  const { data: jobTitleGroups = [], isLoading: isLoadingGroups } = useQuery({
     queryKey: ["admin", "job-title-groups"],
     queryFn: () => organizationApi.getJobTitleGroups(),
+    select: (res) => unwrapData<any[]>(res, []),
   });
-  const jobTitleGroups = groupsRes?.data || [];
 
   // 4. Lấy danh sách toàn bộ Chức danh
   const { data: jobTitlesRes, isLoading: isLoadingJobTitles } = useQuery({
     queryKey: ["admin", "all-job-titles"],
     queryFn: () => organizationApi.getJobTitles(),
+    select: (res) => unwrapData(res),
   });
-  const allJobTitles = jobTitlesRes?.data?.allTitles || [];
+  const allJobTitles = jobTitlesRes?.allTitles ?? [];
 
   // 5. Lấy cấu hình chức danh cho loại đơn vị đang chọn
-  const { data: templatesRes, isLoading: isLoadingTemplates } = useQuery({
+  const { data: currentAssignedIds = [], isLoading: isLoadingTemplates } = useQuery({
     queryKey: ["admin", "unit-type-job-templates", selectedUnitTypeId],
     queryFn: () => organizationApi.getUnitTypeJobTemplates(selectedUnitTypeId!),
     enabled: !!selectedUnitTypeId,
+    select: (res) => unwrapData<number[]>(res, []),
   });
-  const currentAssignedIds = templatesRes?.data || [];
 
   const mutation = useMutation({
     mutationFn: (jobTitleIds: number[]) =>

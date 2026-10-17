@@ -78,6 +78,7 @@ import {
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { userApi } from "@/features/system-admin/users/api";
 import { policyApi } from "@/features/system-admin/policies/api";
+import { unwrapData } from "@/lib/api-helper";
 import { cn } from "@/lib/utils";
 
 interface ReportShareModalProps {
@@ -559,6 +560,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
   const { data: orgTreeData, isLoading: isLoadingTree } = useQuery({
     queryKey: ["share-modal-organizations-tree"],
     queryFn: () => organizationApi.getTree(),
+    select: (res) => unwrapData(res, []),
     enabled: open,
     staleTime: 60000,
   });
@@ -567,6 +569,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
   const { data: orgFlatData } = useQuery({
     queryKey: ["share-modal-organizations-flat"],
     queryFn: () => organizationApi.getOrganizations(),
+    select: (res) => unwrapData(res, []),
     enabled: open,
     staleTime: 60000,
   });
@@ -575,6 +578,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
   const { data: userData } = useQuery({
     queryKey: ["share-modal-users"],
     queryFn: () => userApi.list({ limit: 150 }),
+    select: (res) => unwrapData(res, []),
     enabled: open && assigneeType === "USER",
     staleTime: 60000,
   });
@@ -583,6 +587,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
   const { data: policyData } = useQuery({
     queryKey: ["share-modal-policies"],
     queryFn: () => policyApi.getPolicys(),
+    select: (res) => unwrapData(res, []),
     enabled: open && assigneeType === "ROLE",
     staleTime: 60000,
   });
@@ -609,13 +614,13 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
 
   // Xử lý danh sách đơn vị phân cấp hoàn chỉnh
   const hierarchicalOrganizations = useMemo(() => {
-    const treeList = orgTreeData?.data || orgTreeData || [];
+    const treeList = orgTreeData || [];
     if (Array.isArray(treeList) && treeList.length > 0) {
       const processed = processTreeNodes(treeList);
       if (processed.length > 0) return processed;
     }
 
-    const flatList = orgFlatData?.data || [];
+    const flatList = orgFlatData || [];
     if (Array.isArray(flatList) && flatList.length > 0) {
       return flatList.map((item: any) => ({
         id: String(item.id),
@@ -678,7 +683,7 @@ export const ReportShareModal: React.FC<ReportShareModalProps> = ({
 
   // Danh sách cán bộ chuẩn hóa
   const userOptions = useMemo(() => {
-    const list = userData?.data || [];
+    const list = userData || [];
     if (Array.isArray(list) && list.length > 0) {
       return list.map((u: any) => ({
         id: String(u.id),

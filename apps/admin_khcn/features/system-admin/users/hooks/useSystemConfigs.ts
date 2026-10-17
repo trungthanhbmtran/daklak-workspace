@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { toast } from "sonner";
 
 export const SYSTEM_CONFIGS_KEYS = {
@@ -12,15 +13,12 @@ export function useGetSystemConfigs() {
     queryKey: SYSTEM_CONFIGS_KEYS.all,
     queryFn: async () => {
       const res = await apiClient.get("/system-configs") as any;
-      // res là ApiResponse<config[]> — kiểm tra res.success (không phải res.status)
-      if (res.success && Array.isArray(res.data)) {
-        const map: Record<string, string> = {};
-        res.data.forEach((c: any) => {
-          map[c.key] = c.value;
-        });
-        return map;
-      }
-      return {};
+      const data = unwrapData<any[]>(res, []);
+      const map: Record<string, string> = {};
+      data.forEach((c: any) => {
+        map[c.key] = c.value;
+      });
+      return map;
     },
     staleTime: 5 * 60 * 1000,
   });

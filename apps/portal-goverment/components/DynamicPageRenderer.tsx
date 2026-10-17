@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { unwrapData } from "@/lib/api-helper"
 import { resolveMediaUrl } from "@/lib/utils"
 import {
   Building2,
@@ -818,24 +819,22 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/portal-configs")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
-        console.error("Failed to fetch portal configurations in renderer", e)
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
     staleTime: 5 * 60 * 1000,
   })
 
-  // Chuẩn hoá ledger#35: queryFn trả MẢNG (unwrap .data) — cùng shape header/home-client
+  // Chuẩn hoá: queryFn trả MẢNG unwrap qua unwrapData
   const { data: bannersData } = useQuery({
     queryKey: ["public-banners"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/banners")
-        const body = response?.data ?? response
-        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -848,9 +847,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/posts")
-        const body = response?.data ?? response
-        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -863,8 +861,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/interactions/questions?limit=10")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
-      } catch (e) {
+        return unwrapData<any[]>(response, [])
+      } catch {
         return []
       }
     },
@@ -902,7 +900,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
   // Localized configuration fetchers
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData).find((c: any) => c.code === code)
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
     if (!found) return fallback
 
     if (found.name === "true" || found.name === "false") {
@@ -930,7 +928,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   }, [portalConfigData, currentLang])
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
-    const found = (portalConfigData).find((c: any) => c.code === code)
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
     if (!found || !found.description) return fallback
 
     const trimmed = found.description.trim()
@@ -1052,11 +1050,11 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     return null
   }
 
-  const bannersList = Array.isArray(bannersData) ? bannersData : (bannersData?.data || [])
-  const postsList = Array.isArray(postsData) ? postsData : (postsData?.data || [])
-  const questionsList = Array.isArray(questionsData) ? questionsData : (questionsData?.data || [])
-  const allEmployees = Array.isArray(employeesData) ? employeesData : (employeesData?.data || [])
-  const allOrgUnits = Array.isArray(orgUnitsData) ? orgUnitsData : (orgUnitsData?.data || [])
+  const bannersList = Array.isArray(bannersData) ? bannersData : ((bannersData as any)?.data || [])
+  const postsList = Array.isArray(postsData) ? postsData : ((postsData as any)?.data || [])
+  const questionsList = Array.isArray(questionsData) ? questionsData : ((questionsData as any)?.data || [])
+  const allEmployees = Array.isArray(employeesData) ? employeesData : ((employeesData as any)?.data || [])
+  const allOrgUnits = Array.isArray(orgUnitsData) ? orgUnitsData : ((orgUnitsData as any)?.data || [])
 
   const finalLayout = Array.isArray(layoutSchema) ? layoutSchema : (layoutSchema && typeof layoutSchema === 'object' && (layoutSchema as any).rows ? (layoutSchema as any).rows : [])
 

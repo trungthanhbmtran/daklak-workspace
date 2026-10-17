@@ -69,11 +69,7 @@ export function PersonalTaskWorkbench() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedUnitScope, setSelectedUnitScope] = useState<string>("");
 
-  const { data: orgData } = useOrganizationFlatListQuery(undefined, { enabled: isGlobalAdmin });
-  const departmentOptions = useMemo(() => {
-    const list = orgData?.data || orgData || [];
-    return Array.isArray(list) ? list : [];
-  }, [orgData]);
+  const { data: departmentOptions = [] } = useOrganizationFlatListQuery(undefined, { enabled: isGlobalAdmin });
 
   // Modal / Drawer States
   const [isSelfEvalOpen, setIsSelfEvalOpen] = useState(false);

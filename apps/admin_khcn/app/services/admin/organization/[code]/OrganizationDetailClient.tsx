@@ -22,8 +22,7 @@ export function OrganizationDetailClient({ initialCode }: OrganizationDetailClie
   const rawCode = params?.code || initialCode;
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
-  const { data: unitData, isPending, isFetching, isError, isPlaceholderData } = useOrganizationDetailQuery(code);
-  const unit = unitData?.data;
+  const { data: unit, isPending, isFetching, isError, isPlaceholderData } = useOrganizationDetailQuery(code);
 
   // TanStack Query v5: khi query disabled (code = ""), isLoading = false, isPending = true.
   // isPlaceholderData = true khi keepPreviousData đang giữ data cũ trong lúc fetch data mới.

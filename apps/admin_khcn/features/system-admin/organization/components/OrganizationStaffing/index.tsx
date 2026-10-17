@@ -27,6 +27,7 @@ import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { organizationApi } from "../../api";
 import { organizationQueryKeys } from "../../constants/queryKeys";
+import { unwrapData } from "@/lib/api-helper";
 import type { JobTitleItem, StaffingReportItem } from "../../types";
 
 const STALE = 2 * 60 * 1000;
@@ -44,9 +45,10 @@ export function OrganizationStaffing() {
     queryFn: () => organizationApi.getDetail(code),
     enabled: !!code,
     staleTime: STALE,
+    select: (res) => unwrapData(res),
   });
 
-  const unit = detailQuery.data?.data;
+  const unit = detailQuery.data;
   const unitId = unit?.id;
 
   /* 2. Staffing data */
@@ -260,7 +262,7 @@ export function OrganizationStaffing() {
                 <StaffingTable
                   report={paged}
                   domainsForUnit={domainsForUnit}
-                  unitDomainIds={unit?.domains?.map((d) => d.id) ?? []}
+                  unitDomainIds={unit?.domains?.map((d: any) => d.id) ?? []}
                   subordinateUnits={subordinateUnits}
                   onSaveSlot={(p) => setStaffingSlot.mutate(p)}
                   isSavingSlot={setStaffingSlot.isPending}

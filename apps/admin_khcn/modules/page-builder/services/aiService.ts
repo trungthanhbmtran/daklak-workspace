@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 
 export interface AiServiceConfig {
   apiUrl?: string;
@@ -17,8 +18,8 @@ class AiServiceClass {
   ): Promise<string> {
     try {
       const response: any = await apiClient.post(`${this.apiUrl}/rewrite`, { text, tone });
-      const resultText =
-        response?.data?.text || response?.data?.data?.text || response?.text;
+      const data = unwrapData<any>(response);
+      const resultText = data?.text || response?.text;
       if (resultText) {
         return resultText;
       }
@@ -37,10 +38,8 @@ class AiServiceClass {
         text,
         targetLanguage,
       });
-      const translated =
-        response?.data?.translatedText ||
-        response?.data?.data?.translatedText ||
-        response?.translatedText;
+      const data = unwrapData<any>(response);
+      const translated = data?.translatedText || response?.translatedText;
       if (translated) {
         return translated;
       }
@@ -59,10 +58,8 @@ class AiServiceClass {
         text,
         maxSentences,
       });
-      const summary =
-        response?.data?.summary ||
-        response?.data?.data?.summary ||
-        response?.summary;
+      const data = unwrapData<any>(response);
+      const summary = data?.summary || response?.summary;
       if (summary) {
         return summary;
       }
@@ -84,10 +81,8 @@ class AiServiceClass {
         pageTitle,
         content,
       });
-      const seo =
-        response?.data?.seo ||
-        response?.data?.data?.seo ||
-        response?.seo;
+      const data = unwrapData<any>(response);
+      const seo = data?.seo || response?.seo;
       if (seo?.title) {
         return seo;
       }

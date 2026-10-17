@@ -65,8 +65,8 @@ export function CategoryModal({ isOpen, onClose, category, groupCode }: Category
         await createCategory(values);
       }
       onClose();
-    } catch (error) {
-      console.error(error);
+    } catch {
+      // Handled by UI / mutation
     }
   };
 

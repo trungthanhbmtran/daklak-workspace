@@ -3,6 +3,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 
 const API_BASE = "/auth";
 
@@ -12,7 +13,7 @@ export function useUser() {
     queryFn: async () => {
       try {
         const result: any = await apiClient.get(`${API_BASE}/me`);
-        return result?.data?.data || result?.data || result;
+        return unwrapData(result);
       } catch (error: any) {
         if (error.response?.status === 401) return null;
         throw error;

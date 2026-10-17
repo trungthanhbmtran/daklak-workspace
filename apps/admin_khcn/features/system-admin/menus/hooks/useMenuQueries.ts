@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { menuApi } from "../api";
 import { menuKeys } from "../keys";
 import { MenuItem, PbacResource } from "../types";
@@ -9,8 +10,7 @@ export function useMenuFlatListQuery(q?: string) {
     queryKey: [...menuKeys.lists(), { q }],
     queryFn: async () => {
       const res = await menuApi.getMenus(q);
-      const list = Array.isArray(res) ? res : (res as { data?: MenuItem[] })?.data;
-      return (list ?? []) as MenuItem[];
+      return unwrapData<MenuItem[]>(res, []);
     },
   });
 }
@@ -24,8 +24,8 @@ export function useMenuTreeQuery(q?: string) {
 
 async function fetchResources(): Promise<PbacResource[]> {
   const res = await apiClient.get("/resources");
-  const list = Array.isArray(res) ? res : (res as { data?: PbacResource[] })?.data ?? [];
-  return (list as PbacResource[]).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+  const list = unwrapData<PbacResource[]>(res, []);
+  return list.sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
 }
 
 export function usePbacResourcesQuery(enabled = false) {

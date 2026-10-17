@@ -108,9 +108,9 @@ export function EmployeeEditClient({ params }: EmployeeEditClientProps) {
     staleTime: 2 * 60 * 1000,
   });
 
-  const partyTitles: any[] = jobTitlesRes?.data?.partyTitles ?? [];
-  const govTitles: any[] = jobTitlesRes?.data?.govTitles ?? [];
-  const allTitles: any[] = jobTitlesRes?.data?.allTitles ?? [];
+  const partyTitles: any[] = jobTitlesRes?.partyTitles ?? [];
+  const govTitles: any[] = jobTitlesRes?.govTitles ?? [];
+  const allTitles: any[] = jobTitlesRes?.allTitles ?? [];
 
   const rankTitles = useMemo(
     () => allTitles.filter((j) => j.type === "RANK"),

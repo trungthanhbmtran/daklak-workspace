@@ -48,7 +48,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { unwrapTaskData } from "./task-ui-utils";
 
 interface TaskEvaluationApprovalSheetProps {
   task?: HrmTask | null;
@@ -81,7 +80,7 @@ export function TaskEvaluationApprovalSheet({
     enabled: open && isValidId,
   });
   const currentTask: HrmTask | any = useMemo(() => {
-    return unwrapTaskData(detailData) || unwrapTaskData(task) || {};
+    return detailData || task || {};
   }, [detailData, task]);
 
   const { data: historyData } = useTaskHistory(isValidId ? activeTaskId : undefined, { enabled: open && isValidId });
@@ -89,16 +88,13 @@ export function TaskEvaluationApprovalSheet({
   const { data: subtasksData } = useTaskSubtasks(isValidId ? activeTaskId : undefined, { enabled: open && isValidId });
 
   const historyList: any[] = useMemo(() => {
-    const res = unwrapTaskData(historyData);
-    return Array.isArray(res) ? res : [];
+    return Array.isArray(historyData) ? historyData : [];
   }, [historyData]);
   const stepsList: any[] = useMemo(() => {
-    const res = unwrapTaskData(stepsData);
-    return Array.isArray(res) ? res : (currentTask?.steps || []);
+    return Array.isArray(stepsData) ? stepsData : (currentTask?.steps || []);
   }, [stepsData, currentTask?.steps]);
   const subtasksList: any[] = useMemo(() => {
-    const res = unwrapTaskData(subtasksData);
-    return Array.isArray(res) ? res : (currentTask?.subTasks || []);
+    return Array.isArray(subtasksData) ? subtasksData : (currentTask?.subTasks || []);
   }, [subtasksData, currentTask?.subTasks]);
 
   // ── Thống kê Dữ liệu Hệ thống (System Metrics) ──

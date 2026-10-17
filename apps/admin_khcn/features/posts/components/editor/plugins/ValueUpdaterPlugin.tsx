@@ -81,7 +81,7 @@ export default function ValueUpdaterPlugin({ value }: ValueUpdaterPluginProps): 
       const initialState = editor.parseEditorState(safeValue);
       editor.setEditorState(initialState);
     } catch (e) {
-      console.error("[ValueUpdaterPlugin] Failed to parse value:", e);
+      // error handled
     }
   }, [editor, value]);
 

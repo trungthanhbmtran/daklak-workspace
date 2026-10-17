@@ -42,7 +42,7 @@ export function usePortalMenu() {
       ];
       setLanguages(finalLanguages);
     } catch (error) {
-      console.error("Error fetching languages:", error);
+      // error handled
       setLanguages([
         { id: 1, group: 'LANGUAGE', code: 'vi', name: 'Tiếng Việt', sort: 1, active: 1 },
         { id: 2, group: 'LANGUAGE', code: 'en', name: 'English', sort: 2, active: 1 }
@@ -114,7 +114,7 @@ export function usePortalMenu() {
       setIsDialogOpen(false);
       fetchMenus();
     } catch (error) {
-      console.error("Error saving menu:", error);
+      // error handled
       toast.error((error as any)?.response?.data?.message || "Lỗi khi lưu dữ liệu");
     }
   };

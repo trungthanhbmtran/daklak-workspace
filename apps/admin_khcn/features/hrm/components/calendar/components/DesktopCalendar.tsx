@@ -114,18 +114,12 @@ export function DesktopCalendar({ activeTab }: { activeTab: TabType }) {
 
   // Cập nhật tham số truyền lên Backend
   // Backend sẽ tự tính fetchStartDate, fetchEndDate, nextDate, prevDate thông qua viewMode và referenceDate
-  const { data: tasksRes, isLoading } = useTasksList({
+  const { data: allTasks = [], isLoading } = useTasksList({
     limit: FETCH_LIMIT,
     viewMode: viewMode,
     referenceDate: currentDate.toISOString(),
     role: activeTab === "personal" ? "ASSIGNEE" : undefined,
   });
-
-  const allTasks: TaskDto[] = Array.isArray(tasksRes)
-    ? (tasksRes as any)
-    : Array.isArray((tasksRes as any)?.data)
-    ? (tasksRes as any).data
-    : [];
 
   // Map task -> event, lọc theo tab, bỏ qua task thiếu ngày hợp lệ
   const filteredEvents = useMemo<CalendarEventItem[]>(() => {

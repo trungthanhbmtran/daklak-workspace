@@ -57,7 +57,8 @@ Bên dưới Gateway, giao tiếp nội bộ giữa Gateway và các Microservic
 Để tránh tình trạng code cồng kềnh và tốn tài nguyên chuyển đổi không cần thiết (redundant formatting/mapping), các Agent và Developer phải tuyệt đối tuân thủ:
 
 ### Tại API Gateway:
-- **KHÔNG BỌC DỮ LIỆU BẰNG TAY**: Tại Controller, chỉ cần `return result` thô nhận được từ gRPC. Tuyệt đối KHÔNG viết mã tự bọc kiểu `return { success: true, data: result }`. Nếu làm vậy, Interceptor sẽ tiếp tục bọc thêm một lớp nữa dẫn đến lỗi `data.data` lồng nhau.
+- **KHÔNG BỌC DỮ LIỆU BẰNG TAY**: Tại Controller, chỉ cần `return result` thô nhận được từ gRPC. Tuyệt đối KHÔNG viết mã tự bọc kiểu `return { success: true, data: result }` hay `return { data: result }`. `TransformInterceptor` là Source of Truth duy nhất đảm bảo response body luôn là envelope chuẩn 1 tầng.
+- **TỰ ĐỘNG PHẲNG HÓA VÀ TRÍCH XUẤT PHÂN TRANG (Automatic Flattening & Pagination Extraction)**: `TransformInterceptor` tự động phát hiện và bóc tách các vỏ bọc `{ items: [...], total: ... }`, `{ rows: [...], count: ... }` hoặc `{ data: [...], total: ... }`, đưa thực thể mảng trực tiếp vào `data: [...]` và đưa số liệu phân trang vào `meta.pagination: { total, page, pageSize, totalPages }`.
 - **KHÔNG XÓA NULL/UNDEFINED BẰNG TAY**: `TransformInterceptor` đã có hàm `deepClean` đệ quy tự động dọn dẹp các trường rỗng. Không viết thêm các hàm utility thừa thãi trong Controller để xử lý việc này.
 
 ### Tại Microservices:

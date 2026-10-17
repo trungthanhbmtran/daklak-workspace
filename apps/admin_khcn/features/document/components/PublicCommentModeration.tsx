@@ -46,7 +46,7 @@ const CommentCard = React.memo(function CommentCard({ comment }: CommentCardProp
       try {
         await moderateComment({ id: comment.id, status });
       } catch (err) {
-        console.error("Moderation error:", err);
+        // error handled
       }
     },
     [comment.id, moderateComment],

@@ -58,7 +58,7 @@ export class ImageNode extends DecoratorNode<React.ReactNode> {
             if (realSrc && realSrc.startsWith('http')) {
               return { node: $createImageNode(realSrc, domNode.alt || "Hình ảnh") };
             } else {
-              console.error("❌ [LỖI] Không tìm thấy link http/https hợp lệ. Hủy bỏ tấm ảnh này.");
+              // error handled
             }
           }
           return null;

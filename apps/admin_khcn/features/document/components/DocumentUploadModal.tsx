@@ -187,7 +187,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
       toast.success("Đã tải file và gợi ý thông tin văn bản!");
     } catch (error) {
-      console.error("[DocumentUpload] Extraction Error:", error);
+      // error handled
       toast.error((error as any)?.response?.data?.message || "Không thể trích xuất thông tin tự động.");
     } finally {
       setIsProcessing(false);
@@ -268,7 +268,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
       onClose();
     } catch (error: any) {
-      console.error("[DocumentUpload] Submit error:", error);
+      // error handled
     }
   };
 

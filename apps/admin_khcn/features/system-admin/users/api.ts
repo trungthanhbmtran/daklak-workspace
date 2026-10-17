@@ -8,7 +8,7 @@ export const userApi = {
     try {
       const res: any = await apiClient.get("/users", { params });
       return {
-        data: res?.data?.items ?? res?.data ?? res ?? [],
+        data: unwrapData<UserItem[]>(res, []),
         meta: { total: res?.meta?.pagination?.total ?? res?.meta?.total ?? 0 }
       };
     } catch (err: any) {
@@ -29,40 +29,40 @@ export const userApi = {
 
   create: async (payload: UserCreatePayload): Promise<UserItem> => {
     const res: any = await apiClient.post("/users", payload);
-    return res?.data ?? res;
+    return unwrapData<UserItem>(res, res);
   },
 
   setActive: async (id: number, isActive: boolean): Promise<{ success: boolean; message?: string }> => {
     const res: any = await apiClient.patch(`/users/${id}/active`, { isActive });
-    return { success: res?.data?.success ?? res?.success ?? true, message: res?.data?.message ?? res?.message };
+    return { success: res?.success ?? true, message: res?.message };
   },
 
   update: async (id: number, payload: Partial<UserCreatePayload>): Promise<UserItem> => {
     const res: any = await apiClient.put(`/users/${id}`, payload);
-    return res?.data ?? res;
+    return unwrapData<UserItem>(res, res);
   },
 
   remove: async (id: number): Promise<{ success: boolean }> => {
     const res: any = await apiClient.delete(`/users/${id}`);
-    return { success: res?.data?.success ?? res?.success ?? true };
+    return { success: res?.success ?? true };
   },
 
   assignUserGroups: async (id: number, userGroupIds: number[]): Promise<{ success: boolean }> => {
     const res: any = await apiClient.post(`/users/${id}/assign-user-groups`, { userGroupIds });
-    return { success: res?.data?.success ?? res?.success ?? true };
+    return { success: res?.success ?? true };
   },
 
   updateNotificationPrefs: async (id: number, prefs: Record<string, boolean>) => {
     const res: any = await apiClient.put(`/users/${id}/notification-prefs`, {
       notificationPrefs: prefs,
     });
-    return res?.data ?? res;
+    return unwrapData(res);
   },
 };
 
 export const notificationApi = {
   getEvents: async (): Promise<any[]> => {
     const res: any = await apiClient.get("/notifications/events");
-    return res?.data ?? res ?? [];
+    return unwrapData<any[]>(res, []);
   },
 };

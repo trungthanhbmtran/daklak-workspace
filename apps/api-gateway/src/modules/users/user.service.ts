@@ -106,24 +106,22 @@ export class UserService implements OnModuleInit {
     const data: any = await firstValueFrom(
       this.userGrpcService.FindOne({ id }, metadata),
     ).catch((e) => this.handleRpcError(e));
-    if (!data) return { data: null };
+    if (!data) return null;
 
     return {
-      data: {
-        id: data.id,
-        email: data.email,
-        username: data.username,
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        avatarUrl: data.avatarUrl,
-        isActive: data.isActive ?? true,
-        cccd: data.cccd,
-        employeeCode: data.employeeCode,
-        lastLogin: data.lastLogin,
-        policies: data.policies,
-        userGroups: data.userGroups,
-        userGroupIds: (data.userGroups || []).map((g: any) => g.id),
-      },
+      id: data.id,
+      email: data.email,
+      username: data.username,
+      fullName: data.fullName,
+      phoneNumber: data.phoneNumber,
+      avatarUrl: data.avatarUrl,
+      isActive: data.isActive ?? true,
+      cccd: data.cccd,
+      employeeCode: data.employeeCode,
+      lastLogin: data.lastLogin,
+      policies: data.policies,
+      userGroups: data.userGroups,
+      userGroupIds: (data.userGroups || []).map((g: any) => g.id),
     };
   }
 
@@ -131,7 +129,7 @@ export class UserService implements OnModuleInit {
     const data: any = await firstValueFrom(
       this.userGrpcService.FindOne({ id }, metadata),
     ).catch((e) => this.handleRpcError(e));
-    if (!data) return { data: [] };
+    if (!data) return [];
 
     const policies: any[] = Array.isArray(data.policies) ? data.policies : [];
 
@@ -188,7 +186,7 @@ export class UserService implements OnModuleInit {
         `Tài khoản đã được tạo: ${fullName || email} (${email}). Thông báo đăng nhập đã gửi tới email người dùng.`,
       );
     }
-    return { data: created };
+    return created;
   }
 
   async assignPosition(id: number, body: any, metadata?: Metadata) {
@@ -205,7 +203,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       this.logger.error('Failed to clear user cache on assignPosition:', err);
     }
-    return { data: result };
+    return result;
   }
 
   async setActive(id: number, isActive: boolean, metadata?: Metadata) {
@@ -220,7 +218,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       this.logger.error('Failed to clear user cache on setActive:', err);
     }
-    return { data: result };
+    return result;
   }
 
   async assignUserGroups(
@@ -239,7 +237,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       this.logger.error('Failed to clear user cache on assignUserGroups:', err);
     }
-    return { data: result };
+    return result;
   }
 
   async update(id: string, body: any, metadata?: Metadata) {
@@ -262,7 +260,7 @@ export class UserService implements OnModuleInit {
     } catch (err) {
       this.logger.error('Failed to clear user cache on update:', err);
     }
-    return { data: result };
+    return result;
   }
 
   async delete(id: string, metadata?: Metadata) {

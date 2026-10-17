@@ -79,7 +79,7 @@ export class PortalConfigController {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
-    return { data: res.data };
+    return res?.data;
   }
 
   @Get()
@@ -89,7 +89,7 @@ export class PortalConfigController {
     ).catch((e) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
-    return { data: res.data };
+    return res?.data;
   }
 
   @Put(':id')
@@ -102,7 +102,7 @@ export class PortalConfigController {
     const res: any = await firstValueFrom(
       this.configService.update({ id, ...dto }, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
-    return { data: res.data };
+    return res?.data;
   }
 
   @Post('upsert')
@@ -121,7 +121,7 @@ export class PortalConfigController {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: res.data };
+    return res?.data;
   }
 
   /**
@@ -143,6 +143,6 @@ export class PortalConfigController {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: res.data };
+    return res?.data;
   }
 }

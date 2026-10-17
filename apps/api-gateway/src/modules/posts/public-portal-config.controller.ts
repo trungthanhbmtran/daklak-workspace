@@ -27,6 +27,6 @@ export class PublicPortalConfigController {
         return null;
       },
     );
-    return { data: res.data };
+    return res?.data ?? [];
   }
 }

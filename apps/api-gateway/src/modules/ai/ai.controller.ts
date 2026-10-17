@@ -358,7 +358,7 @@ export class AiGatewayController implements OnModuleInit {
         8000,
         'AI ListModels',
       )) as any;
-      return { data: response.data || [] };
+      return response.data || [];
     } catch (e: any) {
       this.logger.error(`ListModels failed: ${e.message}`);
       if (e.status) throw e;

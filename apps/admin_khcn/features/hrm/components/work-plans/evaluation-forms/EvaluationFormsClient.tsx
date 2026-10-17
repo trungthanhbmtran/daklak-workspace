@@ -135,8 +135,8 @@ export function EvaluationFormsClient() {
     setExportingXmlCode(item.formCode);
     try {
       const res: any = await kpiFormsApi.getXml(item.formCode);
-      const rawData = Array.isArray(res?.data) ? res.data[0] : res?.data;
-      const xml = rawData?.xmlContent || res?.xmlContent || '';
+      const rawData = unwrapData<any>(res);
+      const xml = rawData?.xmlContent || '';
       if (!xml) {
         toast.error('Nội dung file XML đang trống');
         return;
@@ -156,8 +156,8 @@ export function EvaluationFormsClient() {
     setExportingDocxCode(item.formCode);
     try {
       const res: any = await kpiFormsApi.getXml(item.formCode);
-      const rawData = Array.isArray(res?.data) ? res.data[0] : res?.data;
-      const xml = rawData?.xmlContent || res?.xmlContent || '';
+      const rawData = unwrapData<any>(res);
+      const xml = rawData?.xmlContent || '';
       if (!xml) {
         toast.error('Không tìm thấy nội dung XML của biểu mẫu này');
         return;
@@ -313,16 +313,16 @@ export function EvaluationFormsClient() {
     queryKey: ['organizations', 'tree'],
     queryFn: async () => {
       const result = await organizationApi.getTree();
-      return Array.isArray(result?.data) ? result.data : [];
+      return unwrapData<any[]>(result, []);
     },
   });
   const units = useMemo(() => flattenUnits(unitsQuery.data ?? []), [unitsQuery.data]);
   const workflowsQuery = useQuery({
     queryKey: ['workflow', 'definitions', 'form-template-assignment'],
-    queryFn: () => workflowApi.list({ skip: 0, take: 100 }),
+    queryFn: async () => unwrapData<any[]>(await workflowApi.list({ skip: 0, take: 100 }), []),
     enabled: Boolean(assignForm),
   });
-  const assignableWorkflows = (workflowsQuery.data?.data ?? []).filter((workflow) => workflow.ownerUnitCode === assignUnitCode);
+  const assignableWorkflows = (workflowsQuery.data ?? []).filter((workflow: any) => workflow.ownerUnitCode === assignUnitCode);
   const bindingsQuery = useQuery({
     queryKey: ['kpi-form-bindings', assignForm?.formCode],
     queryFn: async () => unwrapData<any[]>(await kpiFormsApi.listBindings(assignForm!.formCode), []),
@@ -363,8 +363,8 @@ export function EvaluationFormsClient() {
     setValidationResult(null);
     try {
       const res: any = await kpiFormsApi.getXml(form.formCode);
-      const rawData = Array.isArray(res?.data) ? res.data[0] : res?.data;
-      const xml = rawData?.xmlContent || res?.xmlContent || '';
+      const rawData = unwrapData<any>(res);
+      const xml = rawData?.xmlContent || '';
       setEditingXmlText(xml);
     } catch {
       toast.error('Không thể nạp nội dung XML mẫu');
@@ -977,8 +977,8 @@ export function EvaluationFormsClient() {
                         onClick={async () => {
                           try {
                             const res: any = await kpiFormsApi.getXml(previewFormCode || '');
-                            const raw = Array.isArray(res?.data) ? res.data[0] : res?.data;
-                            const fetchedXml = raw?.xmlContent || res?.xmlContent || '';
+                            const raw = unwrapData<any>(res);
+                            const fetchedXml = raw?.xmlContent || '';
                             if (fetchedXml) {
                               toast.success('Đã nạp thành công ruột XML chuẩn!');
                               refetch();

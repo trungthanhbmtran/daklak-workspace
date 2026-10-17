@@ -183,21 +183,21 @@ export class WorkflowService implements OnModuleInit {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { data: result?.data || [], meta: {}, message: 'OK' };
+    return result?.data || [];
   }
 
   async getTriggers(metadata?: any) {
     const result = (await firstValueFrom(
       this.categoryGrpcService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { data: result?.data || [], meta: {}, message: 'OK' };
+    return result?.data || [];
   }
 
   async getModules(metadata?: any) {
     const result = (await firstValueFrom(
       this.workflowGrpcService.ListModules({}, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return { data: result?.data || [], meta: {}, message: 'OK' };
+    return result?.data || [];
   }
 
   async getOrgRoles(metadata?: any) {
@@ -212,7 +212,7 @@ export class WorkflowService implements OnModuleInit {
       category: j.category,
     }));
     items.sort((a: any, b: any) => (a.rank ?? 99) - (b.rank ?? 99));
-    return { data: items || [], meta: {}, message: 'OK' };
+    return items;
   }
 
   async create(body: CreateWorkflowDto, user?: any, metadata?: any) {

@@ -2,6 +2,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { unwrapData } from "@/lib/api-helper";
 import { hrmTaskTemplatesApi } from "../api";
 import { hrmKeys } from "../keys";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ export function useTaskTemplatesList(
   return useQuery({
     queryKey: [...hrmKeys.taskTemplates(), { rank, classification }],
     queryFn: () => hrmTaskTemplatesApi.list({ rank, classification }),
+    select: (res) => unwrapData<any[]>(res, []),
     enabled: options?.enabled ?? true,
     staleTime: 60_000,
   });

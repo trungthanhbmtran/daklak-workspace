@@ -11,6 +11,8 @@ import { EditorNodes } from "./nodes";
 export const initialConfig = {
   namespace: "VIP_Pro_Editor",
   theme: editorTheme,
-  nodes: EditorNodes, 
-  onError: (error: Error) => console.error("Lexical Error:", error),
+  nodes: EditorNodes,
+  onError: (_error: Error) => {
+    // Lexical error boundary handled silently
+  },
 };

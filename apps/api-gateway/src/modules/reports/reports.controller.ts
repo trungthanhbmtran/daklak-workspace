@@ -55,7 +55,7 @@ export class ReportsController {
     'REPORT:MANAGE',
   )
   tableSources(@Req() req: any) {
-    return { data: this.sources.list(req.user) };
+    return this.sources.list(req.user);
   }
 
   @Post('table/preview')

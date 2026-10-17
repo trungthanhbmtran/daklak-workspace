@@ -23,7 +23,7 @@ const DETAIL_GC_TIME = 2 * 60_000;   // 2 phút
  */
 export function useTasksList(params: any = {}) {
   const queryParams = { summary: true, ...params };
-  return useQuery({
+  return useQuery<any>({
     queryKey: hrmKeys.tasksList(queryParams),
     queryFn: () => hrmTasksApi.list(queryParams),
     staleTime: TASKS_STALE_TIME,
@@ -36,18 +36,19 @@ export function useTasksList(params: any = {}) {
 }
 
 export function useTaskStats(params: any = {}) {
-  return useQuery({
+  return useQuery<any>({
     queryKey: [...hrmKeys.tasksList(params), "stats"],
     queryFn: () => hrmTasksApi.getStats(params),
     staleTime: TASKS_STALE_TIME,
     gcTime: TASKS_GC_TIME,
     refetchOnWindowFocus: true,
+    select: (res) => unwrapData(res, {}),
   });
 }
 
 export function useTaskDetail(taskId: number | undefined, options?: { enabled?: boolean }) {
   const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
-  return useQuery({
+  return useQuery<any>({
     queryKey: [...hrmKeys.tasks(), 'detail', taskId],
     queryFn: isEnabled && taskId ? () => hrmTasksApi.getTask(taskId) : skipToken,
     enabled: isEnabled,
@@ -64,13 +65,14 @@ export function useTaskDetail(taskId: number | undefined, options?: { enabled?: 
  */
 export function useTaskComments(conversationId: string | undefined, options?: { enabled?: boolean }) {
   const isEnabled = (options?.enabled ?? true) && Boolean(conversationId);
-  return useQuery({
+  return useQuery<any>({
     queryKey: conversationId ? hrmKeys.taskComments(conversationId as any) : [...hrmKeys.tasks(), 'comments', 'none'],
     queryFn: isEnabled && conversationId ? () => hrmTasksApi.getComments(conversationId) : skipToken,
     enabled: isEnabled,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
     refetchOnWindowFocus: false, // chat không cần refetch khi focus lại tab
+    select: (res) => unwrapData(res, []),
   });
 }
 
@@ -80,7 +82,7 @@ export function useTaskComments(conversationId: string | undefined, options?: { 
  */
 export function useTaskSubtasks(taskId: number | undefined, options?: { enabled?: boolean }) {
   const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
-  return useQuery({
+  return useQuery<any>({
     queryKey: taskId ? hrmKeys.taskSubtasks(taskId) : [...hrmKeys.tasks(), 'subtasks', 'none'],
     queryFn: isEnabled && taskId ? () => hrmTasksApi.getSubTasks(taskId) : skipToken,
     enabled: isEnabled,
@@ -175,8 +177,8 @@ export function useAddComment(conversationId: string | undefined) {
           createdAt: new Date().toISOString(),
           isOptimistic: true,
         };
-        const existingData = old?.data?.items || [];
-        return { ...old, data: { ...old?.data, items: [...existingData, optimisticMsg] } };
+        const currentList = Array.isArray(old) ? old : unwrapData<any[]>(old, []);
+        return [...currentList, optimisticMsg];
       });
 
       return { previous };
@@ -329,8 +331,9 @@ export function useRespondTask(taskId: number | undefined) {
       return hrmTasksApi.respondTask(taskId, payload);
     },
     onSuccess: (res) => {
-      if (taskId && res?.data) {
-        qc.setQueryData(hrmKeys.taskDetail(taskId), res.data);
+      const data = unwrapData(res);
+      if (taskId && data) {
+        qc.setQueryData(hrmKeys.taskDetail(taskId), data);
       }
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       if (taskId) {
@@ -347,7 +350,7 @@ export function useRespondTask(taskId: number | undefined) {
 /** Lịch sử thao tác của một task. */
 export function useTaskHistory(taskId: number | undefined, options?: { enabled?: boolean }) {
   const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
-  return useQuery({
+  return useQuery<any>({
     queryKey: taskId ? hrmKeys.taskHistory(taskId) : [...hrmKeys.tasks(), "history", "none"],
     queryFn: isEnabled && taskId ? () => hrmTasksApi.getHistory(taskId) : skipToken,
     enabled: isEnabled,
@@ -361,7 +364,7 @@ export function useTaskHistory(taskId: number | undefined, options?: { enabled?:
 /** Danh sách các bước thực hiện (steps/checklist) của một task. */
 export function useTaskSteps(taskId: number | undefined, options?: { enabled?: boolean }) {
   const isEnabled = (options?.enabled ?? true) && Boolean(taskId);
-  return useQuery({
+  return useQuery<any>({
     queryKey: taskId ? hrmKeys.taskSteps(taskId) : [...hrmKeys.tasks(), "steps", "none"],
     queryFn: isEnabled && taskId ? () => hrmTasksApi.listSteps(taskId) : skipToken,
     enabled: isEnabled,
@@ -480,8 +483,9 @@ export function useRequestCoordination(taskId: number | undefined) {
       return hrmTasksApi.requestCoordination(taskId, payload);
     },
     onSuccess: (res) => {
-      if (taskId && res?.data) {
-        qc.setQueryData(hrmKeys.taskDetail(taskId), res.data);
+      const data = unwrapData(res);
+      if (taskId && data) {
+        qc.setQueryData(hrmKeys.taskDetail(taskId), data);
       }
       qc.invalidateQueries({ queryKey: hrmKeys.tasks() });
       if (taskId) {
@@ -523,6 +527,7 @@ export function useAttendanceStats(taskId: number | undefined) {
     queryFn: taskId ? () => hrmTasksApi.getAttendanceStats(taskId) : skipToken,
     staleTime: DETAIL_STALE_TIME,
     gcTime: DETAIL_GC_TIME,
+    select: (res) => unwrapData(res, null),
   });
 }
 
@@ -562,7 +567,7 @@ export function useTaskContext(
     enabled: isEnabled,
     staleTime: 10_000,
     gcTime: 60_000,
-    select: (res) => unwrapData(res, null),
+    select: (res) => unwrapData<any>(res, null),
   });
 }
 

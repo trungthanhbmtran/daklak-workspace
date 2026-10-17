@@ -11,15 +11,14 @@ import { ExternalLink, Users } from 'lucide-react';
 
 // Thành phần phụ để hiển thị thống kê điểm danh cho từng sự kiện
 function AttendanceStats({ taskId }: { taskId: number }) {
-  const { data } = useAttendanceStats(taskId);
-  const stats = data?.data;
+  const { data: stats } = useAttendanceStats(taskId);
   
   if (!stats) return null;
   
   return (
     <div className="flex items-center gap-2 text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded-md border border-slate-100">
       <Users className="w-3.5 h-3.5" />
-      <span>Đã tham gia: <b>{stats.attended}</b> / {stats.total} người ({Math.round(stats.attendanceRate)}%)</span>
+      <span>Đã tham gia: <b>{(stats as any).attended}</b> / {(stats as any).total} người ({Math.round((stats as any).attendanceRate)}%)</span>
     </div>
   );
 }

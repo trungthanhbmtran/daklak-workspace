@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { workflowApi } from "./api";
+import { unwrapData } from "@/lib/api-helper";
 
 export const workflowKeys = {
   all: ["workflow"] as const,
@@ -14,21 +15,69 @@ export const workflowKeys = {
 };
 
 export function useWorkflowDefinitions(params?: { search?: string }) {
-  return useQuery({ queryKey: workflowKeys.definitions(params), queryFn: () => workflowApi.list({ ...params, skip: 0, take: 100 }) });
+  return useQuery({
+    queryKey: workflowKeys.definitions(params),
+    queryFn: () => workflowApi.list({ ...params, skip: 0, take: 100 }),
+    select: (res) => unwrapData(res, []),
+  });
 }
 export function useWorkflowDefinition(id?: string) {
-  return useQuery({ queryKey: workflowKeys.definition(id), queryFn: () => workflowApi.getOne(id!), enabled: Boolean(id) });
+  return useQuery({
+    queryKey: workflowKeys.definition(id),
+    queryFn: () => workflowApi.getOne(id!),
+    enabled: Boolean(id),
+    select: (res) => unwrapData(res, null),
+  });
 }
-export function useWorkflowModules() { return useQuery({ queryKey: workflowKeys.modules, queryFn: workflowApi.getModules }); }
-export function useWorkflowRoles() { return useQuery({ queryKey: workflowKeys.roles, queryFn: workflowApi.getOrgRoles }); }
-export function useWorkflowProcessTypes() { return useQuery({ queryKey: workflowKeys.processTypes, queryFn: () => workflowApi.getProcessTypes(true) }); }
-export function useWorkflowTriggers() { return useQuery({ queryKey: workflowKeys.triggers, queryFn: workflowApi.getTriggers }); }
-export function useWorkflowBindings() { return useQuery({ queryKey: workflowKeys.bindings, queryFn: () => workflowApi.listBindings({ skip: 0, take: 100 }) }); }
+export function useWorkflowModules() {
+  return useQuery({
+    queryKey: workflowKeys.modules,
+    queryFn: workflowApi.getModules,
+    select: (res) => unwrapData(res, []),
+  });
+}
+export function useWorkflowRoles() {
+  return useQuery({
+    queryKey: workflowKeys.roles,
+    queryFn: workflowApi.getOrgRoles,
+    select: (res) => unwrapData(res, []),
+  });
+}
+export function useWorkflowProcessTypes() {
+  return useQuery({
+    queryKey: workflowKeys.processTypes,
+    queryFn: () => workflowApi.getProcessTypes(true),
+    select: (res) => unwrapData(res, []),
+  });
+}
+export function useWorkflowTriggers() {
+  return useQuery({
+    queryKey: workflowKeys.triggers,
+    queryFn: workflowApi.getTriggers,
+    select: (res) => unwrapData(res, []),
+  });
+}
+export function useWorkflowBindings() {
+  return useQuery({
+    queryKey: workflowKeys.bindings,
+    queryFn: () => workflowApi.listBindings({ skip: 0, take: 100 }),
+    select: (res) => unwrapData(res, []),
+  });
+}
 export function useWorkflowInstances(params: { search?: string; status?: string } = {}) {
-  return useQuery({ queryKey: [...workflowKeys.instances, params], queryFn: () => workflowApi.listInstances({ ...params, skip: 0, take: 100 }) });
+  return useQuery({
+    queryKey: [...workflowKeys.instances, params],
+    queryFn: () => workflowApi.listInstances({ ...params, skip: 0, take: 100 }),
+    select: (res) => unwrapData(res, []),
+  });
 }
 export function useWorkflowLogs(instanceId?: string) {
-  return useQuery({ queryKey: ["workflow", "logs", instanceId], queryFn: () => workflowApi.getLogs(instanceId!), enabled: Boolean(instanceId) });
+  return useQuery({
+    queryKey: ["workflow", "logs", instanceId],
+    queryFn: () => workflowApi.getLogs(instanceId!),
+    enabled: Boolean(instanceId),
+    select: (res) => unwrapData(res, []),
+  });
 }
 export function useSaveWorkflow() {
   const client = useQueryClient();

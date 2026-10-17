@@ -98,7 +98,7 @@ export class ResourcesController implements OnModuleInit {
       name: r.name ?? r.code ?? '',
       serviceCode: r.serviceCode ?? null,
     }));
-    return { data: resources };
+    return resources;
   }
 
   @Get('permission-matrix')
@@ -126,7 +126,7 @@ export class ResourcesController implements OnModuleInit {
         });
       }
     }
-    return { data: out };
+    return out;
   }
 
   @Post()
@@ -146,7 +146,7 @@ export class ResourcesController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result };
+    return result;
   }
 
   @Put(':id')
@@ -168,6 +168,6 @@ export class ResourcesController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result };
+    return result;
   }
 }

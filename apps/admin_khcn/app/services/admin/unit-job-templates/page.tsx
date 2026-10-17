@@ -5,6 +5,7 @@ import { CATEGORY_KEYS } from "@/features/system-admin/categories/keys";
 import { UNIT_TYPE_CATEGORY_GROUP } from "@/features/system-admin/organization/constants/category-groups";
 import { connection } from "next/server";
 import type { ApiResponse } from "@/lib/api.types";
+import { unwrapData } from "@/lib/api-helper";
 import type { CategoryItem } from "@/features/system-admin/categories/types";
 
 type JobTitles = {
@@ -28,7 +29,7 @@ export default async function UnitJobTemplatesPage() {
       queryKey: [CATEGORY_KEYS.all, "group", UNIT_TYPE_CATEGORY_GROUP, undefined],
       queryFn: async () => {
         const res = await serverFetch<ApiResponse<CategoryItem[]>>(`/categories?group=${UNIT_TYPE_CATEGORY_GROUP}`);
-        return res?.data ?? [];
+        return unwrapData<CategoryItem[]>(res, []);
       },
     }),
 
@@ -37,7 +38,7 @@ export default async function UnitJobTemplatesPage() {
       queryKey: ["admin", "unit-types"],
       queryFn: async () => {
         const res = await serverFetch<ApiResponse<unknown[]>>("/organizations/unit-types");
-        return { data: res?.data ?? [] };
+        return unwrapData<unknown[]>(res, []);
       },
     }),
 
@@ -45,9 +46,8 @@ export default async function UnitJobTemplatesPage() {
     queryClient.prefetchQuery({
       queryKey: ["admin", "job-title-groups"],
       queryFn: async () => {
-        const res = await serverFetch<ApiResponse<CategoryItem[] | { data: CategoryItem[] }>>("/categories?group=JOB_TITLE_GROUP&limit=100");
-        const data = res?.data;
-        return { data: Array.isArray(data) ? data : data?.data ?? [] };
+        const res = await serverFetch<ApiResponse<CategoryItem[]>>("/categories?group=JOB_TITLE_GROUP&limit=100");
+        return unwrapData<CategoryItem[]>(res, []);
       },
     }),
 
@@ -55,14 +55,12 @@ export default async function UnitJobTemplatesPage() {
     queryClient.prefetchQuery({
       queryKey: ["admin", "all-job-titles"],
       queryFn: async () => {
-        const res = await serverFetch<JobTitles & { data?: JobTitles }>("/organizations/job-titles");
-        const data = res?.data ?? res;
+        const res = await serverFetch<ApiResponse<JobTitles>>("/organizations/job-titles");
+        const data = unwrapData<JobTitles>(res, {});
         return {
-          data: {
-            partyTitles: data?.partyTitles || [],
-            govTitles: data?.govTitles || [],
-            allTitles: data?.allTitles || [],
-          }
+          partyTitles: data?.partyTitles || [],
+          govTitles: data?.govTitles || [],
+          allTitles: data?.allTitles || [],
         };
       },
     }),

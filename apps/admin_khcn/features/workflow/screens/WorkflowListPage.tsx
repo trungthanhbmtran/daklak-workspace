@@ -13,6 +13,7 @@ import { WORKFLOW_ROUTES } from "@/features/workflow/routes";
 import { useWorkflowDefinitions } from "@/features/workflow/hooks";
 import { workflowApi, type Workflow } from "@/features/workflow/api";
 import { organizationApi } from "@/features/system-admin/organization/api";
+import { unwrapData } from "@/lib/api-helper";
 import type { OrganizationUnitNode } from "@/features/system-admin/organization/types";
 import { flattenUnitHierarchy, getCategoryBadge, type FlatUnitItem } from "@/features/workflow/components/OrganizationUnitSelector";
 
@@ -23,20 +24,15 @@ function statusLabel(status?: string) {
 export function WorkflowListPage() {
   const [search, setSearch] = useState("");
   const query = useWorkflowDefinitions({ search: search || undefined });
-  const rows = useMemo(() => query.data?.data ?? [], [query.data]);
+  const rows = useMemo(() => (query.data as any[]) ?? [], [query.data]);
 
   const organizationTree = useQuery({
     queryKey: ["organizations", "tree"],
-    queryFn: () => organizationApi.getTree(),
+    queryFn: async () => unwrapData<OrganizationUnitNode[]>(await organizationApi.getTree(), []),
   });
 
   const unitMap = useMemo(() => {
-    const rawData = organizationTree.data as unknown;
-    const tree: OrganizationUnitNode[] = Array.isArray(rawData)
-      ? (rawData as OrganizationUnitNode[])
-      : rawData && typeof rawData === "object" && Array.isArray((rawData as { data?: unknown }).data)
-        ? ((rawData as { data: OrganizationUnitNode[] }).data)
-        : [];
+    const tree = (organizationTree.data ?? []) as OrganizationUnitNode[];
     const flat = flattenUnitHierarchy(tree);
     const map = new Map<string, FlatUnitItem>();
     for (const item of flat) {
@@ -81,7 +77,7 @@ export function WorkflowListPage() {
           />
         </div>
         <Badge variant="secondary">
-          {query.data?.meta?.total ?? rows.length} quy trình
+          {rows.length} quy trình
         </Badge>
       </div>
 

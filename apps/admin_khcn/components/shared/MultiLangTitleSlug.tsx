@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { convertToSlug } from "@/lib/slug";
 
 export interface MultiLangValue {
@@ -51,12 +52,9 @@ export function MultiLangTitleSlug({
         queryFn: async (): Promise<LanguageItem[]> => {
             try {
                 const res = await apiClient.get("/categories");
+                const items = unwrapData<any[]>(res, []);
 
-                if (!Array.isArray(res?.data)) {
-                    return DEFAULT_LANGUAGES;
-                }
-
-                return res.data
+                return items
                     .filter(
                         (item: any) =>
                             item.group === "LANGUAGE" && item.active === 1

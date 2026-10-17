@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { categoryApi } from '@/features/system-admin/categories/api';
 import { organizationApi } from '@/features/system-admin/organization/api';
+import { unwrapData } from '@/lib/api-helper';
 import { useTaskTemplatesList } from '@/features/hrm/hooks';
 import { GovClassification } from '../ConfigureRankTasksClient';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
@@ -57,10 +58,8 @@ export function useConfigureRankTasks() {
         refetch: refetchUnits
     } = useQuery({
         queryKey: ['categories', 'UNIT'],
-        queryFn: async () => {
-            const res = await categoryApi.fetchByGroup('UNIT');
-            return res.data || [];
-        },
+        queryFn: () => categoryApi.fetchByGroup('UNIT'),
+        select: (res) => unwrapData<CategoryItem[]>(res, []),
         staleTime: 5 * 60 * 1000,
     });
 
@@ -74,7 +73,8 @@ export function useConfigureRankTasks() {
         refetch: refetchJobTitles
     } = useQuery({
         queryKey: ['job-titles-all'],
-        queryFn: async () => (await organizationApi.getJobTitles()).data,
+        queryFn: () => organizationApi.getJobTitles(),
+        select: (res) => unwrapData(res),
         staleTime: 5 * 60 * 1000,
     });
 

@@ -8,6 +8,7 @@ import { lazy, Suspense } from "react";
 import type { LucideIcon } from "lucide-react";
 import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { menuApi } from "@/features/system-admin/menus/api";
+import { unwrapData } from "@/lib/api-helper";
 
 // ----------------------------------------------------------------------
 // 1. ICON MAP — hỗ trợ cả Ionicons-style (cũ) và PascalCase Lucide (mới)
@@ -85,8 +86,9 @@ export function useHubServices() {
     queryKey: ["menus", "hub"],
     queryFn: async () => {
       // Backend (Gateway) tính toán hubApps theo PBAC của user
-      const res: any = await menuApi.getHubApps("ADMIN_PORTAL");
-      return res?.apps ?? res?.data?.apps ?? [];
+      const res = await menuApi.getHubApps("ADMIN_PORTAL");
+      const unwrapped = unwrapData<any>(res, []);
+      return Array.isArray(unwrapped) ? unwrapped : (unwrapped?.apps ?? []);
     },
     staleTime: 5 * 60 * 1000, // Cache 5 phút
   });
@@ -133,8 +135,9 @@ export function useServiceMenus() {
     queryFn: async () => {
       if (!serviceCode) return null;
       // Backend (Gateway) trả sidebar items của đúng service theo PBAC
-      const res: any = await menuApi.getServiceSidebar(serviceCode, "ADMIN_PORTAL");
-      return res?.sidebar ?? res?.data?.sidebar ?? null;
+      const res = await menuApi.getServiceSidebar(serviceCode, "ADMIN_PORTAL");
+      const unwrapped = unwrapData<any>(res, null);
+      return unwrapped?.sidebar ?? unwrapped;
     },
     enabled: !!serviceCode, // Chỉ gọi khi đã biết service
     staleTime: 5 * 60 * 1000,

@@ -143,12 +143,10 @@ export function ConsultationManageClient() {
   const pathname = usePathname();
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  const { data: consultationsData, isLoading } = useListConsultations({
+  const { data: consultations = [], isLoading } = useListConsultations({
     search: searchTerm,
     status: statusFilter === "ALL" ? "" : statusFilter,
   });
-
-  const consultations = useMemo(() => consultationsData?.data ?? [], [consultationsData]);
 
   const stats = useMemo(() => {
     const total = consultations.length;

@@ -47,7 +47,7 @@ const FeedbackCard = React.memo(function FeedbackCard({ fb }: FeedbackCardProps)
       try {
         await moderateComment({ id: fb.id, status });
       } catch (err) {
-        console.error("Moderation error:", err);
+        // error handled
       }
     },
     [fb.id, moderateComment],

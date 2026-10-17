@@ -23,7 +23,7 @@ export function PersonalAiRouterConfig() {
         const parsed = JSON.parse(configs['AI_PROVIDERS']);
         setAiProviders(Array.isArray(parsed) ? parsed.sort((a, b) => a.priority - b.priority) : []);
       } catch (e) {
-        console.error("Failed to parse AI_PROVIDERS", e);
+        // error handled
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

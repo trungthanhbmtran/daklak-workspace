@@ -83,7 +83,7 @@ export class PbacController implements OnModuleInit {
     const result: any = await firstValueFrom(
       this.pbacService.FindAllUserGroups({}, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result?.userGroups || [] };
+    return result?.userGroups || [];
   }
 
   @Get(':id')
@@ -118,7 +118,7 @@ export class PbacController implements OnModuleInit {
         };
       });
     }
-    return { data: result };
+    return result;
   }
 
   @Post()
@@ -152,7 +152,7 @@ export class PbacController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result };
+    return result;
   }
 
   @Put(':id')
@@ -191,7 +191,7 @@ export class PbacController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result };
+    return result;
   }
 
   @Delete(':id')
@@ -203,6 +203,6 @@ export class PbacController implements OnModuleInit {
     const result = await firstValueFrom(
       this.pbacService.DeleteUserGroup({ id }, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e));
-    return { data: result };
+    return result;
   }
 }

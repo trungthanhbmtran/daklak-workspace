@@ -114,7 +114,7 @@ export class OrganizationsService implements OnModuleInit {
           scope: body.scope,
         }, metadata),
       );
-      return { data: result };
+      return result;
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi tạo đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -133,7 +133,7 @@ export class OrganizationsService implements OnModuleInit {
       categoryCode: this.getCategoryCodeFromTypeCode(t.code),
     }));
 
-    return { data: dataWithCategory };
+    return dataWithCategory;
   }
 
   async getFullTree(user: any, q?: string, metadata?: Metadata) {
@@ -268,7 +268,7 @@ export class OrganizationsService implements OnModuleInit {
     }
 
     if (isPartyUnit) {
-      return { data: { partyTitles: data, govTitles: [], allTitles: data } };
+      return { partyTitles: data, govTitles: [], allTitles: data };
     }
 
     const isParty = (j: any) =>
@@ -277,7 +277,7 @@ export class OrganizationsService implements OnModuleInit {
     const partyTitles = data.filter(isParty);
     const govTitles = data.filter((j: any) => !isParty(j));
 
-    return { data: { partyTitles, govTitles, allTitles: data } };
+    return { partyTitles, govTitles, allTitles: data };
   }
 
   async updateJobTitle(id: number, body: any, metadata?: Metadata) {
@@ -288,7 +288,7 @@ export class OrganizationsService implements OnModuleInit {
           domainId: body.domainId,
         }, metadata),
       );
-      return { data: result };
+      return result;
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi cập nhật chức danh';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -300,7 +300,7 @@ export class OrganizationsService implements OnModuleInit {
   async getOne(id: number, metadata?: Metadata) {
     try {
       const result = await firstValueFrom(this.orgGrpcService.GetOne({ id }, metadata));
-      return { data: this.mapToOrganizationNode(result) };
+      return this.mapToOrganizationNode(result);
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -313,7 +313,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(
         this.orgGrpcService.GetOrganizationByCode({ code }, metadata),
       );
-      return { data: this.mapToOrganizationNode(result) };
+      return this.mapToOrganizationNode(result);
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -348,7 +348,7 @@ export class OrganizationsService implements OnModuleInit {
         this.mapToOrganizationNode(result),
         result.id,
       );
-      return { data: mapped };
+      return mapped;
     } catch (err: any) {
       if (isNumeric && err?.code === 5) {
         try {
@@ -359,7 +359,7 @@ export class OrganizationsService implements OnModuleInit {
             this.mapToOrganizationNode(resultById),
             resultById.id,
           );
-          return { data: mapped };
+          return mapped;
         } catch (e2: any) {
           const message = e2?.details ?? e2?.message ?? 'Đơn vị không tồn tại';
           if (e2?.code === 5) throw new NotFoundException(message);
@@ -414,7 +414,7 @@ export class OrganizationsService implements OnModuleInit {
       const result = await firstValueFrom(
         this.orgGrpcService.UpdateUnit(payload as any, metadata),
       );
-      return { data: result };
+      return result;
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi cập nhật đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -451,7 +451,7 @@ export class OrganizationsService implements OnModuleInit {
           scope: body.scope,
         }, metadata),
       );
-      return { data: result };
+      return result;
     } catch (err: any) {
       const message =
         err?.details ?? err?.message ?? 'Lỗi cập nhật phạm vi phụ trách';
@@ -464,9 +464,7 @@ export class OrganizationsService implements OnModuleInit {
     const res = (await firstValueFrom(
       this.orgGrpcService.GetSubTree({ id }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
-    return {
-      data: (res.nodes || []).map((n) => this.mapToOrganizationNode(n)),
-    };
+    return (res.nodes || []).map((n) => this.mapToOrganizationNode(n));
   }
 
   async setStaffing(body: any, metadata?: Metadata) {
@@ -478,7 +476,7 @@ export class OrganizationsService implements OnModuleInit {
           quantity: body.quantity,
         }, metadata),
       );
-      return { data: result };
+      return result;
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi thiết lập biên chế';
       if (err?.code === 5) throw new NotFoundException(message);
@@ -605,7 +603,7 @@ export class OrganizationsService implements OnModuleInit {
           monitoredUnitIds: body.monitoredUnitIds,
         }, metadata),
       );
-      return { data: result };
+      return result;
     } catch (err: any) {
       const message =
         err?.details ?? err?.message ?? 'Lỗi thiết lập vị trí biên chế';
@@ -622,7 +620,7 @@ export class OrganizationsService implements OnModuleInit {
       )) as any;
       const nodes = res.nodes || [];
       const flatList = this.flattenTree(nodes);
-      return { data: flatList };
+      return flatList;
     } catch (error: any) {
       throw new InternalServerErrorException(
         error?.message || 'Failed to fetch public org units',
@@ -649,7 +647,7 @@ export class OrganizationsService implements OnModuleInit {
       const res = (await firstValueFrom(
         this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }, metadata),
       )) as any;
-      return { data: res.jobTitleIds || [] };
+      return res.jobTitleIds || [];
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi lấy mẫu chức danh';
       if (err?.code === 5) throw new NotFoundException(message);

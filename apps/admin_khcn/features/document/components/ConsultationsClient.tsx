@@ -44,13 +44,10 @@ export function ConsultationsClient() {
    const searchTerm = searchParams.get('search') || "";
    const [statusFilter, setStatusFilter] = useState("OPEN");
 
-   const { data, isLoading } = useListConsultations({
+   const { data: consultations = [], isLoading } = useListConsultations({
       status: statusFilter,
       search: searchTerm,
    });
-
-
-   const consultations = useMemo(() => data?.data ?? [], [data]);
 
    return (
       <div className="p-6 space-y-8 bg-muted/5 min-h-screen">

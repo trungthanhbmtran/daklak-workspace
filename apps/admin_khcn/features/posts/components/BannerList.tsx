@@ -11,6 +11,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { unwrapData } from "@/lib/api-helper";
 
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
@@ -84,20 +85,14 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     setPage(1);
   }, [searchTerm, activeTab, pageSize]);
 
-  const { data: banners, isLoading, isError, error } = useQuery({
+  const { data: bannersResponse, isLoading, isError, error } = useQuery({
     queryKey: ["banners", page, pageSize, searchTerm, activeTab],
-    queryFn: async () => {
-      const res = await postsApi.getBanners({
-        page,
-        limit: pageSize,
-        search: searchTerm || undefined,
-        position: activeTab === "all" ? undefined : activeTab,
-      });
-      return {
-        items: res.data,
-        meta: res.meta || {}
-      };
-    },
+    queryFn: () => postsApi.getBanners({
+      page,
+      limit: pageSize,
+      search: searchTerm || undefined,
+      position: activeTab === "all" ? undefined : activeTab,
+    }),
   });
 
   const deleteMutation = useMutation({
@@ -112,9 +107,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     },
   });
 
-  const filteredBanners = banners?.items || [];
-  const totalItems = Number(banners?.meta?.total) || 0;
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const filteredBanners = unwrapData<Banner[]>(bannersResponse, []);
+  const totalItems = Number(bannersResponse?.meta?.pagination?.total ?? (bannersResponse?.meta as any)?.total ?? 0);
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
 
   const columns: ColumnDef<Banner>[] = [
     {

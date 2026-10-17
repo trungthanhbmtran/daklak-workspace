@@ -137,13 +137,11 @@ export function TransparencyClient() {
 
   const { useDocumentStats, useListDocuments } = useDocuments();
   const { data: stats } = useDocumentStats();
-  const { data: reportsData, isLoading } = useListDocuments({
+  const { data: reports = [], isLoading } = useListDocuments({
     isPublic: "true",
     search: searchTerm,
     fiscalYear,
   });
-
-  const reports = useMemo(() => reportsData?.data ?? [], [reportsData]);
   const totalReports = (stats?.outgoingTotal || 0) + (stats?.incomingTotal || 0);
 
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);

@@ -100,7 +100,7 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
       form.reset();
       setSelectedFile(null);
     } catch (error) {
-      console.error(error);
+      // error handled
     }
   };
 

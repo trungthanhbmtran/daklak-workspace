@@ -307,8 +307,8 @@ export class TasksService implements OnModuleInit {
           assigneeCode: body.assigneeCode,
           domainId: body.domainId,
         });
-        if (resolved?.data?.supervisorCode) {
-          body.supervisorCode = resolved.data.supervisorCode;
+        if (resolved?.supervisorCode) {
+          body.supervisorCode = resolved.supervisorCode;
         }
       } catch {}
     }
@@ -504,28 +504,25 @@ export class TasksService implements OnModuleInit {
           departmentId: departmentId || (assignee.startsWith('DEPT_') ? parseInt(assignee.replace('DEPT_', ''), 10) : undefined),
           assigneeCode: !assignee.startsWith('DEPT_') ? assignee : undefined,
         });
-        if (supRes?.data?.supervisorCode) {
+        if (supRes?.supervisorCode) {
           supervisor = {
-            code: supRes.data.supervisorCode,
-            name: supRes.data.supervisorName || supRes.data.supervisorCode,
-            jobTitle: supRes.data.supervisorJobTitle,
-            unitName: supRes.data.supervisorUnitName,
-            reason: supRes.data.reason || 'Lãnh đạo thẩm định theo VTVL tuyến báo cáo & phân công quản lý',
+            code: supRes.supervisorCode,
+            name: supRes.supervisorName || supRes.supervisorCode,
+            jobTitle: supRes.supervisorJobTitle,
+            unitName: supRes.supervisorUnitName,
+            reason: supRes.reason || 'Lãnh đạo thẩm định theo VTVL tuyến báo cáo & phân công quản lý',
           };
         }
       } catch {}
     }
 
     return {
-      success: true,
-      data: {
-        deptLeaders,
-        deptStaff,
-        stepAssigneeOptions,
-        formulaDomainCode,
-        kpiDefaults,
-        supervisor,
-      },
+      deptLeaders,
+      deptStaff,
+      stepAssigneeOptions,
+      formulaDomainCode,
+      kpiDefaults,
+      supervisor,
     };
   }
 
@@ -535,12 +532,9 @@ export class TasksService implements OnModuleInit {
 
     if (count === 0) {
       return {
-        success: true,
-        data: {
-          assigneePercentage: 100,
-          coordinatorPercentage: 0,
-          coordinators: [],
-        },
+        assigneePercentage: 100,
+        coordinatorPercentage: 0,
+        coordinators: [],
       };
     }
 
@@ -548,12 +542,9 @@ export class TasksService implements OnModuleInit {
     const leadPct = 100 - coorPct * count;
 
     return {
-      success: true,
-      data: {
-        assigneePercentage: leadPct,
-        coordinatorPercentage: coorPct,
-        coordinators: codes.map((id) => ({ id, percentage: coorPct })),
-      },
+      assigneePercentage: leadPct,
+      coordinatorPercentage: coorPct,
+      coordinators: codes.map((id) => ({ id, percentage: coorPct })),
     };
   }
 
@@ -815,13 +806,10 @@ export class TasksService implements OnModuleInit {
     };
 
     return {
-      success: true,
-      data: {
-        metrics,
-        actionItems,
-        recentTasks,
-        workloadBenchmark,
-      },
+      metrics,
+      actionItems,
+      recentTasks,
+      workloadBenchmark,
     };
   }
 
@@ -838,7 +826,7 @@ export class TasksService implements OnModuleInit {
     }
 
     if (!targetUnitId && !targetDomainId && !assigneeCode) {
-      return { success: true, data: null };
+      return null;
     }
 
     try {
@@ -862,26 +850,23 @@ export class TasksService implements OnModuleInit {
         }
         const u = this.userCacheMap.get(supervisorCode);
         return {
-          success: true,
-          data: {
-            supervisorCode,
-            supervisorName: u ? u.fullName || u.username : supervisorCode,
-            supervisorJobTitle: u?.jobTitleName || undefined,
-            supervisorUnitName: u?.unitName || undefined,
-            reason: assigneeCode
-              ? 'Lãnh đạo thẩm định theo VTVL tuyến báo cáo trực tiếp & phân công quản lý'
-              : targetUnitId
-              ? 'Lãnh đạo được phân công theo dõi đơn vị trong định biên tổ chức'
-              : 'Lãnh đạo được phân công theo dõi lĩnh vực trong định biên tổ chức',
-            allMatchedCodes: codes,
-          },
+          supervisorCode,
+          supervisorName: u ? u.fullName || u.username : supervisorCode,
+          supervisorJobTitle: u?.jobTitleName || undefined,
+          supervisorUnitName: u?.unitName || undefined,
+          reason: assigneeCode
+            ? 'Lãnh đạo thẩm định theo VTVL tuyến báo cáo trực tiếp & phân công quản lý'
+            : targetUnitId
+            ? 'Lãnh đạo được phân công theo dõi đơn vị trong định biên tổ chức'
+            : 'Lãnh đạo được phân công theo dõi lĩnh vực trong định biên tổ chức',
+          allMatchedCodes: codes,
         };
       }
     } catch {
       // Fallback null
     }
 
-    return { success: true, data: null };
+    return null;
   }
 
   async recommendAssignees(

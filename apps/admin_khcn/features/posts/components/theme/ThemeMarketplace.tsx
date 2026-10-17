@@ -94,7 +94,7 @@ export function ThemeMarketplace({ onCustomizeClick }: { onCustomizeClick: () =>
             setNotification(`Đã kích hoạt thành công giao diện "${selectedTheme.name}"!`);
             setTimeout(() => setNotification(null), 4000);
         } catch (error) {
-            console.error("Lỗi kích hoạt theme:", error);
+            // error handled
         }
     };
 

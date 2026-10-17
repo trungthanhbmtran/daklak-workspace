@@ -65,7 +65,7 @@ export class PartnerController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { data: res };
+    return res;
   }
 
   @Get()
@@ -77,7 +77,7 @@ export class PartnerController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     )) as any;
-    return { data: res.data || [] };
+    return res?.data || [];
   }
 
   @Post(':id/keys')
@@ -94,7 +94,7 @@ export class PartnerController implements OnModuleInit {
         this.getGrpcMetadata(req),
       ),
     );
-    return { data: res };
+    return res;
   }
 
   @Put('keys/:keyId/revoke')

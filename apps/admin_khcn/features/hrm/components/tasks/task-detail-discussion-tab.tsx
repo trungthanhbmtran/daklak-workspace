@@ -78,12 +78,7 @@ export function TaskDiscussionTab({
     return participant?.fullName || participant?.employeeName || senderId;
   };
 
-  const rawComments = (commentsData as any)?.data;
-  const comments: any[] = Array.isArray(rawComments)
-    ? rawComments
-    : Array.isArray(rawComments?.items)
-    ? rawComments.items
-    : [];
+  const comments: any[] = Array.isArray(commentsData) ? commentsData : [];
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

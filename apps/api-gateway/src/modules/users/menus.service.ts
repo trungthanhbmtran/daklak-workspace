@@ -186,7 +186,7 @@ export class MenusService implements OnModuleInit {
       }, metadata),
     ).catch((e) => this.handleRpcError(e));
     const branches = getRealBranches(response?.data ?? []);
-    return { apps: this.buildHubApps(branches) };
+    return this.buildHubApps(branches);
   }
 
   async getServiceSidebar(user: any, code: string, app?: string, metadata?: Metadata) {
@@ -206,7 +206,7 @@ export class MenusService implements OnModuleInit {
     const sidebarMenus = this.buildSidebarMenus(branches);
     const sidebar =
       sidebarMenus.find((s: any) => s.serviceCode === code) ?? null;
-    return { sidebar };
+    return sidebar;
   }
 
   private buildHubApps(branches: any[]) {

@@ -35,11 +35,11 @@ export function UnitScopePanel() {
   const code = rawCode ? decodeURIComponent(rawCode) : "";
 
   const { data: detailResponse, isPending: isDetailPending, isFetching: isDetailFetching, isError: isDetailError, isPlaceholderData: isDetailPlaceholder } = useOrganizationDetailQuery(code);
-  const selectedId = detailResponse?.data?.id;
-  const parentId = detailResponse?.data?.parentId;
+  const selectedId = (detailResponse as any)?.id ?? (detailResponse as any)?.data?.id;
+  const parentId = (detailResponse as any)?.parentId ?? (detailResponse as any)?.data?.parentId;
 
   const { data: scopeResponse, isPending, isFetching } = useOrganizationScopeQuery(selectedId ?? undefined);
-  const scopeData = scopeResponse?.data;
+  const scopeData = (scopeResponse as any)?.data ?? scopeResponse;
   const isScopeLoading = isPending || isFetching;
 
   // Local IDs — server sẽ dùng để sort & đánh dấu selected
@@ -56,14 +56,15 @@ export function UnitScopePanel() {
   }
 
   const isPartyUnit =
-    detailResponse?.data?.categoryCode === "DANG" ||
+    (detailResponse as any)?.categoryCode === "DANG" ||
+    (detailResponse as any)?.data?.categoryCode === "DANG" ||
     [
       "CQ_DANG",
       "CO_QUAN_DANG",
       "BAN_DANG",
       "PHONG_BAN_DANG",
       "VAN_PHONG_DANG_UY",
-    ].includes(detailResponse?.data?.typeCode || "") ||
+    ].includes((detailResponse as any)?.typeCode || (detailResponse as any)?.data?.typeCode || "") ||
     (code || "").startsWith("BTCTU_") ||
     (code || "").startsWith("TU_");
 

@@ -45,15 +45,9 @@ export function TaskEditClient({ id }: TaskEditClientProps) {
   const numericId = typeof id === "string" ? parseInt(id, 10) : id;
   const isValidId = !Number.isNaN(numericId) && numericId > 0;
 
-  const { data: detailData, isLoading, isError } = useTaskDetail(isValidId ? numericId : undefined, {
+  const { data: currentTask, isLoading, isError } = useTaskDetail(isValidId ? numericId : undefined, {
     enabled: isValidId,
   });
-
-  const rawDetail = (detailData as any)?.data ?? detailData;
-  const currentTask: any =
-    rawDetail && typeof rawDetail === "object" && rawDetail.data && typeof rawDetail.data === "object" && !Array.isArray(rawDetail.data)
-      ? rawDetail.data
-      : rawDetail;
 
   // Form State
   const [title, setTitle] = useState("");

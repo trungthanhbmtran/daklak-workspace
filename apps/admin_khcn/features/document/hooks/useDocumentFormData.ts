@@ -3,14 +3,12 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData } from "@/lib/api-helper";
 import { toast } from "sonner";
 
 const fetchList = async (group: string): Promise<any[]> => {
-  const res: any = await apiClient.get("/categories", { params: { group } });
-  const d = res?.data || res;
-  if (Array.isArray(d)) return d;
-  if (d && Array.isArray(d.data)) return d.data;
-  return [];
+  const res = await apiClient.get("/categories", { params: { group } });
+  return unwrapData<any[]>(res, []);
 };
 
 /**
@@ -45,8 +43,8 @@ export function useCabinetFiles(enabled = true) {
   return useQuery({
     queryKey: ["document-cabinet"],
     queryFn: async (): Promise<any[]> => {
-      const res: any = await apiClient.get("/documents/cabinet");
-      return res.data;
+      const res = await apiClient.get("/documents/cabinet");
+      return unwrapData<any[]>(res, []);
     },
     enabled,
     staleTime: 60_000,
@@ -60,8 +58,8 @@ export function useDossierComponents(dossierId: string) {
   return useQuery({
     queryKey: ["dossier-components", dossierId],
     queryFn: async (): Promise<any[]> => {
-      const res: any = await apiClient.get(`/documents/dossiers/${dossierId}/components`);
-      return res.data;
+      const res = await apiClient.get(`/documents/dossiers/${dossierId}/components`);
+      return unwrapData<any[]>(res, []);
     },
     enabled: !!dossierId,
     staleTime: 30_000,
@@ -137,8 +135,8 @@ export function useDossierList() {
   return useQuery({
     queryKey: ["dossiers-list"],
     queryFn: async (): Promise<any[]> => {
-      const res: any = await apiClient.get("/documents/dossiers/list");
-      return res.data;
+      const res = await apiClient.get("/documents/dossiers/list");
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 60_000,
     placeholderData: [],
@@ -171,8 +169,8 @@ export function useProcedureList() {
   return useQuery({
     queryKey: ["procedures-list"],
     queryFn: async (): Promise<any[]> => {
-      const res: any = await apiClient.get("/documents/procedures/list");
-      return res.data;
+      const res = await apiClient.get("/documents/procedures/list");
+      return unwrapData<any[]>(res, []);
     },
     staleTime: 2 * 60_000,
     placeholderData: [],

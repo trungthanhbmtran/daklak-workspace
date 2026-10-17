@@ -28,8 +28,8 @@ export function OrganizationLayoutClient({ children }: { children: React.ReactNo
   const updateUnit = (id: number, payload: any) => updateUnitBase({ id, payload });
   const updateScope = (id: number, payload: any) => updateScopeBase({ id, payload });
 
-  const tree = treeResponse?.data ?? [];
-  const flatUnits = flatListResponse?.data ?? [];
+  const tree = (treeResponse as any)?.data ?? treeResponse ?? [];
+  const flatUnits = (flatListResponse as any)?.data ?? flatListResponse ?? [];
 
   const contextValue = {
     state: {

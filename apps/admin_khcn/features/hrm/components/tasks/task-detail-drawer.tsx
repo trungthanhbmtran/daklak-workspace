@@ -51,7 +51,6 @@ import {
   getTaskTypeBadge,
   translateTaskStatus,
   getTaskStatusColor,
-  unwrapTaskData,
 } from "./task-ui-utils";
 
 interface TaskDetailDrawerProps {
@@ -98,7 +97,7 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
   });
 
   const currentTask: any = useMemo(() => {
-    return unwrapTaskData(detailData) || unwrapTaskData(task) || null;
+    return detailData || task || null;
   }, [detailData, task]);
 
   const isCompleted = currentTask?.status?.toUpperCase() === "COMPLETED" || currentTask?.status?.toUpperCase() === "DONE";

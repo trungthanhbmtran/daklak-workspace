@@ -4,6 +4,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useTheme } from "next-themes";
 import axios from "axios";
+import { unwrapData } from "@/lib/api-helper";
 import { portalConfigApi } from "@/features/portal-config/api";
 
 export interface TypographySettings {
@@ -188,8 +189,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     axios
       .get("/api/v1/public/portal-configs", { withCredentials: true })
       .then((res: any) => {
-        const body = res.data; // axios response.data
-        const configs = Array.isArray(body?.data) ? body.data : [];
+        const configs = unwrapData<any[]>(res.data, []);
         const found = configs.find((c: any) => c.code === "theme_appearance");
         if (!found?.description) return;
 
@@ -293,7 +293,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       });
       setIsDirty(false);
     } catch (err) {
-      console.error("[ThemeProvider] saveTheme API error:", err);
+      // error handled
       setIsDirty(false);
     }
   };
