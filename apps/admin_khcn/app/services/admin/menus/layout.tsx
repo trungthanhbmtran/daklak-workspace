@@ -1,4 +1,4 @@
-import { MenuSidebar } from "@/features/system-admin/menus";
+import { MenusLayoutClient } from "@/features/system-admin/menus";
 
 export default function MenusLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,12 +10,7 @@ export default function MenusLayout({ children }: { children: React.ReactNode })
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 min-w-0 overflow-hidden font-sans antialiased">
-        <MenuSidebar />
-        <div className="flex-1 h-full min-w-0 hidden lg:block overflow-y-auto p-1">
-          {children}
-        </div>
-      </div>
+      <MenusLayoutClient>{children}</MenusLayoutClient>
     </div>
   );
 }

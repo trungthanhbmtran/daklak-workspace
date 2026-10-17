@@ -811,7 +811,7 @@ export function CreateTaskDialog({
                     Đơn vị / Phòng ban chủ trì <span className="text-red-500">*</span>
                   </Label>
                   <Select value={selectedDepartmentId} onValueChange={handleDepartmentChange}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0 truncate [&>span]:truncate">
                       <SelectValue placeholder="Chọn phòng ban chủ trì..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
@@ -855,7 +855,7 @@ export function CreateTaskDialog({
                     required
                     disabled={!selectedDepartmentId}
                   >
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0 disabled:opacity-60">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-blue-500 shadow-sm min-w-0 truncate [&>span]:truncate disabled:opacity-60">
                       <SelectValue
                         placeholder={
                           selectedDepartmentId
@@ -954,7 +954,7 @@ export function CreateTaskDialog({
                   </Badge>
                 </div>
                 <Select value={supervisorCode} onValueChange={setSupervisorCode}>
-                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-emerald-500 shadow-sm border-slate-200 min-w-0">
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-10 text-sm focus:ring-emerald-500 shadow-sm border-slate-200 min-w-0 truncate [&>span]:truncate">
                     <SelectValue placeholder="Chọn lãnh đạo phụ trách..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">
@@ -1023,7 +1023,7 @@ export function CreateTaskDialog({
                   <UsersIcon className="w-3.5 h-3.5 text-slate-500" /> Nhân sự / Đơn vị phối hợp thực hiện
                 </Label>
                 <Select value="" onValueChange={handleAddCoordinator}>
-                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-9 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm text-xs min-w-0">
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-9 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm text-xs min-w-0 truncate [&>span]:truncate">
                     <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
                   </SelectTrigger>
                   <SelectContent className="max-h-[300px]">

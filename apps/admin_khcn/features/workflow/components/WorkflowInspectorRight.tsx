@@ -72,7 +72,7 @@ export function WorkflowInspectorRight({
   const nodeRole = currentNode ? getNodeRoleInfo(currentNode.id, currentNode.type, currentNode.data) : null;
 
   return (
-    <aside className="w-84 shrink-0 border-l bg-card/70 backdrop-blur-xs flex flex-col min-w-0 h-full overflow-hidden transition-all z-10">
+    <aside className="w-full lg:w-84 lg:shrink-0 border-l bg-card/70 backdrop-blur-xs flex flex-col min-w-0 h-full overflow-hidden transition-all z-10">
       {/* HEADER INSPECTOR */}
       <div className="flex items-center justify-between border-b px-3.5 py-2.5 bg-muted/20">
         <div className="flex items-center gap-2 min-w-0">
@@ -142,14 +142,14 @@ export function WorkflowInspectorRight({
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-0">
               <Label className="text-xs font-semibold">Thuộc giai đoạn / đợt</Label>
               <Select
                 value={String(currentNode.data?.phaseId || "__unassigned__")}
                 onValueChange={(val) => onUpdateNode({ phaseId: val === "__unassigned__" ? undefined : val })}
                 disabled={readOnly}
               >
-                <SelectTrigger className="w-full text-xs h-9">
+                <SelectTrigger className="w-full text-xs h-9 min-w-0 truncate [&>span]:truncate">
                   <SelectValue placeholder="Chọn giai đoạn..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -187,14 +187,14 @@ export function WorkflowInspectorRight({
                   <UserRound className="size-3.5 text-primary" /> Phân công & Thẩm quyền
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <Label className="text-[11px] text-muted-foreground">Chiến lược phân công</Label>
                   <Select
                     value={String(currentNode.data?.assignmentStrategy || "BY_ROLE")}
                     onValueChange={(val) => onUpdateNode({ assignmentStrategy: val })}
                     disabled={readOnly}
                   >
-                    <SelectTrigger className="w-full text-xs h-8">
+                    <SelectTrigger className="w-full text-xs h-8 min-w-0 truncate [&>span]:truncate">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -206,14 +206,14 @@ export function WorkflowInspectorRight({
                 </div>
 
                 {(currentNode.data?.assignmentStrategy === "BY_ROLE" || !currentNode.data?.assignmentStrategy) && (
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5 min-w-0">
                     <Label className="text-[11px] text-muted-foreground">Chức danh phê duyệt</Label>
                     <Select
                       value={String(currentNode.data?.targetRole || "")}
                       onValueChange={(val) => onUpdateNode({ targetRole: val })}
                       disabled={readOnly || roles.isPending}
                     >
-                      <SelectTrigger className="w-full text-xs h-8">
+                      <SelectTrigger className="w-full text-xs h-8 min-w-0 truncate [&>span]:truncate">
                         <SelectValue placeholder="Chọn chức danh từ API..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -240,7 +240,7 @@ export function WorkflowInspectorRight({
                 </span>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 min-w-0">
                 <Label className="text-[11px] text-muted-foreground">Mẫu biểu áp dụng</Label>
                 <Select
                   value={String(currentNode.data?.formPreset || "__none__")}
@@ -253,7 +253,7 @@ export function WorkflowInspectorRight({
                   }}
                   disabled={readOnly}
                 >
-                  <SelectTrigger className="w-full text-xs h-8">
+                  <SelectTrigger className="w-full text-xs h-8 min-w-0 truncate [&>span]:truncate">
                     <SelectValue placeholder="Chọn mẫu biểu chuẩn..." />
                   </SelectTrigger>
                   <SelectContent>

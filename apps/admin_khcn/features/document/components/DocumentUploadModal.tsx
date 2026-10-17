@@ -274,7 +274,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden shadow-2xl border-none">
+      <DialogContent className="w-[95vw] sm:max-w-[850px] max-h-[90vh] overflow-y-auto p-0 shadow-2xl border-none">
         <DialogHeader className="p-6 border-b bg-linear-to-br from-primary/10 via-background to-background">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -543,10 +543,10 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                         </FormItem>
                       )} />
                       <FormField name="transparencyCategory" render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="min-w-0">
                           <FormLabel className="text-[10px] font-bold uppercase">Phân loại báo cáo</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl><SelectTrigger className="bg-background border-primary/20 h-9"><SelectValue placeholder="Chọn loại báo cáo..." /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="bg-background border-primary/20 h-9 min-w-0 truncate [&>span]:truncate"><SelectValue placeholder="Chọn loại báo cáo..." /></SelectTrigger></FormControl>
                             <SelectContent>
                               {categories.reportTypes.length > 0 ? (
                                 categories.reportTypes.map(cat => <SelectItem key={cat.id} value={cat.code || cat.id}>{cat.name}</SelectItem>)
@@ -580,10 +580,10 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <FormField name="typeId" render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Loại văn bản</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} >
-                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn loại..." /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10 min-w-0 truncate [&>span]:truncate"><SelectValue placeholder="Chọn loại..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.types.map(cat => <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>)}
                         {categories.types.length === 0 && <SelectItem value="DISABLED" disabled>Không có dữ liệu</SelectItem>}
@@ -592,10 +592,10 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   </FormItem>
                 )} />
                 <FormField name="fieldId" render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Lĩnh vực</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn lĩnh vực..." /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10 min-w-0 truncate [&>span]:truncate"><SelectValue placeholder="Chọn lĩnh vực..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.fields.map(cat => <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>)}
                         {categories.fields.length === 0 && <SelectItem value="DISABLED" disabled>Không có dữ liệu</SelectItem>}
@@ -604,10 +604,10 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   </FormItem>
                 )} />
                 <FormField name="urgency" render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ khẩn</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn độ khẩn..." /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10 min-w-0 truncate [&>span]:truncate"><SelectValue placeholder="Chọn độ khẩn..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.urgencies.length > 0 ? (
                           categories.urgencies.map(cat => (
@@ -627,10 +627,10 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   </FormItem>
                 )} />
                 <FormField name="securityLevel" render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="min-w-0">
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ mật</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn độ mật..." /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10 min-w-0 truncate [&>span]:truncate"><SelectValue placeholder="Chọn độ mật..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.securityLevels.length > 0 ? (
                           categories.securityLevels.map(cat => (

@@ -11,10 +11,13 @@ import {
 import { OrganizationProvider } from "@/features/system-admin/organization/context/OrganizationContext";
 import { OrganizationSidebar } from "@/features/system-admin/organization/components/OrganizationSidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function OrganizationLayoutClient({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const isRoot = pathname === "/services/admin/organization" || pathname === "/services/admin/organization/";
   const searchTerm = searchParams.get('search') || "";
 
   const { data: treeResponse, isLoading: isLoadingTree } = useOrganizationTreeQuery(searchTerm);
@@ -54,8 +57,8 @@ export function OrganizationLayoutClient({ children }: { children: React.ReactNo
   if (isLoadingTree || isLoadingFlatList) {
     return (
       <div className="flex flex-col lg:flex-row gap-6 flex-1 w-full min-h-0 overflow-hidden h-full">
-        <Skeleton className="w-full lg:w-[380px] flex-1 lg:flex-none h-full rounded-xl shrink-0" />
-        <Skeleton className="flex-1 h-full rounded-xl" />
+        <Skeleton className={cn("w-full lg:w-[380px] h-full rounded-xl shrink-0", isRoot ? "block" : "hidden lg:block")} />
+        <Skeleton className={cn("flex-1 h-full rounded-xl", isRoot ? "hidden lg:block" : "block")} />
       </div>
     );
   }
@@ -63,8 +66,10 @@ export function OrganizationLayoutClient({ children }: { children: React.ReactNo
   return (
     <OrganizationProvider value={contextValue}>
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 flex-1 w-full min-h-0 overflow-hidden font-sans antialiased min-w-0 h-full">
-        <OrganizationSidebar />
-        <div className="flex-1 min-w-0 flex flex-col overflow-hidden h-full pb-2">
+        <div className={cn("w-full lg:w-[380px] shrink-0 h-full", isRoot ? "flex flex-col" : "hidden lg:flex flex-col")}>
+          <OrganizationSidebar />
+        </div>
+        <div className={cn("flex-1 min-w-0 flex flex-col overflow-hidden h-full pb-2", isRoot ? "hidden lg:flex" : "flex")}>
           {children}
         </div>
       </div>

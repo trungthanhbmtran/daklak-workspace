@@ -96,7 +96,7 @@ const MinutesRow = React.memo(function MinutesRow({ minutes: m }: MinutesRowProp
 
       {/* Actions */}
       <TableCell className="px-6 py-5 text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <Button variant="secondary" size="icon" className="rounded-full shadow-sm" iconStart={<Eye className="h-4 w-4" />}></Button>
           <Button variant="secondary" size="icon" className="rounded-full shadow-sm" iconStart={<Download className="h-4 w-4" />}></Button>
         </div>

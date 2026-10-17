@@ -59,7 +59,7 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
   return (
     <TableRow className="hover:bg-blue-500/[0.02] transition-all group cursor-pointer" onClick={handleClick}>
       {/* Number + type */}
-      <TableCell className="px-8 py-6">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
         <div className="flex flex-col gap-1.5">
           <span className="font-black text-foreground tracking-tight">{doc.documentNumber}</span>
           <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
       </TableCell>
 
       {/* Abstract + issuer */}
-      <TableCell className="px-8 py-6 max-w-md">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5 max-w-md">
         <div className="flex flex-col gap-1">
           <p className="font-bold text-foreground/90 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
             {doc.abstract || doc.title || "Không có trích yếu"}
@@ -89,7 +89,7 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
       </TableCell>
 
       {/* Issue date */}
-      <TableCell className="px-8 py-6">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-foreground font-bold">
             <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
@@ -102,7 +102,7 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
       </TableCell>
 
       {/* Signer */}
-      <TableCell className="px-8 py-6">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-foreground font-bold">
             <User className="h-3.5 w-3.5 text-muted-foreground" />
@@ -115,8 +115,8 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDetail }: DocumentR
       </TableCell>
 
       {/* Action */}
-      <TableCell className="px-8 py-6 text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5 text-right">
+        <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:translate-x-2 sm:group-hover:translate-x-0">
           <Button
             variant="secondary"
             size="icon"
@@ -231,27 +231,27 @@ export function IncomingDocumentsClient() {
             <Table>
               <TableHeader>
                 <TableRow className="text-[10px] font-black uppercase tracking-widest text-muted-foreground bg-muted/30">
-                  <TableHead className="px-8 py-5 w-48">Số / Ký hiệu</TableHead>
-                  <TableHead className="px-8 py-5">Trích yếu / Cơ quan ban hành</TableHead>
-                  <TableHead className="px-8 py-5 w-40">Ngày ban hành</TableHead>
-                  <TableHead className="px-8 py-5 w-48">Người tiếp nhận</TableHead>
-                  <TableHead className="px-8 py-5 w-24 text-right" />
+                  <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-48">Số / Ký hiệu</TableHead>
+                  <TableHead className="px-4 py-3 lg:px-6 lg:py-4">Trích yếu / Cơ quan ban hành</TableHead>
+                  <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-40">Ngày ban hành</TableHead>
+                  <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-48">Người tiếp nhận</TableHead>
+                  <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-24 text-right" />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
-                      <TableCell className="px-8 py-6"><Skeleton className="h-10 w-32 rounded-lg" /></TableCell>
-                      <TableCell className="px-8 py-6">
+                      <TableCell className="px-4 py-4 lg:px-6 lg:py-5"><Skeleton className="h-10 w-32 rounded-lg" /></TableCell>
+                      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
                         <div className="space-y-2">
                           <Skeleton className="h-4 w-full rounded-md" />
                           <Skeleton className="h-3 w-1/2 rounded-md" />
                         </div>
                       </TableCell>
-                      <TableCell className="px-8 py-6"><Skeleton className="h-8 w-24 rounded-lg" /></TableCell>
-                      <TableCell className="px-8 py-6"><Skeleton className="h-8 w-32 rounded-lg" /></TableCell>
-                      <TableCell className="px-8 py-6 text-right"><Skeleton className="h-9 w-9 rounded-xl ml-auto" /></TableCell>
+                      <TableCell className="px-4 py-4 lg:px-6 lg:py-5"><Skeleton className="h-8 w-24 rounded-lg" /></TableCell>
+                      <TableCell className="px-4 py-4 lg:px-6 lg:py-5"><Skeleton className="h-8 w-32 rounded-lg" /></TableCell>
+                      <TableCell className="px-4 py-4 lg:px-6 lg:py-5 text-right"><Skeleton className="h-9 w-9 rounded-xl ml-auto" /></TableCell>
                     </TableRow>
                   ))
                 ) : documents.length === 0 ? (

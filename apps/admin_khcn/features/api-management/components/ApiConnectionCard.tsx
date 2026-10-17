@@ -75,7 +75,7 @@ export function ApiConnectionCard({ connection, onEdit }: Props) {
           </div>
         </div>
         
-        <div className="flex items-center gap-1.5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <div className="flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 transition-all duration-300">
           {connection.enabled && (
             <Button 
               variant="outline" 

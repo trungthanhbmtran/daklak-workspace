@@ -70,32 +70,34 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
 
       <Tabs defaultValue="documents" className="w-full">
         {/* Thanh Navigation Tab */}
-        <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/40 p-1">
-          <TabsTrigger value="documents" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <FileText className="h-4 w-4" /> Văn bản Bộ / Ngành
-          </TabsTrigger>
-          <TabsTrigger value="consultation" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm relative">
-            <MessageSquareShare className="h-4 w-4" /> Quản lý Lấy ý kiến
-            <span className="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-destructive animate-pulse"></span>
-          </TabsTrigger>
-          <TabsTrigger value="finance" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm">
-            <PieChart className="h-4 w-4" /> Công khai Tài chính
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto no-scrollbar w-full">
+          <TabsList className="flex w-max min-w-full sm:grid sm:grid-cols-3 h-12 bg-muted/40 p-1">
+            <TabsTrigger value="documents" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap shrink-0">
+              <FileText className="h-4 w-4 mr-1.5 shrink-0" /> Văn bản Bộ / Ngành
+            </TabsTrigger>
+            <TabsTrigger value="consultation" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm relative whitespace-nowrap shrink-0">
+              <MessageSquareShare className="h-4 w-4 mr-1.5 shrink-0" /> Quản lý Lấy ý kiến
+              <span className="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-destructive animate-pulse"></span>
+            </TabsTrigger>
+            <TabsTrigger value="finance" className="font-semibold data-[state=active]:bg-background data-[state=active]:shadow-sm whitespace-nowrap shrink-0">
+              <PieChart className="h-4 w-4 mr-1.5 shrink-0" /> Công khai Tài chính
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* ========================================== */}
         {/* TAB 1: VĂN BẢN ĐI/ĐẾN BỘ NGÀNH */}
         {/* ========================================== */}
         <TabsContent value="documents" className="mt-6 space-y-4">
           <Card className="border shadow-sm overflow-hidden">
-            <div className="p-4 border-b bg-muted/10 flex flex-col sm:flex-row gap-4 justify-between items-center">
-              <div className="flex gap-3 w-full sm:w-auto">
+            <div className="p-4 border-b bg-muted/10 flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <div className="relative w-full sm:w-72">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input placeholder="Tìm số ký hiệu, trích yếu..." className="pl-8 bg-background" />
                 </div>
                 <Select defaultValue="INCOMING">
-                  <SelectTrigger className="w-[160px] bg-background"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full sm:w-[160px] bg-background"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="INCOMING">Văn bản Đến</SelectItem>
                     <SelectItem value="OUTGOING">Văn bản Đi</SelectItem>
@@ -161,39 +163,39 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
         {/* ========================================== */}
         <TabsContent value="consultation" className="mt-6 space-y-4">
           <Card className="border shadow-sm">
-            <div className="p-4 border-b flex justify-between items-center bg-muted/10">
-              <div className="flex gap-2">
-                <Input placeholder="Tên dự thảo..." className="w-72 bg-background" />
+            <div className="p-4 border-b flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-muted/10">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Input placeholder="Tên dự thảo..." className="w-full sm:w-72 bg-background" />
                 <Select defaultValue="GATHERING">
-                  <SelectTrigger className="w-[160px] bg-background"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="w-full sm:w-[160px] bg-background"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="GATHERING">Đang lấy ý kiến</SelectItem>
                     <SelectItem value="COMPILED">Đã tổng hợp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={onOpenConsultationModal} iconStart={<Plus className="h-4 w-4" />}>Tạo luồng lấy ý kiến</Button>
+              <Button className="w-full sm:w-auto shrink-0" onClick={onOpenConsultationModal} iconStart={<Plus className="h-4 w-4" />}>Tạo luồng lấy ý kiến</Button>
             </div>
             
             <div className="divide-y bg-background">
               {/* Item Dự thảo 1 */}
               <div className="p-5 hover:bg-muted/30 transition-colors">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="space-y-1.5">
-                    <h4 className="text-base font-bold text-primary cursor-pointer hover:underline">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <h4 className="text-base font-bold text-primary cursor-pointer hover:underline break-words">
                       Dự thảo Kế hoạch ứng dụng CNTT và CĐS tỉnh Đắk Lắk giai đoạn 2026-2030
                     </h4>
                     <p className="text-sm text-muted-foreground">
                       Cơ quan chủ trì soạn thảo: <strong className="text-foreground">Sở Khoa học và Công nghệ tỉnh Đắk Lắk</strong>
                     </p>
                   </div>
-                  <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300 font-semibold px-3 py-1">
+                  <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300 font-semibold px-3 py-1 shrink-0">
                     <Clock className="h-3.5 w-3.5 mr-1.5" /> Hạn chót: 28/02/2026
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  <div className="col-span-2 bg-muted/20 border rounded-lg p-3">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div className="col-span-1 md:col-span-2 bg-muted/20 border rounded-lg p-3">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-xs font-bold uppercase text-muted-foreground">Tiến độ phản hồi</span>
                       <span className="text-xs font-bold text-primary">12 / 15 đơn vị</span>
@@ -202,14 +204,14 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                       <div className="bg-primary h-2 rounded-full" style={{ width: "80%" }}></div>
                     </div>
                     <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                      <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Sở Tài chính (Đã gửi)</Badge>
-                      <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Sở Kế hoạch & Đầu tư (Đã gửi)</Badge>
-                      <Badge variant="secondary" className="text-[10px] bg-rose-100 text-rose-700 hover:bg-rose-100">UBND TP. Buôn Ma Thuột (Chưa gửi)</Badge>
+                      <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shrink-0">Sở Tài chính (Đã gửi)</Badge>
+                      <Badge variant="secondary" className="text-[10px] bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shrink-0">Sở Kế hoạch & Đầu tư (Đã gửi)</Badge>
+                      <Badge variant="secondary" className="text-[10px] bg-rose-100 text-rose-700 hover:bg-rose-100 shrink-0">UBND TP. Buôn Ma Thuột (Chưa gửi)</Badge>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 justify-center">
-                    <Button variant="outline" className="w-full justify-start h-9 bg-background" iconStart={<Download className="h-4 w-4  text-muted-foreground" />}>Tải File Dự thảo gốc</Button>
+                  <div className="flex flex-col sm:flex-row md:flex-col gap-2 justify-center">
+                    <Button variant="outline" className="w-full justify-start h-9 bg-background" iconStart={<Download className="h-4 w-4 text-muted-foreground" />}>Tải File Dự thảo gốc</Button>
                     <Button variant="default" className="w-full justify-start h-9" iconStart={<CheckCircle2 className="h-4 w-4" />}>Tổng hợp giải trình</Button>
                   </div>
                 </div>
@@ -217,16 +219,16 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
 
               {/* Item Dự thảo 2 */}
               <div className="p-5 hover:bg-muted/30 transition-colors opacity-70">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="space-y-1.5">
-                    <h4 className="text-base font-bold text-foreground">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <h4 className="text-base font-bold text-foreground break-words">
                       Dự thảo Quyết định sáp nhập Sở Thông tin Truyền thông vào Sở Khoa học Công nghệ
                     </h4>
                     <p className="text-sm text-muted-foreground">
                       Cơ quan chủ trì: <strong className="text-foreground">UBND Tỉnh</strong>
                     </p>
                   </div>
-                  <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-300 font-semibold px-3 py-1">
+                  <Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-300 font-semibold px-3 py-1 shrink-0">
                     <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Đã đóng góp ý kiến
                   </Badge>
                 </div>
@@ -251,24 +253,24 @@ export default function DocumentManager({ onOpenUploadModal, onOpenConsultationM
                 Theo quy định tại Luật Ngân sách Nhà nước và Thông tư hướng dẫn về công khai tài chính cơ quan hành chính.
               </CardDescription>
             </CardHeader>
-            <div className="p-4 flex gap-4 border-b bg-background">
+            <div className="p-4 flex flex-wrap sm:flex-nowrap gap-3 sm:gap-4 border-b bg-background items-center">
               <Select defaultValue="2026">
-                <SelectTrigger className="w-[120px] font-bold"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[120px] font-bold"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="2026">Năm 2026</SelectItem>
                   <SelectItem value="2025">Năm 2025</SelectItem>
                 </SelectContent>
               </Select>
               <Select defaultValue="ALL">
-                <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-[200px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Tất cả danh mục</SelectItem>
                   <SelectItem value="ESTIMATE">Dự toán thu chi</SelectItem>
                   <SelectItem value="SETTLEMENT">Quyết toán ngân sách</SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex-1" />
-              <Button variant="outline" className="bg-primary/5 text-primary border-primary/20 hover:bg-primary/10" onClick={onOpenFinanceModal} iconStart={<Upload className="h-4 w-4" />}>Đăng tải báo cáo</Button>
+              <div className="hidden sm:block flex-1" />
+              <Button variant="outline" className="w-full sm:w-auto bg-primary/5 text-primary border-primary/20 hover:bg-primary/10" onClick={onOpenFinanceModal} iconStart={<Upload className="h-4 w-4" />}>Đăng tải báo cáo</Button>
             </div>
             
              <div className="w-full">

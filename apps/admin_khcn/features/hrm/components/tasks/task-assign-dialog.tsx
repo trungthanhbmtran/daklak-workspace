@@ -127,7 +127,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isPending) onOpenChange(v); }}>
-      <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden border-0 shadow-2xl">
+      <DialogContent className="w-[95vw] sm:max-w-[650px] max-h-[90vh] overflow-y-auto p-0 border-0 shadow-2xl">
         <div className="p-6 pb-5 border-b bg-white dark:bg-slate-950">
           <DialogHeader>
             <DialogTitle className="text-xl flex items-center gap-2">
@@ -152,7 +152,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                 Đơn vị / Phòng ban chủ trì <span className="text-red-500">*</span>
               </Label>
               <Select value={selectedDepartmentId} onValueChange={handleDepartmentChange}>
-                <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm min-w-0">
+                <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm min-w-0 truncate [&>span]:truncate">
                   <SelectValue placeholder="Chọn phòng ban chủ trì..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
@@ -196,7 +196,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
                 onValueChange={setAssignee}
                 disabled={!selectedDepartmentId}
               >
-                <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm min-w-0 disabled:opacity-60">
+                <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 focus:ring-blue-500 shadow-sm min-w-0 truncate [&>span]:truncate disabled:opacity-60">
                   <SelectValue
                     placeholder={
                       selectedDepartmentId
@@ -286,7 +286,7 @@ export function TaskAssignDialog({ open, onOpenChange, taskId, currentAssigneeCo
               <UsersIcon className="w-4 h-4 text-slate-400" /> Phối hợp thực hiện
             </Label>
             <Select value={undefined} onValueChange={handleAddCoordinator}>
-              <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm min-w-0">
+              <SelectTrigger className="w-full bg-white dark:bg-slate-950 h-11 border-dashed text-slate-500 focus:ring-blue-500 shadow-sm min-w-0 truncate [&>span]:truncate">
                 <SelectValue placeholder="+ Thêm người / đơn vị phối hợp..." />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">

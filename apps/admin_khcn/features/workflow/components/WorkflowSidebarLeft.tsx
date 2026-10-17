@@ -87,7 +87,7 @@ export function WorkflowSidebarLeft({
   if (!isOpen) return null;
 
   return (
-    <aside className="w-80 shrink-0 border-r bg-card/60 backdrop-blur-xs flex flex-col min-w-0 h-full overflow-hidden transition-all z-10">
+    <aside className="w-full lg:w-80 lg:shrink-0 border-r bg-card/60 backdrop-blur-xs flex flex-col min-w-0 h-full overflow-hidden transition-all z-10">
       {/* HEADER SIDEBAR */}
       <div className="flex items-center justify-between border-b px-3.5 py-2.5 bg-muted/20">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">

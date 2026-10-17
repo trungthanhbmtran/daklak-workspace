@@ -170,7 +170,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg rounded-xl border p-6">
+      <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border p-4 sm:p-6">
         <DialogHeader className="border-b pb-4 mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Settings2 className="w-5 h-5 text-blue-600" />
@@ -223,7 +223,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                     </Button>
                   </div>
                 )}
-                <div className="grid grid-cols-4 items-center gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
                   <Label
                     htmlFor={`name-${lang.code}`}
                     className={`text-right font-bold text-sm ${lang.code !== "vi" ? "text-blue-600" : "text-slate-700"
@@ -233,7 +233,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                   </Label>
                   <Input
                     id={`name-${lang.code}`}
-                    className={`col-span-3 rounded-lg ${lang.code !== "vi" ? "border-blue-100 focus:border-blue-300" : ""
+                    className={`col-span-1 sm:col-span-3 rounded-lg ${lang.code !== "vi" ? "border-blue-100 focus:border-blue-300" : ""
                       }`}
                     placeholder={`Tên bằng ${lang.name}...`}
                     value={
@@ -248,7 +248,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                     }
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
                   <Label
                     htmlFor={`desc-${lang.code}`}
                     className={`text-right text-sm ${lang.code !== "vi" ? "text-blue-600" : "text-slate-500"
@@ -258,7 +258,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                   </Label>
                   <Textarea
                     id={`desc-${lang.code}`}
-                    className={`col-span-3 rounded-lg resize-none ${lang.code !== "vi" ? "border-blue-100" : ""
+                    className={`col-span-1 sm:col-span-3 rounded-lg resize-none ${lang.code !== "vi" ? "border-blue-100" : ""
                       }`}
                     rows={2}
                     placeholder={`Mô tả bằng ${lang.name}...`}
@@ -282,26 +282,26 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
 
             {languages.length === 0 && (
               <TabsContent value="vi" className="space-y-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right font-bold">
+                <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                  <Label htmlFor="name" className="text-left sm:text-right font-bold">
                     Tên Menu
                   </Label>
                   <Input
                     id="name"
-                    className="col-span-3 rounded-lg"
+                    className="col-span-1 sm:col-span-3 rounded-lg"
                     value={editingMenu.name || ""}
                     onChange={(e) =>
                       setEditingMenu({ ...editingMenu, name: e.target.value })
                     }
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-right">
+                <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+                  <Label htmlFor="description" className="text-left sm:text-right">
                     Mô tả
                   </Label>
                   <Textarea
                     id="description"
-                    className="col-span-3 rounded-lg resize-none"
+                    className="col-span-1 sm:col-span-3 rounded-lg resize-none"
                     rows={2}
                     value={editingMenu.description || ""}
                     onChange={(e) =>
@@ -316,8 +316,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             )}
           </Tabs>
 
-          <div className="grid grid-cols-4 items-center gap-4 border-t pt-4">
-            <Label htmlFor="type" className="text-right font-bold text-sm text-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 border-t pt-4">
+            <Label htmlFor="type" className="text-left sm:text-right font-bold text-sm text-slate-700">
               Loại liên kết
             </Label>
             <Select
@@ -353,7 +353,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 }
               }}
             >
-              <SelectTrigger className="col-span-3 rounded-lg">
+              <SelectTrigger className="col-span-1 sm:col-span-3 rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -366,8 +366,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </Select>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="position" className="text-right font-bold text-sm text-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+            <Label htmlFor="position" className="text-left sm:text-right font-bold text-sm text-slate-700">
               Vị trí
             </Label>
             <Select
@@ -376,7 +376,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 setEditingMenu({ ...editingMenu, position: v as any })
               }
             >
-              <SelectTrigger className="col-span-3 rounded-lg">
+              <SelectTrigger className="col-span-1 sm:col-span-3 rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -388,8 +388,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
           </div>
 
           {editingMenu.type === "CATEGORY" && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="categorySelect" className="text-right font-bold text-sm text-slate-700">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="categorySelect" className="text-left sm:text-right font-bold text-sm text-slate-700">
                 Chuyên mục
               </Label>
               <Select
@@ -402,7 +402,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                   });
                 }}
               >
-                <SelectTrigger id="categorySelect" className="col-span-3 rounded-lg">
+                <SelectTrigger id="categorySelect" className="col-span-1 sm:col-span-3 rounded-lg">
                   <SelectValue placeholder="Chọn chuyên mục bài viết..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -418,19 +418,19 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
           )}
 
           {editingMenu.type === "STATIC_PAGE" && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-bold text-sm text-slate-700">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label className="text-left sm:text-right font-bold text-sm text-slate-700">
                 Cấu hình hệ thống
               </Label>
-              <div className="col-span-3 bg-blue-50/50 border border-blue-100 p-3 rounded-lg text-xs text-blue-700">
+              <div className="col-span-1 sm:col-span-3 bg-blue-50/50 border border-blue-100 p-3 rounded-lg text-xs text-blue-700">
                 Tự động liên kết đến phân hệ <strong>Hệ thống quản lý Văn bản pháp quy & Quyết định công bố</strong> của Cổng thông tin (Đường dẫn: <code>/van-ban</code>).
               </div>
             </div>
           )}
 
           {editingMenu.type === "UNIT" && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="unitSelect" className="text-right font-bold text-sm text-slate-700">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="unitSelect" className="text-left sm:text-right font-bold text-sm text-slate-700">
                 Chọn Đơn vị
               </Label>
               <Select
@@ -443,7 +443,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                   });
                 }}
               >
-                <SelectTrigger id="unitSelect" className="col-span-3 rounded-lg">
+                <SelectTrigger id="unitSelect" className="col-span-1 sm:col-span-3 rounded-lg">
                   <SelectValue placeholder="Chọn đơn vị giới thiệu từ CSDL Đơn vị..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-[240px]">
@@ -459,11 +459,11 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
           )}
 
           {editingMenu.type === "POST" && (
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label className="text-right font-bold text-sm text-slate-700 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-start gap-2 sm:gap-4">
+              <Label className="text-left sm:text-right font-bold text-sm text-slate-700 mt-2">
                 Bài viết / Trang tĩnh
               </Label>
-              <div className="col-span-3 space-y-2">
+              <div className="col-span-1 sm:col-span-3 space-y-2">
                 {/* Thanh tìm kiếm bài viết nhanh */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
@@ -526,8 +526,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
           )}
 
           {editingMenu.type === "URL" && editingMenu.link?.startsWith("/tuy-bien/") && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="customPageSelect" className="text-right font-bold text-sm text-slate-700">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="customPageSelect" className="text-left sm:text-right font-bold text-sm text-slate-700">
                 Trang thiết kế
               </Label>
               <Select
@@ -541,7 +541,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                   });
                 }}
               >
-                <SelectTrigger id="customPageSelect" className="col-span-3 rounded-lg">
+                <SelectTrigger id="customPageSelect" className="col-span-1 sm:col-span-3 rounded-lg">
                   <SelectValue placeholder="Chọn trang đã thiết kế trực quan..." />
                 </SelectTrigger>
                 <SelectContent className="max-h-[220px]">
@@ -557,13 +557,13 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
           )}
 
           {editingMenu.type === "URL" && !editingMenu.link?.startsWith("/tuy-bien/") && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="link" className="text-right font-bold text-sm text-slate-700">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+              <Label htmlFor="link" className="text-left sm:text-right font-bold text-sm text-slate-700">
                 Đường dẫn liên kết
               </Label>
               <Input
                 id="link"
-                className="col-span-3 font-mono text-sm rounded-lg"
+                className="col-span-1 sm:col-span-3 font-mono text-sm rounded-lg"
                 placeholder="Ví dụ: / hoặc https://chinhphu.vn"
                 value={editingMenu.link || ""}
                 onChange={(e) =>
@@ -573,8 +573,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </div>
           )}
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="parentId" className="text-right font-bold text-sm text-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+            <Label htmlFor="parentId" className="text-left sm:text-right font-bold text-sm text-slate-700">
               Menu cha
             </Label>
             <Select
@@ -586,7 +586,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 })
               }
             >
-              <SelectTrigger className="col-span-3 rounded-lg">
+              <SelectTrigger className="col-span-1 sm:col-span-3 rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -602,8 +602,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </Select>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="order" className="text-right font-bold text-sm text-slate-700">
+          <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+            <Label htmlFor="order" className="text-left sm:text-right font-bold text-sm text-slate-700">
               Thứ tự
             </Label>
             <Input
@@ -619,7 +619,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
               }
             />
 
-            <Label htmlFor="target" className="text-right font-bold text-sm text-slate-700">
+            <Label htmlFor="target" className="text-left sm:text-right font-bold text-sm text-slate-700">
               Đích đến
             </Label>
             <Select
@@ -636,14 +636,14 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </Select>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4 border-t pt-4">
-            <div className="col-span-3 flex flex-col">
+          <div className="flex items-center justify-between gap-4 border-t pt-4">
+            <div className="flex flex-col">
               <Label className="font-bold text-sm text-slate-700">Trạng thái hiển thị</Label>
               <Text className="text-[10px] text-muted-foreground italic">
                 Cho phép người dân nhìn thấy mục menu này trên Portal.
               </Text>
             </div>
-            <div className="flex justify-end">
+            <div className="flex justify-end shrink-0">
               <Switch
                 checked={editingMenu.isActive}
                 onCheckedChange={(v) =>

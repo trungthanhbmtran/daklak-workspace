@@ -1313,3 +1313,16 @@ pm --prefix apps/hrm-service run build hoàn thành với exit code 0.
   - Quét 0 `console.log`, 0 `debugger`, dọn sạch 100% rác thừa và imports không dùng.
   - Kiểm tra chuẩn mã hóa UTF-8 không BOM trên toàn bộ các file.
   - Docker compose build & deploy container `daklak-workspace-admin-frontend-1` thành công.
+
+## 2026-10-17: Sửa Email Tràn Popup và Mở Hồ Sơ Cá Nhân Trên `/admin/hub`
+- **Phạm vi:** `apps/admin_khcn/components/layouts/header-user-profile.tsx`.
+- **Thay đổi:** Giới hạn popup theo viewport, thêm `min-w-0` và `wrap-break-word` cho email; chuyển dropdown sang controlled state và đóng menu trước khi mở dialog Hồ sơ cá nhân; xóa hai import không dùng (`Mail`, `Calendar`).
+- **Kế hoạch/ownership:** Bổ sung phạm vi Code 2 vào `.agents/current_plan.md`; không đổi API, routing, dữ liệu hoặc quyền nên không cần cập nhật kiến trúc.
+- **Kiểm chứng:**
+  - `npm run lint -- components/layouts/header-user-profile.tsx` trong `apps/admin_khcn`: PASS, exit 0.
+  - `npm run typecheck` trong `apps/admin_khcn`: PASS, exit 0.
+  - `npm run build` trong `apps/admin_khcn`: FAIL do Turbopack không kết nối được `fonts.googleapis.com` để tải Inter và Geist Mono; lỗi môi trường mạng, chưa xác nhận build.
+  - Mở `http://113.184.220.82/admin/hub`: chuyển tới `/admin/login?callbackUrl=%2Fhub`; chưa có phiên đăng nhập, do đó popup email và luồng mở hồ sơ runtime `UNVERIFIED`.
+  - Package chưa có test script, test config hoặc component test hiện hữu; regression test UI `UNVERIFIED`.
+  - `git diff --check`: không có lỗi whitespace; `header-user-profile.tsx` UTF-8 không BOM.
+- **Trạng thái nghiệm thu:** Chưa `AGENT_ACCEPTED` vì runtime/regression test và build còn `UNVERIFIED` do môi trường truy cập.

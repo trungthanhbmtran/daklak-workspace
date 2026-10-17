@@ -13,8 +13,8 @@ import { ResponsiveTableProps } from './types';
 
 export default function DesktopTable<T>({ columns, data, keyExtractor, caption, footer, className, tableClassName }: ResponsiveTableProps<T>) {
   return (
-    <div className={cn("w-full min-w-0 overflow-hidden", className)}>
-      <Table className={cn("w-full", tableClassName)}>
+    <div className={cn("w-full min-w-0 overflow-x-auto custom-scrollbar", className)}>
+      <Table className={cn("w-full min-w-[640px]", tableClassName)}>
         {caption && <TableCaption>{caption}</TableCaption>}
         <TableHeader>
           <TableRow className="bg-muted/30">

@@ -78,7 +78,7 @@ export function EditTaskDialog({ open, onOpenChange, task, onSuccess }: EditTask
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="w-[95vw] sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Edit3 className="w-5 h-5 text-blue-600" />
@@ -113,11 +113,11 @@ export function EditTaskDialog({ open, onOpenChange, task, onSuccess }: EditTask
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5 min-w-0">
               <label className="text-sm font-medium text-slate-700">Mức độ ưu tiên</label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full min-w-0 truncate [&>span]:truncate">
                   <SelectValue placeholder="Chọn mức độ" />
                 </SelectTrigger>
                 <SelectContent>

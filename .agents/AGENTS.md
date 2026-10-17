@@ -61,14 +61,37 @@ Các coder tuân thủ cùng 7 Bộ ràng buộc kỹ thuật và ghi log riêng
 ## 4. TÁM BỘ RÀNG BUỘC KỸ THUẬT BẮT BUỘC (INVIOLABLE CONSTRAINTS)
 *(Các ranh giới bảo mật, dữ liệu và contract là bắt buộc. Các hướng dẫn UI/CSS nêu kết quả cần đạt; lựa chọn triển khai phải dựa trên component, container và design system thực tế.)*
 
-### 1. Ràng buộc UI/UX & CSS Layout (theo ngữ cảnh thực tế)
-- **Co giãn và chữ dài:** Dùng min-w-0 trên flex/grid item khi nội dung động cần co lại; chọn wrap-break-word cho văn bản thường và break-all chỉ khi chuỗi định danh không thể xuống dòng hợp lý.
+### 1. Ràng buộc UI/UX & CSS Layout (Design System & Responsive Standards)
+*(Quy chuẩn chi tiết xem tại [`.agents/rules/ui-ux-design-system.md`](rules/ui-ux-design-system.md))*
+
+- **Kích cỡ hiển thị trên từng màn hình (Screen Viewport Breakpoints):**
+  * **`< 375px` (Mobile XS / Compact):** Toàn bộ bố cục xếp 1 cột dọc (`grid-cols-1`, `flex-col`); Dialog/Sheet co giãn theo bề rộng màn hình (`w-[95vw]`); TabsList chuyển sang thanh trượt ngang có cuộn (`overflow-x-auto`); Padding an toàn `p-3` hoặc `px-2 py-3`.
+  * **`375px - 639px` (Mobile Standard):** Lưới form 1 cột; tiêu đề tự động co rút (`truncate`); menu điều hướng ẩn vào Mobile Drawer / Hamburger Menu; Padding `p-4`.
+  * **`640px - 767px` (`sm:` Phablet / Tablet Portrait):** Form nhập liệu chia 2 cột cho các trường ngắn (`sm:grid-cols-2`); Dialog hiển thị kích thước chuẩn `sm:max-w-[500px]`; Thẻ chỉ số chia 2 cột; Padding `p-5`.
+  * **`768px - 1023px` (`md:` Tablet Landscape / Small Laptop):** Sidebar thu gọn (icon-only); Lưới dữ liệu chia 2-3 cột (`md:grid-cols-2`, `md:grid-cols-3`); Bảng dữ liệu desktop đầy đủ có thanh cuộn ngang độc lập; Padding `p-6`.
+  * **`1024px - 1279px` (`lg:` Laptop Văn phòng Tiêu chuẩn):** Sidebar mở rộng đầy đủ (240px - 260px); Form chia 3-4 cột; TabsList chuyển sang dạng lưới cân đối (`lg:grid`).
+  * **`1280px - 1535px` (`xl:` Desktop Làm Việc Tiêu Chuẩn):** Bố cục đa cột hoàn chỉnh (`max-w-7xl mx-auto`); Cột danh sách điều hướng và bảng làm việc song song (`xl:flex-row`).
+  * **`≥ 1536px` (`2xl:` Màn hình Lớn / Dashboard IOC):** Thẻ chia 4-5 cột (`2xl:grid-cols-4`, `2xl:grid-cols-5`); Giới hạn bề rộng bằng container `2xl:max-w-[1600px]`.
+- **Hệ thống Kiểu chữ Chuẩn hóa (Typography Hierarchy):**
+  * Phông chữ hệ thống `font-sans` (Inter / Roboto) tối ưu hiển thị Unicode Tiếng Việt, độ tương phản đáp ứng chuẩn WCAG AA.
+  * **`text-[10px]` / `text-[11px]`:** Micro text, Badge số đếm, tag trạng thái nhỏ (Khẩn, Mật, Hỏa tốc), helper text form.
+  * **`text-xs` (12px / 16px):** Nhãn form (`text-xs font-semibold text-slate-700`), Tiêu đề cột bảng (`TableHead` uppercase text-slate-500), Nút bấm phụ (`size="sm"`), Breadcrumbs.
+  * **`text-sm` (14px / 20px):** **CỠ CHỮ CỐT LÕI CỦA TOÀN BỘ HỆ THỐNG:** Body text, Input text, Select value, Dropdown menu item, Nội dung ô bảng (`TableCell`). Đảm bảo mật độ thông tin công vụ sắc nét, tối ưu.
+  * **`text-base` (16px / 24px):** Tiêu đề Card con, Subheadings, Trích yếu văn bản nổi bật.
+  * **`text-lg` (18px / 28px):** Tiêu đề Dialog/Modal (`DialogTitle`), Tiêu đề Drawer, Heading `h3`.
+  * **`text-xl` (20px / 28px):** Tiêu đề Page Subheading, Chỉ số thống kê lớn trong Card Dashboard.
+  * **`text-2xl` (24px / 32px):** Tiêu đề Trang chính (`h2` tại Service Header: `text-xl md:text-2xl font-bold tracking-tight text-slate-900`).
+- **Quy chuẩn Danh sách (Lists), Bảng biểu (Tables) & Thẻ (Cards):**
+  * **Danh sách (List Components):** Phân cách bằng `divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border bg-white dark:bg-slate-950 overflow-hidden`; padding hàng `py-2.5 px-3` (compact) hoặc `py-3.5 px-4` (tiêu chuẩn); hover `hover:bg-slate-50/80`; trạng thái rỗng (Empty State) bắt buộc có icon (36-44px), tiêu đề `text-sm font-semibold`, mô tả `text-xs text-slate-500` và nút CTA.
+  * **Bảng dữ liệu (Data Tables):** Bắt buộc bọc trong container `w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800`; Header `text-xs font-semibold uppercase text-slate-500 py-3 px-4 bg-slate-50/80`; Body `text-sm text-slate-700 py-3 px-4`; Canh lề Left (Trích yếu, tên), Center (Mã, STT, Trạng thái, Ngày tháng), Right (Số tiền, KPI, Thao tác). Cột nội dung dài dùng `min-w-[200px] whitespace-normal break-words` (CẤM dùng `whitespace-nowrap` kéo dãn bảng).
+  * **Lưới thẻ (Card Grids):** Quy chuẩn cột theo breakpoint `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6`; Card chuẩn `rounded-xl sm:rounded-2xl border-slate-200 p-4 sm:p-6 min-w-0 shadow-xs`.
+- **Co giãn và chữ dài:** Dùng min-w-0 trên flex/grid item khi nội dung động cần co lại; chọn wrap-break-word cho văn bản thường và break-all chỉ khi chuỗi định danh không thể xuống dòng hợp lý. Với các Form Controls (nhất là Shadcn `<Select>` / `<SelectTrigger>`), BẮT BUỘC dùng `w-full min-w-0` và `[&>span]:truncate` (kèm `title` hover) trên trigger, đồng thời đặt `min-w-0` trên cột grid cha để chống lỗi vỡ layout/tràn khung chứa (tham chiếu Blacklist mục 5).
 - **Rút gọn có chủ đích:** Chỉ dùng truncate/line-clamp khi giao diện thực sự cần giới hạn dòng; bảo đảm người dùng vẫn xem hoặc truy cập được nội dung đầy đủ, kể cả bằng keyboard/screen reader khi phù hợp.
 - **Luồng cuộn:** Không để nội dung người dùng cần xem bị cắt hoặc mất đường cuộn. overflow-hidden, h-full, chiều cao giới hạn được phép cho canvas, chart, animation hoặc panel có bounds rõ ràng; với vùng cuộn lồng nhau, xác định parent có chiều cao và min-h-0 phù hợp rồi kiểm tra trên route thật.
 - **Layout responsive:** Chọn breakpoint theo chiều rộng khả dụng của container và độ rộng tối thiểu để điều khiển nội dung; tính cả navigation/sidebar. md và lg chỉ là lựa chọn, không phải quy tắc cố định. Ưu tiên layout/grid/container query thích ứng; chọn xếp dọc, thu gọn sidebar hoặc cuộn ngang có kiểm soát khi phù hợp.
 - **Toolbar và danh sách:** Nhóm input theo số lượng, độ dài nhãn và hành động thực tế; nhãn phải rõ, thao tác không đè lên nội dung. Grid 12 cột, shrink-0 và max-width là công cụ chọn lọc, không bắt buộc cho mọi component.
 - **Accordion/Collapsible async:** Chọn controlled state khi cần đồng bộ danh sách mục mở với dữ liệu tải/cập nhật bất đồng bộ. defaultValue phù hợp nếu component chỉ mount sau khi có dữ liệu và trạng thái khởi tạo không cần đổi. Không ép mở tất cả nhóm trừ khi thiết kế yêu cầu; giữ lựa chọn mở/đóng của người dùng.
-- **Sheet và Dialog:** Sheet thường phù hợp với form dài hoặc nội dung cần đối chiếu; Dialog phù hợp với xác nhận và tác vụ ngắn. Chọn theo luồng người dùng, thiết bị, accessibility và pattern hiện có; mọi phương án phải giữ keyboard/focus behavior đúng.
+- **Sheet và Dialog:** Sheet thường phù hợp với form dài hoặc nội dung cần đối chiếu; Dialog phù hợp với xác nhận và tác vụ ngắn. Bắt buộc khai báo `w-[95vw]` trên mobile và `max-h-[90vh] overflow-y-auto`. Chọn theo luồng người dùng, thiết bị, accessibility và pattern hiện có; mọi phương án phải giữ keyboard/focus behavior đúng.
 - **Chất lượng thị giác:** Bám design system và các màn hình cùng khu vực; giữ phân cấp thị giác, khoảng cách, typography và mật độ thông tin nhất quán. Kiểm tra trạng thái loading/empty/error và viewport thực tế thay vì chỉ thêm utility class theo checklist.
 
 ### Frontend State Ownership, Rendering, and Modal/Sheet Loading

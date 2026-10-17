@@ -87,31 +87,31 @@ export function GatewayClient() {
       </div>
 
       <Tabs defaultValue="services" className="flex flex-col flex-1 min-h-0 mt-2">
-        <div className="shrink-0 flex justify-start mb-6 border-b border-border">
-          <TabsList className="h-12 bg-transparent border-none p-0 flex gap-6">
+        <div className="shrink-0 flex justify-start mb-6 border-b border-border overflow-x-auto no-scrollbar max-w-full">
+          <TabsList className="h-12 bg-transparent border-none p-0 flex gap-4 sm:gap-6 min-w-max">
             <TabsTrigger 
               value="services" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all whitespace-nowrap shrink-0"
             >
-              <Network className="w-4 h-4 mr-2" /> Upstreams
+              <Network className="w-4 h-4 mr-2 shrink-0" /> Upstreams
             </TabsTrigger>
             <TabsTrigger 
               value="routes" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all whitespace-nowrap shrink-0"
             >
-              <RouteIcon className="w-4 h-4 mr-2" /> Routing Rules
+              <RouteIcon className="w-4 h-4 mr-2 shrink-0" /> Routing Rules
             </TabsTrigger>
             <TabsTrigger 
               value="apikeys" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all whitespace-nowrap shrink-0"
             >
-              <Key className="w-4 h-4 mr-2" /> Security (API Keys)
+              <Key className="w-4 h-4 mr-2 shrink-0" /> Security (API Keys)
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2 font-medium text-muted-foreground data-[state=active]:text-foreground transition-all whitespace-nowrap shrink-0"
             >
-              <Settings className="w-4 h-4 mr-2" /> Cấu hình
+              <Settings className="w-4 h-4 mr-2 shrink-0" /> Cấu hình
             </TabsTrigger>
           </TabsList>
         </div>

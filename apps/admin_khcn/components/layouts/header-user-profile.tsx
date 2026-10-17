@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, User, Settings, Sparkles, Bot, Shield, Building2, Briefcase, Mail, Phone, Calendar } from "lucide-react";
+import { LogOut, User, Settings, Sparkles, Bot, Shield, Building2, Briefcase, Phone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ interface HeaderUserProfileProps {
 }
 
 export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [activeSettingsTab, setActiveSettingsTab] = useState<string>("ai-router");
@@ -44,9 +45,14 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
     setVisitedTabs((prev) => new Set(prev).add(value));
   };
 
+  const handleOpenProfile = () => {
+    setIsMenuOpen(false);
+    setIsProfileOpen(true);
+  };
+
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -75,11 +81,11 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-60 border-border" align="end" forceMount>
+        <DropdownMenuContent className="w-60 max-w-[calc(100vw-2rem)] border-border" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1.5 pb-1">
+            <div className="flex min-w-0 flex-col space-y-1.5 pb-1">
               <Text weight="semibold" className="leading-none">{fullName}</Text>
-              <Text variant="muted" className="leading-none text-xs">{email}</Text>
+              <Text variant="muted" className="min-w-0 max-w-full wrap-break-word text-xs leading-normal">{email}</Text>
               
               {(user?.jobTitleName || user?.unitName) && (
                 <div className="mt-2 flex flex-col space-y-1 border-t border-border/50 pt-2">
@@ -98,7 +104,7 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-border" />
-          <DropdownMenuItem className="cursor-pointer" onSelect={() => setIsProfileOpen(true)}>
+          <DropdownMenuItem className="cursor-pointer" onSelect={handleOpenProfile}>
             <User className="mr-2 h-4 w-4 text-muted-foreground" /> Hồ sơ cá nhân
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onSelect={() => setIsSettingsOpen(true)}>

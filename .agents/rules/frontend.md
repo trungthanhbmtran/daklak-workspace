@@ -61,21 +61,56 @@ API Gateway và Axios Interceptor đã chuẩn hóa 100% cả đầu vào và đ
 - Đối với các dịch vụ bên ngoài (như presigned MinIO/S3 PUT upload), được phép dùng instance `axios` độc lập để tránh gửi kèm Authorization Header nội bộ gây lỗi CORS.
 - **Không cần bước chuẩn hóa dữ liệu lặp lại ở Frontend:** Do API Gateway và Axios đã chuẩn hóa đầu vào và đầu ra thành Single-Level Data, Frontend chỉ việc nhận đúng cấu trúc thực thể từ `data` (hoặc thông qua custom hook) để render trực tiếp, KHÔNG viết thêm các hàm/bước chuẩn hóa dữ liệu cũ thừa thãi.
 
-## 6. UI/UX & CSS Layout
-### Nguyên tắc layout theo ngữ cảnh
-- **Co giãn và chữ dài:** Dùng min-w-0 trên flex/grid item khi nội dung động cần co lại; chọn wrap-break-word cho văn bản thường và break-all chỉ khi chuỗi định danh không thể xuống dòng hợp lý. Với các Form Controls (nhất là Shadcn `<Select>` / `<SelectTrigger>`), BẮT BUỘC dùng `w-full min-w-0` và `[&>span]:truncate` (kèm `title` hover) trên trigger, đồng thời đặt `min-w-0` trên cột grid cha để chống lỗi vỡ layout/tràn khung chứa (tham chiếu Blacklist mục 5).
-- **Rút gọn có chủ đích:** Chỉ dùng truncate/line-clamp khi giao diện thực sự cần giới hạn dòng; bảo đảm người dùng vẫn xem hoặc truy cập được nội dung đầy đủ, kể cả bằng keyboard/screen reader khi phù hợp.
-- **Luồng cuộn:** Không để nội dung người dùng cần xem bị cắt hoặc mất đường cuộn. overflow-hidden, h-full, chiều cao giới hạn được phép cho canvas, chart, animation hoặc panel có bounds rõ ràng; với vùng cuộn lồng nhau, xác định parent có chiều cao và min-h-0 phù hợp rồi kiểm tra trên route thật.
-- **Layout responsive:** Chọn breakpoint theo chiều rộng khả dụng của container và độ rộng tối thiểu để điều khiển nội dung; tính cả navigation/sidebar. md và lg chỉ là lựa chọn, không phải quy tắc cố định. Ưu tiên layout/grid/container query thích ứng; chọn xếp dọc, thu gọn sidebar hoặc cuộn ngang có kiểm soát khi phù hợp.
-- **Toolbar và danh sách:** Nhóm input theo số lượng, độ dài nhãn và hành động thực tế; nhãn phải rõ, thao tác không đè lên nội dung. Grid 12 cột, shrink-0 và max-width là công cụ chọn lọc, không bắt buộc cho mọi component.
-- **Accordion/Collapsible async:** Chọn controlled state khi cần đồng bộ danh sách mục mở với dữ liệu tải/cập nhật bất đồng bộ. defaultValue phù hợp nếu component chỉ mount sau khi có dữ liệu và trạng thái khởi tạo không cần đổi. Không ép mở tất cả nhóm trừ khi thiết kế yêu cầu; giữ lựa chọn mở/đóng của người dùng.
-- **Sheet và Dialog:** Sheet thường phù hợp với form dài hoặc nội dung cần đối chiếu; Dialog phù hợp với xác nhận và tác vụ ngắn. Chọn theo luồng người dùng, thiết bị, accessibility và pattern hiện có; mọi phương án phải giữ keyboard/focus behavior đúng.
-- **Chất lượng thị giác:** Bám design system và các màn hình cùng khu vực; giữ phân cấp thị giác, khoảng cách, typography và mật độ thông tin nhất quán. Kiểm tra trạng thái loading/empty/error và viewport thực tế thay vì chỉ thêm utility class theo checklist.
+## 6. UI/UX & CSS Layout (Design System & Responsive Standards)
+*(Chi tiết định chuẩn toàn diện xem tại: [`.agents/rules/ui-ux-design-system.md`](ui-ux-design-system.md))*
 
-### Kiểm chứng trực quan và khả năng truy cập
-- Với thay đổi UI, chạy route thật ở viewport nhỏ và lớn phù hợp; đối chiếu components/design system hiện có và kiểm tra tràn, chồng lấn, nội dung dài cùng trạng thái loading/empty/error liên quan.
-- Kiểm tra điều khiển bằng bàn phím, focus nhìn thấy được, nhãn/tên accessible và hành vi focus của Dialog/Sheet; ưu tiên phần tử semantic thay cho click handler trên phần tử không tương tác.
-- Nếu không có browser/runtime phù hợp, ghi phần kiểm chứng UI là `UNVERIFIED`; không kết luận giao diện đạt chỉ từ build hoặc lint.
+### A. Kích cỡ hiển thị trên từng màn hình (Screen Breakpoints)
+- **`< 375px` (Mobile XS / Compact):** Toàn bộ xếp 1 cột (`grid-cols-1`, `flex-col`); Dialog/Sheet co dãn `w-[95vw]`; TabsList cuộn ngang `overflow-x-auto`; Padding `p-3` hoặc `px-2 py-3`.
+- **`375px - 639px` (Mobile Standard):** Lưới form 1 cột; tiêu đề tự co rút (`truncate`); menu điều hướng ẩn vào Mobile Drawer. Padding `p-4`.
+- **`640px - 767px` (`sm:` Phablet / Tablet Portrait):** Bắt đầu chia 2 cột cho các trường ngắn (`sm:grid-cols-2`); Dialog mở rộng `sm:max-w-[500px]`. Padding `p-5`.
+- **`768px - 1023px` (`md:` Tablet Landscape / Small Laptop):** Sidebar thu gọn (icon-only); Lưới chia 2-3 cột (`md:grid-cols-2`, `md:grid-cols-3`); Bảng dữ liệu desktop đầy đủ có thanh cuộn ngang độc lập.
+- **`1024px - 1279px` (`lg:` Laptop Văn phòng Tiêu chuẩn):** Sidebar mở rộng đầy đủ (240px - 260px); Form chia 3-4 cột; TabsList chuyển sang dạng lưới cân đối (`lg:grid`).
+- **`1280px - 1535px` (`xl:` Desktop Tiêu chuẩn):** Bố cục đa cột hoàn chỉnh (`max-w-7xl mx-auto`); Cột danh mục và bảng làm việc song song (`xl:flex-row`).
+- **`≥ 1536px` (`2xl:` Màn hình Lớn / Dashboard IOC):** Thẻ chia 4-5 cột (`2xl:grid-cols-4`, `2xl:grid-cols-5`); Giới hạn bề rộng `2xl:max-w-[1600px]`.
+
+### B. Quy chuẩn Kiểu chữ (Typography Hierarchy)
+- **Phông chữ:** `font-sans` (Inter / Roboto) tối ưu hiển thị Unicode Tiếng Việt, độ tương phản chuẩn WCAG AA.
+- **Thang cỡ chữ (Font Scale):**
+  - **`text-[10px]` / `text-[11px]`:** Micro text, Badge số đếm, tag trạng thái nhỏ (Khẩn, Mật, Hỏa tốc), helper text form.
+  - **`text-xs` (12px / 16px):** Nhãn form (`text-xs font-semibold text-slate-700`), Tiêu đề cột bảng (`TableHead` uppercase text-slate-500), Nút bấm phụ (`size="sm"`), Breadcrumbs.
+  - **`text-sm` (14px / 20px):** **CỠ CHỮ CỐT LÕI CỦA TOÀN BỘ HỆ THỐNG:** Body text, Input text, Select value, Dropdown item, Ô nội dung bảng (`TableCell`). Đảm bảo mật độ thông tin công vụ sắc nét, tối ưu.
+  - **`text-base` (16px / 24px):** Tiêu đề Card con, Subheadings, Trích yếu văn bản nổi bật.
+  - **`text-lg` (18px / 28px):** Tiêu đề Dialog/Modal (`DialogTitle`), Tiêu đề Drawer, Heading `h3`.
+  - **`text-xl` (20px / 28px):** Tiêu đề Page Subheading, Chỉ số thống kê lớn trong Card Dashboard.
+  - **`text-2xl` (24px / 32px):** Tiêu đề Trang chính (`h2` tại Service Header: `text-xl md:text-2xl font-bold`).
+- **Ngắt dòng & Co rút:**
+  - Chuỗi văn bản thông thường: Dùng `break-words` hoặc `wrap-break-word`.
+  - Chuỗi mã/UUID dài không dấu cách: Dùng `break-all`.
+  - Form controls & Select: BẮT BUỘC 100% `<SelectTrigger>` có `w-full min-w-0 truncate [&>span]:truncate`, thẻ cha trong flex/grid có `min-w-0`.
+
+### C. Quy chuẩn Danh sách (Lists) & Bảng biểu (Tables)
+- **Danh sách (List Components):**
+  - Viền phân cách: `divide-y divide-slate-100 dark:divide-slate-800 rounded-xl border bg-white dark:bg-slate-950 overflow-hidden`.
+  - Khoảng đệm hàng: `py-2.5 px-3` (compact / drawer) hoặc `py-3.5 px-4` (tiêu chuẩn).
+  - Tương tác: `hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-colors min-w-0`.
+  - Trạng thái rỗng (Empty State): Bắt buộc icon (36-44px text-slate-400) + tiêu đề (`text-sm font-semibold`) + mô tả phụ (`text-xs text-slate-500`) + nút CTA nếu có quyền.
+- **Bảng dữ liệu (Data Tables):**
+  - Bọc ngoài: Bắt buộc bọc trong `w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800`.
+  - Tiêu đề cột (`TableHead`): `text-xs font-semibold uppercase tracking-wider text-slate-500 py-3 px-4 bg-slate-50/80`.
+  - Ô nội dung (`TableCell`): `text-sm text-slate-700 dark:text-slate-200 py-3 px-4`.
+  - Canh lề (Alignment): Left (Trích yếu, tên, phòng ban), Center (Mã, STT, Trạng thái, Ngày tháng), Right (Số tiền, KPI, Thao tác nút bấm).
+  - Co rút cột: Cột nội dung dài dùng `min-w-[200px] whitespace-normal break-words` (CẤM dùng `whitespace-nowrap` kéo dãn bảng). Cột cố định dùng `whitespace-nowrap shrink-0`.
+- **Lưới thẻ (Card Grids):**
+  - Breakpoints: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6`.
+  - Cấu trúc Card: `rounded-xl sm:rounded-2xl border-slate-200 p-4 sm:p-6 min-w-0 shadow-xs hover:shadow-md transition-shadow`.
+
+### D. Nguyên tắc layout & kiểm chứng trực quan
+- **Co giãn và chữ dài:** Dùng min-w-0 trên flex/grid item khi nội dung động cần co lại; chọn wrap-break-word cho văn bản thường và break-all chỉ khi chuỗi định danh không thể xuống dòng hợp lý.
+- **Rút gọn có chủ đích:** Chỉ dùng truncate/line-clamp khi giao diện thực sự cần giới hạn dòng; bảo đảm người dùng vẫn xem hoặc truy cập được nội dung đầy đủ (tooltip `title`).
+- **Luồng cuộn:** Không để nội dung người dùng cần xem bị cắt hoặc mất đường cuộn. Bắt buộc kiểm tra bounds trên route thật.
+- **Accordion/Collapsible async:** Chọn controlled state khi cần đồng bộ danh sách mục mở với dữ liệu async.
+- **Sheet và Dialog:** Sheet thường phù hợp với form dài; Dialog phù hợp với xác nhận và tác vụ ngắn. Bắt buộc `w-[95vw]` trên mobile và `max-h-[90vh] overflow-y-auto`.
+- **Kiểm chứng trực quan:** Với thay đổi UI, kiểm tra trực tiếp ở các kích thước 360px, 768px, 1280px, 1920px; không chỉ dựa vào lint/typecheck.
 
 ## 7. BaseURL & API Endpoint Routing
 - **Tại `admin_khcn`**: `apiClient` và `serverFetch` đã có `baseURL = "/api/v1/admin"`. TUYỆT ĐỐI KHÔNG thêm tiền tố `/admin` hoặc `/api/v1/admin` vào chuỗi URL khi gọi API (ví dụ: dùng `apiClient.get('/integration/routes')`, KHÔNG ĐƯỢC dùng `apiClient.get('/admin/integration/routes')` hay `apiClient.get('/api/v1/admin/integration/routes')` sẽ dẫn tới URL đúp `.../admin/admin/...` gây 404).

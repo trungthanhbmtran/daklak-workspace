@@ -86,7 +86,7 @@ function NationalEmblem({ className = "w-16 h-16" }: { className?: string }) {
       {/* Text banner background strip */}
       <rect x="35" y="80" width="30" height="6" rx="2" fill="#FBC02D" />
       <text x="50" y="85" fontSize="4.5" fontWeight="bold" fill="#D32F2F" textAnchor="middle">
-        VIá»†T NAM
+        VIỆT NAM
       </text>
     </svg>
   )
@@ -138,18 +138,18 @@ interface MenuItem {
 // 2. Static layout translation dictionary
 const translations = {
   vi: {
-    hotline: "ÄÆ°á»ng dÃ¢y nÃ³ng",
-    searchPlaceholder: "TÃ¬m kiáº¿m nhanh...",
-    sitemapTitle: "DANH Má»¤C TRANG",
-    home: "Trang chá»§",
-    about: "Giá»›i thiá»‡u",
-    news: "Tin tá»©c",
-    documents: "VÄƒn báº£n",
-    procedures: "Thá»§ tá»¥c hÃ nh chÃ­nh",
-    feedback: "Há»i Ä‘Ã¡p & GÃ³p Ã½",
-    contact: "LiÃªn há»‡",
-    days: ["Chá»§ Nháº­t", "Thá»© Hai", "Thá»© Ba", "Thá»© TÆ°", "Thá»© NÄƒm", "Thá»© SÃ¡u", "Thá»© Báº£y"],
-    selectLanguage: "Chá»n ngÃ´n ngá»¯",
+    hotline: "Đường dây nóng",
+    searchPlaceholder: "Tìm kiếm nhanh...",
+    sitemapTitle: "DANH MỤC TRANG",
+    home: "Trang chủ",
+    about: "Giới thiệu",
+    news: "Tin tức",
+    documents: "Văn bản",
+    procedures: "Thủ tục hành chính",
+    feedback: "Hỏi đáp & Góp ý",
+    contact: "Liên hệ",
+    days: ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"],
+    selectLanguage: "Chọn ngôn ngữ",
   },
   en: {
     hotline: "Hotline",
@@ -330,19 +330,19 @@ export default function Header() {
           name: t.about,
           path: currentLang === "en" ? "/en/aboutus" : "/vi/gioi-thieu",
           children: [
-            { name: currentLang === "en" ? "Overview" : "Giá»›i thiá»‡u chung", path: currentLang === "en" ? "/en/aboutus#chung" : "/vi/gioi-thieu#chung" },
-            { name: currentLang === "en" ? "Organizational Structure" : "CÆ¡ cáº¥u tá»• chá»©c", path: currentLang === "en" ? "/en/aboutus#co-cau" : "/vi/gioi-thieu#co-cau" },
-            { name: currentLang === "en" ? "Leadership Info" : "ThÃ´ng tin lÃ£nh Ä‘áº¡o", path: currentLang === "en" ? "/en/aboutus#lanh-dao" : "/vi/gioi-thieu#lanh-dao" }
+            { name: currentLang === "en" ? "Overview" : "Giới thiệu chung", path: currentLang === "en" ? "/en/aboutus#chung" : "/vi/gioi-thieu#chung" },
+            { name: currentLang === "en" ? "Organizational Structure" : "Cơ cấu tổ chức", path: currentLang === "en" ? "/en/aboutus#co-cau" : "/vi/gioi-thieu#co-cau" },
+            { name: currentLang === "en" ? "Leadership Info" : "Thông tin lãnh đạo", path: currentLang === "en" ? "/en/aboutus#lanh-dao" : "/vi/gioi-thieu#lanh-dao" }
           ]
         },
         {
           name: t.news,
           path: currentLang === "en" ? "/en/news" : "/vi/tin-tuc",
           children: [
-            { name: currentLang === "en" ? "Party Activity" : "Tin hoáº¡t Ä‘á»™ng Äáº£ng á»¦y", path: currentLang === "en" ? "/en/news?category=dang-uy" : "/vi/tin-tuc?category=dang-uy" },
-            { name: currentLang === "en" ? "People's Council" : "Tin Há»™i Ä‘á»“ng nhÃ¢n dÃ¢n", path: currentLang === "en" ? "/en/news?category=hdnd" : "/vi/tin-tuc?category=hdnd" },
-            { name: currentLang === "en" ? "People's Committee" : "Tin á»¦y ban nhÃ¢n dÃ¢n", path: currentLang === "en" ? "/en/news?category=ubnd" : "/vi/tin-tuc?category=ubnd" },
-            { name: currentLang === "en" ? "Socio-Economic" : "Kinh táº¿ - XÃ£ há»™i", path: currentLang === "en" ? "/en/news?category=kinh-te" : "/vi/tin-tuc?category=kinh-te" }
+            { name: currentLang === "en" ? "Party Activity" : "Tin hoạt động Đảng ủy", path: currentLang === "en" ? "/en/news?category=dang-uy" : "/vi/tin-tuc?category=dang-uy" },
+            { name: currentLang === "en" ? "People's Council" : "Tin Hội đồng nhân dân", path: currentLang === "en" ? "/en/news?category=hdnd" : "/vi/tin-tuc?category=hdnd" },
+            { name: currentLang === "en" ? "People's Committee" : "Tin Ủy ban nhân dân", path: currentLang === "en" ? "/en/news?category=ubnd" : "/vi/tin-tuc?category=ubnd" },
+            { name: currentLang === "en" ? "Socio-Economic" : "Kinh tế - Xã hội", path: currentLang === "en" ? "/en/news?category=kinh-te" : "/vi/tin-tuc?category=kinh-te" }
           ]
         },
         { name: t.documents, path: currentLang === "en" ? "/en/documents" : "/vi/van-ban" },
@@ -581,7 +581,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto w-full px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
-              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thá»© TÆ°, 06/05/2026")}
+              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thứ Tư, 06/05/2026")}
               {weatherString && <span> | {weatherString}</span>}
             </span>
           </div>
@@ -597,7 +597,7 @@ export default function Header() {
                   <button
                     onClick={() => handleLanguageChange(currentLang === "en" ? "vi" : "en")}
                     className="transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95 flex items-center justify-center p-0.5 rounded-[3px] ring-1 ring-slate-200/50 dark:ring-slate-800/50 shadow-sm"
-                    title={currentLang === "en" ? "Switch to Tiáº¿ng Viá»‡t" : "Switch to English"}
+                    title={currentLang === "en" ? "Chuyển sang Tiếng Việt" : "Switch to English"}
                   >
                     {currentLang === "en" ? (
                       <UKFlagSVG className="w-[24px] h-[16px]" />
@@ -611,7 +611,7 @@ export default function Header() {
                 <button
                   onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                   className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900 transition-colors text-slate-600 dark:text-slate-300"
-                  title="Äá»•i giao diá»‡n SÃ¡ng/Tá»‘i"
+                  title="Đổi giao diện Sáng/Tối"
                 >
                   {resolvedTheme === "dark" ? (
                     <Sun className="w-4 h-4 text-amber-500" />
@@ -831,14 +831,14 @@ export default function Header() {
             <button
               onClick={() => router.push(currentLang === "en" ? "/news" : "/tin-tuc")}
               className="p-1 hover:text-yellow-200 transition-colors"
-              title={currentLang === "en" ? "Search" : "TÃ¬m kiáº¿m"}
+              title={currentLang === "en" ? "Search" : "Tìm kiếm"}
             >
               <Search className="w-4 h-4" />
             </button>
             <button
               onClick={() => router.push(currentLang === "en" ? "/feedback" : "/tuong-tac")}
               className="p-1 hover:text-yellow-200 transition-colors"
-              title={currentLang === "en" ? "Interactive Portal" : "Cá»•ng tÆ°Æ¡ng tÃ¡c"}
+              title={currentLang === "en" ? "Interactive Portal" : "Cổng tương tác"}
             >
               <User className="w-4 h-4" />
             </button>
@@ -869,7 +869,7 @@ export default function Header() {
                 <button
                   onClick={() => handleLanguageChange(currentLang === "en" ? "vi" : "en")}
                   className="transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95 flex items-center justify-center p-0.5 rounded-[3px] ring-1 ring-white/30 shadow-sm"
-                  title={currentLang === "en" ? "Switch to Tiáº¿ng Viá»‡t" : "Switch to English"}
+                  title={currentLang === "en" ? "Chuyển sang Tiếng Việt" : "Switch to English"}
                 >
                   {currentLang === "en" ? (
                     <UKFlagSVG className="w-[22px] h-[15px]" />

@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Plus, Edit, Trash2, CornerDownRight,
-  ExternalLink, Shield, ShieldCheck, Loader2
+  ExternalLink, Shield, ShieldCheck, Loader2, ArrowLeft
 } from "lucide-react";
+import Link from "next/link";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -158,8 +159,11 @@ export function MenuForm({ menuId }: MenuFormProps) {
           <div className={`p-2 rounded-lg ${isCreate ? "bg-primary text-primary-foreground shadow-sm" : "bg-accent text-accent-foreground border"}`}>
             {isCreate ? <Plus className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
           </div>
-          <div>
-            <CardTitle className="text-base font-bold leading-none">
+          <div className="min-w-0">
+            <Link href="/services/admin/menus" className="lg:hidden inline-flex items-center text-xs text-primary font-medium mb-1 hover:underline">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Cây menu
+            </Link>
+            <CardTitle className="text-base font-bold leading-none truncate">
               {isCreate ? `Thêm Menu ${parentMenu ? `con vào "${parentMenu.name}"` : "gốc"}` : `Thiết lập: ${selectedMenu?.name}`}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1.5">

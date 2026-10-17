@@ -95,8 +95,8 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-3xl bg-background flex flex-col max-h-[90vh] print-content">
-        <DialogHeader className="p-8 bg-muted/20 border-b shrink-0">
+      <DialogContent className="w-[95vw] max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-2xl sm:rounded-3xl bg-background flex flex-col max-h-[90vh] print-content">
+        <DialogHeader className="p-4 sm:p-6 md:p-8 bg-muted/20 border-b shrink-0">
           <div className="flex justify-between items-start gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -121,10 +121,10 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8">
           {isLoading ? (
             <div className="space-y-8">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <Skeleton className="h-20 w-full rounded-2xl" />
                 <Skeleton className="h-20 w-full rounded-2xl" />
               </div>

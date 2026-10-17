@@ -165,14 +165,28 @@ export function NotificationListClient() {
                 const isLink = href !== "#";
 
                 const content = (
-                  <div className={`p-5 flex gap-4 transition-colors ${!item.read ? 'bg-primary/5 hover:bg-primary/10' : 'bg-card hover:bg-muted/50'}`}>
-                    <div className="mt-1 flex-shrink-0">
-                      {getIcon(item.type)}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2">
+                  <div className={`p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 transition-colors ${!item.read ? 'bg-primary/5 hover:bg-primary/10' : 'bg-card hover:bg-muted/50'}`}>
+                    <div className="flex items-start gap-3 sm:block">
+                      <div className="mt-1 shrink-0">
+                        {getIcon(item.type)}
+                      </div>
+                      <div className="flex-1 min-w-0 sm:hidden">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className={`text-base ${!item.read ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground'}`}>{item.title}</h4>
+                          {getPriorityBadge(item.type)}
+                          {!item.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0"></span>}
+                        </div>
+                        <div className="flex items-center text-xs text-muted-foreground gap-1 mt-1">
+                          <Clock className="h-3 w-3" />
+                          {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi }) : ""}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="hidden sm:flex justify-between items-start gap-2">
+                        <div className="flex items-center gap-2 flex-wrap min-w-0">
+                          <h4 className={`text-base truncate ${!item.read ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground'}`}>{item.title}</h4>
                           {getPriorityBadge(item.type)}
                           {!item.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0"></span>}
                         </div>
@@ -181,9 +195,10 @@ export function NotificationListClient() {
                           {item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: vi }) : ""}
                         </div>
                       </div>
-                      <p className="text-sm text-foreground/80">{item.body}</p>
+                      <p className="text-sm text-foreground/80 break-words">{item.body}</p>
                     </div>
-                    <div className="flex-shrink-0 flex items-center justify-center pl-4">
+
+                    <div className="shrink-0 flex items-center justify-end sm:justify-center sm:pl-4">
                       {!item.read ? (
                         <Button variant="outline" size="sm" className="text-xs relative z-10" onClick={(e) => {
                           e.preventDefault();

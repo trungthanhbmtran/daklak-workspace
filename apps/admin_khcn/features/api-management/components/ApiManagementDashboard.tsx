@@ -69,7 +69,7 @@ export function ApiManagementDashboard() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 w-full sm:w-auto">
           <ApiConnectionCreateDialog />
           <ApiImportWizard />
           <Button 

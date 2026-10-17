@@ -60,7 +60,7 @@ function MatrixCell({ action, perms, form, resourceCode, resourceId, currentPoli
               <Settings2 className="h-3 w-3" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-[340px] p-4 space-y-4 shadow-xl border-muted/50" sideOffset={12}>
+          <PopoverContent className="w-[90vw] sm:w-[340px] max-w-full p-4 space-y-4 shadow-xl border-muted/50" sideOffset={12}>
             <div className="space-y-1.5 border-b pb-3">
               <h4 className="font-bold leading-none text-sm text-primary uppercase tracking-wider">Cấu hình chi tiết ({action})</h4>
               <p className="text-[11px] text-muted-foreground">Tuỳ chỉnh PBAC Effect và Condition linh hoạt.</p>
@@ -69,7 +69,7 @@ function MatrixCell({ action, perms, form, resourceCode, resourceId, currentPoli
               <div className="space-y-2">
                 <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Effect (Tác dụng)</FormLabel>
                 <Select value={currentPolicy?.effect || "ALLOW"} onValueChange={(val) => handleChangeEffect(action, val, targetResourceId, resourceCode)}>
-                  <SelectTrigger className="h-8 text-xs font-medium">
+                  <SelectTrigger className="h-8 text-xs font-medium w-full min-w-0 truncate [&>span]:truncate">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

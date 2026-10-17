@@ -185,10 +185,10 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                 {isPublic && (
                   <div className="space-y-2 pt-2 border-t border-emerald-100">
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-0">
                         <label className="text-[10px] font-bold text-emerald-700">LOẠI CÔNG KHAI:</label>
                         <Select value={transCategory} onValueChange={setTransCategory}>
-                          <SelectTrigger className="h-8 text-[11px] bg-background">
+                          <SelectTrigger className="h-8 text-[11px] bg-background w-full min-w-0 truncate [&>span]:truncate">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -199,10 +199,10 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-0">
                         <label className="text-[10px] font-bold text-emerald-700">NĂM:</label>
                         <Select value={fiscalYear} onValueChange={setFiscalYear}>
-                          <SelectTrigger className="h-8 text-[11px] bg-background">
+                          <SelectTrigger className="h-8 text-[11px] bg-background w-full min-w-0 truncate [&>span]:truncate">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

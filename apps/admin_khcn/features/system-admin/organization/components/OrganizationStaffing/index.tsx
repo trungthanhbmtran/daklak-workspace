@@ -70,6 +70,7 @@ export function OrganizationStaffing() {
   const [quantity, setQuantity] = useState("1");
   const [govPage, setGovPage] = useState(1);
   const [partyPage, setPartyPage] = useState(1);
+  const [titleSearch, setTitleSearch] = useState("");
 
   /* Config dialog */
   const [configOpen, setConfigOpen] = useState(false);
@@ -154,9 +155,16 @@ export function OrganizationStaffing() {
     const totalPages = Math.max(1, Math.ceil(reportList.length / PAGE_SIZE));
     const safeP = page > totalPages ? 1 : page;
     const paged = reportList.slice((safeP - 1) * PAGE_SIZE, safeP * PAGE_SIZE);
+
+    const filteredTitles = titleSearch.trim()
+      ? titleList.filter((t) =>
+          t.name.toLowerCase().includes(titleSearch.toLowerCase().trim()),
+        )
+      : titleList;
+
     return (
-      <div className="flex flex-col flex-1 min-h-0 gap-4 mt-2">
-        <section className="shrink-0 rounded-lg border bg-muted/30 p-4">
+      <div className="flex flex-col gap-5 mt-2">
+        <section className="rounded-lg border bg-muted/30 p-4">
           <h3 className="text-sm font-medium mb-3">
             {isPartyUnit
               ? "Thêm vị trí việc làm cơ quan Đảng"
@@ -166,7 +174,7 @@ export function OrganizationStaffing() {
             onSubmit={handleSubmit}
             className="flex flex-wrap items-end gap-4"
           >
-            <div className="space-y-1.5 min-w-[240px]">
+            <div className="space-y-1.5 flex-1 min-w-[220px] max-w-md">
               <label className="text-sm font-medium leading-none text-foreground">
                 {isPartyUnit ? "Vị trí việc làm" : "Chức danh"}
               </label>
@@ -206,7 +214,7 @@ export function OrganizationStaffing() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5 w-24">
+            <div className="space-y-1.5 w-24 shrink-0">
               <label className="text-sm font-medium leading-none text-foreground">
                 Số lượng
               </label>
@@ -222,7 +230,7 @@ export function OrganizationStaffing() {
             <Button
               type="submit"
               size="default"
-              className="h-10"
+              className="h-10 shrink-0"
               disabled={setStaffing.isPending || !selectedJobTitleId}
             >
               {setStaffing.isPending
@@ -234,8 +242,8 @@ export function OrganizationStaffing() {
           </form>
         </section>
 
-        <section className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
+        <section className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">
               {isPartyUnit
                 ? "Danh sách vị trí việc làm cơ quan Đảng"
@@ -258,16 +266,14 @@ export function OrganizationStaffing() {
             </div>
           ) : (
             <>
-              <div className="rounded-lg border overflow-y-auto flex-1 min-h-0 relative">
-                <StaffingTable
-                  report={paged}
-                  domainsForUnit={domainsForUnit}
-                  unitDomainIds={unit?.domains?.map((d: any) => d.id) ?? []}
-                  subordinateUnits={subordinateUnits}
-                  onSaveSlot={(p) => setStaffingSlot.mutate(p)}
-                  isSavingSlot={setStaffingSlot.isPending}
-                />
-              </div>
+              <StaffingTable
+                report={paged}
+                domainsForUnit={domainsForUnit}
+                unitDomainIds={unit?.domains?.map((d: any) => d.id) ?? []}
+                subordinateUnits={subordinateUnits}
+                onSaveSlot={(p) => setStaffingSlot.mutate(p)}
+                isSavingSlot={setStaffingSlot.isPending}
+              />
               {totalPages > 1 && (
                 <div className="shrink-0 flex items-center justify-between mt-2 px-1">
                   <span className="text-xs text-muted-foreground">
@@ -305,33 +311,58 @@ export function OrganizationStaffing() {
         </section>
 
         {titleList.length > 0 && (
-          <section className="shrink-0 rounded-lg border bg-muted/20 p-4">
-            <h3 className="text-sm font-medium mb-1">
-              {isPartyUnit ? "Cấu hình vị trí việc làm" : "Cấu hình chức danh"}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              {isPartyUnit
-                ? "Lĩnh vực công tác Đảng phụ trách (theo cấp ủy giao). Theo dõi phòng ban, đơn vị trực thuộc."
-                : "Lĩnh vực phụ trách (theo cấp trên giao). Theo dõi phòng ban, đơn vị trực thuộc."}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {titleList.map((j) => (
-                <Button
-                  key={j.id}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8"
-                  onClick={() => openConfig(j)}
-                >
-                  {j.name}
-                  {(j.domain?.name ||
-                    j.geographicArea?.name ||
-                    (j.monitoredUnits?.length ?? 0) > 0) && (
-                    <span className="text-muted-foreground">•</span>
-                  )}
-                </Button>
-              ))}
+          <section className="rounded-lg border bg-muted/20 p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-medium">
+                    {isPartyUnit ? "Cấu hình vị trí việc làm" : "Cấu hình chức danh"}
+                  </h3>
+                  <span className="text-xs text-muted-foreground font-normal">
+                    ({titleList.length} {isPartyUnit ? "vị trí" : "chức danh"})
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isPartyUnit
+                    ? "Lĩnh vực công tác Đảng phụ trách (theo cấp ủy giao). Theo dõi phòng ban, đơn vị trực thuộc."
+                    : "Lĩnh vực phụ trách (theo cấp trên giao). Theo dõi phòng ban, đơn vị trực thuộc."}
+                </p>
+              </div>
+              {titleList.length > 8 && (
+                <div className="w-full sm:w-48 shrink-0">
+                  <Input
+                    placeholder="Tìm nhanh vị trí..."
+                    className="h-8 text-xs bg-background"
+                    value={titleSearch}
+                    onChange={(e) => setTitleSearch(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto pr-1">
+              {filteredTitles.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic py-2">
+                  Không tìm thấy vị trí phù hợp.
+                </p>
+              ) : (
+                filteredTitles.map((j) => (
+                  <Button
+                    key={j.id}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-normal"
+                    onClick={() => openConfig(j)}
+                  >
+                    {j.name}
+                    {(j.domain?.name ||
+                      j.geographicArea?.name ||
+                      (j.monitoredUnits?.length ?? 0) > 0) && (
+                      <span className="text-muted-foreground">•</span>
+                    )}
+                  </Button>
+                ))
+              )}
             </div>
           </section>
         )}
@@ -340,7 +371,7 @@ export function OrganizationStaffing() {
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 gap-4">
+    <div className="flex flex-col gap-5 pb-6">
       <div className="shrink-0">
         <h2 className="text-base font-semibold text-foreground">
           {isPartyUnit
@@ -385,7 +416,7 @@ export function OrganizationStaffing() {
         </div>
       ) : isPartyUnit ? (
         /* Cơ quan Đảng: Tuyệt đối không có chức danh chính quyền, hiển thị trực tiếp VTVL khối Đảng */
-        <div className="flex-1 min-h-0 flex flex-col w-full">
+        <div className="flex flex-col w-full">
           {renderTab(
             partyTitles,
             partyReport,
@@ -402,7 +433,7 @@ export function OrganizationStaffing() {
             setSelectedJobTitleId("");
             setQuantity("1");
           }}
-          className="flex-1 min-h-0 flex flex-col w-full"
+          className="flex flex-col w-full"
         >
           <TabsList className="shrink-0 w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
             <TabsTrigger
@@ -420,7 +451,7 @@ export function OrganizationStaffing() {
           </TabsList>
           <TabsContent
             value="CHINH_QUYEN"
-            className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col"
+            className="mt-0 data-[state=active]:flex flex-col"
           >
             {renderTab(
               govTitles,
@@ -432,7 +463,7 @@ export function OrganizationStaffing() {
           </TabsContent>
           <TabsContent
             value="DANG"
-            className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col"
+            className="mt-0 data-[state=active]:flex flex-col"
           >
             {renderTab(
               partyTitles,

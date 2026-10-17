@@ -9,17 +9,17 @@ export function PortalHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-sm">
       <div className="flex h-16 w-full items-center justify-between px-4 lg:px-8">
 
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
             <ShieldCheck className="h-5 w-5" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-base font-bold leading-tight tracking-tight">Cổng Ứng dụng Nội bộ</span>
-            <span className="text-xs text-muted-foreground hidden sm:inline-block">Sở Khoa học và Công nghệ tỉnh Đắk Lắk</span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm sm:text-base font-bold leading-tight tracking-tight truncate">Cổng Ứng dụng Nội bộ</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline-block truncate">Sở Khoa học và Công nghệ tỉnh Đắk Lắk</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 shrink-0">
           <ThemeToggle />
           <NotificationBell />
           <HeaderUserProfile showName />

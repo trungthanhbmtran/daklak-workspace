@@ -350,7 +350,7 @@ function WorkflowEditor({
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <Input
-                className="h-8 w-64 md:w-80 font-bold text-sm tracking-tight border-transparent hover:border-border focus:border-primary px-2 transition-all"
+                className="h-8 w-full sm:w-64 md:w-80 font-bold text-sm tracking-tight border-transparent hover:border-border focus:border-primary px-2 transition-all min-w-0 flex-1 sm:flex-initial"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Tên quy trình nghiệp vụ..."
@@ -360,7 +360,7 @@ function WorkflowEditor({
               {workflow && (
                 <Badge
                   variant={workflow.status === "PUBLISHED" ? "default" : "secondary"}
-                  className="px-2 py-0.5 text-[11px]"
+                  className="px-2 py-0.5 text-[11px] shrink-0"
                 >
                   {workflow.status === "PUBLISHED" ? "Đã phát hành" : "Bản nháp"} · v{workflow.version ?? 1}
                 </Badge>
@@ -373,14 +373,14 @@ function WorkflowEditor({
         </div>
 
         {/* CỤM NÚT THAO TÁC HEADER */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           {/* TOGGLE LEFT SIDEBAR */}
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setIsLeftSidebarOpen((prev) => !prev)}
-            className="h-8 px-2.5 text-xs text-muted-foreground gap-1.5 hidden md:flex"
+            className="h-8 px-2 sm:px-2.5 text-xs text-muted-foreground gap-1.5 flex"
             title={isLeftSidebarOpen ? "Ẩn cột thiết lập" : "Hiện cột thiết lập"}
           >
             {isLeftSidebarOpen ? <PanelLeftClose className="size-3.5" /> : <PanelLeftOpen className="size-3.5" />}
@@ -394,7 +394,7 @@ function WorkflowEditor({
             size="sm"
             onClick={arrangeWorkflow}
             disabled={nodes.length < 2}
-            className="h-8 px-2.5 text-xs gap-1.5"
+            className="h-8 px-2 sm:px-2.5 text-xs gap-1.5"
             title="Tự động căn chỉnh các bước theo thứ tự luồng"
           >
             <ArrowDownWideNarrow className="size-3.5 text-primary" />
@@ -407,7 +407,7 @@ function WorkflowEditor({
             variant="outline"
             size="sm"
             onClick={() => setIsRightInspectorOpen((prev) => !prev)}
-            className="h-8 px-2.5 text-xs text-muted-foreground gap-1.5 hidden md:flex"
+            className="h-8 px-2 sm:px-2.5 text-xs text-muted-foreground gap-1.5 flex"
             title={isRightInspectorOpen ? "Ẩn cột thuộc tính" : "Hiện cột thuộc tính"}
           >
             {isRightInspectorOpen ? <PanelRightClose className="size-3.5" /> : <PanelRightOpen className="size-3.5" />}

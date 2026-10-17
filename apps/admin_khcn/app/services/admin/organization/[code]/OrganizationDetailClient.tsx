@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FileText, MapPin, Users } from "lucide-react";
+import { ArrowLeft, FileText, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -78,6 +78,9 @@ export function OrganizationDetailClient({ initialCode }: OrganizationDetailClie
         ) : unit ? (
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-0.5 min-w-0">
+              <Link href="/services/admin/organization" className="lg:hidden inline-flex items-center text-xs text-primary font-medium mb-1 hover:underline">
+                <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Danh sách đơn vị
+              </Link>
               <p className="text-xs text-muted-foreground truncate">
                 {parentUnit ? `${parentUnit.name} /` : "Cơ cấu tổ chức /"} {unit.name}
               </p>
@@ -92,8 +95,8 @@ export function OrganizationDetailClient({ initialCode }: OrganizationDetailClie
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col min-h-0 h-full w-full">
         {/* Tab bar */}
-        <div className="shrink-0 border-b bg-muted/30 px-4 pt-3 pb-2">
-          <TabsList className="flex h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1 justify-start">
+        <div className="shrink-0 border-b bg-muted/30 px-4 pt-3 pb-2 overflow-x-auto custom-scrollbar">
+          <TabsList className="flex h-9 w-max sm:w-auto bg-muted/60 p-0.5 rounded-lg space-x-1 justify-start">
             <TabsTrigger 
               value="info" 
               className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground"

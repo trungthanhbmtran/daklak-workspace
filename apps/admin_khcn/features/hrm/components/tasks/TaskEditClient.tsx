@@ -208,10 +208,10 @@ export function TaskEditClient({ id }: TaskEditClientProps) {
 
           {/* Mức ưu tiên & Hạn hoàn thành */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-0">
               <Label className="text-xs font-semibold text-slate-700">Mức độ ưu tiên</Label>
               <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
-                <SelectTrigger className="h-9 text-xs">
+                <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -278,10 +278,10 @@ export function TaskEditClient({ id }: TaskEditClientProps) {
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-0">
               <Label className="text-xs font-semibold text-slate-700">Hệ số độ khó (K)</Label>
               <Select value={String(difficultyFactor)} onValueChange={(v) => setDifficultyFactor(Number(v))}>
-                <SelectTrigger className="h-9 text-xs">
+                <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

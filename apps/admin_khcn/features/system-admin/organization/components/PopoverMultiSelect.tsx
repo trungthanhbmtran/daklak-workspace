@@ -272,16 +272,16 @@ export function PopoverMultiSelect({
         <Button
           type="button"
           variant="outline"
-          className="w-full justify-between font-normal bg-background hover:bg-muted/50 border-input h-auto min-h-11 py-2 shadow-sm text-left"
+          className="w-full justify-between font-normal bg-background hover:bg-muted/50 border-input h-auto min-h-11 py-2 shadow-sm text-left min-w-0"
         >
-          <span className="flex items-center gap-2 truncate text-muted-foreground font-medium">
+          <span className="flex items-center gap-2 truncate text-muted-foreground font-medium min-w-0">
             {icon && <span className="shrink-0">{icon}</span>}
             <span className="truncate">{triggerLabel}</span>
           </span>
           {selectedIds.length > 0 && (
             <Badge
               variant="secondary"
-              className="bg-primary/10 text-primary shrink-0"
+              className="bg-primary/10 text-primary shrink-0 ml-2"
             >
               {selectedIds.length} đã chọn
             </Badge>

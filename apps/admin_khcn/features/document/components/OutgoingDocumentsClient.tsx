@@ -105,7 +105,7 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDelete, onSendLgsp 
 
   return (
     <TableRow className="hover:bg-emerald-500/[0.02] transition-all group cursor-pointer">
-      <TableCell className="px-8 py-6">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
         <div className="flex flex-col gap-1.5">
           <span className="font-black text-foreground tracking-tight">
             {doc.documentNumber || doc.notation}
@@ -116,20 +116,20 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDelete, onSendLgsp 
         </div>
       </TableCell>
 
-      <TableCell className="px-8 py-6 max-w-md">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5 max-w-md">
         <p className="font-bold text-foreground/90 leading-snug line-clamp-2 group-hover:text-emerald-600 transition-colors">
           {doc.abstract || doc.title}
         </p>
       </TableCell>
 
-      <TableCell className="px-8 py-6">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
         <div className="flex items-center gap-2 text-muted-foreground font-medium">
           <Building2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
           <span className="text-xs line-clamp-1">{doc.recipients || "---"}</span>
         </div>
       </TableCell>
 
-      <TableCell className="px-8 py-6">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5">
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
             <User className="h-3.5 w-3.5 text-muted-foreground" /> {doc.signerName || "---"}
@@ -140,8 +140,8 @@ const DocumentRow = React.memo(function DocumentRow({ doc, onDelete, onSendLgsp 
         </div>
       </TableCell>
 
-      <TableCell className="px-8 py-6 text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+      <TableCell className="px-4 py-4 lg:px-6 lg:py-5 text-right">
+        <div className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:translate-x-2 sm:group-hover:translate-x-0">
           <Button
             variant="secondary"
             size="icon"
@@ -196,11 +196,11 @@ const DocumentsTable = React.memo(function DocumentsTable({
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                <TableHead className="px-8 py-5 w-48">Số / Ký hiệu</TableHead>
-                <TableHead className="px-8 py-5">Trích yếu nội dung</TableHead>
-                <TableHead className="px-8 py-5 w-64">Nơi nhận</TableHead>
-                <TableHead className="px-8 py-5 w-48">Người ký & Ngày Ban hành</TableHead>
-                <TableHead className="px-8 py-5 text-right w-32" />
+                <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-48">Số / Ký hiệu</TableHead>
+                <TableHead className="px-4 py-3 lg:px-6 lg:py-4">Trích yếu nội dung</TableHead>
+                <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-64">Nơi nhận</TableHead>
+                <TableHead className="px-4 py-3 lg:px-6 lg:py-4 w-48">Người ký & Ngày Ban hành</TableHead>
+                <TableHead className="px-4 py-3 lg:px-6 lg:py-4 text-right w-32" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -208,7 +208,7 @@ const DocumentsTable = React.memo(function DocumentsTable({
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     {Array.from({ length: 5 }).map((__, j) => (
-                      <TableCell key={j} className="px-8 py-6">
+                      <TableCell key={j} className="px-4 py-4 lg:px-6 lg:py-5">
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
                     ))}

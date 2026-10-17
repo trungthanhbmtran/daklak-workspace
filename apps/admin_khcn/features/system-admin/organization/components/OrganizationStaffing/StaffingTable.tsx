@@ -33,7 +33,7 @@ export function StaffingTable({ report, domainsForUnit, unitDomainIds, subordina
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
-            <TableHead className="font-semibold text-foreground w-[260px]">Chức danh</TableHead>
+            <TableHead className="font-semibold text-foreground w-[240px] md:w-[280px]">Vị trí việc làm / Chức danh</TableHead>
             <TableHead className="font-semibold text-foreground">Lĩnh vực phụ trách</TableHead>
             <TableHead className="text-right font-semibold text-foreground w-24">Định biên</TableHead>
             <TableHead className="text-right font-semibold text-foreground w-20">Hiện có</TableHead>
@@ -47,7 +47,7 @@ export function StaffingTable({ report, domainsForUnit, unitDomainIds, subordina
             return (
               <Fragment key={row.id}>
                 <TableRow className={cn("transition-colors group", isOpen && "bg-muted/50 hover:bg-muted/50 border-b-0", hasSlots && "cursor-pointer select-none")} onClick={() => hasSlots && toggleRow(row.id)}>
-                  <TableCell className="font-medium p-4">
+                  <TableCell className="font-medium p-4 whitespace-normal">
                     <div className="flex items-center gap-2">
                       {hasSlots && <div className="text-muted-foreground group-hover:text-foreground transition-colors shrink-0">{isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}</div>}
                       <span className={cn(hasSlots && "group-hover:underline decoration-muted-foreground")}>{row.jobTitleName}</span>
@@ -61,21 +61,21 @@ export function StaffingTable({ report, domainsForUnit, unitDomainIds, subordina
                 </TableRow>
                 {hasSlots && (
                   <TableRow className={cn("hover:bg-transparent border-t-0", !isOpen && "hidden")}>
-                    <TableCell colSpan={4} className="p-0 bg-muted/10">
+                    <TableCell colSpan={4} className="p-0 bg-muted/10 whitespace-normal">
                       <Collapsible open={isOpen}>
                         <CollapsibleContent className="border-b border-t transition-all">
-                          <div className="p-4 flex flex-col md:flex-row gap-5">
-                            <div className="w-full md:w-[200px] shrink-0 space-y-2">
+                          <div className="p-4 flex flex-col xl:flex-row gap-5">
+                            <div className="w-full xl:w-[200px] shrink-0 space-y-2">
                               <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1 px-2 py-1">
                                 <UserCheck className="h-3.5 w-3.5" /><span>Chọn vị trí ({row.quantity})</span>
                               </div>
-                              <div className="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+                              <div className="flex flex-row xl:flex-col gap-1.5 overflow-x-auto xl:overflow-x-visible pb-2 xl:pb-0">
                                 {Array.from({ length: row.quantity }, (_, i) => i + 1).map(slotOrder => {
                                   const isSel = activeSlot === slotOrder;
                                   const existing = row.slots?.find(s => s.slotOrder === slotOrder);
                                   return (
                                     <Button key={slotOrder} type="button" onClick={() => setActiveSlotMap(p => ({ ...p, [row.id]: slotOrder }))}
-                                      className={cn("flex flex-col text-left px-3 py-2 text-xs rounded-lg transition-all min-w-[100px] md:w-full border select-none shrink-0 relative", isSel ? "bg-primary text-primary-foreground border-primary shadow-sm" : "bg-background text-foreground hover:bg-muted/80 border-border")}>
+                                      className={cn("flex flex-col text-left px-3 py-2 text-xs rounded-lg transition-all min-w-[140px] xl:w-full border select-none shrink-0 relative", isSel ? "bg-primary text-primary-foreground border-primary shadow-sm" : "bg-background text-foreground hover:bg-muted/80 border-border")}>
                                       <div className="flex items-center justify-between w-full gap-1">
                                         <span className="font-semibold truncate" title={existing?.description || `Vị trí ${slotOrder}`}>
                                           {existing?.description ? existing.description.split(' (')[0] : `Vị trí ${slotOrder}`}

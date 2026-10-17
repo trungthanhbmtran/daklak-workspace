@@ -24,7 +24,11 @@
 - [ ] `ADDITIVE_MIGRATION_ONLY`: Cột mới thêm vào schema BẮT BUỘC là `nullable` (`?`) hoặc có `@default(...)`. Tuyệt đối không thêm cột NOT NULL không default.
 - [ ] FOREIGN_KEY_INDEXED: Index được chọn theo query patterns và query plan; xem xét khóa ngoại/filter/order cùng composite index hiện hữu, tránh index trùng hoặc dư.
 
-## 5. Quy chuẩn Frontend & UI/UX
+## 5. Quy chuẩn Frontend, UI/UX & Responsive System
+- [ ] `RESPONSIVE_BREAKPOINT_BOUNDS`: Bố cục tuân thủ 6 cấp độ breakpoint; Dialog/Sheet có `w-[95vw]` trên mobile (`<640px`) và `max-h-[90vh] overflow-y-auto`; không ép cứng `grid-cols-2+` ở mobile; TabsList có container cuộn ngang (`overflow-x-auto no-scrollbar`).
+- [ ] `TYPOGRAPHY_SYSTEM`: Tuân thủ chuẩn font scale: `text-sm` cho body text/input/table cell; `text-xs` cho form label/table head/badge; `text-[10px]` cho micro text; tiêu đề dùng `truncate` hoặc `line-clamp` kèm tooltip `title`.
+- [ ] `TABLE_LIST_CONVENTIONS`: Bảng dữ liệu bắt buộc bọc `overflow-x-auto`; cột nội dung dài dùng `min-w-[200px] whitespace-normal break-words` (không dùng `whitespace-nowrap`); Danh sách có viền `divide-y`, padding chuẩn và đầy đủ Empty State.
+- [ ] `SELECT_TRIGGER_OVERFLOW`: 100% `<SelectTrigger>` có `w-full min-w-0 truncate [&>span]:truncate`; thẻ cha trong CSS Grid/Flexbox có `min-w-0` (tham chiếu Blacklist #5).
 - [ ] `FLEX_GRID_MIN_W_0`: Mọi container `flex` hoặc `grid` có text/badge co giãn đều có class `min-w-0` và `wrap-break-word` khi cần ngắt dòng; không dùng class `break-words` trong code mới.
 - [ ] NO_SCROLL_TRAP: Nội dung cần xem không bị cắt hoặc mất đường cuộn; vùng overflow/fixed-height có parent bounds rõ ràng và được kiểm tra trên route.
 - [ ] ZERO_OVERLAPPING_LAYOUT: Bố cục thích ứng với chiều rộng khả dụng và nội dung thực tế; không chồng lấn, cắt chữ hoặc tạo cuộn ngang ngoài ý muốn.

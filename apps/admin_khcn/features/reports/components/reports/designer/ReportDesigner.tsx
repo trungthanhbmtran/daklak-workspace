@@ -222,10 +222,10 @@ export const ReportDesigner: React.FC<ReportDesignerProps> = ({
       </div>
 
       {/* Main Designer Area */}
-      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden w-full">
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 min-w-0 overflow-hidden w-full">
         {/* Left Panel: Source Explorer (Only show in Model tab) */}
         {activeTab === 'model' && (
-          <div className="w-1/4 min-w-[260px] max-w-[340px] border-r border-slate-200/80 bg-white overflow-y-auto shadow-sm z-0 shrink-0">
+          <div className="w-full md:w-1/4 md:min-w-[260px] md:max-w-[340px] max-h-56 md:max-h-none border-b md:border-b-0 md:border-r border-slate-200/80 bg-white overflow-y-auto shadow-sm z-0 shrink-0">
             <SourceExplorer onAddSource={handleAddSource} />
           </div>
         )}

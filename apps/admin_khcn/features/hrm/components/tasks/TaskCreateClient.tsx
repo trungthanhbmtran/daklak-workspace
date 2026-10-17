@@ -391,10 +391,10 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
 
               {/* Loại công việc & Mức ưu tiên */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <Label className="text-xs font-semibold text-slate-700">Loại nhiệm vụ</Label>
                   <Select value={taskType} onValueChange={(v: any) => setTaskType(v)}>
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                       <SelectValue placeholder="Chọn loại công việc" />
                     </SelectTrigger>
                     <SelectContent>
@@ -405,10 +405,10 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
                   </Select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <Label className="text-xs font-semibold text-slate-700">Mức độ ưu tiên</Label>
                   <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                       <SelectValue placeholder="Chọn mức ưu tiên" />
                     </SelectTrigger>
                     <SelectContent>
@@ -423,13 +423,13 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
 
               {/* Chu kỳ nếu là định kỳ */}
               {taskType === "PERIODIC" && (
-                <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-1.5">
+                <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-1.5 min-w-0">
                   <Label className="text-xs font-semibold text-emerald-900 flex items-center gap-1.5">
-                    <Repeat className="w-3.5 h-3.5 text-emerald-600" />
+                    <Repeat className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     Chu kỳ lặp lại nhiệm vụ định kỳ
                   </Label>
                   <Select value={recurrence} onValueChange={(v: any) => setRecurrence(v)}>
-                    <SelectTrigger className="h-9 text-xs bg-white">
+                    <SelectTrigger className="h-9 text-xs bg-white w-full min-w-0 truncate [&>span]:truncate">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -523,10 +523,10 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
 
               {/* Lọc phòng ban & Chủ trì */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <Label className="text-xs font-semibold text-slate-700">Đơn vị / Phòng ban thực hiện</Label>
                   <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                       <SelectValue placeholder="Chọn phòng ban" />
                     </SelectTrigger>
                     <SelectContent>
@@ -540,12 +540,12 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
                   </Select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <Label className="text-xs font-semibold text-slate-700">
                     Cán bộ / Đơn vị chủ trì <span className="text-red-500">*</span>
                   </Label>
                   <Select value={assignee} onValueChange={setAssignee}>
-                    <SelectTrigger className="h-9 text-xs font-semibold text-slate-800">
+                    <SelectTrigger className="h-9 text-xs font-semibold text-slate-800 w-full min-w-0 truncate [&>span]:truncate">
                       <SelectValue placeholder="-- Chọn cán bộ chủ trì --" />
                     </SelectTrigger>
                     <SelectContent>
@@ -608,9 +608,9 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-semibold text-slate-800">Cán bộ phối hợp thực hiện</Label>
                   <Select onValueChange={handleAddCoordinator}>
-                    <SelectTrigger className="h-8 w-56 text-xs border-dashed">
-                      <Plus className="w-3.5 h-3.5 mr-1 text-blue-600" />
-                      <span>+ Thêm người phối hợp</span>
+                    <SelectTrigger className="h-8 max-w-full sm:w-56 text-xs border-dashed min-w-0 truncate [&>span]:truncate">
+                      <Plus className="w-3.5 h-3.5 mr-1 text-blue-600 shrink-0" />
+                      <span className="truncate">+ Thêm người phối hợp</span>
                     </SelectTrigger>
                     <SelectContent>
                       {employees
@@ -682,7 +682,7 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
                   )}
                 </div>
                 <Select value={supervisorCode} onValueChange={setSupervisorCode}>
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                     <SelectValue placeholder="Chọn lãnh đạo thẩm định" />
                   </SelectTrigger>
                   <SelectContent>
@@ -779,13 +779,13 @@ export function TaskCreateClient({ parentId }: { parentId?: string | number }) {
                   />
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 min-w-0">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold text-slate-700">Hệ số độ khó (K)</Label>
                     <span className="text-2xs font-bold text-indigo-700">K = {difficultyK}</span>
                   </div>
                   <Select value={String(difficultyK)} onValueChange={(v) => setDifficultyK(Number(v))}>
-                    <SelectTrigger className="h-9 text-xs">
+                    <SelectTrigger className="h-9 text-xs w-full min-w-0 truncate [&>span]:truncate">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
