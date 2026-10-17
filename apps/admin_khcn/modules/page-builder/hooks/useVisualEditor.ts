@@ -119,8 +119,7 @@ export function useVisualEditor(initialLayout: Row[], languages: PageLanguage[],
                     }
                 }
             }
-        } catch (error) {
-            console.error(error);
+        } catch {
             toast.warning("Bạn đã nhấn chồng!");
         }
     };

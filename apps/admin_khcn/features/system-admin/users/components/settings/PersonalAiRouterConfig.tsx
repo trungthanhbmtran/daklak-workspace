@@ -63,8 +63,7 @@ export function PersonalAiRouterConfig() {
         value: JSON.stringify(sorted),
       });
       toast.success(`Đã cập nhật cấu hình AI cá nhân thành công!`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Lỗi cập nhật cấu hình AI');
     }
   };

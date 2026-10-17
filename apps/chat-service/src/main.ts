@@ -45,12 +45,18 @@ async function bootstrap() {
   });
 
   // 3. Connect to RabbitMQ (Event Subscriber)
+  const rabbitUrl = process.env.RABBITMQ_URL;
+  if (!rabbitUrl) {
+    // Fail-fast: không chạy với credentials mặc định (đã xóa fallback amqp://admin:...@localhost)
+    throw new Error(
+      "RABBITMQ_URL chưa được cấu hình " +
+        "— chat-service yêu cầu RabbitMQ để subscribe chat_queue. Vui lòng cấu hình RABBITMQ_URL trong .env.",
+    );
+  }
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [
-        process.env.RABBITMQ_URL ?? "amqp://admin:Admin%40123@localhost:5672",
-      ],
+      urls: [rabbitUrl],
       queue: "chat_queue",
       queueOptions: {
         durable: true,

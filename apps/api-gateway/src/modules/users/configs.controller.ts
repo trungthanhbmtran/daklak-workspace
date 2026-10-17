@@ -6,6 +6,7 @@ import {
   OnModuleInit,
   Put,
   UseGuards,
+  Req,
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
@@ -15,9 +16,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 
 @ApiTags('System Configs')
 @Controller('admin/system-configs')
@@ -38,26 +43,41 @@ export class ConfigsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any,
+    private readonly issuer: TokenIssuerService,
   ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   onModuleInit() {
     this.configService = this.client.getService('SystemConfigService');
   }
 
   @Get()
-  async getConfigs() {
+  async getConfigs(@Req() req: any) {
     const response = (await firstValueFrom(
-      this.configService.GetConfigs({}),
+      this.configService.GetConfigs({}, this.getGrpcMetadata(req)),
     ).catch((e) => this.handleRpcError(e))) as any;
     return response.configs || [];
   }
 
   @Put()
   async updateConfig(
+    @Req() req: any,
     @Body() body: { key: string; value: string; description?: string },
   ) {
-    return firstValueFrom(this.configService.UpdateConfig(body)).catch((e) =>
-      this.handleRpcError(e),
-    );
+    return firstValueFrom(
+      this.configService.UpdateConfig(body, this.getGrpcMetadata(req)),
+    ).catch((e) => this.handleRpcError(e));
   }
 }

@@ -64,8 +64,7 @@ export function AiRouterConfig() {
         description: 'Cấu hình AI Đa nền tảng & Cơ chế Failover'
       });
       toast.success(`Đã cập nhật hệ thống định tuyến AI thành công!`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Lỗi cập nhật cấu hình AI');
     }
   };

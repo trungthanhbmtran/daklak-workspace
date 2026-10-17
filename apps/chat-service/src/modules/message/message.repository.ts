@@ -45,6 +45,14 @@ export class MessageRepository {
     }
   }
 
+  async findConversationIdById(messageId: string): Promise<string | null> {
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      select: { conversationId: true },
+    });
+    return message?.conversationId ?? null;
+  }
+
   async upsertReadReceipt(messageId: string, userId: string) {
     try {
       return await this.prisma.readReceipt.upsert({

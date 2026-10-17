@@ -19,14 +19,7 @@ import {
   FileText
 } from "lucide-react"
 
-// 1. Client-side cookie getter helper
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
-  return match ? decodeURIComponent(match[2]) : null
-}
-
-// 2. Localized dictionaries for layout strings
+// 1. Localized dictionaries for layout strings
 const footerTranslations = {
   vi: {
     oneGateTitle: "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG",
@@ -97,14 +90,6 @@ const footerTranslations = {
 export default function Footer() {
   const pathname = usePathname()
   const { config: appearanceConfig } = useAppearance()
-  const [mounted, setMounted] = React.useState(false)
-  const [onlineCount, setOnlineCount] = React.useState(4)
-  const [todayCount, setTodayCount] = React.useState(38)
-  const [totalCount, setTotalCount] = React.useState(107)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // 3. Resolve the active language client-side based on pathname segment
   const currentLang = React.useMemo(() => {
@@ -166,21 +151,6 @@ export default function Footer() {
 
     return found.name || fallback
   }, [portalConfigData, currentLang])
-
-  React.useEffect(() => {
-    // Generate organic visitor fluctuation
-    const interval = setInterval(() => {
-      setOnlineCount(prev => {
-        const diff = Math.floor(Math.random() * 3) - 1
-        const next = prev + diff
-        return next > 0 ? next : 1
-      })
-      setTodayCount(prev => prev + 1)
-      setTotalCount(prev => prev + 1)
-    }, 15000)
-
-    return () => clearInterval(interval)
-  }, [])
 
   // Helper to dynamically resolve CMS Menu links based on standard CMS types
   const resolveMenuLink = React.useCallback((item: any) => {
@@ -431,26 +401,27 @@ export default function Footer() {
                 {ft.statsTitle}
               </h4>
 
+              {/* GAP(ledger#23): chưa có BE cho thống kê truy cập — hiển thị "—", không bịa số liệu */}
               <div className="grid grid-cols-2 gap-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 shadow-inner">
                 <div className="flex flex-col items-center justify-center p-2.5 bg-slate-950/40 rounded-lg">
                   <span className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                     <Users className="w-3 h-3 text-sky-400" />
                     {ft.statsOnline}
                   </span>
-                  <span className="text-lg font-black text-white mt-1 font-mono tracking-wide">{onlineCount}</span>
+                  <span className="text-lg font-black text-white mt-1 font-mono tracking-wide">—</span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-2.5 bg-slate-950/40 rounded-lg">
                   <span className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                     <Eye className="w-3 h-3 text-emerald-400" />
                     {ft.statsToday}
                   </span>
-                  <span className="text-lg font-black text-white mt-1 font-mono tracking-wide">{todayCount}</span>
+                  <span className="text-lg font-black text-white mt-1 font-mono tracking-wide">—</span>
                 </div>
                 <div className="flex flex-col items-center justify-center p-2.5 bg-slate-950/40 rounded-lg col-span-2 mt-1">
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                     {ft.statsTotal}
                   </span>
-                  <span className="text-xl font-black text-yellow-200 mt-1 font-mono tracking-widest">{totalCount.toLocaleString()}</span>
+                  <span className="text-xl font-black text-yellow-200 mt-1 font-mono tracking-widest">—</span>
                 </div>
               </div>
 
@@ -529,10 +500,11 @@ export default function Footer() {
               <h4 className="text-xs font-bold text-portal-primary uppercase tracking-widest border-b border-slate-800 pb-2">
                 {ft.statsTitle}
               </h4>
+              {/* GAP(ledger#23): chưa có BE cho thống kê truy cập — hiển thị "—" */}
               <div className="flex flex-col gap-1.5 text-xs text-slate-400">
-                <span>{ft.statsOnline}: <strong className="text-white font-mono">{onlineCount}</strong></span>
-                <span>{ft.statsToday}: <strong className="text-white font-mono">{todayCount}</strong></span>
-                <span>{ft.statsTotal}: <strong className="text-white font-mono">{totalCount.toLocaleString()}</strong></span>
+                <span>{ft.statsOnline}: <strong className="text-white font-mono">—</strong></span>
+                <span>{ft.statsToday}: <strong className="text-white font-mono">—</strong></span>
+                <span>{ft.statsTotal}: <strong className="text-white font-mono">—</strong></span>
               </div>
             </div>
           </div>

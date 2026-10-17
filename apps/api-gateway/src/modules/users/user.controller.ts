@@ -18,8 +18,12 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 import { UserService } from './user.service';
 
 @ApiTags('Users')
@@ -27,7 +31,23 @@ import { UserService } from './user.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly issuer: TokenIssuerService,
+  ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách user' })
@@ -42,7 +62,13 @@ export class UserController {
     @Query('limit') limitStr?: string,
     @Query('search') search?: string,
   ) {
-    return this.userService.list(req.user, pageStr, limitStr, search);
+    return this.userService.list(
+      req.user,
+      pageStr,
+      limitStr,
+      search,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get(':id')
@@ -52,8 +78,8 @@ export class UserController {
     description:
       'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
   })
-  async getDetail(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getDetail(id);
+  async getDetail(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.userService.getDetail(id, this.getGrpcMetadata(req));
   }
 
   @Get(':id/policies')
@@ -62,8 +88,11 @@ export class UserController {
     status: 200,
     description: 'Danh sách policies từ tất cả roles của user',
   })
-  async getUserPolicies(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getUserPolicies(id);
+  async getUserPolicies(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.userService.getUserPolicies(id, this.getGrpcMetadata(req));
   }
 
   @Post()
@@ -77,7 +106,7 @@ export class UserController {
       'id, email, username, fullName, phoneNumber, cccd, employeeCode, ...',
   })
   async create(
-    @Req() req: { user?: { id?: string | number; email?: string } },
+    @Req() req: any,
     @Body()
     body: {
       email: string;
@@ -90,50 +119,65 @@ export class UserController {
       employeeCode?: string;
     },
   ) {
-    return this.userService.create(req.user, body);
+    return this.userService.create(req.user, body, this.getGrpcMetadata(req));
   }
 
   @Post(':id/assign-position')
   @ApiOperation({ summary: 'Bổ nhiệm chức vụ cho user (đơn vị + chức danh)' })
   @ApiResponse({ status: 200, description: 'Thông tin bổ nhiệm (camelCase)' })
   async assignPosition(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { unitId: number; jobTitleId: number; isPrimary?: boolean },
   ) {
-    return this.userService.assignPosition(id, body);
+    return this.userService.assignPosition(id, body, this.getGrpcMetadata(req));
   }
 
   @Patch(':id/active')
   @ApiOperation({ summary: 'Khóa hoặc mở tài khoản (isActive: true/false)' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async setActive(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { isActive: boolean },
   ) {
-    return this.userService.setActive(id, body.isActive);
+    return this.userService.setActive(
+      id,
+      body.isActive,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Post(':id/assign-user-groups')
   @ApiOperation({ summary: 'Gán nhóm quyền (PBAC User Groups) cho user' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async assignUserGroups(
+    @Req() req: any,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { userGroupIds: number[] },
   ) {
-    return this.userService.assignUserGroups(id, body.userGroupIds);
+    return this.userService.assignUserGroups(
+      id,
+      body.userGroupIds,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật user' })
   @ApiResponse({ status: 200 })
-  async update(@Param('id') id: string, @Body() body: any) {
-    return this.userService.update(id, body);
+  async update(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    return this.userService.update(id, body, this.getGrpcMetadata(req));
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa user' })
   @ApiResponse({ status: 200 })
-  async delete(@Param('id') id: string) {
-    return this.userService.delete(id);
+  async delete(@Req() req: any, @Param('id') id: string) {
+    return this.userService.delete(id, this.getGrpcMetadata(req));
   }
 }

@@ -191,7 +191,17 @@ export function EmbeddedReportWidget({
       (yField.toLowerCase().includes("tasks") ||
         yField.toLowerCase().includes("total") ||
         yField.toLowerCase().includes("amount") ||
-        yField.toLowerCase().includes("quantity"));
+        yField.toLowerCase().includes("quantity") ||
+        yField.toLowerCase().includes("thuc_hien") ||
+        yField.toLowerCase().includes("giai_ngan") ||
+        yField.toLowerCase().includes("kim_ngach") ||
+        yField.toLowerCase().includes("du_toan") ||
+        yField.toLowerCase().includes("chi") ||
+        yField.toLowerCase().includes("thu") ||
+        yField.toLowerCase().includes("von") ||
+        yField.toLowerCase().includes("tien") ||
+        yField.toLowerCase().includes("so_luong") ||
+        yField.toLowerCase().includes("doanh_thu"));
 
     dataset.forEach((row) => {
       const rawKey = row[xField];

@@ -7,6 +7,7 @@ import { Metadata } from '@grpc/grpc-js';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { StatisticsService } from '../statistics/statistics.service';
+import { safeParse } from '../../common/safe-parse.util';
 import {
   normalizeRow,
   normalizeSchema,
@@ -56,6 +57,12 @@ const SCHEMA_META_KEYS = new Set([
 ]);
 
 function getSampleRowsForApi(endpointOrPath: string): any[] {
+  // Ledger #23 (Fabricated KPI data): sample rows là dữ liệu bịa cho dev/demo.
+  // Mặc định trả [] — báo cáo hiển thị trống/N/A thay vì số liệu ảo.
+  // Chỉ bật khi REPORT_ENABLE_SAMPLE_DATA=true (môi trường demo/dev riêng).
+  if (process.env.REPORT_ENABLE_SAMPLE_DATA !== 'true') {
+    return [];
+  }
   const p = (endpointOrPath || '').toLowerCase();
   if (p.includes('document-statistics') || p.includes('doc_stats')) {
     return [
@@ -135,44 +142,64 @@ function getSampleRowsForApi(endpointOrPath: string): any[] {
       },
     ];
   }
+  if (p.includes('btc_finance') || p.includes('finance_overview') || p.includes('finance')) {
+    return [
+      { id: 1, ma_chi_tieu: 'TC_01', ten_chi_tieu: 'Thu Ngân sách Nhà nước trên địa bàn tỉnh', linh_vuc: 'Thu ngân sách', don_vi_phu_trach: 'Cục Thuế tỉnh Đắk Lắk', du_toan_giao: 9640000000000, thuc_hien: 8520000000000, ty_le_dat: 88.4, cung_ky_nam_truoc: 7550000000000, danh_gia_tien_do: 'Vượt tiến độ dự toán (88.4%)', ky_bao_cao: 'Tháng 10/2026' },
+      { id: 2, ma_chi_tieu: 'TC_02', ten_chi_tieu: 'Chi Ngân sách địa phương theo phân bổ', linh_vuc: 'Chi ngân sách', don_vi_phu_trach: 'Kho bạc Nhà nước Đắk Lắk', du_toan_giao: 14200000000000, thuc_hien: 11650000000000, ty_le_dat: 82.0, cung_ky_nam_truoc: 10420000000000, danh_gia_tien_do: 'Đảm bảo chi thường xuyên và ĐTPT', ky_bao_cao: 'Tháng 10/2026' },
+      { id: 3, ma_chi_tieu: 'TC_03', ten_chi_tieu: 'Kế hoạch Vốn Đầu tư công giải ngân', linh_vuc: 'Đầu tư phát triển', don_vi_phu_trach: 'Sở Kế hoạch và Đầu tư', du_toan_giao: 6750000000000, thuc_hien: 5480000000000, ty_le_dat: 81.2, cung_ky_nam_truoc: 4620000000000, danh_gia_tien_do: 'Đạt mức khá so với cả nước (81.2%)', ky_bao_cao: 'Tháng 10/2026' },
+      { id: 4, ma_chi_tieu: 'TC_04', ten_chi_tieu: 'Kim ngạch Xuất khẩu Nông sản chủ lực', linh_vuc: 'Hải quan & XNK', don_vi_phu_trach: 'Chi cục HQ Buôn Ma Thuột', du_toan_giao: 360000000, thuc_hien: 320100000, ty_le_dat: 88.9, cung_ky_nam_truoc: 278000000, danh_gia_tien_do: 'Xuất siêu 284 Triệu USD', ky_bao_cao: 'Tháng 10/2026' },
+      { id: 5, ma_chi_tieu: 'TC_05', ten_chi_tieu: 'Thuế Doanh nghiệp phát sinh qua HĐĐT', linh_vuc: 'Thuế điện tử', don_vi_phu_trach: 'Cục Thuế tỉnh Đắk Lắk', du_toan_giao: 4300000000000, thuc_hien: 3840000000000, ty_le_dat: 89.3, cung_ky_nam_truoc: 3320000000000, danh_gia_tien_do: '2.450 doanh nghiệp hoạt động', ky_bao_cao: 'Tháng 10/2026' },
+      { id: 6, ma_chi_tieu: 'TC_06', ten_chi_tieu: 'Cao tốc Khánh Hòa - Buôn Ma Thuột (DA TP3)', linh_vuc: 'Dự án trọng điểm', don_vi_phu_trach: 'BQLDA ĐTXD CTGT & NN PTNT Tỉnh', du_toan_giao: 1350000000000, thuc_hien: 1080000000000, ty_le_dat: 80.0, cung_ky_nam_truoc: 620000000000, danh_gia_tien_do: 'Bám sát mốc tiến độ thông xe 2026', ky_bao_cao: 'Tuần 41/2026' },
+      { id: 7, ma_chi_tieu: 'TC_07', ten_chi_tieu: 'Đường Hồ Chí Minh tránh phía Đông TP. BMT', linh_vuc: 'Dự án trọng điểm', don_vi_phu_trach: 'BQLDA ĐTXD CTGT & NN PTNT Tỉnh', du_toan_giao: 520000000000, thuc_hien: 460000000000, ty_le_dat: 88.5, cung_ky_nam_truoc: 310000000000, danh_gia_tien_do: 'Giai đoạn thảm nhựa hoàn thiện', ky_bao_cao: 'Tuần 41/2026' },
+      { id: 8, ma_chi_tieu: 'TC_08', ten_chi_tieu: 'Trung tâm Giám sát Điều hành Thông minh IOC', linh_vuc: 'Chuyển đổi số & ĐMST', don_vi_phu_trach: 'Sở Thông tin và Truyền thông', du_toan_giao: 65000000000, thuc_hien: 58000000000, ty_le_dat: 89.2, cung_ky_nam_truoc: 25000000000, danh_gia_tien_do: 'Tích hợp trục LGSP & CSDL ngành', ky_bao_cao: 'Tuần 41/2026' },
+    ];
+  }
   if (p.includes('hhxnk')) {
     return [
-      { id: 1, thang_bc: '10/2026', loai_hinh: 'Xuất khẩu cà phê', kim_ngach_usd: 145000000, thue_xnk_vnd: 0, dia_ban: 'TP. Buôn Ma Thuột', ghi_chu: 'Thị trường EU, Mỹ' },
-      { id: 2, thang_bc: '10/2026', loai_hinh: 'Xuất khẩu sầu riêng', kim_ngach_usd: 85000000, thue_xnk_vnd: 0, dia_ban: 'Huyện Krông Pắc', ghi_chu: 'Chính ngạch sang Trung Quốc' },
-      { id: 3, thang_bc: '10/2026', loai_hinh: 'Xuất khẩu cao su', kim_ngach_usd: 32000000, thue_xnk_vnd: 0, dia_ban: 'Huyện Cư M\'gar', ghi_chu: 'Thị trường châu Á' },
-      { id: 4, thang_bc: '10/2026', loai_hinh: 'Nhập khẩu phân bón máy móc', kim_ngach_usd: 28000000, thue_xnk_vnd: 3500000000, dia_ban: 'TP. Buôn Ma Thuột', ghi_chu: 'Phục vụ sản xuất nông nghiệp' },
+      { id: 1, ma_hai_quan: 'HQ_DL_01', ten_chi_cuc: 'Chi cục HQ Buôn Ma Thuột', loai_hinh: 'Xuất khẩu', mat_hang: 'Cà phê Robusta nhân xô', thi_truong: 'Liên minh Châu Âu (EU), Hoa Kỳ', so_luong_tan: 38500, kim_ngach_usd: 154200000, thue_xnk_vnd: 0, thoi_gian: 'Tháng 10/2026' },
+      { id: 2, ma_hai_quan: 'HQ_DL_01', ten_chi_cuc: 'Chi cục HQ Buôn Ma Thuột', loai_hinh: 'Xuất khẩu', mat_hang: 'Sầu riêng cấp đông xuất khẩu', thi_truong: 'Trung Quốc (Chính ngạch)', so_luong_tan: 18200, kim_ngach_usd: 89500000, thue_xnk_vnd: 0, thoi_gian: 'Tháng 10/2026' },
+      { id: 3, ma_hai_quan: 'HQ_DL_01', ten_chi_cuc: 'Chi cục HQ Buôn Ma Thuột', loai_hinh: 'Xuất khẩu', mat_hang: 'Hạt tiêu đen Đắk Lắk', thi_truong: 'Hoa Kỳ, Nhật Bản', so_luong_tan: 7600, kim_ngach_usd: 42800000, thue_xnk_vnd: 0, thoi_gian: 'Tháng 10/2026' },
+      { id: 4, ma_hai_quan: 'HQ_DL_01', ten_chi_cuc: 'Chi cục HQ Buôn Ma Thuột', loai_hinh: 'Xuất khẩu', mat_hang: 'Mủ cao su thiên nhiên', thi_truong: 'Hàn Quốc, Đài Loan', so_luong_tan: 12400, kim_ngach_usd: 33600000, thue_xnk_vnd: 0, thoi_gian: 'Tháng 10/2026' },
+      { id: 5, ma_hai_quan: 'HQ_DL_02', ten_chi_cuc: 'Chi cục HQ Cửa khẩu', loai_hinh: 'Nhập khẩu', mat_hang: 'Phân bón & Vật tư công nghệ cao', thi_truong: 'Nhật Bản, Israel', so_luong_tan: 15800, kim_ngach_usd: 36100000, thue_xnk_vnd: 4250000000, thoi_gian: 'Tháng 10/2026' },
     ];
   }
   if (p.includes('nsnn_thu')) {
     return [
-      { id: 1, dia_ban: 'Toàn tỉnh', du_toan_nam: 8500000000000, so_thuc_thu: 7200000000000, tien_do_dat: 84.7, ghi_chu: 'Thu nội địa và XNK' },
-      { id: 2, dia_ban: 'TP. Buôn Ma Thuột', du_toan_nam: 2800000000000, so_thuc_thu: 2450000000000, tien_do_dat: 87.5, ghi_chu: 'Thu từ SXKD và đất' },
-      { id: 3, dia_ban: 'Huyện Ea Kar', du_toan_nam: 350000000000, so_thuc_thu: 295000000000, tien_do_dat: 84.3, ghi_chu: 'Đạt tiến độ kế hoạch' },
-      { id: 4, dia_ban: 'Huyện Krông Ana', du_toan_nam: 280000000000, so_thuc_thu: 238000000000, tien_do_dat: 85.0, ghi_chu: 'Vượt nhẹ so với cùng kỳ' },
+      { id: 1, dia_ban: 'Toàn tỉnh Đắk Lắk', khoan_thu: 'Tổng thu NSNN trên địa bàn', du_toan_nam: 9640000000000, so_thuc_thu: 8520000000000, tien_do_dat: 88.4, cung_ky_nam_truoc: 7550000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Đạt 88.4% dự toán HĐND tỉnh giao' },
+      { id: 2, dia_ban: 'TP. Buôn Ma Thuột', khoan_thu: 'Thuế TNDN & Tiền sử dụng đất', du_toan_nam: 3200000000000, so_thuc_thu: 2860000000000, tien_do_dat: 89.4, cung_ky_nam_truoc: 2510000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Trung tâm kinh tế đô thị của tỉnh' },
+      { id: 3, dia_ban: 'Thị xã Buôn Hồ', khoan_thu: 'Thuế GTGT & Thuế TNCN', du_toan_nam: 680000000000, so_thuc_thu: 598000000000, tien_do_dat: 87.9, cung_ky_nam_truoc: 520000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Khu vực kinh tế phía Bắc' },
+      { id: 4, dia_ban: 'Huyện Cư M\'gar', khoan_thu: 'Thuế SXKD & Nông sản cà phê', du_toan_nam: 560000000000, so_thuc_thu: 505000000000, tien_do_dat: 90.2, cung_ky_nam_truoc: 440000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Vùng chuyên canh cà phê lớn nhất' },
+      { id: 5, dia_ban: 'Huyện Krông Pắc', khoan_thu: 'Thuế chuỗi giá trị sầu riêng', du_toan_nam: 480000000000, so_thuc_thu: 442000000000, tien_do_dat: 92.1, cung_ky_nam_truoc: 365000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Thủ phủ sầu riêng xuất khẩu' },
+      { id: 6, dia_ban: 'Huyện Ea Kar', khoan_thu: 'Thuế dịch vụ thương mại', du_toan_nam: 410000000000, so_thuc_thu: 358000000000, tien_do_dat: 87.3, cung_ky_nam_truoc: 312000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Vùng đô thị động lực phía Đông' },
+      { id: 7, dia_ban: 'Huyện Krông Ana', khoan_thu: 'Thuế nông lâm nghiệp', du_toan_nam: 320000000000, so_thuc_thu: 278000000000, tien_do_dat: 86.9, cung_ky_nam_truoc: 245000000000, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Bám sát tiến độ thu' }
     ];
   }
   if (p.includes('nsnn_chi')) {
     return [
-      { id: 1, linh_vuc_chi: 'Chi sự nghiệp giáo dục', du_toan_giao: 3800000000000, so_da_chi: 2950000000000, ty_le_giai_ngan: 77.6, ghi_chu: 'Đảm bảo lương và hoạt động dạy học' },
-      { id: 2, linh_vuc_chi: 'Chi đầu tư phát triển', du_toan_giao: 4200000000000, so_da_chi: 3100000000000, ty_le_giai_ngan: 73.8, ghi_chu: 'Theo tiến độ giải ngân vốn ĐTC' },
-      { id: 3, linh_vuc_chi: 'Chi sự nghiệp y tế', du_toan_giao: 1200000000000, so_da_chi: 950000000000, ty_le_giai_ngan: 79.2, ghi_chu: 'Khám chữa bệnh và phòng dịch' },
-      { id: 4, linh_vuc_chi: 'Chi quản lý nhà nước', du_toan_giao: 1500000000000, so_da_chi: 1210000000000, ty_le_giai_ngan: 80.7, ghi_chu: 'Tiết kiệm chi thường xuyên' },
+      { id: 1, linh_vuc_chi: 'Chi đầu tư phát triển', du_toan_giao: 4850000000000, so_da_chi: 3940000000000, ty_le_giai_ngan: 81.2, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Hạ tầng giao thông, thủy lợi, y tế' },
+      { id: 2, linh_vuc_chi: 'Chi sự nghiệp giáo dục và đào tạo', du_toan_giao: 4120000000000, so_da_chi: 3480000000000, ty_le_giai_ngan: 84.5, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Đảm bảo lương và cơ sở vật chất trường học' },
+      { id: 3, linh_vuc_chi: 'Chi quản lý hành chính nhà nước', du_toan_giao: 1650000000000, so_da_chi: 1340000000000, ty_le_giai_ngan: 81.2, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Tiết kiệm chi thường xuyên theo NQ Chính phủ' },
+      { id: 4, linh_vuc_chi: 'Chi sự nghiệp y tế và dân số', du_toan_giao: 1380000000000, so_da_chi: 1150000000000, ty_le_giai_ngan: 83.3, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Khám chữa bệnh BHYT và phòng chống dịch' },
+      { id: 5, linh_vuc_chi: 'Chi sự nghiệp khoa học và công nghệ', du_toan_giao: 210000000000, so_da_chi: 178000000000, ty_le_giai_ngan: 84.8, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Đổi mới sáng tạo và chuyển đổi số' },
+      { id: 6, linh_vuc_chi: 'Chi an sinh xã hội & người có công', du_toan_giao: 980000000000, so_da_chi: 862000000000, ty_le_giai_ngan: 88.0, thoi_gian: 'Tháng 10/2026', ghi_chu: 'Chính sách người có công và đồng bào DTTS' }
     ];
   }
   if (p.includes('dtc_giaingan_tuan')) {
     return [
-      { id: 1, ten_du_an: 'Đường cao tốc Khánh Hòa - Buôn Ma Thuột (Dự án thành phần 3)', chu_dau_tu: 'BQLDA ĐTXD CTGT & NN PTNT Đắk Lắk', ke_hoach_von: 1350000000000, da_giai_ngan: 1080000000000, ty_le_dat: 80.0, tuan_bao_cao: 'Tuần 41/2026' },
-      { id: 2, ten_du_an: 'Đường Hồ Chí Minh đoạn tránh phía Đông TP. Buôn Ma Thuột', chu_dau_tu: 'BQLDA ĐTXD CTGT & NN PTNT Đắk Lắk', ke_hoach_von: 520000000000, da_giai_ngan: 460000000000, ty_le_dat: 88.5, tuan_bao_cao: 'Tuần 41/2026' },
-      { id: 3, ten_du_an: 'Bệnh viện Đa khoa vùng Tây Nguyên (Giai đoạn hoàn thiện)', chu_dau_tu: 'Sở Y tế Đắk Lắk', ke_hoach_von: 180000000000, da_giai_ngan: 155000000000, ty_le_dat: 86.1, tuan_bao_cao: 'Tuần 41/2026' },
-      { id: 4, ten_du_an: 'Nâng cấp hệ thống thủy lợi hồ Ea Kao', chu_dau_tu: 'BQLDA Nông nghiệp Tỉnh', ke_hoach_von: 120000000000, da_giai_ngan: 98000000000, ty_le_dat: 81.7, tuan_bao_cao: 'Tuần 41/2026' },
+      { id: 1, ten_du_an: 'Cao tốc Khánh Hòa - Buôn Ma Thuột (Dự án TP3)', chu_dau_tu: 'BQLDA ĐTXD CTGT & NN PTNT Tỉnh', ke_hoach_von: 1350000000000, giai_ngan_tuan: 42000000000, da_giai_ngan: 1080000000000, ty_le_dat: 80.0, tuan_bao_cao: 'Tuần 41/2026' },
+      { id: 2, ten_du_an: 'Đường Hồ Chí Minh tránh phía Đông TP. BMT', chu_dau_tu: 'BQLDA ĐTXD CTGT & NN PTNT Tỉnh', ke_hoach_von: 520000000000, giai_ngan_tuan: 18500000000, da_giai_ngan: 460000000000, ty_le_dat: 88.5, tuan_bao_cao: 'Tuần 41/2026' },
+      { id: 3, ten_du_an: 'Khu Công nghệ cao & Đổi mới sáng tạo Tỉnh', chu_dau_tu: 'Sở Khoa học và Công nghệ', ke_hoach_von: 240000000000, giai_ngan_tuan: 8200000000, da_giai_ngan: 198000000000, ty_le_dat: 82.5, tuan_bao_cao: 'Tuần 41/2026' },
+      { id: 4, ten_du_an: 'Bệnh viện Đa khoa vùng Tây Nguyên (Giai đoạn 2)', chu_dau_tu: 'Sở Y tế Đắk Lắk', ke_hoach_von: 180000000000, giai_ngan_tuan: 5400000000, da_giai_ngan: 155000000000, ty_le_dat: 86.1, tuan_bao_cao: 'Tuần 41/2026' },
+      { id: 5, ten_du_an: 'Nâng cấp hệ thống hồ thủy lợi Ea Kao', chu_dau_tu: 'BQLDA ĐTXD CTGT & NN PTNT Tỉnh', ke_hoach_von: 120000000000, giai_ngan_tuan: 3800000000, da_giai_ngan: 98000000000, ty_le_dat: 81.7, tuan_bao_cao: 'Tuần 41/2026' },
+      { id: 6, ten_du_an: 'Trung tâm Điều hành Đô thị Thông minh IOC', chu_dau_tu: 'Sở Thông tin và Truyền thông', ke_hoach_von: 65000000000, giai_ngan_tuan: 2500000000, da_giai_ngan: 58000000000, ty_le_dat: 89.2, tuan_bao_cao: 'Tuần 41/2026' }
     ];
   }
   if (p.includes('hddn')) {
     return [
-      { id: 1, loai_hinh_dn: 'Công ty TNHH MTV', so_thanh_lap_moi: 620, so_giai_the: 85, tong_von_dang_ky_ty: 4250.5, thoi_diem: '9 tháng 2026' },
-      { id: 2, loai_hinh_dn: 'Công ty Cổ phần', so_thanh_lap_moi: 310, so_giai_the: 42, tong_von_dang_ky_ty: 6890.2, thoi_diem: '9 tháng 2026' },
-      { id: 3, loai_hinh_dn: 'Công ty TNHH 2TV trở lên', so_thanh_lap_moi: 245, so_giai_the: 38, tong_von_dang_ky_ty: 1980.0, thoi_diem: '9 tháng 2026' },
-      { id: 4, loai_hinh_dn: 'Doanh nghiệp tư nhân', so_thanh_lap_moi: 65, so_giai_the: 15, tong_von_dang_ky_ty: 310.8, thoi_diem: '9 tháng 2026' },
+      { id: 1, mst: '6000123456', ten_doanh_nghiep: 'Công ty Cổ phần Tập đoàn Trung Nguyên', loai_hoa_don: 'HĐĐT có mã cơ quan thuế', so_luong_hd: 2840, tong_tien_truoc_thue: 58200000000, tien_thue: 4656000000, ky_ke_khai: 'Tháng 10/2026' },
+      { id: 2, mst: '6000234567', ten_doanh_nghiep: 'Công ty TNHH MTV XNK 2-9 Đắk Lắk (Simexco)', loai_hoa_don: 'HĐĐT có mã cơ quan thuế', so_luong_hd: 1950, tong_tien_truoc_thue: 49800000000, tien_thue: 3984000000, ky_ke_khai: 'Tháng 10/2026' },
+      { id: 3, mst: '6000345678', ten_doanh_nghiep: 'Công ty CP Cà phê An Thái', loai_hoa_don: 'HĐĐT có mã cơ quan thuế', so_luong_hd: 1120, tong_tien_truoc_thue: 21500000000, tien_thue: 1720000000, ky_ke_khai: 'Tháng 10/2026' },
+      { id: 4, mst: '6000456789', ten_doanh_nghiep: 'HTX Nông nghiệp Dịch vụ Công bằng Ea Tu', loai_hoa_don: 'HĐĐT khởi tạo từ máy tính tiền', so_luong_hd: 840, tong_tien_truoc_thue: 14200000000, tien_thue: 1136000000, ky_ke_khai: 'Tháng 10/2026' }
     ];
   }
   if (p.includes('htx')) {
@@ -235,6 +262,36 @@ function getSampleRowsForApi(endpointOrPath: string): any[] {
 }
 
 const FALLBACK_CATALOG: CatalogEntry[] = [
+  {
+    endpoint: 'BTC_FINANCE_OVERVIEW',
+    name: 'Giám sát Tài chính & Ngân sách Tổng hợp tỉnh Đắk Lắk (Bộ Tài chính & LGSP)',
+    fields: ['id', 'ma_chi_tieu', 'ten_chi_tieu', 'linh_vuc', 'don_vi_phu_trach', 'du_toan_giao', 'thuc_hien', 'ty_le_dat', 'cung_ky_nam_truoc', 'danh_gia_tien_do', 'ky_bao_cao'],
+  },
+  {
+    endpoint: 'BTC_NSNN_THU',
+    name: 'Thu Ngân sách Nhà nước trên địa bàn tỉnh Đắk Lắk (Cục Thuế & Bộ Tài chính)',
+    fields: ['id', 'dia_ban', 'khoan_thu', 'du_toan_nam', 'so_thuc_thu', 'tien_do_dat', 'cung_ky_nam_truoc', 'thoi_gian', 'ghi_chu'],
+  },
+  {
+    endpoint: 'BTC_NSNN_CHI',
+    name: 'Chi Ngân sách Nhà nước tỉnh Đắk Lắk (Kho bạc Nhà nước & Bộ Tài chính)',
+    fields: ['id', 'linh_vuc_chi', 'du_toan_giao', 'so_da_chi', 'ty_le_giai_ngan', 'thoi_gian', 'ghi_chu'],
+  },
+  {
+    endpoint: 'BTC_DTC_GIAINGAN_TUAN',
+    name: 'Giải ngân Vốn Đầu tư công theo tuần - Dự án trọng điểm (Trục Tài chính Đắk Lắk)',
+    fields: ['id', 'ten_du_an', 'chu_dau_tu', 'ke_hoach_von', 'giai_ngan_tuan', 'da_giai_ngan', 'ty_le_dat', 'tuan_bao_cao'],
+  },
+  {
+    endpoint: 'BTC_HHXNK',
+    name: 'Kim ngạch Hàng hóa Xuất Nhập khẩu Hải quan Đắk Lắk (Tổng cục Hải quan)',
+    fields: ['id', 'ma_hai_quan', 'ten_chi_cuc', 'loai_hinh', 'mat_hang', 'thi_truong', 'so_luong_tan', 'kim_ngach_usd', 'thue_xnk_vnd', 'thoi_gian'],
+  },
+  {
+    endpoint: 'BTC_HDDN',
+    name: 'Hóa đơn Điện tử & Hoạt động Doanh nghiệp (Bộ Tài chính & Thuế điện tử)',
+    fields: ['id', 'mst', 'ten_doanh_nghiep', 'loai_hoa_don', 'so_luong_hd', 'tong_tien_truoc_thue', 'tien_thue', 'ky_ke_khai'],
+  },
   {
     endpoint: 'BTCTU_KPI_STATS',
     name: 'Đánh giá Cán bộ Ban Tổ chức Tỉnh ủy (SOP 4 bước & Mẫu 05)',
@@ -546,6 +603,23 @@ export class ReportsService implements OnModuleInit {
         }
       } else if (sourceCode === 'USER_CADRE_STATS' || sourceCode.includes('CADRE')) {
         statsRes = await this.statsService.getEmployeeQualityStatistics(queryParams, null, queryMeta);
+      } else if (
+        sourceCode.startsWith('BTC_') ||
+        sourceCode.includes('FINANCE') ||
+        sourceCode.includes('NSNN') ||
+        sourceCode.includes('DTC_') ||
+        sourceCode.includes('HHXNK') ||
+        sourceCode.includes('HDDN')
+      ) {
+        const snapshot = await this.prisma.statisticsSnapshot.findFirst({
+          where: { dataSourceCode: sourceCode },
+          orderBy: { recordedAt: 'desc' },
+        });
+        if (snapshot && Array.isArray(snapshot.data) && (snapshot.data as any[]).length > 0) {
+          statsRes = { data: snapshot.data };
+        } else {
+          statsRes = { data: getSampleRowsForApi(sourceCode) };
+        }
       } else if (sourceCode.includes('|')) {
         const [uCode, uPath] = sourceCode.split('|');
         statsRes = await this.fetchDynamicApiSource(
@@ -868,10 +942,17 @@ export class ReportsService implements OnModuleInit {
 
   async getReportRunStatus(payloadStr: string, _userDataStr: string) {
     try {
-      const payload = JSON.parse(payloadStr);
+      const payload = safeParse(payloadStr, 'GetReportRunStatus payload không phải JSON hợp lệ');
       const runId = Number(payload.id || payload.runId);
-      const run = await this.prisma.reportRun.findUnique({
-        where: { id: runId },
+      // Ledger #17 (IDOR): nếu request có organizationId → chặn scope theo đơn vị.
+      // Blocker: proto GenericRequest chỉ có payload JSON string — organizationId
+      // đi trong payload, gateway hiện chưa gửi field này (xem báo cáo lane).
+      const orgScope =
+        payload.organizationId !== undefined && payload.organizationId !== null
+          ? { organizationId: Number(payload.organizationId) }
+          : {};
+      const run = await this.prisma.reportRun.findFirst({
+        where: { id: runId, ...orgScope },
       });
       if (!run) {
         throw new RpcException('Không tìm thấy lượt chạy');
@@ -899,11 +980,24 @@ export class ReportsService implements OnModuleInit {
   async getDatasetSnapshot(payloadStr: string, _userDataStr: string) {
     try {
       // Tối ưu: Lấy an toàn các chunks và xử lý lọc/phân trang trực tiếp trên backend
-      const payload = JSON.parse(payloadStr);
+      const payload = safeParse(payloadStr, 'GetDatasetSnapshot payload không phải JSON hợp lệ');
       const runId = Number(payload.runId || payload.id);
       const limit = Math.min(Math.max(Number(payload.limit) || 1000, 1), 2000);
       const page = Math.max(Number(payload.page) || 1, 1);
       const search = payload.search || payload.q ? String(payload.search || payload.q).trim() : '';
+
+      // Ledger #17 (IDOR): scope snapshot theo run — verify organizationId của run
+      // khi request có field organizationId (DatasetSnapshot không có cột riêng).
+      const orgScope =
+        payload.organizationId !== undefined && payload.organizationId !== null
+          ? { organizationId: Number(payload.organizationId) }
+          : {};
+      const run = await this.prisma.reportRun.findFirst({
+        where: { id: Number(runId), ...orgScope },
+      });
+      if (!run) {
+        throw new RpcException('Không tìm thấy lượt chạy báo cáo tương ứng');
+      }
 
       const snapshots = await this.prisma.datasetSnapshot.findMany({
         where: { runId: Number(runId) },
@@ -953,6 +1047,7 @@ export class ReportsService implements OnModuleInit {
         message: 'Lấy dữ liệu kết quả thành công',
       };
     } catch (error: any) {
+      if (error instanceof RpcException) throw error;
       this.logger.error('Error fetching dataset snapshot', error?.stack);
       throw new RpcException('Lỗi lấy kết quả báo cáo');
     }
@@ -1002,7 +1097,10 @@ export class ReportsService implements OnModuleInit {
       const timestamp = new Date().toISOString().slice(0, 10);
 
       if (format === 'decision' || format === 'decision_html' || format === 'mau05') {
-        const total = filteredRows.length > 0 ? filteredRows.length : 23;
+        // Ledger #23: không bao giờ điền số bịa (total fallback 23). Total = số dòng thật.
+        const total = filteredRows.length;
+        const ratioOf = (count: number) =>
+          total > 0 ? ((count / total) * 100).toFixed(1) : '';
         const excellentRows = filteredRows.filter((r) => {
           const rank = String(r.approvedRank || r.ranking || r.proposedRank || '').toLowerCase();
           return rank.includes('xuất sắc');
@@ -1026,32 +1124,35 @@ export class ReportsService implements OnModuleInit {
         });
 
         const excCount = excellentRows.length;
-        const excRatio = ((excCount / total) * 100).toFixed(1);
+        const excRatio = ratioOf(excCount);
         const goodCount = goodRows.length;
-        const goodRatio = ((goodCount / total) * 100).toFixed(1);
+        const goodRatio = ratioOf(goodCount);
         const satCount = satRows.length;
-        const satRatio = ((satCount / total) * 100).toFixed(1);
+        const satRatio = ratioOf(satCount);
         const unsatCount = unsatRows.length;
-        const unsatRatio = ((unsatCount / total) * 100).toFixed(1);
+        const unsatRatio = ratioOf(unsatCount);
 
         const excListHtml = excellentRows
           .map((c) => {
-            const score = Number(c.sTong ?? c.qualityScore ?? 100).toFixed(1);
-            return `<li style="margin: 4px 0;">Đ/c <strong>${c.fullName || c.employeeName}</strong> - ${c.jobTitle || 'Cán bộ'} (${c.departmentName || ''}) - <strong>${score} điểm</strong></li>`;
+            const rawScore = c.sTong ?? c.qualityScore;
+            const score =
+              rawScore == null ? 'N/A' : `${Number(rawScore).toFixed(1)} điểm`;
+            return `<li style="margin: 4px 0;">Đ/c <strong>${c.fullName || c.employeeName}</strong> - ${c.jobTitle || 'Cán bộ'} (${c.departmentName || ''}) - <strong>${score}</strong></li>`;
           })
           .join('\n');
 
-        const collectives = [
-          { name: 'Tập thể Lãnh đạo Ban', score: '98.5', rank: 'Hoàn thành xuất sắc nhiệm vụ' },
-          { name: 'Phòng Tổ chức đảng, đảng viên', score: '96.0', rank: 'Hoàn thành xuất sắc nhiệm vụ' },
-          { name: 'Phòng Tổ chức cán bộ', score: '95.5', rank: 'Hoàn thành xuất sắc nhiệm vụ' },
-          { name: 'Phòng Bảo vệ chính trị nội bộ', score: '88.5', rank: 'Hoàn thành tốt nhiệm vụ' },
-          { name: 'Văn phòng Ban', score: '87.0', rank: 'Hoàn thành tốt nhiệm vụ' },
-        ];
+        // Ledger #23: danh sách tập thể + điểm KPI (98.5/96.0/95.5/88.5/87.0) là dữ liệu
+        // bịa kết cứng trong template → xóa hẳn, không render khi không có dữ liệu thật.
+        const collectiveHtml = '';
 
-        const collectiveHtml = collectives
-          .map((col, idx) => `<p style="margin: 3px 0;">${idx + 1}. <strong>${col.name}:</strong> Điểm KPI ${col.score}/100 • Xếp loại: <strong>${col.rank}</strong>.</p>`)
-          .join('\n');
+        // Kỳ đánh giá lấy từ dữ liệu thật (quarterYear/periodName của dòng dữ liệu),
+        // nếu không có → để trống thay vì hardcode "Quý I/2026".
+        const periodCandidates = filteredRows
+          .map((r: any) => r.quarterYear || r.periodName)
+          .filter(Boolean)
+          .map(String);
+        const periodLabel = periodCandidates.length > 0 ? periodCandidates[0] : '';
+        const periodText = periodLabel ? ` ${periodLabel}` : '';
 
         const dateStr = `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`;
 
@@ -1084,7 +1185,7 @@ export class ReportsService implements OnModuleInit {
         <div style="font-size: 12pt;">TỈNH ỦY ĐẮK LẮK</div>
         <div style="font-size: 12.5pt; font-weight: bold;">BAN TỔ CHỨC TỈNH ỦY</div>
         <div class="divider" style="width: 100px;"></div>
-        <div style="font-size: 12pt; margin-top: 4px;">Số: 125-QĐ/BTCTU</div>
+        <div style="font-size: 12pt; margin-top: 4px;">Số: </div>
       </td>
       <td style="width: 55%;">
         <div style="font-size: 13pt; font-weight: bold;">ĐẢNG CỘNG SẢN VIỆT NAM</div>
@@ -1096,7 +1197,7 @@ export class ReportsService implements OnModuleInit {
 
   <div class="title-block">
     <div class="doc-title">QUYẾT ĐỊNH</div>
-    <div class="doc-subtitle">Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy Quý I năm 2026</div>
+    <div class="doc-subtitle">Về việc phê duyệt kết quả đánh giá, xếp loại chất lượng cán bộ, công chức và tập thể cơ quan Ban Tổ chức Tỉnh ủy${periodText}</div>
     <div class="divider" style="width: 80px; height: 1px; margin-top: 8px;"></div>
   </div>
 
@@ -1104,18 +1205,17 @@ export class ReportsService implements OnModuleInit {
     <p style="margin: 4px 0; text-indent: 1.27cm;">- Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và tổ chức bộ máy cơ quan;</p>
     <p style="margin: 4px 0; text-indent: 1.27cm;">- Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ, công chức, viên chức hằng quý và hằng năm;</p>
     <p style="margin: 4px 0; text-indent: 1.27cm;">- Căn cứ Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương về quy chế kết nối, chia sẻ dữ liệu và kiểm tra nghiệp vụ Ngành Tổ chức xây dựng Đảng;</p>
-    <p style="margin: 4px 0; text-indent: 1.27cm;">- Căn cứ Biên bản cuộc họp của Hội đồng Thẩm định đánh giá xếp loại cơ quan Ban Tổ chức Tỉnh ủy ngày 25 tháng 03 năm 2026;</p>
     <p style="margin: 4px 0; text-indent: 1.27cm;">- Xét đề nghị của Trưởng phòng Tổ chức cán bộ và Chánh Văn phòng Ban,</p>
   </div>
 
   <div class="decision-declaration">BAN TỔ CHỨC TỈNH ỦY QUYẾT ĐỊNH:</div>
 
-  <div class="article-title">Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với 05 tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk:</div>
+  <div class="article-title">Điều 1. Phê duyệt kết quả đánh giá, xếp loại chất lượng${periodText} đối với các tập thể phòng thuộc cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk:</div>
   <div class="article-content">
     ${collectiveHtml}
   </div>
 
-  <div class="article-title">Điều 2. Phê duyệt kết quả đánh giá, xếp loại chất lượng Quý I năm 2026 đối với ${total} cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk, cụ thể:</div>
+  <div class="article-title">Điều 2. Phê duyệt kết quả đánh giá, xếp loại chất lượng${periodText} đối với ${total} cán bộ, công chức cơ quan Ban Tổ chức Tỉnh ủy Đắk Lắk, cụ thể:</div>
   <div class="article-content">
     <p style="margin: 4px 0;">• <strong>1. Hoàn thành xuất sắc nhiệm vụ: 0${excCount} đồng chí</strong> (Tỷ lệ ${excRatio}%, bảo đảm đúng quy định khống chế trần không quá 20% theo Hướng dẫn 05-HD/TU; 100% có hồ sơ kê khai nhiệm vụ nổi trội Mẫu 04):</p>
     <ul style="margin: 4px 0 6px 0; padding-left: 24px;">
@@ -1151,7 +1251,6 @@ export class ReportsService implements OnModuleInit {
           ĐÃ KÝ ĐIỆN TỬ
         </div>
         <div style="height: 25px;"></div>
-        <div style="font-weight: bold; font-size: 13pt;">Nguyễn Thượng Hải</div>
       </td>
     </tr>
   </table>
@@ -1177,6 +1276,12 @@ export class ReportsService implements OnModuleInit {
       if (format === 'html' || format === 'pdf') {
         const titleUpper = reportName.toUpperCase();
         const dateStr = `Buôn Ma Thuột, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`;
+        // Kỳ đánh giá từ dữ liệu thật; thiếu → 'N/A' thay vì kỳ cứng.
+        const periodCandidatesHtml = filteredRows
+          .map((r: any) => r.quarterYear || r.periodName)
+          .filter(Boolean)
+          .map(String);
+        const periodHtmlLabel = periodCandidatesHtml.length > 0 ? periodCandidatesHtml[0] : '';
 
         const rowsHtml = filteredRows
           .map((r, idx) => {
@@ -1185,10 +1290,17 @@ export class ReportsService implements OnModuleInit {
             const name = r.fullName || r.employeeName || '';
             const title = r.jobTitle || '';
             const dept = r.departmentName || r.organName || '';
-            const scoreNV = Number(r.sNhiemVu ?? (Number(r.sTong ?? 100) * 0.7).toFixed(1));
-            const scoreChung = Number(r.sChung ?? (Number(r.sTong ?? 100) - scoreNV).toFixed(1));
-            const scoreTong = Number(r.sTong ?? r.qualityScore ?? 100).toFixed(1);
-            const rank = r.approvedRank || r.ranking || r.proposedRank || 'Hoàn thành tốt nhiệm vụ';
+            // Ledger #23: không điền điểm fallback bịa (sTong??100 → 70/30). Thiếu → N/A.
+            const num = (v: unknown): number | null =>
+              v == null || v === '' || Number.isNaN(Number(v)) ? null : Number(v);
+            const rawNV = num(r.sNhiemVu);
+            const rawChung = num(r.sChung);
+            const rawTong = num(r.sTong ?? r.qualityScore);
+            const fmtNum = (v: number | null): string => (v == null ? 'N/A' : v.toFixed(1));
+            const scoreNV = rawNV ?? (rawTong != null ? Number((rawTong * 0.7).toFixed(1)) : null);
+            const scoreChung = rawChung ?? (rawNV != null && rawTong != null ? Number((rawTong - rawNV).toFixed(1)) : null);
+            const scoreTong = rawTong;
+            const rank = r.approvedRank || r.ranking || r.proposedRank || '';
 
             return `<tr>
               <td style="text-align:center;">${stt}</td>
@@ -1196,9 +1308,9 @@ export class ReportsService implements OnModuleInit {
               <td><strong>${name}</strong></td>
               <td>${title}</td>
               <td>${dept}</td>
-              <td style="text-align:center;">${scoreChung}</td>
-              <td style="text-align:center;">${scoreNV}</td>
-              <td style="text-align:center;font-weight:bold;">${scoreTong}</td>
+              <td style="text-align:center;">${fmtNum(scoreChung)}</td>
+              <td style="text-align:center;">${fmtNum(scoreNV)}</td>
+              <td style="text-align:center;font-weight:bold;">${fmtNum(scoreTong)}</td>
               <td>${rank}</td>
             </tr>`;
           })
@@ -1240,7 +1352,7 @@ export class ReportsService implements OnModuleInit {
   </table>
 
   <div class="title">${titleUpper}</div>
-  <div class="subtitle">(Kỳ đánh giá: Quý I/2026 · Hướng dẫn số 05-HD/TU & Quy định 39-QĐ/TU)</div>
+  <div class="subtitle">(Kỳ đánh giá: ${periodHtmlLabel ? periodHtmlLabel : 'N/A'} · Hướng dẫn số 05-HD/TU & Quy định 39-QĐ/TU)</div>
 
   <table class="data-table">
     <thead>
@@ -1273,7 +1385,6 @@ export class ReportsService implements OnModuleInit {
         <div style="font-weight: bold;">TRƯỞNG BAN</div>
         <div style="font-style: italic; font-size: 11pt;">(Ký, đóng dấu)</div>
         <div style="height: 70px;"></div>
-        <div style="font-weight: bold;">Nguyễn Thượng Hải</div>
       </td>
     </tr>
   </table>
@@ -1318,13 +1429,22 @@ export class ReportsService implements OnModuleInit {
       ];
 
       const csvRows = filteredRows.map((r, idx) => {
-        const sTong = Number(r.sTong ?? r.qualityScore ?? 100);
-        const sNV = Number(r.sNhiemVu ?? (sTong * 0.7).toFixed(1));
-        const sChung = Number(r.sChung ?? (sTong - sNV).toFixed(1));
-        const taskCount = Number(r.taskCount ?? 6);
-        const compCount = Number(r.completedCount ?? taskCount);
-        const scoreA = taskCount > 0 ? Math.min(100, Math.round((compCount / taskCount) * 100)) : 100;
-        const scoreB = Number(r.qualityScore || Math.min(100, Math.round(sNV / 0.7)));
+        // Ledger #23: bỏ mọi fallback số liệu bịa (taskCount??6, scoreA??100, điểm C/D 98/95,
+        // rank mặc định 'Hoàn thành tốt nhiệm vụ', sopStep 'Bước 4') → khi không có dữ liệu
+        // thật thì để trống (UI/file hiển thị N/A/trống).
+        const num = (v: unknown): number | null =>
+          v == null || v === '' || Number.isNaN(Number(v)) ? null : Number(v);
+        const sTong = num(r.sTong ?? r.qualityScore);
+        const sNV = num(r.sNhiemVu) ?? (sTong != null ? Number((sTong * 0.7).toFixed(1)) : null);
+        const sChung = num(r.sChung) ?? (sTong != null && sNV != null ? Number((sTong - sNV).toFixed(1)) : null);
+        const taskCount = num(r.taskCount);
+        const compCount = num(r.completedCount);
+        const scoreA =
+          taskCount != null && taskCount > 0 && compCount != null
+            ? Math.min(100, Math.round((compCount / taskCount) * 100))
+            : null;
+        const scoreB = num(r.qualityScore);
+        const csvNum = (v: number | null): string | number => (v == null ? '' : v);
 
         return [
           idx + 1,
@@ -1332,17 +1452,17 @@ export class ReportsService implements OnModuleInit {
           `"${r.fullName || r.employeeName || ''}"`,
           `"${r.jobTitle || ''}"`,
           `"${r.departmentName || r.organName || ''}"`,
-          taskCount,
-          compCount,
-          scoreA,
-          scoreB,
-          98,
-          95,
-          sChung,
-          sNV,
-          sTong,
-          `"${r.approvedRank || r.ranking || r.proposedRank || 'Hoàn thành tốt nhiệm vụ'}"`,
-          `"${r.sopStep || 'Bước 4: Ban hành QĐ'}"`,
+          csvNum(taskCount),
+          csvNum(compCount),
+          csvNum(scoreA),
+          csvNum(scoreB),
+          '', // Điểm C (Tiến độ) — không có dữ liệu thật
+          '', // Điểm D (Phối hợp) — không có dữ liệu thật
+          csvNum(sChung),
+          csvNum(sNV),
+          csvNum(sTong),
+          `"${r.approvedRank || r.ranking || r.proposedRank || ''}"`,
+          `"${r.sopStep || ''}"`,
           `"${r.hasMau04 || ''}"`,
         ].join(',');
       });
@@ -1378,17 +1498,23 @@ export class ReportsService implements OnModuleInit {
   ) {
     try {
       const user = userDataStr ? JSON.parse(userDataStr) : {};
-      // Người dùng có quyền xem/quản lý báo cáo, liên thông hoặc quản trị hệ thống đều được nạp nguồn API
+      // Ledger #11: bỏ `\|\| true` (permission bypass). Default-deny: chỉ user có
+      // role quản trị hoặc permission api-sourcesMatchingWhitelist mới được nạp nguồn API liên thông.
+      const API_SOURCE_PERMISSIONS = [
+        'INTEGRATION:VIEW',
+        'REPORT:READ',
+        'REPORT:MANAGE',
+        'API_GATEWAY:VIEW',
+      ];
+      const flatten: string[] = Array.isArray(user.permissionsFlatten)
+        ? user.permissionsFlatten
+        : [];
+      const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
       const includesApiSources =
-        !user.permissionsFlatten ||
-        user.permissionsFlatten.length === 0 ||
-        user.permissionsFlatten.includes('INTEGRATION:VIEW') ||
-        user.permissionsFlatten.includes('REPORT:READ') ||
-        user.permissionsFlatten.includes('REPORT:MANAGE') ||
-        user.permissionsFlatten.includes('API_GATEWAY:VIEW') ||
-        user.roles?.includes('ADMIN') ||
-        user.roles?.includes('SUPER_ADMIN') ||
-        true;
+        roles.includes('ADMIN') ||
+        roles.includes('SUPER_ADMIN') ||
+        flatten.includes('*') ||
+        API_SOURCE_PERMISSIONS.some((p) => flatten.includes(p));
 
       const now = Date.now();
       if (

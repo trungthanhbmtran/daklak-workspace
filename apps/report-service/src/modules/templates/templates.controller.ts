@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { TemplatesService } from './templates.service';
+import { safeParse } from '../../common/safe-parse.util';
 
 @Controller()
 export class TemplatesController {
@@ -8,7 +9,7 @@ export class TemplatesController {
 
   @GrpcMethod('ReportService', 'CreateTemplate')
   async createTemplate(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const res = await this.templatesService.createTemplate(body);
     return { success: true, data: JSON.stringify(res) };
   }
@@ -27,14 +28,14 @@ export class TemplatesController {
 
   @GrpcMethod('ReportService', 'GetTemplateById')
   async getTemplateById(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const res = await this.templatesService.getTemplateById(+body.id);
     return { success: true, data: JSON.stringify(res) };
   }
 
   @GrpcMethod('ReportService', 'UpdateTemplate')
   async updateTemplate(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const id = body.id;
     delete body.id;
     const res = await this.templatesService.updateTemplate(+id, body);
@@ -43,14 +44,14 @@ export class TemplatesController {
 
   @GrpcMethod('ReportService', 'DeleteTemplate')
   async deleteTemplate(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const res = await this.templatesService.deleteTemplate(+body.id);
     return { success: true, data: JSON.stringify(res) };
   }
 
   @GrpcMethod('ReportService', 'AssignReport')
   async assignReport(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const { templateId, assigneeType, assigneeId, permissions } = body;
     const res = await this.templatesService.assignReport(+templateId, assigneeType, assigneeId, permissions);
     return { success: true, data: JSON.stringify(res) };
@@ -58,14 +59,14 @@ export class TemplatesController {
 
   @GrpcMethod('ReportService', 'GetReportAssignments')
   async getReportAssignments(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const res = await this.templatesService.getReportAssignments(+body.templateId);
     return { success: true, data: JSON.stringify(res) };
   }
 
   @GrpcMethod('ReportService', 'UnassignReport')
   async unassignReport(data: { payload: string }) {
-    const body = data.payload ? JSON.parse(data.payload) : {};
+    const body = safeParse(data?.payload, 'Template payload không phải JSON hợp lệ');
     const res = await this.templatesService.unassignReport(
       +body.templateId,
       body.assigneeType,
@@ -76,7 +77,7 @@ export class TemplatesController {
 
   @GrpcMethod('ReportService', 'GetMyAssignedReports')
   async getMyAssignedReports(data: { userData: string }) {
-    const userData = data.userData ? JSON.parse(data.userData) : {};
+    const userData = safeParse(data?.userData, 'GetMyAssignedReports userData không phải JSON hợp lệ');
     const res = await this.templatesService.getMyAssignedReports(userData.userId, userData.unitId);
     return { success: true, data: JSON.stringify(res) };
   }

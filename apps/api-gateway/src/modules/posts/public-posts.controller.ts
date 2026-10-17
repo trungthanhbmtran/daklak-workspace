@@ -17,6 +17,7 @@ import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { getInternalGrpcMetadata } from '../../core/utils/internal-metadata.util';
 
 @ApiTags('Public Posts')
 @Controller('public/posts')
@@ -51,13 +52,16 @@ export class PublicPostsController implements OnModuleInit {
 
     // Chỉ trả về các bài viết công khai (PUBLISHED)
     return firstValueFrom(
-      this.postService.listPosts({ ...req, status: 'PUBLISHED' }),
+      this.postService.listPosts(
+        { ...req, status: 'PUBLISHED' },
+        getInternalGrpcMetadata(),
+      ),
     ).catch((e) => this.handleRpcError(e));
   }
 
   @Get('slug/:slug')
   async findBySlug(@Param('slug') slug: string) {
-    return firstValueFrom(this.postService.getPostBySlug({ slug })).catch(
+    return firstValueFrom(this.postService.getPostBySlug({ slug }, getInternalGrpcMetadata())).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
@@ -66,14 +70,14 @@ export class PublicPostsController implements OnModuleInit {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return firstValueFrom(this.postService.getPost({ id })).catch((e) =>
+    return firstValueFrom(this.postService.getPost({ id }, getInternalGrpcMetadata())).catch((e) =>
       this.handleRpcError(e),
     );
   }
 
   @Post(':id/view')
   async incrementView(@Param('id') id: string) {
-    return firstValueFrom(this.postService.incrementViewCount({ id })).catch(
+    return firstValueFrom(this.postService.incrementViewCount({ id }, getInternalGrpcMetadata())).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },

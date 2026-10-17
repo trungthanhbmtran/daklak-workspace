@@ -11,6 +11,13 @@ import type {
   UpdateJobTitlePayload,
 } from "./types";
 
+/**
+ * Unwrap payload từ gateway envelope chính thức (helper feature-local duy nhất của organization).
+ * apiClient đã trả body nhưng gateway envelope chưa được gỡ toàn cục: một số endpoint
+ * bọc thêm `{ data: ... }` → chuẩn hoá một lần duy nhất tại API/query boundary này.
+ */
+const unwrapOrgEnvelope = (res: any): any => res?.data?.data ?? res?.data ?? [];
+
 export const organizationApi = {
   getOrganizations: (q?: string): Promise<{ data: OrganizationUnitNode[] }> =>
     apiClient.get("/organizations", { params: { q: q || undefined } }).then((r: any) => ({
@@ -105,7 +112,7 @@ export const organizationApi = {
 
   getUnitTypeJobTemplates: (unitTypeId: number): Promise<{ data: number[] }> =>
     apiClient.get(`/organizations/unit-types/${unitTypeId}/job-templates`).then((r: any) => ({
-      data: r?.data?.data || r?.data || [],
+      data: unwrapOrgEnvelope(r),
     })),
 
   updateUnitTypeJobTemplates: (unitTypeId: number, jobTitleIds: number[]) =>
@@ -113,7 +120,7 @@ export const organizationApi = {
 
   getJobTitleGroups: () =>
     apiClient.get("/categories", { params: { group: "JOB_TITLE_GROUP", limit: 100 } }).then((r: any) => ({
-      data: r?.data?.data || r?.data || [],
+      data: unwrapOrgEnvelope(r),
     })),
 
   /**

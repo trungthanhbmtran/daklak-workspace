@@ -47,7 +47,7 @@ export class DocumentsService implements OnModuleInit {
     }
   }
 
-  async listDocuments(query: any, user?: any) {
+  async listDocuments(query: any, user?: any, metadata?: any) {
     const isAdmin =
       user?.permissionsFlatten?.includes('DOCUMENT:MANAGE') ||
       user?.permissionsFlatten?.includes('DOCUMENT:VIEW_ALL') ||
@@ -80,13 +80,13 @@ export class DocumentsService implements OnModuleInit {
       req.isIncoming = query.isIncoming === 'true';
 
     const res = await this.callGrpc(
-      this.documentService.ListDocuments(req),
+      this.documentService.ListDocuments(req, metadata),
       'DocumentService.ListDocuments',
     );
     return normalizeResponsePayload(res, 'document');
   }
 
-  async listAdminProcedures(query: any) {
+  async listAdminProcedures(query: any, metadata?: any) {
     const req = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
@@ -94,40 +94,40 @@ export class DocumentsService implements OnModuleInit {
       category: query.category || 'ALL',
     };
     return this.callGrpc(
-      this.documentService.ListProcedures(req),
+      this.documentService.ListProcedures(req, metadata),
       'DocumentService.ListProcedures',
     );
   }
 
-  async getAdminProcedure(id: string) {
+  async getAdminProcedure(id: string, metadata?: any) {
     return this.callGrpc(
-      this.documentService.GetProcedure({ id }),
+      this.documentService.GetProcedure({ id }, metadata),
       'DocumentService.GetProcedure',
     );
   }
 
-  async createAdminProcedure(body: any) {
+  async createAdminProcedure(body: any, metadata?: any) {
     return this.callGrpc(
-      this.documentService.CreateProcedure(body),
+      this.documentService.CreateProcedure(body, metadata),
       'DocumentService.CreateProcedure',
     );
   }
 
-  async updateAdminProcedure(id: string, body: any) {
+  async updateAdminProcedure(id: string, body: any, metadata?: any) {
     return this.callGrpc(
-      this.documentService.UpdateProcedure({ id, ...body }),
+      this.documentService.UpdateProcedure({ id, ...body }, metadata),
       'DocumentService.UpdateProcedure',
     );
   }
 
-  async deleteAdminProcedure(id: string) {
+  async deleteAdminProcedure(id: string, metadata?: any) {
     return this.callGrpc(
-      this.documentService.DeleteProcedure({ id }),
+      this.documentService.DeleteProcedure({ id }, metadata),
       'DocumentService.DeleteProcedure',
     );
   }
 
-  async listAdminDossiers(query: any) {
+  async listAdminDossiers(query: any, metadata?: any) {
     const req = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
@@ -135,75 +135,78 @@ export class DocumentsService implements OnModuleInit {
       status: query.status || '',
     };
     return this.callGrpc(
-      this.documentService.ListDossiers(req),
+      this.documentService.ListDossiers(req, metadata),
       'DocumentService.ListDossiers',
     );
   }
 
-  async getAdminDossier(id: string) {
+  async getAdminDossier(id: string, metadata?: any) {
     return this.callGrpc(
-      this.documentService.GetDossier({ id }),
+      this.documentService.GetDossier({ id }, metadata),
       'DocumentService.GetDossier',
     );
   }
 
-  async createAdminDossier(body: any) {
+  async createAdminDossier(body: any, metadata?: any) {
     return this.callGrpc(
-      this.documentService.CreateDossier(body),
+      this.documentService.CreateDossier(body, metadata),
       'DocumentService.CreateDossier',
     );
   }
 
-  async updateAdminDossier(id: string, body: any) {
+  async updateAdminDossier(id: string, body: any, metadata?: any) {
     return this.callGrpc(
-      this.documentService.UpdateDossier({ id, ...body }),
+      this.documentService.UpdateDossier({ id, ...body }, metadata),
       'DocumentService.UpdateDossier',
     );
   }
 
-  async deleteAdminDossier(id: string) {
+  async deleteAdminDossier(id: string, metadata?: any) {
     return this.callGrpc(
-      this.documentService.DeleteDossier({ id }),
+      this.documentService.DeleteDossier({ id }, metadata),
       'DocumentService.DeleteDossier',
     );
   }
 
-  async listCabinetFiles(user: any, userId: string, orgId: string) {
+  async listCabinetFiles(user: any, userId: string, orgId: string, metadata?: any) {
     const finalUserId = user?.id ? String(user.id) : userId || '';
     return this.callGrpc(
-      this.cabinetService.ListFiles({
-        userId: finalUserId,
-        orgId: orgId || '',
-      }),
+      this.cabinetService.ListFiles(
+        {
+          userId: finalUserId,
+          orgId: orgId || '',
+        },
+        metadata,
+      ),
       'CabinetService.ListFiles',
     );
   }
 
-  async addCabinetFile(user: any, body: any) {
+  async addCabinetFile(user: any, body: any, metadata?: any) {
     body.userId = user?.id ? String(user.id) : '';
     return this.callGrpc(
-      this.cabinetService.AddFile(body),
+      this.cabinetService.AddFile(body, metadata),
       'CabinetService.AddFile',
     );
   }
 
-  async deleteCabinetFile(id: string) {
+  async deleteCabinetFile(id: string, metadata?: any) {
     return this.callGrpc(
-      this.cabinetService.DeleteFile({ id }),
+      this.cabinetService.DeleteFile({ id }, metadata),
       'CabinetService.DeleteFile',
     );
   }
 
-  async getComponents(id: string) {
+  async getComponents(id: string, metadata?: any) {
     return this.callGrpc(
-      this.dossierService.GetComponents({ id }),
+      this.dossierService.GetComponents({ id }, metadata),
       'DossierService.GetComponents',
     );
   }
 
-  async updateComponent(id: string, body: any) {
+  async updateComponent(id: string, body: any, metadata?: any) {
     return this.callGrpc(
-      this.dossierService.UpdateComponent({ id, ...body }),
+      this.dossierService.UpdateComponent({ id, ...body }, metadata),
       'DossierService.UpdateComponent',
     );
   }
@@ -211,9 +214,9 @@ export class DocumentsService implements OnModuleInit {
   async createDossierFromTemplate(body: {
     procedureId: string;
     senderName: string;
-  }) {
+  }, metadata?: any) {
     return this.callGrpc(
-      this.dossierService.CreateDossierFromTemplate(body),
+      this.dossierService.CreateDossierFromTemplate(body, metadata),
       'DossierService.CreateDossierFromTemplate',
     );
   }
@@ -221,9 +224,9 @@ export class DocumentsService implements OnModuleInit {
   async createBlankDossier(body: {
     procedureName: string;
     senderName: string;
-  }) {
+  }, metadata?: any) {
     return this.callGrpc(
-      this.dossierService.CreateBlankDossier(body),
+      this.dossierService.CreateBlankDossier(body, metadata),
       'DossierService.CreateBlankDossier',
     );
   }
@@ -231,32 +234,33 @@ export class DocumentsService implements OnModuleInit {
   async addComponentFromCabinet(
     dossierId: string,
     body: { name: string; fileUrl: string },
+    metadata?: any,
   ) {
     return this.callGrpc(
-      this.dossierService.AddComponentFromCabinet({ dossierId, ...body }),
+      this.dossierService.AddComponentFromCabinet({ dossierId, ...body }, metadata),
       'DossierService.AddComponentFromCabinet',
     );
   }
 
-  async getDocument(id: string) {
+  async getDocument(id: string, metadata?: any) {
     const res = await this.callGrpc(
-      this.documentService.GetDocument({ id }),
+      this.documentService.GetDocument({ id }, metadata),
       'DocumentService.GetDocument',
     );
     return normalizeResponsePayload(res, 'document');
   }
 
-  async createDocument(user: any, body: any) {
+  async createDocument(user: any, body: any, metadata?: any) {
     body.userId = user?.id ? String(user.id) : undefined;
     body.userName = user?.fullname || user?.username || undefined;
     const res = await this.callGrpc(
-      this.documentService.CreateDocument(body),
+      this.documentService.CreateDocument(body, metadata),
       'DocumentService.CreateDocument',
     );
     return normalizeResponsePayload(res, 'document');
   }
 
-  async updateDocument(id: string, user: any, body: any) {
+  async updateDocument(id: string, user: any, body: any, metadata?: any) {
     const payload = {
       id,
       ...body,
@@ -264,41 +268,84 @@ export class DocumentsService implements OnModuleInit {
       userName: user?.fullname || user?.username || undefined,
     };
     const res = await this.callGrpc(
-      this.documentService.UpdateDocument(payload),
+      this.documentService.UpdateDocument(payload, metadata),
       'DocumentService.UpdateDocument',
     );
     return normalizeResponsePayload(res, 'document');
   }
 
-  async extractMetadata(body: { fileId: string }) {
+  async processDocument(
+    id: string,
+    user: any,
+    body: { note?: string },
+    metadata?: any,
+  ) {
+    const res = await this.callGrpc(
+      this.documentService.ProcessDocument(
+        {
+          id,
+          actorId: user?.id ? String(user.id) : undefined,
+          note: body?.note,
+        },
+        metadata,
+      ),
+      'DocumentService.ProcessDocument',
+    );
+    return normalizeResponsePayload(res, 'document');
+  }
+
+  async finalizeDocument(
+    id: string,
+    user: any,
+    body: { note?: string },
+    metadata?: any,
+  ) {
+    const res = await this.callGrpc(
+      this.documentService.FinalizeDocument(
+        {
+          id,
+          actorId: user?.id ? String(user.id) : undefined,
+          note: body?.note,
+        },
+        metadata,
+      ),
+      'DocumentService.FinalizeDocument',
+    );
+    return normalizeResponsePayload(res, 'document');
+  }
+
+  async extractMetadata(body: { fileId: string }, metadata?: any) {
     return this.callGrpc(
-      this.documentService.ExtractMetadata(body),
+      this.documentService.ExtractMetadata(body, metadata),
       'DocumentService.ExtractMetadata',
     );
   }
 
-  async getDocumentLogs(id: string) {
+  async getDocumentLogs(id: string, metadata?: any) {
     return this.callGrpc(
-      this.documentService.GetLogs({ documentId: id }),
+      this.documentService.GetLogs({ documentId: id }, metadata),
       'DocumentService.GetLogs',
     );
   }
 
-  async deleteDocument(id: string) {
+  async deleteDocument(id: string, metadata?: any) {
     return this.callGrpc(
-      this.documentService.DeleteDocument({ id }),
+      this.documentService.DeleteDocument({ id }, metadata),
       'DocumentService.DeleteDocument',
     );
   }
 
   // --- LGSP Interoperability Methods ---
-  async syncLgsp(user?: any) {
+  async syncLgsp(user?: any, metadata?: any) {
     try {
       const res: any = await this.callGrpc(
-        this.documentService.SyncLgsp({
-          actorId: user?.id ? String(user.id) : undefined,
-          actorName: user?.fullname || user?.username || undefined,
-        }),
+        this.documentService.SyncLgsp(
+          {
+            actorId: user?.id ? String(user.id) : undefined,
+            actorName: user?.fullname || user?.username || undefined,
+          },
+          metadata,
+        ),
         'DocumentService.SyncLgsp',
         35000,
       );
@@ -322,15 +369,18 @@ export class DocumentsService implements OnModuleInit {
     }
   }
 
-  async sendLgspDocument(id: string, body: { receiverCode: string }, user?: any) {
+  async sendLgspDocument(id: string, body: { receiverCode: string }, user?: any, metadata?: any) {
     try {
       return await this.callGrpc(
-        this.documentService.SendLgspDocument({
-          documentId: id,
-          receiverCode: body.receiverCode,
-          actorId: user?.id ? String(user.id) : undefined,
-          actorName: user?.fullname || user?.username || undefined,
-        }),
+        this.documentService.SendLgspDocument(
+          {
+            documentId: id,
+            receiverCode: body.receiverCode,
+            actorId: user?.id ? String(user.id) : undefined,
+            actorName: user?.fullname || user?.username || undefined,
+          },
+          metadata,
+        ),
         'DocumentService.SendLgspDocument',
         25000,
       );
@@ -346,12 +396,15 @@ export class DocumentsService implements OnModuleInit {
     }
   }
 
-  async getLgspAgencies(query: any) {
+  async getLgspAgencies(query: any, metadata?: any) {
     const res: any = await this.callGrpc(
-      this.documentService.GetLgspAgencies({
-        limit: query?.limit ? parseInt(query.limit) : undefined,
-        offset: query?.offset ? parseInt(query.offset) : undefined,
-      }),
+      this.documentService.GetLgspAgencies(
+        {
+          limit: query?.limit ? parseInt(query.limit) : undefined,
+          offset: query?.offset ? parseInt(query.offset) : undefined,
+        },
+        metadata,
+      ),
       'DocumentService.GetLgspAgencies',
       15000,
     );
@@ -365,12 +418,15 @@ export class DocumentsService implements OnModuleInit {
     return res;
   }
 
-  async getLgspSentStatus(id: string, lgspDocId?: string) {
+  async getLgspSentStatus(id: string, lgspDocId?: string, metadata?: any) {
     const res: any = await this.callGrpc(
-      this.documentService.GetLgspSentStatus({
-        documentId: id,
-        lgspDocId: lgspDocId,
-      }),
+      this.documentService.GetLgspSentStatus(
+        {
+          documentId: id,
+          lgspDocId: lgspDocId,
+        },
+        metadata,
+      ),
       'DocumentService.GetLgspSentStatus',
       15000,
     );
@@ -384,26 +440,26 @@ export class DocumentsService implements OnModuleInit {
     return res;
   }
 
-  async getLgspConfig() {
+  async getLgspConfig(metadata?: any) {
     return this.callGrpc(
-      this.documentService.GetLgspConfig({}),
+      this.documentService.GetLgspConfig({}, metadata),
       'DocumentService.GetLgspConfig',
       10000,
     );
   }
 
-  async updateLgspConfig(body: any) {
+  async updateLgspConfig(body: any, metadata?: any) {
     return this.callGrpc(
-      this.documentService.UpdateLgspConfig(body),
+      this.documentService.UpdateLgspConfig(body, metadata),
       'DocumentService.UpdateLgspConfig',
       10000,
     );
   }
 
-  async testLgspConnection() {
+  async testLgspConnection(metadata?: any) {
     try {
       return await this.callGrpc(
-        this.documentService.TestLgspConnection({}),
+        this.documentService.TestLgspConnection({}, metadata),
         'DocumentService.TestLgspConnection',
         12000,
       );

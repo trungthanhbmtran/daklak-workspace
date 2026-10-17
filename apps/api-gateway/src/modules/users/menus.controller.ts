@@ -19,8 +19,12 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 import { MenusService, MenuDto } from './menus.service';
 
 @ApiTags('Menu')
@@ -28,20 +32,36 @@ import { MenusService, MenuDto } from './menus.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class MenusController {
-  constructor(private readonly menusService: MenusService) {}
+  constructor(
+    private readonly menusService: MenusService,
+    private readonly issuer: TokenIssuerService,
+  ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách menu (flat) cho trang quản lý menu' })
   @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
-  async getAll(@Query('app') app?: string) {
-    return this.menusService.getAll(app);
+  async getAll(@Req() req: any, @Query('app') app?: string) {
+    return this.menusService.getAll(app, this.getGrpcMetadata(req));
   }
 
   @Get('tree')
   @ApiOperation({ summary: 'Lấy danh sách menu dưới dạng cây' })
   @ApiResponse({ status: 200, description: 'Cây menu' })
-  async getMenuTree(@Query('app') app?: string) {
-    return this.menusService.getMenuTree(app);
+  async getMenuTree(@Req() req: any, @Query('app') app?: string) {
+    return this.menusService.getMenuTree(app, this.getGrpcMetadata(req));
   }
 
   @Get('me')
@@ -54,7 +74,11 @@ export class MenusController {
   })
   @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
-    return this.menusService.getMyMenus(req.user, app);
+    return this.menusService.getMyMenus(
+      req.user,
+      app,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('hub')
@@ -64,7 +88,11 @@ export class MenusController {
   @ApiQuery({ name: 'app', required: false, example: 'ADMIN_PORTAL' })
   @ApiResponse({ status: 200, description: 'Mảng AppItem cho Hub' })
   async getHubApps(@Req() req: any, @Query('app') app?: string) {
-    return this.menusService.getHubApps(req.user, app);
+    return this.menusService.getHubApps(
+      req.user,
+      app,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('sidebar')
@@ -84,28 +112,37 @@ export class MenusController {
     @Query('code') code: string,
     @Query('app') app?: string,
   ) {
-    return this.menusService.getServiceSidebar(req.user, code, app);
+    return this.menusService.getServiceSidebar(
+      req.user,
+      code,
+      app,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Post()
   @ApiOperation({ summary: 'Tạo menu mới (PBAC: quyền gắn với Permission)' })
   @ApiBody({ description: 'Thông tin menu' })
   @ApiResponse({ status: 201, description: 'Menu đã tạo' })
-  async create(@Body() body: MenuDto) {
-    return this.menusService.create(body);
+  async create(@Req() req: any, @Body() body: MenuDto) {
+    return this.menusService.create(body, this.getGrpcMetadata(req));
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật menu (PBAC: quyền gắn với Permission)' })
   @ApiResponse({ status: 200, description: 'Menu đã cập nhật' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: MenuDto) {
-    return this.menusService.update(id, body);
+  async update(
+    @Req() req: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: MenuDto,
+  ) {
+    return this.menusService.update(id, body, this.getGrpcMetadata(req));
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa menu' })
   @ApiResponse({ status: 200, description: 'Đã xóa' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.menusService.delete(id);
+  async delete(@Req() req: any, @Param('id', ParseIntPipe) id: number) {
+    return this.menusService.delete(id, this.getGrpcMetadata(req));
   }
 }

@@ -53,8 +53,8 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
         fiscalYear: isPublic ? parseInt(fiscalYear) : null,
       });
       setComment("");
-    } catch (error) {
-      console.error(`${actionLabel} error:`, error);
+    } catch {
+      toast.error(`${actionLabel} không thành công, vui lòng thử lại.`);
     } finally {
       setIsSaving(false);
     }

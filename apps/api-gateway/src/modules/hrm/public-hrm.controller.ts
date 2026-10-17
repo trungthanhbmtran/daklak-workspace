@@ -14,6 +14,7 @@ import {
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { getInternalGrpcMetadata } from '../../core/utils/internal-metadata.util';
 
 @ApiTags('Public HRM')
 @Controller('public/hrm/employees')
@@ -59,7 +60,7 @@ export class PublicHrmController implements OnModuleInit {
     }
 
     const response = await firstValueFrom(
-      this.employeeService.ListEmployees(req),
+      this.employeeService.ListEmployees(req, getInternalGrpcMetadata()),
     ).catch((e) => this.handleRpcError(e));
     return response;
   }

@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { ClientGrpc, RpcException } from '@nestjs/microservices';
 import { PrismaService } from '../../database/prisma.service';
 import { AppCacheService } from '../../core/cache/app-cache.service';
@@ -17,6 +17,7 @@ import {
 
 @Injectable()
 export class KpiEvaluationsService implements OnModuleInit {
+  private readonly logger = new Logger(KpiEvaluationsService.name);
   private docSvc: any;
   private sysConfigSvc: any;
 
@@ -109,7 +110,7 @@ export class KpiEvaluationsService implements OnModuleInit {
           }
         }
       } catch (e: any) {
-        console.warn(`[Integration] Could not fetch LGSP_ORGANIZATION_ID from user-service: ${e.message}`);
+        this.logger.warn(`[Integration] Could not fetch LGSP_ORGANIZATION_ID from user-service: ${e.message}`);
       }
 
       const payload = {
@@ -127,7 +128,7 @@ export class KpiEvaluationsService implements OnModuleInit {
       }
       return 0;
     } catch (err) {
-      console.error(`[Integration] Error fetching LGSP metric:`, err);
+      this.logger.error(`[Integration] Error fetching LGSP metric:`, err);
       return 0;
     }
   }

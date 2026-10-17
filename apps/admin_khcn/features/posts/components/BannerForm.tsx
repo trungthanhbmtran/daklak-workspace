@@ -168,7 +168,6 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   };
 
   const onError = (errors: any) => {
-    console.warn("Form validation errors:", errors);
     const firstErrorKey = Object.keys(errors)[0];
     if (firstErrorKey) {
       const msg = errors[firstErrorKey]?.message || "Vui lòng kiểm tra lại thông tin nhập liệu!";

@@ -291,8 +291,7 @@ Nhiệm vụ cốt lõi của bạn là hỗ trợ ban lãnh đạo và cán b�
         }
       ]);
       toast.success('Đã lưu cấu hình Bộ não AI thành công!');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Lỗi hệ thống khi lưu cấu hình AI Prompt');
     }
   };

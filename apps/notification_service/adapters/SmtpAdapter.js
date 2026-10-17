@@ -27,14 +27,19 @@ class SmtpAdapter extends BaseAdapter {
     const port = resolveEnv(dyn.port) || resolveEnv(this.config.port);
     const secure = dyn.secure !== undefined ? resolveEnv(dyn.secure) : resolveEnv(this.config.secure);
     const user = resolveEnv(dyn.user) || resolveEnv(this.config.user);
-    const passwordRef = resolveEnv(dyn.password) || resolveEnv(this.config.passwordRef);
+    // Ledger #24: password đọc theo thứ tự dyn.password → config.passwordRef → config.password
+    // (trước đây bỏ sót config.password, khiến SMTP auth fail khi cấu hình chỉ có password).
+    const password =
+      resolveEnv(dyn.password) ||
+      resolveEnv(this.config.passwordRef) ||
+      resolveEnv(this.config.password);
     const portNum = port ? parseInt(port, 10) : 587;
-    
+
     const transporter = nodemailer.createTransport({
       host: host || 'localhost',
       port: portNum,
       secure: secure === 'true' || secure === true,
-      auth: user && passwordRef ? { user, pass: passwordRef } : undefined,
+      auth: user && password ? { user, pass: password } : undefined,
     });
     
     if (Object.keys(dyn).length === 0) {

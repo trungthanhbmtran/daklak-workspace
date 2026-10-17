@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import * as yaml from 'js-yaml';
 import { Collection } from 'postman-collection';
 
@@ -46,6 +46,8 @@ export interface ParseResult {
 
 @Injectable()
 export class ImportParserService {
+  private readonly logger = new Logger(ImportParserService.name);
+
   async parseFileOrText(
     content: string,
     filename?: string,
@@ -354,7 +356,7 @@ export class ImportParserService {
         endpoints,
       };
     } catch (e: any) {
-      console.error('Postman parse error:', e);
+      this.logger.error('Postman parse error:', e);
       throw new BadRequestException(
         `Lỗi khi phân tích Postman file: ${e.message || 'Lỗi không xác định'}`,
       );

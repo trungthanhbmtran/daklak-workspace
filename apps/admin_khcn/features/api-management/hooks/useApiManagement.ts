@@ -76,9 +76,13 @@ export const useCreateEndpoint = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ connectionId, data }: { connectionId: string; data: any }) => apiManagementApi.createEndpoint(connectionId, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Thêm Endpoint thành công");
       qc.invalidateQueries({ queryKey: ['api-connections'] });
+      // Detail fallback từ object cha → phải invalidate detail để danh sách endpoints refresh.
+      if (variables?.connectionId) {
+        qc.invalidateQueries({ queryKey: ['api-connections', variables.connectionId] });
+      }
     },
     onError: (err: any) => toast.error(err?.response?.data?.message || "Lỗi khi thêm Endpoint")
   });
@@ -87,10 +91,15 @@ export const useCreateEndpoint = () => {
 export const useUpdateEndpoint = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ endpointId, data }: { endpointId: string; data: any }) => apiManagementApi.updateEndpoint(endpointId, data),
-    onSuccess: () => {
+    mutationFn: ({ endpointId, data }: { endpointId: string; connectionId?: string; data: any }) =>
+      apiManagementApi.updateEndpoint(endpointId, data),
+    onSuccess: (_, variables) => {
       toast.success("Cập nhật Endpoint thành công");
       qc.invalidateQueries({ queryKey: ['api-connections'] });
+      // Detail fallback từ object cha → phải invalidate detail để danh sách endpoints refresh.
+      if (variables?.connectionId) {
+        qc.invalidateQueries({ queryKey: ['api-connections', variables.connectionId] });
+      }
     },
     onError: (err: any) => toast.error(err?.response?.data?.message || "Lỗi khi cập nhật Endpoint")
   });
@@ -99,10 +108,14 @@ export const useUpdateEndpoint = () => {
 export const useDeleteEndpoint = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (endpointId: string) => apiManagementApi.deleteEndpoint(endpointId),
-    onSuccess: () => {
+    mutationFn: ({ endpointId }: { endpointId: string; connectionId?: string }) =>
+      apiManagementApi.deleteEndpoint(endpointId),
+    onSuccess: (_, variables) => {
       toast.success("Xóa Endpoint thành công");
       qc.invalidateQueries({ queryKey: ['api-connections'] });
+      if (variables?.connectionId) {
+        qc.invalidateQueries({ queryKey: ['api-connections', variables.connectionId] });
+      }
     },
     onError: (err: any) => toast.error(err?.response?.data?.message || "Lỗi khi xóa Endpoint")
   });

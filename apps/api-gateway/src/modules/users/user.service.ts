@@ -9,14 +9,18 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 import { MICROSERVICES } from '../../core/constants/services';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RedisService } from '../../core/redis/redis.service';
 
 @Injectable()
 export class UserService implements OnModuleInit {
+  private readonly logger = new Logger(UserService.name);
+
   private handleRpcError(e: any, defaultMsg = 'RPC Call Failed'): never {
     const code = e?.code;
     const message = e?.details || e?.message || defaultMsg;
@@ -45,7 +49,13 @@ export class UserService implements OnModuleInit {
     );
   }
 
-  async list(user: any, pageStr?: string, limitStr?: string, search?: string) {
+  async list(
+    user: any,
+    pageStr?: string,
+    limitStr?: string,
+    search?: string,
+    metadata?: Metadata,
+  ) {
     const userId = user?.id;
     const page = parseInt(pageStr || '1', 10);
     const limit = parseInt(limitStr || '10', 10);
@@ -54,7 +64,7 @@ export class UserService implements OnModuleInit {
 
     const userInfo: any = userId
       ? await firstValueFrom(
-          this.userGrpcService.FindOne({ id: userId }),
+          this.userGrpcService.FindOne({ id: userId }, metadata),
         ).catch((err: any) => {
           if (err?.code !== 5) this.handleRpcError(err);
           return null;
@@ -84,7 +94,7 @@ export class UserService implements OnModuleInit {
         take,
         search,
         unitCodeStartsWith,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: response?.data,
@@ -92,9 +102,9 @@ export class UserService implements OnModuleInit {
     };
   }
 
-  async getDetail(id: number) {
+  async getDetail(id: number, metadata?: Metadata) {
     const data: any = await firstValueFrom(
-      this.userGrpcService.FindOne({ id }),
+      this.userGrpcService.FindOne({ id }, metadata),
     ).catch((e) => this.handleRpcError(e));
     if (!data) return { data: null };
 
@@ -117,9 +127,9 @@ export class UserService implements OnModuleInit {
     };
   }
 
-  async getUserPolicies(id: number) {
+  async getUserPolicies(id: number, metadata?: Metadata) {
     const data: any = await firstValueFrom(
-      this.userGrpcService.FindOne({ id }),
+      this.userGrpcService.FindOne({ id }, metadata),
     ).catch((e) => this.handleRpcError(e));
     if (!data) return { data: [] };
 
@@ -143,7 +153,7 @@ export class UserService implements OnModuleInit {
     };
   }
 
-  async create(user: any, body: any) {
+  async create(user: any, body: any, metadata?: Metadata) {
     const createdByUserId = user?.id != null ? Number(user.id) : 0;
     const createdByEmail = user?.email ?? '';
     let created: unknown;
@@ -160,7 +170,7 @@ export class UserService implements OnModuleInit {
           employeeCode: body.employeeCode,
           createdByUserId: createdByUserId || undefined,
           createdByEmail: createdByEmail || undefined,
-        }),
+        }, metadata),
       );
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi tạo tài khoản';
@@ -181,54 +191,58 @@ export class UserService implements OnModuleInit {
     return { data: created };
   }
 
-  async assignPosition(id: number, body: any) {
+  async assignPosition(id: number, body: any, metadata?: Metadata) {
     const result = await firstValueFrom(
       this.userGrpcService.AssignPosition({
         userId: id,
         unitId: body.unitId,
         jobTitleId: body.jobTitleId,
         isPrimary: body.isPrimary ?? false,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
-      console.error('Failed to clear user cache on assignPosition:', err);
+      this.logger.error('Failed to clear user cache on assignPosition:', err);
     }
     return { data: result };
   }
 
-  async setActive(id: number, isActive: boolean) {
+  async setActive(id: number, isActive: boolean, metadata?: Metadata) {
     const result = await firstValueFrom(
       this.userGrpcService.SetUserActive({
         userId: id,
         isActive: isActive ?? false,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
-      console.error('Failed to clear user cache on setActive:', err);
+      this.logger.error('Failed to clear user cache on setActive:', err);
     }
     return { data: result };
   }
 
-  async assignUserGroups(id: number, userGroupIds: number[]) {
+  async assignUserGroups(
+    id: number,
+    userGroupIds: number[],
+    metadata?: Metadata,
+  ) {
     const result = await firstValueFrom(
       this.userGrpcService.AssignUserGroups({
         userId: id,
         userGroupIds: userGroupIds,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
-      console.error('Failed to clear user cache on assignUserGroups:', err);
+      this.logger.error('Failed to clear user cache on assignUserGroups:', err);
     }
     return { data: result };
   }
 
-  async update(id: string, body: any) {
+  async update(id: string, body: any, metadata?: Metadata) {
     const result = await firstValueFrom(
       this.userGrpcService.UpdateUser({
         id: parseInt(id, 10),
@@ -238,7 +252,7 @@ export class UserService implements OnModuleInit {
         phoneNumber: body.phoneNumber,
         cccd: body.cccd,
         employeeCode: body.employeeCode,
-      }),
+      }, metadata),
     ).catch((e) => {
       throw new BadRequestException(e.message || 'Lỗi cập nhật người dùng');
     });
@@ -246,16 +260,16 @@ export class UserService implements OnModuleInit {
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
-      console.error('Failed to clear user cache on update:', err);
+      this.logger.error('Failed to clear user cache on update:', err);
     }
     return { data: result };
   }
 
-  async delete(id: string) {
+  async delete(id: string, metadata?: Metadata) {
     await firstValueFrom(
       this.userGrpcService.DeleteUser({
         id: parseInt(id, 10),
-      }),
+      }, metadata),
     ).catch((e) => {
       throw new BadRequestException(e.message || 'Lỗi xóa người dùng');
     });
@@ -263,7 +277,7 @@ export class UserService implements OnModuleInit {
     try {
       await this.redisService.getClient().del(`user:profile:${id}`);
     } catch (err) {
-      console.error('Failed to clear user cache on delete:', err);
+      this.logger.error('Failed to clear user cache on delete:', err);
     }
     return { };
   }

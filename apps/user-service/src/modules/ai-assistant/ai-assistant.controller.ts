@@ -25,8 +25,8 @@ export class AiAssistantController implements OnModuleInit {
     this.mediaService = this.mediaClient.getService('MediaService');
   }
 
-  // Guard Identity gRPC áp dụng onSuccess từng handler @GrpcMethod
-  // (KHÔNG đặt ở class level vì @EventPattern worker RMQ không có gRPC metadata).
+  // Guard identity gRPC đặt ở từng handler @GrpcMethod
+  // (KHÔNG đặt ở class level vì @EventPattern worker RMQ không có gRPC metadata → guard sẽ từ chối sự kiện nội bộ).
   @UseGuards(GrpcAuthGuard)
   @GrpcMethod('AiAssistantService', 'Chat')
   async chat(data: any, @CurrentUser() user: { id: number }) {

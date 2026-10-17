@@ -54,107 +54,7 @@ const COMMUNE_ZONES = [
   { id: "BM", name: "Buôn Êđê (Khu bảo tồn văn hóa truyền thống)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 người", center: { x: 78, y: 72 } }
 ]
 
-const DEFAULT_ORG_SECTIONS = {
-  vi: [
-    {
-      title: "ĐẢNG ỦY XÃ",
-      desc: "Cơ quan lãnh đạo toàn diện mọi hoạt động chính trị, kinh tế, xã hội, an ninh quốc phòng tại địa phương.",
-      details: ["Bí thư Đảng ủy xã", "Phó Bí thư Thường trực Đảng ủy", "Ủy viên Ban Thường vụ Đảng ủy", "Các Chi bộ trực thuộc thôn, buôn, trường học"]
-    },
-    {
-      title: "HỘI ĐỒNG NHÂN DÂN",
-      desc: "Cơ quan quyền lực nhà nước ở địa phương, đại diện cho ý chí, nguyện vọng và quyền làm chủ của nhân dân.",
-      details: ["Chủ tịch Hội đồng nhân dân", "Phó Chủ tịch HĐND xã", "Ban Pháp chế HĐND", "Ban Kinh tế - Xã hội HĐND"]
-    },
-    {
-      title: "ỦY BAN NHÂN DÂN",
-      desc: "Cơ quan chấp hành của Hội đồng nhân dân, cơ quan hành chính nhà nước ở địa phương, quản lý điều hành toàn diện.",
-      details: ["Chủ tịch Ủy ban nhân dân", "Các Phó Chủ tịch UBND xã", "Bộ phận Tiếp nhận & Trả kết quả (Một cửa)", "Công chức Chuyên môn nghiệp vụ"]
-    },
-    {
-      title: "ỦY BAN MTTQ & ĐOÀN THỂ",
-      desc: "Tập hợp lực lượng đại đoàn kết toàn dân tộc, phối hợp cùng chính quyền tổ chức thực hiện các phong trào thi đua.",
-      details: ["Ủy ban Mặt trận Tổ quốc xã", "Hội Liên hiệp Phụ nữ xã", "Đoàn Thanh niên Cộng sản Hồ Chí Minh", "Hội Nông dân & Hội Cựu chiến binh"]
-    }
-  ],
-  en: [
-    {
-      title: "COMMUNE PARTY COMMITTEE",
-      desc: "The comprehensive leadership body for all political, economic, social, national security, and defense activities in the locality.",
-      details: ["Party Committee Secretary", "Permanent Deputy Secretary", "Standing Committee Members", "Affiliated Party cells in villages and schools"]
-    },
-    {
-      title: "PEOPLE'S COUNCIL",
-      desc: "The local state power body representing the will, aspirations, and mastery rights of the citizens.",
-      details: ["Chairman of People's Council", "Vice Chairman of People's Council", "Legal Affairs Committee", "Economic and Social Affairs Committee"]
-    },
-    {
-      title: "PEOPLE'S COMMITTEE",
-      desc: "The executive branch of the People's Council, acting as the local administrative state organ to manage comprehensive operations.",
-      details: ["Chairman of People's Committee", "Vice Chairmen of People's Committee", "One-stop Reception & Result Return Department", "Specialized Professional Officials"]
-    },
-    {
-      title: "FATHERLAND FRONT & ASSOCIATIONS",
-      desc: "Rallying the great national unity block, collaborating with authorities to organize emulation movements.",
-      details: ["Commune Fatherland Front Committee", "Women's Union", "Youth Union", "Farmers' Association & Veterans' Association"]
-    }
-  ]
-}
-
-const DEFAULT_LEADERS = {
-  vi: [
-    {
-      name: "Nguyễn Văn Hồng",
-      role: "Bí thư Đảng ủy - Chủ tịch HĐND xã",
-      responsibility: "Chịu trách nhiệm lãnh đạo toàn diện công tác Đảng, công tác chính trị tư tưởng; chỉ đạo toàn bộ hoạt động giám sát, ban hành nghị quyết phát triển của Hội đồng nhân dân xã.",
-      phone: "0914.281.xxx",
-      email: "nvhong@krongbong.daklak.gov.vn",
-      room: "Phòng 201 - Tầng 2, Trụ sở UBND xã"
-    },
-    {
-      name: "Trần Quốc Tuấn",
-      role: "Phó Bí thư Đảng ủy - Chủ tịch UBND xã",
-      responsibility: "Lãnh đạo, chỉ đạo toàn diện công tác quản lý điều hành hành chính nhà nước; trực tiếp chỉ đạo quy hoạch phát triển kinh tế, thu chi ngân sách, cải cách thủ tục hành chính.",
-      phone: "0905.112.xxx",
-      email: "tqtuan@krongbong.daklak.gov.vn",
-      room: "Phòng 102 - Tầng 1, Trụ sở UBND xã"
-    },
-    {
-      name: "H'Yen Knul",
-      role: "Phó Chủ tịch UBND xã",
-      responsibility: "Phụ trách khối Văn hóa - Xã hội, Y tế, Giáo dục; trực tiếp chỉ đạo thực hiện các chính sách an sinh xã hội, giảm nghèo bền vững và công tác dân tộc thiểu số địa bàn.",
-      phone: "0983.475.xxx",
-      email: "hyenknul@krongbong.daklak.gov.vn",
-      room: "Phòng 104 - Tầng 1, Trụ sở UBND xã"
-    }
-  ],
-  en: [
-    {
-      name: "Nguyen Van Hong",
-      role: "Party Secretary - Chairman of People's Council",
-      responsibility: "Responsible for the comprehensive leadership of Party affairs and political-ideological education; directs all inspection activities and issues development resolutions for the People's Council.",
-      phone: "0914.281.xxx",
-      email: "nvhong@krongbong.daklak.gov.vn",
-      room: "Room 201 - 2nd Floor, Commune HQ"
-    },
-    {
-      name: "Tran Quoc Tuan",
-      role: "Deputy Party Secretary - Chairman of People's Committee",
-      responsibility: "Leads and comprehensively directs the administrative management of local government; directly oversees economic development planning, budget revenues/expenditures, and administrative procedural reform.",
-      phone: "0905.112.xxx",
-      email: "tqtuan@krongbong.daklak.gov.vn",
-      room: "Room 102 - 1st Floor, Commune HQ"
-    },
-    {
-      name: "H'Yen Knul",
-      role: "Vice Chairwoman of People's Committee",
-      responsibility: "In charge of Culture - Social affairs, Healthcare, and Education; directly oversees social security policies, sustainable poverty reduction, and ethnic minority affairs in the area.",
-      phone: "0983.475.xxx",
-      email: "hyenknul@krongbong.daklak.gov.vn",
-      room: "Room 104 - 1st Floor, Commune HQ"
-    }
-  ]
-}
+// GAP(ledger#23): mock đơn vị tổ chức mặc định đã xoá — data thật từ /public/org-units hoặc bộ nhớ trình dựng
 
 const getLocalizedField = (obj: any, baseField: string, lang: string): string => {
   if (!obj) return ""
@@ -170,27 +70,12 @@ const getLocalizedField = (obj: any, baseField: string, lang: string): string =>
 // ----------------------------------------------------------------------
 function HeroSliderWidget({ banners, currentLang, data }: { banners: any[], currentLang: string, data?: any }) {
   const [activeIdx, setActiveIdx] = React.useState(0)
+  // Không fallback mock — chỉ hiển thị banner thật (ledger #23)
   const displayBanners = React.useMemo(() => {
-    if (banners && banners.length > 0) {
-      const activeBanners = banners.filter(b => b.status !== false).slice(0, 5)
-      if (activeBanners.length > 0) return activeBanners
+    if (Array.isArray(banners) && banners.length > 0) {
+      return banners.filter(b => b.status !== false).slice(0, data?.limit || 5)
     }
-    return [
-      {
-        id: "mock-1",
-        name: currentLang === "en" ? "WELCOME TO DANG KANG COMMUNE PORTAL" : "CHÀO MỪNG ĐẾN VỚI CỔNG THÔNG TIN XÃ DANG KANG",
-        description: currentLang === "en" ? "Solidarity - Innovation - Rapid & Sustainable Development" : "Đoàn kết - Đổi mới - Phát triển nhanh và bền vững",
-        imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
-        customUrl: "/gioi-thieu"
-      },
-      {
-        id: "mock-2",
-        name: currentLang === "en" ? "NATIONAL DIGITAL TRANSFORMATION" : "ĐẨY MẠNH CHUYỂN ĐỔI SỐ QUỐC GIA",
-        description: currentLang === "en" ? "Serving citizens and enterprises with integrity and professionalism" : "Phục vụ người dân và doanh nghiệp minh bạch, chuyên nghiệp",
-        imageUrl: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=1200&q=80",
-        customUrl: "/thu-tuc"
-      }
-    ]
+    return []
   }, [banners, currentLang, data])
 
   React.useEffect(() => {
@@ -260,8 +145,9 @@ function HeroSliderWidget({ banners, currentLang, data }: { banners: any[], curr
 }
 
 function FeaturedNewsWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
+  // Không fallback mock bài viết — chỉ hiển thị bài thật (ledger #23)
   const displayPosts = React.useMemo(() => {
-    let filtered = posts || []
+    let filtered = Array.isArray(posts) ? posts : []
 
     // Filter by category if selectedCategory is set in data
     if (data?.selectedCategory) {
@@ -272,28 +158,16 @@ function FeaturedNewsWidget({ posts, currentLang, data }: { posts: any[], curren
       )
     }
 
-    // If empty (either no posts at all, or none in this category), provide default mocks
-    if (filtered.length === 0) {
-      return [
-        {
-          id: "news-1",
-          title: currentLang === "en" ? "Implementation of sustainable agricultural programs in Dang Kang" : "Triển khai chương trình phát triển nông nghiệp bền vững tại xã Dang Kang",
-          description: currentLang === "en" ? "Supporting local farmers with high-yield coffee and pepper cultivation techniques." : "Hỗ trợ bà con nông dân kỹ thuật canh tác cà phê và hồ tiêu đạt năng suất cao.",
-          thumbnail: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-          publishedAt: new Date().toISOString()
-        },
-        {
-          id: "news-2",
-          title: currentLang === "en" ? "Notice on registration of one-stop administrative records via digital portal" : "Thông báo về việc đăng ký hồ sơ hành chính một cửa qua cổng điện tử",
-          description: currentLang === "en" ? "Streamlining paperwork verification and reducing physical waiting queues." : "Tối ưu hóa quy trình xác minh giấy tờ và giảm bớt thời gian chờ đợi tại trụ sở.",
-          thumbnail: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80",
-          publishedAt: new Date(Date.now() - 86400000).toISOString()
-        }
-      ]
-    }
-
     return filtered.slice(0, data?.limit || 4)
   }, [posts, currentLang, data])
+
+  if (displayPosts.length === 0) {
+    return (
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center py-6">
+        {currentLang === "en" ? "No news published yet" : "Chưa có tin tức được công bố"}
+      </p>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -308,12 +182,16 @@ function FeaturedNewsWidget({ posts, currentLang, data }: { posts: any[], curren
             href={`/tin-tuc/${post.slug || post.id}`}
             className="group bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-red-500/50 transition-all flex flex-col sm:flex-row"
           >
-            <div className="sm:w-2/5 h-48 sm:h-auto relative overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
-              <img
-                src={post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80"}
-                alt={title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+            <div className="sm:w-2/5 h-48 sm:h-auto relative overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0 flex items-center justify-center">
+              {post.thumbnail ? (
+                <img
+                  src={resolveMediaUrl(post.thumbnail)}
+                  alt={title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <Newspaper className="w-8 h-8 text-slate-400" />
+              )}
               <div className="absolute top-2 left-2 bg-red-600 text-white font-extrabold text-[9px] px-2 py-1 rounded shadow uppercase tracking-wider">
                 {currentLang === "en" ? "News" : "Tin tức"}
               </div>
@@ -407,32 +285,26 @@ function PublicServicesWidget({ currentLang }: { currentLang: string }) {
 }
 
 function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
+  // Không fallback mock văn bản — chỉ hiển thị dữ liệu thật (ledger #23)
   const docs = React.useMemo(() => {
-    let filtered = posts || []
-
-    // Filter by specific category or general 'van-ban'
-    if (data?.selectedCategory) {
-      filtered = filtered
-    } else {
-      filtered = filtered
-    }
-
-    if (filtered.length > 0) {
-      return filtered.slice(0, data?.limit || 5)
-    }
-    return [
-      { id: "doc-1", title: currentLang === "en" ? "Resolution on communal economic targets for 2026" : "Nghị quyết về chỉ tiêu phát triển kinh tế - xã hội xã Dang Kang năm 2026", codeNum: "12/NQ-HĐND", dateStr: "10/01/2026" },
-      { id: "doc-2", title: currentLang === "en" ? "Decision promulgating regulations on one-stop office workflow" : "Quyết định ban hành quy chế hoạt động của bộ phận một cửa cấp xã", codeNum: "45/QĐ-UBND", dateStr: "15/02/2026" },
-      { id: "doc-3", title: currentLang === "en" ? "Plan for disease prevention in livestock and poultry" : "Kế hoạch phòng chống dịch bệnh gia súc, gia cầm trên địa bàn xã", codeNum: "08/KH-UBND", dateStr: "22/03/2026" }
-    ]
+    const list = Array.isArray(posts) ? posts : []
+    return list.slice(0, data?.limit || 5)
   }, [posts, currentLang, data])
+
+  if (docs.length === 0) {
+    return (
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center py-6">
+        {currentLang === "en" ? "No documents published yet" : "Chưa có văn bản được công bố"}
+      </p>
+    )
+  }
 
   return (
     <div className="space-y-3">
       {docs.map((doc: any, idx: number) => {
         const title = getLocalizedField(doc, "title", currentLang) || doc.title || ""
-        const codeNum = doc.codeNum || "QĐ/UBND"
-        const dateStr = doc.dateStr || (doc.publishedAt ? new Date(doc.publishedAt).toLocaleDateString() : "14/05/2026")
+        const codeNum = doc.codeNum || doc.documentNumber || doc.notation || ""
+        const dateStr = doc.dateStr || (doc.publishedAt ? new Date(doc.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : "")
 
         return (
           <div
@@ -445,12 +317,16 @@ function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], curr
               </div>
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded font-black tracking-wider">
-                    {codeNum}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {dateStr}
-                  </span>
+                  {codeNum && (
+                    <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded font-black tracking-wider">
+                      {codeNum}
+                    </span>
+                  )}
+                  {dateStr && (
+                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {dateStr}
+                    </span>
+                  )}
                 </div>
                 <h5 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white mt-1 leading-snug truncate">
                   {title}
@@ -492,17 +368,9 @@ function OrgDirectoryWidget({
     if (Array.isArray(selectedUnitsCache) && selectedUnitsCache.length > 0) {
       return selectedUnitsCache;
     }
-    // If absolutely empty, fallback to mock units to maintain a beautiful layout preview!
-    const sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"] || [];
-    return sections.map((section: any, idx: number) => ({
-      id: idx + 10000,
-      name: section.title,
-      description: section.desc,
-      address: section.details?.[0] || "",
-      email: section.details?.[1] || "lienhe@daklak.gov.vn",
-      parentId: null
-    }));
-  }, [allOrgUnits, selectedUnitsCache, currentLang]);
+    // Không fallback mock đơn vị — hiển thị empty state bên dưới (ledger #23)
+    return [];
+  }, [allOrgUnits, selectedUnitsCache]);
 
   // Filter based on selectedUnitIds (safe type matching using string conversion)
   const filteredUnits = React.useMemo(() => {
@@ -622,7 +490,7 @@ function OrgDirectoryWidget({
             <div className="border-t border-slate-200 dark:border-slate-800 pt-3 flex flex-col gap-1.5 text-[10.5px] font-medium text-slate-500 dark:text-slate-400 leading-normal">
               <span className="flex items-start gap-1.5"><MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.address || (currentLang === "en" ? "HQ Address" : "Trụ sở UBND Xã")}</span>
               {unit.phoneNumber && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.phoneNumber}</span>}
-              <span className="flex items-center gap-1.5 truncate"><Mail className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.email || "xadangkang@daklak.gov.vn"}</span>
+              {unit.email && <span className="flex items-center gap-1.5 truncate"><Mail className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.email}</span>}
             </div>
           </div>
         ))}
@@ -648,7 +516,8 @@ function OrgDirectoryWidget({
                   {unit.name}
                 </h5>
                 <span className="text-[10px] text-slate-400 font-medium leading-relaxed truncate">
-                  {unit.address || (currentLang === "en" ? "Commune Headquarters" : "Trụ sở Ủy ban nhân dân")} • {unit.email || "xadangkang@daklak.gov.vn"}
+                  {unit.address || (currentLang === "en" ? "Commune Headquarters" : "Trụ sở Ủy ban nhân dân")}
+                  {unit.email ? ` • ${unit.email}` : ""}
                 </span>
               </div>
             </div>
@@ -693,12 +562,26 @@ function OrgDirectoryWidget({
 }
 
 function MediaGalleryWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
-  const mediaItems = [
-    { title: "Hội nghị tổng kết phong trào thi đua toàn dân đoàn kết", img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80", type: "photo" },
-    { title: "Ra quân dọn dẹp vệ sinh môi trường đường làng ngõ xóm", img: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80", type: "photo" },
-    { title: "Phóng sự: Nông dân Dang Kang vươn lên làm giàu từ cây tiêu", img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80", type: "video" },
-    { title: "Hướng dẫn thực hiện dịch vụ công trực tuyến mức độ 4", img: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80", type: "video" }
-  ]
+  // Không fallback mock ảnh/video — chỉ hiển thị media thật gắn với bài viết (ledger #23)
+  const mediaItems = React.useMemo(() => {
+    if (!Array.isArray(posts)) return []
+    return posts
+      .filter((p: any) => p.thumbnail)
+      .slice(0, data?.limit || 4)
+      .map((p: any) => ({
+        title: getLocalizedField(p, "title", currentLang) || p.title || "",
+        img: resolveMediaUrl(p.thumbnail),
+        type: "photo"
+      }))
+  }, [posts, currentLang, data])
+
+  if (mediaItems.length === 0) {
+    return (
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center py-6">
+        {currentLang === "en" ? "No media published yet" : "Chưa có hình ảnh/video được công bố"}
+      </p>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -726,16 +609,21 @@ function MediaGalleryWidget({ posts, currentLang, data }: { posts: any[], curren
 
 function FaqAccordionWidget({ questions, currentLang, data }: { questions: any[], currentLang: string, data?: any }) {
   const [expandedIdx, setExpandedIdx] = React.useState<number | null>(0)
+  // Không fallback mock Câu hỏi - Trả lời — chỉ hiển thị câu hỏi đã được giải đáp thật (ledger #23)
   const displayQa = React.useMemo(() => {
-    if (questions && questions.length > 0) {
-      return questions.slice(0, 5)
+    if (Array.isArray(questions) && questions.length > 0) {
+      return questions.slice(0, data?.limit || 5)
     }
-    return [
-      { q: currentLang === "en" ? "What documents are required to register birth registration for newborn?" : "Thủ tục đăng ký khai sinh cho trẻ sơ sinh cần chuẩn bị những giấy tờ gì?", a: currentLang === "en" ? "Parents need to bring Certificate of Birth from hospital, marriage certificate, and identity cards to commune one-stop desk." : "Cha mẹ cần mang theo Giấy chứng sinh của bệnh viện, Giấy đăng ký kết hôn và CCCD đến bộ phận một cửa UBND xã để được giải quyết ngay." },
-      { q: currentLang === "en" ? "How many days does it take to process land use right transfer?" : "Thời gian giải quyết thủ tục chuyển nhượng quyền sử dụng đất là bao lâu?", a: currentLang === "en" ? "According to regulations, standard verification takes 10-15 working days from valid dossier submission." : "Theo quy định, thời gian thẩm định hồ sơ chuẩn là từ 10-15 ngày làm việc kể từ khi nhận đủ hồ sơ hợp lệ." },
-      { q: currentLang === "en" ? "What is the schedule for commune leadership direct citizen reception?" : "Lịch tiếp công dân trực tiếp của lãnh đạo UBND xã vào ngày nào?", a: currentLang === "en" ? "Commune chairman directly receives citizens every Thursday morning from 08:00 to 11:30 at Room 102." : "Chủ tịch UBND xã trực tiếp tiếp công dân định kỳ vào sáng Thứ 5 hàng tuần từ 08:00 đến 11:30 tại Phòng 102 trụ sở." }
-    ]
+    return []
   }, [questions, currentLang, data])
+
+  if (displayQa.length === 0) {
+    return (
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider text-center py-6">
+        {currentLang === "en" ? "No answered questions yet" : "Chưa có câu hỏi đã được giải đáp"}
+      </p>
+    )
+  }
 
   return (
     <div className="space-y-3">
@@ -911,6 +799,20 @@ interface DynamicPageRendererProps {
 }
 
 export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRendererProps) {
+  // Gate mega-fetch (ledger #35): chỉ bật query cho loại widget thực sự có mặt trong layout
+  const widgetTypes = React.useMemo(() => {
+    const types = new Set<string>()
+    const rows = Array.isArray(layoutSchema) ? layoutSchema : (layoutSchema as any)?.rows || []
+    rows.forEach((row: any) =>
+      (row?.columns || []).forEach((col: any) =>
+        (col?.widgets || []).forEach((w: any) => {
+          if (w?.type) types.add(String(w.type))
+        })
+      )
+    )
+    return types
+  }, [layoutSchema])
+
   const { data: portalConfigData } = useQuery({
     queryKey: ["public-portal-configs"],
     queryFn: async () => {
@@ -925,35 +827,39 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     staleTime: 5 * 60 * 1000,
   })
 
-  // Fetch Banners & Posts for dynamic new widgets
+  // Chuẩn hoá ledger#35: queryFn trả MẢNG (unwrap .data) — cùng shape header/home-client
   const { data: bannersData } = useQuery({
     queryKey: ["public-banners"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/banners")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+        const body = response?.data ?? response
+        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
       } catch (e) {
         return []
       }
     },
+    enabled: widgetTypes.has("HERO_SLIDER"),
     staleTime: 5 * 60 * 1000,
   })
 
   const { data: postsData } = useQuery({
-    queryKey: ["public-posts"],
+    queryKey: ["public-posts-renderer"],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/posts")
-        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+        const body = response?.data ?? response
+        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
       } catch (e) {
         return []
       }
     },
+    enabled: widgetTypes.has("FEATURED_NEWS") || widgetTypes.has("LEGAL_DOCUMENTS") || widgetTypes.has("PHOTO_VIDEO_GALLERY"),
     staleTime: 5 * 60 * 1000,
   })
 
   const { data: questionsData } = useQuery({
-    queryKey: ["public-questions", currentLang],
+    queryKey: ["public-questions-renderer", currentLang],
     queryFn: async () => {
       try {
         const response: any = await apiClient.get("/public/interactions/questions?limit=10")
@@ -962,19 +868,21 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
         return []
       }
     },
+    enabled: widgetTypes.has("FAQ_ACCORDION"),
     staleTime: 5 * 60 * 1000,
   })
 
   const { data: employeesData } = useQuery({
-    queryKey: ["public-employees"],
+    queryKey: ["public-employees-renderer"],
     queryFn: async () => {
       try {
-        const response: any = await apiClient.get("/public/employees")
+        const response: any = await apiClient.get("/public/hrm/employees?pageSize=50")
         return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
       } catch (e) {
         return []
       }
     },
+    enabled: widgetTypes.has("LEADERSHIP_LIST"),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -988,6 +896,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
         return []
       }
     },
+    enabled: widgetTypes.has("ORG_SECTIONS_DIRECTORY"),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -1096,13 +1005,30 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   const [subject, setSubject] = React.useState("")
   const [message, setMessage] = React.useState("")
   const [submitted, setSubmitted] = React.useState(false)
+  const [submitting, setSubmitting] = React.useState(false)
+  const [submitError, setSubmitError] = React.useState<string | null>(null)
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  // Gửi câu hỏi công dân qua BE thật: POST /public/interactions/questions (posts-service)
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!fullName || !email || !message) return
-    setSubmitted(true)
-    setSubject("")
-    setMessage("")
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      await apiClient.post("/public/interactions/questions", {
+        title: subject || "Góp ý từ cổng thông tin",
+        content: message,
+        askedByName: fullName,
+        askedByEmail: email,
+      })
+      setSubmitted(true)
+      setSubject("")
+      setMessage("")
+    } catch (err: any) {
+      setSubmitError(err?.response?.data?.message || "Gửi thông tin thất bại. Vui lòng thử lại sau.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   // Safe JSON Lexical Parsing & Render
@@ -1266,33 +1192,41 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                             {widget.type === "LEADERSHIP_LIST" && (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {(() => {
-                                  let leaders = []
-                                  if (Array.isArray(widget.data?.selectedLeaderIds) && widget.data.selectedLeaderIds.length > 0) {
-                                    // Use the IDs from the builder to find the actual employee data
-                                    leaders = allEmployees.map((emp: any) => ({
-                                      name: getLocalizedField(emp, "fullName", currentLang) || `${emp.lastname || ''} ${emp.firstname || ''}`.trim(),
-                                      role: getLocalizedField(emp, "roleName", currentLang) || emp.jobTitle?.name || emp.jobTitleName || "Cán bộ",
-                                      responsibility: getLocalizedField(emp, "jobDescription", currentLang) || `Chịu trách nhiệm phụ trách chung và điều hành các hoạt động tại cơ quan.`,
-                                      phone: emp.phoneNumber || emp.phone || "09xx.xxx.xxx",
-                                      email: emp.email || "canbo@daklak.gov.vn",
-                                      room: emp.officeRoom || "Trụ sở UBND xã"
-                                    }))
-                                  } else if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
-                                    leaders = allEmployees.map((emp: any) => ({
-                                      name: getLocalizedField(emp, "fullName", currentLang),
-                                      role: getLocalizedField(emp, "roleName", currentLang),
-                                      responsibility: getLocalizedField(emp, "jobDescription", currentLang),
-                                      phone: emp.phoneNumber || "09xx.xxx.xxx",
-                                      email: emp.email || "canbo@daklak.gov.vn",
-                                      room: emp.officeRoom || "Trụ sở UBND xã"
-                                    }))
-                                  } else if (widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0) {
+                                  let leaders: any[] = []
+                                  // Ledger #23: chỉ hiển thị cán bộ được chọn trong builder, không fabric dữ liệu liên hệ
+                                  const leaderIds: any[] = Array.isArray(widget.data?.selectedLeaderIds) ? widget.data.selectedLeaderIds : []
+                                  const employeeIds: any[] = Array.isArray(widget.data?.selectedEmployeeIds) ? widget.data.selectedEmployeeIds : []
+                                  const selectedIds: any[] = leaderIds.length > 0 ? leaderIds : employeeIds
+                                  const listEmployees: any[] = Array.isArray(allEmployees) ? allEmployees : []
+                                  if (selectedIds.length > 0) {
+                                    const idSet = new Set(selectedIds.map((id: any) => String(id)))
+                                    leaders = listEmployees
+                                      .filter((emp: any) => idSet.has(String(emp?.id ?? emp?._id)))
+                                      .map((emp: any) => ({
+                                        name: getLocalizedField(emp, "fullName", currentLang) || `${emp.lastname || ""} ${emp.firstname || ""}`.trim(),
+                                        role: getLocalizedField(emp, "roleName", currentLang) || emp.jobTitle?.name || emp.jobTitleName || "",
+                                        responsibility: getLocalizedField(emp, "jobDescription", currentLang) || "",
+                                        phone: emp.phoneNumber || emp.phone || "",
+                                        email: emp.email || "",
+                                        room: emp.officeRoom || ""
+                                      }))
+                                      .filter((l: any) => l.name)
+                                  } else if (Array.isArray(widget.data?.selectedLeaders) && widget.data.selectedLeaders.length > 0) {
+                                    // selectedLeaders do builder lưu sẵn (dữ liệu thật từ admin), giữ nguyên
                                     leaders = widget.data.selectedLeaders
-                                  } else {
-                                    leaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])
                                   }
 
-                                  return Array.isArray(leaders) ? leaders.map((leader: any, idx: number) => (
+                                  if (!Array.isArray(leaders) || leaders.length === 0) {
+                                    return (
+                                      <div className="sm:col-span-2 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-[11px] text-slate-400 font-semibold">
+                                        {currentLang === "en"
+                                          ? "Leadership directory is being updated."
+                                          : "Danh mục lãnh đạo đang được cập nhật."}
+                                      </div>
+                                    )
+                                  }
+
+                                  return leaders.map((leader: any, idx: number) => (
                                     <div
                                       key={leader?.name || idx}
                                       className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
@@ -1308,33 +1242,46 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                       </div>
 
                                       <div className="p-3.5 flex-1 flex flex-col gap-3 text-[11px]">
-                                        <div className="flex flex-col gap-1 flex-1">
-                                          <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
-                                            <CalendarDays className="w-3 h-3 text-slate-400" />
-                                            {currentLang === "en" ? "Scope of Responsibility" : "Phạm vi trách nhiệm"}
-                                          </span>
-                                          <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
-                                            {leader.responsibility}
-                                          </p>
-                                        </div>
+                                        {leader.responsibility ? (
+                                          <div className="flex flex-col gap-1 flex-1">
+                                            <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
+                                              <CalendarDays className="w-3 h-3 text-slate-400" />
+                                              {currentLang === "en" ? "Scope of Responsibility" : "Phạm vi trách nhiệm"}
+                                            </span>
+                                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
+                                              {leader.responsibility}
+                                            </p>
+                                          </div>
+                                        ) : null}
 
                                         <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5 font-medium text-slate-500 dark:text-slate-400">
-                                          <div className="flex items-center gap-1.5">
-                                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                            <span>{currentLang === "en" ? "Office Location" : "Nơi làm việc"}: {leader.room}</span>
-                                          </div>
-                                          <div className="flex items-center gap-1.5">
-                                            <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                            <a href={`tel:${leader.phone}`} className="hover:text-red-600">{currentLang === "en" ? "Mobile" : "Di động"}: {leader.phone}</a>
-                                          </div>
-                                          <div className="flex items-center gap-1.5">
-                                            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                            <a href={`mailto:${leader.email}`} className="hover:text-red-600 break-all">{currentLang === "en" ? "E-mail Address" : "Thư điện tử"}: {leader.email}</a>
-                                          </div>
+                                          {leader.room ? (
+                                            <div className="flex items-center gap-1.5">
+                                              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                              <span>{currentLang === "en" ? "Office Location" : "Nơi làm việc"}: {leader.room}</span>
+                                            </div>
+                                          ) : null}
+                                          {leader.phone ? (
+                                            <div className="flex items-center gap-1.5">
+                                              <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                              <a href={`tel:${leader.phone}`} className="hover:text-red-600">{currentLang === "en" ? "Mobile" : "Di động"}: {leader.phone}</a>
+                                            </div>
+                                          ) : null}
+                                          {leader.email ? (
+                                            <div className="flex items-center gap-1.5">
+                                              <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                              <a href={`mailto:${leader.email}`} className="hover:text-red-600 break-all">{currentLang === "en" ? "E-mail Address" : "Thư điện tử"}: {leader.email}</a>
+                                            </div>
+                                          ) : null}
+                                          {!leader.room && !leader.phone && !leader.email ? (
+                                            <span className="text-[10px] italic text-slate-400">
+                                              {currentLang === "en" ? "Contact details not publicly provided." : "Thông tin liên hệ chưa được công bố."}
+                                            </span>
+                                          ) : null}
                                         </div>
                                       </div>
                                     </div>
-                                  )) : null;
+                                  ));
                                 })()}
                               </div>
                             )}
@@ -1520,12 +1467,19 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                       />
                                     </div>
 
+                                    {submitError && (
+                                      <p className="text-[11px] font-bold text-red-600 dark:text-red-400 leading-relaxed border-l-2 border-red-500 pl-2.5">
+                                        {submitError}
+                                      </p>
+                                    )}
+
                                     <button
                                       type="submit"
-                                      className="w-full bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-extrabold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
+                                      disabled={submitting}
+                                      className="w-full bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-extrabold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow disabled:opacity-60 disabled:cursor-not-allowed"
                                     >
                                       <Send className="w-4 h-4 text-yellow-300 dark:text-red-600 shrink-0" />
-                                      {currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý"}
+                                      {currentLang === "en" ? (submitting ? "SENDING..." : "SEND FEEDBACK") : (submitting ? "ĐANG GỬI..." : "GỬI THƯ GÓP Ý")}
                                     </button>
                                   </form>
                                 ) : (

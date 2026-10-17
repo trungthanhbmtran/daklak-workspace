@@ -2,6 +2,7 @@ import { Controller, Get, Inject, Logger } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { getInternalGrpcMetadata } from '../../core/utils/internal-metadata.util';
 
 @Controller('public/portal-configs')
 export class PublicPortalConfigController {
@@ -20,7 +21,7 @@ export class PublicPortalConfigController {
 
   @Get()
   async findAll() {
-    const res: any = await firstValueFrom(this.configService.getAll({})).catch(
+    const res: any = await firstValueFrom(this.configService.getAll({}, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         return null;

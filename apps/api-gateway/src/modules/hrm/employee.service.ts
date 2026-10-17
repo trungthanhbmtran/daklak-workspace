@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
@@ -31,7 +32,7 @@ export class EmployeeService implements OnModuleInit {
     );
   }
 
-  private async fetchDictionaries(empList: any[]) {
+  private async fetchDictionaries(empList: any[], metadata?: Metadata) {
     try {
       const jobTitleIds = new Set<number>();
       const unitIds = new Set<number>();
@@ -50,13 +51,13 @@ export class EmployeeService implements OnModuleInit {
 
       const results = await Promise.allSettled([
         jtArray.length > 0
-          ? firstValueFrom(this.orgService.ListJobTitles({ ids: jtArray }))
+          ? firstValueFrom(this.orgService.ListJobTitles({ ids: jtArray }, metadata))
           : Promise.resolve({ data: [] }),
         unitArray.length > 0
-          ? firstValueFrom(this.orgService.GetOrganizations({ ids: unitArray }))
+          ? firstValueFrom(this.orgService.GetOrganizations({ ids: unitArray }, metadata))
           : Promise.resolve({ nodes: [] }),
         catArray.length > 0
-          ? firstValueFrom(this.catService.GetAllCategories({ ids: catArray }))
+          ? firstValueFrom(this.catService.GetAllCategories({ ids: catArray }, metadata))
           : Promise.resolve({ data: [] }),
       ]);
 
@@ -128,14 +129,18 @@ export class EmployeeService implements OnModuleInit {
     };
   }
 
-  private async executeWithDicts(rpcCall: Promise<any>, isList = false) {
+  private async executeWithDicts(
+    rpcCall: Promise<any>,
+    isList = false,
+    metadata?: Metadata,
+  ) {
     const res = await rpcCall.catch((e: any) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
 
     if (res && res.data) {
       const empList = isList && Array.isArray(res.data) ? res.data : [res.data];
-      const dicts = await this.fetchDictionaries(empList);
+      const dicts = await this.fetchDictionaries(empList, metadata);
 
       if (isList && Array.isArray(res.data)) {
         res.data = res.data.map((e: any) =>
@@ -153,7 +158,7 @@ export class EmployeeService implements OnModuleInit {
     return res;
   }
 
-  async list(user: any, query: any) {
+  async list(user: any, query: any, metadata?: Metadata) {
     const req = { ...query };
     if (req.page) req.page = parseInt(req.page);
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
@@ -206,7 +211,7 @@ export class EmployeeService implements OnModuleInit {
       const callerUnitId = parseInt(req.callerUnitId, 10);
       try {
         const resOrg: any = await firstValueFrom(
-          this.orgService.GetOrganizations({ ids: [callerUnitId] }),
+          this.orgService.GetOrganizations({ ids: [callerUnitId] }, metadata),
         );
         if (resOrg?.nodes?.[0]?.hierarchyPath) {
           req.departmentPathPrefix = resOrg.nodes[0].hierarchyPath;
@@ -220,8 +225,9 @@ export class EmployeeService implements OnModuleInit {
     }
 
     const res: any = await this.executeWithDicts(
-      firstValueFrom(this.employeeService.ListEmployees(req)),
+      firstValueFrom(this.employeeService.ListEmployees(req, metadata)),
       true,
+      metadata,
     );
 
     if (res) {
@@ -238,17 +244,19 @@ export class EmployeeService implements OnModuleInit {
     return res;
   }
 
-  async getDetail(id: string) {
+  async getDetail(id: string, metadata?: Metadata) {
     return this.executeWithDicts(
-      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })),
+      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) }, metadata)),
+      false,
+      metadata,
     );
   }
 
-  async create(body: any) {
+  async create(body: any, metadata?: Metadata) {
     if (body.departmentId) {
       try {
         const resOrg: any = await firstValueFrom(
-          this.orgService.GetOrganizations({ ids: [parseInt(body.departmentId)] }),
+          this.orgService.GetOrganizations({ ids: [parseInt(body.departmentId)] }, metadata),
         );
         if (resOrg?.nodes?.[0]?.hierarchyPath) {
           body.departmentPath = resOrg.nodes[0].hierarchyPath;
@@ -257,7 +265,9 @@ export class EmployeeService implements OnModuleInit {
     }
 
     const res = await this.executeWithDicts(
-      firstValueFrom(this.employeeService.CreateEmployee(body)),
+      firstValueFrom(this.employeeService.CreateEmployee(body, metadata)),
+      false,
+      metadata,
     );
     if (res?.data?.employeeCode) {
       const effectiveJobTitleId =
@@ -275,19 +285,19 @@ export class EmployeeService implements OnModuleInit {
             res.data.employmentStatus !== 'retired' &&
             res.data.employmentStatus !== 'resigned',
           slotOrder: body.slotOrder ? parseInt(body.slotOrder, 10) : 0,
-        }),
+        }, metadata),
       ).catch(() => {});
     }
     return res;
   }
 
-  async update(id: string, body: any) {
+  async update(id: string, body: any, metadata?: Metadata) {
     const payload = { ...body, id: parseInt(id) };
 
     if (payload.departmentId) {
       try {
         const resOrg: any = await firstValueFrom(
-          this.orgService.GetOrganizations({ ids: [parseInt(payload.departmentId)] }),
+          this.orgService.GetOrganizations({ ids: [parseInt(payload.departmentId)] }, metadata),
         );
         if (resOrg?.nodes?.[0]?.hierarchyPath) {
           payload.departmentPath = resOrg.nodes[0].hierarchyPath;
@@ -296,7 +306,9 @@ export class EmployeeService implements OnModuleInit {
     }
 
     const res = await this.executeWithDicts(
-      firstValueFrom(this.employeeService.UpdateEmployee(payload)),
+      firstValueFrom(this.employeeService.UpdateEmployee(payload, metadata)),
+      false,
+      metadata,
     );
     if (res?.data?.employeeCode) {
       const effectiveJobTitleId =
@@ -314,17 +326,17 @@ export class EmployeeService implements OnModuleInit {
             res.data.employmentStatus !== 'retired' &&
             res.data.employmentStatus !== 'resigned',
           slotOrder: payload.slotOrder ? parseInt(payload.slotOrder, 10) : 0,
-        }),
+        }, metadata),
       ).catch(() => {});
     }
     return res;
   }
 
-  async delete(id: string) {
+  async delete(id: string, metadata?: Metadata) {
     // 1. Lấy mã NV trước khi xóa
     let empCode = '';
     try {
-      const emp = await this.getDetail(id);
+      const emp = await this.getDetail(id, metadata);
       empCode = emp?.data?.employeeCode || '';
     } catch (e) {
       // ignore
@@ -332,7 +344,7 @@ export class EmployeeService implements OnModuleInit {
 
     // 2. Xóa
     const res = await firstValueFrom(
-      this.employeeService.DeleteEmployee({ id: parseInt(id) }),
+      this.employeeService.DeleteEmployee({ id: parseInt(id) }, metadata),
     ).catch((e: any) => {
       throw new InternalServerErrorException(e.message || 'RPC Call Failed');
     });
@@ -345,7 +357,7 @@ export class EmployeeService implements OnModuleInit {
           unitId: 0,
           jobTitleId: 0,
           isActive: false,
-        })
+        }, metadata)
       ).catch(() => {});
     }
 

@@ -86,6 +86,31 @@ export const FIELD_LABEL_MAP: Record<string, string> = {
   so_du_an_moi: 'Số dự án mới',
   von_ngoai_ns_ty: 'Vốn ngoài NS (Tỷ VNĐ)',
   tien_do_trien_khai: 'Tiến độ triển khai',
+  // Bộ Tài chính & Trục liên thông LGSP Đắk Lắk
+  ma_chi_tieu: 'Mã chỉ tiêu BTC',
+  ten_chi_tieu: 'Tên chỉ tiêu tài chính',
+  linh_vuc: 'Lĩnh vực tài chính',
+  don_vi_phu_trach: 'Đơn vị phụ trách',
+  thuc_hien: 'Thực hiện (Tỷ VNĐ / Triệu USD)',
+  cung_ky_nam_truoc: 'Cùng kỳ năm trước',
+  danh_gia_tien_do: 'Đánh giá tiến độ BTC',
+  ky_bao_cao: 'Kỳ báo cáo',
+  khoan_thu: 'Khoản thu / Sắc thuế',
+  ti_le_dat: 'Tỷ lệ đạt (%)',
+  thoi_gian: 'Thời gian',
+  du_toan_chi: 'Dự toán chi (Tỷ VNĐ)',
+  giai_ngan_tuan: 'Giải ngân trong tuần (Tỷ VNĐ)',
+  luy_ke_giai_ngan: 'Lũy kế giải ngân (Tỷ VNĐ)',
+  mat_hang: 'Mặt hàng nông sản',
+  thi_truong: 'Thị trường xuất khẩu',
+  so_luong_tan: 'Khối lượng (Tấn)',
+  mst: 'Mã số thuế doanh nghiệp',
+  ten_doanh_nghiep: 'Tên doanh nghiệp',
+  loai_hoa_don: 'Loại hóa đơn điện tử',
+  so_luong_hd: 'Số lượng hóa đơn',
+  tong_tien_truoc_thue: 'Tổng tiền trước thuế (Triệu VNĐ)',
+  tien_thue: 'Tiền thuế VAT (Triệu VNĐ)',
+  ky_ke_khai: 'Kỳ kê khai thuế',
   // Các thực thể VTVL, Tổ chức, Nhân sự & Quy trình
   employeeCode: 'Mã công chức',
   username: 'Tên đăng nhập',
@@ -192,6 +217,16 @@ export function inferFieldType(field: string): ColumnType {
     lower.includes('rate') ||
     lower.includes('price') ||
     lower.includes('quantity') ||
+    lower.includes('thuc_hien') ||
+    lower.includes('cung_ky') ||
+    lower.includes('du_toan') ||
+    lower.includes('giai_ngan') ||
+    lower.includes('kim_ngach') ||
+    lower.includes('so_luong') ||
+    lower.includes('tien') ||
+    lower.includes('thue') ||
+    lower.includes('doanh_thu') ||
+    lower.includes('ti_le') ||
     lower === 'id' ||
     lower.endsWith('id')
   ) {
@@ -290,6 +325,43 @@ const SHORT_CHART_LABELS: Record<string, string> = {
   'Phòng Tổ chức đảng - Đảng viên': 'Phòng TCĐ-ĐV',
   'Văn phòng Ban': 'Văn phòng Ban',
   'Lãnh đạo Ban': 'Lãnh đạo Ban',
+  // Nhãn rút gọn cho biểu đồ Tài chính & Bộ Tài chính
+  'TP. Buôn Ma Thuột': 'TP. BMT',
+  'Thị xã Buôn Hồ': 'TX. Buôn Hồ',
+  'Huyện Cư M\'gar': 'H. Cư M\'gar',
+  'Huyện Ea Kar': 'H. Ea Kar',
+  'Huyện Krông Pắc': 'H. Krông Pắc',
+  'Huyện Krông Ana': 'H. Krông Ana',
+  'Cục Thuế tỉnh Đắk Lắk': 'Cục Thuế tỉnh',
+  'Thuế Thu nhập Doanh nghiệp (TNDN)': 'Thuế TNDN',
+  'Thuế Giá trị gia tăng (GTGT)': 'Thuế GTGT',
+  'Thuế Tiêu thụ đặc biệt & Tài nguyên': 'Thuế TTĐB & TN',
+  'Thu tiền sử dụng đất & Tiền thuê đất': 'Tiền đất',
+  'Lệ phí trước bạ & Phí khác': 'Lệ phí trước bạ',
+  'Chi đầu tư phát triển': 'Chi ĐTPT',
+  'Chi sự nghiệp Giáo dục - Đào tạo': 'Chi GD-ĐT',
+  'Chi sự nghiệp Y tế - Dân số': 'Chi Y tế',
+  'Chi sự nghiệp Khoa học & Công nghệ': 'Chi KH&CN',
+  'Chi quản lý hành chính nhà nước': 'Chi QLHC',
+  'Chi bảo đảm xã hội & Môi trường': 'Chi An sinh',
+  'Cà phê Robusta nhân & rang xay': 'Cà phê Robusta',
+  'Hạt tiêu đen Chư Kuin / Ea H\'leo': 'Hạt tiêu',
+  'Sầu riêng đông lạnh Krông Pắc': 'Sầu riêng ĐL',
+  'Cao su tự nhiên Tây Nguyên': 'Cao su TN',
+  'Phân bón công nghệ cao (Nhập khẩu)': 'Phân bón CNC',
+  'Thu Ngân sách Nhà nước trên địa bàn tỉnh': 'Thu NSNN tỉnh',
+  'Chi Ngân sách địa phương theo phân bổ': 'Chi NS địa phương',
+  'Kế hoạch Vốn Đầu tư công giải ngân': 'Giải ngân ĐTC',
+  'Kim ngạch Xuất khẩu Nông sản chủ lực': 'Xuất khẩu Nông sản',
+  'Thuế Doanh nghiệp phát sinh qua HĐĐT': 'Thuế qua HĐĐT',
+  'Cao tốc Khánh Hòa - Buôn Ma Thuột (DA TP3)': 'Cao tốc KH-BMT',
+  'Đường Hồ Chí Minh tránh phía Đông TP. BMT': 'Tránh Đông BMT',
+  'Trung tâm Giám sát Điều hành Thông minh IOC': 'IOC Đắk Lắk',
+  'Kho bạc Nhà nước Đắk Lắk': 'KBNN Đắk Lắk',
+  'Sở Kế hoạch và Đầu tư': 'Sở KH&ĐT',
+  'Chi cục HQ Buôn Ma Thuột': 'Chi cục HQ BMT',
+  'BQLDA ĐTXD CTGT & NN PTNT Tỉnh': 'BQLDA CTGT&NN',
+  'Sở Thông tin và Truyền thông': 'Sở TTTT',
 };
 
 /**

@@ -225,7 +225,7 @@ export function ApiEndpointEditDialog({
 
     if (endpoint) {
       updateMut.mutate(
-        { endpointId: endpoint.id, data },
+        { endpointId: endpoint.id, connectionId, data },
         {
           onSuccess: () => onOpenChange(false),
         },

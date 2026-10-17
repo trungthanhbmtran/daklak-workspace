@@ -460,6 +460,90 @@ export class TasksService {
     }
   }
 
+  /** Parse JSON an toàn: lỗi → {} + logger.warn (chấp nhận giá trị đã parse sẵn) */
+  private safeParseJson<T = any>(raw: unknown, contextLabel: string): T {
+    if (raw === undefined || raw === null || raw === '') return {} as T;
+    if (typeof raw === 'object') return raw as T;
+    try {
+      return JSON.parse(String(raw)) as T;
+    } catch (e) {
+      this.logger.warn(`${contextLabel}: JSON parse failed, fallback {} — ${(e as any)?.message}`);
+      return {} as T;
+    }
+  }
+
+  // ─── KPI helpers (Server-side recompute — backend là source of truth tính điểm KPI) ────
+
+  /**
+   * Mirror công thức hiển thị của TaskEvaluateClient.tsx:102-116 (admin_khcn — chỉ đọc tham chiếu):
+   *  - rawWeightedScore = clamp( round(c1*0.25 + c2*0.4 + c3*0.2 + c4*0.15 + bonusPenalty), 0, 100 )
+   *  - finalKpiScore    = round( baseScore * (rawWeightedScore/100) * difficultyK * (primaryPercentage/100) )
+   *  - rankGrade        = ≥90 → A, ≥70 → B, ≥50 → C, còn lại D (FE ngưỡng thực tế: 90/70/50)
+   * baseScore/difficultyK đọc từ metadata của task (TaskCreateClient gửi metadata.baseScore/difficultyFactor);
+   * primaryPercentage đọc từ participant ASSIGNEE (contributionPercentage) — bỏ qua giá trị client gửi.
+   */
+  private recomputeKpiEvaluation(rawTask: any, evidenceData: any): { scores: any; evaluationExtras: any } {
+    const scoresIn = evidenceData?.scores && typeof evidenceData.scores === 'object' ? { ...evidenceData.scores } : {};
+    const num = (v: any): number => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    // 1) Raw inputs từ evaluator (điểm thành tố do người thẩm định nhập — nguồn khách quan duy nhất client được cung cấp)
+    const c1Timeliness = num(evidenceData?.c1Timeliness ?? scoresIn.timelinessScore);
+    const c2Quality = num(evidenceData?.c2Quality ?? scoresIn.qualityScore);
+    const c3Proactiveness = num(evidenceData?.c3Proactiveness ?? scoresIn.attitudeScore);
+    const c4Discipline = num(evidenceData?.c4Discipline);
+    const bonusPenalty = num(evidenceData?.bonusPenalty);
+
+    // 2) Hệ số nhiệm vụ — chiếm từ dữ liệu task trên server, bỏ qua giá trị client gửi
+    const taskMeta = (rawTask?.metadata && typeof rawTask.metadata === 'object' ? rawTask.metadata : {}) as any;
+    const baseScore = num(taskMeta.baseScore) || num(taskMeta.kpiScore) || 10;
+    const difficultyK = num(taskMeta.kpiWeight) || num(taskMeta.difficultyFactor) || 1.0;
+    const assigneeParticipant = Array.isArray(rawTask?.participants)
+      ? rawTask.participants.find((p: any) => p?.participantRole === 'ASSIGNEE')
+      : undefined;
+    const primaryPercentage = num(assigneeParticipant?.contributionPercentage) > 0
+      ? num(assigneeParticipant.contributionPercentage)
+      : 100;
+
+    // 3) Recompute theo công thức FE (mirror chính xác, clamp sau khi round)
+    const rawWeighted = Math.max(0, Math.min(100, Math.round(
+      c1Timeliness * 0.25 + c2Quality * 0.4 + c3Proactiveness * 0.2 + c4Discipline * 0.15 + bonusPenalty
+    )));
+    const finalKpiScore = Math.round(baseScore * (rawWeighted / 100) * difficultyK * (primaryPercentage / 100));
+    const rankGrade = rawWeighted >= 90 ? 'A' : rawWeighted >= 70 ? 'B' : rawWeighted >= 50 ? 'C' : 'D';
+
+    // 4) Ghi đè mọi trường tổng hợp client-sent (chống fake điểm/label)
+    const scores = {
+      ...scoresIn,
+      volumePct: primaryPercentage,
+      difficultyK,
+      totalScore: rawWeighted,
+      rawWeightedScore: rawWeighted,
+      finalKpiScore,
+      rankGrade,
+      qualityGrade: rankGrade,
+    };
+
+    const evaluationExtras = {
+      inputs: {
+        c1Timeliness, c2Quality, c3Proactiveness, c4Discipline, bonusPenalty,
+        baseScore, difficultyK, primaryPercentage,
+      },
+      computed: {
+        rawWeightedScore: rawWeighted,
+        finalKpiScore,
+        rankGrade,
+        weights: { c1Timeliness: 0.25, c2Quality: 0.4, c3Proactiveness: 0.2, c4Discipline: 0.15 },
+      },
+      computedByServer: true,
+      computedAt: new Date().toISOString(),
+    };
+
+    return { scores, evaluationExtras };
+  }
+
   private async executeCreateTaskTransaction(data: any, planId: number | null, parentId: number | null, creatorCode: string, workflowId: string | null, workflowCode: string | null, currentNodeId: string | null) {
     return this.prisma.$transaction(async (tx) => {
       let parsedMetadata: any = {};
@@ -712,7 +796,7 @@ export class TasksService {
   }
 
   private async handlePostCreateWorkflow(newTask: any, data: any, planId: number | null, parentId: number | null, creatorCode: string) {
-    const existingMetadata = newTask.metadata ? (typeof newTask.metadata === 'string' ? JSON.parse(newTask.metadata) : newTask.metadata) : {};
+    const existingMetadata = this.safeParseJson(newTask.metadata, `Task#${newTask.id} createTask workflow metadata`);
     const { workflowId, currentNodeId } = existingMetadata;
 
     if (workflowId && currentNodeId) {
@@ -1113,19 +1197,22 @@ export class TasksService {
       };
     }
 
-    // Parse và lưu thông tin thẩm định đánh giá nếu có (EVALUATE_APPROVE)
+    // Đánh giá KPI (EVALUATE_APPROVE): BACKEND là source of truth — recompute điểm từ raw inputs,
+    // ghi đè toàn bộ giá trị tổng hợp client gửi (tránh fake điểm) theo công thức TaskEvaluateClient FE.
     let evidenceData: any = context?.evidenceData;
     if (!evidenceData && context?.evidenceDataJson) {
-      try {
-        evidenceData = JSON.parse(context.evidenceDataJson);
-      } catch {}
+      evidenceData = this.safeParseJson(context.evidenceDataJson, `Task#${id} evaluate evidenceData`);
     }
     if (evidenceData?.scores) {
+      const { scores: computedScores, evaluationExtras } = this.recomputeKpiEvaluation(rawTask, evidenceData);
+      // Dùng scores đã recompute cho cả history record phía dưới
+      evidenceData = { ...evidenceData, scores: computedScores };
       updateData.metadata = {
         ...((rawTask.metadata as any) || {}),
         ...(updateData.metadata || {}),
         evaluation: {
-          scores: evidenceData.scores,
+          ...evaluationExtras,
+          scores: computedScores,
           feedback: evidenceData.feedback || rejectReason || context?.evidence || '',
           evaluatedBy: actor,
           evaluatedAt: new Date().toISOString(),

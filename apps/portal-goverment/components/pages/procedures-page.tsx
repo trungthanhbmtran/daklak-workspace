@@ -332,9 +332,12 @@ export default function ProceduresPage() {
                           <HelpCircle className="w-4 h-4" />
                           Liên hệ phòng Một cửa xã Dang Kang để được hướng dẫn trực tiếp.
                         </span>
+                        {/* GAP NOTE (ledger #23): BE chưa có endpoint nộp hồ sơ trực tuyến → tắt nút, hướng dẫn nộp trực tiếp/văn thư thay vì alert fake */}
                         <button
-                          onClick={() => alert(`Khởi tạo biểu mẫu trực tuyến cho: ${proc.title}`)}
-                          className="bg-portal-primary text-white hover:bg-red-700 px-5 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-wider shadow"
+                          type="button"
+                          disabled
+                          className="bg-portal-primary text-white px-5 py-2.5 rounded-xl font-bold uppercase text-[10px] tracking-wider shadow opacity-50 cursor-not-allowed"
+                          title="Hệ thống nộp hồ sơ trực tuyến đang được cập nhật. Vui lòng nộp hồ sơ trực tiếp tại Bộ phận Một cửa hoặc qua văn thư."
                         >
                           NỘP HỒ SƠ TRỰC TUYẾN
                         </button>

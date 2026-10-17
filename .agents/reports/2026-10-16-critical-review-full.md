@@ -7,31 +7,43 @@ Phạm vi: apps/api-gateway, user, hrm, document, posts, media, chat, notificati
 ## LEDGER SỬA LỖI (cập nhật trạng thái tại đây khi fix — tick ✅ khi verified)
 | # | Mức | Tóm tắt | Trạng thái | Người sửa | Ngày sửa | Bằng chứng kiểm chứng |
 |---|-----|---------|-----------|-----------|----------|----------------------|
-| 1 | P0 | workflow-client syntax hỏng (2 file) | ⬜ TODO | — | — | — |
-| 2 | P0 | inbox-idempotency schema mismatch + ghi SUCCESS trước logic | ⬜ TODO | — | — | — |
-| 3 | P0 | Prisma drift: Outbox/ProcessedCommand/binding không migration | ⬜ TODO | — | — | — |
-| 4 | P0 | Migration DROP 7 bảng + NOT NULL không default + DROP+ADD snake_case | ⬜ TODO | — | — | — |
-| 5 | P0 | benchmark.js truncate notificationLog | ⬜ TODO | — | — | — |
-| 6 | P0 | LGSP clientId/clientSecret hardcode | ⬜ TODO | — | — | — |
-| 7 | P0 | internal-secret-daklak fallback ×4 file | ⬜ TODO | — | — | — |
-| 8 | P0 | SSO secret/ID hardcode + token localStorage (portal) | ⬜ TODO | — | — | — |
-| 9 | P0 | DB/AMQP/MinIO credentials hardcode ×10+ file | ⬜ TODO | — | — | — |
-| 10 | P0 | grpc-auth.guard impersonate systemUser khi thiếu env | ⬜ TODO | — | — | — |
-| 11 | P0 | report-service `\|\| true` vô hiệu permission check | ⬜ TODO | — | — | — |
-| 12 | P0 | RCE new Function + startProcess dùng version chưa PUBLISHED | ⬜ TODO | — | — | — |
-| 13 | P0 | workflow gRPC không auth guard, identity từ payload | ⬜ TODO | — | — | — |
-| 14 | P0 | AI Assistant không owner-scope | ⬜ TODO | — | — | — |
-| 15 | P0 | media/download/:id không guard | ⬜ TODO | — | — | — |
-| 16 | P0 | chat sendMessage spoofing senderId | ⬜ TODO | — | — | — |
-| 17 | P0 | IDOR chat GetMessages + report run snapshot | ⬜ TODO | — | — | — |
-| 18 | P0 | notification REST API không authentication | ⬜ TODO | — | — | — |
-| 19 | P1 | ~70+ gRPC gateway + 7 services thiếu metadata | ⬜ TODO | — | — | — |
-| 20 | P1 | document dual source of truth workflow status | ⬜ TODO | — | — | — |
-| 21 | P1 | admin_khcn tự tính KPI/permission client-side | ⬜ TODO | — | — | — |
-| 22 | P1 | workflow engine race/OCC/idempotency | ⬜ TODO | — | — | — |
-| 23 | P1 | Fabricated KPI data (report + portal) | ⬜ TODO | — | — | — |
-| 24–36 | P2 | Bug/hiệu năng (broadcast recipient array, floating promise, safeParse, N+1, unbounded query, collision HS-code, presence TTL...) | ⬜ TODO | — | — | — |
-| P3 | P3 | Vệ sinh (console spam, dead code, eslint_output.json, encoding) | ⬜ TODO | — | — | — |
+| 1 | P0 | workflow-client syntax hỏng (2 file) | ✅ DONE | L1 | 2026-10-17 | tsc 7.0.2 compile-check EXIT 0; baseline trước fix = EXIT 1 (21 err) |
+| 2 | P0 | inbox-idempotency schema mismatch + ghi SUCCESS trước logic | ✅ DONE | L1 | 2026-10-17 | `where/id` khớp schema main.prisma:335; business logic chạy trong tx xong mới ghi PROCESSED; runtime smoke vs Prisma thật = UNVERIFIED (cần DB) |
+| 3 | P0 | Prisma drift: Outbox/ProcessedCommand/binding không migration | ✅ DONE | L7 | 2026-10-17 | 9 migration mới additive (CREATE TABLE IF NOT EXISTS MySQL); `prisma validate` 9/9 PASS; `migrate deploy` UNVERIFIED (không DB) |
+| 4 | P0 | Migration DROP 7 bảng + NOT NULL không default + DROP+ADD snake_case | ⚠️ MANUAL REVIEW | L7 | 2026-10-17 | Không sửa migration history (an toàn data). Cần review 2 migration 20260720 của workflow-service; fresh-deploy sẽ fail tại 20261012130000 ALTER workflow_bindings trước khi tới migration mới |
+| 5 | P0 | benchmark.js truncate notificationLog | ✅ DONE | L8 | 2026-10-17 | Guard `ALLOW_DESTRUCTIVE_BENCHMARK`; runtime smoke `node benchmark.js` → cảnh báo + exit 2, không deleteMany |
+| 6 | P0 | LGSP clientId/clientSecret hardcode | ✅ DONE (code) — ROTATE KEY | L5 | 2026-10-17 | Fallback xoá + fail-fast; spec test cập nhật theo fail-fast; npm build EXIT 0 |
+| 7 | P0 | internal-secret-daklak fallback ×4 file | ✅ DONE (code) — ROTATE KEY | L1,L2 | 2026-10-17 | 4/4 file fail-fast (guard, registry, executor, statistics); integration grep = 0 match |
+| 8 | P0 | SSO secret/ID hardcode + token localStorage (portal) | ✅ DONE (fallback xoá); localStorage defer | L10 | 2026-10-17 | route.ts 500 khi thiếu env; auth-provider throw; tsc portal EXIT 0 |
+| 9 | P0 | DB/AMQP/MinIO credentials hardcode ×10+ file | ✅ DONE | L5,L8 | 2026-10-17 | toà bộ xoá + fail-fast; node --check PASS 7 file; còn sót: translate `mq_consumer.py:12` guest:guest (không nằm trong danh sách giao) |
+| 10 | P0 | grpc-auth.guard impersonate systemUser khi thiếu env | ✅ DONE | L1 | 2026-10-17 | Thiếu env → RpcException; token sai → UNAUTHENTICATED; không còn systemUser fallback |
+| 11 | P0 | report-service `\|\| true` vô hiệu permission check | ✅ DONE | L8 | 2026-10-17 | Default-deny theo role + permissionsFlatten (ADMIN/SUPER_ADMIN/\*/INTEGRATION:VIEW/REPORT:*) |
+| 12 | P0 | RCE new Function + startProcess dùng version chưa PUBLISHED | ✅ DONE | L6 | 2026-10-17 | startProcess chỉ version PUBLISHED; createProcess/updateProcess validate graph; script task default-off qua `WORKFLOW_ENABLE_SCRIPT_TASK`; tsc EXIT 0 |
+| 13 | P0 | workflow gRPC không auth guard, identity từ payload | ✅ DONE | L6 | 2026-10-17 | GrpcAuthGuard + GrpcAuthModule; callers chưa truyền metadata phải bổ sung (xem #19) |
+| 14 | P0 | AI Assistant không owner-scope | ✅ DONE | L3 | 2026-10-17 | where {id,userId} / deleteMany ownership; GrpcAuthGuard per-handler; service tsc EXIT 0. Gateway cần truyền userId (L2 đã đính metadata) |
+| 15 | P0 | media/download/:id không guard | ✅ DONE | L2 | 2026-10-17 | JwtAuthGuard+PermissionsGuard; cộng thêm 3 controller thiếu guard khác (minutes, posts-tag, posts-banner) |
+| 16 | P0 | chat sendMessage spoofing senderId | ✅ DONE | L2 | 2026-10-17 | senderId luôn từ req.user, override client; chat spec PASS |
+| 17 | P0 | IDOR chat GetMessages + report run snapshot | 🟠 PARTIAL | L8 | 2026-10-17 | report: org-scope thêm khi request có field (proto không có field riêng — gap); **chat GetMessages chưa verify participant — CÒN TODO** |
+| 18 | P0 | notification REST API không authentication | ✅ DONE — cần gateway forward token | L8 | 2026-10-17 | Middleware x-internal-token khóa mọi method; smoke PASS. Gateway integrations.controller chưa forward header → TODO L2-nếp sau |
+| 19 | P1 | ~70+ gRPC gateway + 7 services thiếu metadata | 🟠 PARTIAL | L2 | 2026-10-17 | Xong users/documents/posts/workflow/chat/notifications ~40 call (metadata + delegation token). Còn: service-layer user/organizations/menus/categories, hrm employee/master-plans/tasks ListUsers, public-* endpoints cần system-token |
+| 20 | P1 | document dual source of truth workflow status | 🟠 PARTIAL | L5 | 2026-10-17 | update() strip status + wire ProcessDocument/FinalizeDocument thật; CHANGELOG: gateway cần 2 REST endpoint mới + FE đổi nút; integration PASS |
+| 21 | P1 | admin_khcn tự tính KPI/permission client-side | ✅ DONE | L4,L9 | 2026-10-17 | Backend recompute (mirror công thức FE, override client-sent; jest 48/48 PASS); FE submit raw inputs; broken hardcoded admin/role-string; default-deny allowedActions. Backend gap: inject EVALUATE_APPROVE vào computeAllowedActions |
+| 22 | P1 | workflow engine race/OCC/idempotency | ✅ DONE | L6 | 2026-10-17 | tx đồng bộ idempotency; claim theo stateVersion; ACK P2002 → duplicate; resolveNodeCode chuẩn compile(); runtime behavior: replay → 200 instance cũ |
+| 23 | P1 | Fabricated KPI data (report + portal) | ✅ DONE | L8,L10 | 2026-10-17 | Sample data gated `REPORT_ENABLE_SAMPLE_DATA`; statistics fallback số liệu fake → null; portal: counter/poll/sent/alert/news-mock + fake weather/leadership + Unsplash fallback: xoá / wire thật |
+| 24 | P2 | Notification broadcast recipients array | ✅ DONE | L8 | 2026-10-17 | Per-recipient loop + per-item error handling; SmtpAdapter password fix |
+| 25 | P2 | markRead floating promise + sequential loop | ✅ DONE | L2 | 2026-10-17 | return promise; Promise.allSettled cho broadcast |
+| 26 | P2 | JSON.parse thiếu safeParse (10+ điểm) | ✅ DONE | L2,L3,L4,L6,L8 | 2026-10-17 | api-gateway/user-service/hrm/workflow/report/notification/python worker đều safeParse/try-catch; python py_compile UNVERIFIED (không có Python runtime trong máy) |
+| 27 | P2 | Catch nuốt lỗi (serviceTask, lgsp, dossiers...) | ✅ DONE (mức zero-stall) | L6,L5 | 2026-10-17 | serviceTask default-off + skip có log; lgsp/dossiers catch → logger.warn |
+| 28 | P2 | axios không timeout + RMQ fire-and-forget | ✅ DONE | L6 | 2026-10-17 | timeout 10s; emit self-dispatch + catchError → Logger |
+| 29 | P2 | Mã hồ sơ collision Math.random | ✅ DONE | L5 | 2026-10-17 | randomUUID hex 8 ký tự (`HS-2026-xxxxxxxx`); build PASS |
+| 30 | P2 | Chat presence không TTL | ✅ DONE | L8 | 2026-10-17 | setex 60s + tự refresh |
+| 31 | P2 | Least Data | 🟠 PARTIAL | L3,L5 | 2026-10-17 | ListUsers strip phone/cccd; document/posts select giới hạn; còn: gateway config findMany include full apiKey; GetUsersByIds full record (trao lane sau); email giữ theo role quản lý |
+| 32 | P2 | N+1 | 🟠 PARTIAL | L5,L8 | 2026-10-17 | translator.py batch 1 query; portal-config $transaction; còn: getAllowedActionsBatch per-request, LGSP per-packet (giữ vì HTTP tuần tự có lý do hoá t cố ý) |
+| 33 | P2 | Unbounded query | 🟠 PARTIAL | L5,L6 | 2026-10-17 | listInstances clamp 100; posts take/dư; dossiers take 100; còn: report engine dual PrismaClient pool, portal-menu full-table (đã select nhưng không take) |
+| 34 | P2 | Error mapping gRPC→HTTP + 8 RPC missing | 🟠 PARTIAL | L1 | 2026-10-17 | shared filter GRPC_STATUS_HTTP_MAP; 8 RPC proto không implement — chưa làm (deadline tách task proto/API riêng) |
+| 35 | P2 | Frontend admin/portal fetch & sanitize | 🟠 PARTIAL | L9,L10 | 2026-10-17 | Portal: banners collision chuẩn hoá, stripUnsafeHtml + sanitizeCustomCss, Devtools dev-only, employees endpoint đúng; admin: mutation invalidate connection query. Còn: mega-featch Renderer (enable gate có), ApiConnectionDetail hybrid fallback (BE thiếu endpoint :id/endpoints) |
+| 36 | P2 | Workflow contract mapping sai | ✅ DONE (phần lớn) | L6 | 2026-10-17 | startWorkflow/triggerAutoBinding/priority=0 xử lý; còn updateProcessBinding priority (follow-up) |
+| P3 | P3 | Vệ sinh | 🟠 PARTIAL | L1-L10 | 2026-10-17 | console.error→Logger ở gateway/hrm/report/notification/python/kpi; FE admin 8 điểm + FinanceUploadModal xoá; eslint_output.json xoá; getCookie dedup portal. Còn lại: 24 file admin console.error (list report-back L9), console.error reports/user/import gateway service-layer |
 
 ---
 

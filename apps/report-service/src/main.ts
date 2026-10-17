@@ -36,12 +36,17 @@ async function bootstrap() {
       },
     },
   });
+  // Fail-fast: không chạy với credentials mặc định (đã xóa fallback amqp://admin:...@rabbitmq)
+  const rabbitUrl = process.env.RABBITMQ_URL;
+  if (!rabbitUrl) {
+    throw new Error(
+      'RABBITMQ_URL chưa được cấu hình — report-service yêu cầu RabbitMQ để subscribe report_queue. Vui lòng cấu hình RABBITMQ_URL trong .env.',
+    );
+  }
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [
-        process.env.RABBITMQ_URL || 'amqp://admin:admin123@rabbitmq:5672',
-      ],
+      urls: [rabbitUrl],
       queue: 'report_queue',
       queueOptions: {
         durable: true,
@@ -55,4 +60,7 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(process.env.PORT ?? 3011);
 }
-void bootstrap();
+void bootstrap().catch((err) => {
+  console.error('[Report Service] Bootstrap failed:', err?.message || err);
+  process.exit(1);
+});

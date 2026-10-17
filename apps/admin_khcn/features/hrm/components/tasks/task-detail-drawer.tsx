@@ -8,7 +8,6 @@ import { Heading, Text } from "@/components/ui/typography";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HrmTask } from "../../types/task";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -17,8 +16,6 @@ import {
   MessageSquare,
   CheckCircle2,
   ArrowRightCircle,
-  Repeat,
-  Briefcase,
   Calendar,
   Award,
   Edit3,
@@ -28,13 +25,10 @@ import {
   Users,
   FileText,
   ShieldCheck,
-  Building,
   TrendingUp,
-  AlertTriangle,
-  PlayCircle,
   Inbox,
-  Sparkles,
   ExternalLink,
+  X,
 } from "lucide-react";
 
 import { useTaskDetail, useRespondTask, useUpdateTaskStatus } from "../../hooks/useTasks";
@@ -169,9 +163,24 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-[850px] md:max-w-[950px] lg:max-w-[1050px] xl:max-w-[1150px] p-0 flex flex-col h-full bg-slate-50 shadow-2xl border-l border-slate-200">
+      <SheetContent
+        showCloseButton={false}
+        className="w-full sm:max-w-[850px] md:max-w-[950px] lg:max-w-[1050px] xl:max-w-[1150px] p-0 flex flex-col h-full bg-slate-50 shadow-2xl border-l border-slate-200"
+      >
         {isLoadingDetail && !currentTask ? (
-          <div className="p-8 space-y-6 bg-white h-full">
+          <div className="p-8 space-y-6 bg-white h-full relative">
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-8 px-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs font-semibold gap-1 border border-slate-200 bg-white"
+                title="Đóng (Esc)"
+              >
+                <X className="w-4 h-4 text-slate-600" />
+                <span>Đóng</span>
+              </Button>
+            </div>
             <div className="space-y-3">
               <Skeleton className="h-6 w-3/4 rounded-lg" />
               <Skeleton className="h-4 w-1/2 rounded-md" />
@@ -187,7 +196,19 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
             </div>
           </div>
         ) : !currentTask ? (
-          <div className="p-16 text-center text-slate-500 flex flex-col items-center justify-center h-full">
+          <div className="p-16 text-center text-slate-500 flex flex-col items-center justify-center h-full relative">
+            <div className="absolute top-4 right-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-8 px-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs font-semibold gap-1 border border-slate-200 bg-white"
+                title="Đóng (Esc)"
+              >
+                <X className="w-4 h-4 text-slate-600" />
+                <span>Đóng</span>
+              </Button>
+            </div>
             <AlertCircle className="w-12 h-12 text-slate-400 mb-3" />
             <p className="text-base font-semibold text-slate-700">Không tìm thấy thông tin công việc</p>
             <p className="text-xs text-slate-400 mt-1">Dữ liệu có thể đã bị thay đổi hoặc bạn không có thẩm quyền truy cập.</p>
@@ -223,7 +244,7 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                       {getTaskTypeBadge(currentTask)}
                     </div>
 
-                    <SheetTitle className="text-xl font-bold text-slate-900 leading-snug break-words">
+                    <SheetTitle className="text-xl font-bold text-slate-900 leading-snug wrap-break-word">
                       {currentTask.title}
                     </SheetTitle>
 
@@ -307,9 +328,23 @@ export function TaskDetailDrawer({ taskId, task, open, onOpenChange }: TaskDetai
                         <span className="hidden sm:inline">Trang đầy đủ</span>
                       </Button>
                     </Link>
+
+                    {/* Prominent Header Close Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onOpenChange(false)}
+                      className="h-8 px-2.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg text-xs font-semibold gap-1 shrink-0 ml-1 border border-slate-200 bg-white shadow-2xs transition-colors"
+                      title="Đóng chi tiết công việc (Esc)"
+                      aria-label="Đóng"
+                    >
+                      <X className="w-4 h-4 text-slate-600" />
+                      <span className="hidden sm:inline">Đóng</span>
+                    </Button>
                   </div>
                 </div>
               </SheetHeader>
+
 
               {/* ── Enterprise Structured Info Cards Grid ── */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-4 border-t border-slate-100 text-xs">

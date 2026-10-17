@@ -318,14 +318,6 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
   );
 }
 
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null
-  const value = "; " + document.cookie
-  const parts = value.split("; " + name + "=")
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null
-  return null
-}
-
 interface HomeClientProps {
   initialPortalMenus?: any
   initialPosts?: any
@@ -335,6 +327,21 @@ interface HomeClientProps {
 export default function HomeClient({ initialPortalMenus, initialPosts, initialBanners }: HomeClientProps) {
   const pathname = usePathname()
 
+  // Normalize server-provided initial payloads to array shape (unwrap body.data) matching client queryFn
+  const initialPostsList = React.useMemo(() => {
+    if (Array.isArray(initialPosts)) return initialPosts
+    return Array.isArray((initialPosts as any)?.data)
+      ? (initialPosts as any).data
+      : []
+  }, [initialPosts])
+
+  const initialBannersList = React.useMemo(() => {
+    if (Array.isArray(initialBanners)) return initialBanners
+    return Array.isArray((initialBanners as any)?.data)
+      ? (initialBanners as any).data
+      : []
+  }, [initialBanners])
+
   const currentLang = React.useMemo(() => {
     if (!pathname) return "vi"
     const segments = pathname.split("/").filter(Boolean)
@@ -343,14 +350,6 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [pathname])
 
   const [currentSlide, setCurrentSlide] = React.useState(0)
-  const [pollVoted, setPollVoted] = React.useState(false)
-  const [pollChoice, setPollChoice] = React.useState<string | null>(null)
-  const [pollStats, setPollStats] = React.useState({
-    verySatisfied: 45,
-    satisfied: 35,
-    normal: 15,
-    unsatisfied: 5
-  })
   const [activeQaIdx, setActiveQaIdx] = React.useState<any>(0)
   const [lightboxImg, setLightboxImg] = React.useState<string | null>(null)
   const [lightboxTitle, setLightboxTitle] = React.useState<string | null>(null)
@@ -395,12 +394,17 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }
 
   const { data: postsData } = useQuery({
-    queryKey: ["public-posts", undefined],
+    queryKey: ["public-posts", currentLang],
     queryFn: async () => {
-      const response = await apiClient.get("/public/posts")
-      return response
+      try {
+        const response: any = await apiClient.get("/public/posts")
+        const body = response?.data ?? response
+        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
+      } catch (e) {
+        return []
+      }
     },
-    initialData: initialPosts,
+    initialData: initialPostsList,
   })
 
   const { data: menusData } = useQuery({
@@ -412,13 +416,19 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     initialData: initialPortalMenus,
   })
 
+  // Chuẩn hoá ledger#35: queryFn trả MẢNG (unwrap .data) — cùng shape header/DynamicPageRenderer
   const { data: bannersData } = useQuery({
     queryKey: ["public-banners"],
     queryFn: async () => {
-      const response = await apiClient.get("/public/banners")
-      return response
+      try {
+        const response: any = await apiClient.get("/public/banners")
+        const body = response?.data ?? response
+        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
+      } catch (e) {
+        return []
+      }
     },
-    initialData: initialBanners,
+    initialData: initialBannersList,
   })
 
   const { data: portalConfigData } = useQuery({
@@ -484,34 +494,31 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [menusData, currentLang])
 
   const middleBanners = React.useMemo(() => {
-    if (!bannersData?.data || bannersData.data.length === 0) {
-      return []
-    }
-    const list = bannersData.data.filter(
+    const list = Array.isArray(bannersData) ? bannersData : []
+    const filtered = list.filter(
       (b: any) => b.position?.toLowerCase() === "middle" && b.status !== false
     )
-    list.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
-    return list
+    filtered.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    return filtered
   }, [bannersData])
 
   const customPatrioticBanners = React.useMemo(() => {
-    if (!bannersData?.data || bannersData.data.length === 0) {
-      return []
-    }
-    const list = bannersData.data.filter(
+    const list = Array.isArray(bannersData) ? bannersData : []
+    const filtered = list.filter(
       (b: any) => b.position?.toLowerCase() === "custom" && b.status !== false
     )
-    list.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
-    return list
+    filtered.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    return filtered
   }, [bannersData])
 
   const slides = React.useMemo(() => {
-    const dbSlides = postsData?.data
-      ? postsData.data.slice(0, 3).map((post: any) => ({
+    const dbSlides = postsData && postsData.length > 0
+      ? postsData.slice(0, 3).map((post: any) => ({
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         excerpt: getLocalizedField(post, "description", currentLang) || getLocalizedField(post, "content", currentLang) || "",
-        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
+        // Ledger #23: không fabric ảnh placeholder Unsplash — chỉ dùng thumbnail thật từ BE
+        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "",
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN"),
         category: getLocalizedField(post.category, "name", currentLang) || (currentLang === "en" ? "News" : "Tin tức")
       }))
@@ -520,8 +527,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [postsData, currentLang])
 
   const tickerText = React.useMemo(() => {
-    if (postsData?.data) {
-      const notices = postsData.data.slice(0, 5)
+    if (postsData && postsData.length > 0) {
+      const notices = postsData.slice(0, 5)
       if (notices.length > 0) {
         return notices.map((n: any) => '🌟 ' + getLocalizedField(n, "title", currentLang)).join(" | ")
       }
@@ -530,8 +537,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [postsData, currentLang])
 
   const announcements = React.useMemo(() => {
-    if (postsData?.data) {
-      const filtered = postsData.data.slice(0, 6).map((post: any) => ({
+    if (postsData && postsData.length > 0) {
+      const filtered = postsData.slice(0, 6).map((post: any) => ({
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN"),
@@ -543,8 +550,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [postsData, currentLang])
 
   const constructionNews = React.useMemo(() => {
-    if (postsData?.data) {
-      const filtered = postsData.data.filter((p: any) =>
+    if (postsData && postsData.length > 0) {
+      const filtered = postsData.filter((p: any) =>
         p.category?.slug === "xay-dung" ||
         p.category?.name?.toLowerCase().includes("xây dựng") ||
         p.category?.name?.toLowerCase().includes("công thương")
@@ -552,7 +559,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         excerpt: getLocalizedField(post, "description", currentLang) || getLocalizedField(post, "content", currentLang) || "",
-        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=400&q=80",
+        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "",
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN")
       }))
       if (filtered.length > 0) return filtered
@@ -561,8 +568,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [postsData, currentLang])
 
   const agricultureNews = React.useMemo(() => {
-    if (postsData?.data) {
-      const filtered = postsData.data.filter((p: any) =>
+    if (postsData && postsData.length > 0) {
+      const filtered = postsData.filter((p: any) =>
         p.category?.slug === "nong-nghiep" ||
         p.category?.name?.toLowerCase().includes("nông nghiệp") ||
         p.category?.name?.toLowerCase().includes("nông thôn")
@@ -570,7 +577,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         excerpt: getLocalizedField(post, "description", currentLang) || getLocalizedField(post, "content", currentLang) || "",
-        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=400&q=80",
+        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "",
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN")
       }))
       if (filtered.length > 0) return filtered
@@ -579,8 +586,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [postsData, currentLang])
 
   const galleryPhotos = React.useMemo(() => {
-    if (postsData?.data) {
-      const withImages = postsData.data.slice(0, 4).map((post: any) => ({
+    if (postsData && postsData.length > 0) {
+      const withImages = postsData.slice(0, 4).filter((post: any) => post.thumbnail).map((post: any) => ({
         id: post.id,
         title: getLocalizedField(post, "title", currentLang),
         image: resolveMediaUrl(post.thumbnail),
@@ -596,7 +603,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     return list.map((e: any) => ({
       name: ((e.lastname || "") + " " + (e.firstname || "")).trim() || "Cán bộ UBND",
       role: e.jobTitle?.name || (currentLang === "en" ? "Commune Official" : "Cán bộ Xã"),
-      phone: e.phone || "0262.3812.345",
+      phone: e.phoneNumber || e.phone || "",
       hasStar: e.jobTitleId === 1 || e.jobTitle?.id === 1 || e.jobTitle?.code === "giamDoc",
     }))
   }, [leadersData, currentLang])
@@ -610,8 +617,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [questionsData, currentLang])
 
   const constructionLinks = React.useMemo(() => {
-    if (!postsData?.data) return []
-    const filtered = postsData.data.filter((p: any) =>
+    if (!Array.isArray(postsData)) return []
+    const filtered = postsData.filter((p: any) =>
       p.category?.slug === "xay-dung" ||
       p.category?.name?.toLowerCase().includes("xây dựng") ||
       p.category?.name?.toLowerCase().includes("công thương")
@@ -623,8 +630,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   }, [postsData, currentLang])
 
   const agricultureLinks = React.useMemo(() => {
-    if (!postsData?.data) return []
-    const filtered = postsData.data.filter((p: any) =>
+    if (!Array.isArray(postsData)) return []
+    const filtered = postsData.filter((p: any) =>
       p.category?.slug === "nong-nghiep" ||
       p.category?.name?.toLowerCase().includes("nông nghiệp") ||
       p.category?.name?.toLowerCase().includes("nông thôn")
@@ -706,21 +713,6 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     return () => clearInterval(galleryTimer)
   }, [galleryPhotos.length])
 
-  React.useEffect(() => {
-    // Check if user has already voted
-    const savedVote = localStorage.getItem("dangkang_portal_poll_voted")
-    const savedChoice = localStorage.getItem("dangkang_portal_poll_choice")
-    if (savedVote && savedChoice) {
-      setPollVoted(true)
-      setPollChoice(savedChoice)
-
-      const savedStats = localStorage.getItem("dangkang_portal_poll_stats")
-      if (savedStats) {
-        setPollStats(JSON.parse(savedStats))
-      }
-    }
-  }, [])
-
   const nextSlide = () => {
     if (slides.length === 0) return
     setCurrentSlide((currentSlide + 1) % slides.length)
@@ -730,25 +722,6 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     if (slides.length === 0) return
     setCurrentSlide((currentSlide - 1 + slides.length) % slides.length)
   }
-
-  const handleVoteSubmit = () => {
-    if (!pollChoice) return
-
-    const updatedStats = { ...pollStats }
-    if (pollChoice === "verySatisfied") updatedStats.verySatisfied += 1
-    else if (pollChoice === "satisfied") updatedStats.satisfied += 1
-    else if (pollChoice === "normal") updatedStats.normal += 1
-    else if (pollChoice === "unsatisfied") updatedStats.unsatisfied += 1
-
-    setPollStats(updatedStats)
-    setPollVoted(true)
-
-    localStorage.setItem("dangkang_portal_poll_voted", "true")
-    localStorage.setItem("dangkang_portal_poll_choice", pollChoice)
-    localStorage.setItem("dangkang_portal_poll_stats", JSON.stringify(updatedStats))
-  }
-
-  const totalVotes = pollStats.verySatisfied + pollStats.satisfied + pollStats.normal + pollStats.unsatisfied
 
   return (
     <div className="flex flex-col gap-8 md:gap-10 animate-fade-in select-none">
@@ -846,13 +819,15 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === currentSlide ? "opacity-100 pointer-events-auto scale-100" : "opacity-0 pointer-events-none scale-105"
                   }`}
               >
-                {/* Slide Background Image */}
+                {/* Slide Background Image — chỉ khi BE có thumbnail (ledger #23) */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/15 z-10" />
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                />
+                {slide.image ? (
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
 
                 {/* Semi-transparent Overlay Bottom Block */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 z-20 flex flex-col gap-2 bg-gradient-to-t from-black/95 to-black/60 border-t border-white/5">
@@ -997,11 +972,11 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* 3. Horizontal Decorative Patriotic Promotion Banner 1 */}
       {(() => {
-        const hasMiddle1 = bannersData?.data?.some(
+        const hasMiddle1 = (bannersData || []).some(
           (b: any) => b.position?.toLowerCase() === "middle_1" && b.status !== false
         );
         if (hasMiddle1) {
-          return <PortalBannerSlot position="middle_1" banners={bannersData?.data || []} />;
+          return <PortalBannerSlot position="middle_1" banners={bannersData || []} />;
         }
 
         // Fallback to legacy custom Patriotic banners if they exist
@@ -1134,12 +1109,16 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 key={news.id}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-portal-primary transition-all flex flex-col sm:flex-row gap-4 group"
               >
-                <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0">
-                  <img
-                    src={news.image}
-                    alt={news.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0 bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                  {news.image ? (
+                    <img
+                      src={news.image}
+                      alt={news.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <FileText className="w-7 h-7 text-slate-300 dark:text-slate-700" />
+                  )}
                 </div>
                 <div className="flex flex-col gap-2 flex-1">
                   <span className="text-slate-400 text-[9px] font-bold tracking-wider flex items-center gap-1">
@@ -1198,7 +1177,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       </div>
 
       {/* Dynamic Banner Slot - Giữa trang - Vị trí 2 */}
-      <PortalBannerSlot position="middle_2" banners={bannersData?.data || []} />
+      <PortalBannerSlot position="middle_2" banners={bannersData || []} />
 
       {/* 6. Cloned Category Section 2: LĨNH VỰC NÔNG NGHIỆP & TÀI NGUYÊN */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1217,12 +1196,16 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 key={news.id}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-portal-primary transition-all flex flex-col sm:flex-row gap-4 group"
               >
-                <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0">
-                  <img
-                    src={news.image}
-                    alt={news.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0 bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                  {news.image ? (
+                    <img
+                      src={news.image}
+                      alt={news.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <FileText className="w-7 h-7 text-slate-300 dark:text-slate-700" />
+                  )}
                 </div>
                 <div className="flex flex-col gap-2 flex-1">
                   <span className="text-slate-400 text-[9px] font-bold tracking-wider flex items-center gap-1">
@@ -1281,7 +1264,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       </div>
 
       {/* Dynamic Banner Slot - Giữa trang - Vị trí 3 */}
-      <PortalBannerSlot position="middle_3" banners={bannersData?.data || []} />
+      <PortalBannerSlot position="middle_3" banners={bannersData || []} />
 
       {/* 7. Commune Photo Gallery Section - "THƯ VIỆN ẢNH HOẠT ĐỘNG DANG KANG" */}
       <div className="flex flex-col gap-4">
@@ -1468,12 +1451,14 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   <div className="flex flex-col flex-1 min-w-0">
                     <h5 className="text-xs md:text-sm font-extrabold text-yellow-300 group-hover:text-white transition-colors truncate">{leader.name}</h5>
                     <span className="text-[10.5px] md:text-xs text-slate-300 font-semibold tracking-wide truncate">{leader.role}</span>
-                    <a
-                      href={`tel:${leader.phone}`}
-                      className="text-[10.5px] md:text-xs text-slate-300 hover:text-white flex items-center gap-1 transition-colors font-mono font-semibold mt-0.5"
-                    >
-                      <Phone className="w-2.5 h-2.5 text-yellow-500" /> {leader.phone}
-                    </a>
+                    {leader.phone ? (
+                      <a
+                        href={`tel:${leader.phone}`}
+                        className="text-[10.5px] md:text-xs text-slate-300 hover:text-white flex items-center gap-1 transition-colors font-mono font-semibold mt-0.5"
+                      >
+                        <Phone className="w-2.5 h-2.5 text-yellow-500" /> {leader.phone}
+                      </a>
+                    ) : null}
                   </div>
                 </div>
               ))}
@@ -1481,6 +1466,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
           </div>
 
           {/* Dashboard Item 2: Satisfaction Survey Poll */}
+          {/* GAP(ledger#23): chưa có BE lưu/broadcast kết quả khảo sát (chỉ có Q&A /public/interactions/questions).
+              Không hiển thị tỉ lệ % bịa — hiển thị trạng thái "Tính năng đang cập nhật". */}
           <div id="khao-sat" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4.5 rounded-lg shadow-sm flex flex-col gap-3 h-full justify-between animate-fade-in">
             <div>
               <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-2.5">
@@ -1496,81 +1483,15 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 Ý kiến của bạn về chất lượng giải quyết thủ tục hành chính tại bộ phận Một cửa xã Dang Kang?
               </p>
 
-              {!pollVoted ? (
-                <div className="flex flex-col gap-2">
-                  {[
-                    { value: "verySatisfied", label: "🤩 Rất hài lòng" },
-                    { value: "satisfied", label: "😊 Hài lòng" },
-                    { value: "normal", label: "😐 Bình thường" },
-                    { value: "unsatisfied", label: "😞 Không hài lòng" }
-                  ].map((option) => (
-                    <label
-                      key={option.value}
-                      className={`flex items-center gap-2 px-2 py-1.5 rounded border cursor-pointer transition-all text-xs font-semibold ${pollChoice === option.value
-                        ? "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/75 text-emerald-600 dark:text-emerald-400"
-                        : "bg-slate-50/50 dark:bg-slate-950/20 border-slate-100 dark:border-slate-800/45 hover:bg-slate-50 hover:border-slate-300"
-                        }`}
-                    >
-                      <input
-                        type="radio"
-                        name="satisfaction-poll"
-                        value={option.value}
-                        checked={pollChoice === option.value}
-                        onChange={(e) => setPollChoice(e.target.value)}
-                        className="w-3.5 h-3.5 text-emerald-600 bg-slate-100 border-slate-300 focus:ring-emerald-500 accent-emerald-600 cursor-pointer"
-                      />
-                      <span>{option.label}</span>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2 mt-1 animate-fade-in text-xs font-semibold">
-                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-wider block">
-                    CẢM ƠN BẠN ĐÃ BÌNH CHỌN!
-                  </span>
-
-                  <div className="flex flex-col gap-2">
-                    {[
-                      { key: "verySatisfied", label: "🤩 Rất hài lòng", count: pollStats.verySatisfied },
-                      { key: "satisfied", label: "😊 Hài lòng", count: pollStats.satisfied },
-                      { key: "normal", label: "😐 Bình thường", count: pollStats.normal },
-                      { key: "unsatisfied", label: "😞 Không hài lòng", count: pollStats.unsatisfied }
-                    ].map((stat) => {
-                      const percent = Math.round((stat.count / totalVotes) * 100) || 0
-                      const isUserChoice = pollChoice === stat.key
-
-                      return (
-                        <div key={stat.key} className="flex flex-col gap-0.5">
-                          <div className="flex justify-between">
-                            <span className={isUserChoice ? "font-black text-emerald-600 dark:text-emerald-400" : "text-slate-700"}>
-                              {stat.label}
-                            </span>
-                            <span className="font-mono text-xs">{percent}%</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-1000 ${isUserChoice ? "bg-emerald-500" : "bg-slate-400 dark:bg-slate-700"
-                                }`}
-                              style={{ width: `${percent}%` }}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
+              <div className="bg-slate-50 border border-slate-200 dark:bg-slate-950/40 dark:border-slate-800 rounded-lg p-3.5 flex items-start gap-2.5 text-xs font-semibold text-slate-500 dark:text-slate-400 leading-relaxed">
+                <AlertCircle className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                <span>
+                  {currentLang === "en"
+                    ? "Online survey feature is being updated. Feedback channels remain available below."
+                    : "Tính năng khảo sát trực tuyến đang được cập nhật. Bạn vẫn có thể gửi ý kiến qua mục phản hồi bên dưới."}
+                </span>
+              </div>
             </div>
-
-            {!pollVoted && (
-              <button
-                onClick={handleVoteSubmit}
-                disabled={!pollChoice}
-                className="w-full mt-2 bg-portal-primary hover:bg-portal-primary-hover disabled:bg-slate-200 text-white text-xs font-black tracking-widest uppercase py-2.5 rounded shadow-sm transition-all"
-              >
-                GỬI BÌNH CHỌN
-              </button>
-            )}
           </div>
 
           {/* Dashboard Item 3: Live Citizen Ask & Answer */}
@@ -1676,7 +1597,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       </div>
 
       {/* Dynamic Banner Slot - Phía dưới (Footer / Bottom) */}
-      <PortalBannerSlot position="bottom" banners={bannersData?.data || []} />
+      <PortalBannerSlot position="bottom" banners={bannersData || []} />
     </div>
   )
 }

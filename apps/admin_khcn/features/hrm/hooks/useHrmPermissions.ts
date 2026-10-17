@@ -33,20 +33,16 @@ export interface HrmUserPermissions {
 }
 
 export function useHrmPermissions(): HrmUserPermissions {
-  const { user, isLoading, isAdmin, permissions: perms, roles, hasPermission, hasRole } = usePermissions();
-
-  const isLeader =
-    hasRole("lãnh đạo") ||
-    hasRole("trưởng phòng") ||
-    hasRole("phó phòng") ||
-    hasRole("giám đốc");
+  // Quy tắc: mọi nhánh quyền chỉ dựa trên permission strings từ Backend (permissionsFlatten),
+  // KHÔNG string-match tên vai trò, KHÔNG tự tính theo quan hệ supervisor/assigner (ledger #21).
+  const { user, isLoading, isAdmin, permissions: perms, roles, hasPermission } = usePermissions();
 
   const canCreateEmployee = hasPermission("HRM_EMPLOYEE:CREATE") || hasPermission("HRM_EMPLOYEE:MANAGE");
   const canEditEmployee = hasPermission("HRM_EMPLOYEE:UPDATE") || hasPermission("HRM_EMPLOYEE:MANAGE");
   const canDeleteEmployee = hasPermission("HRM_EMPLOYEE:DELETE") || hasPermission("HRM_EMPLOYEE:MANAGE");
   const canViewEmployee = hasPermission("HRM_EMPLOYEE:VIEW") || hasPermission("HRM_EMPLOYEE:READ");
 
-  const canCreateTask = isLeader || hasPermission("TASK:CREATE") || hasPermission("TASK:ASSIGN") || hasPermission("TASK:MANAGE");
+  const canCreateTask = hasPermission("TASK:CREATE") || hasPermission("TASK:ASSIGN") || hasPermission("TASK:MANAGE");
   const canManageTask = hasPermission("TASK:MANAGE") || hasPermission("HRM_TASKS:MANAGE");
 
   /**
@@ -97,10 +93,16 @@ export function useHrmPermissions(): HrmUserPermissions {
     return Boolean(myCode && (task.creatorEmployeeCode === myCode || task.assignerCode === myCode));
   };
 
+  /**
+   * Server-driven (ledger #21): allowedActions do backend tính sẵn trên task DTO.
+   * Bằng chứng backend: hrm-service task-shared.service.computeAllowedActions trả actions
+   * (workflow engine + native inject) đính vào detail (tasks.service.ts:86) và list (batch :362).
+   * Client CHỈ đọc kết quả; khi task thiếu allowedActions → default-deny (false).
+   */
   const canEvaluateTask = (task?: any): boolean => {
-    if (hasPermission("TASK:EVALUATE") || canManageTask || hasPermission("KPI:EVALUATE")) return true;
     if (!task) return false;
 
+    // 1. Server-driven: allowedActions là nguồn Authoritative cho task cụ thể này.
     if (Array.isArray(task.allowedActions)) {
       return (
         task.allowedActions.includes("EVALUATE_APPROVE") ||
@@ -109,8 +111,10 @@ export function useHrmPermissions(): HrmUserPermissions {
       );
     }
 
-    const myCode = user?.employeeCode;
-    return Boolean(myCode && (task.supervisorCode === myCode || task.assignerCode === myCode));
+    // 2. Default-deny: task không mang allowedActions từ backend → không enable UI.
+    // TODO(backend-gap): backend cần đảm bảo allowedActions luôn trả trên task detail/list DTO
+    // để UI enable nút thẩm định đúng; backend tự enforce quyền khi RPC chạy.
+    return false;
   };
 
   const canEditTask = (task?: any): boolean => {
@@ -162,14 +166,12 @@ export function useHrmPermissions(): HrmUserPermissions {
   };
 
   const canManageKpi =
-    isLeader ||
     hasPermission("KPI:UPDATE") ||
     hasPermission("KPI:CREATE") ||
     hasPermission("KPI:MANAGE") ||
     hasPermission("PLAN:MANAGE");
 
   const canManageEvaluationForms =
-    isLeader ||
     hasPermission("KPI:CREATE") ||
     hasPermission("KPI:UPDATE") ||
     hasPermission("PLAN:CREATE") ||

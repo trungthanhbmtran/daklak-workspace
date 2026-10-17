@@ -25,13 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { getCookie } from "@/lib/utils"
 
-// Client-side cookie getter helper
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
-  return match ? decodeURIComponent(match[2]) : null
-}
+// getCookie dùng shared helper từ @/lib/utils (P3 dedup — local copy removed)
 
 const documentsPageTranslations = {
   vi: {
@@ -55,10 +51,10 @@ const documentsPageTranslations = {
     lblOrg: "Cơ quan ban hành",
     lblSigner: "Người ký duyệt",
     lblSummary: "Tóm tắt nội dung văn bản",
-    lblSize: "Kích thước: 1.45 MB - Định dạng: PDF",
     btnDownload: "Tải về",
     btnClose: "ĐÓNG CỬA SỔ",
-    downloadAlert: "Bắt đầu tải tệp đính kèm văn bản: ",
+    // GAP NOTE (ledger #23): BE chưa có public document-download endpoint → tắt nút tải, hiển thị hướng dẫn thay vì alert fake
+    downloadUnavailable: "Tính năng tải tệp đính kèm đang được cập nhật. Vui lòng liên hệ văn thư Office để được cung cấp văn bản.",
     viewDetail: "Xem chi tiết",
     allTypes: "Tất cả loại",
     quyetDinh: "Quyết định",
@@ -91,10 +87,10 @@ const documentsPageTranslations = {
     lblOrg: "Issuing Agency",
     lblSigner: "Signed By",
     lblSummary: "Document Executive Summary",
-    lblSize: "Size: 1.45 MB - Format: PDF",
     btnDownload: "Download",
     btnClose: "CLOSE WINDOW",
-    downloadAlert: "Starting download of document attachment: ",
+    // GAP NOTE (ledger #23): BE chưa có public document-download endpoint → tắt nút tải, hiển thị hướng dẫn thay vì alert fake
+    downloadUnavailable: "The attachment download feature is being updated. Please contact the Office records desk to obtain the document.",
     viewDetail: "View Details",
     allTypes: "All Types",
     quyetDinh: "Decision",
@@ -316,17 +312,15 @@ export default function DocumentsPage() {
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            alert(`${t.downloadAlert}${doc.code}`)
-                          }}
-                          className="p-1.5 rounded-lg bg-portal-primary/5 hover:bg-portal-primary/15 border border-portal-primary/10 text-portal-primary dark:text-yellow-500 transition-all"
-                          title={t.btnDownload}
+                        <button
+                          type="button"
+                          disabled
+                          className="p-1.5 rounded-lg bg-portal-primary/5 border border-portal-primary/10 text-portal-primary dark:text-yellow-500 opacity-50 cursor-not-allowed"
+                          title={t.downloadUnavailable}
+                          aria-disabled
                         >
                           <Download className="w-3.5 h-3.5" />
-                        </a>
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -410,22 +404,10 @@ export default function DocumentsPage() {
                 <p className="leading-relaxed text-slate-600 dark:text-slate-400 font-semibold">{selectedDoc.summary}</p>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-950 p-3 sm:p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-4 mt-1 font-semibold text-[11px]">
-                <div className="flex items-center gap-2">
-                  <FileSpreadsheet className="w-8 h-8 text-red-500" />
-                  <div className="flex flex-col">
-                    <span>Van_ban_so_{selectedDoc.id}.pdf</span>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      {t.lblSize}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => alert(`${t.downloadAlert}Van_ban_so_${selectedDoc.id}.pdf`)}
-                  className="bg-portal-primary text-white hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-1 transition-colors font-bold uppercase text-[10px] tracking-wider shadow"
-                >
-                  <Download className="w-3.5 h-3.5" /> {t.btnDownload}
-                </button>
+              {/* GAP NOTE (ledger #23): BE chưa có public document-download endpoint; tên tệp & kích thước trước đó là dữ liệu bịa → thay bằng thông báo rõ ràng */}
+              <div className="bg-slate-50 dark:bg-slate-950 p-3 sm:p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 flex items-center gap-3 mt-1 font-semibold text-[11px] text-slate-500 dark:text-slate-400">
+                <FileSpreadsheet className="w-8 h-8 text-slate-400 shrink-0" />
+                <span className="leading-relaxed">{t.downloadUnavailable}</span>
               </div>
             </div>
 

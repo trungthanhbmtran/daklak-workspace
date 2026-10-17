@@ -10,6 +10,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 import { MICROSERVICES } from '../../core/constants/services';
 import {
   CreateWorkflowDto,
@@ -66,38 +67,38 @@ export class WorkflowService implements OnModuleInit {
   }
 
   // --- Process Catalog ---
-  async registerProcessType(body: any) {
+  async registerProcessType(body: any, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.RegisterProcessType(body),
+      this.workflowGrpcService.RegisterProcessType(body, metadata),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'ProcessType registered' };
   }
 
-  async listProcessTypes(activeOnly: boolean) {
+  async listProcessTypes(activeOnly: boolean, metadata?: any) {
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ListProcessTypes({ activeOnly }),
+      this.workflowGrpcService.ListProcessTypes({ activeOnly }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return { data: result?.data || [], message: 'OK' };
   }
 
-  async getProcessType(code: string) {
+  async getProcessType(code: string, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.GetProcessType({ code }),
+      this.workflowGrpcService.GetProcessType({ code }, metadata),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'OK' };
   }
 
   // --- Process Bindings ---
-  async createProcessBinding(body: any) {
+  async createProcessBinding(body: any, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.CreateProcessBinding(body),
+      this.workflowGrpcService.CreateProcessBinding(body, metadata),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'Binding created' };
   }
 
-  async listProcessBindings(query: any) {
+  async listProcessBindings(query: any, metadata?: any) {
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ListProcessBindings(query),
+      this.workflowGrpcService.ListProcessBindings(query, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: result?.data || [],
@@ -106,9 +107,9 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async getProcessBinding(id: string, organizationId?: string) {
+  async getProcessBinding(id: string, organizationId?: string, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.GetProcessBinding({ id, organizationId }),
+      this.workflowGrpcService.GetProcessBinding({ id, organizationId }, metadata),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'OK' };
   }
@@ -118,29 +119,33 @@ export class WorkflowService implements OnModuleInit {
     actorId: string,
     reason: string,
     organizationId?: string,
+    metadata?: any,
   ) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.DeactivateProcessBinding({
-        id,
-        actorId,
-        reason,
-        organizationId,
-      }),
+      this.workflowGrpcService.DeactivateProcessBinding(
+        {
+          id,
+          actorId,
+          reason,
+          organizationId,
+        },
+        metadata,
+      ),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'Binding deactivated' };
   }
 
   // --- Process Execution ---
-  async startByProcessType(body: any) {
+  async startByProcessType(body: any, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.StartByProcessType(body),
+      this.workflowGrpcService.StartByProcessType(body, metadata),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'Workflow started' };
   }
 
-  async submitAction(body: any) {
+  async submitAction(body: any, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.SubmitAction(body),
+      this.workflowGrpcService.SubmitAction(body, metadata),
     ).catch((e) => this.handleRpcError(e));
     return { data: result, message: 'Action submitted' };
   }
@@ -174,30 +179,30 @@ export class WorkflowService implements OnModuleInit {
     return res;
   }
 
-  async getMicroservices() {
+  async getMicroservices(metadata?: any) {
     const result = (await firstValueFrom(
-      this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' }),
+      this.categoryGrpcService.GetByGroup({ group: 'MICROSERVICE' }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return { data: result?.data || [], meta: {}, message: 'OK' };
   }
 
-  async getTriggers() {
+  async getTriggers(metadata?: any) {
     const result = (await firstValueFrom(
-      this.categoryGrpcService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
+      this.categoryGrpcService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return { data: result?.data || [], meta: {}, message: 'OK' };
   }
 
-  async getModules() {
+  async getModules(metadata?: any) {
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ListModules({}),
+      this.workflowGrpcService.ListModules({}, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return { data: result?.data || [], meta: {}, message: 'OK' };
   }
 
-  async getOrgRoles() {
+  async getOrgRoles(metadata?: any) {
     const result = (await firstValueFrom(
-      this.orgGrpcService.ListJobTitles({}),
+      this.orgGrpcService.ListJobTitles({}, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     const items = (result?.data ?? []).map((j: any) => ({
       code: j.code,
@@ -210,7 +215,7 @@ export class WorkflowService implements OnModuleInit {
     return { data: items || [], meta: {}, message: 'OK' };
   }
 
-  async create(body: CreateWorkflowDto, user?: any) {
+  async create(body: CreateWorkflowDto, user?: any, metadata?: any) {
     const payload = {
       name: body.name,
       description: body.description,
@@ -225,7 +230,7 @@ export class WorkflowService implements OnModuleInit {
       createdBy: user?.id?.toString(),
     };
     const result = (await firstValueFrom(
-      this.workflowGrpcService.CreateWorkflow(payload),
+      this.workflowGrpcService.CreateWorkflow(payload, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: this.mapResponse(result) || {},
@@ -234,7 +239,7 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async update(id: string, body: UpdateWorkflowDto, user?: any) {
+  async update(id: string, body: UpdateWorkflowDto, user?: any, metadata?: any) {
     const payload: any = {
       id,
       name: body.name,
@@ -249,7 +254,7 @@ export class WorkflowService implements OnModuleInit {
       ownerUnitCode: body.ownerUnitCode,
     };
     const result = (await firstValueFrom(
-      this.workflowGrpcService.UpdateWorkflow(payload),
+      this.workflowGrpcService.UpdateWorkflow(payload, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: this.mapResponse(result) || {},
@@ -258,18 +263,21 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async list(query: any, user?: any) {
+  async list(query: any, user?: any, metadata?: any) {
     const skip = query.skip || 0;
     const take = query.take || 20;
     const search = query.search;
     const organizationId = this.getOrganizationId(user);
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ListWorkflows({
-        skip,
-        take,
-        search,
-        organizationId,
-      }),
+      this.workflowGrpcService.ListWorkflows(
+        {
+          skip,
+          take,
+          search,
+          organizationId,
+        },
+        metadata,
+      ),
     ).catch((e) => this.handleRpcError(e))) as any;
     const items = (result?.data || []).map((item: any) =>
       this.mapResponse(item),
@@ -281,14 +289,23 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async resume(instanceId: string, nodeId: string, body: any, user: any) {
+  async resume(
+    instanceId: string,
+    nodeId: string,
+    body: any,
+    user: any,
+    metadata?: any,
+  ) {
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ResumeWorkflow({
-        instanceId,
-        nodeId,
-        actionData: body.actionData || body,
-        userRoles: user?.roles || [],
-      }),
+      this.workflowGrpcService.ResumeWorkflow(
+        {
+          instanceId,
+          nodeId,
+          actionData: body.actionData || body,
+          userRoles: user?.roles || [],
+        },
+        metadata,
+      ),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: result || {},
@@ -297,10 +314,10 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async listInstances(query: any, organizationId?: string) {
+  async listInstances(query: any, organizationId?: string, metadata?: any) {
     const payload = { ...query, organizationId };
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ListInstances(payload),
+      this.workflowGrpcService.ListInstances(payload, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     const items = (result?.data || []).map((inst: any) =>
       normalizeWorkflow(inst),
@@ -312,9 +329,9 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async getInstance(id: string, organizationId?: string) {
+  async getInstance(id: string, organizationId?: string, metadata?: any) {
     const result = await firstValueFrom(
-      this.workflowGrpcService.GetInstance({ id, organizationId }),
+      this.workflowGrpcService.GetInstance({ id, organizationId }, metadata),
     ).catch((e) => this.handleRpcError(e));
     return {
       data: result ? normalizeWorkflow(result) : {},
@@ -323,9 +340,9 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async getLogs(instanceId: string, organizationId?: string) {
+  async getLogs(instanceId: string, organizationId?: string, metadata?: any) {
     const response = (await firstValueFrom(
-      this.workflowGrpcService.GetLogs({ instanceId, organizationId }),
+      this.workflowGrpcService.GetLogs({ instanceId, organizationId }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: response?.logs || [],
@@ -334,10 +351,10 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async findOne(id: string, user?: any) {
+  async findOne(id: string, user?: any, metadata?: any) {
     const organizationId = this.getOrganizationId(user);
     const result = (await firstValueFrom(
-      this.workflowGrpcService.FindOneWorkflow({ id, organizationId }),
+      this.workflowGrpcService.FindOneWorkflow({ id, organizationId }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: this.mapResponse(result) || {},
@@ -346,10 +363,10 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async delete(id: string, user?: any) {
+  async delete(id: string, user?: any, metadata?: any) {
     const organizationId = this.getOrganizationId(user);
     const result = (await firstValueFrom(
-      this.workflowGrpcService.DeleteWorkflow({ id, organizationId }),
+      this.workflowGrpcService.DeleteWorkflow({ id, organizationId }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: {},
@@ -358,11 +375,14 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async publish(id: string, user?: any) {
+  async publish(id: string, user?: any, metadata?: any) {
     const organizationId = this.getOrganizationId(user);
     const actorId = user?.id?.toString();
     const result = (await firstValueFrom(
-      this.workflowGrpcService.PublishWorkflow({ id, actorId, organizationId }),
+      this.workflowGrpcService.PublishWorkflow(
+        { id, actorId, organizationId },
+        metadata,
+      ),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: this.mapResponse(result) || {},
@@ -371,9 +391,9 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async applyModule(id: string, moduleCode: string) {
+  async applyModule(id: string, moduleCode: string, metadata?: any) {
     const result = (await firstValueFrom(
-      this.workflowGrpcService.ApplyModule({ id, moduleCode }),
+      this.workflowGrpcService.ApplyModule({ id, moduleCode }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: result || {},
@@ -382,14 +402,17 @@ export class WorkflowService implements OnModuleInit {
     };
   }
 
-  async start(id: string, body: StartWorkflowDto, user: any) {
+  async start(id: string, body: StartWorkflowDto, user: any, metadata?: any) {
     const initiatorId = user?.id?.toString() || 'system';
     const result = (await firstValueFrom(
-      this.workflowGrpcService.StartWorkflow({
-        workflowId: id,
-        initialContext: body.initialContext,
-        initiatorId,
-      }),
+      this.workflowGrpcService.StartWorkflow(
+        {
+          workflowId: id,
+          initialContext: body.initialContext,
+          initiatorId,
+        },
+        metadata,
+      ),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: result || {},

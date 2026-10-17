@@ -13,10 +13,43 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const url = process.env.DATABASE_URL || 'mysql://root:mypassword@127.0.0.1:3306/admin_notification';
+// ── Fail-fast: không chạy với connection string/secret mặc định ──
+const url = process.env.DATABASE_URL;
+if (!url) {
+  console.error('[Notification] Thiếu biến môi trường DATABASE_URL. Cấu hình DATABASE_URL trong .env trước khi khởi động (đã xóa fallback credentials).');
+  process.exit(2);
+}
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN;
+if (!INTERNAL_TOKEN) {
+  console.error('[Notification] Thiếu biến môi trường INTERNAL_TOKEN. Các REST API quản lý cấu hình (integrations/channels) yêu cầu xác thực nội bộ qua header "x-internal-token". Cấu hình INTERNAL_TOKEN trong .env trước khi khởi động.');
+  process.exit(2);
+}
 const mariadbUrl = url.replace(/^mysql:\/\//, 'mariadb://');
 const adapter = new PrismaMariaDb(mariadbUrl);
 const prisma = new PrismaClient({ adapter });
+
+// Safe-parse JSON: trả về null khi payload không phải JSON hợp lệ (không throw)
+function safeParseJson(str) {
+  try {
+    return JSON.parse(str || '{}');
+  } catch {
+    return null;
+  }
+}
+
+// ── Auth middleware: khóa TẤT CẢ route /api(/*) bằng header x-internal-token ──
+// Quyết định scope (ledger #18): GET cũng bị khóa vì GET /integrations trả về
+// full config chứa bot token / SMTP credentials nên coi như lộ secret cấp 2.
+// Caller hợp lệ duy nhất hiện tại: api-gateway IntegrationsController
+// (http://notification-service:50075/api/v1/integrations) → gateway phải forward
+// header "x-internal-token" khi gọi (blocker đã ghi trong báo cáo lane).
+app.use('/api', (req, res, next) => {
+  const provided = req.get('x-internal-token');
+  if (!provided || provided !== INTERNAL_TOKEN) {
+    return res.status(401).json({ success: false, message: 'Unauthorized: thiếu hoặc sai header x-internal-token' });
+  }
+  next();
+});
 
 // Map NotificationChannel to Integration for frontend
 const mapToIntegration = (c) => ({
@@ -48,7 +81,10 @@ app.get('/api/v1/integrations', async (req, res) => {
 app.post('/api/v1/integrations', async (req, res) => {
   try {
     const { systemName, integrationCode, configData } = req.body;
-    const parsedConfig = JSON.parse(configData || '{}');
+    const parsedConfig = safeParseJson(configData);
+    if (parsedConfig === null) {
+      return res.status(400).json({ success: false, message: 'configData không phải JSON hợp lệ' });
+    }
     const channel = await prisma.notificationChannel.create({
       data: {
         name: systemName,
@@ -71,7 +107,10 @@ app.post('/api/v1/integrations', async (req, res) => {
 app.put('/api/v1/integrations/:id', async (req, res) => {
   try {
     const { systemName, integrationCode, configData } = req.body;
-    const parsedConfig = JSON.parse(configData || '{}');
+    const parsedConfig = safeParseJson(configData);
+    if (parsedConfig === null) {
+      return res.status(400).json({ success: false, message: 'configData không phải JSON hợp lệ' });
+    }
     const channel = await prisma.notificationChannel.update({
       where: { id: parseInt(req.params.id) },
       data: {

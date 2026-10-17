@@ -289,9 +289,8 @@ export class StatisticsService implements OnModuleInit {
           const assigneeName =
             mainAssignee?.fullName || t.assigneeName || (assigneeCode !== 'Chưa giao' ? assigneeCode : 'Chưa giao');
           const deptId = t.departmentId || mainAssignee?.departmentId || t.plan?.departmentId || 0;
-          const deptName =
-            (unitMap[deptId] ? unitMap[deptId].name : null) ||
-            (deptId === 0 || deptId === 2 ? 'Sở Khoa học và Công nghệ' : 'Chưa phân công');
+          // Ledger #23: bỏ fake name 'Sở Khoa học và Công nghệ' cho deptId===2
+          const deptName = unitMap[deptId] ? unitMap[deptId].name : 'Chưa phân công';
 
           return {
             id: t.id,
@@ -745,15 +744,25 @@ export class StatisticsService implements OnModuleInit {
                 ? 'Văn phòng Ban'
                 : 'Ban Tổ chức Tỉnh ủy Đắk Lắk');
 
-            const sChung = Number(ev.generalScoreFinal ?? ev.general_score_final ?? 30.0);
-            const sNhiemVu = Number(ev.taskScoreFinal ?? ev.task_score_final ?? 65.0);
-            const sTong = Number(ev.totalScore ?? (sChung + sNhiemVu));
+            // Ledger #23: không fallback điểm bịa (30.0/65.0). Thiếu dữ liệu → null (UI hiển thị N/A).
+            const rawSC = ev.generalScoreFinal ?? ev.general_score_final;
+            const rawSNT = ev.taskScoreFinal ?? ev.task_score_final;
+            const sChung = rawSC == null ? null : Number(rawSC);
+            const sNhiemVu = rawSNT == null ? null : Number(rawSNT);
+            const sTong =
+              ev.totalScore != null
+                ? Number(ev.totalScore)
+                : sChung != null && sNhiemVu != null
+                ? sChung + sNhiemVu
+                : null;
 
-            let rank = 'Hoàn thành tốt nhiệm vụ';
-            if (sTong >= 95) rank = 'Hoàn thành xuất sắc nhiệm vụ';
-            else if (sTong >= 80) rank = 'Hoàn thành tốt nhiệm vụ';
-            else if (sTong >= 65) rank = 'Hoàn thành nhiệm vụ';
-            else rank = 'Không hoàn thành nhiệm vụ';
+            let rank: string | null = null;
+            if (sTong != null) {
+              if (sTong >= 95) rank = 'Hoàn thành xuất sắc nhiệm vụ';
+              else if (sTong >= 80) rank = 'Hoàn thành tốt nhiệm vụ';
+              else if (sTong >= 65) rank = 'Hoàn thành nhiệm vụ';
+              else rank = 'Không hoàn thành nhiệm vụ';
+            }
 
             const isFinal = ev.phase === 'FINAL' || ev.status === 'APPROVED';
             const isReviewed = ev.phase === 'ASSESSMENT' || ev.status === 'REVIEWED';
@@ -786,10 +795,10 @@ export class StatisticsService implements OnModuleInit {
               sTong,
               proposedRank: rank,
               approvedRank: rank,
-              hasMau04: sTong >= 95 ? 'Có (Đề án 01-ĐA/TU)' : 'Không',
+              hasMau04: sTong != null && sTong >= 95 ? 'Có (Đề án 01-ĐA/TU)' : 'Không',
               sopStep,
               status: statusStr,
-              quarterYear: ev.periodName || ev.period?.name || 'Quý I/2026',
+              quarterYear: ev.periodName || ev.period?.name || null,
             };
           });
 
@@ -879,9 +888,8 @@ export class StatisticsService implements OnModuleInit {
               t.assigneeName ||
               (code !== 'CHUA_GIAO' ? code : 'Chưa giao');
             const deptId = t.departmentId || mainAssignee?.departmentId || 0;
-            const deptName =
-              (unitMap[deptId] ? unitMap[deptId].name : null) ||
-              'Sở Khoa học và Công nghệ';
+            // Ledger #23: bỏ fake name 'Sở Khoa học và Công nghệ'
+            const deptName = unitMap[deptId] ? unitMap[deptId].name : 'Chưa phân công';
 
             if (!empMap.has(code)) {
               empMap.set(code, {
@@ -1020,9 +1028,13 @@ export class StatisticsService implements OnModuleInit {
 
         // Đẩy các tháng vào rows
         Array.from(monthStatsMap.entries()).forEach(([m, stat]) => {
-          const avgProg = stat.total > 0 ? Math.round(stat.totalProgress / stat.total) : 85;
-          const doneRatio = stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : 80;
-          const score = Math.min(100, Math.max(60, Math.round(avgProg * 0.5 + doneRatio * 0.5)));
+          // Ledger #23: không fallback số liệu bịa (avgProg 85 / doneRatio 80 / dueDate cứng)
+          const avgProg = stat.total > 0 ? Math.round(stat.totalProgress / stat.total) : null;
+          const doneRatio = stat.total > 0 ? Math.round((stat.completed / stat.total) * 100) : null;
+          const score =
+            avgProg != null && doneRatio != null
+              ? Math.min(100, Math.max(60, Math.round(avgProg * 0.5 + doneRatio * 0.5)))
+              : null;
           rows.push({
             month: m,
             score,
@@ -1033,7 +1045,7 @@ export class StatisticsService implements OnModuleInit {
             title: `Tiến độ nhiệm vụ ${m}`,
             progress: avgProg,
             role: 'Chủ trì',
-            dueDate: `30/${m.replace('Tháng ', '')}/2026`,
+            dueDate: null,
             cadreCode: user?.employeeCode || 'SYSTEM',
             fullName: user?.fullName || 'Hệ thống Quản lý',
           });
@@ -1052,7 +1064,7 @@ export class StatisticsService implements OnModuleInit {
         rows.push(
           {
             month: 'Hiện tại',
-            score: 95,
+            score: null,
             completedTasks: completedCount,
             status: 'Hoàn thành',
             departmentName: 'Toàn cơ quan',
@@ -1066,13 +1078,13 @@ export class StatisticsService implements OnModuleInit {
           },
           {
             month: 'Hiện tại',
-            score: 85,
+            score: null,
             completedTasks: inProgressCount,
             status: 'Đang xử lý',
             departmentName: 'Toàn cơ quan',
             workload: 1.0,
             title: 'Nhiệm vụ đang tiến hành',
-            progress: 60,
+            progress: null,
             role: 'Chủ trì',
             dueDate: 'Hiện tại',
             cadreCode: user?.employeeCode || 'SYSTEM',
@@ -1080,13 +1092,13 @@ export class StatisticsService implements OnModuleInit {
           },
           {
             month: 'Hiện tại',
-            score: 70,
+            score: null,
             completedTasks: overdueCount,
             status: 'Quá hạn',
             departmentName: 'Toàn cơ quan',
             workload: 1.0,
             title: 'Nhiệm vụ quá hạn',
-            progress: 30,
+            progress: null,
             role: 'Chủ trì',
             dueDate: 'Hiện tại',
             cadreCode: user?.employeeCode || 'SYSTEM',
@@ -1106,15 +1118,15 @@ export class StatisticsService implements OnModuleInit {
           const workload = Number((count / Math.max(1, avgTasksPerDept)).toFixed(2));
           rows.push({
             month: 'T10',
-            score: 90,
+            score: null,
             completedTasks: count,
             status: 'Đang xử lý',
             departmentName: dept,
             workload,
             title: `${dept}: ${count} công việc thực tế (Tải ${workload})`,
-            progress: 80,
+            progress: null,
             role: 'Đơn vị',
-            dueDate: '30/10/2026',
+            dueDate: null,
             cadreCode: `DEPT_${dept.slice(0, 4)}`,
             fullName: dept,
           });
@@ -1124,7 +1136,7 @@ export class StatisticsService implements OnModuleInit {
         taskRows.slice(0, 15).forEach((t: any) => {
           rows.push({
             month: 'T10',
-            score: 95,
+            score: null,
             completedTasks: 1,
             status: t.status || 'Đang xử lý',
             departmentName: t.departmentName || 'Cơ quan',
@@ -1132,7 +1144,7 @@ export class StatisticsService implements OnModuleInit {
             title: t.title || `Nhiệm vụ #${t.id}`,
             progress: Number(t.progress || 0),
             role: 'Chủ trì',
-            dueDate: t.dueDate || '30/10/2026',
+            dueDate: t.dueDate || null,
             cadreCode: t.assigneeCode || 'CB_001',
             fullName: t.assigneeName || 'Chuyên viên',
           });

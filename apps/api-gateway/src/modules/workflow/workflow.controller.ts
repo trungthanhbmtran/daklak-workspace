@@ -11,9 +11,13 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Metadata } from '@grpc/grpc-js';
+import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RequirePermissions } from '../../core/decorators/permissions.decorator';
+import { TokenIssuerService } from '../../core/auth/token-issuer.service';
+import { clientIp } from '../../core/client-ip';
 
 import {
   CreateWorkflowDto,
@@ -32,28 +36,47 @@ import { WorkflowService } from './workflow.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class WorkflowController {
-  constructor(private readonly workflowService: WorkflowService) {}
+  constructor(
+    private readonly workflowService: WorkflowService,
+    private readonly issuer: TokenIssuerService,
+  ) {}
+
+  private getGrpcMetadata(req: any) {
+    const meta = new Metadata();
+    meta.set(
+      'authorization',
+      'Bearer ' +
+        this.issuer.signDelegation(req.user, {
+          requestId: randomUUID(),
+          ipAddress: clientIp(req),
+        }),
+    );
+    return meta;
+  }
 
   // --- Process Catalog ---
   @Post('catalog/process-types')
   @RequirePermissions('WORKFLOW:UPDATE')
   @ApiOperation({ summary: 'Đăng ký loại quy trình mới' })
-  async registerProcessType(@Body() body: any) {
-    return this.workflowService.registerProcessType(body);
+  async registerProcessType(@Req() req: any, @Body() body: any) {
+    return this.workflowService.registerProcessType(body, this.getGrpcMetadata(req));
   }
 
   @Get('catalog/process-types')
   @RequirePermissions('WORKFLOW:VIEW')
   @ApiOperation({ summary: 'Danh sách các loại quy trình' })
-  async listProcessTypes(@Query('activeOnly') activeOnly?: string) {
-    return this.workflowService.listProcessTypes(activeOnly === 'true');
+  async listProcessTypes(@Req() req: any, @Query('activeOnly') activeOnly?: string) {
+    return this.workflowService.listProcessTypes(
+      activeOnly === 'true',
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('catalog/process-types/:code')
   @RequirePermissions('WORKFLOW:VIEW')
   @ApiOperation({ summary: 'Chi tiết loại quy trình' })
-  async getProcessType(@Param('code') code: string) {
-    return this.workflowService.getProcessType(code);
+  async getProcessType(@Req() req: any, @Param('code') code: string) {
+    return this.workflowService.getProcessType(code, this.getGrpcMetadata(req));
   }
 
   // --- Process Bindings ---
@@ -68,7 +91,10 @@ export class WorkflowController {
         req.user.organizationId || req.user.orgId || req.user.unitId,
     };
     delete payload.actorId;
-    return this.workflowService.createProcessBinding(payload);
+    return this.workflowService.createProcessBinding(
+      payload,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('bindings')
@@ -79,11 +105,14 @@ export class WorkflowController {
     query: PaginationQueryDto & { processTypeCode?: string; status?: string },
     @Req() req: any,
   ) {
-    return this.workflowService.listProcessBindings({
-      ...query,
-      organizationId:
-        req.user.organizationId || req.user.orgId || req.user.unitId,
-    });
+    return this.workflowService.listProcessBindings(
+      {
+        ...query,
+        organizationId:
+          req.user.organizationId || req.user.orgId || req.user.unitId,
+      },
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('bindings/:id')
@@ -92,7 +121,11 @@ export class WorkflowController {
   async getProcessBinding(@Param('id') id: string, @Req() req: any) {
     const organizationId =
       req.user.organizationId || req.user.orgId || req.user.unitId;
-    return this.workflowService.getProcessBinding(id, organizationId);
+    return this.workflowService.getProcessBinding(
+      id,
+      organizationId,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Post('bindings/:id/deactivate')
@@ -108,6 +141,7 @@ export class WorkflowController {
       req.user.id.toString(),
       body.reason,
       req.user.organizationId || req.user.orgId || req.user.unitId,
+      this.getGrpcMetadata(req),
     );
   }
 
@@ -122,7 +156,10 @@ export class WorkflowController {
       ...body,
       actorId: req.user.id.toString(),
     };
-    return this.workflowService.startByProcessType(payload);
+    return this.workflowService.startByProcessType(
+      payload,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Post('instances/:instanceId/action')
@@ -138,7 +175,7 @@ export class WorkflowController {
       instanceId,
       actorId: req.user.id.toString(),
     };
-    return this.workflowService.submitAction(payload);
+    return this.workflowService.submitAction(payload, this.getGrpcMetadata(req));
   }
 
   // --- Backward Compatible (Legacy APIs) ---
@@ -147,36 +184,36 @@ export class WorkflowController {
   @ApiOperation({
     summary: 'Lấy danh sách các microservice khả dụng cho workflow',
   })
-  async getMicroservices() {
-    return this.workflowService.getMicroservices();
+  async getMicroservices(@Req() req: any) {
+    return this.workflowService.getMicroservices(this.getGrpcMetadata(req));
   }
 
   @Get('triggers')
   @RequirePermissions('WORKFLOW:VIEW')
   @ApiOperation({ summary: 'Lấy danh sách các trigger khả dụng' })
-  async getTriggers() {
-    return this.workflowService.getTriggers();
+  async getTriggers(@Req() req: any) {
+    return this.workflowService.getTriggers(this.getGrpcMetadata(req));
   }
 
   @Get('modules')
   @RequirePermissions('WORKFLOW:VIEW')
   @ApiOperation({ summary: 'Danh sách module nghiệp vụ đang active' })
-  async getModules() {
-    return this.workflowService.getModules();
+  async getModules(@Req() req: any) {
+    return this.workflowService.getModules(this.getGrpcMetadata(req));
   }
 
   @Get('org-roles')
   @RequirePermissions('WORKFLOW:VIEW')
   @ApiOperation({ summary: 'Danh sách chức danh/vị trí' })
-  async getOrgRoles() {
-    return this.workflowService.getOrgRoles();
+  async getOrgRoles(@Req() req: any) {
+    return this.workflowService.getOrgRoles(this.getGrpcMetadata(req));
   }
 
   @Post()
   @RequirePermissions('WORKFLOW:CREATE')
   @ApiOperation({ summary: 'Tạo quy trình mới/phiên bản mới' })
   async create(@Body() body: CreateWorkflowDto, @Req() req: any) {
-    return this.workflowService.create(body, req.user);
+    return this.workflowService.create(body, req.user, this.getGrpcMetadata(req));
   }
 
   @Put(':id')
@@ -187,7 +224,12 @@ export class WorkflowController {
     @Body() body: UpdateWorkflowDto,
     @Req() req: any,
   ) {
-    return this.workflowService.update(id, body, req.user);
+    return this.workflowService.update(
+      id,
+      body,
+      req.user,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get()
@@ -197,7 +239,7 @@ export class WorkflowController {
     @Query() query: PaginationQueryDto & { search?: string },
     @Req() req: any,
   ) {
-    return this.workflowService.list(query, req.user);
+    return this.workflowService.list(query, req.user, this.getGrpcMetadata(req));
   }
 
   @Post('instances/:instanceId/resume/:nodeId')
@@ -209,7 +251,13 @@ export class WorkflowController {
     @Body() body: ResumeWorkflowDto,
     @Req() req: any,
   ) {
-    return this.workflowService.resume(instanceId, nodeId, body, req.user);
+    return this.workflowService.resume(
+      instanceId,
+      nodeId,
+      body,
+      req.user,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Get('instances')
@@ -226,7 +274,11 @@ export class WorkflowController {
   ) {
     const orgId =
       req?.user?.organizationId || req?.user?.orgId || req?.user?.unitId;
-    return this.workflowService.listInstances(query, orgId);
+    return this.workflowService.listInstances(
+      query,
+      orgId,
+      req?.user ? this.getGrpcMetadata(req) : undefined,
+    );
   }
 
   @Get('instances/:id')
@@ -235,7 +287,11 @@ export class WorkflowController {
   async getInstance(@Param('id') id: string, @Req() req?: any) {
     const orgId =
       req?.user?.organizationId || req?.user?.orgId || req?.user?.unitId;
-    return this.workflowService.getInstance(id, orgId);
+    return this.workflowService.getInstance(
+      id,
+      orgId,
+      req?.user ? this.getGrpcMetadata(req) : undefined,
+    );
   }
 
   @Get('instances/:instanceId/logs')
@@ -244,35 +300,43 @@ export class WorkflowController {
   async getLogs(@Param('instanceId') instanceId: string, @Req() req?: any) {
     const orgId =
       req?.user?.organizationId || req?.user?.orgId || req?.user?.unitId;
-    return this.workflowService.getLogs(instanceId, orgId);
+    return this.workflowService.getLogs(
+      instanceId,
+      orgId,
+      req?.user ? this.getGrpcMetadata(req) : undefined,
+    );
   }
 
   @Get(':id')
   @RequirePermissions('WORKFLOW:VIEW')
   @ApiOperation({ summary: 'Chi tiết quy trình' })
   async findOne(@Param('id') id: string, @Req() req: any) {
-    return this.workflowService.findOne(id, req.user);
+    return this.workflowService.findOne(id, req.user, this.getGrpcMetadata(req));
   }
 
   @Delete(':id')
   @RequirePermissions('WORKFLOW:DELETE', 'WORKFLOW:UPDATE')
   @ApiOperation({ summary: 'Xóa quy trình' })
   async delete(@Param('id') id: string, @Req() req: any) {
-    return this.workflowService.delete(id, req.user);
+    return this.workflowService.delete(id, req.user, this.getGrpcMetadata(req));
   }
 
   @Post(':id/publish')
   @RequirePermissions('WORKFLOW:UPDATE', 'WORKFLOW:APPROVE')
   @ApiOperation({ summary: 'Publish quy trình' })
   async publish(@Param('id') id: string, @Req() req: any) {
-    return this.workflowService.publish(id, req.user);
+    return this.workflowService.publish(id, req.user, this.getGrpcMetadata(req));
   }
 
   @Post(':id/apply-module')
   @RequirePermissions('WORKFLOW:UPDATE')
   @ApiOperation({ summary: 'Gán quy trình vào một nghiệp vụ và publish' })
-  async applyModule(@Param('id') id: string, @Body() body: ApplyModuleDto) {
-    return this.workflowService.applyModule(id, body.moduleCode);
+  async applyModule(@Param('id') id: string, @Body() body: ApplyModuleDto, @Req() req: any) {
+    return this.workflowService.applyModule(
+      id,
+      body.moduleCode,
+      this.getGrpcMetadata(req),
+    );
   }
 
   @Post(':id/start')
@@ -283,6 +347,11 @@ export class WorkflowController {
     @Body() body: StartWorkflowDto,
     @Req() req: any,
   ) {
-    return this.workflowService.start(id, body, req.user);
+    return this.workflowService.start(
+      id,
+      body,
+      req.user,
+      this.getGrpcMetadata(req),
+    );
   }
 }

@@ -89,6 +89,48 @@ async function main() {
         path: '/admin/hrm/workbench',
         fields: ['month', 'score', 'completedTasks', 'status', 'departmentName', 'workload', 'title', 'progress', 'role', 'dueDate', 'cadreCode', 'fullName'],
       },
+      {
+        code: 'BTC_FINANCE_OVERVIEW',
+        name: 'Giám sát Tài chính & Ngân sách Tổng hợp tỉnh Đắk Lắk (Bộ Tài chính & LGSP)',
+        upstream: 'api-gateway',
+        path: '/api/v1/external/btc/overview',
+        fields: ['id', 'ma_chi_tieu', 'ten_chi_tieu', 'linh_vuc', 'don_vi_phu_trach', 'du_toan_giao', 'thuc_hien', 'ty_le_dat', 'cung_ky_nam_truoc', 'danh_gia_tien_do', 'ky_bao_cao'],
+      },
+      {
+        code: 'BTC_NSNN_THU',
+        name: 'Thu Ngân sách Nhà nước trên địa bàn tỉnh Đắk Lắk (Cục Thuế & Bộ Tài chính)',
+        upstream: 'api-gateway',
+        path: '/api/v1/external/btc/nsnn_thu',
+        fields: ['id', 'dia_ban', 'khoan_thu', 'du_toan_nam', 'so_thuc_thu', 'tien_do_dat', 'cung_ky_nam_truoc', 'thoi_gian', 'ghi_chu'],
+      },
+      {
+        code: 'BTC_NSNN_CHI',
+        name: 'Chi Ngân sách Nhà nước tỉnh Đắk Lắk (Kho bạc Nhà nước & Bộ Tài chính)',
+        upstream: 'api-gateway',
+        path: '/api/v1/external/btc/nsnn_chi',
+        fields: ['id', 'linh_vuc_chi', 'du_toan_giao', 'so_da_chi', 'ty_le_giai_ngan', 'thoi_gian', 'ghi_chu'],
+      },
+      {
+        code: 'BTC_DTC_GIAINGAN_TUAN',
+        name: 'Giải ngân Vốn Đầu tư công theo tuần - Dự án trọng điểm (Trục Tài chính Đắk Lắk)',
+        upstream: 'api-gateway',
+        path: '/api/v1/external/btc/dtc_giaingan_tuan',
+        fields: ['id', 'ten_du_an', 'chu_dau_tu', 'ke_hoach_von', 'giai_ngan_tuan', 'da_giai_ngan', 'ty_le_dat', 'tuan_bao_cao'],
+      },
+      {
+        code: 'BTC_HHXNK',
+        name: 'Kim ngạch Hàng hóa Xuất Nhập khẩu Hải quan Đắk Lắk (Tổng cục Hải quan)',
+        upstream: 'api-gateway',
+        path: '/api/v1/external/btc/hhxnk',
+        fields: ['id', 'ma_hai_quan', 'ten_chi_cuc', 'loai_hinh', 'mat_hang', 'thi_truong', 'so_luong_tan', 'kim_ngach_usd', 'thue_xnk_vnd', 'thoi_gian'],
+      },
+      {
+        code: 'BTC_HDDN',
+        name: 'Hóa đơn Điện tử & Hoạt động Doanh nghiệp (Bộ Tài chính & Thuế điện tử)',
+        upstream: 'api-gateway',
+        path: '/api/v1/external/btc/hddn',
+        fields: ['id', 'mst', 'ten_doanh_nghiep', 'loai_hoa_don', 'so_luong_hd', 'tong_tien_truoc_thue', 'tien_thue', 'ky_ke_khai'],
+      },
     ],
   });
 
@@ -571,7 +613,51 @@ async function main() {
         groupBy: [],
         charts: [
           { type: 'bar', xAxis: 'employeeName', yAxis: 'qualityScore', title: 'Điểm Chất lượng Năng suất Cán bộ' },
-          { type: 'pie', xAxis: 'ranking', yAxis: 'taskCount', title: 'Phân bổ Xếp loại Thi đua' },
+        ],
+      },
+    },
+  });
+
+  // 3.6 REP_BTC_FINANCE_DAKLAK
+  const financeDef = await prisma.reportDefinition.create({
+    data: {
+      code: 'REP_BTC_FINANCE_DAKLAK',
+      name: 'Báo cáo & Dashboard Giám sát Số liệu Ngành Tài chính tỉnh Đắk Lắk (Trục Bộ Tài chính & LGSP)',
+      description: 'Hệ thống giám sát điều hành toàn diện số liệu tài chính công: tổng hợp thu - chi ngân sách nhà nước, tiến độ giải ngân vốn đầu tư công các công trình trọng điểm, kim ngạch xuất nhập khẩu nông sản chủ lực (cà phê, tiêu, sầu riêng) và quản lý hóa đơn điện tử doanh nghiệp theo mẫu trục liên thông LGSP tỉnh Đắk Lắk & Bộ Tài chính.',
+      version: 1,
+      configuration: {
+        version: 1,
+        sources: [
+          {
+            id: 'BTC_FINANCE_OVERVIEW',
+            endpoint: 'BTC_FINANCE_OVERVIEW',
+            name: 'Tổng hợp Giám sát Tài chính Ngân sách',
+            upstream: 'api-gateway',
+            path: '/api/v1/external/btc/overview',
+            fields: ['id', 'ma_chi_tieu', 'ten_chi_tieu', 'linh_vuc', 'don_vi_phu_trach', 'du_toan_giao', 'thuc_hien', 'ty_le_dat', 'cung_ky_nam_truoc', 'danh_gia_tien_do', 'ky_bao_cao'],
+          },
+        ],
+        joins: [],
+        filters: [],
+        columns: [
+          { key: 'id', source: 'BTC_FINANCE_OVERVIEW', field: 'id', type: 'number', label: 'STT', aggregate: 'none' },
+          { key: 'ma_chi_tieu', source: 'BTC_FINANCE_OVERVIEW', field: 'ma_chi_tieu', type: 'string', label: 'Mã chỉ tiêu', aggregate: 'none' },
+          { key: 'ten_chi_tieu', source: 'BTC_FINANCE_OVERVIEW', field: 'ten_chi_tieu', type: 'string', label: 'Chỉ tiêu giám sát tài chính', aggregate: 'none' },
+          { key: 'linh_vuc', source: 'BTC_FINANCE_OVERVIEW', field: 'linh_vuc', type: 'string', label: 'Lĩnh vực tài chính', aggregate: 'none' },
+          { key: 'don_vi_phu_trach', source: 'BTC_FINANCE_OVERVIEW', field: 'don_vi_phu_trach', type: 'string', label: 'Đơn vị chủ trì', aggregate: 'none' },
+          { key: 'du_toan_giao', source: 'BTC_FINANCE_OVERVIEW', field: 'du_toan_giao', type: 'number', label: 'Dự toán / Kế hoạch vốn (VNĐ)', aggregate: 'sum' },
+          { key: 'thuc_hien', source: 'BTC_FINANCE_OVERVIEW', field: 'thuc_hien', type: 'number', label: 'Thực hiện / Giải ngân (VNĐ)', aggregate: 'sum' },
+          { key: 'ty_le_dat', source: 'BTC_FINANCE_OVERVIEW', field: 'ty_le_dat', type: 'number', label: 'Tiến độ đạt (%)', aggregate: 'avg' },
+          { key: 'cung_ky_nam_truoc', source: 'BTC_FINANCE_OVERVIEW', field: 'cung_ky_nam_truoc', type: 'number', label: 'Cùng kỳ năm trước (VNĐ)', aggregate: 'sum' },
+          { key: 'danh_gia_tien_do', source: 'BTC_FINANCE_OVERVIEW', field: 'danh_gia_tien_do', type: 'string', label: 'Đánh giá tiến độ', aggregate: 'none' },
+          { key: 'ky_bao_cao', source: 'BTC_FINANCE_OVERVIEW', field: 'ky_bao_cao', type: 'string', label: 'Kỳ báo cáo', aggregate: 'none' },
+        ],
+        groupBy: [],
+        charts: [
+          { type: 'bar', xAxis: 'ten_chi_tieu', yAxis: 'thuc_hien', title: 'Số Thực hiện / Giải ngân theo Chỉ tiêu Tài chính (VNĐ)' },
+          { type: 'pie', xAxis: 'linh_vuc', yAxis: 'thuc_hien', title: 'Cơ cấu Phân bổ Nguồn vốn theo Lĩnh vực Tài chính' },
+          { type: 'line', xAxis: 'ten_chi_tieu', yAxis: 'ty_le_dat', title: 'Tỷ lệ Hoàn thành Tiến độ các Chỉ tiêu Tài chính (%)' },
+          { type: 'bar', xAxis: 'don_vi_phu_trach', yAxis: 'thuc_hien', title: 'Quy mô Thực hiện theo Đơn vị Chủ trì' },
         ],
       },
     },

@@ -220,6 +220,45 @@ export function useUpdateStatus(taskId: number | undefined) {
   });
 }
 
+/** Dữ liệu thô gửi lên backend khi thẩm định — cấm kèm điểm tổng hợp/xếp loại tự tính. */
+interface EvaluateTaskScores {
+  volumePct?: number;
+  difficultyK?: number;
+  isUnexpected?: boolean;
+  qualityGrade?: string;
+  attitudeScore?: number;
+  c1Timeliness?: number;
+  c2Quality?: number;
+  c3Proactiveness?: number;
+  c4Discipline?: number;
+  bonusPenalty?: number;
+  baseScore?: number;
+  primaryPercentage?: number;
+}
+
+/**
+ * Ghép chuỗi minh chứng lưu workflow history CHỈ từ RAW INPUTS — không nhúng điểm
+ * tổng hợp hay rank client tự tính (đó là phạm vi recompute của backend).
+ */
+function buildApproveEvidence(scores: EvaluateTaskScores | undefined, feedback?: string): string {
+  const s = scores || {};
+  const rows = [
+    s.volumePct != null ? `- Khối lượng chủ trì: ${s.volumePct}%` : null,
+    s.primaryPercentage != null ? `- Tỷ lệ gánh vác: ${s.primaryPercentage}%` : null,
+    s.difficultyK != null ? `- Hệ số độ khó K: ${s.difficultyK}` : null,
+    s.baseScore != null ? `- Cơ số điểm: ${s.baseScore}` : null,
+    s.c1Timeliness != null ? `- C1 Tiến độ & Thời hạn: ${s.c1Timeliness}đ` : null,
+    s.c2Quality != null ? `- C2 Chất lượng sản phẩm: ${s.c2Quality}đ` : null,
+    s.c3Proactiveness != null ? `- C3 Chủ động & Sáng tạo: ${s.c3Proactiveness}đ` : null,
+    s.c4Discipline != null ? `- C4 Kỷ luật & Phối hợp: ${s.c4Discipline}đ` : null,
+    s.bonusPenalty ? `- Thưởng/Phạt đột xuất: ${s.bonusPenalty}đ` : null,
+    s.qualityGrade ? `- Mức chất lượng quy định: ${s.qualityGrade}` : null,
+    s.attitudeScore != null ? `- Thái độ: ${s.attitudeScore}` : null,
+    s.isUnexpected ? `- Nhiệm vụ phát sinh đột xuất: Có` : null,
+  ].filter(Boolean);
+  return `⭐ [LÃNH ĐẠO ĐÁNH GIÁ & PHÊ DUYỆT]:\n${rows.join("\n") || "(Không có dữ liệu chấm điểm chi tiết)"}\n- Ý kiến chỉ đạo: ${feedback || "Hoàn thành tốt"}`;
+}
+
 /**
  * Hook dành cho Lãnh đạo / Người phụ trách thẩm định, phê duyệt và chốt điểm đánh giá công việc.
  */
@@ -230,26 +269,21 @@ export function useEvaluateTask() {
       id: number;
       payload: {
         action: 'APPROVE' | 'RETURN';
-        status?: string;
-        scores?: {
-          volumePct: number;
-          difficultyK: number;
-          isUnexpected?: boolean;
-          qualityGrade: string;
-          qualityScore: number;
-          timelinessScore: number;
-          attitudeScore: number;
-          totalScore: number;
-          rankGrade: string;
-        };
+        /**
+         * RAW INPUTS ONLY (ledger #21 — "Frontend là dumb client"):
+         * scores chỉ chứa dữ liệu thô do người dùng nhập / tham số quy định trên task
+         * (điểm 4 thành tố Đề án 01-BTCTU, thưởng-phạt, cơ số, hệ số K, tỷ lệ gánh vác).
+         * Các giá trị tổng hợp (totalScore/rawWeightedScore, finalKpiScore, rankGrade/xếp loại)
+         * PHẢI do backend (hrm-service) recompute — client không tự tính và không gửi giá trị tự tính.
+         */
+        scores?: EvaluateTaskScores;
         feedback?: string;
         rejectReason?: string;
-        evidenceData?: any;
       };
     }) => {
       const status = payload.action === 'APPROVE' ? 'COMPLETED' : 'RETURNED';
       const evidence = payload.action === 'APPROVE'
-        ? `⭐ [LÃNH ĐẠO ĐÁNH GIÁ & PHÊ DUYỆT]:\n- Điểm tổng hợp: ${payload.scores?.totalScore ?? 0}/100 (${payload.scores?.rankGrade ?? 'HOÀN THÀNH'})\n- Khối lượng (A): ${payload.scores?.volumePct ?? 100}% (Hệ số K=${payload.scores?.difficultyK ?? 1.0})\n- Chất lượng (B): ${payload.scores?.qualityScore ?? 100}đ\n- Tiến độ (C): ${payload.scores?.timelinessScore ?? 100}đ\n- Trách nhiệm (D): ${payload.scores?.attitudeScore ?? 10}đ\n- Ý kiến chỉ đạo: ${payload.feedback || 'Hoàn thành tốt'}`
+        ? buildApproveEvidence(payload.scores, payload.feedback)
         : `⚠️ [LÃNH ĐẠO YÊU CẦU BỔ SUNG MINH CHỨNG / LÀM LẠI]:\n${payload.rejectReason || payload.feedback || 'Yêu cầu kiểm tra và hoàn thiện lại kết quả công việc'}`;
 
       return hrmTasksApi.updateStatus(id, {

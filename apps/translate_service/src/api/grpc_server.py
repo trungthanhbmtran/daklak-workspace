@@ -1,8 +1,11 @@
 import grpc
+import logging
 from concurrent import futures
 import translation_pb2
 import translation_pb2_grpc
 from core.translator import SmartTranslator
+
+logger = logging.getLogger(__name__)
 
 
 class TranslationServicer(translation_pb2_grpc.TranslationServiceServicer):
@@ -10,17 +13,25 @@ class TranslationServicer(translation_pb2_grpc.TranslationServiceServicer):
         self.translator = SmartTranslator()
 
     def TranslateSync(self, request, context):
-        res = self.translator.translate(request.text, request.target_lang)
-        return translation_pb2.TranslateResponse(translated_text=res)
+        try:
+            res = self.translator.translate(request.text, request.target_lang)
+            return translation_pb2.TranslateResponse(translated_text=res)
+        except Exception as exc:  # noqa: BLE001 — biên dịch gRPC trả status lỗi rõ thay vì crash thread
+            logger.exception("TranslateSync lỗi khi dịch văn bản")
+            context.abort(grpc.StatusCode.INTERNAL, f"Translate failed: {exc}")
 
     def HealthCheck(self, request, context):
         return translation_pb2.HealthResponse(status=True)
 
 
 def run_grpc_server():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [grpc_server] %(message)s",
+    )
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     translation_pb2_grpc.add_TranslationServiceServicer_to_server(TranslationServicer(), server)
     server.add_insecure_port('[::]:50053')
-    print("🚀 gRPC Server đang chạy tại port 50053...")
+    logger.info("🚀 gRPC Server đang chạy tại port 50053...")
     server.start()
     server.wait_for_termination()

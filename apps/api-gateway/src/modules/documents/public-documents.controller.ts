@@ -11,6 +11,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { getInternalGrpcMetadata } from '../../core/utils/internal-metadata.util';
 
 @ApiTags('Public Documents')
 @Controller('public/documents')
@@ -36,7 +37,7 @@ export class PublicDocumentsController implements OnModuleInit {
       search: query.search || '',
       category: query.category || 'ALL',
     };
-    return firstValueFrom(this.documentService.ListProcedures(req)).catch(
+    return firstValueFrom(this.documentService.ListProcedures(req, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
@@ -46,7 +47,7 @@ export class PublicDocumentsController implements OnModuleInit {
 
   @Get('procedures/:id')
   async getProcedure(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetProcedure({ id })).catch(
+    return firstValueFrom(this.documentService.GetProcedure({ id }, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
@@ -56,7 +57,7 @@ export class PublicDocumentsController implements OnModuleInit {
 
   @Get('dossiers/:code')
   async getDossierByCode(@Param('code') code: string) {
-    return firstValueFrom(this.documentService.GetDossier({ code })).catch(
+    return firstValueFrom(this.documentService.GetDossier({ code }, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
@@ -84,7 +85,7 @@ export class PublicDocumentsController implements OnModuleInit {
       req.fiscalYear = parseInt(query.fiscalYear.toString());
     if (query.transparencyCategory)
       req.transparencyCategory = query.transparencyCategory;
-    return firstValueFrom(this.documentService.ListDocuments(req)).catch(
+    return firstValueFrom(this.documentService.ListDocuments(req, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
@@ -94,7 +95,7 @@ export class PublicDocumentsController implements OnModuleInit {
 
   @Get(':id')
   async getDocument(@Param('id') id: string) {
-    return firstValueFrom(this.documentService.GetDocument({ id })).catch(
+    return firstValueFrom(this.documentService.GetDocument({ id }, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');

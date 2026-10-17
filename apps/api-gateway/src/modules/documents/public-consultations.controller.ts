@@ -11,6 +11,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { getInternalGrpcMetadata } from '../../core/utils/internal-metadata.util';
 
 @ApiTags('Public Consultations')
 @Controller('public/documents/consultations')
@@ -33,7 +34,10 @@ export class PublicConsultationsController implements OnModuleInit {
   ) {
     const payload = { consultationId, ...body };
     return firstValueFrom(
-      this.consultationService.SubmitPublicComment(payload),
+      this.consultationService.SubmitPublicComment(
+        payload,
+        getInternalGrpcMetadata(),
+      ),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');

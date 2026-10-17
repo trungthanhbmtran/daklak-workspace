@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { getCookie } from "@/lib/utils"
 import {
   MapPin,
   Phone,
@@ -30,12 +31,7 @@ const COMMUNE_ZONES = [
   { id: "BM", name: "Buôn Êđê (Khu bảo tồn văn hóa truyền thống)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 người", center: { x: 78, y: 72 } }
 ]
 
-// Client-side cookie getter helper
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
-  return match ? decodeURIComponent(match[2]) : null
-}
+// Client-side cookie getter removed — dùng shared helper từ @/lib/utils (P3 dedup)
 
 export default function ContactPage() {
   const [mounted, setMounted] = React.useState(false)
@@ -158,19 +154,42 @@ export default function ContactPage() {
   const [subject, setSubject] = React.useState("")
   const [message, setMessage] = React.useState("")
   const [submitted, setSubmitted] = React.useState(false)
+  const [submitting, setSubmitting] = React.useState(false)
+  const [submitError, setSubmitError] = React.useState("")
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!fullName || !email || !message) return
-    setSubmitted(true)
+    setSubmitting(true)
+    setSubmitError("")
 
-    // Clear inputs
-    setSubject("")
-    setMessage("")
+    try {
+      // Wire thật BE: posts-service POST /public/interactions/questions (ledger #23 — không fabric "SENT")
+      await apiClient.post("/public/interactions/questions", {
+        title: subject || (currentLang === "en" ? "Citizen feedback" : "Góp ý từ công dân"),
+        content: message,
+        askedByName: fullName,
+        askedByEmail: email,
+      })
+      setSubmitted(true)
+      setFullName("")
+      setEmail("")
+      setSubject("")
+      setMessage("")
+    } catch (err: any) {
+      setSubmitError(
+        currentLang === "en"
+          ? "Failed to send your message. Please try again later or contact us directly."
+          : "Không gửi được thư của bạn. Vui lòng thử lại sau hoặc liên hệ trực tiếp Office."
+      )
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const resetContactForm = () => {
     setSubmitted(false)
+    setSubmitError("")
   }
 
   return (
@@ -302,12 +321,21 @@ export default function ContactPage() {
                   />
                 </div>
 
+                {submitError ? (
+                  <p className="text-[11px] text-red-600 dark:text-red-400 font-semibold leading-relaxed" role="alert">
+                    {submitError}
+                  </p>
+                ) : null}
+
                 <button
                   type="submit"
-                  className="w-full mt-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
+                  disabled={submitting}
+                  className="w-full mt-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4 text-yellow-200 dark:text-portal-primary" />
-                  {currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý"}
+                  {submitting
+                    ? (currentLang === "en" ? "SENDING..." : "ĐANG GỬI...")
+                    : (currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý")}
                 </button>
               </form>
             ) : (

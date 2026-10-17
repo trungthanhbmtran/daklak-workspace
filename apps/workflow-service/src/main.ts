@@ -71,6 +71,7 @@ async function bootstrap() {
   );
 }
 bootstrap().catch((err) => {
-  console.error('Error starting WorkflowService', err);
+  // [P3] Nest Logger thay console.error (Cleanup Gate)
+  new Logger('WorkflowService').error('Error starting WorkflowService', err);
   process.exit(1);
 });

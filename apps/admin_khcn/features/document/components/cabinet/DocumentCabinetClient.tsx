@@ -54,7 +54,6 @@ export function DocumentCabinetClient() {
 
       toast.success("Đã thêm vào tủ văn bản thành công!");
     } catch (error) {
-      console.error(error);
       toast.error((error as any)?.response?.data?.message || "Thêm vào tủ văn bản thất bại!");
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";

@@ -10,6 +10,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @Injectable()
@@ -96,7 +97,7 @@ export class OrganizationsService implements OnModuleInit {
     };
   }
 
-  async create(body: any) {
+  async create(body: any, metadata?: Metadata) {
     try {
       if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
         throw new BadRequestException('domainIds phải là một mảng');
@@ -111,7 +112,7 @@ export class OrganizationsService implements OnModuleInit {
           parentId: body.parentId,
           domainIds: body.domainIds ?? [],
           scope: body.scope,
-        }),
+        }, metadata),
       );
       return { data: result };
     } catch (err: any) {
@@ -122,9 +123,9 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getUnitTypes() {
+  async getUnitTypes(metadata?: Metadata) {
     const res = (await firstValueFrom(
-      this.orgGrpcService.ListUnitTypes({}),
+      this.orgGrpcService.ListUnitTypes({}, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
 
     const dataWithCategory = (res.data || []).map((t: any) => ({
@@ -135,9 +136,9 @@ export class OrganizationsService implements OnModuleInit {
     return { data: dataWithCategory };
   }
 
-  async getFullTree(user: any, q?: string) {
+  async getFullTree(user: any, q?: string, metadata?: Metadata) {
     const res = (await firstValueFrom(
-      this.orgGrpcService.GetFullTree({ q: q || '' }),
+      this.orgGrpcService.GetFullTree({ q: q || '' }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     let nodes = res.nodes || [];
 
@@ -146,7 +147,7 @@ export class OrganizationsService implements OnModuleInit {
     if (userId) {
       try {
         userInfo = await firstValueFrom(
-          this.userGrpcService.FindOne({ id: userId }),
+          this.userGrpcService.FindOne({ id: userId }, metadata),
         );
       } catch (err: any) {
         if (err?.code === 5)
@@ -195,9 +196,9 @@ export class OrganizationsService implements OnModuleInit {
     };
   }
 
-  async getOrganizations(user: any, q?: string) {
+  async getOrganizations(user: any, q?: string, metadata?: Metadata) {
     const res = (await firstValueFrom(
-      this.orgGrpcService.GetOrganizations({ q: q || '' }),
+      this.orgGrpcService.GetOrganizations({ q: q || '' }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
 
     let flatList = res.nodes || [];
@@ -207,7 +208,7 @@ export class OrganizationsService implements OnModuleInit {
     if (userId) {
       try {
         userInfo = await firstValueFrom(
-          this.userGrpcService.FindOne({ id: userId }),
+          this.userGrpcService.FindOne({ id: userId }, metadata),
         );
       } catch (err: any) {
         if (err?.code === 5)
@@ -237,13 +238,13 @@ export class OrganizationsService implements OnModuleInit {
     };
   }
 
-  async getJobTitles(unitId?: string) {
+  async getJobTitles(unitId?: string, metadata?: Metadata) {
     const unitIdNum =
       unitId != null && unitId !== '' ? parseInt(unitId, 10) : undefined;
     const res = (await firstValueFrom(
       this.orgGrpcService.ListJobTitles({
         unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     const data = res.data || [];
 
@@ -251,7 +252,7 @@ export class OrganizationsService implements OnModuleInit {
     if (unitIdNum && !Number.isNaN(unitIdNum)) {
       try {
         const unitRes: any = await firstValueFrom(
-          this.orgGrpcService.GetOne({ id: unitIdNum }),
+          this.orgGrpcService.GetOne({ id: unitIdNum }, metadata),
         );
         const cat = this.getCategoryCodeFromTypeCode(unitRes?.typeCode);
         if (
@@ -279,13 +280,13 @@ export class OrganizationsService implements OnModuleInit {
     return { data: { partyTitles, govTitles, allTitles: data } };
   }
 
-  async updateJobTitle(id: number, body: any) {
+  async updateJobTitle(id: number, body: any, metadata?: Metadata) {
     try {
       const result = await firstValueFrom(
         this.orgGrpcService.UpdateJobTitle({
           id,
           domainId: body.domainId,
-        }),
+        }, metadata),
       );
       return { data: result };
     } catch (err: any) {
@@ -296,9 +297,9 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getOne(id: number) {
+  async getOne(id: number, metadata?: Metadata) {
     try {
-      const result = await firstValueFrom(this.orgGrpcService.GetOne({ id }));
+      const result = await firstValueFrom(this.orgGrpcService.GetOne({ id }, metadata));
       return { data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Đơn vị không tồn tại';
@@ -307,10 +308,10 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getOneByCode(code: string) {
+  async getOneByCode(code: string, metadata?: Metadata) {
     try {
       const result = await firstValueFrom(
-        this.orgGrpcService.GetOrganizationByCode({ code }),
+        this.orgGrpcService.GetOrganizationByCode({ code }, metadata),
       );
       return { data: this.mapToOrganizationNode(result) };
     } catch (err: any) {
@@ -320,13 +321,13 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getDetail(identifier: string) {
+  async getDetail(identifier: string, metadata?: Metadata) {
     const isNumeric = /^\d+$/.test(identifier);
 
     const enrichWithSubordinates = async (mapped: any, id: number) => {
       try {
         const allOrgsRes: any = await firstValueFrom(
-          this.orgGrpcService.GetOrganizations({ q: '' }),
+          this.orgGrpcService.GetOrganizations({ q: '' }, metadata),
         );
         mapped.subordinateUnits = (allOrgsRes.nodes || [])
           .filter((n: any) => n.parentId === id || n.parent_id === id)
@@ -341,7 +342,7 @@ export class OrganizationsService implements OnModuleInit {
 
     try {
       const result = (await firstValueFrom(
-        this.orgGrpcService.GetOrganizationByCode({ code: identifier }),
+        this.orgGrpcService.GetOrganizationByCode({ code: identifier }, metadata),
       )) as any;
       const mapped = await enrichWithSubordinates(
         this.mapToOrganizationNode(result),
@@ -352,7 +353,7 @@ export class OrganizationsService implements OnModuleInit {
       if (isNumeric && err?.code === 5) {
         try {
           const resultById = (await firstValueFrom(
-            this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }),
+            this.orgGrpcService.GetOne({ id: parseInt(identifier, 10) }, metadata),
           )) as any;
           const mapped = await enrichWithSubordinates(
             this.mapToOrganizationNode(resultById),
@@ -371,10 +372,10 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getUnitScope(id: number) {
+  async getUnitScope(id: number, metadata?: Metadata) {
     try {
       const result: any = await firstValueFrom(
-        this.orgGrpcService.GetUnitScope({ id }),
+        this.orgGrpcService.GetUnitScope({ id }, metadata),
       );
       const data = result?.data ?? result;
       return {
@@ -390,7 +391,7 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async update(id: number, body: any) {
+  async update(id: number, body: any, metadata?: Metadata) {
     try {
       if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
         throw new BadRequestException('domainIds phải là một mảng');
@@ -411,7 +412,7 @@ export class OrganizationsService implements OnModuleInit {
       };
       if (body.parentId !== undefined) payload.parentId = body.parentId;
       const result = await firstValueFrom(
-        this.orgGrpcService.UpdateUnit(payload as any),
+        this.orgGrpcService.UpdateUnit(payload as any, metadata),
       );
       return { data: result };
     } catch (err: any) {
@@ -422,10 +423,10 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: number, metadata?: Metadata) {
     try {
       const res = (await firstValueFrom(
-        this.orgGrpcService.DeleteUnit({ id }),
+        this.orgGrpcService.DeleteUnit({ id }, metadata),
       )) as any;
       return {
         message: res?.message ?? 'Đã xóa đơn vị',
@@ -438,7 +439,7 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async updateScope(id: number, body: any) {
+  async updateScope(id: number, body: any, metadata?: Metadata) {
     if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
       throw new BadRequestException('domainIds phải là một mảng');
     }
@@ -448,7 +449,7 @@ export class OrganizationsService implements OnModuleInit {
           id,
           domainIds: body.domainIds ?? [],
           scope: body.scope,
-        }),
+        }, metadata),
       );
       return { data: result };
     } catch (err: any) {
@@ -459,23 +460,23 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getSubTree(id: number) {
+  async getSubTree(id: number, metadata?: Metadata) {
     const res = (await firstValueFrom(
-      this.orgGrpcService.GetSubTree({ id }),
+      this.orgGrpcService.GetSubTree({ id }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       data: (res.nodes || []).map((n) => this.mapToOrganizationNode(n)),
     };
   }
 
-  async setStaffing(body: any) {
+  async setStaffing(body: any, metadata?: Metadata) {
     try {
       const result = await firstValueFrom(
         this.orgGrpcService.SetStaffing({
           unitId: body.unitId,
           jobTitleId: body.jobTitleId,
           quantity: body.quantity,
-        }),
+        }, metadata),
       );
       return { data: result };
     } catch (err: any) {
@@ -515,15 +516,15 @@ export class OrganizationsService implements OnModuleInit {
     };
   }
 
-  async getStaffingReport(id: number) {
+  async getStaffingReport(id: number, metadata?: Metadata) {
     try {
       const res = (await firstValueFrom(
-        this.orgGrpcService.GetStaffingReport({ unitId: id }),
+        this.orgGrpcService.GetStaffingReport({ unitId: id }, metadata),
       )) as any;
 
       let jtRes: any;
       try {
-        jtRes = await this.getJobTitles(id.toString());
+        jtRes = await this.getJobTitles(id.toString(), metadata);
       } catch (err: any) {
         throw new InternalServerErrorException(
           err?.message || 'Lỗi lấy danh sách chức danh',
@@ -543,7 +544,7 @@ export class OrganizationsService implements OnModuleInit {
       let isPartyUnit = false;
       try {
         const unitRes: any = await firstValueFrom(
-          this.orgGrpcService.GetOne({ id }),
+          this.orgGrpcService.GetOne({ id }, metadata),
         );
         const cat = this.getCategoryCodeFromTypeCode(unitRes?.typeCode);
         if (
@@ -580,7 +581,7 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async setStaffingSlot(body: any) {
+  async setStaffingSlot(body: any, metadata?: Metadata) {
     if (
       body.geographicAreaIds !== undefined &&
       !Array.isArray(body.geographicAreaIds)
@@ -602,7 +603,7 @@ export class OrganizationsService implements OnModuleInit {
           domainIds: body.domainIds,
           geographicAreaIds: body.geographicAreaIds,
           monitoredUnitIds: body.monitoredUnitIds,
-        }),
+        }, metadata),
       );
       return { data: result };
     } catch (err: any) {
@@ -614,10 +615,10 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async getPublicOrgUnits() {
+  async getPublicOrgUnits(metadata?: Metadata) {
     try {
       const res = (await firstValueFrom(
-        this.orgGrpcService.GetFullTree({}),
+        this.orgGrpcService.GetFullTree({}, metadata),
       )) as any;
       const nodes = res.nodes || [];
       const flatList = this.flattenTree(nodes);
@@ -643,10 +644,10 @@ export class OrganizationsService implements OnModuleInit {
     return result;
   }
 
-  async getUnitTypeJobTemplates(unitTypeId: number) {
+  async getUnitTypeJobTemplates(unitTypeId: number, metadata?: Metadata) {
     try {
       const res = (await firstValueFrom(
-        this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }),
+        this.orgGrpcService.GetUnitTypeJobTemplates({ unitTypeId }, metadata),
       )) as any;
       return { data: res.jobTitleIds || [] };
     } catch (err: any) {
@@ -656,13 +657,13 @@ export class OrganizationsService implements OnModuleInit {
     }
   }
 
-  async updateUnitTypeJobTemplates(unitTypeId: number, jobTitleIds: number[]) {
+  async updateUnitTypeJobTemplates(unitTypeId: number, jobTitleIds: number[], metadata?: Metadata) {
     try {
       const res = (await firstValueFrom(
         this.orgGrpcService.UpdateUnitTypeJobTemplates({
           unitTypeId,
           jobTitleIds,
-        }),
+        }, metadata),
       )) as any;
       return { };
     } catch (err: any) {

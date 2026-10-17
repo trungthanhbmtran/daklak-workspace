@@ -1038,8 +1038,12 @@ export class UsersService implements OnModuleInit {
       const base = this.toUserResponse(u);
       const firstPos = u.jobPositions?.[0];
       const roleNames: string[] = [];
+      // [P2 #31] Least Data: GetUsersByIds chỉ dùng để aggregate tên/đơn vị trên Gateway —
+      // strip cùng cặp field nhạy cảm như listUsers (giữ '' cho proto contract).
       return {
         ...base,
+        phoneNumber: '',
+        cccd: '',
         roleNames,
         role_names: roleNames,
         unitName: firstPos?.unit?.name ?? '',

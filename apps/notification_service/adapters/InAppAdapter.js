@@ -4,7 +4,12 @@ const amqp = require('amqplib');
 class InAppAdapter extends BaseAdapter {
   constructor(id, config = {}) {
     super(id, config);
-    this.rabbitUrl = process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672';
+    const rabbitUrl = process.env.RABBITMQ_URL;
+    if (!rabbitUrl) {
+      // Fail-fast (ledger #9): không tự gán credentials mặc định
+      throw new Error('[InAppAdapter] Thiếu biến môi trường RABBITMQ_URL. InApp adapter phát thông báo qua RabbitMQ gateway_queue và yêu cầu RABBITMQ_URL được cấu hình.');
+    }
+    this.rabbitUrl = rabbitUrl;
     this.queueName = 'gateway_queue';
     this.connection = null;
     this.channel = null;

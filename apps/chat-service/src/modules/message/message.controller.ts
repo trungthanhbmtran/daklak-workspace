@@ -1,114 +1,48 @@
-import { Controller } from "@nestjs/common";
-import {
-  GrpcMethod,
-  GrpcStreamMethod,
-  RpcException,
-} from "@nestjs/microservices";
-import { status } from "@grpc/grpc-js";
-import { MessageService } from "./message.service";
-import { Observable, Subject } from "rxjs";
+import { Controller, Logger, UseGuards } from "@nestjs/common";
+import { GrpcMethod, Payload } from "@nestjs/microservices";
+import { GrpcAuthGuard } from "../../../../../shared/security/grpc-auth/grpc-auth.guard";
+import { CurrentUser } from "../../../../../shared/security/grpc-auth/decorators";
+import { ChatActor, MessageService } from "./message.service";
 import { CreateMessageDto } from "./dto/create-message.dto";
-import { MessageResponseDto } from "./dto/message-response.dto";
 
 @Controller()
 export class MessageController {
+  private readonly logger = new Logger(MessageController.name);
+
   constructor(private readonly messageService: MessageService) {}
 
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod("ChatService", "GetMessages")
-  async getMessages(data: {
-    conversationId: string;
-    limit: number;
-    offset: number;
-  }): Promise<{ data: MessageResponseDto[] }> {
+  async getMessages(
+    @Payload() data: { conversationId: string; limit: number; offset: number },
+    @CurrentUser() user: ChatActor,
+  ) {
     const messages = await this.messageService.getMessages(
       data.conversationId,
-      data.limit,
-      data.offset,
+      data.limit || 50,
+      data.offset || 0,
+      user,
     );
-    return { data: messages };
+    return { messages };
   }
 
-  @GrpcMethod("ChatService", "MarkRead")
-  async markRead(data: {
-    messageId: string;
-    userId: string;
-  }): Promise<{ success: boolean }> {
-    const success = await this.messageService.markRead(
-      data.messageId,
-      data.userId,
-    );
-    return { success };
-  }
-
+  @UseGuards(GrpcAuthGuard)
   @GrpcMethod("ChatService", "SendMessage")
-  async sendMessage(data: CreateMessageDto): Promise<MessageResponseDto> {
-    return await this.messageService.saveMessage(data);
+  async sendMessage(
+    @Payload() data: CreateMessageDto,
+    @CurrentUser() user: ChatActor,
+  ) {
+    const message = await this.messageService.saveMessage(data, user);
+    return message;
   }
 
-  // NOTE: Streaming endpoints in gRPC (like Chat) are typically handled via @GrpcStreamMethod
-  // But for simple Request-Response, @GrpcMethod is fine.
-  @GrpcMethod("ChatService", "Chat")
-  chat(data$: Observable<CreateMessageDto>): Observable<MessageResponseDto> {
-    const subject = new Subject<MessageResponseDto>();
-
-    data$.subscribe({
-      next: (msg) => {
-        this.messageService
-          .saveMessage(msg)
-          .then((savedMsg) => {
-            subject.next(savedMsg);
-          })
-          .catch((err) => {
-            subject.error(err);
-          });
-      },
-      complete: () => subject.complete(),
-      error: (err) => subject.error(err),
-    });
-
-    return subject.asObservable();
-  }
-
-  @GrpcMethod("ChatService", "GetUnreadCount")
-  async getUnreadCount(data: { userId: string }): Promise<{ count: number }> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: "Not implemented yet",
-    });
-  }
-
-  @GrpcMethod("ChatService", "SearchMessage")
-  async searchMessage(data: {
-    query: string;
-    conversationId: string;
-  }): Promise<{ data: MessageResponseDto[] }> {
-    throw new RpcException({
-      code: status.UNIMPLEMENTED,
-      message: "Not implemented yet",
-    });
-  }
-
-  @GrpcStreamMethod("ChatService", "WatchPresence")
-  watchPresence(data$: Observable<{ userIds: string[] }>): Observable<any> {
-    const subject = new Subject<any>();
-    subject.error(
-      new RpcException({
-        code: status.UNIMPLEMENTED,
-        message: "Not implemented yet",
-      }),
-    );
-    return subject.asObservable();
-  }
-
-  @GrpcMethod("ChatService", "WatchConversation")
-  watchConversation(data: { conversationId: string }): Observable<any> {
-    const subject = new Subject<any>();
-    subject.error(
-      new RpcException({
-        code: status.UNIMPLEMENTED,
-        message: "Not implemented yet",
-      }),
-    );
-    return subject.asObservable();
+  @UseGuards(GrpcAuthGuard)
+  @GrpcMethod("ChatService", "MarkRead")
+  async markRead(
+    @Payload() data: { messageId: string; userId: string },
+    @CurrentUser() user: ChatActor,
+  ) {
+    await this.messageService.markRead(data.messageId, data.userId, user);
+    return { success: true };
   }
 }

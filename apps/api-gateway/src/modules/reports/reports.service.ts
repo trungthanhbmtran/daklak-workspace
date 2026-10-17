@@ -4,6 +4,7 @@ import {
   OnModuleInit,
   InternalServerErrorException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -12,6 +13,7 @@ import { timeout } from 'rxjs';
 
 @Injectable()
 export class ReportsService implements OnModuleInit {
+  private readonly logger = new Logger(ReportsService.name);
   private reportService: any;
 
   constructor(
@@ -45,7 +47,7 @@ export class ReportsService implements OnModuleInit {
         throw new BadRequestException(
           e.details || 'Cấu hình báo cáo không hợp lệ',
         );
-      console.error(`RPC Call Failed [${method}]`, e.message);
+      this.logger.error(`RPC Call Failed [${method}]`, e.message);
       throw new InternalServerErrorException('Lỗi gọi gRPC Report Service');
     });
   }

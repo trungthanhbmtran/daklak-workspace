@@ -47,7 +47,7 @@ export default function ApiConnectionEndpoints({
 
   const handleDelete = (id: string) => {
     if (confirm("Xóa endpoint này?")) {
-      deleteMut.mutate(id);
+      deleteMut.mutate({ endpointId: id, connectionId });
     }
   };
 

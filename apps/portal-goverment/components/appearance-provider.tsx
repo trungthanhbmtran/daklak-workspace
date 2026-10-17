@@ -4,6 +4,7 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import apiClient from "@/lib/axiosInstance";
+import { sanitizeCustomCss } from "@/lib/utils";
 
 export interface ThemeColors {
   primary: string;
@@ -172,7 +173,8 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
       customStyle.id = customStyleId;
       document.head.appendChild(customStyle);
     }
-    customStyle.innerHTML = config.customCss || "";
+    // Custom CSS từ admin — sanitize để chặn `</style>` breakout và `url(javascript:...)` (ledger item 7)
+    customStyle.innerHTML = sanitizeCustomCss(config.customCss || "");
 
     // Favicon động
     if (config.branding.favicon) {

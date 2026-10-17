@@ -553,6 +553,14 @@ export class TaskSharedService {
   }
 
   
+  // Khớp quy tắc server ở TasksService.updateTaskStatus (EVALUATE_APPROVE):
+  // chỉ người giao việc hoặc người giám sát, và task phải ở trạng thái PENDING_EVALUATION.
+  private canEvaluateApprove(t: any, query: any): boolean {
+    const code = query?.currentEmployeeCode;
+    if (!code || t?.status !== 'PENDING_EVALUATION') return false;
+    return t.assignerCode === code || t.supervisorCode === code;
+  }
+
   public async computeAllowedActionsBatch(tasks: any[], query: any): Promise<Record<number, string[]>> {
     if (!tasks || tasks.length === 0) return {};
     const result: Record<number, string[]> = {};
@@ -769,6 +777,10 @@ export class TaskSharedService {
         actions.push('CHAT');
       }
 
+      if (this.canEvaluateApprove(t, query)) {
+        actions.push('EVALUATE_APPROVE');
+      }
+
       result[t.id] = Array.from(new Set(actions));
     }
 
@@ -941,6 +953,10 @@ export class TaskSharedService {
     // Always allow chat for participants
     if (isTreeParticipant || t.creatorEmployeeCode === query.currentEmployeeCode) {
       actions.push('CHAT');
+    }
+
+    if (this.canEvaluateApprove(t, query)) {
+      actions.push('EVALUATE_APPROVE');
     }
 
     return Array.from(new Set(actions));

@@ -72,7 +72,7 @@ export class TasksService implements OnModuleInit {
   private userCacheExpiresAt = 0;
   private readonly USER_CACHE_TTL = 10 * 60 * 1000; // 10 minutes TTL
 
-  async populateUsers(tasks: any[]) {
+  async populateUsers(tasks: any[], req?: any) {
     if (!tasks || tasks.length === 0) return tasks;
 
     const empCodes = new Set<string>();
@@ -114,7 +114,10 @@ export class TasksService implements OnModuleInit {
     if (this.userCacheMap.size === 0 || now > this.userCacheExpiresAt) {
       try {
         const usersRes: any = await executeGrpcCall(
-          this.userService.ListUsers({ take: 500 }),
+          this.userService.ListUsers(
+            { take: 500 },
+            req ? this.getGrpcMetadata(req) : undefined,
+          ),
           8000,
           'TasksService.populateUsers',
         );
@@ -336,11 +339,15 @@ export class TasksService implements OnModuleInit {
     // 1. Lấy danh sách nhân sự từ EmployeeService
     let employees: any[] = [];
     try {
-      const empRes = await this.employeeService.list(req.user, {
-        departmentId: departmentId || undefined,
-        pageSize: 200,
-        assignableOnly: true,
-      });
+      const empRes = await this.employeeService.list(
+        req.user,
+        {
+          departmentId: departmentId || undefined,
+          pageSize: 200,
+          assignableOnly: true,
+        },
+        this.getGrpcMetadata(req),
+      );
       employees = empRes?.data || [];
     } catch {
       employees = [];
@@ -599,7 +606,7 @@ export class TasksService implements OnModuleInit {
 
     const rawTasks = grpcRes?.data || [];
     const tasks = Array.isArray(rawTasks) ? rawTasks : [rawTasks].filter(Boolean);
-    await this.populateUsers(tasks);
+    await this.populateUsers(tasks, req);
 
     // Lọc theo khoảng ngày nếu có
     let myTasks = tasks;
@@ -851,7 +858,7 @@ export class TasksService implements OnModuleInit {
       if (codes.length > 0) {
         const supervisorCode = codes[0];
         if (this.userCacheMap.size === 0 || !this.userCacheMap.has(supervisorCode)) {
-          await this.populateUsers([{ supervisorCode }]);
+          await this.populateUsers([{ supervisorCode }], req);
         }
         const u = this.userCacheMap.get(supervisorCode);
         return {
@@ -995,13 +1002,13 @@ export class TasksService implements OnModuleInit {
     if (response?.data) {
       const isSummary = summary === 'true';
       if (Array.isArray(response.data)) {
-        await this.populateUsers(response.data);
+        await this.populateUsers(response.data, req);
         response.data.forEach((t: any) => this.translateTaskData(t));
         if (isSummary) {
           response.data = response.data.map((t: any) => this.pruneSummaryTask(t));
         }
       } else {
-        await this.populateUsers([response.data]);
+        await this.populateUsers([response.data], req);
         this.translateTaskData(response.data);
         if (isSummary) {
           response.data = this.pruneSummaryTask(response.data);
@@ -1356,10 +1363,10 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       if (Array.isArray(response.data)) {
-        await this.populateUsers(response.data);
+        await this.populateUsers(response.data, req);
         response.data.forEach((t: any) => this.translateTaskData(t));
       } else {
-        await this.populateUsers([response.data]);
+        await this.populateUsers([response.data], req);
         this.translateTaskData(response.data);
       }
     }
@@ -1416,7 +1423,7 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e))) as any;
     const target = response?.data ? response.data : response;
     if (target) {
-      await this.populateUsers([target]);
+      await this.populateUsers([target], req);
       this.translateTaskData(target);
     }
     return response;
@@ -1430,7 +1437,7 @@ export class TasksService implements OnModuleInit {
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
       if (Array.isArray(response.data)) {
-        await this.populateUsers(response.data);
+        await this.populateUsers(response.data, req);
       }
     }
     return response;
@@ -1454,7 +1461,7 @@ export class TasksService implements OnModuleInit {
       'TasksService.CreateStep',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
-      await this.populateUsers([response.data]);
+      await this.populateUsers([response.data], req);
     }
     return response;
   }
@@ -1487,7 +1494,7 @@ export class TasksService implements OnModuleInit {
       'TasksService.UpdateStep',
     ).catch((e) => this.handleRpcError(e));
     if (response?.data) {
-      await this.populateUsers([response.data]);
+      await this.populateUsers([response.data], req);
     }
     return response;
   }

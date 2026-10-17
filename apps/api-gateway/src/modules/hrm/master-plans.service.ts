@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { executeGrpcCall } from '../../core/utils/grpc-call.util';
 import { MICROSERVICES } from '../../core/constants/services';
+import { Metadata } from '@grpc/grpc-js';
 
 @Injectable()
 export class MasterPlansService implements OnModuleInit {
@@ -51,7 +52,7 @@ export class MasterPlansService implements OnModuleInit {
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
-  private async populateUsers(plans: any[]) {
+  private async populateUsers(plans: any[], metadata?: Metadata) {
     if (!plans || plans.length === 0) return plans;
 
     const empCodes = new Set<string>();
@@ -90,7 +91,7 @@ export class MasterPlansService implements OnModuleInit {
 
     try {
       const usersRes: any = await executeGrpcCall(
-        this.userService.ListUsers({ take: 500 }),
+        this.userService.ListUsers({ take: 500 }, metadata),
         6000,
         'UserService.ListUsers',
       );
@@ -138,13 +139,15 @@ export class MasterPlansService implements OnModuleInit {
     return plans;
   }
 
-  private async getUnitMap(): Promise<Record<number, any>> {
+  private async getUnitMap(
+    metadata?: Metadata,
+  ): Promise<Record<number, any>> {
     if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now()) {
       return this.unitMapCache.data;
     }
     try {
       const treeRes: any = await executeGrpcCall(
-        this.orgService.GetFullTree({}),
+        this.orgService.GetFullTree({}, metadata),
         6000,
         'OrgService.GetFullTree',
       );
@@ -201,6 +204,7 @@ export class MasterPlansService implements OnModuleInit {
     type?: string,
     status?: string,
     reqDepartmentId?: string,
+    metadata?: Metadata,
   ) {
     const isAdmin =
       user?.permissionsFlatten?.includes('PLAN:MANAGE') ||
@@ -211,7 +215,7 @@ export class MasterPlansService implements OnModuleInit {
 
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
-      const unitMap = await this.getUnitMap();
+      const unitMap = await this.getUnitMap(metadata);
       callerAncestorUnitIds = this.getAncestorUnitIds(
         unitMap,
         parseInt(user.unitId, 10),
@@ -230,22 +234,22 @@ export class MasterPlansService implements OnModuleInit {
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
         isLeader,
-      }),
+      }, metadata),
       8000,
       'MasterPlanService.FindAll',
     ).catch((e) => this.handleRpcError(e));
 
     if (res?.data) {
       if (Array.isArray(res.data)) {
-        await this.populateUsers(res.data);
+        await this.populateUsers(res.data, metadata);
       } else {
-        await this.populateUsers([res.data]);
+        await this.populateUsers([res.data], metadata);
       }
     }
     return res;
   }
 
-  async findById(user: any, id: string) {
+  async findById(user: any, id: string, metadata?: Metadata) {
     const isAdmin =
       user?.permissionsFlatten?.includes('PLAN:MANAGE') ||
       user?.username === 'admin' ||
@@ -255,7 +259,7 @@ export class MasterPlansService implements OnModuleInit {
 
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
-      const unitMap = await this.getUnitMap();
+      const unitMap = await this.getUnitMap(metadata);
       callerAncestorUnitIds = this.getAncestorUnitIds(
         unitMap,
         parseInt(user.unitId, 10),
@@ -270,33 +274,33 @@ export class MasterPlansService implements OnModuleInit {
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
         isLeader,
-      }),
+      }, metadata),
       8000,
       'MasterPlanService.FindById',
     ).catch((e) => this.handleRpcError(e));
 
     if (res) {
-      await this.populateUsers([res]);
+      await this.populateUsers([res], metadata);
     }
     return res;
   }
 
-  async create(user: any, body: any) {
+  async create(user: any, body: any, metadata?: Metadata) {
     body.createdByCode = user?.employeeCode || 'system';
     if (user?.unitId) {
       body.departmentId = parseInt(user.unitId, 10);
     }
     return executeGrpcCall(
-      this.masterPlanService.Create(body),
+      this.masterPlanService.Create(body, metadata),
       8000,
       'MasterPlanService.Create',
     ).catch((e) => this.handleRpcError(e));
   }
 
-  async update(user: any, id: string, body: any) {
+  async update(user: any, id: string, body: any, metadata?: Metadata) {
     body.updatedByCode = user?.employeeCode || 'system';
     return executeGrpcCall(
-      this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
+      this.masterPlanService.Update({ id: parseInt(id, 10), ...body }, metadata),
       8000,
       'MasterPlanService.Update',
     ).catch((e) => this.handleRpcError(e));

@@ -1,9 +1,15 @@
 require('dotenv').config();
 const { PrismaClient } = require('../generated/prisma/client');
-const mariadb = require('mariadb');
 
-const url = process.env.DATABASE_URL || 'mysql://root:mypassword@127.0.0.1:3306/admin_notification';
-const prisma = new PrismaClient();
+const url = process.env.DATABASE_URL;
+if (!url) {
+  console.error('[Notification Seed] Thiếu biến môi trường DATABASE_URL. Không seed database với connection string mặc định. Hãy export DATABASE_URL hoặc cấu hình .env trước khi chạy seed.');
+  process.exit(2);
+}
+const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
+const prisma = new PrismaClient({
+  adapter: new PrismaMariaDb(url.replace(/^mysql:\/\//, 'mariadb://')),
+});
 
 async function main() {
   console.log('Seeding notification_channels...');

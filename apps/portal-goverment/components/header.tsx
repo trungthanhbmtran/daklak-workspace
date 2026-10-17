@@ -133,13 +133,6 @@ interface MenuItem {
   }[]
 }
 
-// 1. Helper to parse cookies on the client
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
-  return match ? decodeURIComponent(match[2]) : null
-}
-
 // 2. Static layout translation dictionary
 const translations = {
   vi: {
@@ -219,12 +212,19 @@ export default function Header() {
     },
   })
 
+  // Chuẩn hoá: queryFn trả MẢNG (unwrap .data) — cùng shape với home-client/DynamicPageRenderer (ledger #35)
   const { data: bannersData } = useQuery({
     queryKey: ["public-banners"],
     queryFn: async () => {
-      const response = await apiClient.get("/public/banners")
-      return response
+      try {
+        const response: any = await apiClient.get("/public/banners")
+        const body = response?.data ?? response
+        return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
+      } catch (e) {
+        return []
+      }
     },
+    staleTime: 5 * 60 * 1000,
   })
 
   React.useEffect(() => {
@@ -484,13 +484,10 @@ export default function Header() {
   })
 
   const weatherString = React.useMemo(() => {
-    const defaultLocation = currentLang === "en" ? "Dak Lak" : "Äáº¯k Láº¯k"
+    if (!weatherData) return null
+    const defaultLocation = currentLang === "en" ? "Dak Lak" : "Dak Lak"
     const location = getConfigValue("weather_location", defaultLocation)
-    if (weatherData) {
-      return `${location} ${weatherData.temp}Â°C ${weatherData.emoji}`
-    }
-    // Fallback if API fails or is loading
-    return `${location} 24Â°C ðŸŒ¤ï¸`
+    return `${location} ${weatherData.temp}` + "\u00B0C " + weatherData.emoji
   }, [weatherData, currentLang, getConfigValue])
 
   const logoUrlToRender = React.useMemo(() => {
@@ -498,10 +495,8 @@ export default function Header() {
   }, [appearanceConfig.branding.logo, getConfigValue]);
 
   const topBanners = React.useMemo(() => {
-    if (!bannersData?.data || bannersData.data.length === 0) {
-      return []
-    }
-    const filtered = bannersData.data.filter(
+    const list = Array.isArray(bannersData) ? bannersData : []
+    const filtered = list.filter(
       (b: any) => b.position?.toLowerCase() === "top" && b.status !== false
     )
     filtered.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
@@ -591,7 +586,8 @@ export default function Header() {
         <div className="max-w-7xl mx-auto w-full px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
-              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thá»© TÆ°, 06/05/2026")} | {weatherString}
+              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thá»© TÆ°, 06/05/2026")}
+              {weatherString && <span> | {weatherString}</span>}
             </span>
           </div>
           <div className="flex items-center gap-4 flex-wrap justify-center font-semibold">

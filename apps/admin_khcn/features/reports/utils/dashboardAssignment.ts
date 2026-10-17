@@ -49,6 +49,13 @@ export const DASHBOARD_TARGETS: DashboardTarget[] = [
     href: "/services/admin",
     defaultReport: "REP_BTCTU_SOP_KPI",
   },
+  {
+    key: "finance",
+    name: "Dashboard Giám sát Tài chính (Bộ Tài chính)",
+    description: "Giám sát thu chi NSNN, giải ngân đầu tư công, hải quan xuất nhập khẩu và hóa đơn điện tử tỉnh Đắk Lắk",
+    href: "/services/reports?tab=finance-mof",
+    defaultReport: "REP_BTC_FINANCE_DAKLAK",
+  },
 ];
 
 const STORAGE_KEY = "daklak_dashboard_report_assignments";

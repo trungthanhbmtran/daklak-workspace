@@ -1,6 +1,20 @@
+// ⚠️ Script benchmark DESTRUCTIVE — script đo hiệu năng xóa toàn bộ bảng notification_log
+if (process.env.ALLOW_DESTRUCTIVE_BENCHMARK !== 'true') {
+  console.error(
+    '[Benchmark] DỪNG: benchmark.js sẽ XÓA TOÀN BỘ dữ liệu bảng notification_log (deleteMany).' +
+      ' Script chỉ dành cho môi trường dev/test riêng biệt.' +
+      ' Nếu chắc chắn muốn chạy, đặt biến môi trường ALLOW_DESTRUCTIVE_BENCHMARK=true (ví dụ: ALLOW_DESTRUCTIVE_BENCHMARK=true node benchmark.js).'
+  );
+  process.exit(2);
+}
+
 const { PrismaClient } = require('./generated/prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
-const url = process.env.DATABASE_URL || 'mysql://root:mypassword@127.0.0.1:3306/admin_notification';
+const url = process.env.DATABASE_URL;
+if (!url) {
+  console.error('[Benchmark] Thiếu biến môi trường DATABASE_URL. Không chạy benchmark với connection string mặc định. Hãy cấu hình .env hoặc export DATABASE_URL trước khi chạy.');
+  process.exit(2);
+}
 const adapter = new PrismaMariaDb(url.replace(/^mysql:\/\//, 'mariadb://'));
 const prisma = new PrismaClient({ adapter });
 const { performance } = require('perf_hooks');

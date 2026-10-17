@@ -285,6 +285,7 @@ export function TaskEvaluationApprovalSheet({
   const handleApprove = async () => {
     if (!activeTaskId) return;
     try {
+      // RAW INPUTS ONLY: chỉ gửi dữ liệu thô; điểm tổng hợp/xếp loại do backend recompute.
       await evaluateTaskMutation.mutateAsync({
         id: activeTaskId,
         payload: {
@@ -294,13 +295,9 @@ export function TaskEvaluationApprovalSheet({
             difficultyK,
             isUnexpected,
             qualityGrade,
-            qualityScore: calculatedScores.qualScore,
-            timelinessScore: calculatedScores.progScore,
             attitudeScore,
-            totalScore: calculatedScores.finalScore,
-            rankGrade: calculatedScores.rank,
           },
-          feedback: feedback.trim() || `Đạt ${calculatedScores.finalScore} điểm. Đánh giá xếp loại: ${calculatedScores.rank}.`,
+          feedback: feedback.trim() || undefined,
         },
       });
       onSuccess?.();

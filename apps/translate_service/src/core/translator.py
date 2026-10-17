@@ -1,10 +1,13 @@
 import hashlib
 import json
+import logging
 import re
 import concurrent.futures
 from googletrans import Translator
 from database.models import TranslationDictionary, Glossary
 from database.session import SessionLocal
+
+logger = logging.getLogger(__name__)
 
 
 class SmartTranslator:
@@ -50,7 +53,7 @@ class SmartTranslator:
 
             return result_text
         except Exception as e:
-            print(f"Lỗi khi áp dụng Glossary: {e}")
+            logger.error("Lỗi khi áp dụng Glossary: %s", e)
             return text
 
     def _translate_batch(self, texts: list, target_lang: str, db, is_unsupported: bool) -> dict:
@@ -91,7 +94,7 @@ class SmartTranslator:
                 if cached_map:
                     db.commit()
             except Exception as db_err:
-                print(f"Error querying DB cache in batch: {db_err}")
+                logger.error("Error querying DB cache in batch: %s", db_err)
 
         # Phân loại văn bản nào đã có cache, văn bản nào cần dịch mới
         for t in unique_texts:
@@ -144,7 +147,7 @@ class SmartTranslator:
                     else:
                         translated_results = [results.text]
                 except Exception as e:
-                    print(f"Error in batch translation call: {e}")
+                    logger.error("Error in batch translation call: %s", e)
                     # Nếu lỗi luồng batch, thử lại từng từ nhỏ lẻ
                     for p in sub_processed:
                         try:
@@ -166,25 +169,39 @@ class SmartTranslator:
                             result_map[orig_text] = translated
                             translations_to_save.append((orig_text, translated))
                     except Exception as e:
-                        print(f"Error processing a translation batch: {e}")
+                        logger.error("Error processing a translation batch: %s", e)
 
         # Lưu đống bản dịch mới vào DB một lần để học máy tự động
         if db and translations_to_save:
             try:
+                # Ledger #32 (N+1): batch lookup hash bằng IN(...) 1 query duy nhất,
+                # thay vì query .first() cho từng dòng.
+                hash_to_entry: dict = {}
                 for orig, trans in translations_to_save:
-                    h = self._get_hash(orig, target_lang)
-                    existing = db.query(TranslationDictionary).filter_by(hash=h).first()
-                    if not existing:
-                        new_entry = TranslationDictionary(
-                            source_text=orig,
-                            translated_text=trans,
-                            target_lang=target_lang,
-                            hash=h
-                        )
-                        db.add(new_entry)
+                    hash_to_entry[self._get_hash(orig, target_lang)] = (orig, trans)
+
+                hash_list = list(hash_to_entry.keys())
+                existing_hashes: set = set()
+                if hash_list:
+                    existing_rows = (
+                        db.query(TranslationDictionary)
+                        .filter(TranslationDictionary.hash.in_(hash_list))
+                        .all()
+                    )
+                    existing_hashes = {row.hash for row in existing_rows}
+
+                for h, (orig, trans) in hash_to_entry.items():
+                    if h in existing_hashes:
+                        continue
+                    db.add(TranslationDictionary(
+                        source_text=orig,
+                        translated_text=trans,
+                        target_lang=target_lang,
+                        hash=h
+                    ))
                 db.commit()
             except Exception as db_save_err:
-                print(f"Error saving batch translations to DB: {db_save_err}")
+                logger.error("Error saving batch translations to DB: %s", db_save_err)
 
         return result_map
 
@@ -275,7 +292,7 @@ class SmartTranslator:
                     db.commit()
                     return record.translated_text
         except Exception as db_err:
-            print(f"Lỗi kết nối/truy vấn DB khi tra từ điển: {db_err}")
+            logger.error("Lỗi kết nối/truy vấn DB khi tra từ điển: %s", db_err)
 
         try:
             # 2. Xử lý dịch thuật
@@ -305,7 +322,7 @@ class SmartTranslator:
 
                         translated_text = json.dumps(json_data, ensure_ascii=False)
             except Exception as le_err:
-                print(f"Error parsing/translating lexical: {le_err}")
+                logger.error("Error parsing/translating lexical: %s", le_err)
                 is_lexical = False
 
             if not is_lexical:
@@ -327,12 +344,12 @@ class SmartTranslator:
                         db.add(new_entry)
                         db.commit()
                 except Exception as db_save_err:
-                    print(f"Lỗi lưu bản dịch vào DB: {db_save_err}")
+                    logger.error("Lỗi lưu bản dịch vào DB: %s", db_save_err)
 
             return translated_text
 
         except Exception as e:
-            print(f"Lỗi Translator: {e}")
+            logger.error("Lỗi Translator: %s", e)
             return f"[Lỗi hệ thống] {text}"
         finally:
             if db:

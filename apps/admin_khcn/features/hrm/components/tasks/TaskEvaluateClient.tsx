@@ -7,32 +7,22 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Award,
-  Calendar,
   CheckCircle2,
-  Clock,
   RotateCcw,
   AlertTriangle,
-  FileText,
-  UserCheck,
-  ShieldCheck,
-  TrendingUp,
   Loader2,
-  Sparkles,
   Scale,
-  Check,
-  Percent,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Heading, Text } from "@/components/ui/typography";
+import { Heading } from "@/components/ui/typography";
 import { toast } from "sonner";
 
 import { useTaskDetail, useEvaluateTask, useTaskSteps } from "../../hooks/useTasks";
-import { useUser } from "@/hooks/useUser";
 import { safeFormatDate, translateTaskStatus, getTaskStatusColor } from "./task-ui-utils";
 
 interface TaskEvaluateClientProps {
@@ -43,7 +33,6 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
   const router = useRouter();
   const numericId = typeof id === "string" ? parseInt(id, 10) : id;
   const isValidId = !Number.isNaN(numericId) && numericId > 0;
-  const { user } = useUser();
 
   // Queries
   const { data: detailData, isLoading, isError } = useTaskDetail(isValidId ? numericId : undefined, {
@@ -75,19 +64,14 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
   }, [currentTask]);
 
   // Form State: 4 Thành tố Đề án 01-BTCTU
-  const [c1Timeliness, setC1Timeliness] = useState<number>(90);
+  // Chỉ lưu OVERRIDE của người dùng; mặc định C1 là điểm đề xuất của hệ thống (derived, single source of truth).
+  const [c1TimelinessOverride, setC1TimelinessOverride] = useState<number | null>(null);
+  const c1Timeliness = c1TimelinessOverride ?? (systemTimeliness.score || 90);
   const [c2Quality, setC2Quality] = useState<number>(90);
   const [c3Proactiveness, setC3Proactiveness] = useState<number>(85);
   const [c4Discipline, setC4Discipline] = useState<number>(95);
   const [bonusPenalty, setBonusPenalty] = useState<number>(0);
   const [feedback, setFeedback] = useState<string>("");
-
-  // Tự động gán điểm thời hạn gợi ý khi nạp xong task
-  useMemo(() => {
-    if (systemTimeliness?.score) {
-      setC1Timeliness(systemTimeliness.score);
-    }
-  }, [systemTimeliness]);
 
   // Hệ số K & Tỷ lệ gánh vác
   const difficultyK = currentTask?.kpiWeight || currentTask?.difficultyFactor || 1.0;
@@ -121,34 +105,24 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
   const handleApprove = async () => {
     if (!isValidId) return;
     try {
+      // Dumb-client rule (ledger #21): chỉ gửi RAW INPUTS — điểm 4 thành tố + tham số quy định.
+      // rawWeightedScore/finalKpiScore/xếp loại do backend (hrm-service) recompute khi thẩm định,
+      // client KHÔNG submit giá trị tự tính (fake-score risk) và không tự khai evaluator từ hồ sơ user.
       await evaluateTask.mutateAsync({
         id: numericId,
         payload: {
           action: "APPROVE",
-          status: "COMPLETED",
           scores: {
-            volumePct: primaryPercentage,
-            difficultyK,
-            isUnexpected: currentTask.metadata?.isIncidental || false,
-            qualityGrade: rankClassification.label,
-            qualityScore: c2Quality,
-            timelinessScore: c1Timeliness,
-            attitudeScore: c3Proactiveness,
-            totalScore: rawWeightedScore,
-            rankGrade: rankClassification.label,
-          },
-          feedback: feedback.trim() || undefined,
-          evidenceData: {
             c1Timeliness,
             c2Quality,
             c3Proactiveness,
             c4Discipline,
             bonusPenalty,
-            rawWeightedScore,
-            finalKpiScore,
-            evaluatorEmployeeCode: user?.employeeCode,
-            evaluatedAt: new Date().toISOString(),
+            baseScore,
+            difficultyK,
+            primaryPercentage,
           },
+          feedback: feedback.trim() || undefined,
         },
       });
       toast.success("Đã thẩm định và chốt điểm KPI công vụ thành công!");
@@ -169,7 +143,6 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
         id: numericId,
         payload: {
           action: "RETURN",
-          status: "RETURNED",
           rejectReason: feedback.trim(),
           feedback: feedback.trim(),
         },
@@ -340,7 +313,7 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
                       min={0}
                       max={100}
                       value={c1Timeliness}
-                      onChange={(e) => setC1Timeliness(Number(e.target.value) || 0)}
+                      onChange={(e) => setC1TimelinessOverride(Number(e.target.value) || 0)}
                       className="w-20 h-8 text-center text-sm font-bold text-blue-700 bg-white"
                     />
                     <span className="text-xs text-slate-500 font-bold">/ 100đ</span>
@@ -492,12 +465,12 @@ export function TaskEvaluateClient({ id }: TaskEvaluateClientProps) {
 
                 <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-center space-y-1">
                   <span className="text-2xs font-bold text-emerald-900 uppercase tracking-wider block">
-                    Điểm KPI chốt chính thức
+                    Điểm KPI dự kiến
                   </span>
                   <div className="text-3xl font-extrabold text-emerald-700">
                     {finalKpiScore} <span className="text-sm font-semibold text-emerald-600">điểm</span>
                   </div>
-                  <span className="text-2xs text-emerald-600">Ghi nhận vào hồ sơ KPI tháng của cán bộ</span>
+                  <span className="text-2xs text-emerald-600">Con số ước tính hiển thị; Backend chốt điểm chính thức khi phê duyệt</span>
                 </div>
               </div>
 

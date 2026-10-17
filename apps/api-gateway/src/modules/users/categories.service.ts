@@ -10,6 +10,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 import { MICROSERVICES } from '../../core/constants/services';
 import { RedisService } from '../../core/redis/redis.service';
 
@@ -51,10 +52,10 @@ export class CategoriesService implements OnModuleInit {
     );
   }
 
-  async getGroups() {
+  async getGroups(metadata?: Metadata) {
     try {
       const res: any = await firstValueFrom(
-        this.categoryService.GetAllGroups({}),
+        this.categoryService.GetAllGroups({}, metadata),
       );
       return { data: res.groups };
     } catch (error) {
@@ -64,14 +65,14 @@ export class CategoriesService implements OnModuleInit {
     }
   }
 
-  async updateGroup(code: string, body: { name: string; order?: number }) {
+  async updateGroup(code: string, body: { name: string; order?: number }, metadata?: Metadata) {
     try {
       const res: any = await firstValueFrom(
         this.categoryService.UpdateGroup({
           code,
           name: body.name,
           order: body.order ?? 0,
-        }),
+        }, metadata),
       );
       return { data: res };
     } catch (error) {
@@ -86,6 +87,7 @@ export class CategoriesService implements OnModuleInit {
     skip?: string,
     selectedIds?: string,
     parentUnitId?: string,
+    metadata?: Metadata,
   ) {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     const skipNum = skip ? parseInt(skip, 10) : 0;
@@ -107,7 +109,7 @@ export class CategoriesService implements OnModuleInit {
 
     if (!group) {
       const result: any = await firstValueFrom(
-        this.categoryService.GetAllCategories({}),
+        this.categoryService.GetAllCategories({}, metadata),
       ).catch((e) => this.handleRpcError(e));
       const response = {
         data: result?.data?.map(toFrontendItem) || [],
@@ -126,7 +128,7 @@ export class CategoriesService implements OnModuleInit {
         selected_ids: selectedIdsArr,
         parentUnitId: parentId,
         parent_unit_id: parentId,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
 
     const response = {
@@ -137,13 +139,16 @@ export class CategoriesService implements OnModuleInit {
     return response;
   }
 
-  async create(body: {
-    group: string;
-    code: string;
-    name: string;
-    description?: string;
-    order?: number;
-  }) {
+  async create(
+    body: {
+      group: string;
+      code: string;
+      name: string;
+      description?: string;
+      order?: number;
+    },
+    metadata?: Metadata,
+  ) {
     const res = await firstValueFrom(
       this.categoryService.Create({
         group: body.group,
@@ -151,7 +156,7 @@ export class CategoriesService implements OnModuleInit {
         name: body.name,
         description: body.description,
         order: body.order,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
 
     await this.redisService.delPattern(`category_group:${body.group}*`);
@@ -170,6 +175,7 @@ export class CategoriesService implements OnModuleInit {
       sort?: number;
       active?: number;
     },
+    metadata?: Metadata,
   ) {
     const payload = {
       id,
@@ -180,7 +186,7 @@ export class CategoriesService implements OnModuleInit {
       isActive: body.active !== undefined ? !!body.active : undefined,
     };
     const res = await firstValueFrom(
-      this.categoryService.Update(payload),
+      this.categoryService.Update(payload, metadata),
     ).catch((e) => this.handleRpcError(e));
 
     // Invalidate all cache pattern for categories since we don't know the exact group before fetching,
@@ -190,9 +196,9 @@ export class CategoriesService implements OnModuleInit {
     return { data: toFrontendItem(res as any) };
   }
 
-  async delete(id: number) {
+  async delete(id: number, metadata?: Metadata) {
     const res = (await firstValueFrom(
-      this.categoryService.Delete({ id }),
+      this.categoryService.Delete({ id }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
 
     await this.redisService.delPattern(`category_group:*`);
@@ -203,7 +209,7 @@ export class CategoriesService implements OnModuleInit {
   }
 
   // Cho PublicCategoriesController
-  async publicGetByGroup(query: any) {
+  async publicGetByGroup(query: any, metadata?: Metadata) {
     const group = query.group;
     const lang = query.lang || 'vi';
     const limitNum = query.limit ? parseInt(query.limit, 10) : 50;
@@ -211,7 +217,7 @@ export class CategoriesService implements OnModuleInit {
 
     if (!group) {
       const result: any = await firstValueFrom(
-        this.categoryService.GetAllCategories({ lang }),
+        this.categoryService.GetAllCategories({ lang }, metadata),
       ).catch((e) => this.handleRpcError(e));
       return {
         data: result?.data,
@@ -225,7 +231,7 @@ export class CategoriesService implements OnModuleInit {
         search: query.q || '',
         take: limitNum,
         skip: skipNum,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
     return {
       data: result?.data,

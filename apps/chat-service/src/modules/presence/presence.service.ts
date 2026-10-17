@@ -28,7 +28,10 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
   }
 
   async setUserOnline(userId: string) {
-    await this.redisClient.set(`online:${userId}`, "true");
+    // Ledger #30: presence cần TTL để không kẹt ONLINE khi client crash mà không
+    // gọi setUserOffline. TTL 60s — heartbeat/call tiếp theo của setUserOnline
+    // sẽ setex lại key và tự refresh TTL.
+    await this.redisClient.setex(`online:${userId}`, 60, "true");
     await this.redisClient.set(`last_seen:${userId}`, new Date().toISOString());
   }
 

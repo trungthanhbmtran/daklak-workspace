@@ -37,27 +37,26 @@ export function usePermissions(): PermissionsState {
           .filter(Boolean)
       : [];
 
+    /**
+     * Admin flag CHỈ từ dữ liệu backend (ledger #21):
+     * - user.isAdmin: /auth/me của api-gateway tự tính isAdmin server-side (auth.service.ts).
+     * - Wildcard permissions: theo chính xác logic gateway tự dùng (tasks.service.ts:570-575).
+     * Cấm suy đoán admin theo username/employeeCode hay string-match tên vai trò.
+     */
     const isGlobalAdmin = Boolean(
       user?.isAdmin ||
-        user?.username === "admin" ||
-        user?.employeeCode === "ADMIN001" ||
         permissions.includes("*") ||
         permissions.includes("*:*") ||
         permissions.includes("SYSTEM:*") ||
-        permissions.includes("ADMIN") ||
-        roles.some((r) => {
-          const lower = r.toLowerCase();
-          return (
-            lower.includes("quản trị viên hệ thống") ||
-            lower.includes("quản trị hệ thống") ||
-            lower.includes("super admin") ||
-            lower === "admin" ||
-            lower === "administrator" ||
-            lower.includes("quản trị viên đơn vị")
-          );
-        })
+        permissions.some((p) => typeof p === "string" && p.toUpperCase().startsWith("SYSTEM"))
     );
 
+    /**
+     * Alias mapping chỉ DỊCH cách viết tương đương của resource (TASK ↔ HRM_TASK ↔ TASKS),
+     * KHÔNG bypass: checkSinglePerm vẫn phải khớp một permission concrete từ permissionsFlatten.
+     * Quyết định giữ lại: seed policy dữ liệu (user-service) có thể dùng cách viết resource
+     * khác gateway; mapping chỉ mở rộng đối chiếu, không cấp quyền khi không có permission khớp.
+     */
     const RESOURCE_ALIASES: Record<string, string[]> = {
       TASK: ["HRM_TASKS", "HRM_TASK", "TASKS"],
       HRM_TASKS: ["TASK", "HRM_TASK", "TASKS"],
@@ -179,7 +178,6 @@ export function usePermissions(): PermissionsState {
     };
 
     const hasRole = (roleQuery: string): boolean => {
-      if (isGlobalAdmin) return true;
       if (!roleQuery) return false;
       const q = roleQuery.toLowerCase().trim();
       return roles.some((r) => {

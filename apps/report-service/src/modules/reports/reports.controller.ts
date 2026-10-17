@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { executeTable } from './table-engine';
 import { ReportsService } from './reports.service';
+import { safeParse } from '../../common/safe-parse.util';
 import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
@@ -12,7 +13,7 @@ export class ReportsController {
   executeTable(data: { payload: string }) {
     data = data || ({} as any);
     try {
-      const body = JSON.parse(data.payload || '{}') as {
+      const body = safeParse(data?.payload, 'ExecuteTable payload không phải JSON hợp lệ') as {
         data: unknown;
         config: unknown;
       };

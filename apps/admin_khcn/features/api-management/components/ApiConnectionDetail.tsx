@@ -86,6 +86,10 @@ export function ApiConnectionDetail({ id, onBack }: { id: string, onBack: () => 
       </div>
 
       <div>
+        {/* GAP: Backend chưa có GET /api-management/connections/:id/endpoints chuyên biệt
+            (api-gateway api-management.controller.ts chỉ có POST/PUT/DELETE endpoints).
+            → endpoints phải lấy từ detail của object cha (fallback), đây là devi-gap đã duyệt.
+            Backend nên bổ sung endpoint chuyên biệt để client query riêng theo tab Lazy. */}
         <ApiConnectionEndpoints connectionId={id} endpoints={data.endpoints} />
       </div>
     </div>

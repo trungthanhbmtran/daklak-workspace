@@ -10,6 +10,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import { Metadata } from '@grpc/grpc-js';
 import { MICROSERVICES } from '../../core/constants/services';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
@@ -123,8 +124,8 @@ export class MenusService implements OnModuleInit {
     this.menuGrpcService = this.client.getService(MICROSERVICES.MENU.SERVICE);
   }
 
-  async getAll(app?: string) {
-    const res = (await firstValueFrom(this.menuGrpcService.GetAll({})).catch(
+  async getAll(app?: string, metadata?: Metadata) {
+    const res = (await firstValueFrom(this.menuGrpcService.GetAll({}, metadata)).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
@@ -133,8 +134,8 @@ export class MenusService implements OnModuleInit {
     return items.map(toFrontendItem);
   }
 
-  async getMenuTree(app?: string) {
-    const res = (await firstValueFrom(this.menuGrpcService.GetAll({})).catch(
+  async getMenuTree(app?: string, metadata?: Metadata) {
+    const res = (await firstValueFrom(this.menuGrpcService.GetAll({}, metadata)).catch(
       (e) => {
         throw new InternalServerErrorException(e.message || 'RPC Call Failed');
       },
@@ -145,7 +146,7 @@ export class MenusService implements OnModuleInit {
     return tree;
   }
 
-  async getMyMenus(user: any, app?: string) {
+  async getMyMenus(user: any, app?: string, metadata?: Metadata) {
     const rawId = user?.id ?? user?.userId;
     const userId =
       rawId != null && rawId !== ''
@@ -156,7 +157,7 @@ export class MenusService implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.menuGrpcService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
 
     if (response) {
@@ -171,7 +172,7 @@ export class MenusService implements OnModuleInit {
     return response;
   }
 
-  async getHubApps(user: any, app?: string) {
+  async getHubApps(user: any, app?: string, metadata?: Metadata) {
     const rawId = user?.id ?? user?.userId;
     const userId =
       rawId != null && rawId !== ''
@@ -182,13 +183,13 @@ export class MenusService implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.menuGrpcService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
     const branches = getRealBranches(response?.data ?? []);
     return { apps: this.buildHubApps(branches) };
   }
 
-  async getServiceSidebar(user: any, code: string, app?: string) {
+  async getServiceSidebar(user: any, code: string, app?: string, metadata?: Metadata) {
     const rawId = user?.id ?? user?.userId;
     const userId =
       rawId != null && rawId !== ''
@@ -199,7 +200,7 @@ export class MenusService implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.menuGrpcService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
-      }),
+      }, metadata),
     ).catch((e) => this.handleRpcError(e));
     const branches = getRealBranches(response?.data ?? []);
     const sidebarMenus = this.buildSidebarMenus(branches);
@@ -274,11 +275,11 @@ export class MenusService implements OnModuleInit {
     };
   }
 
-  async create(body: MenuDto) {
+  async create(body: MenuDto, metadata?: Metadata) {
     try {
       const payload = this.toCreatePayload(body);
       const res = (await firstValueFrom(
-        this.menuGrpcService.Create(payload),
+        this.menuGrpcService.Create(payload, metadata),
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
@@ -309,11 +310,11 @@ export class MenusService implements OnModuleInit {
     return payload;
   }
 
-  async update(id: number, body: MenuDto) {
+  async update(id: number, body: MenuDto, metadata?: Metadata) {
     try {
       const payload = this.toUpdatePayload(id, body);
       const res = (await firstValueFrom(
-        this.menuGrpcService.Update(payload),
+        this.menuGrpcService.Update(payload, metadata),
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
@@ -324,9 +325,9 @@ export class MenusService implements OnModuleInit {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: number, metadata?: Metadata) {
     const res = (await firstValueFrom(
-      this.menuGrpcService.Delete({ id }),
+      this.menuGrpcService.Delete({ id }, metadata),
     ).catch((e) => this.handleRpcError(e))) as any;
     return {
       message: res?.message ?? 'Đã xóa menu',

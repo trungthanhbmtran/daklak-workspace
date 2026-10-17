@@ -7,6 +7,7 @@ import {
   GrpcMethod,
 } from '@nestjs/microservices';
 import { StatisticsService } from './statistics.service';
+import { safeParse } from '../../common/safe-parse.util';
 import { Metadata } from '@grpc/grpc-js';
 
 @Controller()
@@ -93,8 +94,8 @@ export class StatisticsController {
     data: { payload: string; userData: string },
     metadata: Metadata,
   ) {
-    const filter = data.payload ? JSON.parse(data.payload) : {};
-    const user = data.userData ? JSON.parse(data.userData) : null;
+    const filter = safeParse(data?.payload, 'GetTaskStats payload không phải JSON hợp lệ');
+    const user = safeParse(data?.userData, 'GetTaskStats userData không phải JSON hợp lệ');
     const res: any = await this.statisticsService.getTaskStatistics(
       filter,
       user,
@@ -112,7 +113,7 @@ export class StatisticsController {
     data: { payload: string; userData: string },
     metadata: Metadata,
   ) {
-    const filter = data.payload ? JSON.parse(data.payload) : {};
+    const filter = safeParse(data?.payload, 'GetPostStats payload không phải JSON hợp lệ');
     const res: any = await this.statisticsService.getPostStatistics(
       filter,
       metadata,
@@ -129,8 +130,8 @@ export class StatisticsController {
     data: { payload: string; userData: string },
     metadata: Metadata,
   ) {
-    const filter = data.payload ? JSON.parse(data.payload) : {};
-    const user = data.userData ? JSON.parse(data.userData) : null;
+    const filter = safeParse(data?.payload, 'GetKpiStats payload không phải JSON hợp lệ');
+    const user = safeParse(data?.userData, 'GetKpiStats userData không phải JSON hợp lệ');
     const res: any = await this.statisticsService.getKpiStatistics(
       filter,
       user,
@@ -148,7 +149,7 @@ export class StatisticsController {
     data: { payload: string; userData: string },
     metadata: Metadata,
   ) {
-    const filter = data.payload ? JSON.parse(data.payload) : {};
+    const filter = safeParse(data?.payload, 'GetDocumentStats payload không phải JSON hợp lệ');
     const res: any = await this.statisticsService.getDocumentStatistics(
       filter,
       metadata,

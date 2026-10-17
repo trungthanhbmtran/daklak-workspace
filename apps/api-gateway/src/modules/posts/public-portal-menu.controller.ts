@@ -10,6 +10,7 @@ import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
+import { getInternalGrpcMetadata } from '../../core/utils/internal-metadata.util';
 
 @ApiTags('Public Portal Menus')
 @Controller('public/portal-menus')
@@ -29,7 +30,7 @@ export class PublicPortalMenuController implements OnModuleInit {
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(
+    return firstValueFrom(this.portalMenuService.listPortalMenus(query, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         return null;
@@ -40,7 +41,7 @@ export class PublicPortalMenuController implements OnModuleInit {
   @Get('tree')
   async getTree(@Query() query: any) {
     // The listPortalMenus RPC already returns a hierarchical tree structure O(N)
-    return firstValueFrom(this.portalMenuService.listPortalMenus(query)).catch(
+    return firstValueFrom(this.portalMenuService.listPortalMenus(query, getInternalGrpcMetadata())).catch(
       (e) => {
         this.logger.error(`RPC Call Failed: ${e.message}`);
         return null;

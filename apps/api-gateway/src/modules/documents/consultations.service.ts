@@ -23,7 +23,7 @@ export class ConsultationsService implements OnModuleInit {
     );
   }
 
-  async listConsultations(query: any) {
+  async listConsultations(query: any, metadata?: any) {
     const req = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
@@ -31,75 +31,78 @@ export class ConsultationsService implements OnModuleInit {
       status: query.status,
     };
     return firstValueFrom(
-      this.consultationGrpcService.ListConsultations(req),
+      this.consultationGrpcService.ListConsultations(req, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async listAllPublicComments(status: string) {
+  async listAllPublicComments(status: string, metadata?: any) {
     return firstValueFrom(
-      this.consultationGrpcService.ListPublicComments({ status }),
+      this.consultationGrpcService.ListPublicComments({ status }, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async getConsultation(id: string) {
+  async getConsultation(id: string, metadata?: any) {
     return firstValueFrom(
-      this.consultationGrpcService.GetConsultation({ id }),
+      this.consultationGrpcService.GetConsultation({ id }, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async createConsultation(body: any) {
+  async createConsultation(body: any, metadata?: any) {
     return firstValueFrom(
-      this.consultationGrpcService.CreateConsultation(body),
+      this.consultationGrpcService.CreateConsultation(body, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async submitResponse(consultationId: string, body: any) {
+  async submitResponse(consultationId: string, body: any, metadata?: any) {
     const payload = { consultationId, ...body };
     return firstValueFrom(
-      this.consultationGrpcService.SubmitResponse(payload),
+      this.consultationGrpcService.SubmitResponse(payload, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async listResponses(consultationId: string) {
+  async listResponses(consultationId: string, metadata?: any) {
     return firstValueFrom(
-      this.consultationGrpcService.ListResponses({ consultationId }),
+      this.consultationGrpcService.ListResponses({ consultationId }, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async listPublicComments(consultationId: string, status: string) {
+  async listPublicComments(consultationId: string, status: string, metadata?: any) {
     return firstValueFrom(
-      this.consultationGrpcService.ListPublicComments({
-        consultationId,
-        status,
-      }),
+      this.consultationGrpcService.ListPublicComments(
+        {
+          consultationId,
+          status,
+        },
+        metadata,
+      ),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');
     });
   }
 
-  async moderateComment(id: string, body: any, req: any) {
+  async moderateComment(id: string, body: any, req: any, metadata?: any) {
     const payload = { id, status: body.status, userId: req.user.id };
     return firstValueFrom(
-      this.consultationGrpcService.ModerateComment(payload),
+      this.consultationGrpcService.ModerateComment(payload, metadata),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       throw new InternalServerErrorException('Lỗi gọi gRPC Document Service');

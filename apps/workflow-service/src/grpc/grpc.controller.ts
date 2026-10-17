@@ -221,7 +221,8 @@ export class GrpcWorkflowController {
     const result = await this.bindingService.update(data.id, {
       pinnedVersionId: data.pinnedVersionId || undefined,
       status: data.status || undefined,
-      priority: data.priority ? Number(data.priority) : undefined,
+      // [P2 #36 follow-up] priority=0 hợp lệ — khớp pattern createProcessBinding L205
+      priority: data.priority !== undefined && data.priority !== null ? Number(data.priority) : undefined,
       effectiveTo: data.effectiveTo ? new Date(data.effectiveTo) : undefined,
       reason: data.reason || undefined,
       updatedBy: data.updatedBy,

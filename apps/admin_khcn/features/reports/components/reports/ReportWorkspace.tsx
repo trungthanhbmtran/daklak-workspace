@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   useGetReportDefinitions,
   useGetReportDashboardStats,
@@ -46,8 +46,10 @@ import {
   Award,
   ExternalLink,
   Briefcase,
+  Landmark,
 } from 'lucide-react';
 import { EmbeddedReportWidget } from '../EmbeddedReportWidget';
+import { BtcFinanceDashboardTab } from './BtcFinanceDashboardTab';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +63,28 @@ import { ReportDefinition } from '../../types';
 
 export const ReportWorkspace = () => {
   const router = useRouter();
+  const [selectedTab, setSelectedTab] = useState<string>('all');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (
+        tab &&
+        [
+          'all',
+          'finance-mof',
+          'btctu-kpi',
+          'personal-workbench',
+          'my-reports',
+          'shared',
+          'recent',
+        ].includes(tab)
+      ) {
+        setSelectedTab(tab);
+      }
+    }
+  }, []);
   const {
     data: reports,
     isLoading,
@@ -442,9 +466,9 @@ export const ReportWorkspace = () => {
 
         {/* Main Content Workspace */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 overflow-hidden">
-          <Tabs defaultValue="all" className="w-full">
+          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <div className="px-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-3">
-              <TabsList className="bg-slate-100/60 p-1">
+              <TabsList className="bg-slate-100/60 p-1 flex-wrap h-auto">
                 <TabsTrigger
                   value="all"
                   className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold"
@@ -452,11 +476,18 @@ export const ReportWorkspace = () => {
                   Tất cả báo cáo ({allReports.length})
                 </TabsTrigger>
                 <TabsTrigger
+                  value="finance-mof"
+                  className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold flex items-center gap-1.5 text-emerald-800 data-[state=active]:text-emerald-700 font-bold"
+                >
+                  <Landmark className="w-3.5 h-3.5 text-emerald-600" />
+                  Giám sát Tài chính (Bộ TC)
+                </TabsTrigger>
+                <TabsTrigger
                   value="btctu-kpi"
                   className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs font-semibold flex items-center gap-1.5 text-blue-700 data-[state=active]:text-blue-600"
                 >
                   <Award className="w-3.5 h-3.5" />
-                  Dashboard Điều hành Toàn tỉnh (BTCTU)
+                  Dashboard Toàn tỉnh (BTCTU)
                 </TabsTrigger>
                 <TabsTrigger
                   value="personal-workbench"
@@ -529,6 +560,13 @@ export const ReportWorkspace = () => {
               className="p-6 m-0 focus-visible:outline-none focus-visible:ring-0"
             >
               {renderReportGrid(filteredReports)}
+            </TabsContent>
+
+            <TabsContent
+              value="finance-mof"
+              className="p-6 m-0 focus-visible:outline-none focus-visible:ring-0"
+            >
+              <BtcFinanceDashboardTab />
             </TabsContent>
 
             <TabsContent

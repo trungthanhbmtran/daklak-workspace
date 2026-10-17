@@ -3,200 +3,9 @@
 import * as React from "react"
 import Link from "next/link"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
-import { Calendar, Search, ArrowRight, Home, ChevronRight } from "lucide-react"
-
-// Client-side cookie getter helper
-const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
-  return match ? decodeURIComponent(match[2]) : null
-}
-
-const ALL_NEWS = [
-  {
-    id: 1,
-    title: "Lãnh đạo huyện làm việc với UBND xã Dang Kang về phát triển KT-XH năm 2026",
-    excerpt: "Sáng 29/4, UBND huyện Krông Bông phối hợp cùng các Sở ban ngành làm việc trực tiếp tại UBND xã Dang Kang về kế hoạch chuyển đổi cơ cấu cây trồng nông nghiệp công nghệ cao...",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-    date: "29/04/2026",
-    category: "ubnd",
-    categoryName: "Ủy ban nhân dân",
-    readTime: "4 phút đọc"
-  },
-  {
-    id: 2,
-    title: "Khởi công mở rộng đường liên thôn 3 và thôn 4 nông thôn mới kiểu mẫu",
-    excerpt: "Dự án có tổng mức đầu tư hơn 5 tỷ đồng trích từ nguồn ngân sách xã xã hội hóa và người dân tự nguyện hiến đất mở rộng hành lang lộ giới lên 8m...",
-    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80",
-    date: "28/04/2026",
-    category: "ubnd",
-    categoryName: "Ủy ban nhân dân",
-    readTime: "5 phút đọc"
-  },
-  {
-    id: 3,
-    title: "Tập huấn chuyển đổi số và ứng dụng CNTT cho bà con nông dân trồng cà phê",
-    excerpt: "Hơn 120 hộ dân tiêu biểu của xã đã tham gia lớp tập huấn sử dụng ứng dụng truy xuất nguồn gốc nông sản và theo dõi diễn biến giá cả thị trường...",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80",
-    date: "26/04/2026",
-    category: "kinh-te",
-    categoryName: "Kinh tế - Xã hội",
-    readTime: "3 phút đọc"
-  },
-  {
-    id: 101,
-    title: "Đảng ủy UBND tỉnh: Siết chặt kỷ cương, điều hành linh hoạt, phấn đấu tăng trưởng hai con số",
-    excerpt: "UBND tỉnh yêu cầu siết chặt kỷ luật kỷ cương hành chính, nâng cao trách nhiệm người đứng đầu, tháo gỡ khó khăn thúc đẩy tăng trưởng kinh tế bền vững.",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80",
-    date: "29/04/2026",
-    category: "dang-uy",
-    categoryName: "Hoạt động Đảng",
-    readTime: "3 phút đọc"
-  },
-  {
-    id: 102,
-    title: "HĐND xã Dang Kang chuẩn bị nội dung cho kỳ họp chuyên đề lần thứ 8 khóa XI",
-    excerpt: "Thường trực HĐND xã làm việc thống nhất các tờ trình quy hoạch chi tiết xây dựng trung tâm hành chính và phân bổ ngân sách đầu tư công trung hạn.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
-    date: "28/04/2026",
-    category: "hdnd",
-    categoryName: "Hội đồng nhân dân",
-    readTime: "4 phút đọc"
-  },
-  {
-    id: 103,
-    title: "UBND xã phát động chiến dịch tổng vệ sinh môi trường, phòng ngừa dịch sốt xuất huyết",
-    excerpt: "Đồng loạt 8 thôn buôn trên địa bàn xã ra quân diệt lăng quăng, phát quang bụi rậm, khơi thông cống rãnh tránh nước đọng mùa mưa lũ.",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80",
-    date: "27/04/2026",
-    category: "ubnd",
-    categoryName: "Ủy ban nhân dân",
-    readTime: "3 phút đọc"
-  },
-  {
-    id: 104,
-    title: "Phổ biến tập huấn Luật Đất đai sửa đổi bổ sung năm 2026 cho cán bộ địa chính xã",
-    excerpt: "Tăng cường năng lực quản lý nhà nước về đất đai, giải quyết tranh chấp đất đai tại cơ sở đúng pháp luật và hài hòa quyền lợi công dân.",
-    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80",
-    date: "25/04/2026",
-    category: "ubnd",
-    categoryName: "Ủy ban nhân dân",
-    readTime: "5 phút đọc"
-  },
-  {
-    id: 105,
-    title: "Ngày hội văn hóa thể thao các dân tộc thiểu số xã Dang Kang lần thứ III năm 2026",
-    excerpt: "Quy tụ hơn 300 vận động viên, nghệ nhân tranh tài ở các nội dung bắn nỏ, đẩy gậy, kéo co và trình diễn nhạc cụ cồng chiêng Êđê truyền thống.",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80",
-    date: "24/04/2026",
-    category: "kinh-te",
-    categoryName: "Văn hóa - Xã hội",
-    readTime: "6 phút đọc"
-  },
-  {
-    id: 106,
-    title: "Mô hình nuôi heo rừng lai sinh sản hướng đi phát triển kinh tế hộ buôn Êga",
-    excerpt: "Từ nguồn vốn vay ưu đãi giải quyết việc làm của Ngân hàng Chính sách Xã hội, nhiều hộ đồng bào đã thoát nghèo bền vững nhờ nuôi heo lai thương phẩm.",
-    image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=600&q=80",
-    date: "22/04/2026",
-    category: "kinh-te",
-    categoryName: "Kinh tế - Đời sống",
-    readTime: "4 phút đọc"
-  }
-]
-
-const ALL_NEWS_EN = [
-  {
-    id: 1,
-    title: "District Leaders Work with Dang Kang Commune on Socio-Economic Development in 2026",
-    excerpt: "On the morning of April 29, Krông Bông District People's Committee coordinated with departments to work directly with Dang Kang Commune on agricultural crop restructuring...",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-    date: "29/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "4 min read"
-  },
-  {
-    id: 2,
-    title: "Groundbreaking of Expansion of Inter-village Road 3 and 4 for Model New Rural Area",
-    excerpt: "The project has a total investment of over 5 billion VND from the commune budget, socialization, and voluntary contribution of residents to widen the road to 8m...",
-    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80",
-    date: "28/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "5 min read"
-  },
-  {
-    id: 3,
-    title: "Digital Transformation and IT Training for Coffee Farmers",
-    excerpt: "More than 120 outstanding households of the commune participated in the training course on using agricultural origin tracking and market price tracking applications...",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80",
-    date: "26/04/2026",
-    category: "kinh-te",
-    categoryName: "Socio-Economy",
-    readTime: "3 min read"
-  },
-  {
-    id: 101,
-    title: "Provincial Party Committee: Tighten discipline, flexible administration, strive for double-digit growth",
-    excerpt: "The Provincial People's Committee requests tightening administrative discipline, raising leaders' responsibility, resolving difficulties to promote sustainable economic growth.",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80",
-    date: "29/04/2026",
-    category: "dang-uy",
-    categoryName: "Party Activities",
-    readTime: "3 min read"
-  },
-  {
-    id: 102,
-    title: "Dang Kang Commune People's Council Prepares for the 8th Extraordinary Session of the 11th Term",
-    excerpt: "The Standing Committee of the People's Council coordinates the master plan of the administrative center and the allocation of medium-term public investment.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
-    date: "28/04/2026",
-    category: "hdnd",
-    categoryName: "People's Council",
-    readTime: "4 min read"
-  },
-  {
-    id: 103,
-    title: "Commune Launches Environmental Clean-up Campaign to Prevent Dengue Fever",
-    excerpt: "Simultaneously, 8 villages in the commune mobilized to destroy larvae, clear bushes, and clear sewers to avoid standing water during the rainy season.",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80",
-    date: "27/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "3 min read"
-  },
-  {
-    id: 104,
-    title: "Dissemination and Training on the Revised Land Law 2026 for Commune Land Officers",
-    excerpt: "Strengthen the capacity of state land management, resolve land disputes at the grassroots level according to the law and protect citizens' rights.",
-    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80",
-    date: "25/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "5 min read"
-  },
-  {
-    id: 105,
-    title: "Dang Kang Ethnic Minority Sports and Culture Festival 2026",
-    excerpt: "Gathering more than 300 athletes and artists competing in crossbow shooting, stick pushing, tug of war, and performing traditional Êđê gong instruments.",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80",
-    date: "24/04/2026",
-    category: "kinh-te",
-    categoryName: "Culture - Society",
-    readTime: "6 min read"
-  },
-  {
-    id: 106,
-    title: "Breeding Wild Boars Model as an Economic Way Forward in Êga Village",
-    excerpt: "From the job creation preferential loans of the Social Policy Bank, many households have got out of poverty sustainably by raising boars.",
-    image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=600&q=80",
-    date: "22/04/2026",
-    category: "kinh-te",
-    categoryName: "Economy - Life",
-    readTime: "4 min read"
-  }
-]
+import { usePublicPosts } from "@/hooks/usePublicData"
+import { resolveMediaUrl } from "@/lib/utils"
+import { Calendar, Search, ArrowRight, Home, ChevronRight, Newspaper } from "lucide-react"
 
 const newsPageTranslations = {
   vi: {
@@ -208,6 +17,7 @@ const newsPageTranslations = {
     categoryTitle: "CHUYÊN MỤC TIN",
     noNewsTitle: "Không tìm thấy bài viết phù hợp",
     noNewsDesc: "Vui lòng nhập từ khóa tìm kiếm khác hoặc lựa chọn chuyên mục khác.",
+    loading: "Đang tải danh sách bài viết...",
     detailText: "Chi tiết bài viết",
     allNews: "Tất cả tin tức",
     dangUy: "Hoạt động Đảng Ủy",
@@ -224,6 +34,7 @@ const newsPageTranslations = {
     categoryTitle: "NEWS CATEGORIES",
     noNewsTitle: "No matching articles found",
     noNewsDesc: "Please enter a different search keyword or select another category.",
+    loading: "Loading articles...",
     detailText: "Article Details",
     allNews: "All News",
     dangUy: "Party Committee Activities",
@@ -233,15 +44,17 @@ const newsPageTranslations = {
   }
 }
 
+// Map chuyên mục UI -> từ khóa nhận diện category thật từ BE (slug/code/name)
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  "dang-uy": ["đảng", "dang"],
+  "hdnd": ["hội đồng nhân dân", "hdnd"],
+  "ubnd": ["ủy ban nhân dân", "ubnd"],
+  "kinh-te": ["kinh tế", "kinh-te"]
+}
+
 function NewsListPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
   const pathname = usePathname()
 
   const currentLang = React.useMemo(() => {
@@ -272,6 +85,44 @@ function NewsListPageContent() {
     setSearchQuery(searchParams.get("search") || "")
   }, [searchParams])
 
+  // Wire thật BE (ledger #23): /public/posts qua usePublicPosts — không còn ALL_NEWS mock
+  const { data: postsData, isFetching: postsLoading } = usePublicPosts({ limit: 50 })
+
+  const newsList = React.useMemo(() => {
+    const response: any = postsData
+    const body = response?.data ?? response
+    return Array.isArray(body) ? body : (Array.isArray(body?.data) ? body.data : [])
+  }, [postsData])
+
+  const getLocalizedField = (obj: any, baseField: string, lang: string): string => {
+    if (!obj) return ""
+    if (lang === "en") {
+      const enValue = obj[baseField + "En"] || obj[baseField + "_en"]
+      if (enValue) return enValue
+    }
+    return obj[baseField] || ""
+  }
+
+  const matchesCategory = React.useCallback((post: any, category: string) => {
+    if (category === "all") return true
+    const slugOrCode = (post.category?.slug || post.category?.code || "").toLowerCase()
+    const name = (post.category?.name || "").toLowerCase()
+    if (slugOrCode === category) return true
+    const keywords = CATEGORY_KEYWORDS[category] || []
+    return keywords.some((kw) => name.includes(kw))
+  }, [])
+
+  const filteredNews = React.useMemo(() => {
+    return newsList.filter((post: any) => {
+      const title = (getLocalizedField(post, "title", currentLang) || "").toLowerCase()
+      const excerpt = (getLocalizedField(post, "description", currentLang) || "").toLowerCase()
+      const matchesSearch = !searchQuery.trim() ||
+        title.includes(searchQuery.toLowerCase()) ||
+        excerpt.includes(searchQuery.toLowerCase())
+      return matchesCategory(post, activeCategory) && matchesSearch
+    })
+  }, [newsList, activeCategory, searchQuery, matchesCategory, currentLang])
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const query = searchQuery.trim()
@@ -292,18 +143,6 @@ function NewsListPageContent() {
       router.push(`${routePath}?category=${val}`)
     }
   }
-
-  const newsList = currentLang === "en" ? ALL_NEWS_EN : ALL_NEWS
-
-  const filteredNews = React.useMemo(() => {
-    return newsList.filter(post => {
-      const matchesCategory = activeCategory === "all" || post.category === activeCategory
-      const matchesSearch = !searchQuery.trim() ||
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
-  }, [newsList, activeCategory, searchQuery])
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 animate-fade-in select-none">
@@ -377,10 +216,24 @@ function NewsListPageContent() {
 
         {/* Right Listings grid */}
         <div className="lg:col-span-9 flex flex-col gap-4 sm:gap-6">
-          {filteredNews.length > 0 ? (
+          {postsLoading ? (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center gap-3">
+              <Newspaper className="w-12 h-12 text-slate-300 dark:text-slate-700" />
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{t.loading}</p>
+            </div>
+          ) : filteredNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {filteredNews.map((post) => {
-                const articlePath = currentLang === "en" ? `/news/${post.id}` : `/tin-tuc/${post.id}`
+              {filteredNews.map((post: any) => {
+                const articlePath = currentLang === "en"
+                  ? `/news/${post.slug || post.id}`
+                  : `/tin-tuc/${post.slug || post.id}`
+                const image = post.thumbnail ? resolveMediaUrl(post.thumbnail) : ""
+                const postDate = post.publishedAt || post.createdAt
+                const dateFormatted = postDate
+                  ? new Date(postDate).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN")
+                  : ""
+                const categoryName = getLocalizedField(post.category, "name", currentLang)
+                  || (currentLang === "en" ? "News" : "Tin tức")
                 return (
                   <div
                     key={post.id}
@@ -388,28 +241,39 @@ function NewsListPageContent() {
                   >
                     <div className="h-44 overflow-hidden relative shrink-0">
                       <div className="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md backdrop-blur-sm z-10 border border-white/5">
-                        {post.categoryName}
+                        {categoryName}
                       </div>
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={titleText(post, currentLang)}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
+                          <Newspaper className="w-10 h-10 text-slate-300 dark:text-slate-700" />
+                        </div>
+                      )}
                     </div>
                     <div className="p-4 sm:p-5 flex flex-col gap-3 flex-1">
                       <div className="flex justify-between items-center text-slate-400 text-[10px] font-bold tracking-wider">
                         <span className="flex items-center gap-1 font-mono">
-                          <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                          {post.date}
+                          {dateFormatted ? (
+                            <>
+                              <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                              {dateFormatted}
+                            </>
+                          ) : null}
                         </span>
-                        <span>{post.readTime}</span>
                       </div>
                       <h4 className="text-xs sm:text-sm md:text-base font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-portal-primary transition-colors tracking-wide">
-                        <Link href={articlePath}>{post.title}</Link>
+                        <Link href={articlePath}>{titleText(post, currentLang)}</Link>
                       </h4>
-                      <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed">
-                        {post.excerpt}
-                      </p>
+                      {excerptText(post, currentLang) ? (
+                        <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2 leading-relaxed">
+                          {excerptText(post, currentLang)}
+                        </p>
+                      ) : null}
                       <div className="mt-auto pt-3 border-t border-slate-50 dark:border-slate-850 flex items-center justify-between">
                         <Link
                           href={articlePath}
@@ -441,6 +305,30 @@ function NewsListPageContent() {
 
     </div>
   )
+}
+
+function titleText(post: any, lang: string): string {
+  if (!post) return ""
+  if (lang === "en") {
+    const en = post.titleEn || (post.translations?.en?.title)
+    if (en) return en
+  }
+  const value = typeof post.title === "object" && post.title ? post.title[lang] || post.title.vi : post.title
+  return value || ""
+}
+
+function excerptText(post: any, lang: string): string {
+  if (!post) return ""
+  let desc = post.description
+  if (lang === "en") {
+    const en = post.descriptionEn || post.translations?.en?.description
+    if (en) return en
+  }
+  if (typeof desc === "object" && desc) desc = desc[lang] || desc.vi || ""
+  if (!desc && typeof post.content === "string") {
+    return post.content.replace(/<[^>]+>/g, " ").trim().slice(0, 160)
+  }
+  return desc || ""
 }
 
 export default function NewsListPage() {

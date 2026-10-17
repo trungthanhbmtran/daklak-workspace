@@ -73,7 +73,7 @@ const config = {
     defaultChannel: process.env.NOTIFICATION_DEFAULT_CHANNEL || 'console',
   },
   rabbitmq: {
-    url: process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672',
+    url: process.env.RABBITMQ_URL || null,
     queues: {
       notifications: process.env.NOTIFICATION_QUEUE || 'notifications',
     },

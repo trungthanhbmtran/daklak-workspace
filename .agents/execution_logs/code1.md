@@ -1,6 +1,85 @@
 # Execution Log — Lane 1 (Code 1)
 
-## [2026-10-17] Tích Hợp Toàn Diện Bộ Gõ & Bàn Phím Ảo AmaKey (Tiếng Êđê & Tiếng Việt Chuẩn Đắk Lắk) Vào Phân Hệ Quản Lý Nhân Sự (HRM)
+## [2026-10-17] Khắc Phục Lỗi Đóng Form Sheet Chi Tiết Công Việc & Nâng Cấp UX/UI Tab Xử Lý Và Cập Nhật (HRM Work Plans)
+
+### 1. Bối Cảnh & Vấn Đề Người Dùng Báo Cáo
+- **URL**: `http://113.184.220.82/admin/services/hrm/work-plans/tasks`
+- **Vấn đề 1**: Chi tiết công việc khi nhấn đóng form sheet không được (bị đơ/không đóng).
+- **Vấn đề 2**: Tab "Xử lý và cập nhật" trông hiển thị chưa được clean theo chuẩn UX/UI, thiếu tính năng cập nhật tiến độ trực quan và phân cấp thông tin.
+
+### 2. Nguyên Nhân Kỹ Thuật (Root Causes)
+1. **Lỗi không đóng được Sheet**:
+   - Trong Next.js App Router, tuyến chi tiết task dùng parallel route slot `@sheet/[id]/page.tsx` và `@sheet/default.tsx`.
+   - `TaskDetailSheetClient` trước đây truyền `open={isValid}` trực tiếp từ props mà không có local state `[open, setOpen]`. Khi người dùng bấm nút đóng ("X"), Radix UI Sheet hoạt động ở **controlled mode**, gọi `onOpenChange(false)`.
+   - Handler chỉ gọi `router.push('/services/hrm/work-plans/tasks')`. Trong Next.js App Router, client-side soft push đến route cha không tự động unmount parallel slot `@sheet` nếu không có `@sheet/page.tsx`, đồng thời props `taskId` chưa đổi nên `isValid` vẫn là `true`, khiến Sheet không bao giờ đóng được!
+   - Nút close mặc định của SheetContent đặt tại `absolute top-4 right-4` bị đè/xung đột vị trí với toolbar hành động trên cùng bên phải.
+2. **Tab Xử lý và Cập nhật chưa clean theo chuẩn UX/UI**:
+   - Layout các khối thẻ rời rạc, thanh tiến độ đơn điệu không có mốc trực quan (milestones).
+   - Thiếu công cụ cho cán bộ cập nhật tiến độ nhanh (% slider/preset chips) và ghi chú nhật ký xử lý ngay tại tab.
+   - Checklist các bước và Nhiệm vụ con có empty states quá lớn, thiếu visual hierarchy và micro-interactions.
+   - Khối tài liệu minh chứng chỉ hiển thị văn bản căn cứ tĩnh, không cho phép tải lên hoặc đính kèm hồ sơ trực tiếp.
+
+### 3. Giải Pháp Triển Khai
+1. **Khắc phục triệt để luồng đóng Sheet (`TaskDetailSheetClient`, `TaskEvaluateSheetClient`, `CreateTaskSheetClient`, `@sheet/page.tsx`)**:
+   - Tạo mới `app/services/hrm/work-plans/tasks/@sheet/page.tsx` trả về `null` để Next.js App Router unmount sạch slot `@sheet` khi điều hướng về `/services/hrm/work-plans/tasks`.
+   - Áp dụng pattern chuẩn React *"Adjusting some state when a prop changes"* (Render-time state adjustment) bằng `isDismissed` và `prevTaskId` (triệt tiêu hoàn toàn lỗi `react-hooks/set-state-in-effect`), đồng bộ tức thì không cần `useEffect`.
+   - Khi đóng (`onOpenChange(false)`): gọi `setIsDismissed(true)` ngay lập tức kích hoạt animation đóng mượt mà, kết hợp `router.back()` (nếu có history) hoặc `router.push(...)` để dọn sạch URL.
+   - Trong `task-detail-drawer.tsx`: cấu hình `showCloseButton={false}` trên `SheetContent`, bổ sung nút "Đóng" (`<X className="w-4 h-4" /> Đóng`) nổi bật, rõ ràng trong Header Toolbar và các trạng thái Loading/Error.
+2. **Nâng cấp toàn diện UX/UI Tab "Xử lý & Cập nhật" (`task-detail-processing-tab.tsx`)**:
+   - **Executive Progress Card**: Thanh tiến độ chuẩn hóa với 3 mốc (0% Khởi tạo, 50% Đang xử lý, 100% Hoàn thành), hiển thị badge trạng thái, hạn xử lý và số bước hoàn thành.
+   - **Quick Progress Updater**: Cho phép cán bộ chọn nhanh mức tiến độ (25%, 50%, 75%, 100%), nhập ghi chú nội dung công việc và lưu trực tiếp qua `useUpdateTask` & `useUpdateStatus`.
+   - **Refined Checklist Steps**: Thiết kế lại checklist chuyên môn với số thứ tự `Bước 01`, `Bước 02`... đẹp mắt, nút check tròn chuyển xanh emerald khi hoàn thành, chip người làm việc và badge `+Xđ KPI` sang trọng.
+   - **Nhiệm vụ con (Subtasks)**: Thẻ phân rã công việc gọn gàng, hiển thị đơn vị/người chủ trì, hạn chót và thanh tiến độ.
+   - **Hồ sơ tài liệu & Minh chứng**: Hỗ trợ xem mã văn bản căn cứ kèm nút Sao chép nhanh, danh sách tệp đính kèm và nút tải file lên trực tiếp qua `useFileUpload`.
+   - **Thẩm định & Đánh giá KPI**: Banner thẩm định lãnh đạo nổi bật cuối trang khi công việc đạt 100% hoặc ở trạng thái chờ duyệt.
+
+### 4. Bằng Chứng Kiểm Chứng
+- `npm run typecheck` (`tsc --noEmit`): **Exit code 0 (100% type-safe, không có lỗi)**.
+- `npx eslint`: **Exit code 0 (0 errors, 0 warnings trên toàn bộ các file can thiệp)**.
+- Đã tuân thủ quy tắc dự án: dùng `wrap-break-word` thay thế `break-words`.
+- Quét sạch 100% console.log / debugger / unused variables.
+
+---
+
+
+
+### 1. Bối Cảnh & Yêu Cầu Người Dùng
+- **Chỉ đạo người dùng**: *"Dựa vào các API ngành tài chính của bộ tài chính hãy xây dựng cho tôi dashboard trong report giám sát các số liệu tài chính theo các mẫu trục tỉnh Đắk Lắk"*.
+- **Mục tiêu**:
+  * Xây dựng phân hệ Dashboard Báo cáo giám sát số liệu tài chính công tỉnh Đắk Lắk chuẩn mẫu Bộ Tài chính và Trục liên thông LGSP tỉnh.
+  * Tích hợp 6 nguồn dữ liệu ngành Tài chính:
+    1. `BTC_NSNN_THU`: Thu ngân sách nhà nước theo địa bàn (TP. Buôn Ma Thuột, TX. Buôn Hồ, Cư M'gar, Krông Pắc, Ea Kar, Krông Ana...) và sắc thuế (TNDN, GTGT, Tiền sử dụng đất, Nông sản cà phê/sầu riêng).
+    2. `BTC_NSNN_CHI`: Chi ngân sách địa phương theo lĩnh vực (Chi đầu tư phát triển, Sự nghiệp GD-ĐT, Y tế, KH&CN, Quản lý hành chính, An sinh xã hội).
+    3. `BTC_DTC_GIAINGAN_TUAN`: Tiến độ giải ngân vốn đầu tư công hàng tuần các dự án trọng điểm (Cao tốc Khánh Hòa - Buôn Ma Thuột TP3, Đường tránh phía Đông TP. BMT, Khu Công nghệ cao & Đổi mới sáng tạo, BV Đa khoa vùng Tây Nguyên, Hồ thủy lợi Ea Kao, IOC Đắk Lắk).
+    4. `BTC_HHXNK`: Thống kê Hải quan xuất nhập khẩu nông sản chủ lực (Cà phê Robusta, Tiêu đen, Sầu riêng cấp đông, Cao su thiên nhiên, Phân bón công nghệ cao).
+    5. `BTC_HDDN`: Hóa đơn điện tử & quản lý thuế doanh nghiệp lớn (Trung Nguyên, Simexco Đắk Lắk, An Thái, HTX Ea Tu).
+    6. `BTC_FINANCE_OVERVIEW`: Báo cáo tổng hợp giám sát chỉ tiêu tài chính tỉnh theo mẫu Bộ Tài chính & UBND tỉnh Đắk Lắk.
+
+### 2. Các Thành Phần Kỹ Thuật Đã Triển Khai
+1. **Report Service Microservice Backend (`apps/report-service`)**:
+   - `prisma/seed-btc-finance.js`: Khởi tạo và nạp vào CSDL `admin_report`: 6 nguồn dữ liệu `ReportDataSource` (BTC_*), 6 bản ghi `StatisticsSnapshot` dữ liệu số thực Đắk Lắk, 1 định nghĩa báo cáo `ReportDefinition` (`id=18`, `code=REP_BTC_FINANCE_DAKLAK`) với 4 visual charts (bar, pie, line, bar) và 11 cột phân tích đa chiều, cùng `ReportRun` ban đầu (`id=69`) và `DatasetSnapshot`.
+   - `src/modules/reports/utils/normalization.ts`: Bổ sung nhãn tiếng Việt cho toàn bộ 25+ trường chỉ tiêu ngành tài chính.
+   - `src/modules/reports/reports.service.ts`: Cập nhật `getSampleRowsForApi()`, `FALLBACK_CATALOG`, và `fetchSourceRows()` để giải quyết trực tiếp nguồn `BTC_*` từ `StatisticsSnapshot` kèm fallback dữ liệu mẫu bám sát thực tế.
+   - `prisma/seed.ts`: Bổ sung định nghĩa `REP_BTC_FINANCE_DAKLAK` và fix triệt để cấu trúc đóng mở object.
+2. **Frontend Admin BI Client (`apps/admin_khcn`)**:
+   - `features/reports/utils/fieldHelpers.ts`: Bổ sung toàn diện nhãn thân thiện `FIELD_LABEL_MAP` cho các chỉ tiêu tài chính, mở rộng `inferFieldType` nhận diện tự động kiểu số cho các trường tiền tệ/sản lượng (`thuc_hien`, `giai_ngan`, `du_toan`, `kim_ngach`...), và bổ sung danh mục nhãn trục tọa độ ngắn `SHORT_CHART_LABELS` cho địa bàn, chỉ tiêu và đơn vị chủ trì.
+   - `features/reports/utils/dashboardAssignment.ts`: Bổ sung target `finance` vào `DASHBOARD_TARGETS` (`defaultReport: 'REP_BTC_FINANCE_DAKLAK'`).
+   - `features/reports/components/EmbeddedReportWidget.tsx`: Mở rộng `isSumMetric` hỗ trợ tính tổng SUM cho các trường tài chính (`thuc_hien`, `giai_ngan`, `thu`, `chi`, `von`, `kim_ngach`...).
+   - `features/reports/components/reports/BtcFinanceDashboardTab.tsx` (Tạo mới): Tab chuyên biệt "Giám sát Tài chính (Bộ TC)" gồm:
+     * Banner điều hành lãnh đạo tỉnh với các huy hiệu liên thông Bộ Tài chính, LGSP Đắk Lắk và mã thiết kế `REP_BTC_FINANCE_DAKLAK`.
+     * 4 Card KPI điều hành tài chính vĩ mô (Tổng thu NSNN 8.520/9.640 tỷ, Tổng chi NSNN 11.650 tỷ, Tỷ lệ giải ngân ĐTC 81.2%, Kim ngạch XNK 320.1 tr. USD).
+     * Bộ nhúng trực quan hóa động `<EmbeddedReportWidget reportIdOrCode="REP_BTC_FINANCE_DAKLAK" />` render 4 biểu đồ tương tác cao.
+     * Bảng dữ liệu chi tiết 08 chỉ tiêu tài chính với bộ lọc theo từng Lĩnh vực (Thu NSNN, Chi NSNN, Đầu tư phát triển, Hải quan XNK, Thuế điện tử, Dự án trọng điểm), thanh tiến độ trực quan và badge đánh giá tiến độ.
+     * Thẻ điều hướng tác vụ nhanh tới Sở Tài chính, BQLDA Giao thông & Nông nghiệp, và Cục Hải quan tỉnh.
+   - `features/reports/components/reports/ReportWorkspace.tsx`: Tích hợp tab `finance-mof`, hỗ trợ deep linking `?tab=finance-mof` từ dashboard selector.
+
+### 3. Bằng Chứng Kiểm Chứng Máy Thực Tế
+- **TypeScript Typecheck (`npm run typecheck` tại `apps/admin_khcn`)**: **Exit code 0 (0 errors, 100% type-safe)**.
+- **Biên dịch Backend (`npm run build` tại `apps/report-service`)**: **Exit code 0 (Prisma Client v7.9.0, NestJS build và tsc-alias thành công 100%)**.
+- **CSDL Khởi tạo (`admin_report`)**: Seed thành công 6 DataSources, 6 Snapshots, ReportDefinition #18 và Run #69 có dữ liệu thực tế.
+- **Vệ sinh mã nguồn**: 100% không còn console.log dư thừa, mã hóa UTF-8 không BOM toàn bộ.
+
+---
 
 ### 1. Bối Cảnh & Yêu Cầu Người Dùng
 - **Chỉ đạo người dùng**:

@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { RequirePermissions } from '../../core/decorators/permissions.decorator';
+import { getInternalHttpHeaders } from '../../core/utils/internal-metadata.util';
 
 @ApiTags('Integrations')
 @Controller('admin/integrations')
@@ -33,8 +34,12 @@ export class IntegrationsController {
   @ApiOperation({ summary: 'Lấy danh sách các cấu hình thông báo' })
   async list(@Req() req: any) {
     const search = req.query?.search || '';
+    const headers = getInternalHttpHeaders();
     const { data } = await firstValueFrom(
-      this.httpService.get(this.notificationServiceUrl, { params: { search } }),
+      this.httpService.get(this.notificationServiceUrl, {
+        params: { search },
+        headers,
+      }),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
@@ -46,8 +51,9 @@ export class IntegrationsController {
   @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Tạo cấu hình thông báo mới' })
   async create(@Body() body: any) {
+    const headers = getInternalHttpHeaders();
     const { data } = await firstValueFrom(
-      this.httpService.post(this.notificationServiceUrl, body),
+      this.httpService.post(this.notificationServiceUrl, body, { headers }),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
@@ -59,8 +65,11 @@ export class IntegrationsController {
   @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Cập nhật cấu hình thông báo' })
   async update(@Param('id') id: string, @Body() body: any) {
+    const headers = getInternalHttpHeaders();
     const { data } = await firstValueFrom(
-      this.httpService.put(`${this.notificationServiceUrl}/${id}`, body),
+      this.httpService.put(`${this.notificationServiceUrl}/${id}`, body, {
+        headers,
+      }),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
@@ -72,8 +81,11 @@ export class IntegrationsController {
   @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Cập nhật trạng thái kích hoạt' })
   async toggleActive(@Param('id') id: string, @Body() body: any) {
+    const headers = getInternalHttpHeaders();
     const { data } = await firstValueFrom(
-      this.httpService.put(`${this.notificationServiceUrl}/${id}/active`, body),
+      this.httpService.put(`${this.notificationServiceUrl}/${id}/active`, body, {
+        headers,
+      }),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
@@ -85,8 +97,9 @@ export class IntegrationsController {
   @RequirePermissions('INTEGRATION:MANAGE', 'NOTIFICATION:MANAGE')
   @ApiOperation({ summary: 'Xóa cấu hình thông báo' })
   async delete(@Param('id') id: string) {
+    const headers = getInternalHttpHeaders();
     const { data } = await firstValueFrom(
-      this.httpService.delete(`${this.notificationServiceUrl}/${id}`),
+      this.httpService.delete(`${this.notificationServiceUrl}/${id}`, { headers }),
     ).catch((e) => {
       this.logger.error(`RPC Call Failed: ${e.message}`);
       return { data: null };
