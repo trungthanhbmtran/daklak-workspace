@@ -1,12 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 05: BÁO CÁO KẾT QUẢ KẾT NỐI, CHIA SẺ DỮ LIỆU HẰNG NĂM (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
-<Form05_AnnualIntegrationReport id="M05_BAOCAO_NAM" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
-    <ReportingYear>2026</ReportingYear>
-    <ReportingAgency>Ban Tổ chức Tỉnh ủy Đắk Lắk</ReportingAgency>
-    <Metrics>
-        <TotalAPICalls>125000</TotalAPICalls>
-        <SuccessfulSyncRate>99.8</SuccessfulSyncRate>
-        <DataCleanlinessRate>98.5</DataCleanlinessRate> <!-- Nguyên tắc Đúng, Đủ, Sạch, Sống -->
-        <SecurityIncidentsCount>0</SecurityIncidentsCount>
-    </Metrics>
+<!-- 
+  BIỂU MẪU KẾT NỐI, CHIA SẺ DỮ LIỆU NGÀNH TỔ CHỨC XÂY DỰNG ĐẢNG
+  Mẫu số 05: Báo cáo kết quả kết nối, chia sẻ dữ liệu hằng năm
+  Căn cứ: Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương
+-->
+<Form05_AnnualIntegrationReport id="M05_BAOCAO_NAM" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW" formCode="M05_BAOCAO_NAM" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <SubmissionNumber>112-BC/BTCTU-CNTT</SubmissionNumber>
+    <SubmissionDate>2026-12-15</SubmissionDate>
+    <DocumentTitle>BÁO CÁO</DocumentTitle>
+    <SubTitle>Kết quả kết nối, chia sẻ và khai thác dữ liệu Ngành Tổ chức xây dựng Đảng năm 2026</SubTitle>
+    <EvaluationPeriod>Năm 2026</EvaluationPeriod>
+  </Header>
+
+  <ReportingAgency>Ban Tổ chức Tỉnh ủy Đắk Lắk</ReportingAgency>
+  <ReportingYear>2026</ReportingYear>
+  <Metrics>
+    <TotalAPICalls>125000</TotalAPICalls>
+    <SuccessfulSyncRate>99.8%</SuccessfulSyncRate>
+    <DataCleanlinessRate>98.5% (Đạt tiêu chuẩn Đúng, Đủ, Sạch, Sống)</DataCleanlinessRate>
+    <SecurityIncidentsCount>0</SecurityIncidentsCount>
+  </Metrics>
+
+  <Signatures>
+    <LeftTitle>Nơi nhận</LeftTitle>
+    <LeftSubtitle>- Ban Tổ chức Trung ương (để b/c);&#10;- Thường trực Tỉnh ủy (để b/c);&#10;- Lãnh đạo Ban;&#10;- Lưu: VT, CNTT.</LeftSubtitle>
+    <RightTitle>TRƯỞNG BAN</RightTitle>
+    <RightSubtitle>(Ký, đóng dấu)</RightSubtitle>
+    <RightName>Nguyễn Thượng Hải</RightName>
+    <RightDate>Buôn Ma Thuột, ngày 15 tháng 12 năm 2026</RightDate>
+  </Signatures>
 </Form05_AnnualIntegrationReport>

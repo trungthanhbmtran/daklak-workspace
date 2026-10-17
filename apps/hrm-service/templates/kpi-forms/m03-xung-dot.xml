@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 03: BIÊN BẢN PHÁT HIỆN XUNG ĐỘT DỮ LIỆU (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
-<Form03_DataConflictReport id="M03_XUNG_DOT" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
-    <ReportDate>2026-10-05</ReportDate>
-    <ConflictDetails>
-        <CitizenID>066095001234</CitizenID>
-        <FieldRef name="NgayVaoDangChinhThuc"/>
-        <PartyDBValue>2018-05-19</PartyDBValue>
-        <NationalCivilDBValue>2018-05-20</NationalCivilDBValue>
-        <SingleSourceOfTruthRef>CSDL Tổ chức Đảng, Đảng viên</SingleSourceOfTruthRef>
-    </ConflictDetails>
+<!-- 
+  BIỂU MẪU KẾT NỐI, CHIA SẺ DỮ LIỆU NGÀNH TỔ CHỨC XÂY DỰNG ĐẢNG
+  Mẫu số 03: Biên bản phát hiện xung đột dữ liệu
+  Căn cứ: Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương
+-->
+<Form03_DataConflictReport id="M03_XUNG_DOT" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW" formCode="M03_XUNG_DOT" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <SubmissionNumber>08-BB/BTCTU-TTDL</SubmissionNumber>
+    <SubmissionDate>2026-10-05</SubmissionDate>
+    <DocumentTitle>BIÊN BẢN</DocumentTitle>
+    <SubTitle>Về việc phát hiện và đề xuất xử lý xung đột dữ liệu hồ sơ đảng viên - cán bộ</SubTitle>
+    <EvaluationPeriod>Tháng 10 năm 2026</EvaluationPeriod>
+  </Header>
+
+  <ReportDate>2026-10-05</ReportDate>
+  <ConflictDetails>
+    <CitizenID>066095001234</CitizenID>
+    <FullName>Nguyễn Văn A</FullName>
+    <FieldRef name="NgayVaoDangChinhThuc">Ngày vào Đảng chính thức</FieldRef>
+    <PartyDBValue>2018-05-19</PartyDBValue>
+    <NationalCivilDBValue>2018-05-20</NationalCivilDBValue>
+    <SingleSourceOfTruthRef>CSDL Tổ chức Đảng, Đảng viên (Ban Tổ chức Trung ương)</SingleSourceOfTruthRef>
+    <ResolutionProposal>Điều chỉnh dữ liệu CSDL Cán bộ công chức theo đúng CSDL Đảng viên gốc</ResolutionProposal>
+  </ConflictDetails>
+
+  <Signatures>
+    <LeftTitle>NGƯỜI LẬP BIÊN BẢN</LeftTitle>
+    <LeftSubtitle>(Ký, ghi rõ họ và tên)</LeftSubtitle>
+    <LeftName>Nguyễn Văn B - Quản trị CSDL</LeftName>
+    <RightTitle>LÃNH ĐẠO PHÒNG TCCB</RightTitle>
+    <RightSubtitle>(Ký, ghi rõ họ và tên)</RightSubtitle>
+    <RightName>Nguyễn Văn A</RightName>
+    <RightDate>Buôn Ma Thuột, ngày 05 tháng 10 năm 2026</RightDate>
+  </Signatures>
 </Form03_DataConflictReport>

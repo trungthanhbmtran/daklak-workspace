@@ -1,19 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 04: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ VÀ ĐỀ XUẤT XẾP LOẠI QUÝ (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
-<Form04_SummaryEvaluationTable id="M04_TONGHOP_QUY" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU">
-    <EvaluationPeriod quarter="Q3" year="2026"/>
-    <AuthorityBody>Ban Thường vụ Tỉnh ủy / Tập thể Lãnh đạo Ban</AuthorityBody>
-    <SummaryList>
-        <SummaryRecord stt="1">
-            <CitizenID>066095001234</CitizenID>
-            <FullName>Nguyễn Văn A</FullName>
-            <Position>Trưởng phòng Tổ chức Cán bộ</Position>
-            <SelfScore>100.0</SelfScore>
-            <SelfProposedGrade>Hoàn thành xuất sắc nhiệm vụ</SelfProposedGrade>
-            <AppraisalScore>100.0</AppraisalScore>
-            <AuthorityProposedGrade>Hoàn thành xuất sắc nhiệm vụ</AuthorityProposedGrade>
-            <ExceedingQuotaCheck passesExcellentLimit="true">Nằm trong tỷ lệ 20% xuất sắc</ExceedingQuotaCheck>
-            <Notes>Sản phẩm chất lượng cao, vượt tiến độ SLA</Notes>
-        </SummaryRecord>
-    </SummaryList>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 04: Bảng tổng hợp kết quả đánh giá và đề xuất xếp loại cán bộ quý
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy
+-->
+<Form04_SummaryEvaluationTable id="M04_TONGHOP_QUY" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU" formCode="M04_TONGHOP_QUY" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ VÀ ĐỀ XUẤT XẾP LOẠI CÁN BỘ QUÝ</DocumentTitle>
+    <SubTitle>Kỳ đánh giá: Quý III năm 2026 - Ban Tổ chức Tỉnh ủy Đắk Lắk</SubTitle>
+    <EvaluationPeriod>Quý III năm 2026</EvaluationPeriod>
+    <PeriodQuarter>Q3</PeriodQuarter>
+    <PeriodYear>2026</PeriodYear>
+  </Header>
+
+  <OrganizationInfo>
+    <OrganizationCode>BTCTU_DAKLAK</OrganizationCode>
+    <OrganizationName>Ban Tổ chức Tỉnh ủy Đắk Lắk</OrganizationName>
+    <TotalOfficers>15</TotalOfficers>
+    <TotalEvaluated>15</TotalEvaluated>
+  </OrganizationInfo>
+
+  <QuotaControl maxExcellentRate="0.20">
+    <MaxAllowedExcellent>3</MaxAllowedExcellent>
+    <ProposedExcellent>3</ProposedExcellent>
+    <ProposedGood>11</ProposedGood>
+    <ProposedSatisfactory>1</ProposedSatisfactory>
+    <ProposedUnsatisfactory>0</ProposedUnsatisfactory>
+    <ComplianceStatus>HỢP LỆ (Tỷ lệ xuất sắc: 20.0% &lt;= 20.0%)</ComplianceStatus>
+  </QuotaControl>
+
+  <SummaryList>
+    <SummaryRecord stt="1">
+      <CitizenID>066095001234</CitizenID>
+      <FullName>Nguyễn Văn A</FullName>
+      <Position>Trưởng phòng Tổ chức Cán bộ</Position>
+      <SelfScore>100.0</SelfScore>
+      <AppraisalScore>100.0</AppraisalScore>
+      <CollectiveOpinion>Hoàn thành xuất sắc nhiệm vụ</CollectiveOpinion>
+      <AuthorityProposedGrade>Hoàn thành xuất sắc nhiệm vụ</AuthorityProposedGrade>
+      <ExceedingQuotaCheck>Đạt trần 20%</ExceedingQuotaCheck>
+      <Note>Có sản phẩm nổi trội được biểu dương</Note>
+    </SummaryRecord>
+    <SummaryRecord stt="2">
+      <CitizenID>066095005678</CitizenID>
+      <FullName>Trần Thị B</FullName>
+      <Position>Phó Trưởng phòng Tổ chức Cán bộ</Position>
+      <SelfScore>98.0</SelfScore>
+      <AppraisalScore>98.0</AppraisalScore>
+      <CollectiveOpinion>Hoàn thành xuất sắc nhiệm vụ</CollectiveOpinion>
+      <AuthorityProposedGrade>Hoàn thành xuất sắc nhiệm vụ</AuthorityProposedGrade>
+      <ExceedingQuotaCheck>Đạt trần 20%</ExceedingQuotaCheck>
+      <Note>Hoàn thành vượt mức chỉ tiêu thẩm định hồ sơ</Note>
+    </SummaryRecord>
+    <SummaryRecord stt="3">
+      <CitizenID>066095009999</CitizenID>
+      <FullName>Lê Văn C</FullName>
+      <Position>Trưởng phòng Bảo vệ Chính trị Nội bộ</Position>
+      <SelfScore>97.5</SelfScore>
+      <AppraisalScore>97.0</AppraisalScore>
+      <CollectiveOpinion>Hoàn thành xuất sắc nhiệm vụ</CollectiveOpinion>
+      <AuthorityProposedGrade>Hoàn thành xuất sắc nhiệm vụ</AuthorityProposedGrade>
+      <ExceedingQuotaCheck>Đạt trần 20%</ExceedingQuotaCheck>
+      <Note>Xử lý dứt điểm các vụ việc phức tạp</Note>
+    </SummaryRecord>
+    <SummaryRecord stt="4">
+      <CitizenID>066095003333</CitizenID>
+      <FullName>Phạm Thị D</FullName>
+      <Position>Chuyên viên chính Phòng TCCB</Position>
+      <SelfScore>95.0</SelfScore>
+      <AppraisalScore>94.5</AppraisalScore>
+      <CollectiveOpinion>Hoàn thành tốt nhiệm vụ</CollectiveOpinion>
+      <AuthorityProposedGrade>Hoàn thành tốt nhiệm vụ</AuthorityProposedGrade>
+      <ExceedingQuotaCheck>Điều tiết theo trần 20%</ExceedingQuotaCheck>
+      <Note>Điểm đạt xuất sắc nhưng chuyển mức Tốt do khống chế trần 20%</Note>
+    </SummaryRecord>
+    <SummaryRecord stt="5">
+      <CitizenID>066095004444</CitizenID>
+      <FullName>Hoàng Văn E</FullName>
+      <Position>Chuyên viên Văn phòng Ban</Position>
+      <SelfScore>88.0</SelfScore>
+      <AppraisalScore>87.5</AppraisalScore>
+      <CollectiveOpinion>Hoàn thành tốt nhiệm vụ</CollectiveOpinion>
+      <AuthorityProposedGrade>Hoàn thành tốt nhiệm vụ</AuthorityProposedGrade>
+      <ExceedingQuotaCheck>Hợp lệ</ExceedingQuotaCheck>
+      <Note>Bảo đảm tiến độ công tác phục vụ</Note>
+    </SummaryRecord>
+  </SummaryList>
+
+  <Signatures>
+    <LeftTitle>NGƯỜI TỔNG HỢP</LeftTitle>
+    <LeftSubtitle>(Ký, ghi rõ họ và tên)</LeftSubtitle>
+    <LeftName>Văn phòng Ban</LeftName>
+    <RightTitle>TẬP THỂ LÃNH ĐẠO BAN</RightTitle>
+    <RightSubtitle>(Ký, ghi rõ họ và tên)</RightSubtitle>
+    <RightName>Nguyễn Thượng Hải</RightName>
+    <RightDate>Buôn Ma Thuột, ngày 27 tháng 09 năm 2026</RightDate>
+  </Signatures>
 </Form04_SummaryEvaluationTable>

@@ -6,7 +6,7 @@ Dự án Đắk Lắk Government Platform được thiết kế theo kiến trú
 
 - **`api-gateway`**
   - **Chức năng**: API Gateway đóng vai trò cửa ngõ (routing) cho toàn bộ request từ Client. Chịu trách nhiệm Authentication, giải mã JWT, và chuyển tiếp request tới các service tương ứng thông qua gRPC.
-  - **API Manager & Integration Hub**: Nơi quản lý các nguồn kết nối chính bao gồm các API, xây dựng API nội bộ, và xây dựng các API liên thông kết nối với các hệ thống bên ngoài (LGSP, Cổng DVC, các hệ sinh thái CSDL ngành).
+  - **API Manager & Integration Hub**: Nơi quản lý các nguồn kết nối chính bao gồm các API, xây dựng API nội bộ, và xây dựng các API liên thông kết nối với các hệ thống bên ngoài (LGSP, Cổng DVC, các hệ sinh thái CSDL ngành). Cung cấp engine kết xuất in ấn chuẩn thể thức A4 (`kpi-xml-printer.util`) từ nguồn XML 10 mẫu biểu KPI/HRM.
   - **Lưu ý kiến trúc**: Tuyệt đối không chứa business logic của domain hay query trực tiếp database của service khác. (DB: `daklak_db`)
 
 - **`user-service`** (DB: `admin_systems`)
@@ -16,6 +16,7 @@ Dự án Đắk Lắk Government Platform được thiết kế theo kiến trú
     - `organization` (Cây cơ cấu tổ chức đơn vị, phòng ban).
     - **Cấu trúc Vị trí việc làm (VTVL) & Định biên**: Chức danh nghề nghiệp (`job_titles`), đề án vị trí việc làm theo đơn vị (`org_staffing`), quản lý suất biên chế (`staffing_slots`).
     - **Phân công theo dõi nghiệp vụ**: Phân công lĩnh vực phụ trách (`staffing_slot_domains`), phân công địa bàn quản lý (`staffing_slot_geographic_areas`), phân công phòng ban theo dõi (`staffing_slot_monitored_units`). Các service khác (như `hrm-service`) khi thực hiện giao việc/đánh giá BẮT BUỘC phải tham chiếu và sử dụng cấu trúc VTVL & phân công từ `user-service`, tuyệt đối không tự dựng khung vị trí việc làm rời rạc hay bỏ qua nguồn này.
+    - **Quản lý AI & Smart Router**: Cấu hình AI Smart Router đa nhà cung cấp (`ai_configs`), danh mục trợ lý AI chuyên biệt cho cán bộ (`ai_assistants`), tài liệu và kho tri thức huấn luyện RAG theo từng trợ lý (`ai_assistant_knowledge`).
     - `menus`, `categories` hệ thống.
 
 - **`workflow-service`** (DB: `admin_workflow`)
@@ -29,7 +30,7 @@ Dự án Đắk Lắk Government Platform được thiết kế theo kiến trú
 
 - **`hrm-service`** (DB: `admin_hrm`)
   - **Chức năng**: Quản trị nhân sự và hiệu suất công việc.
-  - **Quản lý**: `employee` (Hồ sơ nhân sự), `task` (Giao việc, nhắc việc, nộp sản phẩm, thẩm định chất lượng), `kpi` (Đánh giá hiệu suất cá nhân và tập thể theo các Mẫu biểu), `master_plan`, `rank_quota`. Kế thừa và gắn kết chặt chẽ với VTVL định biên từ `user-service`.
+  - **Quản lý**: `employee` (Hồ sơ nhân sự), `task` (Giao việc, nhắc việc, nộp sản phẩm, thẩm định chất lượng), `kpi` (Đánh giá hiệu suất cá nhân và tập thể theo bộ 10 Mẫu biểu XML chuẩn hóa chuẩn thể thức Đảng & Nhà nước: M01 Khai thác/Tờ trình, M02 Chấp thuận/Tự kiểm điểm, M03 Scorecard/Biên bản xử lý xung đột, M04 Quyết định tạm ngưng/Tổng hợp quý, M05 Báo cáo năm/Quyết định xếp loại), `master_plan`, `rank_quota`. Kế thừa và gắn kết chặt chẽ với VTVL định biên từ `user-service`.
 
 - **`document-service`** (DB: `admin_document`)
   - **Chức năng**: Quản lý văn bản điện tử và điều hành.
@@ -57,5 +58,5 @@ Dự án Đắk Lắk Government Platform được thiết kế theo kiến trú
 
 ## 4. Frontend Applications
 
-- **`admin_khcn`**: Trang quản trị (Admin Dashboard) dành cho cán bộ công chức/viên chức. Gọi API qua `api-gateway`.
+- **`admin_khcn`**: Trang quản trị (Admin Dashboard) dành cho cán bộ công chức/viên chức. Gọi API qua `api-gateway`. Tích hợp bộ công cụ kết xuất DOCX (`kpiXmlToDocx`) và Quyết định công nhận kết quả đánh giá theo thể thức chuẩn của Đảng (`mau05DecisionHelper`).
 - **`portal-goverment`**: Cổng thông tin điện tử (Public Portal) dành cho người dân và doanh nghiệp.

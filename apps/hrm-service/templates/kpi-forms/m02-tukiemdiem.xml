@@ -1,17 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 02: BẢN TỰ KIỂM ĐIỂM CÁ NHÂN (Mẫu 2A: Lãnh đạo; 2B: Công chức; 2C: Khác) (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
-<Form02_SelfReviewForm id="M02_TUKIEMDIEM" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU" templateType="2A">
-    <PersonalInformation>
-        <CitizenID>066095001234</CitizenID>
-        <FullName>Nguyễn Văn A</FullName>
-        <PartyPosition>Bí thư Chi bộ</PartyPosition>
-        <GovernmentPosition>Trưởng phòng Tổ chức Cán bộ</GovernmentPosition>
-        <Department>Phòng Tổ chức Cán bộ - BTCTU</Department>
-    </PersonalInformation>
-    <SelfReviewContent>
-        <PoliticalIdeology status="Pass">Tuyệt đối trung thành với Đảng, bản lĩnh chính trị vững vàng</PoliticalIdeology>
-        <MoralLifestyle status="Pass">Trong sáng, khiêm tốn, chấp hành nghiêm chuẩn mực đạo đức</MoralLifestyle>
-        <WorkDiscipline status="Pass">Chấp hành nghiêm sự phân công, quy chế làm việc</WorkDiscipline>
-        <SelfCorrection>Thực hiện nghiêm túc tự soi, tự sửa, khắc phục hạn chế kỳ trước</SelfCorrection>
-    </SelfReviewContent>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 02: Bản tự kiểm điểm cá nhân hằng quý (Mẫu 2A: Cán bộ lãnh đạo, quản lý)
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy
+-->
+<Form02_SelfReviewForm id="M02_TUKIEMDIEM" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU" templateType="2A" formCode="M02_TUKIEMDIEM" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>BẢN TỰ KIỂM ĐIỂM CÁ NHÂN</DocumentTitle>
+    <SubTitle>(Dành cho cán bộ lãnh đạo, quản lý và công chức chuyên môn - Mẫu 2A)</SubTitle>
+    <EvaluationPeriod>Quý III năm 2026</EvaluationPeriod>
+    <PeriodQuarter>Q3</PeriodQuarter>
+    <PeriodYear>2026</PeriodYear>
+  </Header>
+
+  <PersonalInformation>
+    <CitizenID>066095001234</CitizenID>
+    <FullName>Nguyễn Văn A</FullName>
+    <PartyPosition>Bí thư Chi bộ</PartyPosition>
+    <GovernmentPosition>Trưởng phòng Tổ chức Cán bộ</GovernmentPosition>
+    <Department>Phòng Tổ chức Cán bộ - BTCTU</Department>
+  </PersonalInformation>
+
+  <LegalBasis>
+    <Item>Căn cứ Hướng dẫn số 05-HD/TU của Ban Thường vụ Tỉnh ủy Đắk Lắk về việc kiểm điểm tự phê bình và phê bình hằng quý, hằng năm;</Item>
+    <Item>Căn cứ Quy định số 01-QĐ/BTCTU của Ban Tổ chức Tỉnh ủy Đắk Lắk.</Item>
+  </LegalBasis>
+
+  <SelfReviewContent>
+    <PoliticalIdeology status="Pass">Tuyệt đối trung thành với mục tiêu, lý tưởng cách mạng của Đảng; chấp hành nghiêm Cương lĩnh, Điều lệ Đảng, Nghị quyết, Chỉ thị của cấp trên.</PoliticalIdeology>
+    <MoralLifestyle status="Pass">Giữ gìn phẩm chất đạo đức trong sáng, khiêm tốn, giản dị; chấp hành nghiêm quy định về những điều đảng viên không được làm và trách nhiệm nêu gương.</MoralLifestyle>
+    <WorkDiscipline status="Pass">Nêu cao tinh thần trách nhiệm, tác phong làm việc khoa học, kỷ luật kỷ cương hành chính; chủ động giải quyết công việc đúng tiến độ và thẩm quyền.</WorkDiscipline>
+    <SelfCorrection>Nghiêm túc tự soi, tự sửa; khắc phục triệt để các tồn tại hạn chế đã được tập thể chỉ ra ở kỳ đánh giá trước.</SelfCorrection>
+  </SelfReviewContent>
+
+  <SelfClassification>Hoàn thành xuất sắc nhiệm vụ</SelfClassification>
+
+  <Signatures>
+    <RightTitle>NGƯỜI TỰ KIỂM ĐIỂM</RightTitle>
+    <RightSubtitle>(Ký, ghi rõ họ và tên)</RightSubtitle>
+    <RightName>Nguyễn Văn A</RightName>
+    <RightDate>Buôn Ma Thuột, ngày 25 tháng 09 năm 2026</RightDate>
+  </Signatures>
 </Form02_SelfReviewForm>

@@ -1,17 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 01: TỜ TRÌNH ĐỀ NGHỊ ĐÁNH GIÁ, XẾP LOẠI QUÝ (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
-<Form01_SubmissionHeader id="M01_TOTRINH" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU">
-    <OrganizationCode>BTCTU_DAKLAK</OrganizationCode>
-    <OrganizationName>Ban Tổ chức Tỉnh ủy Đắk Lắk</OrganizationName>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 01: Tờ trình đề nghị đánh giá, xếp loại cán bộ hằng quý
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy
+-->
+<Form01_SubmissionHeader id="M01_TOTRINH" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU" formCode="M01_TOTRINH" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
     <SubmissionNumber>123-TTr/BTCTU</SubmissionNumber>
     <SubmissionDate>2026-09-25</SubmissionDate>
-    <EvaluationPeriod quarter="Q3" year="2026"/>
-    <TargetAudience>Cán bộ lãnh đạo, quản lý thuộc diện quản lý</TargetAudience>
-    <SummaryContent>
-        <TotalEvaluatedOfficials>15</TotalEvaluatedOfficials>
-        <ProposedExcellent>3</ProposedExcellent> <!-- Tối đa 20% -->
-        <ProposedGood>11</ProposedGood>
-        <ProposedSatisfactory>1</ProposedSatisfactory>
-        <ProposedUnsatisfactory>0</ProposedUnsatisfactory>
-    </SummaryContent>
+    <DocumentTitle>TỜ TRÌNH</DocumentTitle>
+    <SubTitle>Về việc đề nghị đánh giá, xếp loại chất lượng cán bộ lãnh đạo, quản lý Quý III năm 2026</SubTitle>
+    <EvaluationPeriod>Quý III năm 2026</EvaluationPeriod>
+    <PeriodQuarter>Q3</PeriodQuarter>
+    <PeriodYear>2026</PeriodYear>
+  </Header>
+
+  <OrganizationCode>BTCTU_DAKLAK</OrganizationCode>
+  <TargetAudience>Cán bộ lãnh đạo, quản lý thuộc diện Ban Thường vụ Tỉnh ủy quản lý</TargetAudience>
+
+  <LegalBasis>
+    <Item>Căn cứ Quy định số 01-QĐ/BTCTU ngày 25/12/2025 của Ban Tổ chức Tỉnh ủy Đắk Lắk về chức năng, nhiệm vụ, quyền hạn và cơ cấu tổ chức bộ máy cơ quan;</Item>
+    <Item>Căn cứ Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy về phân cấp quản lý cán bộ và bổ nhiệm, giới thiệu cán bộ ứng cử;</Item>
+    <Item>Căn cứ Hướng dẫn số 05-HD/TU ngày 20/02/2026 của Ban Thường vụ Tỉnh ủy Đắk Lắk về đánh giá, xếp loại chất lượng cán bộ lãnh đạo, quản lý hằng quý và hằng năm;</Item>
+    <Item>Căn cứ kết quả họp thẩm định của Tập thể Lãnh đạo Ban Tổ chức Tỉnh ủy ngày 24 tháng 09 năm 2026.</Item>
+  </LegalBasis>
+
+  <SummaryContent>
+    <TotalEvaluatedOfficials>15</TotalEvaluatedOfficials>
+    <ProposedExcellent>3</ProposedExcellent> <!-- Tối đa 20% tổng số cán bộ đánh giá -->
+    <ProposedGood>11</ProposedGood>
+    <ProposedSatisfactory>1</ProposedSatisfactory>
+    <ProposedUnsatisfactory>0</ProposedUnsatisfactory>
+  </SummaryContent>
+
+  <Signatures>
+    <LeftTitle>Nơi nhận</LeftTitle>
+    <LeftSubtitle>- Ban Thường vụ Tỉnh ủy (kính trình);
+- Thường trực Tỉnh ủy (để b/c);
+- Lãnh đạo Ban;
+- Lưu: VT, TC-CB.</LeftSubtitle>
+    <RightTitle>TRƯỞNG BAN</RightTitle>
+    <RightSubtitle>(Ký, đóng dấu)</RightSubtitle>
+    <RightName>Nguyễn Thượng Hải</RightName>
+    <RightDate>Buôn Ma Thuột, ngày 25 tháng 09 năm 2026</RightDate>
+  </Signatures>
 </Form01_SubmissionHeader>

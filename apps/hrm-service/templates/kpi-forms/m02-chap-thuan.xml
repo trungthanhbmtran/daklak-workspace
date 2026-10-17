@@ -1,12 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 02: QUYẾT ĐỊNH CHẤP THUẬN KẾT NỐI, CHIA SẺ DỮ LIỆU (Theo Quy định 348-QĐ/BTCTW - Phụ lục VIII) -->
-<Form02_ConnectionApprovalDecision id="M02_CHAP_THUAN" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW">
+<!-- 
+  BIỂU MẪU KẾT NỐI, CHIA SẺ DỮ LIỆU NGÀNH TỔ CHỨC XÂY DỰNG ĐẢNG
+  Mẫu số 02: Quyết định chấp thuận kết nối, chia sẻ dữ liệu
+  Căn cứ: Quy định số 348-QĐ/BTCTW của Ban Tổ chức Trung ương
+-->
+<Form02_ConnectionApprovalDecision id="M02_CHAP_THUAN" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="QD348-BTCTW" formCode="M02_CHAP_THUAN" schemaVersion="1.0">
+  <Header>
+    <AgencyName>BAN TỔ CHỨC TRUNG ƯƠNG</AgencyName>
+    <OrganizationName>CỤC CÔNG NGHỆ THÔNG TIN</OrganizationName>
     <DecisionNumber>567-QĐ/BTCTW</DecisionNumber>
-    <ApprovingBody>Ban Tổ chức Trung ương</ApprovingBody>
-    <GranteeAgency>Tỉnh ủy Đắk Lắk</GranteeAgency>
-    <ApprovedAPIServices>
-        <API id="API_01" path="/category/hscb/get-user-info" level="Mức 2"/>
-        <API id="API_03" path="/category/csdldv/v1/danh-muc/get-list" level="Mức 1"/>
-    </ApprovedAPIServices>
-    <SecurityRequirements minSecurityLevel="Level3"/>
+    <DecisionDate>Hà Nội, ngày 20 tháng 09 năm 2026</DecisionDate>
+    <DocumentTitle>QUYẾT ĐỊNH</DocumentTitle>
+    <SubTitle>Về việc chấp thuận kết nối, chia sẻ dữ liệu CSDL Đảng viên với Ban Tổ chức Tỉnh ủy Đắk Lắk</SubTitle>
+    <EvaluationPeriod>Năm 2026</EvaluationPeriod>
+  </Header>
+
+  <ApprovingBody>Ban Tổ chức Trung ương</ApprovingBody>
+  <GranteeAgency>Tỉnh ủy Đắk Lắk (Ban Tổ chức Tỉnh ủy)</GranteeAgency>
+  <ApprovedAPIServices>
+    <API id="API_01" path="/category/hscb/get-user-info" level="Mức 2"/>
+    <API id="API_03" path="/category/csdldv/v1/danh-muc/get-list" level="Mức 1"/>
+  </ApprovedAPIServices>
+  <SecurityRequirements minSecurityLevel="Level3 (Mã hóa đường truyền VPN IPsec, xác thực chứng thư số CA Ban Cơ yếu Chính phủ)"/>
+
+  <Signatures>
+    <LeftTitle>Nơi nhận</LeftTitle>
+    <LeftSubtitle>- Lãnh đạo Ban BTCTW (để b/c);&#10;- Ban Tổ chức Tỉnh ủy Đắk Lắk;&#10;- Lưu: VT, Cục CNTT.</LeftSubtitle>
+    <RightTitle>KT. TRƯỞNG BAN&#10;CỤC TRƯỞNG CỤC CNTT</RightTitle>
+    <RightSubtitle>(Ký, đóng dấu)</RightSubtitle>
+    <RightName>Trần Văn C</RightName>
+    <RightDate>Hà Nội, ngày 20 tháng 09 năm 2026</RightDate>
+  </Signatures>
 </Form02_ConnectionApprovalDecision>

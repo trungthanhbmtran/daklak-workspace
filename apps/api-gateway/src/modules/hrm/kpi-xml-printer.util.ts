@@ -1140,3 +1140,10 @@ export function renderKpiXmlToPrintHtml(xmlContent: string, templateTitleFallbac
   const data = parseKpiXml(xmlContent, templateTitleFallback);
   return generatePrintDocumentHtml(data);
 }
+
+export const KpiXmlPrinterUtil = {
+  renderKpiXmlToPrintHtml,
+  generatePrintableHtml: renderKpiXmlToPrintHtml,
+  parseKpiXml,
+  generatePrintDocumentHtml,
+};

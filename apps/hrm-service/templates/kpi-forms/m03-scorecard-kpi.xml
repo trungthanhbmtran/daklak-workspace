@@ -1,49 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MẪU 03: BẢN TỰ ĐÁNH GIÁ & SCORECARD KPI HẰNG QUÝ (Thang điểm 100) (Theo Hướng dẫn 05-HD/TU & Quy định 39-QĐ/TU) -->
-<Form03_QuarterlyKPIScorecard id="M03_SCORECARD_KPI" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU">
-    <EvaluationPeriod quarter="Q3" year="2026"/>
-    <OfficialRef citizenID="066095001234" fullName="Nguyễn Văn A"/>
-    
-    <!-- PHẦN A: NHÓM TIÊU CHÍ CHUNG (TỐI ĐA 30 ĐIỂM) -->
-    <SectionA_GeneralCriteria maxScore="30.0" achievedScore="30.0">
-        <Criterion id="1.1" name="Phẩm chất chính trị, đạo đức, lối sống, nêu gương" max="18.0" score="18.0" status="Ensured"/>
-        <Criterion id="2.1" name="Tư duy đổi mới, khát vọng cống hiến, dám nghĩ dám làm" max="4.0" score="4.0" status="Ensured"/>
-        <Criterion id="3.1" name="Tự phê bình và phê bình, tự soi tự sửa, khắc phục hạn chế" max="8.0" score="8.0" status="Ensured"/>
-    </SectionA_GeneralCriteria>
+<!-- 
+  BIỂU MẪU ĐÁNH GIÁ BAN TỔ CHỨC TỈNH ỦY ĐẮK LẮK
+  Mẫu số 03: Bản tự đánh giá và Scorecard KPI hằng quý (Thang 100)
+  Căn cứ: Hướng dẫn số 05-HD/TU và Quy định số 39-QĐ/TU của Ban Thường vụ Tỉnh ủy
+-->
+<Form03_QuarterlyKPIScorecard id="M03_SCORECARD_KPI" xmlns="http://btctu.daklak.gov.vn/kpi/v1" framework="HD05-TU_QD39-TU" formCode="M03_SCORECARD_KPI" schemaVersion="1.0">
+  <Header>
+    <AgencyName>TỈNH ỦY ĐẮK LẮK</AgencyName>
+    <OrganizationName>BAN TỔ CHỨC TỈNH ỦY</OrganizationName>
+    <DocumentTitle>BẢN TỰ ĐÁNH GIÁ VÀ SCORECARD KPI HẰNG QUÝ</DocumentTitle>
+    <SubTitle>(Thang điểm 100: 30 điểm Tiêu chí chung + 70 điểm Kết quả thực hiện nhiệm vụ)</SubTitle>
+    <EvaluationPeriod>Quý III năm 2026</EvaluationPeriod>
+    <PeriodQuarter>Q3</PeriodQuarter>
+    <PeriodYear>2026</PeriodYear>
+  </Header>
 
-    <!-- PHẦN B: KẾT QUẢ THỰC HIỆN NHIỆM VỤ - KPI (TỐI ĐA 70 ĐIỂM) -->
-    <SectionB_TaskKPI maxScore="70.0">
-        <TaskList>
-            <!-- Ví dụ Đầu việc 1 -->
-            <TaskItem id="T1" difficultyGroup="Group3" baseScore="250">
-                <TaskName>Thẩm định Tờ trình bổ nhiệm cán bộ diện BTVTU quản lý</TaskName>
-                <OutputProduct>Tờ trình + Bản tổng hợp nhân sự</OutputProduct>
-                <PlannedQuantity>4</PlannedQuantity>
-                <CompletedQuantity>4</CompletedQuantity>
-                <QualityFactor>1.00</QualityFactor> <!-- Nếu có lỗi chủ quan bị trừ 25% -> 0.75 -->
-                <SLAFactor>1.15</SLAFactor> <!-- Vượt tiến độ 3-4 ngày -->
-                <CalculatedScore>287.5</CalculatedScore>
-            </TaskItem>
-        </TaskList>
-        
-        <!-- Công thức quy đổi chỉ số A, B, C, D -->
-        <KPI_Metrics>
-            <MetricA_QuantityPercentage>100.0</MetricA_QuantityPercentage>
-            <MetricB_QualityPercentage>95.0</MetricB_QualityPercentage>
-            <MetricC_SLAProgressPercentage>105.0</MetricC_SLAProgressPercentage>
-            <MetricD_LeadershipPercentage>100.0</MetricD_LeadershipPercentage>
-            <AverageKPIPercentage>100.0</AverageKPIPercentage>
-            <RawKPIScore>70.0</RawKPIScore>
-            <FinalSectionBScore cap="70.0">70.0</FinalSectionBScore> <!-- Khống chế trần 70đ -->
-        </KPI_Metrics>
-    </SectionB_TaskKPI>
+  <PersonalInfo>
+    <CitizenID>066095001234</CitizenID>
+    <FullName>Nguyễn Văn A</FullName>
+    <JobTitle>Trưởng phòng Tổ chức Cán bộ</JobTitle>
+    <Department>Phòng Tổ chức Cán bộ - BTCTU</Department>
+  </PersonalInfo>
 
-    <!-- TỔNG HỢP & TỰ ĐỀ XUẤT XẾP LOẠI -->
-    <TotalScore cap="100.0">100.0</TotalScore>
-    <SelfProposedClassification>HOÀN THÀNH XUẤT SẮC NHIỆM VỤ</SelfProposedClassification>
-    
-    <!-- DANH MỤC SẢN PHẨM NỔI TRỘI (NẾU ĐỀ XUẤT XUẤT SẮC) -->
-    <OutstandingProducts>
-        <Product id="P1">Hoàn thành Đề án chuyển đổi số CSDL Đảng viên vượt tiến độ 05 ngày</Product>
-    </OutstandingProducts>
+  <!-- Phần A: 30 điểm tiêu chí chung -->
+  <SectionA_GeneralCriteria maxScore="30">
+    <Criterion id="TC1" name="Tư tưởng chính trị vững vàng" max="10" score="10.0" status="Ensured"/>
+    <Criterion id="TC2" name="Phẩm chất đạo đức, lối sống, trách nhiệm nêu gương" max="10" score="10.0" status="Ensured"/>
+    <Criterion id="TC3" name="Tác phong, lề lối làm việc, ý thức tổ chức kỷ luật" max="10" score="10.0" status="Ensured"/>
+  </SectionA_GeneralCriteria>
+
+  <!-- Phần B: 70 điểm nhiệm vụ chuyên môn -->
+  <SectionB_SpecificTasks maxScore="70">
+    <TaskList>
+      <TaskItem id="T1" domain="DOMAIN_TCCB">
+        <TaskName>Tham mưu rà soát, bổ sung quy hoạch cán bộ diện Ban Thường vụ Tỉnh ủy quản lý nhiệm kỳ 2025 - 2030</TaskName>
+        <OutputProduct>Tờ trình và Danh mục nhân sự rà soát quy hoạch</OutputProduct>
+        <PlannedQuantity>1</PlannedQuantity>
+        <CompletedQuantity>1</CompletedQuantity>
+        <QualityFactor>1.00</QualityFactor>
+        <SLAFactor>1.00</SLAFactor>
+        <Weight>0.40</Weight>
+        <CalculatedScore>28.0</CalculatedScore>
+      </TaskItem>
+      <TaskItem id="T2" domain="DOMAIN_TCCB">
+        <TaskName>Thẩm định hồ sơ điều động, bổ nhiệm cán bộ thuộc thẩm quyền Ban Thường vụ Tỉnh ủy</TaskName>
+        <OutputProduct>Báo cáo thẩm định nhân sự đúng quy trình, tiêu chuẩn</OutputProduct>
+        <PlannedQuantity>12</PlannedQuantity>
+        <CompletedQuantity>12</CompletedQuantity>
+        <QualityFactor>1.00</QualityFactor>
+        <SLAFactor>1.00</SLAFactor>
+        <Weight>0.35</Weight>
+        <CalculatedScore>24.5</CalculatedScore>
+      </TaskItem>
+      <TaskItem id="T3" domain="DOMAIN_TCCB">
+        <TaskName>Thực hiện chế độ chính sách, bảo hiểm y tế và tiền lương cho cán bộ khối cơ quan Đảng</TaskName>
+        <OutputProduct>Quyết định nâng bậc lương và danh sách chi trả kịp thời</OutputProduct>
+        <PlannedQuantity>25</PlannedQuantity>
+        <CompletedQuantity>25</CompletedQuantity>
+        <QualityFactor>1.00</QualityFactor>
+        <SLAFactor>1.00</SLAFactor>
+        <Weight>0.25</Weight>
+        <CalculatedScore>17.5</CalculatedScore>
+      </TaskItem>
+    </TaskList>
+  </SectionB_SpecificTasks>
+
+  <!-- KPI Metrics A, B, C, D -->
+  <KPI_Metrics>
+    <Metric_A name="Tiến độ thực hiện nhiệm vụ (SLA)" achieved="100.0%" score="25.0"/>
+    <Metric_B name="Khối lượng công việc theo định biên VTVL" achieved="100.0%" score="25.0"/>
+    <Metric_C name="Chất lượng sản phẩm thẩm định" achieved="100.0%" score="20.0"/>
+    <Metric_D name="Hiệu quả và đổi mới sáng tạo" achieved="Vượt tiến độ 05 ngày" bonusScore="5.0"/>
+  </KPI_Metrics>
+
+  <OutstandingProducts>
+    <Item title="Đề án chuyển đổi số CSDL Đảng viên và quy trình điện tử Mẫu 2C" completedDate="2026-09-20" note="Vượt tiến độ 05 ngày, được Thường trực Tỉnh ủy biểu dương và tặng điểm thưởng nổi trội."/>
+  </OutstandingProducts>
+
+  <ScoreSummary>
+    <GeneralScore>30.0</GeneralScore>
+    <TaskScore>70.0</TaskScore>
+    <BonusScore>0.0</BonusScore>
+    <TotalScore>100.0</TotalScore>
+    <ProposedGrade>HOÀN THÀNH XUẤT SẮC NHIỆM VỤ</ProposedGrade>
+  </ScoreSummary>
+
+  <Signatures>
+    <LeftTitle>NGƯỜI TỰ ĐÁNH GIÁ</LeftTitle>
+    <LeftSubtitle>(Ký, ghi rõ họ và tên)</LeftSubtitle>
+    <LeftName>Nguyễn Văn A</LeftName>
+    <RightTitle>TRƯỞNG PHÒNG CHUYÊN MÔN</RightTitle>
+    <RightSubtitle>(Ký, ghi rõ họ và tên)</RightSubtitle>
+    <RightName>Lưu Vĩnh Hưng</RightName>
+    <RightDate>Buôn Ma Thuột, ngày 26 tháng 09 năm 2026</RightDate>
+  </Signatures>
 </Form03_QuarterlyKPIScorecard>

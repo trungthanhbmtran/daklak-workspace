@@ -333,28 +333,14 @@ export function renderMau05DecisionHtml(data: Mau05DecisionData): string {
       text-align: center;
       margin: 0;
     }
-    .stamp-container {
-      margin: 18px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .stamp-circle {
-      width: 80px;
-      height: 80px;
-      border: 2px solid rgba(220, 38, 38, 0.5);
-      border-radius: 50%;
-      color: #dc2626;
-      font-size: 10px;
-      font-weight: bold;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .sig-sub {
+      font-style: italic;
+      font-size: 11pt;
       text-align: center;
-      padding: 4px;
-      transform: rotate(12deg);
-      user-select: none;
+      margin: 2px 0 0 0;
+    }
+    .sig-space {
+      height: 75px;
     }
     .sig-name {
       font-weight: bold;
@@ -463,11 +449,8 @@ export function renderMau05DecisionHtml(data: Mau05DecisionData): string {
         </td>
         <td style="width: 50%; text-align: center;">
           <p class="sig-title">${data.signerTitle}</p>
-          <div class="stamp-container">
-            <div class="stamp-circle">
-              Ban Tổ chức Tỉnh ủy Đắk Lắk
-            </div>
-          </div>
+          <p class="sig-sub">(Ký, đóng dấu)</p>
+          <div class="sig-space"></div>
           <p class="sig-name">${data.signerName}</p>
         </td>
       </tr>
