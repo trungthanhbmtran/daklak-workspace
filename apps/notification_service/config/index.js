@@ -6,6 +6,11 @@ const path = require('path');
 const fs = require('fs');
 
 const dotenv = require('dotenv');
+// 1. Tải .env cục bộ của notification_service (apps/notification_service/.env)
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// 2. Tải bổ sung từ .env root của workspace nếu thiếu
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+// 3. Fallback theo process.cwd()
 dotenv.config();
 
 // Resolve value: nếu là string dạng "env:VAR_NAME" hoặc key nằm trong config mà value là tên env thì lấy process.env[VAR_NAME].

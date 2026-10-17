@@ -3,7 +3,10 @@
  * Consumes 'send_notification' messages, fetches active configs from PostgreSQL,
  * and dynamically broadcasts messages to configured channels (inapp, telegram, etc).
  */
+const path = require('path');
 const amqp = require('amqplib');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
 require('dotenv').config();
 const { PrismaClient } = require('../generated/prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');

@@ -8,6 +8,11 @@ if (process.env.ALLOW_DESTRUCTIVE_BENCHMARK !== 'true') {
   process.exit(2);
 }
 
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config();
+
 const { PrismaClient } = require('./generated/prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 const url = process.env.DATABASE_URL;
